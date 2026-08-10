@@ -613,14 +613,14 @@ export async function generateOffscreenPdfBlob(params: {
         </div>
 
         <!-- QR Code Card -->
-        <div style="width: 140px; text-align: center; flex-shrink: 0;">
-          <div style="background: #ffffff; border: 2px solid #e2e8f0; border-radius: 12px; padding: 10px; display: inline-block;">
-            <div id="pdf-qr-wrapper" style="width: 110px; height: 110px; display: flex; align-items: center; justify-content: center; margin: 0 auto; overflow: hidden; background: #ffffff;">
-              ${qrDataUrl ? `<img src="${qrDataUrl}" style="width: 110px; height: 110px; border-radius: 6px; display: block;" alt="Scan to Pay" />` : '<div style="width: 110px; height: 110px; line-height: 110px; font-size: 11px; color: #94a3b8; text-align: center;">Scan to Pay</div>'}
+        <div style="width: 140px; text-align: center;">
+          <div style="background: #ffffff; border: 2px solid #e2e8f0; border-radius: 12px; padding: 10px; margin: 0 auto;">
+            <div id="pdf-qr-wrapper" style="width: 110px; height: 110px; margin: 0 auto; background: #ffffff;">
+              ${qrDataUrl ? `<img src="${qrDataUrl}" style="width: 110px; height: 110px; border-radius: 6px; display: block; margin: 0;" alt="Scan to Pay" />` : '<div style="width: 110px; height: 110px; line-height: 110px; font-size: 11px; color: #94a3b8; text-align: center;">Scan to Pay</div>'}
             </div>
-            <span style="font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; display: block; margin-top: 6px;">
+            <div style="font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-top: 6px; text-align: center;">
               Scan to Pay ₹${grandTotal.toLocaleString('en-IN')}
-            </span>
+            </div>
           </div>
         </div>
       </div>
