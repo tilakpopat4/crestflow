@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code PDF Test</title>
+    <!-- Load html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Load jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Load qrcode -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        #debug-log { background: #f4f4f4; padding: 10px; border: 1px solid #ccc; height: 200px; overflow-y: scroll; font-family: monospace; font-size: 12px; }
+        .log-entry { margin-bottom: 4px; border-bottom: 1px solid #eee; padding-bottom: 4px; }
+    </style>
+</head>
+<body>
+    <h1>QR Code PDF Test</h1>
+    <button id="testBtn">Generate PDF (with inline Image)</button>
+    <button id="testBtnCanvas">Generate PDF (with Canvas)</button>
+    <button id="testBtnSvg">Generate PDF (with SVG)</button>
+    <br><br>
+    
+    <h3>Debug Log:</h3>
+    <div id="debug-log"></div>
+
+    <script>
+        function logMsg(msg) {
+            console.log(msg);
+            const logDiv = document.getElementById('debug-log');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.textContent = `[${new Date().toISOString().split('T')[1].split('.')[0]}] ${msg}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        async function createPdf(useCanvas) {
+            logMsg(`--- Starting PDF Generation (useCanvas: ${useCanvas}) ---`);
+            
+            // 1. Create container
+            logMsg('Creating offscreen container...');
+            const container = document.createElement('div');
+            container.style.position = 'fixed';
+            container.style.left = '0px';
+            container.style.top = '0px';
+            container.style.zIndex = '999999';
+            container.style.width = '794px';
+            container.style.backgroundColor = '#ffffff';
+            container.style.color = '#0f172a';
+            container.style.padding = '32px';
+            container.style.boxSizing = 'border-box';
+            
+            // Replicate the exact DOM structure
+            container.innerHTML = `
+                <div style="border: 2px solid #e2e8f0; border-radius: 12px; padding: 10px; display: inline-block; text-align: center;">
+                    <div id="pdf-qr-wrapper" style="width: 110px; height: 110px; display: flex; align-items: center; justify-content: center; margin: 0 auto; overflow: hidden; background: #ffffff;">
+                    </div>
+                    <span style="font-size: 9px; font-weight: 900; text-transform: uppercase; color: #64748b; display: block; margin-top: 6px;">
+                        Scan to Pay ₹4,500
+                    </span>
+                </div>
+            `;
+            
+            document.body.appendChild(container);
+            const qrWrapper = container.querySelector('#pdf-qr-wrapper');
+
+            // 2. Generate QR
+            logMsg('Generating QR code...');
+            try {
+                if (useCanvas === 'svg') {
+                    // Generate inline SVG
+                    logMsg('Generating inline SVG...');
+                    const svgString = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="110" height="110" viewBox="0 0 33 33">
+                            <path fill="#ffffff" d="M0 0h33v33H0z"/>
+                            <path fill="#000000" d="M3 3h7v7H3zm2 2v3h3V5zm-2 4h7v7H3zm2 2v3h3v-3zm9-8h7v7h-7zm2 2v3h3V5zm-2 9h7v7h-7zm2 2v3h3v-3zm9-11h7v7h-7zm2 2v3h3V5zm-2 9h2v2h-2zm2 2h2v2h-2zm-2 2h2v2h-2zm4-4h2v2h-2zm-2 2h2v2h-2z"/>
+                        </svg>
+                    `;
+                    qrWrapper.innerHTML = svgString;
+                    logMsg('Injected inline SVG to wrapper.');
+                    
+                } else if (useCanvas) {
+                    // Generate Canvas
+                    const canvas = document.createElement('canvas');
+                    new QRCode(canvas, {
+                        text: "upi://pay?pa=tilakpopat2007-1@okaxis&pn=Tilak&am=4500&cu=INR",
+                        width: 110,
+                        height: 110
+                    });
+                    
+                    // Wait a bit for qrcode.js to finish rendering (it's synchronous but just in case)
+                    await new Promise(r => setTimeout(r, 100));
+                    qrWrapper.appendChild(canvas);
+                    logMsg('Appended Canvas to wrapper.');
+                } else {
+                    // Generate Image from Canvas
+                    const tempDiv = document.createElement('div');
+                    new QRCode(tempDiv, {
+                        text: "upi://pay?pa=tilakpopat2007-1@okaxis&pn=Tilak&am=4500&cu=INR",
+                        width: 110,
+                        height: 110
+                    });
+                    
+                    await new Promise(r => setTimeout(r, 100));
+                    const img = tempDiv.querySelector('img');
+                    const canvas = tempDiv.querySelector('canvas');
+                    
+                    let dataUrl = '';
+                    if (img && img.src && img.src.length > 100) {
+                        dataUrl = img.src;
+                    } else if (canvas) {
+                        dataUrl = canvas.toDataURL('image/png');
+                    }
+                    
+                    if (dataUrl) {
+                        const newImg = document.createElement('img');
+                        newImg.src = dataUrl;
+                        newImg.style.width = '110px';
+                        newImg.style.height = '110px';
+                        newImg.style.display = 'block';
+                        
+                        // Wait for image to load before appending
+                        await new Promise((resolve) => {
+                            newImg.onload = resolve;
+                            newImg.onerror = resolve;
+                        });
+                        
+                        qrWrapper.appendChild(newImg);
+                        logMsg('Appended Image to wrapper.');
+                    } else {
+                        logMsg('ERROR: Could not generate data URL from QR Code.');
+                    }
+                }
+
+                // 3. Pause for repaint
+                logMsg('Waiting 500ms for DOM repaint...');
+                await new Promise(r => setTimeout(r, 500));
+
+                // 4. Run html2canvas
+                logMsg('Calling html2canvas...');
+                const canvasResult = await html2canvas(container, {
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff',
+                    logging: true // This will print debug info to the real console
+                });
+                
+                logMsg('html2canvas complete. Creating PDF...');
+
+                // 5. Create PDF
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4',
+                    compress: true
+                });
+
+                const imgData = canvasResult.toDataURL('image/jpeg', 0.98);
+                
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const imgHeight = (canvasResult.height * pdfWidth) / canvasResult.width;
+                
+                pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, imgHeight);
+                
+                logMsg('Saving PDF...');
+                pdf.save(`test_qr_${useCanvas ? 'canvas' : 'image'}.pdf`);
+                logMsg('PDF Generation finished successfully.');
+
+            } catch (err) {
+                logMsg(`ERROR: ${err.message}`);
+                console.error(err);
+            } finally {
+                // Cleanup
+                logMsg('Cleaning up DOM container...');
+                if (document.body.contains(container)) {
+                    document.body.removeChild(container);
+                }
+            }
+        }
+
+        document.getElementById('testBtn').addEventListener('click', () => createPdf(false));
+        document.getElementById('testBtnCanvas').addEventListener('click', () => createPdf(true));
+        document.getElementById('testBtnSvg').addEventListener('click', () => createPdf('svg'));
+    </script>
+</body>
+</html>

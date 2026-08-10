@@ -264,7 +264,7 @@ export function buildUpiPaymentUri(
   // Clean payee name and note (sanitize characters for clean URL encoding)
   const cleanName = payeeName.replace(/[^\w\s.-]/g, '').trim() || 'Payee';
   const cleanNote = transactionNote.replace(/#/g, 'INV-').replace(/[^\w\s.-]/g, '').trim() || 'Invoice Payment';
-  
+
   // Format amount: include &am= if amount > 0
   let amountQuery = '';
   if (typeof amount === 'number' && !isNaN(amount) && amount > 0) {
@@ -404,7 +404,7 @@ export async function generateOffscreenPdfBlob(params: {
   container.style.visibility = 'visible';
   container.style.pointerEvents = 'none';
 
-  const invoiceNo = params.invoice.id.length > 8 
+  const invoiceNo = params.invoice.id.length > 8
     ? `INV-${params.invoice.id.substring(0, 8).toUpperCase()}`
     : params.invoice.id.toUpperCase();
 
@@ -418,9 +418,9 @@ export async function generateOffscreenPdfBlob(params: {
 
   const lastPaymentStr = params.invoice.lastPaymentDate
     ? new Date(params.invoice.lastPaymentDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
-    : (params.client?.lastPaymentDate 
-        ? new Date(params.client.lastPaymentDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
-        : 'N/A (First Cycle)');
+    : (params.client?.lastPaymentDate
+      ? new Date(params.client.lastPaymentDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+      : 'N/A (First Cycle)');
 
   const senderName = params.profile?.name || 'Tilak Popat';
   const senderTitle = params.profile?.professionalTitle || params.profile?.servicesDescription || 'Freelance Video Editor';
@@ -437,12 +437,15 @@ export async function generateOffscreenPdfBlob(params: {
   const invShortId = params.invoice.id ? params.invoice.id.substring(0, 8) : 'INV';
   const transactionNote = `Payment for Invoice #${invShortId}`;
 
-  let qrSvgHtml = '';
+  let qrDataUrl = '';
   if (upiId) {
     try {
-      qrSvgHtml = generateUpiQrCodeSvg(upiId, senderName, grandTotal, transactionNote, 110);
+      const res = await generateUpiQrCodeDataUrl(upiId, senderName, grandTotal, transactionNote);
+      if (res && res.pngDataUrl) {
+        qrDataUrl = res.pngDataUrl;
+      }
     } catch (e) {
-      console.warn("QR SVG generation for offscreen PDF failed:", e);
+      console.warn("QR DataURL generation for offscreen PDF failed:", e);
     }
   }
 
@@ -613,7 +616,7 @@ export async function generateOffscreenPdfBlob(params: {
         <div style="width: 140px; text-align: center; flex-shrink: 0;">
           <div style="background: #ffffff; border: 2px solid #e2e8f0; border-radius: 12px; padding: 10px; display: inline-block;">
             <div id="pdf-qr-wrapper" style="width: 110px; height: 110px; display: flex; align-items: center; justify-content: center; margin: 0 auto; overflow: hidden; background: #ffffff;">
-              ${qrSvgHtml ? qrSvgHtml : '<div style="width: 110px; height: 110px; line-height: 110px; font-size: 11px; color: #94a3b8; text-align: center;">Scan to Pay</div>'}
+              ${qrDataUrl ? `<img src="${qrDataUrl}" style="width: 110px; height: 110px; border-radius: 6px; display: block;" alt="Scan to Pay" />` : '<div style="width: 110px; height: 110px; line-height: 110px; font-size: 11px; color: #94a3b8; text-align: center;">Scan to Pay</div>'}
             </div>
             <span style="font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; display: block; margin-top: 6px;">
               Scan to Pay ₹${grandTotal.toLocaleString('en-IN')}
@@ -731,7 +734,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
   const { data: clients, loading: clientsLoading, addOrUpdateItem: updateClient } = useFirestore<Client>('clients', user?.uid);
   const { data: invoices, addOrUpdateItem: addInvoice } = useFirestore<Invoice>('invoices', user?.uid);
   const { data: workItems, addOrUpdateItem: updateWorkItem } = useFirestore<WorkItem>('workItems', user?.uid);
-  
+
   const [selectedClientId, setSelectedClientId] = useState<string>('');
   const [invoiceSearchQuery, setInvoiceSearchQuery] = useState<string>(initialSearchQuery);
 
@@ -786,19 +789,19 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
       const uninvoicedWork = workItems.filter(w => {
         if (w.clientId !== selectedClientId) return false;
         if (w.status !== 'Uninvoiced') return false;
-        
+
         const workDate = new Date(w.date);
         const yyyy = workDate.getFullYear();
         const mm = String(workDate.getMonth() + 1).padStart(2, '0');
         const dd = String(workDate.getDate()).padStart(2, '0');
         const workDateStr = `${yyyy}-${mm}-${dd}`;
-        
+
         return workDateStr >= dateFrom && workDateStr <= dateTo;
       });
-      
+
       // Sort work log in ascending chronological order (earliest date first)
       uninvoicedWork.sort((a, b) => (a.date - b.date) || (a.createdAt - b.createdAt));
-      
+
       if (uninvoicedWork.length > 0) {
         setReels(uninvoicedWork.map(w => ({
           id: generateUUID(),
@@ -975,7 +978,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
       alert("Please select a client first.");
       return;
     }
-    
+
     if (reels.some(r => !r.title.trim())) {
       alert("Please provide a title for all reels.");
       return;
@@ -1179,11 +1182,11 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                 </button>
               )}
             </div>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-medium text-slate-500 mb-1">Select Client *</label>
-                <select 
+                <select
                   className="w-full border border-slate-200 rounded px-3 py-2 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-500"
                   value={selectedClientId}
                   onChange={handleClientChange}
@@ -1197,12 +1200,12 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                   <p className="text-xs text-amber-600 mt-1">Please add a client in the Clients tab first.</p>
                 )}
               </div>
-              
+
               <div className="space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-medium text-slate-500 mb-1">Date From *</label>
-                    <input 
+                    <input
                       type="date"
                       className="w-full border border-slate-200 rounded px-3 py-2 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-500"
                       value={dateFrom}
@@ -1211,7 +1214,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-slate-500 mb-1">Date To *</label>
-                    <input 
+                    <input
                       type="date"
                       className="w-full border border-slate-200 rounded px-3 py-2 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-500"
                       value={dateTo}
@@ -1228,19 +1231,19 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
               <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wider">Line Items</h3>
               <div className="flex flex-wrap gap-3">
-                <button 
+                <button
                   onClick={() => addItem('', selectedClient ? selectedClient.defaultRate : 0)}
                   className="text-indigo-600 text-xs font-semibold underline hover:text-indigo-700 flex items-center gap-1"
                 >
                   <Plus size={14} /> Add Reel
                 </button>
-                <button 
+                <button
                   onClick={() => addItem('On Site Shoot', selectedClient?.onSiteShootRate || 0)}
                   className="text-indigo-600 text-xs font-semibold underline hover:text-indigo-700 flex items-center gap-1"
                 >
                   <Plus size={14} /> Add On Site Shoot
                 </button>
-                <button 
+                <button
                   onClick={() => addItem('Website Making', selectedClient?.websiteMakingRate || 0)}
                   className="text-indigo-600 text-xs font-semibold underline hover:text-indigo-700 flex items-center gap-1"
                 >
@@ -1248,7 +1251,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                 </button>
               </div>
             </div>
-            
+
             {/* Quick Set Direct Grand Total */}
             <div className="mb-5 p-3.5 bg-gradient-to-r from-indigo-50/90 to-purple-50/90 border border-indigo-100 rounded-xl">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -1264,8 +1267,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                 <div className="flex items-center gap-2">
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-500">₹</span>
-                    <input 
-                      type="number" 
+                    <input
+                      type="number"
                       min="0"
                       placeholder="e.g. 10000"
                       value={directGrandTotalInput}
@@ -1279,7 +1282,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                       className="w-32 sm:w-36 pl-7 pr-2 py-1.5 text-sm font-semibold border border-indigo-200 rounded-lg bg-white text-slate-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 shadow-xs"
                     />
                   </div>
-                  <button 
+                  <button
                     type="button"
                     onClick={handleApplyDirectGrandTotal}
                     className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-lg text-xs font-semibold transition-colors shadow-xs whitespace-nowrap flex items-center gap-1.5"
@@ -1288,7 +1291,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                     <Divide size={13} />
                     Split Equally
                   </button>
-                  <button 
+                  <button
                     type="button"
                     onClick={handleRoundFigures}
                     className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-lg text-xs font-semibold transition-colors shadow-xs whitespace-nowrap flex items-center gap-1.5"
@@ -1305,19 +1308,19 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
               {reels.map((reel, index) => (
                 <div key={reel.id} className="p-4 bg-slate-50 rounded border border-slate-100 relative group">
                   {reels.length > 1 && (
-                    <button 
+                    <button
                       onClick={() => removeReel(reel.id)}
                       className="absolute -top-2 -right-2 p-1.5 bg-white border border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <Trash2 size={14} />
                     </button>
                   )}
-                  
+
                   <div className="grid grid-cols-12 gap-3">
                     <div className="col-span-12">
                       <label className="block text-xs font-medium text-slate-500 mb-1">Description</label>
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         value={reel.title}
                         onChange={(e) => updateReel(reel.id, 'title', e.target.value)}
                         placeholder="e.g. Wedding Highlight Reel"
@@ -1326,8 +1329,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                     </div>
                     <div className="col-span-6 md:col-span-4">
                       <label className="block text-xs font-medium text-slate-500 mb-1">Quantity</label>
-                      <input 
-                        type="number" 
+                      <input
+                        type="number"
                         min="1"
                         value={reel.quantity}
                         onChange={(e) => updateReel(reel.id, 'quantity', Number(e.target.value))}
@@ -1336,8 +1339,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                     </div>
                     <div className="col-span-6 md:col-span-4">
                       <label className="block text-xs font-medium text-slate-500 mb-1">Rate (₹)</label>
-                      <input 
-                        type="number" 
+                      <input
+                        type="number"
                         min="0"
                         value={reel.rate}
                         onChange={(e) => updateReel(reel.id, 'rate', Number(e.target.value))}
@@ -1360,8 +1363,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-slate-500 mb-1">Deduction Description</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     placeholder="e.g. Early payment discount"
                     value={discountDescription}
                     onChange={(e) => setDiscountDescription(e.target.value)}
@@ -1370,8 +1373,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-slate-500 mb-1">Deduction Amount (₹)</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     min="0"
                     placeholder="e.g. 1000"
                     value={discountAmount}
@@ -1410,7 +1413,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
               </div>
             </div>
 
-            <button 
+            <button
               onClick={handleDownload}
               disabled={isGenerating || !selectedClient}
               className="w-full mt-6 flex justify-center items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-4 py-2 rounded text-sm font-medium transition-colors shadow-sm"
@@ -1434,17 +1437,17 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
           <div className="absolute top-4 left-4 bg-white/80 backdrop-blur px-3 py-1.5 rounded text-xs font-bold text-slate-500 uppercase tracking-wider shadow-sm z-10">
             Live Preview
           </div>
-          
+
           {/* This wrapper scales the visual preview so it fits on screen without changing actual dimensions for PDF export */}
           <div className="transform scale-[0.4] min-[400px]:scale-[0.45] sm:scale-[0.6] md:scale-[0.8] xl:scale-[0.9] origin-top transition-transform duration-300">
-            
+
             {/* The actual A4 element captured by html2pdf */}
-            <div 
-              id="invoice-preview-capture" 
+            <div
+              id="invoice-preview-capture"
               className="bg-white shadow-2xl relative flex flex-col justify-between"
-              style={{ 
-                width: '210mm', 
-                minHeight: '297mm', 
+              style={{
+                width: '210mm',
+                minHeight: '297mm',
                 padding: '16mm 18mm',
                 fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
                 color: '#0f172a',
@@ -1533,8 +1536,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                         <div className="flex justify-between items-center">
                           <span className="text-slate-500 font-medium">Last Payment Date:</span>
                           <span className="font-semibold text-slate-800">
-                            {selectedClient?.lastPaymentDate 
-                              ? new Date(selectedClient.lastPaymentDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) 
+                            {selectedClient?.lastPaymentDate
+                              ? new Date(selectedClient.lastPaymentDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
                               : 'N/A (First Cycle)'}
                           </span>
                         </div>
@@ -1638,8 +1641,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                       <div>
                         <span className="text-[11px] font-bold text-slate-400 uppercase block">Payment Cycle</span>
                         <span className="font-semibold text-slate-800">
-                          {selectedClient?.lastPaymentDate 
-                            ? new Date(selectedClient.lastPaymentDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) 
+                          {selectedClient?.lastPaymentDate
+                            ? new Date(selectedClient.lastPaymentDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
                             : 'N/A (First Cycle)'}
                         </span>
                       </div>
@@ -1666,13 +1669,13 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                     <div className="bg-white p-3 border-2 border-slate-200 rounded-2xl shadow-sm flex flex-col items-center min-w-[150px]">
                       {activeUpiUri ? (
                         <div className="p-1 bg-white rounded-lg flex items-center justify-center">
-                          <QRCodeSVG 
-                            value={activeUpiUri} 
-                            size={128} 
-                            level="M" 
-                            includeMargin={true} 
-                            bgColor="#ffffff" 
-                            fgColor="#000000" 
+                          <QRCodeSVG
+                            value={activeUpiUri}
+                            size={128}
+                            level="M"
+                            includeMargin={true}
+                            bgColor="#ffffff"
+                            fgColor="#000000"
                             className="w-32 h-32 block"
                           />
                         </div>
@@ -1772,144 +1775,143 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                   .slice()
                   .sort((a, b) => b.date - a.date)
                   .map((inv) => {
-                  const clientObj = clients.find(c => c.id === inv.clientId) || {
-                    id: inv.clientId,
-                    name: inv.clientName,
-                    email: '',
-                    phone: '',
-                    defaultRate: 0,
-                    createdAt: 0
-                  };
+                    const clientObj = clients.find(c => c.id === inv.clientId) || {
+                      id: inv.clientId,
+                      name: inv.clientName,
+                      email: '',
+                      phone: '',
+                      defaultRate: 0,
+                      createdAt: 0
+                    };
 
-                  const emailDetails = generateInvoiceEmailDetails(clientObj, inv, profile);
+                    const emailDetails = generateInvoiceEmailDetails(clientObj, inv, profile);
 
-                  return (
-                    <tr key={inv.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="p-3.5 font-mono text-xs text-slate-700">
-                        <div className="font-bold text-slate-900">#{inv.id.substring(0, 8).toUpperCase()}</div>
-                        <div className="text-[11px] text-slate-400">
-                          {new Date(inv.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
-                        </div>
-                      </td>
-                      <td className="p-3.5 font-medium text-slate-900">
-                        <div>{inv.clientName}</div>
-                        {clientObj.email && (
-                          <div className="text-[11px] text-slate-400 font-normal">{clientObj.email}</div>
-                        )}
-                      </td>
-                      <td className="p-3.5 text-slate-600">
-                        <div className="font-semibold text-xs text-slate-800">{inv.reels.length} item(s)</div>
-                        <div className="text-[11px] text-slate-400 truncate max-w-xs">
-                          {inv.reels.map(r => r.title).join(', ')}
-                        </div>
-                      </td>
-                      <td className="p-3.5 text-right font-bold text-slate-900">
-                        ₹{inv.totalAmount.toLocaleString('en-IN')}
-                      </td>
-                      <td className="p-3.5 text-center">
-                        <button
-                          onClick={async () => {
-                            const newStatus = inv.status === 'Paid' ? 'Pending' : 'Paid';
-                            await addInvoice({ ...inv, status: newStatus });
-                            if (newStatus === 'Paid' && clientObj.id) {
-                              const pDate = inv.date || Date.now();
-                              await updateClient({ ...clientObj, lastPaymentDate: pDate });
-                            }
-                          }}
-                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border cursor-pointer transition-transform hover:scale-105 ${
-                            inv.status === 'Paid'
-                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
-                              : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
-                          }`}
-                          title={`Click to mark as ${inv.status === 'Paid' ? 'Pending' : 'Paid & update last payment date'}`}
-                        >
-                          {inv.status}
-                        </button>
-                      </td>
-                      <td className="p-3.5 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            onClick={() => handleEditInvoice(inv)}
-                            className="px-2.5 py-1.5 bg-white hover:bg-indigo-50 text-indigo-700 border border-slate-200 hover:border-indigo-200 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 shadow-2xs cursor-pointer"
-                            title="Load invoice into generator to edit"
-                          >
-                            <Pencil size={13} /> Edit
-                          </button>
-
-                          <button
-                            onClick={() => handleRedownloadPdf(inv)}
-                            disabled={downloadingPdfId === inv.id}
-                            className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 disabled:bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer"
-                            title="Re-download PDF Invoice file"
-                          >
-                            {downloadingPdfId === inv.id ? (
-                              <Loader2 size={13} className="animate-spin text-indigo-600" />
-                            ) : (
-                              <Download size={13} className="text-slate-600" />
-                            )}
-                            PDF
-                          </button>
-
+                    return (
+                      <tr key={inv.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="p-3.5 font-mono text-xs text-slate-700">
+                          <div className="font-bold text-slate-900">#{inv.id.substring(0, 8).toUpperCase()}</div>
+                          <div className="text-[11px] text-slate-400">
+                            {new Date(inv.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                          </div>
+                        </td>
+                        <td className="p-3.5 font-medium text-slate-900">
+                          <div>{inv.clientName}</div>
+                          {clientObj.email && (
+                            <div className="text-[11px] text-slate-400 font-normal">{clientObj.email}</div>
+                          )}
+                        </td>
+                        <td className="p-3.5 text-slate-600">
+                          <div className="font-semibold text-xs text-slate-800">{inv.reels.length} item(s)</div>
+                          <div className="text-[11px] text-slate-400 truncate max-w-xs">
+                            {inv.reels.map(r => r.title).join(', ')}
+                          </div>
+                        </td>
+                        <td className="p-3.5 text-right font-bold text-slate-900">
+                          ₹{inv.totalAmount.toLocaleString('en-IN')}
+                        </td>
+                        <td className="p-3.5 text-center">
                           <button
                             onClick={async () => {
-                              const pdfFilename = `Invoice_${clientObj.name.replace(/\s+/g, '_')}_${inv.id.substring(0, 8)}.pdf`;
-                              let pdfBlob: Blob | undefined = undefined;
-                              try {
-                                pdfBlob = await generateOffscreenPdfBlob({
-                                  invoice: inv,
-                                  client: clientObj,
-                                  profile
-                                });
-                              } catch (e) {
-                                console.warn("Could not pre-generate PDF blob for history invoice:", e);
+                              const newStatus = inv.status === 'Paid' ? 'Pending' : 'Paid';
+                              await addInvoice({ ...inv, status: newStatus });
+                              if (newStatus === 'Paid' && clientObj.id) {
+                                const pDate = inv.date || Date.now();
+                                await updateClient({ ...clientObj, lastPaymentDate: pDate });
                               }
-
-                              setEmailModalData({
-                                isOpen: true,
-                                clientName: inv.clientName,
-                                clientEmail: clientObj.email || '',
-                                subject: emailDetails.subject,
-                                body: emailDetails.body,
-                                mailtoLink: emailDetails.mailtoLink,
-                                monthCycleStr: emailDetails.monthCycleStr,
-                                invoiceNo: inv.id.substring(0, 8).toUpperCase(),
-                                totalAmount: inv.totalAmount,
-                                pdfFilename: pdfFilename,
-                                pdfBlob: pdfBlob,
-                                invoiceObj: inv,
-                                clientObj: clientObj,
-                                gmailStatus: { sending: false }
-                              });
                             }}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors shadow-xs"
-                            title="Send Invoice PDF via Gmail"
+                            className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border cursor-pointer transition-transform hover:scale-105 ${inv.status === 'Paid'
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                                : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
+                              }`}
+                            title={`Click to mark as ${inv.status === 'Paid' ? 'Pending' : 'Paid & update last payment date'}`}
                           >
-                            <Mail size={13} /> Send via Gmail
+                            {inv.status}
                           </button>
+                        </td>
+                        <td className="p-3.5 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              onClick={() => handleEditInvoice(inv)}
+                              className="px-2.5 py-1.5 bg-white hover:bg-indigo-50 text-indigo-700 border border-slate-200 hover:border-indigo-200 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 shadow-2xs cursor-pointer"
+                              title="Load invoice into generator to edit"
+                            >
+                              <Pencil size={13} /> Edit
+                            </button>
 
-                          <a
-                            href={emailDetails.mailtoLink}
-                            className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors"
-                            title="Open Default Mail App"
-                          >
-                            <Send size={13} />
-                          </a>
+                            <button
+                              onClick={() => handleRedownloadPdf(inv)}
+                              disabled={downloadingPdfId === inv.id}
+                              className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 disabled:bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer"
+                              title="Re-download PDF Invoice file"
+                            >
+                              {downloadingPdfId === inv.id ? (
+                                <Loader2 size={13} className="animate-spin text-indigo-600" />
+                              ) : (
+                                <Download size={13} className="text-slate-600" />
+                              )}
+                              PDF
+                            </button>
 
-                          <button
-                            onClick={() => {
-                              navigator.clipboard.writeText(`Subject: ${emailDetails.subject}\n\n${emailDetails.body}`);
-                              alert(`Invoice email details for ${inv.clientName} copied to clipboard!`);
-                            }}
-                            className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors"
-                            title="Copy Email Text to Clipboard"
-                          >
-                            <Copy size={13} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                            <button
+                              onClick={async () => {
+                                const pdfFilename = `Invoice_${clientObj.name.replace(/\s+/g, '_')}_${inv.id.substring(0, 8)}.pdf`;
+                                let pdfBlob: Blob | undefined = undefined;
+                                try {
+                                  pdfBlob = await generateOffscreenPdfBlob({
+                                    invoice: inv,
+                                    client: clientObj,
+                                    profile
+                                  });
+                                } catch (e) {
+                                  console.warn("Could not pre-generate PDF blob for history invoice:", e);
+                                }
+
+                                setEmailModalData({
+                                  isOpen: true,
+                                  clientName: inv.clientName,
+                                  clientEmail: clientObj.email || '',
+                                  subject: emailDetails.subject,
+                                  body: emailDetails.body,
+                                  mailtoLink: emailDetails.mailtoLink,
+                                  monthCycleStr: emailDetails.monthCycleStr,
+                                  invoiceNo: inv.id.substring(0, 8).toUpperCase(),
+                                  totalAmount: inv.totalAmount,
+                                  pdfFilename: pdfFilename,
+                                  pdfBlob: pdfBlob,
+                                  invoiceObj: inv,
+                                  clientObj: clientObj,
+                                  gmailStatus: { sending: false }
+                                });
+                              }}
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors shadow-xs"
+                              title="Send Invoice PDF via Gmail"
+                            >
+                              <Mail size={13} /> Send via Gmail
+                            </button>
+
+                            <a
+                              href={emailDetails.mailtoLink}
+                              className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors"
+                              title="Open Default Mail App"
+                            >
+                              <Send size={13} />
+                            </a>
+
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(`Subject: ${emailDetails.subject}\n\n${emailDetails.body}`);
+                                alert(`Invoice email details for ${inv.clientName} copied to clipboard!`);
+                              }}
+                              className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors"
+                              title="Copy Email Text to Clipboard"
+                            >
+                              <Copy size={13} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
           </div>
@@ -1918,11 +1920,11 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
 
       {/* Email Sent / Prepared Modal */}
       {emailModalData && emailModalData.isOpen && (
-        <div 
+        <div
           onClick={() => setEmailModalData(null)}
           className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in cursor-pointer"
         >
-          <div 
+          <div
             onClick={(e) => e.stopPropagation()}
             className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 space-y-5 my-8 max-h-[90vh] overflow-y-auto cursor-default"
           >
@@ -1979,8 +1981,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                   )}
                 </div>
                 <p className="text-[11px] leading-relaxed text-amber-800">
-                  {emailModalData.clientEmail 
-                    ? "Click 'Send Invoice PDF via Gmail' below to authorize Gmail and send the attached PDF directly to your client." 
+                  {emailModalData.clientEmail
+                    ? "Click 'Send Invoice PDF via Gmail' below to authorize Gmail and send the attached PDF directly to your client."
                     : "Please enter your client's email address below, then click 'Send Invoice PDF via Gmail'."}
                 </p>
               </div>
