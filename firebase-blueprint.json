@@ -1,0 +1,93 @@
+{
+  "entities": {
+    "Client": {
+      "title": "Client",
+      "description": "Client details managed by video editor",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "name": { "type": "string", "maxLength": 200 },
+        "company": { "type": "string", "maxLength": 200 },
+        "email": { "type": "string", "maxLength": 200 },
+        "phone": { "type": "string", "maxLength": 50 },
+        "currency": { "type": "string", "maxLength": 10 },
+        "rate": { "type": "number" },
+        "status": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "userId", "name"]
+    },
+    "Invoice": {
+      "title": "Invoice",
+      "description": "Invoice generated for clients",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "invoiceNumber": { "type": "string", "maxLength": 100 },
+        "clientName": { "type": "string", "maxLength": 200 },
+        "totalAmount": { "type": "number" },
+        "status": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "userId", "clientName", "totalAmount"]
+    },
+    "WorkItem": {
+      "title": "WorkItem",
+      "description": "Video project or work log item",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string", "maxLength": 300 },
+        "status": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "userId", "title"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Editor profile details",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "name": { "type": "string", "maxLength": 200 },
+        "email": { "type": "string", "maxLength": 200 }
+      },
+      "required": ["id", "userId"]
+    },
+    "Note": {
+      "title": "Note",
+      "description": "Sticky notes or memo items",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string", "maxLength": 300 },
+        "content": { "type": "string", "maxLength": 5000 }
+      },
+      "required": ["id", "userId"]
+    }
+  },
+  "firestore": {
+    "clients/{clientId}": {
+      "schema": { "$ref": "#/entities/Client" },
+      "description": "Client records owned by user"
+    },
+    "invoices/{invoiceId}": {
+      "schema": { "$ref": "#/entities/Invoice" },
+      "description": "Invoices owned by user"
+    },
+    "workItems/{workItemId}": {
+      "schema": { "$ref": "#/entities/WorkItem" },
+      "description": "Work items owned by user"
+    },
+    "profiles/{profileId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "User profiles"
+    },
+    "notes/{noteId}": {
+      "schema": { "$ref": "#/entities/Note" },
+      "description": "Notes owned by user"
+    }
+  }
+}
