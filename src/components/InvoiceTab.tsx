@@ -437,15 +437,12 @@ export async function generateOffscreenPdfBlob(params: {
   const invShortId = params.invoice.id ? params.invoice.id.substring(0, 8) : 'INV';
   const transactionNote = `Payment for Invoice #${invShortId}`;
 
-  let qrDataUrl = '';
-  let qrCanvas: HTMLCanvasElement | null = null;
+  let qrSvgHtml = '';
   if (upiId) {
     try {
-      const res = await generateUpiQrCodeDataUrl(upiId, senderName, grandTotal, transactionNote);
-      qrDataUrl = res.pngDataUrl;
-      qrCanvas = res.canvas;
+      qrSvgHtml = generateUpiQrCodeSvg(upiId, senderName, grandTotal, transactionNote, 110);
     } catch (e) {
-      console.warn("QR DataURL generation for offscreen PDF failed:", e);
+      console.warn("QR SVG generation for offscreen PDF failed:", e);
     }
   }
 
@@ -616,7 +613,7 @@ export async function generateOffscreenPdfBlob(params: {
         <div style="width: 140px; text-align: center; flex-shrink: 0;">
           <div style="background: #ffffff; border: 2px solid #e2e8f0; border-radius: 12px; padding: 10px; display: inline-block;">
             <div id="pdf-qr-wrapper" style="width: 110px; height: 110px; display: flex; align-items: center; justify-content: center; margin: 0 auto; overflow: hidden; background: #ffffff;">
-              ${qrDataUrl ? `<img src="${qrDataUrl}" style="width: 110px; height: 110px; border-radius: 6px; display: block;" alt="Scan to Pay" />` : '<div style="width: 110px; height: 110px; line-height: 110px; font-size: 11px; color: #94a3b8; text-align: center;">Scan to Pay</div>'}
+              ${qrSvgHtml ? qrSvgHtml : '<div style="width: 110px; height: 110px; line-height: 110px; font-size: 11px; color: #94a3b8; text-align: center;">Scan to Pay</div>'}
             </div>
             <span style="font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; display: block; margin-top: 6px;">
               Scan to Pay ₹${grandTotal.toLocaleString('en-IN')}
@@ -633,23 +630,6 @@ export async function generateOffscreenPdfBlob(params: {
   `;
 
   document.body.appendChild(container);
-
-  const qrWrapper = container.querySelector('#pdf-qr-wrapper');
-  if (qrWrapper) {
-    if (qrDataUrl) {
-      const img = document.createElement('img');
-      img.src = qrDataUrl;
-      img.style.width = '110px';
-      img.style.height = '110px';
-      img.style.borderRadius = '6px';
-      img.style.display = 'block';
-      qrWrapper.innerHTML = '';
-      qrWrapper.appendChild(img);
-    } else if (qrCanvas) {
-      qrWrapper.innerHTML = '';
-      qrWrapper.appendChild(qrCanvas);
-    }
-  }
 
   // Ensure all images (if any) and fonts are fully decoded and rendered
   const images = Array.from(container.querySelectorAll('img'));
