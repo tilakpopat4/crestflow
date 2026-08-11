@@ -15,6 +15,7 @@ import {
 } from '../lib/paymentUtils';
 import { registerFcmDeviceToken, triggerFcmPaymentReminder } from '../lib/fcmService';
 import StickyNotesWidget from './StickyNotesWidget';
+import PaymentDateModal from './PaymentDateModal';
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
@@ -35,6 +36,7 @@ export default function DashboardTab({ user, onNavigateToClients }: DashboardTab
     return Boolean(localStorage.getItem('fcm_device_token'));
   });
   const [isNotificationDismissed, setIsNotificationDismissed] = useState(false);
+  const [paymentModalState, setPaymentModalState] = useState<{ invoiceId: string | null, isOpen: boolean }>({ invoiceId: null, isOpen: false });
 
   const handleRegisterFcmDevice = async () => {
     setIsFcmRegistering(true);
@@ -127,12 +129,16 @@ export default function DashboardTab({ user, onNavigateToClients }: DashboardTab
       
       if (isCurrentMonth) {
         totalInvoicesThisMonth++;
-        if (inv.status === 'Paid') {
+      }
+
+      // For paid earnings, use lastPaymentDate if available to attribute to the month it was ACTUALLY paid
+      if (inv.status === 'Paid') {
+        const paymentDate = inv.lastPaymentDate ? new Date(inv.lastPaymentDate) : invDate;
+        if (paymentDate.getMonth() === currentMonth && paymentDate.getFullYear() === currentYear) {
           totalEarned += inv.totalAmount;
+          const current = clientRevenueMap.get(inv.clientName) || 0;
+          clientRevenueMap.set(inv.clientName, current + inv.totalAmount);
         }
-        
-        const current = clientRevenueMap.get(inv.clientName) || 0;
-        clientRevenueMap.set(inv.clientName, current + inv.totalAmount);
       }
     });
 
@@ -163,40 +169,73 @@ export default function DashboardTab({ user, onNavigateToClients }: DashboardTab
 
     invoices.forEach(inv => {
       if (!inv.date) return;
+      
+      // Invoiced and Pending always align with creation date
       const invDate = new Date(inv.date);
-      const key = `${invDate.getFullYear()}-${String(invDate.getMonth() + 1).padStart(2, '0')}`;
-      const label = invDate.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
+      const invKey = `${invDate.getFullYear()}-${String(invDate.getMonth() + 1).padStart(2, '0')}`;
+      const invLabel = invDate.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
 
-      if (!monthMap.has(key)) {
-        monthMap.set(key, { monthKey: key, monthLabel: label, totalInvoiced: 0, paidEarnings: 0, pendingAmount: 0 });
+      if (!monthMap.has(invKey)) {
+        monthMap.set(invKey, { monthKey: invKey, monthLabel: invLabel, totalInvoiced: 0, paidEarnings: 0, pendingAmount: 0 });
       }
 
-      const item = monthMap.get(key)!;
       const amt = Number(inv.totalAmount) || 0;
-      item.totalInvoiced += amt;
+      const invItem = monthMap.get(invKey)!;
+      invItem.totalInvoiced += amt;
+
+      if (inv.status === 'Pending') {
+        invItem.pendingAmount += amt;
+      }
+
+      // Paid Earnings align with payment date
       if (inv.status === 'Paid') {
-        item.paidEarnings += amt;
-      } else {
-        item.pendingAmount += amt;
+        const payDate = inv.lastPaymentDate ? new Date(inv.lastPaymentDate) : invDate;
+        const payKey = `${payDate.getFullYear()}-${String(payDate.getMonth() + 1).padStart(2, '0')}`;
+        const payLabel = payDate.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
+
+        if (!monthMap.has(payKey)) {
+          monthMap.set(payKey, { monthKey: payKey, monthLabel: payLabel, totalInvoiced: 0, paidEarnings: 0, pendingAmount: 0 });
+        }
+        monthMap.get(payKey)!.paidEarnings += amt;
       }
     });
 
     return Array.from(monthMap.values()).sort((a, b) => a.monthKey.localeCompare(b.monthKey));
   }, [invoices]);
 
-  const toggleInvoiceStatus = async (id: string) => {
+  const toggleInvoiceStatus = (id: string) => {
     const inv = invoices.find(i => i.id === id);
     if (inv) {
-      const nextStatus = inv.status === 'Paid' ? 'Pending' : 'Paid';
-      await addOrUpdateItem({ ...inv, status: nextStatus });
+      if (inv.status === 'Pending') {
+        // Open modal to get payment date
+        setPaymentModalState({ invoiceId: id, isOpen: true });
+      } else {
+        // Unmark as Paid immediately
+        handleConfirmPaymentDate(id, null);
+      }
+    }
+  };
+
+  const handleConfirmPaymentDate = async (invoiceId: string, timestamp: number | null) => {
+    const inv = invoices.find(i => i.id === invoiceId);
+    if (inv) {
+      const nextStatus = timestamp ? 'Paid' : 'Pending';
+      // Update invoice
+      await addOrUpdateItem({ 
+        ...inv, 
+        status: nextStatus,
+        lastPaymentDate: timestamp || undefined
+      });
+
+      // Update client's lastPaymentDate for cycle logic
       if (nextStatus === 'Paid') {
         const clientObj = clients.find(c => c.id === inv.clientId || c.name === inv.clientName);
         if (clientObj) {
-          const pDate = inv.date || Date.now();
-          await updateClient({ ...clientObj, lastPaymentDate: pDate });
+          await updateClient({ ...clientObj, lastPaymentDate: timestamp || Date.now() });
         }
       }
     }
+    setPaymentModalState({ invoiceId: null, isOpen: false });
   };
 
   const deleteInvoice = async (id: string) => {
@@ -692,6 +731,13 @@ export default function DashboardTab({ user, onNavigateToClients }: DashboardTab
 
       {/* Sticky Notes Widget */}
       <StickyNotesWidget user={user} clients={clients} />
+
+      <PaymentDateModal 
+        isOpen={paymentModalState.isOpen}
+        onClose={() => setPaymentModalState({ invoiceId: null, isOpen: false })}
+        onConfirm={(timestamp) => handleConfirmPaymentDate(paymentModalState.invoiceId!, timestamp)}
+        invoiceNumber={paymentModalState.invoiceId?.substring(0, 8).toUpperCase()}
+      />
     </div>
   );
 }
