@@ -56,6 +56,8 @@ export interface Invoice {
   status: 'Pending' | 'Paid';
   discountAmount?: number;
   discountDescription?: string;
+  extraCostAmount?: number;
+  extraCostDescription?: string;
   lastPaymentDate?: number;
 }
 

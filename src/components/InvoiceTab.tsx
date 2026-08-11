@@ -432,6 +432,7 @@ export async function generateOffscreenPdfBlob(params: {
   const reels = params.invoice.reels || [];
   const subtotal = reels.reduce((s, r) => s + (r.quantity * r.rate), 0);
   const discount = params.invoice.discountAmount || 0;
+  const extraCost = params.invoice.extraCostAmount || 0;
   const grandTotal = Math.max(0, params.invoice.totalAmount);
 
   const invShortId = params.invoice.id ? params.invoice.id.substring(0, 8) : 'INV';
@@ -553,6 +554,16 @@ export async function generateOffscreenPdfBlob(params: {
               <td style="padding: 3px 0; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b;">Subtotal</td>
               <td style="padding: 3px 0; text-align: right; font-weight: 700; color: #0f172a;">₹${subtotal.toLocaleString('en-IN')}</td>
             </tr>
+            ${extraCost > 0 ? `
+            <tr>
+              <td style="padding: 3px 0; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #0f172a;">
+                Extra Cost (${params.invoice.extraCostDescription || 'Additional Expenses'})
+              </td>
+              <td style="padding: 3px 0; text-align: right; font-weight: 700; color: #0f172a;">
+                +₹${extraCost.toLocaleString('en-IN')}
+              </td>
+            </tr>
+            ` : ''}
             ${discount > 0 ? `
             <tr>
               <td style="padding: 3px 0; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #e11d48;">
@@ -759,6 +770,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
   const [isGenerating, setIsGenerating] = useState(false);
   const [discountAmount, setDiscountAmount] = useState<string>('');
   const [discountDescription, setDiscountDescription] = useState<string>('');
+  const [extraCostAmount, setExtraCostAmount] = useState<string>('');
+  const [extraCostDescription, setExtraCostDescription] = useState<string>('');
   const [directGrandTotalInput, setDirectGrandTotalInput] = useState<string>('');
   const [customUpiId, setCustomUpiId] = useState<string>('');
   const [editingInvoiceId, setEditingInvoiceId] = useState<string | null>(null);
@@ -850,7 +863,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
     }
 
     const discount = Number(discountAmount) || 0;
-    const targetSubtotal = targetVal + discount;
+    const extraCost = Number(extraCostAmount) || 0;
+    const targetSubtotal = targetVal + discount - extraCost;
 
     if (reels.length === 0) {
       setReels([{ id: generateUUID(), title: 'Video Editing Services', quantity: 1, rate: Math.round(targetSubtotal) }]);
@@ -901,7 +915,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
 
     const newSubtotal = newReels.reduce((sum, r) => sum + (r.quantity * r.rate), 0);
     const discount = Number(discountAmount) || 0;
-    const newGrandTotal = Math.max(0, newSubtotal - discount);
+    const extraCost = Number(extraCostAmount) || 0;
+    const newGrandTotal = Math.max(0, newSubtotal - discount + extraCost);
     setDirectGrandTotalInput(newGrandTotal.toString());
   };
 
@@ -911,7 +926,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
 
   const total = calculateTotal();
   const discount = Number(discountAmount) || 0;
-  const grandTotal = Math.max(0, total - discount);
+  const extraCost = Number(extraCostAmount) || 0;
+  const grandTotal = Math.max(0, total - discount + extraCost);
 
   useEffect(() => {
     if (profile?.upiId && profile.upiId !== 'Not specified') {
@@ -934,6 +950,13 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
       setDiscountAmount('');
     }
     setDiscountDescription(inv.discountDescription || '');
+
+    if (inv.extraCostAmount !== undefined) {
+      setExtraCostAmount(inv.extraCostAmount.toString());
+    } else {
+      setExtraCostAmount('');
+    }
+    setExtraCostDescription(inv.extraCostDescription || '');
     setDirectGrandTotalInput(inv.totalAmount.toString());
     setEditingInvoiceId(inv.id);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -999,6 +1022,10 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
         ...(discount > 0 ? {
           discountAmount: discount,
           discountDescription: discountDescription.trim() || 'Discount/Deduction'
+        } : {}),
+        ...(extraCost > 0 ? {
+          extraCostAmount: extraCost,
+          extraCostDescription: extraCostDescription.trim() || 'Extra Expenses'
         } : {})
       };
 
@@ -1043,6 +1070,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
       setLinkedWorkItemIds([]);
       setDiscountAmount('');
       setDiscountDescription('');
+      setExtraCostAmount('');
+      setExtraCostDescription('');
 
       // 6. Generate email details for this specific invoice
       const emailDetails = generateInvoiceEmailDetails(selectedClient, newInvoice, profile, dateFrom, dateTo);
@@ -1357,9 +1386,34 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
               ))}
             </div>
 
-            {/* Discount / Deduction Fields */}
+            {/* Adjustments Fields */}
             <div className="mt-6 pt-6 border-t border-slate-100 space-y-4">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">Discount / Deduction (Optional)</h4>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">Adjustments (Optional)</h4>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">Extra Cost Description</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Stock footage, Travel"
+                    value={extraCostDescription}
+                    onChange={(e) => setExtraCostDescription(e.target.value)}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm bg-white outline-none transition-colors focus:border-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">Extra Cost Amount (₹)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="e.g. 500"
+                    value={extraCostAmount}
+                    onChange={(e) => setExtraCostAmount(e.target.value)}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm bg-white outline-none transition-colors focus:border-indigo-500"
+                  />
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-slate-500 mb-1">Deduction Description</label>
@@ -1390,6 +1444,12 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                 <span>Subtotal</span>
                 <span>₹{total.toLocaleString('en-IN')}</span>
               </div>
+              {extraCost > 0 && (
+                <div className="flex justify-between items-center text-sm text-slate-700 font-medium">
+                  <span>Extra Cost ({extraCostDescription.trim() || 'Additional Expenses'})</span>
+                  <span>+₹{extraCost.toLocaleString('en-IN')}</span>
+                </div>
+              )}
               {discount > 0 && (
                 <div className="flex justify-between items-center text-sm text-rose-500 font-medium">
                   <span>Deduction ({discountDescription.trim() || 'Discount'})</span>
@@ -1590,6 +1650,14 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                       <span className="font-bold text-slate-900">₹{total.toLocaleString('en-IN')}</span>
                     </div>
 
+                    {extraCost > 0 && (
+                      <div className="flex justify-between items-center py-1.5 px-3 text-sm text-slate-700 font-medium bg-slate-50 rounded-lg border border-slate-200 mb-1">
+                        <span className="font-semibold uppercase tracking-wider text-xs text-slate-600">
+                          Extra Cost {extraCostDescription ? `(${extraCostDescription})` : ''}
+                        </span>
+                        <span className="font-bold">+₹{extraCost.toLocaleString('en-IN')}</span>
+                      </div>
+                    )}
                     {discount > 0 && (
                       <div className="flex justify-between items-center py-1.5 px-3 text-sm text-rose-600 font-medium bg-rose-50/60 rounded-lg border border-rose-100">
                         <span className="font-semibold uppercase tracking-wider text-xs text-rose-600">
