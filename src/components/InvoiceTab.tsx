@@ -12,6 +12,7 @@ import QRCode from 'qrcode';
 import { QRCodeSVG } from 'qrcode.react';
 import ReactDOMServer from 'react-dom/server';
 import { sendEmailWithPdfAttachment, acquireGmailAccessToken } from '../lib/gmailService';
+import PaymentDateModal from './PaymentDateModal';
 
 // Helper functions to parse and convert oklab/oklch/color() colors to standard rgb/rgba,
 // which prevents crashes in html2canvas (used by html2pdf.js) under Tailwind CSS v4.
@@ -793,8 +794,45 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
     clientObj?: Client;
     gmailStatus?: { sending: boolean; success?: boolean; error?: string; messageId?: string };
   } | null>(null);
+  const [paymentModalState, setPaymentModalState] = useState<{ invoiceId: string | null, isOpen: boolean }>({ invoiceId: null, isOpen: false });
 
   const selectedClient = clients.find(c => c.id === selectedClientId);
+
+  const toggleInvoiceStatus = (id: string) => {
+    const inv = invoices.find(i => i.id === id);
+    if (inv) {
+      if (inv.status === 'Pending') {
+        // Open modal to get payment date
+        setPaymentModalState({ invoiceId: id, isOpen: true });
+      } else {
+        // Unmark as Paid immediately
+        handleConfirmPaymentDate(id, null);
+      }
+    }
+  };
+
+  const handleConfirmPaymentDate = async (invoiceId: string, timestamp: number | null) => {
+    const inv = invoices.find(i => i.id === invoiceId);
+    if (inv) {
+      const nextStatus = timestamp ? 'Paid' : 'Pending';
+      const pDate = timestamp || undefined;
+      // Update invoice
+      await addInvoice({ 
+        ...inv, 
+        status: nextStatus,
+        lastPaymentDate: pDate
+      });
+
+      // Update client's lastPaymentDate for cycle logic
+      if (nextStatus === 'Paid') {
+        const clientObj = clients.find(c => c.id === inv.clientId || c.name === inv.clientName);
+        if (clientObj && clientObj.id) {
+          await updateClient({ ...clientObj, lastPaymentDate: pDate || Date.now() });
+        }
+      }
+    }
+    setPaymentModalState({ invoiceId: null, isOpen: false });
+  };
 
   useEffect(() => {
     if (selectedClientId && dateFrom && dateTo) {
@@ -1879,14 +1917,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                         </td>
                         <td className="p-3.5 text-center">
                           <button
-                            onClick={async () => {
-                              const newStatus = inv.status === 'Paid' ? 'Pending' : 'Paid';
-                              await addInvoice({ ...inv, status: newStatus });
-                              if (newStatus === 'Paid' && clientObj.id) {
-                                const pDate = inv.date || Date.now();
-                                await updateClient({ ...clientObj, lastPaymentDate: pDate });
-                              }
-                            }}
+                            onClick={() => toggleInvoiceStatus(inv.id)}
                             className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border cursor-pointer transition-transform hover:scale-105 ${inv.status === 'Paid'
                                 ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
                                 : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
@@ -2186,6 +2217,13 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
           </div>
         </div>
       )}
+
+      <PaymentDateModal 
+        isOpen={paymentModalState.isOpen}
+        onClose={() => setPaymentModalState({ invoiceId: null, isOpen: false })}
+        onConfirm={(timestamp) => handleConfirmPaymentDate(paymentModalState.invoiceId!, timestamp)}
+        invoiceNumber={paymentModalState.invoiceId?.substring(0, 8).toUpperCase()}
+      />
     </div>
   );
 }
