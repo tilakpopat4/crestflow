@@ -3,7 +3,7 @@ import { Client, Invoice, WorkItem } from '../types';
 import { 
   Plus, Edit2, Trash2, CheckCircle2, X, Search, Calendar, 
   Clock, Phone, Mail, ArrowRight, AlertTriangle, Send, ShieldAlert,
-  ChevronRight, Filter, Download, Users
+  ChevronRight, Filter, Download, Users, UploadCloud
 } from 'lucide-react';
 import { useFirestore } from '../hooks/useFirestore';
 import { User } from 'firebase/auth';
@@ -17,6 +17,7 @@ import {
   triggerBrowserOverdueAlert
 } from '../lib/paymentUtils';
 import ClientDashboard from './ClientDashboard';
+import CsvImportModal from './CsvImportModal';
 
 interface ClientsTabProps {
   user: User | null;
@@ -32,6 +33,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
   const [selectedClientId, setSelectedClientId] = useState<string | null>(initialSelectedClientId);
   const [isEditing, setIsEditing] = useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
   const [filterType, setFilterType] = useState<'all' | 'due' | 'uptodate'>('all');
@@ -218,13 +220,22 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
         </div>
         
         {!isFormOpen && (
-          <button 
-            onClick={() => setIsFormOpen(true)}
-            className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-sm w-full md:w-auto"
-          >
-            <Plus size={16} />
-            Add New Client
-          </button>
+          <div className="flex items-center gap-2 w-full md:w-auto">
+            <button 
+              onClick={() => setIsImportModalOpen(true)}
+              className="flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-sm flex-1 md:flex-none"
+            >
+              <UploadCloud size={16} />
+              Import CSV
+            </button>
+            <button 
+              onClick={() => setIsFormOpen(true)}
+              className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-sm flex-1 md:flex-none"
+            >
+              <Plus size={16} />
+              Add New Client
+            </button>
+          </div>
         )}
       </div>
 
@@ -639,6 +650,16 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
           })
         )}
       </div>
+
+      <CsvImportModal 
+        isOpen={isImportModalOpen} 
+        onClose={() => setIsImportModalOpen(false)} 
+        userId={user?.uid} 
+        onImportSuccess={() => {
+          setIsImportModalOpen(false);
+          setSearchQuery('');
+        }}
+      />
     </div>
   );
 }
