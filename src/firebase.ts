@@ -3,16 +3,17 @@ import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyChdcAiC6eDCMHxJLAtPwaNEG9q6_15cwc",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "gen-lang-client-0510777303.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "gen-lang-client-0510777303",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "gen-lang-client-0510777303.firebasestorage.app",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "521759239139",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:521759239139:web:cb170748315744323f0ed6",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDVC84sK2RE7u-Tv-oxtVJCesqTzsyirVo",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "crestflow-14f4b.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "crestflow-14f4b",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "crestflow-14f4b.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "960977935987",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:960977935987:web:9c55663e25a9d8c30a1406",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-5M69302VHW"
 };
 
 export const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app, "ai-studio-freelancevideoed-719c6223-ef27-451a-b661-b552901cdc1f");
+export const db = getFirestore(app);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 googleProvider.addScope('https://www.googleapis.com/auth/gmail.send');
