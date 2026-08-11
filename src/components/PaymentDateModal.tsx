@@ -5,16 +5,20 @@ interface PaymentDateModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: (date: number) => void;
+  onUnmark?: () => void;
   defaultDate?: number;
   invoiceNumber?: string;
+  isAlreadyPaid?: boolean;
 }
 
 export default function PaymentDateModal({
   isOpen,
   onClose,
   onConfirm,
+  onUnmark,
   defaultDate,
-  invoiceNumber
+  invoiceNumber,
+  isAlreadyPaid
 }: PaymentDateModalProps) {
   const [dateStr, setDateStr] = useState<string>('');
 
@@ -80,20 +84,31 @@ export default function PaymentDateModal({
             />
           </div>
 
-          <div className="pt-2 flex gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="flex-1 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition-colors shadow-sm"
-            >
-              Confirm Paid
-            </button>
+          <div className="pt-2 flex flex-col gap-3">
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="flex-1 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition-colors shadow-sm"
+              >
+                {isAlreadyPaid ? 'Update Date' : 'Confirm Paid'}
+              </button>
+            </div>
+            {isAlreadyPaid && onUnmark && (
+              <button
+                type="button"
+                onClick={onUnmark}
+                className="w-full px-4 py-2 text-sm font-semibold text-amber-600 hover:bg-amber-50 rounded-xl transition-colors border border-amber-200"
+              >
+                Mark as Pending (Unpaid)
+              </button>
+            )}
           </div>
         </form>
       </div>

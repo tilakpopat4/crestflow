@@ -801,13 +801,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
   const toggleInvoiceStatus = (id: string) => {
     const inv = invoices.find(i => i.id === id);
     if (inv) {
-      if (inv.status === 'Pending') {
-        // Open modal to get payment date
-        setPaymentModalState({ invoiceId: id, isOpen: true });
-      } else {
-        // Unmark as Paid immediately
-        handleConfirmPaymentDate(id, null);
-      }
+      setPaymentModalState({ invoiceId: id, isOpen: true });
     }
   };
 
@@ -2218,12 +2212,20 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
         </div>
       )}
 
-      <PaymentDateModal 
-        isOpen={paymentModalState.isOpen}
-        onClose={() => setPaymentModalState({ invoiceId: null, isOpen: false })}
-        onConfirm={(timestamp) => handleConfirmPaymentDate(paymentModalState.invoiceId!, timestamp)}
-        invoiceNumber={paymentModalState.invoiceId?.substring(0, 8).toUpperCase()}
-      />
+      {(() => {
+        const modalInv = invoices.find(i => i.id === paymentModalState.invoiceId);
+        return (
+          <PaymentDateModal 
+            isOpen={paymentModalState.isOpen}
+            onClose={() => setPaymentModalState({ invoiceId: null, isOpen: false })}
+            onConfirm={(timestamp) => handleConfirmPaymentDate(paymentModalState.invoiceId!, timestamp)}
+            onUnmark={() => handleConfirmPaymentDate(paymentModalState.invoiceId!, null)}
+            defaultDate={modalInv?.lastPaymentDate}
+            isAlreadyPaid={modalInv?.status === 'Paid'}
+            invoiceNumber={paymentModalState.invoiceId?.substring(0, 8).toUpperCase()}
+          />
+        );
+      })()}
     </div>
   );
 }
