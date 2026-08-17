@@ -357,7 +357,15 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="flex items-start gap-4">
             {client.logoUrl ? (
-              <img src={client.logoUrl} alt={client.name} className="w-16 h-16 rounded-2xl object-cover shadow-md shrink-0" />
+              <img 
+                src={client.logoUrl} 
+                alt={client.name} 
+                className="w-16 h-16 rounded-2xl object-cover shadow-md shrink-0 bg-indigo-50" 
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(client.name)}&background=6366f1&color=ffffff&size=128&rounded=true&bold=true`;
+                }}
+              />
             ) : (
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white flex items-center justify-center font-black text-2xl shadow-md shrink-0">
                 {client.name.charAt(0).toUpperCase()}
@@ -1260,7 +1268,15 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                       >
                         <div className="flex gap-3 min-w-0">
                           {sc.logoUrl ? (
-                            <img src={sc.logoUrl} alt={sc.name} className="w-10 h-10 rounded-lg object-cover shadow-sm shrink-0" />
+                            <img 
+                              src={sc.logoUrl} 
+                              alt={sc.name} 
+                              className="w-10 h-10 rounded-lg object-cover shadow-sm shrink-0 bg-purple-50" 
+                              onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(sc.name)}&background=f3e8ff&color=7e22ce&size=128&rounded=true&bold=true`;
+                              }}
+                            />
                           ) : (
                             <div className="w-10 h-10 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold shadow-sm shrink-0">
                               {sc.name.charAt(0).toUpperCase()}

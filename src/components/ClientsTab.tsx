@@ -604,7 +604,15 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
                       {client.logoUrl ? (
-                        <img src={client.logoUrl} alt={client.name} className="w-12 h-12 rounded-xl object-cover shadow-sm shrink-0" />
+                        <img 
+                          src={client.logoUrl} 
+                          alt={client.name} 
+                          className="w-12 h-12 rounded-xl object-cover shadow-sm shrink-0 bg-indigo-50"
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(client.name)}&background=e0e7ff&color=4338ca&size=128&rounded=true&bold=true`;
+                          }}
+                        />
                       ) : (
                         <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-lg shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
                           {client.name.charAt(0).toUpperCase()}
