@@ -81,18 +81,6 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
         ? new Date(formData.lastPaymentDate).getTime() 
         : Date.now();
 
-      let finalLogoUrl = formData.logoUrl?.trim() || '';
-      if (!finalLogoUrl && formData.instagram) {
-        let handle = formData.instagram.trim();
-        if (handle.startsWith('@')) handle = handle.substring(1);
-        else if (handle.includes('instagram.com/')) {
-          handle = handle.split('instagram.com/')[1].replace('/', '').split('?')[0];
-        }
-        if (handle) {
-          finalLogoUrl = `https://unavatar.io/instagram/${handle}`;
-        }
-      }
-
       if (isEditing) {
         const existing = clients.find(c => c.id === isEditing);
         if (existing) {
@@ -101,7 +89,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
             name: formData.name,
             phone: formData.phone,
             email: formData.email,
-            logoUrl: finalLogoUrl,
+            logoUrl: formData.logoUrl?.trim() || undefined,
             instagram: formData.instagram,
             workExperience: formData.workExperience,
             defaultRate: Number(formData.defaultRate),
@@ -124,7 +112,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
           name: formData.name,
           phone: formData.phone,
           email: formData.email,
-          logoUrl: finalLogoUrl,
+          logoUrl: formData.logoUrl?.trim() || undefined,
           instagram: formData.instagram,
           workExperience: formData.workExperience,
           defaultRate: Number(formData.defaultRate), 

@@ -55,18 +55,6 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
     e.preventDefault();
     if (!subClientForm.name.trim()) return alert("Please enter a sub-client name.");
 
-    let finalLogoUrl = subClientForm.logoUrl.trim();
-    if (!finalLogoUrl && subClientForm.instagram) {
-      let handle = subClientForm.instagram.trim();
-      if (handle.startsWith('@')) handle = handle.substring(1);
-      else if (handle.includes('instagram.com/')) {
-        handle = handle.split('instagram.com/')[1].replace('/', '').split('?')[0];
-      }
-      if (handle) {
-        finalLogoUrl = `https://unavatar.io/instagram/${handle}`;
-      }
-    }
-
     const existingSubs = client.subClients || [];
     let updatedSubs: SubClient[];
 
@@ -78,7 +66,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
               name: subClientForm.name.trim(), 
               code: subClientForm.code.trim() || undefined, 
               notes: subClientForm.notes.trim() || undefined,
-              logoUrl: finalLogoUrl || undefined,
+              logoUrl: subClientForm.logoUrl.trim() || undefined,
               instagram: subClientForm.instagram.trim() || undefined,
               email: subClientForm.email.trim() || undefined,
               phone: subClientForm.phone.trim() || undefined,
@@ -92,7 +80,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
         name: subClientForm.name.trim(),
         code: subClientForm.code.trim() || undefined,
         notes: subClientForm.notes.trim() || undefined,
-        logoUrl: finalLogoUrl || undefined,
+        logoUrl: subClientForm.logoUrl.trim() || undefined,
         instagram: subClientForm.instagram.trim() || undefined,
         email: subClientForm.email.trim() || undefined,
         phone: subClientForm.phone.trim() || undefined,
