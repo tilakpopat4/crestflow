@@ -67,7 +67,8 @@ export function getDriveDirectImageUrl(url: string | undefined | null): string {
     }
     
     if (fileId) {
-      return `https://drive.google.com/uc?export=view&id=${fileId}`;
+      // Use thumbnail endpoint which avoids the Google Drive cookie restriction and CORS issues on modern browsers
+      return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
     }
   }
   
