@@ -603,9 +603,13 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                   {/* Top row: Avatar & Status Badge */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-lg shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                        {client.name.charAt(0).toUpperCase()}
-                      </div>
+                      {client.logoUrl ? (
+                        <img src={client.logoUrl} alt={client.name} className="w-12 h-12 rounded-xl object-cover shadow-sm shrink-0" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-lg shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                          {client.name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
                       <div>
                         <h3 className="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors leading-snug">
                           {client.name}
