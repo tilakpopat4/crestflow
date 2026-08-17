@@ -38,11 +38,45 @@ export async function generateWorkSummary(
   const professionalTitle = profile?.professionalTitle || "Freelancer";
   const name = profile?.name || "Professional";
 
+  let earliestDate = cutoffTime;
+  let hasClientFrom = false;
+
+  filteredClients.forEach(c => {
+    if (c.clientFrom) {
+      const d = new Date(c.clientFrom).getTime();
+      if (!isNaN(d) && d < earliestDate) earliestDate = d;
+      hasClientFrom = true;
+    }
+    c.subClients?.forEach(sc => {
+       if (sc.clientFrom) {
+          const d = new Date(sc.clientFrom).getTime();
+          if (!isNaN(d) && d < earliestDate) earliestDate = d;
+          hasClientFrom = true;
+       }
+    });
+  });
+
+  let experienceText = "";
+  if (hasClientFrom) {
+    const diffTime = Math.abs(cutoffTime - earliestDate);
+    const diffMonths = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 30.44));
+    const years = Math.floor(diffMonths / 12);
+    const months = diffMonths % 12;
+    
+    if (years > 0 && months > 0) {
+      experienceText = `They have over ${years} year(s) and ${months} month(s) of professional experience.`;
+    } else if (years > 0) {
+      experienceText = `They have over ${years} year(s) of professional experience.`;
+    } else if (months > 0) {
+      experienceText = `They have over ${months} month(s) of professional experience.`;
+    }
+  }
+
   const prompt = `You are an expert career summarizing assistant. 
 Please generate a single, professional, and engaging paragraph (about 3-4 sentences) summarizing the work experience and achievements of ${name}, a ${professionalTitle}.
-They have completed ${totalWorkItems} work items/tasks, served ${totalClients} primary clients, and ${totalSubclients} sub-clients.
+${experienceText} They have completed ${totalWorkItems} work items/tasks, served ${totalClients} primary clients, and ${totalSubclients} sub-clients.
 Some examples of their work include: ${workDescriptions || 'general freelancing work'}.
-Do not mention specific dates or specific earnings unless provided. Focus on highlighting their capacity, the breadth of their client base, and the volume of work they've delivered up to this point. Make it sound suitable for a LinkedIn summary or portfolio "About Me" section. Do not use markdown formatting like bolding or headers, just a plain text paragraph.`;
+Do not mention specific dates or specific earnings unless provided. Focus on highlighting their capacity, their experience length, the breadth of their client base, and the volume of work they've delivered up to this point. Make it sound suitable for a LinkedIn summary or portfolio "About Me" section. Do not use markdown formatting like bolding or headers, just a plain text paragraph.`;
 
   try {
     const response = await ai.models.generateContent({

@@ -48,7 +48,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
   // Sub-Client management state
   const [isSubClientsModalOpen, setIsSubClientsModalOpen] = useState(false);
   const [editingSubClientId, setEditingSubClientId] = useState<string | null>(null);
-  const [subClientForm, setSubClientForm] = useState({ name: '', code: '', notes: '', logoUrl: '', instagram: '', email: '', phone: '', workExperience: '' });
+  const [subClientForm, setSubClientForm] = useState({ name: '', code: '', notes: '', logoUrl: '', instagram: '', email: '', phone: '', clientFrom: '', workExperience: '' });
   const [subClientFilter, setSubClientFilter] = useState<'all' | 'direct' | string>('all');
 
   const handleSaveSubClient = async (e: React.FormEvent) => {
@@ -70,6 +70,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
               instagram: subClientForm.instagram.trim() || undefined,
               email: subClientForm.email.trim() || undefined,
               phone: subClientForm.phone.trim() || undefined,
+              clientFrom: subClientForm.clientFrom.trim() || undefined,
               workExperience: subClientForm.workExperience.trim() || undefined
             }
           : sc
@@ -84,6 +85,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
         instagram: subClientForm.instagram.trim() || undefined,
         email: subClientForm.email.trim() || undefined,
         phone: subClientForm.phone.trim() || undefined,
+        clientFrom: subClientForm.clientFrom.trim() || undefined,
         workExperience: subClientForm.workExperience.trim() || undefined,
         createdAt: Date.now()
       };
@@ -92,7 +94,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
 
     try {
       await updateClient({ ...client, subClients: updatedSubs });
-      setSubClientForm({ name: '', code: '', notes: '', logoUrl: '', instagram: '', email: '', phone: '', workExperience: '' });
+      setSubClientForm({ name: '', code: '', notes: '', logoUrl: '', instagram: '', email: '', phone: '', clientFrom: '', workExperience: '' });
       setEditingSubClientId(null);
     } catch (err: any) {
       console.error(err);
@@ -110,6 +112,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
       instagram: sc.instagram || '',
       email: sc.email || '',
       phone: sc.phone || '',
+      clientFrom: sc.clientFrom || '',
       workExperience: sc.workExperience || ''
     });
   };
@@ -120,7 +123,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
       await updateClient({ ...client, subClients: updatedSubs });
       if (editingSubClientId === subId) {
         setEditingSubClientId(null);
-        setSubClientForm({ name: '', code: '', notes: '', logoUrl: '', instagram: '', email: '', phone: '', workExperience: '' });
+        setSubClientForm({ name: '', code: '', notes: '', logoUrl: '', instagram: '', email: '', phone: '', clientFrom: '', workExperience: '' });
       }
     }
   };
@@ -1195,6 +1198,16 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                     placeholder="@username or link"
                     value={subClientForm.instagram}
                     onChange={e => setSubClientForm({ ...subClientForm, instagram: e.target.value })}
+                    className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+                
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Client From (Optional)</label>
+                  <input
+                    type="month"
+                    value={subClientForm.clientFrom}
+                    onChange={e => setSubClientForm({ ...subClientForm, clientFrom: e.target.value })}
                     className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500"
                   />
                 </div>

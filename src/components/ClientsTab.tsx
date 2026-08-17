@@ -57,6 +57,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
     email: '',
     logoUrl: '',
     instagram: '',
+    clientFrom: '',
     workExperience: '',
     defaultRate: '',
     onSiteShootRate: '',
@@ -91,6 +92,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
             email: formData.email,
             logoUrl: formData.logoUrl?.trim() || undefined,
             instagram: formData.instagram,
+            clientFrom: formData.clientFrom,
             workExperience: formData.workExperience,
             defaultRate: Number(formData.defaultRate),
             lastPaymentDate: paymentDateTimestamp,
@@ -114,6 +116,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
           email: formData.email,
           logoUrl: formData.logoUrl?.trim() || undefined,
           instagram: formData.instagram,
+          clientFrom: formData.clientFrom,
           workExperience: formData.workExperience,
           defaultRate: Number(formData.defaultRate), 
           lastPaymentDate: paymentDateTimestamp,
@@ -132,6 +135,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
         email: '', 
         logoUrl: '',
         instagram: '',
+        clientFrom: '',
         workExperience: '',
         defaultRate: '', 
         onSiteShootRate: '', 
@@ -154,6 +158,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
       email: c.email || '', 
       logoUrl: c.logoUrl || '',
       instagram: c.instagram || '',
+      clientFrom: c.clientFrom || '',
       workExperience: c.workExperience || '',
       defaultRate: String(c.defaultRate),
       onSiteShootRate: c.onSiteShootRate ? String(c.onSiteShootRate) : '',
@@ -405,6 +410,16 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                 onChange={e => setFormData({...formData, instagram: e.target.value})}
                 className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-600"
                 placeholder="@username or link"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-slate-700">Client From (Optional)</label>
+              <input 
+                type="month" 
+                value={formData.clientFrom}
+                onChange={e => setFormData({...formData, clientFrom: e.target.value})}
+                className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-600"
               />
             </div>
             

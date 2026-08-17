@@ -7,6 +7,7 @@ export interface SubClient {
   instagram?: string;
   email?: string;
   phone?: string;
+  clientFrom?: string; // e.g. YYYY-MM
   workExperience?: string;
   createdAt?: number;
 }
@@ -18,6 +19,7 @@ export interface Client {
   email: string;
   logoUrl?: string;
   instagram?: string;
+  clientFrom?: string; // e.g. YYYY-MM
   workExperience?: string;
   defaultRate: number;
   onSiteShootRate?: number;
