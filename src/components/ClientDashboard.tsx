@@ -381,7 +381,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                   </span>
                 )}
                 <span className="text-slate-400">
-                  Client since: {new Date(client.createdAt).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}
+                  Client since: {client.clientFrom ? new Date(client.clientFrom + '-01').toLocaleDateString('en-IN', { month: 'short', year: 'numeric' }) : new Date(client.createdAt).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}
                 </span>
                 {client.instagram && (
                   <a href={client.instagram.startsWith('http') ? client.instagram : `https://instagram.com/${client.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-pink-600 hover:underline">
