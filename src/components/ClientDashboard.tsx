@@ -17,7 +17,7 @@ import {
   generateInvoiceEmailDetails,
   triggerBrowserOverdueAlert
 } from '../lib/paymentUtils';
-import { generateUUID, extractVideoUrl } from '../lib/utils';
+import { generateUUID, extractVideoUrl, getDriveDirectImageUrl } from '../lib/utils';
 
 interface ClientDashboardProps {
   client: Client;
@@ -349,7 +349,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
           <div className="flex items-start gap-4">
             {client.logoUrl ? (
               <img 
-                src={client.logoUrl} 
+                src={getDriveDirectImageUrl(client.logoUrl)} 
                 alt={client.name} 
                 className="w-16 h-16 rounded-2xl object-cover shadow-md shrink-0 bg-indigo-50" 
                 onError={(e) => {
@@ -1270,7 +1270,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                         <div className="flex gap-3 min-w-0">
                           {sc.logoUrl ? (
                             <img 
-                              src={sc.logoUrl} 
+                              src={getDriveDirectImageUrl(sc.logoUrl)} 
                               alt={sc.name} 
                               className="w-10 h-10 rounded-lg object-cover shadow-sm shrink-0 bg-purple-50" 
                               onError={(e) => {

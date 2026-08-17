@@ -47,4 +47,29 @@ export function extractVideoUrl(item?: { videoUrl?: string; description?: string
 
   return rawUrl;
 }
-
+export function getDriveDirectImageUrl(url: string | undefined | null): string {
+  if (!url) return '';
+  const trimmedUrl = url.trim();
+  
+  if (trimmedUrl.includes('drive.google.com')) {
+    let fileId = '';
+    
+    // Format 1: /file/d/FILE_ID/view
+    const fileDMatch = trimmedUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (fileDMatch && fileDMatch[1]) {
+      fileId = fileDMatch[1];
+    } else {
+      // Format 2: ?id=FILE_ID
+      const idMatch = trimmedUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+      if (idMatch && idMatch[1]) {
+        fileId = idMatch[1];
+      }
+    }
+    
+    if (fileId) {
+      return `https://drive.google.com/uc?export=view&id=${fileId}`;
+    }
+  }
+  
+  return trimmedUrl;
+}

@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { useFirestore } from '../hooks/useFirestore';
 import { User } from 'firebase/auth';
-import { generateUUID } from '../lib/utils';
+import { generateUUID, getDriveDirectImageUrl } from '../lib/utils';
 import { exportClientCSV } from '../lib/csvExport';
 import { 
   getPaymentStatusInfo, 
@@ -608,7 +608,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                     <div className="flex items-center gap-3">
                       {client.logoUrl ? (
                         <img 
-                          src={client.logoUrl} 
+                          src={getDriveDirectImageUrl(client.logoUrl)} 
                           alt={client.name} 
                           className="w-12 h-12 rounded-xl object-cover shadow-sm shrink-0 bg-indigo-50"
                           onError={(e) => {
