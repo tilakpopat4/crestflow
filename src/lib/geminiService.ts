@@ -7,9 +7,9 @@ export async function generateWorkSummary(
   upToDate: Date,
   profile: UserProfile | null | undefined
 ): Promise<string> {
-  const apiKey = import.meta.env.GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY;
+  const apiKey = profile?.geminiApiKey || import.meta.env.GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY;
   if (!apiKey) {
-    throw new Error("Gemini API key is not configured.");
+    throw new Error("Gemini API key is not configured. Please add it in your Profile Settings.");
   }
 
   const ai = new GoogleGenAI({ apiKey });

@@ -25,6 +25,7 @@ export default function ProfileModal({
   const [upiId, setUpiId] = useState('');
   const [professionalTitle, setProfessionalTitle] = useState('Video Editor Pro');
   const [servicesDescription, setServicesDescription] = useState('Video Editing Services');
+  const [geminiApiKey, setGeminiApiKey] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -35,6 +36,7 @@ export default function ProfileModal({
       setUpiId(initialProfile?.upiId || '');
       setProfessionalTitle(initialProfile?.professionalTitle || 'Video Editor');
       setServicesDescription(initialProfile?.servicesDescription || 'Video Editing Services');
+      setGeminiApiKey(initialProfile?.geminiApiKey || '');
       setError('');
     }
   }, [isOpen, initialProfile, user]);
@@ -64,6 +66,7 @@ export default function ProfileModal({
         upiId: upiId.trim(),
         professionalTitle: professionalTitle.trim(),
         servicesDescription: servicesDescription.trim(),
+        geminiApiKey: geminiApiKey.trim() || undefined,
         createdAt: initialProfile?.createdAt || Date.now()
       };
       await onSave(updatedProfile);
@@ -178,6 +181,18 @@ export default function ProfileModal({
               required
             />
             <p className="text-[10px] text-slate-400 mt-1">This UPI ID is used to generate custom payment links & UPI QR codes on invoices.</p>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">Gemini API Key (Optional)</label>
+            <input 
+              type="password"
+              placeholder="AI Work Summarizer API Key"
+              className="w-full border border-slate-200 rounded-lg px-3.5 py-2 text-sm bg-slate-50 outline-none transition-all focus:border-indigo-500 focus:bg-white font-mono"
+              value={geminiApiKey}
+              onChange={(e) => setGeminiApiKey(e.target.value)}
+            />
+            <p className="text-[10px] text-slate-400 mt-1">Add your own API key to use the AI Work Summarizer. Get one from Google AI Studio.</p>
           </div>
 
           <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">

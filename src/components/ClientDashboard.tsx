@@ -48,12 +48,24 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
   // Sub-Client management state
   const [isSubClientsModalOpen, setIsSubClientsModalOpen] = useState(false);
   const [editingSubClientId, setEditingSubClientId] = useState<string | null>(null);
-  const [subClientForm, setSubClientForm] = useState({ name: '', code: '', notes: '' });
+  const [subClientForm, setSubClientForm] = useState({ name: '', code: '', notes: '', logoUrl: '', instagram: '', email: '', phone: '', workExperience: '' });
   const [subClientFilter, setSubClientFilter] = useState<'all' | 'direct' | string>('all');
 
   const handleSaveSubClient = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!subClientForm.name.trim()) return alert("Please enter a sub-client name.");
+
+    let finalLogoUrl = subClientForm.logoUrl.trim();
+    if (!finalLogoUrl && subClientForm.instagram) {
+      let handle = subClientForm.instagram.trim();
+      if (handle.startsWith('@')) handle = handle.substring(1);
+      else if (handle.includes('instagram.com/')) {
+        handle = handle.split('instagram.com/')[1].replace('/', '').split('?')[0];
+      }
+      if (handle) {
+        finalLogoUrl = `https://unavatar.io/instagram/${handle}`;
+      }
+    }
 
     const existingSubs = client.subClients || [];
     let updatedSubs: SubClient[];
@@ -61,7 +73,17 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
     if (editingSubClientId) {
       updatedSubs = existingSubs.map(sc => 
         sc.id === editingSubClientId 
-          ? { ...sc, name: subClientForm.name.trim(), code: subClientForm.code.trim() || undefined, notes: subClientForm.notes.trim() || undefined }
+          ? { 
+              ...sc, 
+              name: subClientForm.name.trim(), 
+              code: subClientForm.code.trim() || undefined, 
+              notes: subClientForm.notes.trim() || undefined,
+              logoUrl: finalLogoUrl || undefined,
+              instagram: subClientForm.instagram.trim() || undefined,
+              email: subClientForm.email.trim() || undefined,
+              phone: subClientForm.phone.trim() || undefined,
+              workExperience: subClientForm.workExperience.trim() || undefined
+            }
           : sc
       );
     } else {
@@ -70,6 +92,11 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
         name: subClientForm.name.trim(),
         code: subClientForm.code.trim() || undefined,
         notes: subClientForm.notes.trim() || undefined,
+        logoUrl: finalLogoUrl || undefined,
+        instagram: subClientForm.instagram.trim() || undefined,
+        email: subClientForm.email.trim() || undefined,
+        phone: subClientForm.phone.trim() || undefined,
+        workExperience: subClientForm.workExperience.trim() || undefined,
         createdAt: Date.now()
       };
       updatedSubs = [...existingSubs, newSub];
@@ -77,7 +104,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
 
     try {
       await updateClient({ ...client, subClients: updatedSubs });
-      setSubClientForm({ name: '', code: '', notes: '' });
+      setSubClientForm({ name: '', code: '', notes: '', logoUrl: '', instagram: '', email: '', phone: '', workExperience: '' });
       setEditingSubClientId(null);
     } catch (err: any) {
       console.error(err);
@@ -90,7 +117,12 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
     setSubClientForm({
       name: sc.name,
       code: sc.code || '',
-      notes: sc.notes || ''
+      notes: sc.notes || '',
+      logoUrl: sc.logoUrl || '',
+      instagram: sc.instagram || '',
+      email: sc.email || '',
+      phone: sc.phone || '',
+      workExperience: sc.workExperience || ''
     });
   };
 
@@ -100,7 +132,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
       await updateClient({ ...client, subClients: updatedSubs });
       if (editingSubClientId === subId) {
         setEditingSubClientId(null);
-        setSubClientForm({ name: '', code: '', notes: '' });
+        setSubClientForm({ name: '', code: '', notes: '', logoUrl: '', instagram: '', email: '', phone: '', workExperience: '' });
       }
     }
   };
@@ -324,9 +356,13 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
       <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm relative overflow-hidden">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="flex items-start gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white flex items-center justify-center font-black text-2xl shadow-md shrink-0">
-              {client.name.charAt(0).toUpperCase()}
-            </div>
+            {client.logoUrl ? (
+              <img src={client.logoUrl} alt={client.name} className="w-16 h-16 rounded-2xl object-cover shadow-md shrink-0" />
+            ) : (
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white flex items-center justify-center font-black text-2xl shadow-md shrink-0">
+                {client.name.charAt(0).toUpperCase()}
+              </div>
+            )}
 
             <div>
               <div className="flex items-center gap-3 flex-wrap">
@@ -348,7 +384,17 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                 <span className="text-slate-400">
                   Client since: {new Date(client.createdAt).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}
                 </span>
+                {client.instagram && (
+                  <a href={client.instagram.startsWith('http') ? client.instagram : `https://instagram.com/${client.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-pink-600 hover:underline">
+                    Instagram
+                  </a>
+                )}
               </div>
+              {client.workExperience && (
+                <div className="mt-2 text-xs text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-100 max-w-lg">
+                  <span className="font-semibold text-slate-700">Experience/Notes:</span> {client.workExperience}
+                </div>
+              )}
             </div>
           </div>
 
@@ -1112,6 +1158,60 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                     className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500 font-mono"
                   />
                 </div>
+                
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Phone Number (Optional)</label>
+                  <input
+                    type="tel"
+                    placeholder="e.g. +91 98765 43210"
+                    value={subClientForm.phone}
+                    onChange={e => setSubClientForm({ ...subClientForm, phone: e.target.value })}
+                    className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Email Address (Optional)</label>
+                  <input
+                    type="email"
+                    placeholder="subclient@example.com"
+                    value={subClientForm.email}
+                    onChange={e => setSubClientForm({ ...subClientForm, email: e.target.value })}
+                    className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Logo URL (Optional)</label>
+                  <input
+                    type="url"
+                    placeholder="https://example.com/logo.png"
+                    value={subClientForm.logoUrl}
+                    onChange={e => setSubClientForm({ ...subClientForm, logoUrl: e.target.value })}
+                    className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Instagram (Optional)</label>
+                  <input
+                    type="text"
+                    placeholder="@username or link"
+                    value={subClientForm.instagram}
+                    onChange={e => setSubClientForm({ ...subClientForm, instagram: e.target.value })}
+                    className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+                
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Work Experience / Notes (Optional)</label>
+                  <textarea
+                    placeholder="Details about past projects, years of experience, etc."
+                    value={subClientForm.workExperience}
+                    onChange={e => setSubClientForm({ ...subClientForm, workExperience: e.target.value })}
+                    className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500 resize-none h-16"
+                  />
+                </div>
               </div>
 
               <div className="flex items-center justify-end gap-2 pt-1">
@@ -1158,15 +1258,40 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                         key={sc.id}
                         className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-3 hover:bg-purple-50/30 transition-colors"
                       >
-                        <div className="space-y-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-slate-900 text-sm">{sc.name}</span>
-                            {sc.code && (
-                              <span className="px-2 py-0.5 bg-slate-200 text-slate-700 rounded font-mono text-[11px] font-semibold">
-                                {sc.code}
-                              </span>
+                        <div className="flex gap-3 min-w-0">
+                          {sc.logoUrl ? (
+                            <img src={sc.logoUrl} alt={sc.name} className="w-10 h-10 rounded-lg object-cover shadow-sm shrink-0" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold shadow-sm shrink-0">
+                              {sc.name.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                          <div className="space-y-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-slate-900 text-sm">{sc.name}</span>
+                              {sc.code && (
+                                <span className="px-2 py-0.5 bg-slate-200 text-slate-700 rounded font-mono text-[11px] font-semibold">
+                                  {sc.code}
+                                </span>
+                              )}
+                              {sc.instagram && (
+                                <a href={sc.instagram.startsWith('http') ? sc.instagram : `https://instagram.com/${sc.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="text-pink-600 hover:underline text-[10px] ml-1">
+                                  IG
+                                </a>
+                              )}
+                            </div>
+                            {(sc.phone || sc.email) && (
+                              <div className="flex items-center gap-2 text-[10px] text-slate-500">
+                                {sc.phone && <span>{sc.phone}</span>}
+                                {sc.phone && sc.email && <span>•</span>}
+                                {sc.email && <span>{sc.email}</span>}
+                              </div>
                             )}
-                          </div>
+                            {sc.workExperience && (
+                              <div className="text-[10px] text-slate-600 truncate max-w-xs">
+                                <span className="font-semibold">Exp:</span> {sc.workExperience}
+                              </div>
+                            )}
                           <div className="flex items-center gap-3 text-xs text-slate-500">
                             <span>{scWorkLogs.length} work log(s)</span>
                             <span>•</span>
@@ -1176,6 +1301,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                                 ₹{uninvoicedVal.toLocaleString('en-IN')} pending invoice
                               </span>
                             )}
+                          </div>
                           </div>
                         </div>
 

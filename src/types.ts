@@ -3,6 +3,11 @@ export interface SubClient {
   name: string;
   code?: string;
   notes?: string;
+  logoUrl?: string;
+  instagram?: string;
+  email?: string;
+  phone?: string;
+  workExperience?: string;
   createdAt?: number;
 }
 
@@ -11,6 +16,9 @@ export interface Client {
   name: string;
   phone: string;
   email: string;
+  logoUrl?: string;
+  instagram?: string;
+  workExperience?: string;
   defaultRate: number;
   onSiteShootRate?: number;
   websiteMakingRate?: number;
@@ -71,6 +79,7 @@ export interface UserProfile {
   accountNumber?: string;
   ifscCode?: string;
   bankName?: string;
+  geminiApiKey?: string;
   createdAt: number;
 }
 

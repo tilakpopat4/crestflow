@@ -55,6 +55,9 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
     name: '',
     phone: '',
     email: '',
+    logoUrl: '',
+    instagram: '',
+    workExperience: '',
     defaultRate: '',
     onSiteShootRate: '',
     websiteMakingRate: '',
@@ -78,6 +81,18 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
         ? new Date(formData.lastPaymentDate).getTime() 
         : Date.now();
 
+      let finalLogoUrl = formData.logoUrl?.trim() || '';
+      if (!finalLogoUrl && formData.instagram) {
+        let handle = formData.instagram.trim();
+        if (handle.startsWith('@')) handle = handle.substring(1);
+        else if (handle.includes('instagram.com/')) {
+          handle = handle.split('instagram.com/')[1].replace('/', '').split('?')[0];
+        }
+        if (handle) {
+          finalLogoUrl = `https://unavatar.io/instagram/${handle}`;
+        }
+      }
+
       if (isEditing) {
         const existing = clients.find(c => c.id === isEditing);
         if (existing) {
@@ -86,6 +101,9 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
             name: formData.name,
             phone: formData.phone,
             email: formData.email,
+            logoUrl: finalLogoUrl,
+            instagram: formData.instagram,
+            workExperience: formData.workExperience,
             defaultRate: Number(formData.defaultRate),
             lastPaymentDate: paymentDateTimestamp,
             emailRemindersEnabled: formData.emailRemindersEnabled
@@ -106,6 +124,9 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
           name: formData.name,
           phone: formData.phone,
           email: formData.email,
+          logoUrl: finalLogoUrl,
+          instagram: formData.instagram,
+          workExperience: formData.workExperience,
           defaultRate: Number(formData.defaultRate), 
           lastPaymentDate: paymentDateTimestamp,
           emailRemindersEnabled: formData.emailRemindersEnabled,
@@ -121,6 +142,9 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
         name: '', 
         phone: '', 
         email: '', 
+        logoUrl: '',
+        instagram: '',
+        workExperience: '',
         defaultRate: '', 
         onSiteShootRate: '', 
         websiteMakingRate: '',
@@ -140,6 +164,9 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
       name: c.name, 
       phone: c.phone, 
       email: c.email || '', 
+      logoUrl: c.logoUrl || '',
+      instagram: c.instagram || '',
+      workExperience: c.workExperience || '',
       defaultRate: String(c.defaultRate),
       onSiteShootRate: c.onSiteShootRate ? String(c.onSiteShootRate) : '',
       websiteMakingRate: c.websiteMakingRate ? String(c.websiteMakingRate) : '',
@@ -162,6 +189,9 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
       name: '', 
       phone: '', 
       email: '', 
+      logoUrl: '',
+      instagram: '',
+      workExperience: '',
       defaultRate: '', 
       onSiteShootRate: '', 
       websiteMakingRate: '',
@@ -365,6 +395,38 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                 onChange={e => setFormData({...formData, email: e.target.value})}
                 className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-600"
                 placeholder="client@example.com"
+              />
+            </div>
+            
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-slate-700">Logo URL (Optional)</label>
+              <input 
+                type="url" 
+                value={formData.logoUrl}
+                onChange={e => setFormData({...formData, logoUrl: e.target.value})}
+                className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-600"
+                placeholder="https://example.com/logo.png"
+              />
+            </div>
+            
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-slate-700">Instagram Handle / URL (Optional)</label>
+              <input 
+                type="text" 
+                value={formData.instagram}
+                onChange={e => setFormData({...formData, instagram: e.target.value})}
+                className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-600"
+                placeholder="@username or link"
+              />
+            </div>
+            
+            <div className="space-y-1.5 md:col-span-2">
+              <label className="block text-xs font-semibold text-slate-700">Work Experience / Notes (Optional)</label>
+              <textarea 
+                value={formData.workExperience}
+                onChange={e => setFormData({...formData, workExperience: e.target.value})}
+                className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-600 resize-none h-20"
+                placeholder="Details about past projects, years of experience, etc."
               />
             </div>
 
