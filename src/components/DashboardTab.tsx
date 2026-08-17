@@ -16,15 +16,18 @@ import {
 import { registerFcmDeviceToken, triggerFcmPaymentReminder } from '../lib/fcmService';
 import StickyNotesWidget from './StickyNotesWidget';
 import PaymentDateModal from './PaymentDateModal';
+import AISummarizer from './AISummarizer';
+import { UserProfile } from '../types';
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
 interface DashboardTabProps {
   user: User | null;
+  profile?: UserProfile | null;
   onNavigateToClients?: () => void;
 }
 
-export default function DashboardTab({ user, onNavigateToClients }: DashboardTabProps) {
+export default function DashboardTab({ user, profile, onNavigateToClients }: DashboardTabProps) {
   const { data: clients, addOrUpdateItem: updateClient } = useFirestore<Client>('clients', user?.uid);
   const { data: invoices, loading, addOrUpdateItem, removeItem, batchReplaceAll } = useFirestore<Invoice>('invoices', user?.uid);
   const { batchReplaceAll: batchReplaceClients } = useFirestore<any>('clients', user?.uid);
@@ -725,6 +728,9 @@ export default function DashboardTab({ user, onNavigateToClients }: DashboardTab
 
       {/* Sticky Notes Widget */}
       <StickyNotesWidget user={user} clients={clients} />
+
+      {/* AI Summarizer Widget */}
+      <AISummarizer clients={clients} workItems={workItems} profile={profile} />
 
       {(() => {
         const modalInv = invoices.find(i => i.id === paymentModalState.invoiceId);

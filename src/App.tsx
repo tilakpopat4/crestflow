@@ -309,7 +309,7 @@ export default function App() {
           setGlobalQuery={setGlobalSearchQuery}
         />
         <div className="flex-1 overflow-y-auto">
-          {activeTab === 'dashboard' && <DashboardTab user={user} onNavigateToClients={() => setActiveTab('clients')} />}
+          {activeTab === 'dashboard' && <DashboardTab user={user} profile={profile} onNavigateToClients={() => setActiveTab('clients')} />}
           {activeTab === 'clients' && <ClientsTab user={user} initialSearchQuery={globalSearchQuery} initialSelectedClientId={selectedClientIdFromSearch} />}
           {activeTab === 'work' && <WorkLogTab user={user} initialSearchQuery={globalSearchQuery} />}
           {activeTab === 'invoice' && <InvoiceTab user={user} profile={profile} initialSearchQuery={globalSearchQuery} />}
