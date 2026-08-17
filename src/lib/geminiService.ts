@@ -46,7 +46,7 @@ Do not mention specific dates or specific earnings unless provided. Focus on hig
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3.0-flash',
+      model: 'gemini-3.5-flash',
       contents: prompt,
     });
     
