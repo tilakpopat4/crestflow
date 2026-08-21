@@ -201,11 +201,11 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
   }, [selectedYear, workItems, invoices]);
 
   const getContributionColorClass = (count: number) => {
-    if (count === 0) return 'bg-slate-800/40 border border-slate-850/80';
-    if (count === 1) return 'bg-emerald-950 border border-emerald-900/60';
-    if (count === 2) return 'bg-emerald-800 border border-emerald-700/60';
-    if (count === 3) return 'bg-emerald-600 border border-emerald-500/60';
-    return 'bg-emerald-400 border border-emerald-300/60 shadow-[0_0_8px_rgba(52,211,153,0.25)]';
+    if (count === 0) return 'bg-slate-100 border border-slate-200';
+    if (count === 1) return 'bg-emerald-100 border border-emerald-200/40';
+    if (count === 2) return 'bg-emerald-300 border border-emerald-400/40';
+    if (count === 3) return 'bg-emerald-500 border border-emerald-400/50';
+    return 'bg-emerald-600 border border-emerald-500/50 shadow-2xs shadow-emerald-400/20';
   };
 
   const handleRegisterFcmDevice = async () => {
@@ -714,19 +714,19 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
       </div>
 
       {/* GitHub-style Activity Calendar Widget */}
-      <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-md text-slate-100 flex flex-col md:flex-row gap-6 relative">
+      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm text-slate-800 flex flex-col md:flex-row gap-6 relative">
         {/* Left: Calendar & Grid */}
         <div className="flex-1 flex flex-col gap-3 min-w-0">
           <div className="flex justify-between items-center">
-            <div className="text-sm font-semibold tracking-wide text-slate-300 flex items-center gap-2">
-              <Calendar size={16} className="text-indigo-400" />
+            <div className="text-sm font-semibold tracking-wide text-slate-700 flex items-center gap-2">
+              <Calendar size={16} className="text-indigo-600" />
               <span>
                 {totalYearContributions} contributions in {selectedYear === new Date().getFullYear() ? 'the last year' : selectedYear}
               </span>
             </div>
           </div>
 
-          <div className="border border-slate-800/60 rounded-xl p-4 bg-slate-900/40">
+          <div className="border border-slate-100 rounded-xl p-4 bg-slate-50/50">
             <div className="flex gap-2">
               {/* Day labels column */}
               <div className="flex flex-col justify-between text-[10px] text-slate-500 pr-1 pt-[18px] pb-1 h-[94px] select-none shrink-0 font-medium">
@@ -736,7 +736,7 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
               </div>
 
               {/* Scrollable Month labels + Calendar Grid */}
-              <div className="flex-1 overflow-x-auto select-none scrollbar-thin scrollbar-thumb-slate-800">
+              <div className="flex-1 overflow-x-auto select-none scrollbar-thin scrollbar-thumb-slate-350">
                 {/* Month labels header */}
                 <div className="relative h-4 text-[10px] text-slate-500 mb-1 w-full min-w-[720px] font-semibold">
                   {monthLabels.map((ml, idx) => (
@@ -788,11 +788,11 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
             </span>
             <div className="flex items-center gap-1.5 font-medium">
               <span>Less</span>
-              <div className="w-2.5 h-2.5 rounded-[2px] bg-slate-800/40 border border-slate-850/80"></div>
-              <div className="w-2.5 h-2.5 rounded-[2px] bg-emerald-950 border border-emerald-900/60"></div>
-              <div className="w-2.5 h-2.5 rounded-[2px] bg-emerald-800 border border-emerald-700/60"></div>
-              <div className="w-2.5 h-2.5 rounded-[2px] bg-emerald-600 border border-emerald-500/60"></div>
-              <div className="w-2.5 h-2.5 rounded-[2px] bg-emerald-400 border border-emerald-300/60"></div>
+              <div className="w-2.5 h-2.5 rounded-[2px] bg-slate-100 border border-slate-200"></div>
+              <div className="w-2.5 h-2.5 rounded-[2px] bg-emerald-100 border border-emerald-200/40"></div>
+              <div className="w-2.5 h-2.5 rounded-[2px] bg-emerald-300 border border-emerald-400/40"></div>
+              <div className="w-2.5 h-2.5 rounded-[2px] bg-emerald-500 border border-emerald-400/50"></div>
+              <div className="w-2.5 h-2.5 rounded-[2px] bg-emerald-600 border border-emerald-500/50 shadow-2xs shadow-emerald-400/20"></div>
               <span>More</span>
             </div>
           </div>
@@ -807,7 +807,7 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
               className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer text-center whitespace-nowrap min-w-[60px] ${
                 selectedYear === year
                   ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'bg-slate-900 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-800/80'
+                  : 'bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 border border-slate-200'
               }`}
             >
               {year}
