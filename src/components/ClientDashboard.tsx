@@ -249,7 +249,8 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                     quantity: selectedQty,
                     rate: selectedRate,
                     subClientId,
-                    subClientName
+                    subClientName,
+                    videoUrl: trimmedVideoUrl
                   };
                 }
                 return reel;

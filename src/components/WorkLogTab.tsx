@@ -105,7 +105,8 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
                     quantity: selectedQty,
                     rate: selectedRate,
                     subClientId: selectedSub ? selectedSub.id : undefined,
-                    subClientName: selectedSub ? selectedSub.name : undefined
+                    subClientName: selectedSub ? selectedSub.name : undefined,
+                    videoUrl: trimmedVideoUrl
                   };
                 }
                 return reel;

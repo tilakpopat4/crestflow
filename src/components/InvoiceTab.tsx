@@ -464,7 +464,10 @@ export async function generateOffscreenPdfBlob(params: {
     : reels.map((r, idx) => `
       <tr style="border-bottom: 1px solid #e2e8f0;">
         <td style="padding: 10px 10px; font-size: 13px; color: #64748b; text-align: center;">${String(idx + 1).padStart(2, '0')}</td>
-        <td style="padding: 10px 10px; font-size: 13px; color: #0f172a; font-weight: 600;">${r.title || 'Video Editing Work Item'}</td>
+        <td style="padding: 10px 10px; font-size: 13px; color: #0f172a; font-weight: 600;">
+          ${r.title || 'Video Editing Work Item'}
+          ${r.videoUrl ? `<br/><a href="${r.videoUrl}" target="_blank" rel="noopener noreferrer" style="color: #4f46e5; text-decoration: underline; font-size: 11px; font-weight: normal; word-break: break-all;">${r.videoUrl}</a>` : ''}
+        </td>
         <td style="padding: 10px 10px; font-size: 13px; color: #334155; text-align: center;">${r.quantity}</td>
         <td style="padding: 10px 10px; font-size: 13px; color: #334155; text-align: right;">₹${r.rate.toLocaleString('en-IN')}</td>
         <td style="padding: 10px 10px; font-size: 13px; color: #0f172a; font-weight: 700; text-align: right;">₹${(r.quantity * r.rate).toLocaleString('en-IN')}</td>
@@ -852,7 +855,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
           id: generateUUID(),
           title: w.description,
           quantity: w.quantity,
-          rate: w.rate
+          rate: w.rate,
+          videoUrl: w.videoUrl
         })));
         setLinkedWorkItemIds(uninvoicedWork.map(w => w.id));
       } else {
@@ -1388,6 +1392,16 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                         className="w-full border border-slate-200 rounded px-3 py-2 text-sm bg-white outline-none transition-colors focus:border-indigo-500"
                       />
                     </div>
+                    <div className="col-span-12">
+                      <label className="block text-xs font-medium text-slate-500 mb-1">Content / Video URL (Optional)</label>
+                      <input
+                        type="url"
+                        value={reel.videoUrl || ''}
+                        onChange={(e) => updateReel(reel.id, 'videoUrl', e.target.value)}
+                        placeholder="e.g. https://instagram.com/reel/... or drive link"
+                        className="w-full border border-slate-200 rounded px-3 py-2 text-sm bg-white outline-none transition-colors focus:border-indigo-500"
+                      />
+                    </div>
                     <div className="col-span-6 md:col-span-4">
                       <label className="block text-xs font-medium text-slate-500 mb-1">Quantity</label>
                       <input
@@ -1657,7 +1671,19 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                             {String(idx + 1).padStart(2, '0')}
                           </td>
                           <td className="py-4 px-3 text-base font-semibold text-slate-900">
-                            {reel.title || <span className="text-slate-400 italic font-normal">Item description...</span>}
+                            <div>{reel.title || <span className="text-slate-400 italic font-normal">Item description...</span>}</div>
+                            {reel.videoUrl && (
+                              <div className="mt-1">
+                                <a
+                                  href={reel.videoUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs text-indigo-600 font-medium underline break-all hover:text-indigo-800"
+                                >
+                                  {reel.videoUrl}
+                                </a>
+                              </div>
+                            )}
                           </td>
                           <td className="py-4 px-3 text-base text-center font-medium text-slate-700">
                             {reel.quantity}
