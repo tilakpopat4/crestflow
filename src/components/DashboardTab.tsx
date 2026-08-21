@@ -3,7 +3,7 @@ import { Invoice, WorkItem, Client } from '../types';
 import { 
   BarChart, Bar, LineChart, Line, Legend, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell 
 } from 'recharts';
-import { IndianRupee, Clock, TrendingUp, CheckCircle2, DownloadCloud, UploadCloud, AlertTriangle, Send, Users, ArrowRight, Mail, Bell, Copy, Smartphone, X } from 'lucide-react';
+import { IndianRupee, Clock, TrendingUp, CheckCircle2, DownloadCloud, UploadCloud, AlertTriangle, Send, Users, ArrowRight, Mail, Bell, Copy, Smartphone, X, Calendar } from 'lucide-react';
 import { User } from 'firebase/auth';
 import { useFirestore, safeStringify } from '../hooks/useFirestore';
 import { 
@@ -40,6 +40,173 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
   });
   const [isNotificationDismissed, setIsNotificationDismissed] = useState(false);
   const [paymentModalState, setPaymentModalState] = useState<{ invoiceId: string | null, isOpen: boolean }>({ invoiceId: null, isOpen: false });
+
+  const [selectedYear, setSelectedYear] = useState<number>(() => new Date().getFullYear());
+  const [hoveredDay, setHoveredDay] = useState<any | null>(null);
+  const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  // 1. Process contributions
+  const contributions = useMemo(() => {
+    const counts: Record<string, { work: number; payments: number; total: number; details: string[] }> = {};
+
+    workItems.forEach(item => {
+      if (!item.date) return;
+      const date = new Date(item.date);
+      const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      if (!counts[dateStr]) {
+        counts[dateStr] = { work: 0, payments: 0, total: 0, details: [] };
+      }
+      counts[dateStr].work += 1;
+      counts[dateStr].total += 1;
+      counts[dateStr].details.push(`Completed: "${item.description}" (${item.quantity} × ₹${item.rate})`);
+    });
+
+    invoices.forEach(inv => {
+      if (inv.status !== 'Paid' || !inv.lastPaymentDate) return;
+      const date = new Date(inv.lastPaymentDate);
+      const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      if (!counts[dateStr]) {
+        counts[dateStr] = { work: 0, payments: 0, total: 0, details: [] };
+      }
+      counts[dateStr].payments += 1;
+      counts[dateStr].total += 1;
+      counts[dateStr].details.push(`Received Payment: ₹${inv.totalAmount.toLocaleString('en-IN')} (Inv #${inv.id.substring(0, 8).toUpperCase()})`);
+    });
+
+    return counts;
+  }, [workItems, invoices]);
+
+  // 2. Extract active years
+  const availableYears = useMemo(() => {
+    const yearsSet = new Set<number>();
+    yearsSet.add(new Date().getFullYear());
+
+    workItems.forEach(item => {
+      if (item.date) {
+        yearsSet.add(new Date(item.date).getFullYear());
+      }
+    });
+
+    invoices.forEach(inv => {
+      if (inv.lastPaymentDate) {
+        yearsSet.add(new Date(inv.lastPaymentDate).getFullYear());
+      }
+    });
+
+    return Array.from(yearsSet).sort((a, b) => b - a);
+  }, [workItems, invoices]);
+
+  // 3. Compute calendar grid weeks/days
+  const calendarGrid = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    let startDate: Date;
+    let endDate: Date;
+
+    if (selectedYear === currentYear) {
+      endDate = new Date();
+      startDate = new Date();
+      startDate.setDate(endDate.getDate() - 364);
+    } else {
+      startDate = new Date(selectedYear, 0, 1);
+      endDate = new Date(selectedYear, 11, 31);
+    }
+
+    const startDayOfWeek = startDate.getDay();
+    const adjustedStartDate = new Date(startDate);
+    adjustedStartDate.setDate(adjustedStartDate.getDate() - startDayOfWeek);
+
+    const endDayOfWeek = endDate.getDay();
+    const adjustedEndDate = new Date(endDate);
+    adjustedEndDate.setDate(adjustedEndDate.getDate() + (6 - endDayOfWeek));
+
+    interface CalendarDay {
+      date: Date;
+      dateStr: string;
+      contributionInfo: { work: number; payments: number; total: number; details: string[] };
+    }
+
+    const allDays: CalendarDay[] = [];
+    const current = new Date(adjustedStartDate);
+
+    while (current <= adjustedEndDate) {
+      const dateStr = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}-${String(current.getDate()).padStart(2, '0')}`;
+      allDays.push({
+        date: new Date(current),
+        dateStr,
+        contributionInfo: contributions[dateStr] || { work: 0, payments: 0, total: 0, details: [] }
+      });
+      current.setDate(current.getDate() + 1);
+    }
+
+    const weeks: CalendarDay[][] = [];
+    for (let i = 0; i < allDays.length; i += 7) {
+      weeks.push(allDays.slice(i, i + 7));
+    }
+
+    return weeks;
+  }, [selectedYear, contributions]);
+
+  // 4. Compute Month Labels positioning
+  const monthLabels = useMemo(() => {
+    const labels: { index: number; label: string }[] = [];
+    let lastMonth = -1;
+
+    calendarGrid.forEach((week, weekIndex) => {
+      const firstDay = week[0].date;
+      const currentMonth = firstDay.getMonth();
+
+      if (currentMonth !== lastMonth) {
+        labels.push({
+          index: weekIndex,
+          label: firstDay.toLocaleDateString('en-IN', { month: 'short' })
+        });
+        lastMonth = currentMonth;
+      }
+    });
+
+    return labels;
+  }, [calendarGrid]);
+
+  // 5. Total year contributions count
+  const totalYearContributions = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    let startDate: Date;
+    let endDate: Date;
+
+    if (selectedYear === currentYear) {
+      endDate = new Date();
+      startDate = new Date();
+      startDate.setDate(endDate.getDate() - 364);
+    } else {
+      startDate = new Date(selectedYear, 0, 1);
+      endDate = new Date(selectedYear, 11, 31);
+    }
+
+    const startMs = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()).getTime();
+    const endMs = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), 23, 59, 59, 999).getTime();
+
+    let total = 0;
+    workItems.forEach(item => {
+      if (item.date && item.date >= startMs && item.date <= endMs) {
+        total += 1;
+      }
+    });
+    invoices.forEach(inv => {
+      if (inv.status === 'Paid' && inv.lastPaymentDate && inv.lastPaymentDate >= startMs && inv.lastPaymentDate <= endMs) {
+        total += 1;
+      }
+    });
+
+    return total;
+  }, [selectedYear, workItems, invoices]);
+
+  const getContributionColorClass = (count: number) => {
+    if (count === 0) return 'bg-slate-800/40 border border-slate-850/80';
+    if (count === 1) return 'bg-emerald-950 border border-emerald-900/60';
+    if (count === 2) return 'bg-emerald-800 border border-emerald-700/60';
+    if (count === 3) return 'bg-emerald-600 border border-emerald-500/60';
+    return 'bg-emerald-400 border border-emerald-300/60 shadow-[0_0_8px_rgba(52,211,153,0.25)]';
+  };
 
   const handleRegisterFcmDevice = async () => {
     setIsFcmRegistering(true);
@@ -546,6 +713,109 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
         </div>
       </div>
 
+      {/* GitHub-style Activity Calendar Widget */}
+      <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-md text-slate-100 flex flex-col md:flex-row gap-6 relative">
+        {/* Left: Calendar & Grid */}
+        <div className="flex-1 flex flex-col gap-3 min-w-0">
+          <div className="flex justify-between items-center">
+            <div className="text-sm font-semibold tracking-wide text-slate-300 flex items-center gap-2">
+              <Calendar size={16} className="text-indigo-400" />
+              <span>
+                {totalYearContributions} contributions in {selectedYear === new Date().getFullYear() ? 'the last year' : selectedYear}
+              </span>
+            </div>
+          </div>
+
+          <div className="border border-slate-800/60 rounded-xl p-4 bg-slate-900/40">
+            <div className="flex gap-2">
+              {/* Day labels column */}
+              <div className="flex flex-col justify-between text-[10px] text-slate-500 pr-1 pt-[18px] pb-1 h-[94px] select-none shrink-0 font-medium">
+                <span>Mon</span>
+                <span>Wed</span>
+                <span>Fri</span>
+              </div>
+
+              {/* Scrollable Month labels + Calendar Grid */}
+              <div className="flex-1 overflow-x-auto select-none scrollbar-thin scrollbar-thumb-slate-800">
+                {/* Month labels header */}
+                <div className="relative h-4 text-[10px] text-slate-500 mb-1 w-full min-w-[720px] font-semibold">
+                  {monthLabels.map((ml, idx) => (
+                    <span
+                      key={idx}
+                      className="absolute"
+                      style={{ left: `${ml.index * 13.5}px` }}
+                    >
+                      {ml.label}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Grid of days grouped by weeks */}
+                <div className="flex gap-[3.5px] min-w-[720px] pb-1">
+                  {calendarGrid.map((week, wIdx) => (
+                    <div key={wIdx} className="flex flex-col gap-[3.5px]">
+                      {week.map((day) => {
+                        const count = day.contributionInfo?.total || 0;
+                        const colorClass = getContributionColorClass(count);
+
+                        return (
+                          <div
+                            key={day.dateStr}
+                            className={`w-2.5 h-2.5 rounded-[2px] transition-all hover:scale-125 cursor-pointer relative shrink-0 ${colorClass}`}
+                            onMouseEnter={(e) => {
+                              const rect = e.currentTarget.getBoundingClientRect();
+                              setHoveredDay(day);
+                              setTooltipPos({
+                                x: rect.left + rect.width / 2,
+                                y: rect.top
+                              });
+                            }}
+                            onMouseLeave={() => setHoveredDay(null)}
+                          />
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Legend & Helper Info */}
+          <div className="flex justify-between items-center text-[10px] text-slate-500 mt-1 px-1">
+            <span className="text-[10px] text-slate-500">
+              Activity synced with work completions & paid invoice dates.
+            </span>
+            <div className="flex items-center gap-1.5 font-medium">
+              <span>Less</span>
+              <div className="w-2.5 h-2.5 rounded-[2px] bg-slate-800/40 border border-slate-850/80"></div>
+              <div className="w-2.5 h-2.5 rounded-[2px] bg-emerald-950 border border-emerald-900/60"></div>
+              <div className="w-2.5 h-2.5 rounded-[2px] bg-emerald-800 border border-emerald-700/60"></div>
+              <div className="w-2.5 h-2.5 rounded-[2px] bg-emerald-600 border border-emerald-500/60"></div>
+              <div className="w-2.5 h-2.5 rounded-[2px] bg-emerald-400 border border-emerald-300/60"></div>
+              <span>More</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Year selection buttons */}
+        <div className="flex flex-row md:flex-col gap-1.5 shrink-0 justify-start md:pt-7">
+          {availableYears.map((year) => (
+            <button
+              key={year}
+              onClick={() => setSelectedYear(year)}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer text-center whitespace-nowrap min-w-[60px] ${
+                selectedYear === year
+                  ? 'bg-indigo-600 text-white shadow-sm'
+                  : 'bg-slate-900 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-800/80'
+              }`}
+            >
+              {year}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Analytics & Charts Section */}
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Recharts Monthly Earnings Line Chart */}
@@ -746,6 +1016,33 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
           />
         );
       })()}
+
+      {/* Viewport-floating Tooltip */}
+      {hoveredDay && (
+        <div
+          className="fixed bg-slate-950 text-slate-100 text-[11px] rounded-xl p-3 shadow-2xl border border-slate-800 z-[99999] pointer-events-none w-52 transition-all duration-100 ease-out"
+          style={{
+            left: `${tooltipPos.x}px`,
+            top: `${tooltipPos.y}px`,
+            transform: 'translate(-50%, -100%)',
+            marginTop: '-8px'
+          }}
+        >
+          <div className="font-bold text-slate-200 border-b border-slate-850 pb-1 mb-1 font-mono">
+            {hoveredDay.date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+          </div>
+          <div className="text-[11px] font-semibold text-slate-400 mt-1">
+            {hoveredDay.contributionInfo.total === 0 ? 'No contributions' : `${hoveredDay.contributionInfo.total} contribution${hoveredDay.contributionInfo.total === 1 ? '' : 's'}`}
+          </div>
+          {hoveredDay.contributionInfo.details.length > 0 && (
+            <ul className="mt-1.5 space-y-1 text-[10px] text-emerald-400 font-medium">
+              {hoveredDay.contributionInfo.details.map((detail: string, i: number) => (
+                <li key={i} className="list-disc list-inside truncate" title={detail}>{detail}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
     </div>
   );
 }
