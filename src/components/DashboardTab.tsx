@@ -738,22 +738,25 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
               {/* Scrollable Month labels + Calendar Grid */}
               <div className="flex-1 overflow-x-auto select-none scrollbar-thin scrollbar-thumb-slate-350">
                 {/* Month labels header */}
-                <div className="relative h-4 text-[10px] text-slate-500 mb-1 w-full min-w-[720px] font-semibold">
-                  {monthLabels.map((ml, idx) => (
-                    <span
-                      key={idx}
-                      className="absolute"
-                      style={{ left: `${ml.index * 13.5}px` }}
-                    >
-                      {ml.label}
-                    </span>
-                  ))}
+                <div className="flex justify-between w-full gap-[3.5px] text-[10px] text-slate-500 mb-1 min-w-[720px] font-semibold h-4">
+                  {calendarGrid.map((week, wIdx) => {
+                    const labelObj = monthLabels.find(ml => ml.index === wIdx);
+                    return (
+                      <div key={wIdx} className="w-2.5 h-4 relative shrink-0">
+                        {labelObj && (
+                          <span className="absolute left-0 top-0 whitespace-nowrap">
+                            {labelObj.label}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
 
                 {/* Grid of days grouped by weeks */}
-                <div className="flex gap-[3.5px] min-w-[720px] pb-1">
+                <div className="flex justify-between w-full gap-[3.5px] min-w-[720px] pb-1">
                   {calendarGrid.map((week, wIdx) => (
-                    <div key={wIdx} className="flex flex-col gap-[3.5px]">
+                    <div key={wIdx} className="flex flex-col gap-[3.5px] shrink-0">
                       {week.map((day) => {
                         const count = day.contributionInfo?.total || 0;
                         const colorClass = getContributionColorClass(count);
