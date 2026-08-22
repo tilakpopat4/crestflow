@@ -20,10 +20,15 @@ import ProfileModal from './components/ProfileModal';
 import Logo from './components/Logo';
 import { ShieldAlert, LogOut } from 'lucide-react';
 import { setGmailAccessToken } from './lib/gmailService';
+import IntroScreen from './components/IntroScreen';
 
 export type Tab = 'dashboard' | 'clients' | 'work' | 'invoice' | 'admin';
 
 export default function App() {
+  const [showIntro, setShowIntro] = useState(() => {
+    if (window.location.search.includes('forceIntro=true')) return true;
+    return !sessionStorage.getItem('crestflow_intro_played');
+  });
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -187,9 +192,20 @@ export default function App() {
     }
   };
 
-  if (loading || (user && (profilesLoading || isBlocked === null))) {
-    return (
-      <div className="flex items-center justify-center h-screen w-full bg-slate-50">
+    if (showIntro) {
+      return (
+        <IntroScreen
+          onComplete={() => {
+            sessionStorage.setItem('crestflow_intro_played', 'true');
+            setShowIntro(false);
+          }}
+        />
+      );
+    }
+
+    if (loading || (user && (profilesLoading || isBlocked === null))) {
+      return (
+        <div className="flex items-center justify-center h-screen w-full bg-slate-50">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
       </div>
     );
