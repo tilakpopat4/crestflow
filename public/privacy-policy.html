@@ -16,43 +16,43 @@
     }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-300 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+<body class="bg-slate-50 text-slate-700 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white relative overflow-x-hidden">
   <!-- Decorative background grids and blobs -->
-  <div class="fixed inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none opacity-40 z-0"></div>
-  <div class="fixed top-0 left-1/4 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
-  <div class="fixed top-1/3 right-1/4 w-[400px] h-[400px] bg-purple-500/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
+  <div class="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f0_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f0_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none opacity-50 z-0"></div>
+  <div class="absolute top-0 left-1/4 w-[500px] h-[500px] bg-indigo-200/20 rounded-full blur-[120px] pointer-events-none z-0"></div>
+  <div class="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-purple-200/20 rounded-full blur-[120px] pointer-events-none z-0"></div>
 
   <!-- Header -->
-  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
+  <header class="border-b border-slate-200/80 bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-xs">
     <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
       <a href="/" class="flex items-center gap-2.5 group">
-        <img src="/app_logo_icon.png" alt="CrestFlow Logo" class="w-9 h-9 rounded-xl shadow-lg shadow-indigo-600/20 group-hover:scale-105 transition-transform duration-200" />
-        <span class="text-xl font-bold text-white tracking-tight group-hover:text-indigo-400 transition-colors">CrestFlow</span>
+        <img src="/app_logo_icon.png" alt="CrestFlow Logo" class="w-9 h-9 rounded-xl shadow-md shadow-indigo-600/10 group-hover:scale-105 transition-transform duration-200" />
+        <span class="text-xl font-bold text-slate-900 tracking-tight group-hover:text-indigo-600 transition-colors">CrestFlow</span>
       </a>
-      <a href="/" class="text-sm font-medium text-slate-400 hover:text-indigo-400 transition-colors">Back to App</a>
+      <a href="/" class="text-sm font-semibold text-slate-500 hover:text-indigo-600 transition-colors bg-slate-100 hover:bg-slate-200/80 px-3.5 py-1.5 rounded-lg transition-all">Back to App</a>
     </div>
   </header>
 
   <!-- Main Content -->
   <main class="flex-1 max-w-4xl w-full mx-auto px-6 py-12 relative z-10">
-    <div class="bg-slate-950/40 border border-slate-800/80 rounded-3xl p-8 md:p-12 shadow-2xl backdrop-blur-sm">
-      <div class="border-b border-slate-850 pb-8 mb-8">
-        <span class="text-xs font-semibold text-indigo-400 uppercase tracking-widest">Legal Documentation</span>
-        <h1 class="text-4xl md:text-5xl font-extrabold text-white mt-2 mb-4 tracking-tight">Privacy Policy</h1>
+    <div class="bg-white border border-slate-200/80 rounded-3xl p-8 md:p-12 shadow-sm">
+      <div class="border-b border-slate-100 pb-8 mb-8">
+        <span class="text-xs font-bold text-indigo-600 uppercase tracking-widest">Legal Documentation</span>
+        <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 mt-2 mb-4 tracking-tight">Privacy Policy</h1>
         <p class="text-slate-400 text-sm">Last updated: August 22, 2026</p>
       </div>
 
-      <div class="space-y-8 text-slate-300 leading-relaxed">
+      <div class="space-y-8 text-slate-600 leading-relaxed">
         <section class="space-y-3">
-          <h2 class="text-2xl font-bold text-white tracking-tight">1. Introduction</h2>
+          <h2 class="text-2xl font-bold text-slate-900 tracking-tight">1. Introduction</h2>
           <p>
-            Welcome to <strong>CrestFlow</strong> ("we," "our," "us"). We respect your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our application located at <a href="https://clients-management-tilak.vercel.app" class="text-indigo-400 hover:underline">https://clients-management-tilak.vercel.app</a> (the "Service").
+            Welcome to <strong>CrestFlow</strong> ("we," "our," "us"). We respect your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our application located at <a href="https://clients-management-tilak.vercel.app" class="text-indigo-600 hover:underline">https://clients-management-tilak.vercel.app</a> (the "Service").
           </p>
         </section>
 
         <section class="space-y-3">
-          <h2 class="text-2xl font-bold text-white tracking-tight">2. Information We Collect</h2>
-          <p>We collect information to provide a better, more automated experience for our freelancing management workflows.</p>
+          <h2 class="text-2xl font-bold text-slate-900 tracking-tight">2. Information We Collect</h2>
+          <p>We collect information to provide a better, more automated experience for your freelancing workflows.</p>
           <ul class="list-disc pl-6 space-y-2">
             <li><strong>Account Information:</strong> When you sign in with Google, we receive your name, email address, profile picture URL, and unique Google ID.</li>
             <li><strong>Database Information:</strong> Any client directory records, project descriptions, work logs, billing history, and custom invoice data that you choose to store in CrestFlow. This information is stored securely in Firebase/Firestore.</li>
@@ -60,23 +60,23 @@
           </ul>
         </section>
 
-        <section class="bg-indigo-950/20 border border-indigo-900/30 rounded-2xl p-6 space-y-3">
-          <h3 class="text-lg font-bold text-white tracking-tight flex items-center gap-2">
-            <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <section class="bg-indigo-50/50 border border-indigo-100/80 rounded-2xl p-6 space-y-3">
+          <h3 class="text-lg font-bold text-indigo-950 tracking-tight flex items-center gap-2">
+            <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
             </svg>
             Google API Limited Use Disclosure
           </h3>
-          <p class="text-slate-300 text-sm">
-            CrestFlow's use and transfer to any other app of information received from Google APIs will adhere to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" class="text-indigo-400 hover:underline">Google API Services User Data Policy</a>, including the <strong>Limited Use</strong> requirements.
+          <p class="text-slate-700 text-sm">
+            CrestFlow's use and transfer to any other app of information received from Google APIs will adhere to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" class="text-indigo-600 hover:underline">Google API Services User Data Policy</a>, including the <strong>Limited Use</strong> requirements.
           </p>
-          <p class="text-slate-300 text-sm">
-            Specifically, our integration only uses Gmail permissions (<code class="text-indigo-300 bg-indigo-950/80 px-1.5 py-0.5 rounded text-xs">gmail.send</code> and <code class="text-indigo-300 bg-indigo-950/80 px-1.5 py-0.5 rounded text-xs">gmail.compose</code>) to send and format invoice emails directly to your selected clients at your explicit action. We do not read your inbox, store your email logs, or transfer your email content to third parties or marketing platforms.
+          <p class="text-slate-700 text-sm">
+            Specifically, our integration only uses Gmail permissions (<code class="text-indigo-700 bg-indigo-100/85 px-1.5 py-0.5 rounded text-xs">gmail.send</code> and <code class="text-indigo-700 bg-indigo-100/85 px-1.5 py-0.5 rounded text-xs">gmail.compose</code>) to send and format invoice emails directly to your selected clients at your explicit action. We do not read your inbox, store your email logs, or transfer your email content to third parties or marketing platforms.
           </p>
         </section>
 
         <section class="space-y-3">
-          <h2 class="text-2xl font-bold text-white tracking-tight">3. How We Use Your Information</h2>
+          <h2 class="text-2xl font-bold text-slate-900 tracking-tight">3. How We Use Your Information</h2>
           <p>We use the information we collect only to operate and improve the Service:</p>
           <ul class="list-disc pl-6 space-y-2">
             <li>To authenticate you and associate your data with your private user profile.</li>
@@ -87,39 +87,39 @@
         </section>
 
         <section class="space-y-3">
-          <h2 class="text-2xl font-bold text-white tracking-tight">4. Data Sharing and Transfer</h2>
+          <h2 class="text-2xl font-bold text-slate-900 tracking-tight">4. Data Sharing and Transfer</h2>
           <p>
             We do not sell, trade, or otherwise transfer your personal information, database information, or Google User Data to outside parties. Your data is stored directly in your designated Firestore database. No third-party servers receive your credentials or email data.
           </p>
         </section>
 
         <section class="space-y-3">
-          <h2 class="text-2xl font-bold text-white tracking-tight">5. Data Security</h2>
+          <h2 class="text-2xl font-bold text-slate-900 tracking-tight">5. Data Security</h2>
           <p>
             We implement standard security measures to safeguard your information. User data is protected by Firebase Authentication and Firestore Security Rules to prevent unauthorized read or write access.
           </p>
         </section>
 
         <section class="space-y-3">
-          <h2 class="text-2xl font-bold text-white tracking-tight">6. Data Deletion and Control</h2>
+          <h2 class="text-2xl font-bold text-slate-900 tracking-tight">6. Data Deletion and Control</h2>
           <p>
-            You have full control over your data. You can delete items directly within the dashboard. If you wish to delete your entire CrestFlow account and all associated Firestore records permanently, please contact us at <a href="mailto:tilakpopat2007@gmail.com" class="text-indigo-400 hover:underline">tilakpopat2007@gmail.com</a>.
+            You have full control over your data. You can delete items directly within the dashboard. If you wish to delete your entire CrestFlow account and all associated Firestore records permanently, please contact us at <a href="mailto:tilakpopat2007@gmail.com" class="text-indigo-600 hover:underline">tilakpopat2007@gmail.com</a>.
           </p>
         </section>
 
         <section class="space-y-3">
-          <h2 class="text-2xl font-bold text-white tracking-tight">7. Changes to this Privacy Policy</h2>
+          <h2 class="text-2xl font-bold text-slate-900 tracking-tight">7. Changes to this Privacy Policy</h2>
           <p>
             We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last updated" date.
           </p>
         </section>
 
-        <section class="space-y-3 pt-4 border-t border-slate-850">
-          <h2 class="text-2xl font-bold text-white tracking-tight">8. Contact Us</h2>
+        <section class="space-y-3 pt-4 border-t border-slate-100">
+          <h2 class="text-2xl font-bold text-slate-900 tracking-tight">8. Contact Us</h2>
           <p>If you have any questions or suggestions about this Privacy Policy, do not hesitate to contact us:</p>
           <div class="mt-2 flex items-center gap-2">
             <span class="text-slate-400">Email:</span>
-            <a href="mailto:tilakpopat2007@gmail.com" class="text-indigo-400 hover:underline font-medium">tilakpopat2007@gmail.com</a>
+            <a href="mailto:tilakpopat2007@gmail.com" class="text-indigo-600 hover:underline font-semibold">tilakpopat2007@gmail.com</a>
           </div>
         </section>
       </div>
@@ -127,12 +127,12 @@
   </main>
 
   <!-- Footer -->
-  <footer class="border-t border-slate-800 bg-slate-950 py-8 text-center text-slate-500 text-xs relative z-10">
+  <footer class="border-t border-slate-200 bg-white py-8 text-center text-slate-400 text-xs relative z-10">
     <p>&copy; 2026 CrestFlow. All rights reserved.</p>
     <div class="mt-2 flex justify-center gap-4">
-      <a href="/privacy-policy" class="hover:text-indigo-400 transition-colors">Privacy Policy</a>
+      <a href="/privacy-policy" class="hover:text-indigo-600 transition-colors">Privacy Policy</a>
       <span>&bull;</span>
-      <a href="/terms-of-service" class="hover:text-indigo-400 transition-colors">Terms of Service</a>
+      <a href="/terms-of-service" class="hover:text-indigo-600 transition-colors">Terms of Service</a>
     </div>
   </footer>
 </body>
