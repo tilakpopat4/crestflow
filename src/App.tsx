@@ -29,6 +29,7 @@ export default function App() {
     if (window.location.search.includes('forceIntro=true')) return true;
     return !sessionStorage.getItem('crestflow_intro_played');
   });
+  const [isSigningIn, setIsSigningIn] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -170,6 +171,8 @@ export default function App() {
   }, [user, profilesLoading, profile, isBlocked]);
 
   const handleLogin = async () => {
+    if (isSigningIn) return;
+    setIsSigningIn(true);
     try {
       googleProvider.addScope('https://www.googleapis.com/auth/gmail.send');
       googleProvider.addScope('https://www.googleapis.com/auth/gmail.compose');
@@ -180,7 +183,12 @@ export default function App() {
       }
     } catch (error: any) {
       console.error(error);
+      if (error?.code === 'auth/popup-closed-by-user' || error?.code === 'auth/cancelled-popup-request') {
+        return;
+      }
       alert(`Sign in failed. This is often because the app is running in a preview window (iframe). Please open the app in a new tab using the arrow icon in the top right, and try again.\n\nError: ${error.message}`);
+    } finally {
+      setIsSigningIn(false);
     }
   };
 
@@ -268,12 +276,19 @@ export default function App() {
           </p>
           <button 
             onClick={handleLogin}
-            className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded font-medium transition-colors"
+            disabled={isSigningIn}
+            className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white py-2.5 rounded font-medium transition-colors cursor-pointer disabled:cursor-not-allowed"
           >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
-              <path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
-            </svg>
-            {isAdminRoute ? 'Admin Sign In' : 'Sign in with Google'}
+            {isSigningIn ? (
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+            ) : (
+              <svg className="w-5 h-5" viewBox="0 0 24 24">
+                <path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
+              </svg>
+            )}
+            {isSigningIn 
+              ? 'Signing In...' 
+              : (isAdminRoute ? 'Admin Sign In' : 'Sign in with Google')}
           </button>
           {isAdminRoute && (
             <button
