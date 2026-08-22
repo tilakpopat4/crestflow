@@ -21,8 +21,10 @@ import Logo from './components/Logo';
 import { ShieldAlert, LogOut } from 'lucide-react';
 import { setGmailAccessToken } from './lib/gmailService';
 import IntroScreen from './components/IntroScreen';
+import ClientFeedbackForm from './components/ClientFeedbackForm';
+import ReviewsTab from './components/ReviewsTab';
 
-export type Tab = 'dashboard' | 'clients' | 'work' | 'invoice' | 'admin';
+export type Tab = 'dashboard' | 'clients' | 'work' | 'invoice' | 'reviews' | 'admin';
 
 export default function App() {
   const [showIntro, setShowIntro] = useState(() => {
@@ -200,16 +202,22 @@ export default function App() {
     }
   };
 
-    if (showIntro) {
-      return (
-        <IntroScreen
-          onComplete={() => {
-            sessionStorage.setItem('crestflow_intro_played', 'true');
-            setShowIntro(false);
-          }}
-        />
-      );
-    }
+  const isFeedbackRoute = window.location.search.includes('feedback=true');
+
+  if (isFeedbackRoute) {
+    return <ClientFeedbackForm />;
+  }
+
+  if (showIntro) {
+    return (
+      <IntroScreen
+        onComplete={() => {
+          sessionStorage.setItem('crestflow_intro_played', 'true');
+          setShowIntro(false);
+        }}
+      />
+    );
+  }
 
     if (loading || (user && (profilesLoading || isBlocked === null))) {
       return (
@@ -349,6 +357,7 @@ export default function App() {
           {activeTab === 'clients' && <ClientsTab user={user} initialSearchQuery={globalSearchQuery} initialSelectedClientId={selectedClientIdFromSearch} />}
           {activeTab === 'work' && <WorkLogTab user={user} initialSearchQuery={globalSearchQuery} />}
           {activeTab === 'invoice' && <InvoiceTab user={user} profile={profile} initialSearchQuery={globalSearchQuery} />}
+          {activeTab === 'reviews' && <ReviewsTab user={user} profile={profile} />}
           {activeTab === 'admin' && <AdminTab />}
         </div>
       </main>

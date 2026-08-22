@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Client, Invoice, WorkItem, SubClient } from '../types';
+import { Client, Invoice, WorkItem, SubClient, UserProfile } from '../types';
 import { 
   ArrowLeft, Calendar, Phone, Mail, Edit3, CheckCircle2, Clock, 
   IndianRupee, Plus, AlertTriangle, Send, FileText, ClipboardList,
   Sparkles, ShieldAlert, DollarSign, Copy, ExternalLink, Play, Download,
-  Users, Tag, Trash2, Edit2, Filter
+  Users, Tag, Trash2, Edit2, Filter, MessageSquare
 } from 'lucide-react';
 import { User } from 'firebase/auth';
 import { useFirestore } from '../hooks/useFirestore';
@@ -30,6 +30,23 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
   const { data: invoices, addOrUpdateItem: updateInvoice } = useFirestore<Invoice>('invoices', user?.uid);
   const { data: workItems, addOrUpdateItem: updateWorkItem, removeItem: removeWorkItem } = useFirestore<WorkItem>('workItems', user?.uid);
   const { addOrUpdateItem: updateClient } = useFirestore<Client>('clients', user?.uid);
+  const { data: profiles } = useFirestore<UserProfile>('profiles', user?.uid);
+
+  const profile = profiles[0] || null;
+  const [copiedReviewLink, setCopiedReviewLink] = useState(false);
+
+  const handleCopyReviewLink = () => {
+    if (!user) return;
+    const baseUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
+    const nameParam = encodeURIComponent(profile?.name || user.displayName || 'Video Editor');
+    const clientNameParam = encodeURIComponent(client.name);
+    const link = `${baseUrl}?feedback=true&uid=${user.uid}&name=${nameParam}&clientId=${client.id}&clientName=${clientNameParam}`;
+    
+    navigator.clipboard.writeText(link).then(() => {
+      setCopiedReviewLink(true);
+      setTimeout(() => setCopiedReviewLink(false), 2000);
+    });
+  };
 
   const [activeTab, setActiveTab] = useState<'work' | 'invoices' | 'settings'>('work');
   
@@ -320,6 +337,26 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
         </button>
 
         <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={handleCopyReviewLink}
+            className={`flex items-center gap-1.5 px-3.5 py-2 border rounded-lg text-xs font-semibold transition-all shadow-sm cursor-pointer ${
+              copiedReviewLink 
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-700' 
+                : 'bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100/50'
+            }`}
+            title="Copy feedback request link for this client"
+          >
+            {copiedReviewLink ? (
+              <>
+                <CheckCircle2 size={14} className="text-emerald-600" /> Link Copied!
+              </>
+            ) : (
+              <>
+                <MessageSquare size={14} /> Request Review
+              </>
+            )}
+          </button>
+
           <button
             onClick={() => setIsSubClientsModalOpen(true)}
             className="flex items-center gap-1.5 px-3.5 py-2 bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-700 rounded-lg text-xs font-semibold transition-all shadow-sm cursor-pointer"

@@ -96,3 +96,15 @@ export interface StickyNote {
   userId?: string;
 }
 
+export interface ClientReview {
+  id: string;
+  clientId?: string;
+  clientName: string;
+  rating: number; // 1 to 5 stars
+  feedbackText: string;
+  projectName?: string; // Optional project title
+  userId: string; // Freelancer's user ID (owner)
+  createdAt: number;
+}
+
+

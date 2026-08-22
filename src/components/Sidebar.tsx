@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, FileText, LogOut, ClipboardList, Settings, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, LogOut, ClipboardList, Settings, ShieldCheck, MessageSquare } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Tab } from '../App';
 import { User } from 'firebase/auth';
@@ -20,6 +20,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout, profi
     { id: 'clients', label: 'Clients', icon: Users },
     { id: 'work', label: 'Work Log', icon: ClipboardList },
     { id: 'invoice', label: 'Invoice Generator', icon: FileText },
+    { id: 'reviews', label: 'Reviews', icon: MessageSquare },
   ] as const;
 
   return (
