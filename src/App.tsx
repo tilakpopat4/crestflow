@@ -262,11 +262,16 @@ export default function App() {
           {isAdminRoute && (
             <button
               onClick={() => { window.location.href = '/' }}
-              className="mt-4 text-xs text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
+              className="mt-4 text-xs text-indigo-600 hover:text-indigo-800 font-medium transition-colors border-none bg-transparent cursor-pointer"
             >
               Back to Main Website
             </button>
           )}
+          <div className="mt-8 flex justify-center gap-4 text-xs text-slate-400">
+            <a href="/privacy-policy.html" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 hover:underline transition-colors">Privacy Policy</a>
+            <span>•</span>
+            <a href="/terms-of-service.html" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 hover:underline transition-colors">Terms of Service</a>
+          </div>
         </div>
       </div>
     );
