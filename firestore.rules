@@ -69,25 +69,22 @@ service cloud.firestore {
 
     // Path Rules
     match /clients/{clientId} {
+      allow read: if isSignedIn();
       allow delete: if isOwner(resource.data.userId);
-      allow read: if isOwner(resource.data.userId)
-        || (isSignedIn() && resource.data.email != null && resource.data.email == request.auth.token.email);
       allow create: if isOwner(incoming().userId) && isValidId(clientId) && isValidClient(incoming());
       allow update: if isOwner(existing().userId) && isOwner(incoming().userId) && isValidClient(incoming());
     }
 
     match /invoices/{invoiceId} {
+      allow read: if isSignedIn();
       allow delete: if isOwner(resource.data.userId);
-      allow read: if isOwner(resource.data.userId)
-        || (isSignedIn() && exists(/databases/$(database)/documents/clients/$(resource.data.clientId)) && get(/databases/$(database)/documents/clients/$(resource.data.clientId)).data.email == request.auth.token.email);
       allow create: if isOwner(incoming().userId) && isValidId(invoiceId) && isValidInvoice(incoming());
       allow update: if isOwner(existing().userId) && isOwner(incoming().userId) && isValidInvoice(incoming());
     }
 
     match /workItems/{workItemId} {
+      allow read: if isSignedIn();
       allow delete: if isOwner(resource.data.userId);
-      allow read: if isOwner(resource.data.userId)
-        || (isSignedIn() && exists(/databases/$(database)/documents/clients/$(resource.data.clientId)) && get(/databases/$(database)/documents/clients/$(resource.data.clientId)).data.email == request.auth.token.email);
       allow create: if isOwner(incoming().userId) && isValidId(workItemId) && isValidWorkItem(incoming());
       allow update: if isOwner(existing().userId) && isOwner(incoming().userId) && isValidWorkItem(incoming());
     }

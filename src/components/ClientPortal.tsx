@@ -67,7 +67,7 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [reviewSuccess, setReviewSuccess] = useState(false);
 
-  // 1. Fetch Client records associated with this Google email
+  // 1. Fetch Client records associated with this Google email (case-insensitive & trimmed)
   useEffect(() => {
     if (!user.email) {
       setLoading(false);
@@ -75,17 +75,19 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
     }
 
     const userEmail = user.email.toLowerCase().trim();
-    // Query clients where email matches
-    const q = query(collection(db, 'clients'), where('email', '==', userEmail));
     
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    // Listen to clients collection and match user email
+    const unsubscribe = onSnapshot(collection(db, 'clients'), (snapshot) => {
       const fetchedClients: Client[] = [];
       snapshot.forEach((docSnap) => {
-        fetchedClients.push({ id: docSnap.id, ...docSnap.data() } as Client);
+        const data = docSnap.data() as Client;
+        if (data.email && data.email.toLowerCase().trim() === userEmail) {
+          fetchedClients.push({ id: docSnap.id, ...data });
+        }
       });
       setClients(fetchedClients);
-      if (fetchedClients.length > 0 && !selectedClientId) {
-        setSelectedClientId(fetchedClients[0].id);
+      if (fetchedClients.length > 0) {
+        setSelectedClientId(prev => prev && fetchedClients.some(c => c.id === prev) ? prev : fetchedClients[0].id);
       }
       setLoading(false);
     }, (error) => {
@@ -133,6 +135,8 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
       snap.forEach(d => list.push({ id: d.id, ...d.data() } as Invoice));
       list.sort((a, b) => b.date - a.date);
       setInvoices(list);
+    }, (err) => {
+      console.error("Error fetching invoices:", err);
     });
 
     const workQuery = query(collection(db, 'workItems'), where('clientId', '==', currentClient.id));
@@ -141,6 +145,8 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
       snap.forEach(d => list.push({ id: d.id, ...d.data() } as WorkItem));
       list.sort((a, b) => b.date - a.date);
       setWorkItems(list);
+    }, (err) => {
+      console.error("Error fetching work items:", err);
     });
 
     return () => {
@@ -152,6 +158,11 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
   // Financial calculations
   const financials = currentClient ? calculateClientFinancials(currentClient.id, invoices, workItems) : null;
   const paymentStatus = currentClient ? getPaymentStatusInfo(currentClient, invoices, workItems) : null;
+
+  const totalQuantityDelivered = workItems.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+  const totalInvoicedAmount = (financials?.paidTotal || 0) + (financials?.pendingInvoiceTotal || 0);
+  const totalPaidAmount = financials?.paidTotal || 0;
+  const totalPendingBalance = financials?.totalPendingAmount || 0;
 
   // Submit Review Handler
   const handleReviewSubmit = async (e: React.FormEvent) => {
@@ -406,7 +417,7 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
                   <div>
                     <div className="font-bold text-sm">
                       {paymentStatus.isNotificationRequired 
-                        ? `Payment Cycle Alert: ${paymentStatus.message}`
+                        ? `Payment Cycle Alert: ${paymentStatus.notificationMessage || paymentStatus.label}`
                         : `Payment Cycle Status: Up to Date`}
                     </div>
                     <div className="text-xs mt-0.5 opacity-80">
@@ -424,35 +435,33 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
             )}
 
             {/* Financial & Work Metrics */}
-            {financials && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Work Delivered</span>
-                  <div className="text-2xl font-extrabold text-slate-900">{financials.totalQuantityDelivered} Units</div>
-                  <p className="text-[11px] text-slate-400">Total videos / reels produced</p>
-                </div>
-
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Invoiced</span>
-                  <div className="text-2xl font-extrabold text-slate-900">₹{financials.totalInvoiced.toLocaleString('en-IN')}</div>
-                  <p className="text-[11px] text-slate-400">Across {invoices.length} invoices</p>
-                </div>
-
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Paid</span>
-                  <div className="text-2xl font-extrabold text-emerald-600">₹{financials.totalPaid.toLocaleString('en-IN')}</div>
-                  <p className="text-[11px] text-slate-400">Completed payments</p>
-                </div>
-
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Pending Balance</span>
-                  <div className={`text-2xl font-extrabold ${financials.pendingBalance > 0 ? 'text-amber-600' : 'text-slate-900'}`}>
-                    ₹{financials.pendingBalance.toLocaleString('en-IN')}
-                  </div>
-                  <p className="text-[11px] text-slate-400">Due for pending invoices</p>
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Work Delivered</span>
+                <div className="text-2xl font-extrabold text-slate-900">{totalQuantityDelivered} Units</div>
+                <p className="text-[11px] text-slate-400">Total videos / reels produced</p>
               </div>
-            )}
+
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Invoiced</span>
+                <div className="text-2xl font-extrabold text-slate-900">₹{totalInvoicedAmount.toLocaleString('en-IN')}</div>
+                <p className="text-[11px] text-slate-400">Across {invoices.length} invoices</p>
+              </div>
+
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Paid</span>
+                <div className="text-2xl font-extrabold text-emerald-600">₹{totalPaidAmount.toLocaleString('en-IN')}</div>
+                <p className="text-[11px] text-slate-400">Completed payments</p>
+              </div>
+
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Pending Balance</span>
+                <div className={`text-2xl font-extrabold ${totalPendingBalance > 0 ? 'text-amber-600' : 'text-slate-900'}`}>
+                  ₹{totalPendingBalance.toLocaleString('en-IN')}
+                </div>
+                <p className="text-[11px] text-slate-400">Due for pending invoices</p>
+              </div>
+            </div>
 
             {/* Recent Work Log Snapshot */}
             <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-xs space-y-4">
