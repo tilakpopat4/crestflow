@@ -21,11 +21,15 @@ import Logo from './components/Logo';
 import { ShieldAlert, LogOut } from 'lucide-react';
 import { setGmailAccessToken } from './lib/gmailService';
 import ClientFeedbackForm from './components/ClientFeedbackForm';
+import PublicFreelancerProfile from './components/PublicFreelancerProfile';
 import ReviewsTab from './components/ReviewsTab';
 
 export type Tab = 'dashboard' | 'clients' | 'work' | 'invoice' | 'reviews' | 'admin';
 
 export default function App() {
+  const [freelancerId, setFreelancerId] = useState<string | null>(() => {
+    return new URLSearchParams(window.location.search).get('freelancerId');
+  });
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [user, setUser] = useState<User | null>(null);
@@ -201,6 +205,20 @@ export default function App() {
 
   if (isFeedbackRoute) {
     return <ClientFeedbackForm />;
+  }
+
+  if (freelancerId) {
+    return (
+      <PublicFreelancerProfile 
+        freelancerId={freelancerId} 
+        onClose={() => {
+          const url = new URL(window.location.href);
+          url.searchParams.delete('freelancerId');
+          window.history.replaceState({}, '', url.pathname + url.search);
+          setFreelancerId(null);
+        }}
+      />
+    );
   }
 
 

@@ -87,9 +87,14 @@ service cloud.firestore {
     }
 
     match /profiles/{profileId} {
-      allow read: if isSignedIn();
+      allow read: if true;
       allow create: if isOwner(incoming().userId) && isValidId(profileId) && (profileId == request.auth.uid || incoming().userId == request.auth.uid) && isValidProfile(incoming());
       allow update, delete: if isOwner(existing().userId) && isOwner(incoming().userId) && isValidProfile(incoming());
+    }
+
+    match /serviceRequests/{requestId} {
+      allow create: if isValidId(requestId);
+      allow read, update, delete: if isSignedIn() && (isOwner(resource.data.userId) || isOwner(incoming().userId));
     }
 
     match /notes/{noteId} {

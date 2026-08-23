@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Client, Invoice, WorkItem } from '../types';
+import { Client, Invoice, WorkItem, ServiceRequest } from '../types';
 import {
   Plus, Edit2, Trash2, CheckCircle2, X, Search, Calendar,
   Clock, Phone, Mail, ArrowRight, AlertTriangle, Send, ShieldAlert,
-  ChevronRight, Filter, Download, Users, UploadCloud
+  ChevronRight, Filter, Download, Users, UploadCloud, Briefcase, Instagram
 } from 'lucide-react';
 import { useFirestore } from '../hooks/useFirestore';
 import { User } from 'firebase/auth';
@@ -29,6 +29,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
   const { data: clients, loading: clientsLoading, addOrUpdateItem: saveClient, removeItem: deleteClientFromDb } = useFirestore<Client>('clients', user?.uid);
   const { data: invoices } = useFirestore<Invoice>('invoices', user?.uid);
   const { data: workItems } = useFirestore<WorkItem>('workItems', user?.uid);
+  const { data: serviceRequests, addOrUpdateItem: updateServiceRequest } = useFirestore<ServiceRequest>('serviceRequests', user?.uid);
 
   const [selectedClientId, setSelectedClientId] = useState<string | null>(initialSelectedClientId);
   const [isEditing, setIsEditing] = useState<string | null>(null);
@@ -219,6 +220,44 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
     return true;
   });
 
+  const handleAcceptRequest = async (request: ServiceRequest) => {
+    try {
+      const newClientId = generateUUID();
+      const newClient: Client = {
+        id: newClientId,
+        name: request.clientName,
+        phone: request.contactPhone,
+        email: request.contactEmail,
+        defaultRate: request.proposedRate || 1500,
+        createdAt: Date.now(),
+        notes: `Referral service claim submitted on ${new Date(request.createdAt).toLocaleDateString()}:\n${request.projectDetails}`
+      };
+
+      await saveClient(newClient);
+      await updateServiceRequest({
+        ...request,
+        status: 'accepted'
+      });
+      alert(`Accepted request from ${request.contactName}! Client profile created successfully.`);
+    } catch (err: any) {
+      console.error(err);
+      alert(`Failed to accept request: ${err.message}`);
+    }
+  };
+
+  const handleDeclineRequest = async (request: ServiceRequest) => {
+    if (!window.confirm(`Are you sure you want to decline the request from ${request.contactName}?`)) return;
+    try {
+      await updateServiceRequest({
+        ...request,
+        status: 'declined'
+      });
+    } catch (err: any) {
+      console.error(err);
+      alert(`Failed to decline request: ${err.message}`);
+    }
+  };
+
   if (clientsLoading) {
     return (
       <div className="p-8 max-w-7xl mx-auto text-center py-20">
@@ -261,6 +300,69 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
           </div>
         )}
       </div>
+
+      {/* Service Claims / Inquiries (Leads) */}
+      {(() => {
+        const pendingRequests = serviceRequests.filter(req => req.status === 'pending');
+        if (pendingRequests.length === 0) return null;
+        return (
+          <div className="bg-gradient-to-r from-indigo-50/50 to-purple-50/50 border border-indigo-100 rounded-2xl p-5 shadow-sm space-y-4">
+            <div className="flex items-center gap-2.5 text-indigo-900 font-bold text-sm">
+              <Briefcase className="text-indigo-600 animate-pulse" size={20} />
+              <span>Incoming Service Inquiries / Leads ({pendingRequests.length})</span>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {pendingRequests.map((req) => (
+                <div key={req.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between gap-3">
+                  <div className="space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <h4 className="font-bold text-slate-900 text-sm">{req.clientName}</h4>
+                        <p className="text-xs text-slate-500">Contact: {req.contactName}</p>
+                      </div>
+                      {req.proposedRate && (
+                        <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded text-[11px] font-bold">
+                          ₹{req.proposedRate}/reel
+                        </span>
+                      )}
+                    </div>
+                    
+                    <p className="text-xs leading-relaxed bg-slate-50 p-2.5 rounded-lg border border-slate-100/60 whitespace-pre-line max-h-24 overflow-y-auto text-slate-655 text-slate-600">
+                      {req.projectDetails}
+                    </p>
+                    
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-400">
+                      <span className="flex items-center gap-1"><Phone size={12} /> {req.contactPhone}</span>
+                      <span className="flex items-center gap-1"><Mail size={12} /> {req.contactEmail}</span>
+                      {req.instagram && (
+                        <a href={req.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-indigo-600 hover:underline">
+                          <Instagram size={12} /> Instagram
+                        </a>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button
+                      onClick={() => handleDeclineRequest(req)}
+                      className="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                    >
+                      Decline
+                    </button>
+                    <button
+                      onClick={() => handleAcceptRequest(req)}
+                      className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                    >
+                      Accept & Create Client
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Global Payment Reminders Bar across clients (if any client has payment due or delayed) */}
       {!isNotificationDismissed && notificationClients.length > 0 && (

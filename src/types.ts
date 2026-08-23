@@ -107,4 +107,16 @@ export interface ClientReview {
   createdAt: number;
 }
 
-
+export interface ServiceRequest {
+  id: string;
+  userId: string; // Freelancer's UID (userId so useFirestore can filter it)
+  clientName: string; // Company / Client Name
+  contactName: string; // Person Name
+  contactPhone: string;
+  contactEmail: string;
+  projectDetails: string;
+  instagram?: string;
+  proposedRate?: number;
+  status: 'pending' | 'accepted' | 'declined';
+  createdAt: number;
+}

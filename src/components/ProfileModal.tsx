@@ -195,6 +195,29 @@ export default function ProfileModal({
             <p className="text-[10px] text-slate-400 mt-1">Add your own API key to use the AI Work Summarizer. Get one from Google AI Studio.</p>
           </div>
 
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider font-sans">Your Referral & Services Link</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                readOnly
+                className="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-xs bg-slate-100 outline-none font-mono text-slate-600"
+                value={`${window.location.origin}/?freelancerId=${user.uid}`}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}/?freelancerId=${user.uid}`);
+                  alert("Referral link copied to clipboard!");
+                }}
+                className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer"
+              >
+                Copy Link
+              </button>
+            </div>
+            <p className="text-[10px] text-slate-400 mt-1">Share this profile link with clients. They can view your services and claim/inquire directly.</p>
+          </div>
+
           <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
             <button
               type="button"
