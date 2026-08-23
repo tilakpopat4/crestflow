@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User } from 'firebase/auth';
 import { db } from '../firebase';
-import { collection, query, where, onSnapshot, doc, getDoc, setDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, getDoc, setDoc, getDocs } from 'firebase/firestore';
 import { Client, Invoice, WorkItem, UserProfile } from '../types';
 import Logo from './Logo';
 import { 
@@ -66,6 +66,8 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
   const [reviewText, setReviewText] = useState('');
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [reviewSuccess, setReviewSuccess] = useState(false);
+  const [existingReview, setExistingReview] = useState<{ rating: number; feedbackText: string; createdAt: number } | null>(null);
+  const [checkingReview, setCheckingReview] = useState(false);
 
   // 1. Fetch Client records associated with this Google email (case-insensitive & trimmed)
   useEffect(() => {
@@ -163,6 +165,24 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
   const totalInvoicedAmount = (financials?.paidTotal || 0) + (financials?.pendingInvoiceTotal || 0);
   const totalPaidAmount = financials?.paidTotal || 0;
   const totalPendingBalance = financials?.totalPendingAmount || 0;
+
+  // Check if this client already submitted a review
+  useEffect(() => {
+    if (!currentClient) {
+      setExistingReview(null);
+      return;
+    }
+    setCheckingReview(true);
+    const q = query(collection(db, 'reviews'), where('clientId', '==', currentClient.id));
+    getDocs(q).then((snap) => {
+      if (!snap.empty) {
+        const data = snap.docs[0].data();
+        setExistingReview({ rating: data.rating, feedbackText: data.feedbackText, createdAt: data.createdAt });
+      } else {
+        setExistingReview(null);
+      }
+    }).catch(console.error).finally(() => setCheckingReview(false));
+  }, [currentClient?.id]);
 
   // Submit Review Handler
   const handleReviewSubmit = async (e: React.FormEvent) => {
@@ -680,17 +700,34 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
               </p>
             </div>
 
-            {reviewSuccess ? (
+            {checkingReview ? (
+              <div className="text-center text-xs text-slate-400 py-4">Checking review status...</div>
+            ) : existingReview || reviewSuccess ? (
+              // Already reviewed — show permanently, no option to re-submit
               <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center space-y-3">
                 <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto" />
-                <h3 className="font-bold text-emerald-900 text-sm">Thank You for Your Review!</h3>
-                <p className="text-xs text-emerald-700">Your feedback has been submitted successfully.</p>
-                <button
-                  onClick={() => setReviewSuccess(false)}
-                  className="mt-2 text-xs font-bold text-emerald-800 hover:underline cursor-pointer"
-                >
-                  Submit Another Review
-                </button>
+                <h3 className="font-bold text-emerald-900 text-sm">Review Already Submitted</h3>
+                <p className="text-xs text-emerald-700">You've already rated this freelancer. Only one review per client is allowed.</p>
+                {/* Show their submitted rating */}
+                <div className="flex items-center justify-center gap-1 pt-1">
+                  {[1,2,3,4,5].map(s => (
+                    <Star
+                      key={s}
+                      size={20}
+                      className={s <= (existingReview?.rating ?? reviewRating) ? 'text-amber-400 fill-amber-400' : 'text-slate-200'}
+                    />
+                  ))}
+                </div>
+                {existingReview?.feedbackText && (
+                  <p className="text-xs italic text-slate-600 bg-white border border-slate-100 rounded-xl px-4 py-3 text-left">
+                    "{existingReview.feedbackText}"
+                  </p>
+                )}
+                {existingReview?.createdAt && (
+                  <p className="text-[11px] text-slate-400">
+                    Submitted on {new Date(existingReview.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  </p>
+                )}
               </div>
             ) : (
               <form onSubmit={handleReviewSubmit} className="space-y-4">
