@@ -153,7 +153,7 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
           {onClose && (
             <button
               onClick={onClose}
-              className="w-full py-3 bg-indigo-650 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-all shadow active:scale-98"
+              className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-all shadow active:scale-98"
             >
               Back to CrestFlow
             </button>
@@ -187,15 +187,15 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
                 <Briefcase className="w-3.5 h-3.5" /> Open for Bookings
               </span>
               <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">{profile.name}</h1>
-              <p className="text-indigo-650 font-bold text-sm tracking-wide uppercase mt-1">{profile.professionalTitle}</p>
+              <p className="text-indigo-600 font-bold text-sm tracking-wide uppercase mt-1">{profile.professionalTitle}</p>
             </div>
 
             {/* Description */}
             <div className="space-y-2">
-              <h3 className="text-xs font-bold text-slate-450 uppercase tracking-widest flex items-center gap-1.5">
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
                 <Briefcase className="w-3.5 h-3.5 text-slate-400" /> Services Provided
               </h3>
-              <p className="text-slate-650 text-sm leading-relaxed whitespace-pre-line bg-slate-50 border border-slate-100/60 p-4 rounded-2xl">
+              <p className="text-slate-600 text-sm leading-relaxed whitespace-pre-line bg-slate-50 border border-slate-100/60 p-4 rounded-2xl">
                 {profile.servicesDescription}
               </p>
             </div>
@@ -347,7 +347,7 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex items-center justify-center gap-2 bg-indigo-650 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl text-xs font-bold transition-all shadow-md active:scale-98 disabled:opacity-50 flex-1 md:flex-none cursor-pointer"
+                  className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl text-xs font-bold transition-all shadow-md active:scale-98 disabled:opacity-50 flex-1 md:flex-none cursor-pointer"
                 >
                   {isSubmitting ? (
                     <>

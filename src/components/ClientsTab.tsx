@@ -332,7 +332,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                       )}
                     </div>
                     
-                    <p className="text-xs leading-relaxed bg-slate-50 p-2.5 rounded-lg border border-slate-100/60 whitespace-pre-line max-h-24 overflow-y-auto text-slate-655 text-slate-600">
+                    <p className="text-xs leading-relaxed bg-slate-50 p-2.5 rounded-lg border border-slate-100/60 whitespace-pre-line max-h-24 overflow-y-auto text-slate-600">
                       {req.projectDetails}
                     </p>
                     
