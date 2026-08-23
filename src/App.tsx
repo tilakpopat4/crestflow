@@ -20,17 +20,12 @@ import ProfileModal from './components/ProfileModal';
 import Logo from './components/Logo';
 import { ShieldAlert, LogOut } from 'lucide-react';
 import { setGmailAccessToken } from './lib/gmailService';
-import IntroScreen from './components/IntroScreen';
 import ClientFeedbackForm from './components/ClientFeedbackForm';
 import ReviewsTab from './components/ReviewsTab';
 
 export type Tab = 'dashboard' | 'clients' | 'work' | 'invoice' | 'reviews' | 'admin';
 
 export default function App() {
-  const [showIntro, setShowIntro] = useState(() => {
-    if (window.location.search.includes('forceIntro=true')) return true;
-    return !sessionStorage.getItem('crestflow_intro_played');
-  });
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [user, setUser] = useState<User | null>(null);
@@ -208,16 +203,6 @@ export default function App() {
     return <ClientFeedbackForm />;
   }
 
-  if (showIntro) {
-    return (
-      <IntroScreen
-        onComplete={() => {
-          sessionStorage.setItem('crestflow_intro_played', 'true');
-          setShowIntro(false);
-        }}
-      />
-    );
-  }
 
     if (loading || (user && (profilesLoading || isBlocked === null))) {
       return (
