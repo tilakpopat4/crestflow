@@ -11,10 +11,11 @@ import {
   AlertCircle, 
   Loader2, 
   Instagram, 
-  Briefcase,
-  DollarSign,
-  User,
-  ArrowRight
+  Briefcase, 
+  DollarSign, 
+  User, 
+  ArrowRight,
+  MessageCircle
 } from 'lucide-react';
 
 interface PublicFreelancerProfileProps {
@@ -38,6 +39,7 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submittedWhatsAppUrl, setSubmittedWhatsAppUrl] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchProfile() {
@@ -94,6 +96,19 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
       }
 
       await setDoc(reqRef, newRequest);
+
+      // Build WhatsApp draft URL and redirect
+      if (profile.phone) {
+        const cleanPhone = profile.phone.replace(/[^0-9]/g, '');
+        const formattedPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
+        const msg = `Hi ${profile.name},\n\nI've submitted a Service Request for *${clientName.trim()}*.\n\n*Contact:* ${contactName.trim()} (${contactPhone.trim()})\n*Email:* ${contactEmail.trim()}${proposedRate ? `\n*Proposed Rate:* ₹${proposedRate}/reel` : ''}\n\n*Project Details:*\n${projectDetails.trim()}\n\nLooking forward to working with you!`;
+        const waUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(msg)}`;
+        setSubmittedWhatsAppUrl(waUrl);
+
+        // Open WhatsApp in a new tab
+        window.open(waUrl, '_blank');
+      }
+
       setIsSubmitted(true);
     } catch (err: any) {
       console.error(err);
@@ -142,7 +157,7 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
           <div className="space-y-2">
             <h1 className="text-2xl font-bold text-slate-900">Inquiry Submitted!</h1>
             <p className="text-slate-500 text-sm leading-relaxed">
-              Your service request has been sent to <strong>{profile.name}</strong>. They will review your project requirements and get in touch with you shortly.
+              Your service request has been sent to <strong>{profile.name}</strong>. Redirecting to WhatsApp to send a confirmation...
             </p>
           </div>
           <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-left space-y-2 text-xs text-slate-600">
@@ -150,14 +165,29 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
             <div className="flex justify-between"><span className="text-slate-400">Client / Company:</span> <span className="font-semibold text-slate-950">{clientName}</span></div>
             <div className="flex justify-between"><span className="text-slate-400">Contact Email:</span> <span className="font-semibold text-slate-950">{contactEmail}</span></div>
           </div>
-          {onClose && (
-            <button
-              onClick={onClose}
-              className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-all shadow active:scale-98"
-            >
-              Back to CrestFlow
-            </button>
-          )}
+          
+          <div className="space-y-2.5 pt-2">
+            {submittedWhatsAppUrl && (
+              <a
+                href={submittedWhatsAppUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition-all shadow flex items-center justify-center gap-2 active:scale-98"
+              >
+                <MessageCircle className="w-4 h-4" />
+                Open WhatsApp Chat
+              </a>
+            )}
+
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-all"
+              >
+                Back to CrestFlow
+              </button>
+            )}
+          </div>
         </div>
       </div>
     );
