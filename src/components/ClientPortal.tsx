@@ -224,14 +224,6 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
           </div>
 
           <div className="pt-2 space-y-2">
-            {onSwitchToFreelancer && (
-              <button
-                onClick={onSwitchToFreelancer}
-                className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold transition-all shadow cursor-pointer"
-              >
-                Go to Freelancer Dashboard
-              </button>
-            )}
             <button
               onClick={onLogout}
               className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-2"
@@ -299,14 +291,7 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
               </select>
             )}
 
-            {onSwitchToFreelancer && (
-              <button
-                onClick={onSwitchToFreelancer}
-                className="hidden sm:flex text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
-              >
-                Freelancer View
-              </button>
-            )}
+
 
             <button
               onClick={onLogout}
