@@ -82,11 +82,16 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
         contactPhone: contactPhone.trim(),
         contactEmail: contactEmail.trim(),
         projectDetails: projectDetails.trim(),
-        instagram: instagram.trim() || undefined,
-        proposedRate: proposedRate ? Number(proposedRate) : undefined,
         status: 'pending',
         createdAt: Date.now()
       };
+
+      if (instagram.trim()) {
+        newRequest.instagram = instagram.trim();
+      }
+      if (proposedRate && !isNaN(Number(proposedRate))) {
+        newRequest.proposedRate = Number(proposedRate);
+      }
 
       await setDoc(reqRef, newRequest);
       setIsSubmitted(true);

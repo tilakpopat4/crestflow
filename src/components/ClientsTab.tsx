@@ -233,6 +233,10 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
         notes: `Referral service claim submitted on ${new Date(request.createdAt).toLocaleDateString()}:\n${request.projectDetails}`
       };
 
+      if (request.instagram) {
+        newClient.instagram = request.instagram;
+      }
+
       await saveClient(newClient);
       await updateServiceRequest({
         ...request,
