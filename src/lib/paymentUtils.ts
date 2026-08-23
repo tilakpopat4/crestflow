@@ -302,3 +302,30 @@ export function generateInvoiceEmailDetails(
   return { subject, body, mailtoLink, monthCycleStr, invoiceNo };
 }
 
+export function generateUPILink(
+  upiId: string,
+  payeeName: string = '',
+  amount?: number,
+  transactionNote: string = 'Freelance Video Editing Payment'
+): string {
+  const cleanUpiId = (upiId || '').trim().replace(/\s+/g, '');
+  if (!cleanUpiId) return '';
+  const cleanName = payeeName.trim() || 'Freelancer';
+  const cleanNote = transactionNote.trim() || 'Payment';
+  let amountQuery = '';
+  if (amount && Number(amount) > 0) {
+    amountQuery = `&am=${Number(amount).toFixed(2)}`;
+  }
+  return `upi://pay?pa=${cleanUpiId}&pn=${encodeURIComponent(cleanName)}&tn=${encodeURIComponent(cleanNote)}${amountQuery}&cu=INR`;
+}
+
+export function generateUPIQrUrl(
+  upiId: string,
+  payeeName: string = '',
+  amount?: number,
+  transactionNote: string = 'Freelance Video Editing Payment'
+): string {
+  const upiUri = generateUPILink(upiId, payeeName, amount, transactionNote);
+  if (!upiUri) return '';
+  return `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiUri)}`;
+}

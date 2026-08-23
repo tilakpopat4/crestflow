@@ -22,6 +22,7 @@ import { ShieldAlert, LogOut } from 'lucide-react';
 import { setGmailAccessToken } from './lib/gmailService';
 import ClientFeedbackForm from './components/ClientFeedbackForm';
 import PublicFreelancerProfile from './components/PublicFreelancerProfile';
+import ClientPortal from './components/ClientPortal';
 import ReviewsTab from './components/ReviewsTab';
 
 export type Tab = 'dashboard' | 'clients' | 'work' | 'invoice' | 'reviews' | 'admin';
@@ -29,6 +30,9 @@ export type Tab = 'dashboard' | 'clients' | 'work' | 'invoice' | 'reviews' | 'ad
 export default function App() {
   const [freelancerId, setFreelancerId] = useState<string | null>(() => {
     return new URLSearchParams(window.location.search).get('freelancerId');
+  });
+  const [isClientPortalMode, setIsClientPortalMode] = useState(() => {
+    return window.location.search.includes('portal=client') || window.location.hash.includes('portal');
   });
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
@@ -162,14 +166,14 @@ export default function App() {
 
   // Open profile modal ONLY IF user is signed in, profile is empty, and user hasn't completed or dismissed it on this device
   useEffect(() => {
-    if (user && !profilesLoading && isBlocked === false) {
+    if (user && !profilesLoading && isBlocked === false && !isClientPortalMode) {
       const isCompleted = localStorage.getItem(`crestflow_profile_completed_${user.uid}`) === 'true';
       const isDismissed = localStorage.getItem(`crestflow_profile_dismissed_${user.uid}`) === 'true';
       if (!profile && !isCompleted && !isDismissed) {
         setIsProfileModalOpen(true);
       }
     }
-  }, [user, profilesLoading, profile, isBlocked]);
+  }, [user, profilesLoading, profile, isBlocked, isClientPortalMode]);
 
   const handleLogin = async () => {
     if (isSigningIn) return;
@@ -272,23 +276,49 @@ export default function App() {
   if (!user) {
     return (
       <div className="flex items-center justify-center h-screen w-full bg-slate-50">
-        <div className="bg-white p-8 rounded-xl shadow-sm border border-slate-200 text-center max-w-md w-full font-sans">
+        <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 text-center max-w-md w-full font-sans">
           <div className="flex items-center justify-center gap-2.5 mb-4">
             <Logo className="w-10 h-10 shadow-xs" />
             <span className="text-xl font-bold text-slate-900 tracking-tight">CrestFlow</span>
           </div>
+
+          {!isAdminRoute && (
+            <div className="flex bg-slate-100 p-1 rounded-xl mb-6">
+              <button
+                type="button"
+                onClick={() => setIsClientPortalMode(false)}
+                className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                  !isClientPortalMode ? 'bg-white text-indigo-600 shadow-xs' : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                Freelancer Login
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsClientPortalMode(true)}
+                className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                  isClientPortalMode ? 'bg-white text-indigo-600 shadow-xs' : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                Client Portal
+              </button>
+            </div>
+          )}
+
           <h1 className="text-xl font-bold text-slate-800 mb-1">
-            {isAdminRoute ? 'Admin Portal' : 'Welcome Back'}
+            {isAdminRoute ? 'Admin Portal' : (isClientPortalMode ? 'Client Portal Sign In' : 'Welcome Back')}
           </h1>
           <p className="text-slate-500 mb-6 text-sm">
             {isAdminRoute 
               ? 'Please sign in with Google to authenticate and load the Admin database console.' 
-              : 'Sign in to access your CrestFlow Freelancing Dashboard and cloud sync.'}
+              : (isClientPortalMode 
+                  ? 'Sign in with your Google account to view your project work logs, invoices, and payment status.'
+                  : 'Sign in to access your CrestFlow Freelancing Dashboard and cloud sync.')}
           </p>
           <button 
             onClick={handleLogin}
             disabled={isSigningIn}
-            className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white py-2.5 rounded font-medium transition-colors cursor-pointer disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white py-2.5 rounded-xl font-medium transition-colors cursor-pointer disabled:cursor-not-allowed shadow-sm"
           >
             {isSigningIn ? (
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
@@ -299,7 +329,7 @@ export default function App() {
             )}
             {isSigningIn 
               ? 'Signing In...' 
-              : (isAdminRoute ? 'Admin Sign In' : 'Sign in with Google')}
+              : (isAdminRoute ? 'Admin Sign In' : (isClientPortalMode ? 'Sign in to Client Portal' : 'Sign in with Google'))}
           </button>
           {isAdminRoute && (
             <button
@@ -323,6 +353,17 @@ export default function App() {
     return <AdminTab />;
   }
 
+  // Render Client Portal if user is in client mode
+  if (isClientPortalMode) {
+    return (
+      <ClientPortal 
+        user={user} 
+        onLogout={handleLogout} 
+        onSwitchToFreelancer={() => setIsClientPortalMode(false)} 
+      />
+    );
+  }
+
   return (
     <div className="flex flex-col md:flex-row h-screen w-full bg-slate-50 text-slate-900 overflow-hidden font-sans">
       <Sidebar 
@@ -332,6 +373,7 @@ export default function App() {
         onLogout={handleLogout} 
         profile={profile}
         onEditProfile={() => setIsProfileModalOpen(true)}
+        onSwitchToClient={() => setIsClientPortalMode(true)}
       />
       <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative pb-20 md:pb-0">
         <GlobalHeader
