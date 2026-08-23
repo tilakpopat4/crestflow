@@ -80,15 +80,15 @@ export default function ProfileModal({
   };
 
   return (
-    <div 
-      id="profile-modal-overlay" 
+    <div
+      id="profile-modal-overlay"
       onClick={() => { if (!isMandatory && onClose) onClose(); }}
       className={`fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 ${!isMandatory ? 'cursor-pointer' : ''}`}
     >
-      <div 
-        id="profile-modal-container" 
+      <div
+        id="profile-modal-container"
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-xl shadow-2xl border border-slate-200 max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200 cursor-default"
+        className="bg-white rounded-xl shadow-2xl border border-slate-200 max-w-md w-full max-h-[90vh] md:max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 cursor-default"
       >
         {/* Header */}
         <div className="bg-slate-900 text-white p-5 flex items-center justify-between">
@@ -98,7 +98,7 @@ export default function ProfileModal({
               {isMandatory ? 'Set Up Your Freelancer Profile' : 'Profile Settings'}
             </h2>
           </div>
-          <button 
+          <button
             type="button"
             onClick={onClose}
             className="text-slate-400 hover:text-white transition-colors p-1 rounded-full hover:bg-slate-800 cursor-pointer"
@@ -109,7 +109,7 @@ export default function ProfileModal({
         </div>
 
         {/* Content Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1">
           {isMandatory && (
             <div className="bg-indigo-50 border border-indigo-100 text-indigo-800 p-3.5 rounded-lg text-xs leading-relaxed mb-2">
               Welcome! Configure your name, phone number, and UPI ID for invoices and payment links.
@@ -124,7 +124,7 @@ export default function ProfileModal({
 
           <div>
             <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">Your Full Name *</label>
-            <input 
+            <input
               type="text"
               placeholder="e.g. John Doe"
               className="w-full border border-slate-200 rounded-lg px-3.5 py-2 text-sm bg-slate-50 outline-none transition-all focus:border-indigo-500 focus:bg-white"
@@ -136,7 +136,7 @@ export default function ProfileModal({
 
           <div>
             <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">Professional Title *</label>
-            <input 
+            <input
               type="text"
               placeholder="e.g. Video Editor"
               className="w-full border border-slate-200 rounded-lg px-3.5 py-2 text-sm bg-slate-50 outline-none transition-all focus:border-indigo-500 focus:bg-white"
@@ -148,7 +148,7 @@ export default function ProfileModal({
 
           <div>
             <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">Services Description *</label>
-            <input 
+            <input
               type="text"
               placeholder="e.g. Video Editing Services"
               className="w-full border border-slate-200 rounded-lg px-3.5 py-2 text-sm bg-slate-50 outline-none transition-all focus:border-indigo-500 focus:bg-white"
@@ -160,7 +160,7 @@ export default function ProfileModal({
 
           <div>
             <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">Phone Number *</label>
-            <input 
+            <input
               type="text"
               placeholder="e.g. +91 98765 43210"
               className="w-full border border-slate-200 rounded-lg px-3.5 py-2 text-sm bg-slate-50 outline-none transition-all focus:border-indigo-500 focus:bg-white"
@@ -172,7 +172,7 @@ export default function ProfileModal({
 
           <div>
             <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">UPI ID (for pay link & QR Code) *</label>
-            <input 
+            <input
               type="text"
               placeholder="e.g. name@upi"
               className="w-full border border-slate-200 rounded-lg px-3.5 py-2 text-sm bg-slate-50 outline-none transition-all focus:border-indigo-500 focus:bg-white font-mono"
@@ -185,7 +185,7 @@ export default function ProfileModal({
 
           <div>
             <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">Gemini API Key (Optional)</label>
-            <input 
+            <input
               type="password"
               placeholder="AI Work Summarizer API Key"
               className="w-full border border-slate-200 rounded-lg px-3.5 py-2 text-sm bg-slate-50 outline-none transition-all focus:border-indigo-500 focus:bg-white font-mono"
@@ -196,7 +196,7 @@ export default function ProfileModal({
           </div>
 
           <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
-            <button 
+            <button
               type="button"
               onClick={onClose}
               disabled={isSaving}
@@ -204,7 +204,7 @@ export default function ProfileModal({
             >
               Cancel
             </button>
-            <button 
+            <button
               type="submit"
               disabled={isSaving}
               className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm hover:shadow active:scale-95 disabled:opacity-50 cursor-pointer"

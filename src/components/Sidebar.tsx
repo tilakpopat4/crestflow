@@ -19,7 +19,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout, profi
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'clients', label: 'Clients', icon: Users },
     { id: 'work', label: 'Work Log', icon: ClipboardList },
-    { id: 'invoice', label: 'Invoice Generator', icon: FileText },
+    { id: 'invoice', label: 'Invoices', icon: FileText },
     { id: 'reviews', label: 'Reviews', icon: MessageSquare },
   ] as const;
 
@@ -38,8 +38,8 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout, profi
           <p className="text-[11px] text-slate-400 truncate">{profile?.professionalTitle || 'Video Editor Pro'}</p>
         </div>
       </div>
-      
-      <div className="flex-1 px-2 md:px-4 flex flex-row md:flex-col justify-around md:justify-start space-y-0 md:space-y-2 py-2 md:py-0 overflow-y-auto">
+
+      <div className="flex-1 px-1.5 md:px-4 flex flex-row md:flex-col justify-around md:justify-start space-y-0 md:space-y-2 py-1.5 md:py-0 overflow-x-hidden overflow-y-hidden md:overflow-y-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
@@ -48,19 +48,19 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout, profi
               key={item.id}
               onClick={() => setActiveTab(item.id)}
               className={clsx(
-                "flex flex-col md:flex-row items-center md:space-x-3 px-3 py-2 rounded-lg transition-colors text-xs md:text-sm font-medium w-full max-w-[80px] md:max-w-none flex-shrink-0",
-                isActive 
-                  ? "bg-indigo-600 text-white shadow-sm" 
+                "flex flex-col md:flex-row items-center md:space-x-3 px-1.5 md:px-3 py-1.5 md:py-2 rounded-lg transition-colors text-[10px] md:text-sm font-medium flex-1 md:flex-initial md:w-full md:max-w-none flex-shrink md:flex-shrink-0",
+                isActive
+                  ? "bg-indigo-600 text-white shadow-sm"
                   : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
               )}
             >
-              <Icon size={20} className={clsx(isActive ? "text-white" : "text-slate-400", "mb-1 md:mb-0")} />
+              <Icon size={18} className={clsx(isActive ? "text-white" : "text-slate-400", "mb-0.5 md:mb-0")} />
               <span className="truncate">{item.label}</span>
             </button>
           );
         })}
       </div>
-      
+
       <div className="hidden md:flex p-6 border-t border-slate-800 items-center justify-between">
         <div className="flex items-center space-x-3 overflow-hidden">
           {user?.photoURL ? (
@@ -73,7 +73,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout, profi
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-white truncate">{profile?.name || user?.displayName || 'User Account'}</p>
             {onEditProfile && (
-              <button 
+              <button
                 onClick={onEditProfile}
                 className="text-[10px] text-slate-400 hover:text-indigo-400 flex items-center gap-1 transition-colors outline-none mt-0.5"
               >
@@ -83,7 +83,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout, profi
             )}
           </div>
         </div>
-        
+
         {onLogout && (
           <button onClick={onLogout} className="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition-colors" title="Sign out">
             <LogOut size={16} />

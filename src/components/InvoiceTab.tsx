@@ -814,8 +814,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
       const nextStatus = timestamp ? 'Paid' : 'Pending';
       const pDate = timestamp || undefined;
       // Update invoice
-      await addInvoice({ 
-        ...inv, 
+      await addInvoice({
+        ...inv,
         status: nextStatus,
         lastPaymentDate: pDate
       });
@@ -1329,7 +1329,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                     Enter target grand total to divide equally across all {reels.length} item{reels.length === 1 ? '' : 's'}.
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-500">₹</span>
                     <input
@@ -1435,7 +1435,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
             {/* Adjustments Fields */}
             <div className="mt-6 pt-6 border-t border-slate-100 space-y-4">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">Adjustments (Optional)</h4>
-              
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-slate-500 mb-1">Extra Cost Description</label>
@@ -1939,8 +1939,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                           <button
                             onClick={() => toggleInvoiceStatus(inv.id)}
                             className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border cursor-pointer transition-transform hover:scale-105 ${inv.status === 'Paid'
-                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
-                                : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                              : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
                               }`}
                             title={`Click to mark as ${inv.status === 'Paid' ? 'Pending' : 'Paid & update last payment date'}`}
                           >
@@ -2241,7 +2241,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
       {(() => {
         const modalInv = invoices.find(i => i.id === paymentModalState.invoiceId);
         return (
-          <PaymentDateModal 
+          <PaymentDateModal
             isOpen={paymentModalState.isOpen}
             onClose={() => setPaymentModalState({ invoiceId: null, isOpen: false })}
             onConfirm={(timestamp) => handleConfirmPaymentDate(paymentModalState.invoiceId!, timestamp)}

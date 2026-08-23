@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Client, Invoice, WorkItem } from '../types';
-import { 
-  Plus, Edit2, Trash2, CheckCircle2, X, Search, Calendar, 
+import {
+  Plus, Edit2, Trash2, CheckCircle2, X, Search, Calendar,
   Clock, Phone, Mail, ArrowRight, AlertTriangle, Send, ShieldAlert,
   ChevronRight, Filter, Download, Users, UploadCloud
 } from 'lucide-react';
@@ -9,9 +9,9 @@ import { useFirestore } from '../hooks/useFirestore';
 import { User } from 'firebase/auth';
 import { generateUUID, getDriveDirectImageUrl } from '../lib/utils';
 import { exportClientCSV } from '../lib/csvExport';
-import { 
-  getPaymentStatusInfo, 
-  calculateClientFinancials, 
+import {
+  getPaymentStatusInfo,
+  calculateClientFinancials,
   generateWhatsAppReminder,
   generateEmailReminder,
   triggerBrowserOverdueAlert
@@ -34,7 +34,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
   const [isEditing, setIsEditing] = useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  
+
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
   const [filterType, setFilterType] = useState<'all' | 'due' | 'uptodate'>('all');
   const [isNotificationDismissed, setIsNotificationDismissed] = useState(false);
@@ -78,15 +78,15 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const paymentDateTimestamp = formData.lastPaymentDate 
-        ? new Date(formData.lastPaymentDate).getTime() 
+      const paymentDateTimestamp = formData.lastPaymentDate
+        ? new Date(formData.lastPaymentDate).getTime()
         : Date.now();
 
       if (isEditing) {
         const existing = clients.find(c => c.id === isEditing);
         if (existing) {
-          const updatedClient: Client = { 
-            ...existing, 
+          const updatedClient: Client = {
+            ...existing,
             name: formData.name,
             phone: formData.phone,
             email: formData.email,
@@ -98,10 +98,10 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
             lastPaymentDate: paymentDateTimestamp,
             emailRemindersEnabled: formData.emailRemindersEnabled
           };
-          
+
           if (formData.onSiteShootRate) updatedClient.onSiteShootRate = Number(formData.onSiteShootRate);
           else delete updatedClient.onSiteShootRate;
-          
+
           if (formData.websiteMakingRate) updatedClient.websiteMakingRate = Number(formData.websiteMakingRate);
           else delete updatedClient.websiteMakingRate;
 
@@ -109,8 +109,8 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
         }
         setIsEditing(null);
       } else {
-        const newClient: Client = { 
-          id: generateUUID(), 
+        const newClient: Client = {
+          id: generateUUID(),
           name: formData.name,
           phone: formData.phone,
           email: formData.email,
@@ -118,27 +118,27 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
           instagram: formData.instagram,
           clientFrom: formData.clientFrom,
           workExperience: formData.workExperience,
-          defaultRate: Number(formData.defaultRate), 
+          defaultRate: Number(formData.defaultRate),
           lastPaymentDate: paymentDateTimestamp,
           emailRemindersEnabled: formData.emailRemindersEnabled,
-          createdAt: Date.now() 
+          createdAt: Date.now()
         };
         if (formData.onSiteShootRate) newClient.onSiteShootRate = Number(formData.onSiteShootRate);
         if (formData.websiteMakingRate) newClient.websiteMakingRate = Number(formData.websiteMakingRate);
 
         await saveClient(newClient);
       }
-      
-      setFormData({ 
-        name: '', 
-        phone: '', 
-        email: '', 
+
+      setFormData({
+        name: '',
+        phone: '',
+        email: '',
         logoUrl: '',
         instagram: '',
         clientFrom: '',
         workExperience: '',
-        defaultRate: '', 
-        onSiteShootRate: '', 
+        defaultRate: '',
+        onSiteShootRate: '',
         websiteMakingRate: '',
         lastPaymentDate: new Date().toISOString().split('T')[0],
         emailRemindersEnabled: true
@@ -149,13 +149,13 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
       alert("Error saving client: " + (err?.message || String(err)));
     }
   };
-  
+
   const handleEditClient = (c: Client) => {
     setIsEditing(c.id);
-    setFormData({ 
-      name: c.name, 
-      phone: c.phone, 
-      email: c.email || '', 
+    setFormData({
+      name: c.name,
+      phone: c.phone,
+      email: c.email || '',
       logoUrl: c.logoUrl || '',
       instagram: c.instagram || '',
       clientFrom: c.clientFrom || '',
@@ -175,18 +175,18 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
       if (selectedClientId === id) setSelectedClientId(null);
     }
   };
-  
+
   const cancelEdit = () => {
     setIsEditing(null);
-    setFormData({ 
-      name: '', 
-      phone: '', 
-      email: '', 
+    setFormData({
+      name: '',
+      phone: '',
+      email: '',
       logoUrl: '',
       instagram: '',
       workExperience: '',
-      defaultRate: '', 
-      onSiteShootRate: '', 
+      defaultRate: '',
+      onSiteShootRate: '',
       websiteMakingRate: '',
       lastPaymentDate: new Date().toISOString().split('T')[0],
       emailRemindersEnabled: true
@@ -210,8 +210,8 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
   // Filter clients for list/grid view
   const filteredClients = clientStatuses.filter(({ client, statusInfo }) => {
     const matchesSearch = client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          client.phone.includes(searchQuery) ||
-                          client.email?.toLowerCase().includes(searchQuery.toLowerCase());
+      client.phone.includes(searchQuery) ||
+      client.email?.toLowerCase().includes(searchQuery.toLowerCase());
     if (!matchesSearch) return false;
 
     if (filterType === 'due') return statusInfo.isNotificationRequired || statusInfo.daysRemaining <= 3;
@@ -241,17 +241,17 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
             Click any client profile to view their individual dashboard, work logs, and 30-day payment cycle.
           </p>
         </div>
-        
+
         {!isFormOpen && (
           <div className="flex items-center gap-2 w-full md:w-auto">
-            <button 
+            <button
               onClick={() => setIsImportModalOpen(true)}
               className="flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-sm flex-1 md:flex-none"
             >
               <UploadCloud size={16} />
               Import CSV
             </button>
-            <button 
+            <button
               onClick={() => setIsFormOpen(true)}
               className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-sm flex-1 md:flex-none"
             >
@@ -285,11 +285,11 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
             {notificationClients.map(({ client, statusInfo, financials }) => (
-              <div 
+              <div
                 key={client.id}
-                className="bg-white p-3.5 rounded-xl border border-amber-200 flex items-center justify-between gap-3 shadow-xs"
+                className="bg-white p-3.5 rounded-xl border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
               >
-                <div>
+                <div className="w-full sm:w-auto">
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-slate-900 text-xs">{client.name}</span>
                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${statusInfo.badgeClass}`}>
@@ -306,7 +306,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 shrink-0">
+                <div className="flex items-center gap-1.5 shrink-0 w-full sm:w-auto justify-end sm:justify-start">
                   <button
                     onClick={() => setSelectedClientId(client.id)}
                     className="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded text-xs font-semibold transition-colors"
@@ -354,60 +354,60 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
               <X size={20} />
             </button>
           </div>
-          
+
           <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-6">
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-slate-700">Client Name *</label>
-              <input 
+              <input
                 required
-                type="text" 
+                type="text"
                 value={formData.name}
-                onChange={e => setFormData({...formData, name: e.target.value})}
+                onChange={e => setFormData({ ...formData, name: e.target.value })}
                 className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-600"
                 placeholder="e.g. Acme Media Studio"
               />
             </div>
-            
+
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-slate-700">Phone Number *</label>
-              <input 
+              <input
                 required
-                type="tel" 
+                type="tel"
                 value={formData.phone}
-                onChange={e => setFormData({...formData, phone: e.target.value})}
+                onChange={e => setFormData({ ...formData, phone: e.target.value })}
                 className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-600"
                 placeholder="+91 98765 43210"
               />
             </div>
-            
+
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-slate-700">Email Address (Optional)</label>
-              <input 
-                type="email" 
+              <input
+                type="email"
                 value={formData.email}
-                onChange={e => setFormData({...formData, email: e.target.value})}
+                onChange={e => setFormData({ ...formData, email: e.target.value })}
                 className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-600"
                 placeholder="client@example.com"
               />
             </div>
-            
+
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-slate-700">Logo URL (Optional)</label>
-              <input 
-                type="url" 
+              <input
+                type="url"
                 value={formData.logoUrl}
-                onChange={e => setFormData({...formData, logoUrl: e.target.value})}
+                onChange={e => setFormData({ ...formData, logoUrl: e.target.value })}
                 className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-600"
                 placeholder="https://example.com/logo.png"
               />
             </div>
-            
+
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-slate-700">Instagram Handle / URL (Optional)</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={formData.instagram}
-                onChange={e => setFormData({...formData, instagram: e.target.value})}
+                onChange={e => setFormData({ ...formData, instagram: e.target.value })}
                 className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-600"
                 placeholder="@username or link"
               />
@@ -415,19 +415,19 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
 
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-slate-700">Client From (Optional)</label>
-              <input 
-                type="month" 
+              <input
+                type="month"
                 value={formData.clientFrom}
-                onChange={e => setFormData({...formData, clientFrom: e.target.value})}
+                onChange={e => setFormData({ ...formData, clientFrom: e.target.value })}
                 className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-600"
               />
             </div>
-            
+
             <div className="space-y-1.5 md:col-span-2">
               <label className="block text-xs font-semibold text-slate-700">Work Experience / Notes (Optional)</label>
-              <textarea 
+              <textarea
                 value={formData.workExperience}
-                onChange={e => setFormData({...formData, workExperience: e.target.value})}
+                onChange={e => setFormData({ ...formData, workExperience: e.target.value })}
                 className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-600 resize-none h-20"
                 placeholder="Details about past projects, years of experience, etc."
               />
@@ -435,25 +435,25 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
 
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-slate-700">Previous Payment Date *</label>
-              <input 
+              <input
                 required
-                type="date" 
+                type="date"
                 value={formData.lastPaymentDate}
-                onChange={e => setFormData({...formData, lastPaymentDate: e.target.value})}
+                onChange={e => setFormData({ ...formData, lastPaymentDate: e.target.value })}
                 className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-600"
               />
               <p className="text-[10px] text-slate-400">Next payment due date will be 30 days after this date.</p>
             </div>
-            
+
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-slate-700">Default Reel Rate (₹) *</label>
-              <input 
+              <input
                 required
-                type="number" 
+                type="number"
                 min="0"
                 step="1"
                 value={formData.defaultRate}
-                onChange={e => setFormData({...formData, defaultRate: e.target.value})}
+                onChange={e => setFormData({ ...formData, defaultRate: e.target.value })}
                 className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-600"
                 placeholder="e.g. 1500"
               />
@@ -461,25 +461,25 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
 
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-slate-700">On Site Shoot Rate (₹)</label>
-              <input 
-                type="number" 
+              <input
+                type="number"
                 min="0"
                 step="1"
                 value={formData.onSiteShootRate}
-                onChange={e => setFormData({...formData, onSiteShootRate: e.target.value})}
+                onChange={e => setFormData({ ...formData, onSiteShootRate: e.target.value })}
                 className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-600"
                 placeholder="e.g. 5000"
               />
             </div>
-            
+
             <div className="space-y-1.5 md:col-span-2">
               <label className="block text-xs font-semibold text-slate-700">Website Making Rate (₹)</label>
-              <input 
-                type="number" 
+              <input
+                type="number"
                 min="0"
                 step="1"
                 value={formData.websiteMakingRate}
-                onChange={e => setFormData({...formData, websiteMakingRate: e.target.value})}
+                onChange={e => setFormData({ ...formData, websiteMakingRate: e.target.value })}
                 className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-600"
                 placeholder="e.g. 15000"
               />
@@ -505,17 +505,17 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                 className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 cursor-pointer shrink-0"
               />
             </div>
-            
+
             <div className="md:col-span-2 flex justify-end gap-3 mt-2">
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={cancelEdit}
                 className="px-4 py-2 rounded-xl text-slate-700 text-xs font-semibold hover:bg-slate-100 transition-colors"
               >
                 Cancel
               </button>
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-sm"
               >
                 <CheckCircle2 size={16} />
@@ -542,33 +542,30 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
         <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto">
           <button
             onClick={() => setFilterType('all')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-              filterType === 'all'
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${filterType === 'all'
                 ? 'bg-slate-900 text-white'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-            }`}
+              }`}
           >
             All Clients ({clients.length})
           </button>
 
           <button
             onClick={() => setFilterType('due')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
-              filterType === 'due'
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${filterType === 'due'
                 ? 'bg-amber-600 text-white'
                 : 'bg-amber-50 text-amber-800 hover:bg-amber-100'
-            }`}
+              }`}
           >
             <Clock size={12} /> Due / Action ({notificationClients.length})
           </button>
 
           <button
             onClick={() => setFilterType('uptodate')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-              filterType === 'uptodate'
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${filterType === 'uptodate'
                 ? 'bg-emerald-600 text-white'
                 : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
-            }`}
+              }`}
           >
             Up to Date
           </button>
@@ -584,8 +581,8 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
             </div>
             <h3 className="text-base font-bold text-slate-800">No client profiles found</h3>
             <p className="text-xs text-slate-500">
-              {clients.length === 0 
-                ? "Get started by adding your first client profile." 
+              {clients.length === 0
+                ? "Get started by adding your first client profile."
                 : "Try adjusting your search query or filter selection."}
             </p>
           </div>
@@ -598,7 +595,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
             const formattedNextDate = new Date(statusInfo.nextDueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
 
             return (
-              <div 
+              <div
                 key={client.id}
                 className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs hover:shadow-md transition-all group flex flex-col justify-between space-y-5"
               >
@@ -607,9 +604,9 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
                       {client.logoUrl ? (
-                        <img 
-                          src={getDriveDirectImageUrl(client.logoUrl)} 
-                          alt={client.name} 
+                        <img
+                          src={getDriveDirectImageUrl(client.logoUrl)}
+                          alt={client.name}
                           className="w-12 h-12 rounded-xl object-cover shadow-sm shrink-0 bg-indigo-50"
                           onError={(e) => {
                             e.currentTarget.onerror = null;
@@ -728,10 +725,10 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
         )}
       </div>
 
-      <CsvImportModal 
-        isOpen={isImportModalOpen} 
-        onClose={() => setIsImportModalOpen(false)} 
-        userId={user?.uid} 
+      <CsvImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        userId={user?.uid}
         onImportSuccess={() => {
           setIsImportModalOpen(false);
           setSearchQuery('');
