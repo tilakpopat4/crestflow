@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Client, Reel, Invoice, WorkItem, UserProfile } from '../types';
-import { Plus, Trash2, Download, Receipt, FileCheck, Mail, Send, Copy, X, Check, MailCheck, CheckCircle2, AlertCircle, Loader2, FileText, Search, Calculator, Divide, Coins, History, Pencil } from 'lucide-react';
+import { Plus, Trash2, Download, Receipt, FileCheck, Mail, Send, Copy, X, Check, MailCheck, CheckCircle2, AlertCircle, Loader2, FileText, Search, Calculator, Divide, Coins, History, Pencil, Printer, ListChecks } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { useFirestore } from '../hooks/useFirestore';
@@ -381,30 +381,16 @@ export async function generateUpiQrCodeDataUrl(
   });
 }
 
-export async function generateOffscreenPdfBlob(params: {
+export function renderDocumentHtml(params: {
   invoice: Invoice;
   client?: Client;
   profile: UserProfile | null;
   dateFrom?: string;
   dateTo?: string;
-  qrCodeUrl?: string;
+  qrDataUrl?: string;
   customUpiId?: string;
-}): Promise<Blob> {
-  const container = document.createElement('div');
-  container.style.position = 'fixed';
-  container.style.left = '0px';
-  container.style.top = '0px';
-  container.style.zIndex = '999999';
-  container.style.width = '794px';
-  container.style.backgroundColor = '#ffffff';
-  container.style.color = '#0f172a';
-  container.style.boxSizing = 'border-box';
-  container.style.padding = '32px 36px';
-  container.style.fontFamily = 'Inter, system-ui, -apple-system, sans-serif';
-  container.style.opacity = '1';
-  container.style.visibility = 'visible';
-  container.style.pointerEvents = 'none';
-
+  hideFinance?: boolean;
+}): string {
   const invoiceNo = params.invoice.id.length > 8
     ? `INV-${params.invoice.id.substring(0, 8).toUpperCase()}`
     : params.invoice.id.toUpperCase();
@@ -435,22 +421,151 @@ export async function generateOffscreenPdfBlob(params: {
   const discount = params.invoice.discountAmount || 0;
   const extraCost = params.invoice.extraCostAmount || 0;
   const grandTotal = Math.max(0, params.invoice.totalAmount);
+  const totalDeliverablesCount = reels.reduce((s, r) => s + (r.quantity || 1), 0);
 
-  const invShortId = params.invoice.id ? params.invoice.id.substring(0, 8) : 'INV';
-  const transactionNote = `Payment for Invoice #${invShortId}`;
+  const isWorkSummary = !!params.hideFinance;
 
-  let qrDataUrl = '';
-  if (upiId) {
-    try {
-      const res = await generateUpiQrCodeDataUrl(upiId, senderName, grandTotal, transactionNote);
-      if (res && res.pngDataUrl) {
-        qrDataUrl = res.pngDataUrl;
-      }
-    } catch (e) {
-      console.warn("QR DataURL generation for offscreen PDF failed:", e);
-    }
+  if (isWorkSummary) {
+    const itemsRowsHtml = reels.length === 0
+      ? `
+        <tr>
+          <td style="padding: 12px 10px; font-size: 13px; color: #64748b; text-align: center;">01</td>
+          <td style="padding: 12px 12px; font-size: 13px; color: #0f172a; font-weight: 600;">Video Editing / Content Creation Services</td>
+          <td style="padding: 12px 10px; font-size: 13px; color: #334155; text-align: center; font-weight: 700;">1</td>
+        </tr>
+      `
+      : reels.map((r, idx) => `
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 11px 10px; font-size: 13px; color: #64748b; text-align: center; font-weight: 600;">${String(idx + 1).padStart(2, '0')}</td>
+          <td style="padding: 11px 12px; font-size: 13px; color: #0f172a; font-weight: 600;">
+            ${r.title || 'Video Editing Work Item'}
+            ${r.videoUrl ? `<br/><a href="${r.videoUrl}" target="_blank" rel="noopener noreferrer" style="color: #4f46e5; text-decoration: underline; font-size: 11px; font-weight: normal; word-break: break-all;">${r.videoUrl}</a>` : ''}
+          </td>
+          <td style="padding: 11px 10px; font-size: 13px; color: #334155; text-align: center; font-weight: 700;">${r.quantity || 1}</td>
+        </tr>
+      `).join('');
+
+    return `
+      <div style="background: #ffffff; color: #0f172a; font-family: Inter, system-ui, -apple-system, sans-serif; box-sizing: border-box; width: 100%;">
+        
+        <!-- Top Header Block -->
+        <div style="border-bottom: 2px solid #0f172a; padding-bottom: 16px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-start; width: 100%; box-sizing: border-box;">
+          <div style="width: 58%;">
+            <div style="font-size: 22px; font-weight: 900; text-transform: uppercase; color: #0f172a; letter-spacing: -0.5px; line-height: 1.2;">
+              ${senderName}
+            </div>
+            <div style="font-size: 11px; font-weight: 800; color: #4f46e5; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px;">
+              ${senderTitle}
+            </div>
+            ${senderPhone ? `<div style="font-size: 12px; font-weight: 600; color: #475569; margin-top: 6px;"><b>PHONE:</b> ${senderPhone}</div>` : ''}
+          </div>
+          <div style="width: 40%; text-align: right;">
+            <div style="font-size: 24px; font-weight: 900; color: #0f172a; text-transform: uppercase; letter-spacing: -0.5px; line-height: 1.1;">
+              WORK SUMMARY
+            </div>
+            <div style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px;">
+              Work Done Statement
+            </div>
+            <div style="font-size: 12px; font-family: monospace; font-weight: 700; color: #475569; margin-top: 4px;">
+              #WRK-${params.invoice.id.substring(0, 8).toUpperCase()}
+            </div>
+          </div>
+        </div>
+
+        <!-- Prepared For & Summary Overview Section -->
+        <div style="display: flex; gap: 16px; margin-bottom: 20px; width: 100%; box-sizing: border-box;">
+          <!-- Prepared For Card -->
+          <div style="flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; box-sizing: border-box;">
+            <span style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; display: block; margin-bottom: 6px;">
+              PREPARED FOR
+            </span>
+            <div style="font-size: 17px; font-weight: 900; color: #0f172a; margin-bottom: 4px;">
+              ${params.client?.name || params.invoice.clientName}
+            </div>
+            ${params.client?.phone ? `<div style="font-size: 12px; color: #475569; margin-top: 2px;">Ph: ${params.client.phone}</div>` : ''}
+            ${params.client?.email ? `<div style="font-size: 12px; color: #475569; margin-top: 2px;">Email: ${params.client.email}</div>` : ''}
+          </div>
+
+          <!-- Statement Overview Card -->
+          <div style="flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; box-sizing: border-box;">
+            <span style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; display: block; margin-bottom: 6px;">
+              PERIOD OVERVIEW
+            </span>
+            <table style="width: 100%; font-size: 12px; color: #334155; border-collapse: collapse;">
+              <tr>
+                <td style="color: #64748b; padding: 2px 0; font-weight: 500;">Issue Date:</td>
+                <td style="text-align: right; font-weight: 700; color: #0f172a; padding: 2px 0;">${issueDateStr}</td>
+              </tr>
+              <tr>
+                <td style="color: #64748b; padding: 2px 0; font-weight: 500;">Work Period:</td>
+                <td style="text-align: right; font-weight: 600; color: #1e293b; padding: 2px 0;">${billingPeriodStr}</td>
+              </tr>
+              <tr>
+                <td style="color: #64748b; padding: 2px 0; font-weight: 500;">Total Deliverables:</td>
+                <td style="text-align: right; font-weight: 700; color: #4f46e5; padding: 2px 0;">${totalDeliverablesCount} Item(s)</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- Items Table (Without Financial Digits) -->
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; box-sizing: border-box;">
+          <thead>
+            <tr style="background-color: #0f172a; color: #ffffff;">
+              <th style="padding: 10px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; width: 44px; border-top-left-radius: 8px;">#</th>
+              <th style="padding: 10px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: left;">Work Done / Deliverable Description</th>
+              <th style="padding: 10px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; width: 80px; border-top-right-radius: 8px;">Qty</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsRowsHtml}
+          </tbody>
+        </table>
+
+        <!-- Work Summary Banner -->
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 18px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
+          <div>
+            <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #4f46e5;">DELIVERABLES SUMMARY</div>
+            <div style="font-size: 12px; color: #475569; margin-top: 2px;">
+              Completed for <strong>${params.client?.name || params.invoice.clientName}</strong> across cycle (${billingPeriodStr})
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <span style="display: inline-block; background-color: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.5px;">
+              ✓ Completed (${totalDeliverablesCount} items)
+            </span>
+          </div>
+        </div>
+
+        <!-- Note & Verification Section -->
+        <div style="border-top: 2px solid #0f172a; padding-top: 16px; display: flex; justify-content: space-between; align-items: flex-start; width: 100%; box-sizing: border-box;">
+          <div style="width: 65%;">
+            <div style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #0f172a; margin-bottom: 4px;">
+              VERIFICATION & CONFIRMATION
+            </div>
+            <p style="font-size: 11px; color: #64748b; line-height: 1.5; margin: 0;">
+              This statement confirms completion and delivery of the listed creative deliverables for the specified date period.
+            </p>
+          </div>
+          <div style="width: 30%; text-align: right;">
+            <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8;">
+              PREPARED BY
+            </div>
+            <div style="font-size: 13px; font-weight: 800; color: #0f172a; margin-top: 2px;">
+              ${senderName}
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 18px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 9px; color: #94a3b8; display: flex; justify-content: space-between;">
+          <span>This is a computer-generated work delivery summary statement.</span>
+          <span>Generated on ${issueDateStr}</span>
+        </div>
+      </div>
+    `;
   }
 
+  // Full Standard Invoice
   const itemsRowsHtml = reels.length === 0
     ? `
       <tr>
@@ -474,7 +589,7 @@ export async function generateOffscreenPdfBlob(params: {
       </tr>
     `).join('');
 
-  container.innerHTML = `
+  return `
     <div style="background: #ffffff; color: #0f172a; font-family: Inter, system-ui, -apple-system, sans-serif; box-sizing: border-box; width: 100%;">
       
       <!-- Top Header Block -->
@@ -631,7 +746,7 @@ export async function generateOffscreenPdfBlob(params: {
         <div style="width: 140px; text-align: center;">
           <div style="background: #ffffff; border: 2px solid #e2e8f0; border-radius: 12px; padding: 10px; margin: 0 auto;">
             <div id="pdf-qr-wrapper" style="width: 110px; height: 110px; margin: 0 auto; background: #ffffff;">
-              ${qrDataUrl ? `<img src="${qrDataUrl}" style="width: 110px; height: 110px; border-radius: 6px; display: block; margin: 0;" alt="Scan to Pay" />` : '<div style="width: 110px; height: 110px; line-height: 110px; font-size: 11px; color: #94a3b8; text-align: center;">Scan to Pay</div>'}
+              ${params.qrDataUrl ? `<img src="${params.qrDataUrl}" style="width: 110px; height: 110px; border-radius: 6px; display: block; margin: 0;" alt="Scan to Pay" />` : '<div style="width: 110px; height: 110px; line-height: 110px; font-size: 11px; color: #94a3b8; text-align: center;">Scan to Pay</div>'}
             </div>
             <div style="font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-top: 6px; text-align: center;">
               Scan to Pay ₹${grandTotal.toLocaleString('en-IN')}
@@ -646,6 +761,133 @@ export async function generateOffscreenPdfBlob(params: {
       </div>
     </div>
   `;
+}
+
+export function printDocumentHtml(htmlContent: string, documentTitle: string = 'Work_Summary') {
+  const printIframe = document.createElement('iframe');
+  printIframe.style.position = 'fixed';
+  printIframe.style.right = '0';
+  printIframe.style.bottom = '0';
+  printIframe.style.width = '0';
+  printIframe.style.height = '0';
+  printIframe.style.border = '0';
+  document.body.appendChild(printIframe);
+
+  const doc = printIframe.contentWindow?.document;
+  if (!doc) {
+    window.print();
+    return;
+  }
+
+  doc.open();
+  doc.write(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>${documentTitle}</title>
+        <meta charset="utf-8" />
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+        <style>
+          @page {
+            size: A4 portrait;
+            margin: 10mm 12mm;
+          }
+          * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          body {
+            margin: 0;
+            padding: 0;
+            background: #ffffff;
+            font-family: Inter, system-ui, -apple-system, sans-serif;
+            color: #0f172a;
+          }
+          @media print {
+            body {
+              width: 100%;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div style="padding: 16px 20px;">
+          ${htmlContent}
+        </div>
+      </body>
+    </html>
+  `);
+  doc.close();
+
+  setTimeout(() => {
+    try {
+      printIframe.contentWindow?.focus();
+      printIframe.contentWindow?.print();
+    } catch (err) {
+      console.warn("Print iframe trigger error:", err);
+    } finally {
+      setTimeout(() => {
+        if (document.body.contains(printIframe)) {
+          document.body.removeChild(printIframe);
+        }
+      }, 2000);
+    }
+  }, 400);
+}
+
+export async function generateOffscreenPdfBlob(params: {
+  invoice: Invoice;
+  client?: Client;
+  profile: UserProfile | null;
+  dateFrom?: string;
+  dateTo?: string;
+  qrCodeUrl?: string;
+  customUpiId?: string;
+  hideFinance?: boolean;
+}): Promise<Blob> {
+  const container = document.createElement('div');
+  container.style.position = 'fixed';
+  container.style.left = '0px';
+  container.style.top = '0px';
+  container.style.zIndex = '999999';
+  container.style.width = '794px';
+  container.style.backgroundColor = '#ffffff';
+  container.style.color = '#0f172a';
+  container.style.boxSizing = 'border-box';
+  container.style.padding = '32px 36px';
+  container.style.fontFamily = 'Inter, system-ui, -apple-system, sans-serif';
+  container.style.opacity = '1';
+  container.style.visibility = 'visible';
+  container.style.pointerEvents = 'none';
+
+  const senderName = params.profile?.name || 'Tilak Popat';
+  const upiId = (params.customUpiId && params.customUpiId.trim())
+    || (params.profile?.upiId && params.profile.upiId !== 'Not specified' ? params.profile.upiId.trim() : '')
+    || 'tilakpopat2007-1@okaxis';
+
+  const grandTotal = Math.max(0, params.invoice.totalAmount);
+  const invShortId = params.invoice.id ? params.invoice.id.substring(0, 8) : 'INV';
+  const transactionNote = `Payment for Invoice #${invShortId}`;
+
+  let qrDataUrl = '';
+  if (upiId && !params.hideFinance) {
+    try {
+      const res = await generateUpiQrCodeDataUrl(upiId, senderName, grandTotal, transactionNote);
+      if (res && res.pngDataUrl) {
+        qrDataUrl = res.pngDataUrl;
+      }
+    } catch (e) {
+      console.warn("QR DataURL generation for offscreen PDF failed:", e);
+    }
+  }
+
+  container.innerHTML = renderDocumentHtml({
+    ...params,
+    qrDataUrl
+  });
 
   document.body.appendChild(container);
 
@@ -781,6 +1023,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
   const [editingInvoiceId, setEditingInvoiceId] = useState<string | null>(null);
   const [downloadingPdfId, setDownloadingPdfId] = useState<string | null>(null);
   const [isSendingGmail, setIsSendingGmail] = useState(false);
+  const [previewMode, setPreviewMode] = useState<'standard' | 'work-only'>('standard');
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
   const [emailModalData, setEmailModalData] = useState<{
     isOpen: boolean;
     clientName: string;
@@ -1029,6 +1273,95 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
       alert("Failed to generate PDF download. Please try again.");
     } finally {
       setDownloadingPdfId(null);
+    }
+  };
+
+  const handlePrintWorkSummary = (inv?: Invoice, clientObj?: Client) => {
+    const targetClient = clientObj || selectedClient;
+    const targetInvoice: Invoice = inv || {
+      id: generateUUID(),
+      date: Date.now(),
+      clientId: targetClient?.id || '',
+      clientName: targetClient?.name || 'Client',
+      reels: [...reels],
+      totalAmount: grandTotal,
+      status: 'Pending'
+    };
+
+    if (!targetClient && !inv) {
+      alert("Please select a client first to print the work summary.");
+      return;
+    }
+
+    if (!inv && reels.length === 0) {
+      alert("No work items found to print.");
+      return;
+    }
+
+    const htmlContent = renderDocumentHtml({
+      invoice: targetInvoice,
+      client: targetClient,
+      profile,
+      dateFrom,
+      dateTo,
+      hideFinance: true
+    });
+
+    const clientNameStr = (targetClient?.name || targetInvoice.clientName || 'Client').replace(/\s+/g, '_');
+    const printDocTitle = `Work_Summary_${clientNameStr}_${new Date().toLocaleDateString('en-IN').replace(/\//g, '-')}`;
+
+    printDocumentHtml(htmlContent, printDocTitle);
+  };
+
+  const handleDownloadWorkSummaryPdf = async (inv?: Invoice, clientObj?: Client) => {
+    const targetClient = clientObj || selectedClient;
+    const targetInvoice: Invoice = inv || {
+      id: generateUUID(),
+      date: Date.now(),
+      clientId: targetClient?.id || '',
+      clientName: targetClient?.name || 'Client',
+      reels: [...reels],
+      totalAmount: grandTotal,
+      status: 'Pending'
+    };
+
+    if (!targetClient && !inv) {
+      alert("Please select a client first.");
+      return;
+    }
+
+    if (!inv && reels.length === 0) {
+      alert("No work items found to download.");
+      return;
+    }
+
+    setIsGeneratingSummary(true);
+    try {
+      const pdfBlob = await generateOffscreenPdfBlob({
+        invoice: targetInvoice,
+        client: targetClient,
+        profile,
+        dateFrom,
+        dateTo,
+        hideFinance: true
+      });
+
+      const clientNameStr = (targetClient?.name || targetInvoice.clientName || 'Client').replace(/\s+/g, '_');
+      const filename = `Work_Summary_${clientNameStr}_${new Date().toLocaleDateString('en-IN').replace(/\//g, '-')}.pdf`;
+
+      const downloadUrl = URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(downloadUrl);
+    } catch (e: any) {
+      console.error("Error generating work summary PDF:", e);
+      alert("Failed to generate Work Summary PDF: " + (e?.message || String(e)));
+    } finally {
+      setIsGeneratingSummary(false);
     }
   };
 
@@ -1519,35 +1852,108 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
               </div>
             </div>
 
-            <button
-              onClick={handleDownload}
-              disabled={isGenerating || !selectedClient}
-              className="w-full mt-6 flex justify-center items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-4 py-2 rounded text-sm font-medium transition-colors shadow-sm"
-            >
-              {isGenerating ? (
-                <>Generating PDF...</>
-              ) : (
-                <>
-                  <Download size={18} />
-                  Download PDF Invoice
-                </>
-              )}
-            </button>
+            <div className="space-y-2 mt-6">
+              <button
+                onClick={handleDownload}
+                disabled={isGenerating || !selectedClient}
+                className="w-full flex justify-center items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm active:scale-[0.99] cursor-pointer"
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    Generating Full Invoice...
+                  </>
+                ) : (
+                  <>
+                    <Download size={16} />
+                    Download PDF Invoice (With Prices)
+                  </>
+                )}
+              </button>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => handlePrintWorkSummary()}
+                  disabled={!selectedClient || reels.length === 0}
+                  className="flex justify-center items-center gap-1.5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 text-white px-3 py-2 rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer"
+                  title="Print clean work done list without financial digits (prices/rates/totals)"
+                >
+                  <Printer size={14} className="text-emerald-400" />
+                  Print Work List (No Digits)
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleDownloadWorkSummaryPdf()}
+                  disabled={isGeneratingSummary || !selectedClient || reels.length === 0}
+                  className="flex justify-center items-center gap-1.5 bg-slate-100 hover:bg-slate-200 disabled:bg-slate-100 text-slate-700 disabled:text-slate-400 px-3 py-2 rounded-xl text-xs font-semibold transition-all border border-slate-200 cursor-pointer"
+                  title="Download PDF statement of work done without financial digits"
+                >
+                  {isGeneratingSummary ? (
+                    <Loader2 size={14} className="animate-spin text-indigo-600" />
+                  ) : (
+                    <FileText size={14} className="text-slate-600" />
+                  )}
+                  Work Summary PDF
+                </button>
+              </div>
+            </div>
           </div>
 
 
         </div>
 
         {/* Right Column - A4 Preview Wrapper */}
-        <div className="xl:col-span-7 overflow-x-auto bg-slate-200 p-8 rounded-xl flex justify-center shadow-inner min-h-[600px] border border-slate-300 relative">
-          <div className="absolute top-4 left-4 bg-white/80 backdrop-blur px-3 py-1.5 rounded text-xs font-bold text-slate-500 uppercase tracking-wider shadow-sm z-10">
-            Live Preview
+        <div className="xl:col-span-7 bg-slate-200 p-6 sm:p-8 rounded-xl flex flex-col items-center shadow-inner min-h-[600px] border border-slate-300 relative">
+          
+          {/* Preview Mode Switcher & Quick Print Header */}
+          <div className="w-full max-w-[210mm] flex flex-wrap items-center justify-between gap-3 mb-6 bg-white/95 backdrop-blur-md p-3 rounded-xl border border-slate-300 shadow-sm z-10">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">Preview Mode:</span>
+              <div className="inline-flex bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setPreviewMode('standard')}
+                  className={`px-3 py-1 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+                    previewMode === 'standard'
+                      ? 'bg-white text-indigo-700 shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <Receipt size={13} /> Full Invoice (With Prices)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPreviewMode('work-only')}
+                  className={`px-3 py-1 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+                    previewMode === 'work-only'
+                      ? 'bg-emerald-600 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <ListChecks size={13} /> Work Done Only (No Digits)
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => handlePrintWorkSummary()}
+                disabled={!selectedClient || reels.length === 0}
+                className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                title="Print Work Done Statement without financial digits"
+              >
+                <Printer size={13} className="text-emerald-400" /> Print Work Done
+              </button>
+            </div>
           </div>
 
           {/* This wrapper scales the visual preview so it fits on screen without changing actual dimensions for PDF export */}
           <div className="transform scale-[0.4] min-[400px]:scale-[0.45] sm:scale-[0.6] md:scale-[0.8] xl:scale-[0.9] origin-top transition-transform duration-300">
 
-            {/* The actual A4 element captured by html2pdf */}
+            {/* The actual A4 element captured for live preview */}
             <div
               id="invoice-preview-capture"
               className="bg-white shadow-2xl relative flex flex-col justify-between"
@@ -1583,23 +1989,28 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                     )}
                   </div>
 
-                  {/* Right Invoice Title */}
+                  {/* Right Invoice / Work Summary Title */}
                   <div className="w-1/3 text-right flex flex-col items-end">
-                    <h2 className="text-4xl font-black text-slate-900 tracking-tight uppercase">
-                      INVOICE
+                    <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight uppercase">
+                      {previewMode === 'work-only' ? 'WORK SUMMARY' : 'INVOICE'}
                     </h2>
+                    {previewMode === 'work-only' ? (
+                      <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-0.5">
+                        Work Done Statement
+                      </p>
+                    ) : null}
                     <p className="text-sm font-mono font-bold text-slate-600 mt-1">
-                      #INV-{String(invoices.length + 1).padStart(4, '0')}
+                      #{previewMode === 'work-only' ? 'WRK' : 'INV'}-{String(invoices.length + 1).padStart(4, '0')}
                     </p>
                   </div>
                 </div>
 
-                {/* Billed To & Invoice Metadata Cards */}
+                {/* Billed To / Prepared For & Summary Overview Cards */}
                 <div className="grid grid-cols-2 gap-6 mb-8">
-                  {/* Billed To Card */}
+                  {/* Client Card */}
                   <div className="bg-slate-50/80 border border-slate-200/80 rounded-xl p-5 shadow-2xs">
                     <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400 block mb-2">
-                      Billed To
+                      {previewMode === 'work-only' ? 'Prepared For' : 'Billed To'}
                     </span>
                     {selectedClient ? (
                       <div>
@@ -1613,16 +2024,16 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                       </div>
                     ) : (
                       <div className="text-sm text-slate-400 italic">
-                        Select a client to preview invoice details
+                        Select a client to preview {previewMode === 'work-only' ? 'work details' : 'invoice details'}
                       </div>
                     )}
                   </div>
 
-                  {/* Invoice Summary Card */}
+                  {/* Overview Card */}
                   <div className="bg-slate-50/80 border border-slate-200/80 rounded-xl p-5 shadow-2xs flex flex-col justify-between">
                     <div>
                       <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400 block mb-2">
-                        Invoice Overview
+                        {previewMode === 'work-only' ? 'Period Overview' : 'Invoice Overview'}
                       </span>
                       <div className="space-y-1.5 text-sm">
                         <div className="flex justify-between items-center">
@@ -1633,20 +2044,29 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                         </div>
                         {dateFrom && dateTo && (
                           <div className="flex justify-between items-center">
-                            <span className="text-slate-500 font-medium">Billing Period:</span>
+                            <span className="text-slate-500 font-medium">{previewMode === 'work-only' ? 'Work Period:' : 'Billing Period:'}</span>
                             <span className="font-semibold text-slate-800 text-xs">
                               {new Date(dateFrom).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })} – {new Date(dateTo).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                             </span>
                           </div>
                         )}
-                        <div className="flex justify-between items-center">
-                          <span className="text-slate-500 font-medium">Last Payment Date:</span>
-                          <span className="font-semibold text-slate-800">
-                            {selectedClient?.lastPaymentDate
-                              ? new Date(selectedClient.lastPaymentDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
-                              : 'N/A (First Cycle)'}
-                          </span>
-                        </div>
+                        {previewMode === 'work-only' ? (
+                          <div className="flex justify-between items-center">
+                            <span className="text-slate-500 font-medium">Total Deliverables:</span>
+                            <span className="font-bold text-indigo-600">
+                              {reels.reduce((s, r) => s + (r.quantity || 1), 0)} Item(s)
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="flex justify-between items-center">
+                            <span className="text-slate-500 font-medium">Last Payment Date:</span>
+                            <span className="font-semibold text-slate-800">
+                              {selectedClient?.lastPaymentDate
+                                ? new Date(selectedClient.lastPaymentDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+                                : 'N/A (First Cycle)'}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -1658,10 +2078,18 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                     <thead>
                       <tr className="bg-slate-900 text-white rounded-lg">
                         <th className="py-3 px-3 font-bold text-xs uppercase tracking-wider text-slate-200 rounded-l-lg w-12 text-center">#</th>
-                        <th className="py-3 px-3 font-bold text-xs uppercase tracking-wider text-slate-200">Item Description</th>
-                        <th className="py-3 px-3 font-bold text-xs uppercase tracking-wider text-slate-200 text-center w-20">Qty</th>
-                        <th className="py-3 px-3 font-bold text-xs uppercase tracking-wider text-slate-200 text-right w-32">Rate</th>
-                        <th className="py-3 px-3 font-bold text-xs uppercase tracking-wider text-slate-200 text-right rounded-r-lg w-36">Total Amount</th>
+                        <th className="py-3 px-3 font-bold text-xs uppercase tracking-wider text-slate-200">
+                          {previewMode === 'work-only' ? 'Work Done / Deliverable Description' : 'Item Description'}
+                        </th>
+                        <th className={`py-3 px-3 font-bold text-xs uppercase tracking-wider text-slate-200 text-center ${previewMode === 'work-only' ? 'w-24 rounded-r-lg' : 'w-20'}`}>
+                          Qty
+                        </th>
+                        {previewMode !== 'work-only' && (
+                          <>
+                            <th className="py-3 px-3 font-bold text-xs uppercase tracking-wider text-slate-200 text-right w-32">Rate</th>
+                            <th className="py-3 px-3 font-bold text-xs uppercase tracking-wider text-slate-200 text-right rounded-r-lg w-36">Total Amount</th>
+                          </>
+                        )}
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200">
@@ -1685,142 +2113,177 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                               </div>
                             )}
                           </td>
-                          <td className="py-4 px-3 text-base text-center font-medium text-slate-700">
+                          <td className="py-4 px-3 text-base text-center font-bold text-slate-700">
                             {reel.quantity}
                           </td>
-                          <td className="py-4 px-3 text-base text-right font-medium text-slate-700">
-                            ₹{reel.rate.toLocaleString('en-IN')}
-                          </td>
-                          <td className="py-4 px-3 text-base text-right font-bold text-slate-900">
-                            ₹{(reel.quantity * reel.rate).toLocaleString('en-IN')}
-                          </td>
+                          {previewMode !== 'work-only' && (
+                            <>
+                              <td className="py-4 px-3 text-base text-right font-medium text-slate-700">
+                                ₹{reel.rate.toLocaleString('en-IN')}
+                              </td>
+                              <td className="py-4 px-3 text-base text-right font-bold text-slate-900">
+                                ₹{(reel.quantity * reel.rate).toLocaleString('en-IN')}
+                              </td>
+                            </>
+                          )}
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
 
-                {/* Totals Section */}
-                <div className="flex justify-end mb-10 avoid-break" style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
-                  <div className="w-72 sm:w-80 space-y-2">
-                    <div className="flex justify-between items-center py-1.5 px-3 text-sm text-slate-600">
-                      <span className="font-semibold uppercase tracking-wider text-xs text-slate-500">Subtotal</span>
-                      <span className="font-bold text-slate-900">₹{total.toLocaleString('en-IN')}</span>
+                {/* Totals Section (For Full Invoice) OR Deliverables Summary (For Work Summary) */}
+                {previewMode === 'work-only' ? (
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-8 flex justify-between items-center avoid-break">
+                    <div>
+                      <span className="text-xs font-bold uppercase tracking-wider text-indigo-700 block">Deliverables Summary</span>
+                      <p className="text-xs text-slate-600 mt-0.5">
+                        Completed for <strong className="text-slate-800">{selectedClient?.name || 'Client'}</strong> ({dateFrom && dateTo ? `${new Date(dateFrom).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })} – ${new Date(dateTo).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}` : 'Current Cycle'})
+                      </p>
                     </div>
+                    <span className="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-bold uppercase tracking-wider">
+                      ✓ Completed ({reels.reduce((s, r) => s + (r.quantity || 1), 0)} items)
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex justify-end mb-10 avoid-break" style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
+                    <div className="w-72 sm:w-80 space-y-2">
+                      <div className="flex justify-between items-center py-1.5 px-3 text-sm text-slate-600">
+                        <span className="font-semibold uppercase tracking-wider text-xs text-slate-500">Subtotal</span>
+                        <span className="font-bold text-slate-900">₹{total.toLocaleString('en-IN')}</span>
+                      </div>
 
-                    {extraCost > 0 && (
-                      <div className="flex justify-between items-center py-1.5 px-3 text-sm text-slate-700 font-medium bg-slate-50 rounded-lg border border-slate-200 mb-1">
-                        <span className="font-semibold uppercase tracking-wider text-xs text-slate-600">
-                          Extra Cost {extraCostDescription ? `(${extraCostDescription})` : ''}
-                        </span>
-                        <span className="font-bold">+₹{extraCost.toLocaleString('en-IN')}</span>
-                      </div>
-                    )}
-                    {discount > 0 && (
-                      <div className="flex justify-between items-center py-1.5 px-3 text-sm text-rose-600 font-medium bg-rose-50/60 rounded-lg border border-rose-100">
-                        <span className="font-semibold uppercase tracking-wider text-xs text-rose-600">
-                          Deduction {discountDescription ? `(${discountDescription})` : ''}
-                        </span>
-                        <span className="font-bold">-₹{discount.toLocaleString('en-IN')}</span>
-                      </div>
-                    )}
+                      {extraCost > 0 && (
+                        <div className="flex justify-between items-center py-1.5 px-3 text-sm text-slate-700 font-medium bg-slate-50 rounded-lg border border-slate-200 mb-1">
+                          <span className="font-semibold uppercase tracking-wider text-xs text-slate-600">
+                            Extra Cost {extraCostDescription ? `(${extraCostDescription})` : ''}
+                          </span>
+                          <span className="font-bold">+₹{extraCost.toLocaleString('en-IN')}</span>
+                        </div>
+                      )}
+                      {discount > 0 && (
+                        <div className="flex justify-between items-center py-1.5 px-3 text-sm text-rose-600 font-medium bg-rose-50/60 rounded-lg border border-rose-100">
+                          <span className="font-semibold uppercase tracking-wider text-xs text-rose-600">
+                            Deduction {discountDescription ? `(${discountDescription})` : ''}
+                          </span>
+                          <span className="font-bold">-₹{discount.toLocaleString('en-IN')}</span>
+                        </div>
+                      )}
 
-                    <div className="bg-slate-900 text-white p-4 rounded-xl shadow-md flex justify-between items-center mt-2">
-                      <div>
-                        <span className="text-xs font-bold uppercase tracking-widest text-indigo-300 block">Total Due</span>
-                        <span className="text-[10px] text-slate-400 font-medium">Payable via UPI / Bank</span>
+                      <div className="bg-slate-900 text-white p-4 rounded-xl shadow-md flex justify-between items-center mt-2">
+                        <div>
+                          <span className="text-xs font-bold uppercase tracking-widest text-indigo-300 block">Total Due</span>
+                          <span className="text-[10px] text-slate-400 font-medium">Payable via UPI / Bank</span>
+                        </div>
+                        <span className="text-2xl font-black text-white tracking-tight">₹{grandTotal.toLocaleString('en-IN')}</span>
                       </div>
-                      <span className="text-2xl font-black text-white tracking-tight">₹{grandTotal.toLocaleString('en-IN')}</span>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
 
-              {/* Payment Details & QR Code Footer Section */}
+              {/* Payment Details & QR Code (Full Invoice) OR Verification Statement (Work Summary) */}
               <div className="border-t-2 border-slate-900 pt-6 mt-6 avoid-break" style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
-                <div className="grid grid-cols-12 gap-6 items-start">
-                  {/* Left Column: Bank & UPI Info */}
-                  <div className="col-span-8 space-y-3">
-                    <span className="text-xs font-black uppercase tracking-widest text-slate-900 block">
-                      Payment Information
-                    </span>
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-slate-800 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                      <div>
-                        <span className="text-[11px] font-bold text-slate-400 uppercase block">Payment Method</span>
-                        <span className="font-semibold text-slate-900">UPI Transfer</span>
-                      </div>
-                      <div>
-                        <span className="text-[11px] font-bold text-slate-400 uppercase block mb-0.5">UPI ID</span>
-                        <input
-                          type="text"
-                          value={customUpiId}
-                          onChange={(e) => setCustomUpiId(e.target.value)}
-                          placeholder="e.g. username@bank"
-                          className="font-mono font-bold text-indigo-600 bg-indigo-50/80 border border-indigo-200 px-2 py-0.5 rounded text-xs w-full focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
-                          title="Click to change UPI ID for instant QR code generation"
-                        />
-                      </div>
-                      <div>
-                        <span className="text-[11px] font-bold text-slate-400 uppercase block">Payee Name</span>
-                        <span className="font-semibold text-slate-900">{profile?.name || user?.displayName || 'Video Editor'}</span>
-                      </div>
-                      <div>
-                        <span className="text-[11px] font-bold text-slate-400 uppercase block">Payment Cycle</span>
-                        <span className="font-semibold text-slate-800">
-                          {selectedClient?.lastPaymentDate
-                            ? new Date(selectedClient.lastPaymentDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
-                            : 'N/A (First Cycle)'}
-                        </span>
-                      </div>
-                      {profile?.accountNumber && (
-                        <>
-                          <div>
-                            <span className="text-[11px] font-bold text-slate-400 uppercase block">Bank Account No</span>
-                            <span className="font-mono font-semibold text-slate-900">{profile.accountNumber}</span>
-                          </div>
-                          <div>
-                            <span className="text-[11px] font-bold text-slate-400 uppercase block">IFSC / Bank</span>
-                            <span className="font-semibold text-slate-900">{profile.ifscCode || ''} {profile.bankName ? `(${profile.bankName})` : ''}</span>
-                          </div>
-                        </>
-                      )}
+                {previewMode === 'work-only' ? (
+                  <div className="flex justify-between items-start gap-6">
+                    <div className="w-2/3 space-y-1">
+                      <span className="text-xs font-black uppercase tracking-widest text-slate-900 block">
+                        Verification & Confirmation
+                      </span>
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        This statement confirms completion and delivery of the listed creative deliverables for the specified date period.
+                      </p>
                     </div>
-                    <p className="text-xs text-slate-500 italic mt-2">
-                      Thank you for your business! Please process payment within 7 days of receiving this invoice.
-                    </p>
+                    <div className="w-1/3 text-right">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Prepared By</span>
+                      <span className="font-bold text-slate-900 text-sm">{profile?.name || user?.displayName || 'Video Editor'}</span>
+                    </div>
                   </div>
-
-                  {/* Right Column: QR Code */}
-                  <div className="col-span-4 flex flex-col items-center justify-center">
-                    <div className="bg-white p-3 border-2 border-slate-200 rounded-2xl shadow-sm flex flex-col items-center min-w-[150px]">
-                      {activeUpiUri ? (
-                        <div className="p-1 bg-white rounded-lg flex items-center justify-center">
-                          <QRCodeSVG
-                            value={activeUpiUri}
-                            size={128}
-                            level="M"
-                            includeMargin={true}
-                            bgColor="#ffffff"
-                            fgColor="#000000"
-                            className="w-32 h-32 block"
+                ) : (
+                  <div className="grid grid-cols-12 gap-6 items-start">
+                    {/* Left Column: Bank & UPI Info */}
+                    <div className="col-span-8 space-y-3">
+                      <span className="text-xs font-black uppercase tracking-widest text-slate-900 block">
+                        Payment Information
+                      </span>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-slate-800 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <div>
+                          <span className="text-[11px] font-bold text-slate-400 uppercase block">Payment Method</span>
+                          <span className="font-semibold text-slate-900">UPI Transfer</span>
+                        </div>
+                        <div>
+                          <span className="text-[11px] font-bold text-slate-400 uppercase block mb-0.5">UPI ID</span>
+                          <input
+                            type="text"
+                            value={customUpiId}
+                            onChange={(e) => setCustomUpiId(e.target.value)}
+                            placeholder="e.g. username@bank"
+                            className="font-mono font-bold text-indigo-600 bg-indigo-50/80 border border-indigo-200 px-2 py-0.5 rounded text-xs w-full focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                            title="Click to change UPI ID for instant QR code generation"
                           />
                         </div>
-                      ) : (
-                        <div className="w-32 h-32 flex flex-col items-center justify-center text-slate-400 text-xs italic bg-slate-50 rounded-lg">
-                          <AlertCircle className="w-5 h-5 mb-1 text-amber-500" />
-                          <span>Enter UPI ID</span>
+                        <div>
+                          <span className="text-[11px] font-bold text-slate-400 uppercase block">Payee Name</span>
+                          <span className="font-semibold text-slate-900">{profile?.name || user?.displayName || 'Video Editor'}</span>
                         </div>
-                      )}
-                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 mt-2 text-center">
-                        Scan with GPay / PhonePe / Paytm
-                      </span>
+                        <div>
+                          <span className="text-[11px] font-bold text-slate-400 uppercase block">Payment Cycle</span>
+                          <span className="font-semibold text-slate-800">
+                            {selectedClient?.lastPaymentDate
+                              ? new Date(selectedClient.lastPaymentDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+                              : 'N/A (First Cycle)'}
+                          </span>
+                        </div>
+                        {profile?.accountNumber && (
+                          <>
+                            <div>
+                              <span className="text-[11px] font-bold text-slate-400 uppercase block">Bank Account No</span>
+                              <span className="font-mono font-semibold text-slate-900">{profile.accountNumber}</span>
+                            </div>
+                            <div>
+                              <span className="text-[11px] font-bold text-slate-400 uppercase block">IFSC / Bank</span>
+                              <span className="font-semibold text-slate-900">{profile.ifscCode || ''} {profile.bankName ? `(${profile.bankName})` : ''}</span>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-500 italic mt-2">
+                        Thank you for your business! Please process payment within 7 days of receiving this invoice.
+                      </p>
+                    </div>
+
+                    {/* Right Column: QR Code */}
+                    <div className="col-span-4 flex flex-col items-center justify-center">
+                      <div className="bg-white p-3 border-2 border-slate-200 rounded-2xl shadow-sm flex flex-col items-center min-w-[150px]">
+                        {activeUpiUri ? (
+                          <div className="p-1 bg-white rounded-lg flex items-center justify-center">
+                            <QRCodeSVG
+                              value={activeUpiUri}
+                              size={128}
+                              level="M"
+                              includeMargin={true}
+                              bgColor="#ffffff"
+                              fgColor="#000000"
+                              className="w-32 h-32 block"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-32 h-32 flex flex-col items-center justify-center text-slate-400 text-xs italic bg-slate-50 rounded-lg">
+                            <AlertCircle className="w-5 h-5 mb-1 text-amber-500" />
+                            <span>Enter UPI ID</span>
+                          </div>
+                        )}
+                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 mt-2 text-center">
+                          Scan with GPay / PhonePe / Paytm
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
                 {/* Bottom Signature & Verification Note */}
                 <div className="mt-6 pt-3 border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-400 font-medium">
-                  <span>This is a computer-generated invoice statement.</span>
+                  <span>{previewMode === 'work-only' ? 'This is a computer-generated work delivery summary statement.' : 'This is a computer-generated invoice statement.'}</span>
                   <span>Generated on {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                 </div>
               </div>
@@ -1969,6 +2432,15 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                                 <Download size={13} className="text-slate-600" />
                               )}
                               PDF
+                            </button>
+
+                            <button
+                              onClick={() => handlePrintWorkSummary(inv, clientObj)}
+                              className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer"
+                              title="Print Work Summary statement without financial digits"
+                            >
+                              <Printer size={13} className="text-slate-600" />
+                              Work List
                             </button>
 
                             <button
