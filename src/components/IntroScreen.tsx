@@ -62,39 +62,39 @@ export default function IntroScreen({ onComplete }: IntroScreenProps) {
     <div
       ref={containerRef}
       onMouseMove={handleMouseMove}
-      className="fixed inset-0 bg-slate-50 flex flex-col justify-between p-6 md:p-12 z-[100] text-slate-800 select-none overflow-hidden font-sans"
+      className="fixed inset-0 bg-slate-50 dark:bg-slate-950 flex flex-col justify-between p-6 md:p-12 z-[100] text-slate-800 dark:text-slate-100 select-none overflow-hidden font-sans transition-colors duration-150"
     >
       {/* Decorative background grids and blobs */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f0_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f0_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none opacity-60 z-0"></div>
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-indigo-200/25 rounded-full blur-[120px] pointer-events-none z-0"></div>
-      <div className="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-purple-200/25 rounded-full blur-[120px] pointer-events-none z-0"></div>
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f0_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f0_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none opacity-60 dark:opacity-25 z-0"></div>
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-indigo-200/25 dark:bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
+      <div className="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-purple-200/25 dark:bg-purple-500/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
 
       {/* Safe zone guides (Video Editor Overlay) */}
-      <div className="absolute inset-8 border border-slate-200/80 pointer-events-none z-10 flex flex-col justify-between p-2">
-        <div className="flex justify-between text-[10px] font-mono text-slate-400">
+      <div className="absolute inset-8 border border-slate-200/80 dark:border-slate-800 pointer-events-none z-10 flex flex-col justify-between p-2">
+        <div className="flex justify-between text-[10px] font-mono text-slate-400 dark:text-slate-500">
           <span>REC [AUTO]</span>
           <span>TC 00:00:0{Math.floor(percent / 20)}:24</span>
         </div>
-        <div className="flex justify-between text-[10px] font-mono text-slate-400">
+        <div className="flex justify-between text-[10px] font-mono text-slate-400 dark:text-slate-500">
           <span>1080p 60fps</span>
           <span>SAFE AREA 90%</span>
         </div>
         {/* Safe zone corner hooks */}
-        <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-slate-300"></div>
-        <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-slate-300"></div>
-        <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-slate-300"></div>
-        <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-slate-300"></div>
+        <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-slate-300 dark:border-slate-700"></div>
+        <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-slate-300 dark:border-slate-700"></div>
+        <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-slate-300 dark:border-slate-700"></div>
+        <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-slate-300 dark:border-slate-700"></div>
       </div>
 
       {/* Header with Skip button */}
       <div className="flex justify-between items-center z-20">
-        <div className="flex items-center gap-2 text-xs font-mono text-indigo-600 tracking-widest uppercase">
+        <div className="flex items-center gap-2 text-xs font-mono text-indigo-600 dark:text-indigo-400 tracking-widest uppercase">
           <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
           Rendering Engine v3.5
         </div>
         <button
           onClick={skipIntro}
-          className="px-4 py-1.5 bg-white hover:bg-indigo-50/50 border border-slate-200 hover:border-indigo-300 text-slate-600 hover:text-indigo-600 rounded-xl text-xs font-semibold tracking-wider uppercase transition-all duration-200 shadow-xs"
+          className="px-4 py-1.5 bg-white dark:bg-slate-800 hover:bg-indigo-50/50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 hover:border-indigo-300 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-xl text-xs font-semibold tracking-wider uppercase transition-all duration-200 shadow-xs cursor-pointer"
         >
           Skip Intro
         </button>
@@ -183,7 +183,7 @@ export default function IntroScreen({ onComplete }: IntroScreenProps) {
                   stiffness: 120,
                   damping: 14
                 }}
-                className="font-display font-extrabold text-5xl md:text-7xl tracking-wider bg-gradient-to-r from-slate-900 via-indigo-950 to-indigo-600 bg-clip-text text-transparent"
+                className="font-display font-extrabold text-5xl md:text-7xl tracking-wider bg-gradient-to-r from-slate-900 via-indigo-950 to-indigo-600 dark:from-white dark:via-indigo-200 dark:to-indigo-400 bg-clip-text text-transparent"
               >
                 {letter}
               </motion.span>
@@ -195,7 +195,7 @@ export default function IntroScreen({ onComplete }: IntroScreenProps) {
             initial={{ opacity: 0, y: 10 }}
             animate={playheadActive ? { opacity: 1, y: 0 } : { opacity: 0 }}
             transition={{ duration: 0.8, delay: 1.1 }}
-            className="text-xs md:text-sm font-semibold uppercase tracking-widest text-slate-400 mt-2 font-display flex items-center gap-1.5"
+            className="text-xs md:text-sm font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500 mt-2 font-display flex items-center gap-1.5"
           >
             Creative Workspace
             <Sparkles className="w-3.5 h-3.5 text-indigo-500 animate-pulse" />
@@ -207,7 +207,7 @@ export default function IntroScreen({ onComplete }: IntroScreenProps) {
       {/* Bottom Timeline & Export Progress Controls */}
       <div className="w-full max-w-4xl mx-auto space-y-6 z-20">
         {/* 1. Interactive Video Editor Timeline Tracks */}
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-4 space-y-3 shadow-xs relative overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 space-y-3 shadow-xs relative overflow-hidden">
           
           {/* Moving Playhead Line */}
           {playheadActive && (
@@ -224,19 +224,19 @@ export default function IntroScreen({ onComplete }: IntroScreenProps) {
 
           {/* Track 1: Video Track */}
           <div className="flex items-center gap-3">
-            <span className="text-[10px] font-mono text-slate-400 w-6 flex-shrink-0 flex items-center gap-1">
-              <Film className="w-3 h-3 text-slate-400" />
+            <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500 w-6 flex-shrink-0 flex items-center gap-1">
+              <Film className="w-3 h-3 text-slate-400 dark:text-slate-500" />
               V1
             </span>
-            <div className="flex-1 bg-slate-50 rounded-md h-8 relative overflow-hidden border border-slate-100 flex items-center p-1 gap-2">
-              <div className="w-1/3 bg-indigo-50 border border-indigo-100 rounded h-full flex items-center px-2 text-[9px] font-mono text-indigo-700 font-medium">
+            <div className="flex-1 bg-slate-50 dark:bg-slate-800/80 rounded-md h-8 relative overflow-hidden border border-slate-100 dark:border-slate-700/60 flex items-center p-1 gap-2">
+              <div className="w-1/3 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/50 rounded h-full flex items-center px-2 text-[9px] font-mono text-indigo-700 dark:text-indigo-300 font-medium">
                 A_Roll_01.mp4
               </div>
               <div className="w-1/4 bg-indigo-600 border border-indigo-750 rounded h-full flex items-center px-2 text-[9px] font-mono text-white font-medium shadow-xs">
                 <Scissors className="w-2.5 h-2.5 mr-1" />
                 Cut_Scene.mp4
               </div>
-              <div className="w-1/3 bg-indigo-50 border border-indigo-100 rounded h-full flex items-center px-2 text-[9px] font-mono text-indigo-700 font-medium">
+              <div className="w-1/3 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/50 rounded h-full flex items-center px-2 text-[9px] font-mono text-indigo-700 dark:text-indigo-300 font-medium">
                 A_Roll_02.mp4
               </div>
             </div>
@@ -244,13 +244,13 @@ export default function IntroScreen({ onComplete }: IntroScreenProps) {
 
           {/* Track 2: Audio Track */}
           <div className="flex items-center gap-3">
-            <span className="text-[10px] font-mono text-slate-400 w-6 flex-shrink-0 flex items-center gap-1">
-              <Sliders className="w-3 h-3 text-slate-400" />
+            <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500 w-6 flex-shrink-0 flex items-center gap-1">
+              <Sliders className="w-3 h-3 text-slate-400 dark:text-slate-500" />
               A1
             </span>
-            <div className="flex-1 bg-slate-50 rounded-md h-8 relative overflow-hidden border border-slate-100 flex items-center p-1 gap-2">
-              <div className="w-full bg-emerald-50 border border-emerald-100 rounded h-full flex items-center px-2 justify-between">
-                <span className="text-[9px] font-mono text-emerald-700 font-medium">Background_Synth.wav</span>
+            <div className="flex-1 bg-slate-50 dark:bg-slate-800/80 rounded-md h-8 relative overflow-hidden border border-slate-100 dark:border-slate-700/60 flex items-center p-1 gap-2">
+              <div className="w-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-100 dark:border-emerald-900/50 rounded h-full flex items-center px-2 justify-between">
+                <span className="text-[9px] font-mono text-emerald-700 dark:text-emerald-300 font-medium">Background_Synth.wav</span>
                 {/* Decorative audio waves */}
                 <div className="flex items-end gap-0.5 h-4 opacity-75">
                   <div className="w-0.5 bg-emerald-500 animate-wave-1 h-3"></div>
@@ -266,19 +266,19 @@ export default function IntroScreen({ onComplete }: IntroScreenProps) {
 
         {/* 2. Export / Loading Progress Bar */}
         <div className="space-y-2">
-          <div className="flex justify-between text-xs font-mono text-slate-500">
+          <div className="flex justify-between text-xs font-mono text-slate-500 dark:text-slate-400">
             <span>Exporting "CrestFlow_Launch_Teaser.mp4"</span>
-            <span className="text-indigo-600 font-bold">{percent}%</span>
+            <span className="text-indigo-600 dark:text-indigo-400 font-bold">{percent}%</span>
           </div>
           {/* Progress bar track */}
-          <div className="w-full bg-slate-200 border border-slate-300 rounded-full h-2 relative overflow-hidden">
+          <div className="w-full bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-full h-2 relative overflow-hidden">
             <motion.div 
               className="bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 h-full rounded-full"
               style={{ width: `${percent}%` }}
               transition={{ ease: 'easeOut' }}
             />
           </div>
-          <div className="flex justify-between text-[10px] font-mono text-slate-400">
+          <div className="flex justify-between text-[10px] font-mono text-slate-400 dark:text-slate-500">
             <span>Encoding: ProRes 422 HQ</span>
             <span>Target: Login Screen</span>
           </div>

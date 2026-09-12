@@ -275,12 +275,12 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
   }
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 text-slate-900 dark:text-slate-100">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Client Directory & Profiles</h2>
-          <p className="text-slate-500 text-sm mt-1">
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Client Directory & Profiles</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
             Click any client profile to view their individual dashboard, work logs, and 30-day payment cycle.
           </p>
         </div>
@@ -289,14 +289,14 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
           <div className="flex items-center gap-2 w-full md:w-auto">
             <button
               onClick={() => setIsImportModalOpen(true)}
-              className="flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-sm flex-1 md:flex-none"
+              className="flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-sm flex-1 md:flex-none cursor-pointer"
             >
               <UploadCloud size={16} />
               Import CSV
             </button>
             <button
               onClick={() => setIsFormOpen(true)}
-              className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-sm flex-1 md:flex-none"
+              className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-sm flex-1 md:flex-none cursor-pointer"
             >
               <Plus size={16} />
               Add New Client
@@ -310,47 +310,47 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
         const pendingRequests = serviceRequests.filter(req => req.status === 'pending');
         if (pendingRequests.length === 0) return null;
         return (
-          <div className="bg-gradient-to-r from-indigo-50/50 to-purple-50/50 border border-indigo-100 rounded-2xl p-5 shadow-sm space-y-4">
-            <div className="flex items-center gap-2.5 text-indigo-900 font-bold text-sm">
-              <Briefcase className="text-indigo-600 animate-pulse" size={20} />
+          <div className="bg-gradient-to-r from-indigo-50/50 to-purple-50/50 dark:from-indigo-950/40 dark:to-purple-950/40 border border-indigo-100 dark:border-indigo-900/40 rounded-2xl p-5 shadow-sm space-y-4">
+            <div className="flex items-center gap-2.5 text-indigo-900 dark:text-indigo-200 font-bold text-sm">
+              <Briefcase className="text-indigo-600 dark:text-indigo-400 animate-pulse" size={20} />
               <span>Incoming Service Inquiries / Leads ({pendingRequests.length})</span>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {pendingRequests.map((req) => (
-                <div key={req.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between gap-3">
+                <div key={req.id} className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs flex flex-col justify-between gap-3">
                   <div className="space-y-2">
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <h4 className="font-bold text-slate-900 text-sm">{req.clientName}</h4>
-                        <p className="text-xs text-slate-500">Contact: {req.contactName}</p>
+                        <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm">{req.clientName}</h4>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Contact: {req.contactName}</p>
                       </div>
                       {req.proposedRate && (
-                        <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded text-[11px] font-bold">
+                        <span className="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-900/60 rounded text-[11px] font-bold">
                           ₹{req.proposedRate}/reel
                         </span>
                       )}
                     </div>
                     
-                    <p className="text-xs leading-relaxed bg-slate-50 p-2.5 rounded-lg border border-slate-100/60 whitespace-pre-line max-h-24 overflow-y-auto text-slate-600">
+                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-900/60 p-2.5 rounded-lg border border-slate-100 dark:border-slate-800">
                       {req.projectDetails}
                     </p>
                     
-                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-400">
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-400 dark:text-slate-500">
                       <span className="flex items-center gap-1"><Phone size={12} /> {req.contactPhone}</span>
                       <span className="flex items-center gap-1"><Mail size={12} /> {req.contactEmail}</span>
                       {req.instagram && (
-                        <a href={req.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-indigo-600 hover:underline">
+                        <a href={req.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 hover:underline">
                           <Instagram size={12} /> Instagram
                         </a>
                       )}
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-700">
                     <button
                       onClick={() => handleDeclineRequest(req)}
-                      className="px-3 py-1.5 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                      className="px-3 py-1.5 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
                     >
                       Decline
                     </button>
@@ -370,19 +370,19 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
 
       {/* Global Payment Reminders Bar across clients (if any client has payment due or delayed) */}
       {!isNotificationDismissed && notificationClients.length > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 shadow-sm space-y-3 relative">
+        <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-2xl p-5 shadow-sm space-y-3 relative">
           <div className="flex items-center justify-between pr-8">
-            <div className="flex items-center gap-2.5 text-amber-900 font-bold text-sm">
-              <AlertTriangle className="text-amber-600 animate-bounce" size={20} />
+            <div className="flex items-center gap-2.5 text-amber-900 dark:text-amber-300 font-bold text-sm">
+              <AlertTriangle className="text-amber-600 dark:text-amber-400 animate-bounce" size={20} />
               <span>Payment Cycle Reminders ({notificationClients.length} Action Required)</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-amber-700 font-medium">30-Day Recurring Cycle Alerts</span>
+              <span className="text-xs text-amber-700 dark:text-amber-400 font-medium">30-Day Recurring Cycle Alerts</span>
             </div>
           </div>
           <button
             onClick={() => setIsNotificationDismissed(true)}
-            className="absolute top-4 right-4 text-amber-700 hover:text-amber-950 hover:bg-amber-200/60 p-1.5 rounded-lg transition-colors cursor-pointer"
+            className="absolute top-4 right-4 text-amber-700 dark:text-amber-400 hover:text-amber-950 dark:hover:text-amber-200 hover:bg-amber-200/60 dark:hover:bg-amber-900/40 p-1.5 rounded-lg transition-colors cursor-pointer"
             title="Dismiss notification"
             aria-label="Close notification"
           >
@@ -393,16 +393,16 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
             {notificationClients.map(({ client, statusInfo, financials }) => (
               <div
                 key={client.id}
-                className="bg-white p-3.5 rounded-xl border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
+                className="bg-white dark:bg-slate-800 p-3.5 rounded-xl border border-amber-200 dark:border-amber-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
               >
                 <div className="w-full sm:w-auto">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-slate-900 text-xs">{client.name}</span>
+                    <span className="font-bold text-slate-900 dark:text-slate-100 text-xs">{client.name}</span>
                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${statusInfo.badgeClass}`}>
                       {statusInfo.label}
                     </span>
                   </div>
-                  <div className="text-[11px] text-slate-500 mt-1">
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
                     Due Date: {new Date(statusInfo.nextDueDate).toLocaleDateString('en-IN')}
                     {financials.totalPendingAmount > 0 && (
                       <span className="font-semibold text-rose-600 ml-2">
@@ -415,7 +415,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                 <div className="flex items-center gap-1.5 shrink-0 w-full sm:w-auto justify-end sm:justify-start">
                   <button
                     onClick={() => setSelectedClientId(client.id)}
-                    className="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded text-xs font-semibold transition-colors"
+                    className="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 rounded text-xs font-semibold transition-colors"
                   >
                     Dashboard
                   </button>
@@ -453,106 +453,107 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
 
       {/* Add / Edit Client Form Modal */}
       {isFormOpen && (
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-md animate-in fade-in slide-in-from-top-4 duration-300">
-          <div className="flex justify-between items-center mb-6 border-b border-slate-100 pb-3">
-            <h3 className="text-lg font-bold text-slate-900">{isEditing ? 'Edit Client Profile' : 'Add New Client Profile'}</h3>
-            <button onClick={cancelEdit} className="text-slate-400 hover:text-slate-600">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-md animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="flex justify-between items-center mb-6 border-b border-slate-100 dark:border-slate-700 pb-3">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">{isEditing ? 'Edit Client Profile' : 'Add New Client Profile'}</h3>
+            <button onClick={cancelEdit} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
               <X size={20} />
             </button>
           </div>
 
           <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-6">
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-slate-700">Client Name *</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Client Name *</label>
               <input
                 required
                 type="text"
                 value={formData.name}
                 onChange={e => setFormData({ ...formData, name: e.target.value })}
-                className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-600"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none transition-colors focus:border-indigo-600 dark:focus:border-indigo-400"
                 placeholder="e.g. Acme Media Studio"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-slate-700">Phone Number *</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Phone Number *</label>
               <input
                 required
                 type="tel"
                 value={formData.phone}
                 onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-600"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none transition-colors focus:border-indigo-600 dark:focus:border-indigo-400"
                 placeholder="+91 98765 43210"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-slate-700">Email Address (Optional)</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Email Address (Optional)</label>
               <input
                 type="email"
                 value={formData.email}
                 onChange={e => setFormData({ ...formData, email: e.target.value })}
-                className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-600"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none transition-colors focus:border-indigo-600 dark:focus:border-indigo-400"
                 placeholder="client@example.com"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-slate-700">Logo URL (Optional)</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Logo URL (Optional)</label>
               <input
                 type="url"
                 value={formData.logoUrl}
                 onChange={e => setFormData({ ...formData, logoUrl: e.target.value })}
-                className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-600"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none transition-colors focus:border-indigo-600 dark:focus:border-indigo-400"
                 placeholder="https://example.com/logo.png"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-slate-700">Instagram Handle / URL (Optional)</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Instagram Handle / URL (Optional)</label>
               <input
                 type="text"
                 value={formData.instagram}
                 onChange={e => setFormData({ ...formData, instagram: e.target.value })}
-                className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-600"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none transition-colors focus:border-indigo-600 dark:focus:border-indigo-400"
                 placeholder="@username or link"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-slate-700">Client From (Optional)</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Client Acquisition Source</label>
               <input
-                type="month"
+                type="text"
                 value={formData.clientFrom}
                 onChange={e => setFormData({ ...formData, clientFrom: e.target.value })}
-                className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-600"
-              />
-            </div>
-
-            <div className="space-y-1.5 md:col-span-2">
-              <label className="block text-xs font-semibold text-slate-700">Work Experience / Notes (Optional)</label>
-              <textarea
-                value={formData.workExperience}
-                onChange={e => setFormData({ ...formData, workExperience: e.target.value })}
-                className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-600 resize-none h-20"
-                placeholder="Details about past projects, years of experience, etc."
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none transition-colors focus:border-indigo-600 dark:focus:border-indigo-400"
+                placeholder="e.g. LinkedIn, Referral, Cold Outreach"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-slate-700">Previous Payment Date *</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Previous Work Experience (Optional)</label>
+              <input
+                type="text"
+                value={formData.workExperience}
+                onChange={e => setFormData({ ...formData, workExperience: e.target.value })}
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none transition-colors focus:border-indigo-600 dark:focus:border-indigo-400"
+                placeholder="e.g. 6 months, 20+ videos completed"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Last Payment Received Date *</label>
               <input
                 required
                 type="date"
                 value={formData.lastPaymentDate}
                 onChange={e => setFormData({ ...formData, lastPaymentDate: e.target.value })}
-                className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-600"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 outline-none transition-colors focus:border-indigo-600 dark:focus:border-indigo-400"
               />
-              <p className="text-[10px] text-slate-400">Next payment due date will be 30 days after this date.</p>
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-slate-700">Default Reel Rate (₹) *</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Default Rate per Reel/Video (₹) *</label>
               <input
                 required
                 type="number"
@@ -560,45 +561,45 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                 step="1"
                 value={formData.defaultRate}
                 onChange={e => setFormData({ ...formData, defaultRate: e.target.value })}
-                className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-600"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none transition-colors focus:border-indigo-600 dark:focus:border-indigo-400"
                 placeholder="e.g. 1500"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-slate-700">On Site Shoot Rate (₹)</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">On Site Shoot Rate (₹)</label>
               <input
                 type="number"
                 min="0"
                 step="1"
                 value={formData.onSiteShootRate}
                 onChange={e => setFormData({ ...formData, onSiteShootRate: e.target.value })}
-                className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-600"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none transition-colors focus:border-indigo-600 dark:focus:border-indigo-400"
                 placeholder="e.g. 5000"
               />
             </div>
 
             <div className="space-y-1.5 md:col-span-2">
-              <label className="block text-xs font-semibold text-slate-700">Website Making Rate (₹)</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Website Making Rate (₹)</label>
               <input
                 type="number"
                 min="0"
                 step="1"
                 value={formData.websiteMakingRate}
                 onChange={e => setFormData({ ...formData, websiteMakingRate: e.target.value })}
-                className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 outline-none transition-colors focus:border-indigo-600"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none transition-colors focus:border-indigo-600 dark:focus:border-indigo-400"
                 placeholder="e.g. 15000"
               />
             </div>
 
-            <div className="md:col-span-2 p-3 bg-indigo-50/60 border border-indigo-100 rounded-xl flex items-center justify-between">
+            <div className="md:col-span-2 p-3 bg-indigo-50/60 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/40 rounded-xl flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <Mail size={18} className="text-indigo-600 shrink-0" />
+                <Mail size={18} className="text-indigo-600 dark:text-indigo-400 shrink-0" />
                 <div>
-                  <label htmlFor="emailRemindersToggle" className="text-xs font-bold text-slate-900 cursor-pointer">
+                  <label htmlFor="emailRemindersToggle" className="text-xs font-bold text-slate-900 dark:text-slate-100 cursor-pointer">
                     Enable Overdue Payment Email Reminders
                   </label>
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
                     Automatically draft email reminders and trigger browser alerts when payment due dates are reached or overdue.
                   </p>
                 </div>
@@ -608,7 +609,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                 type="checkbox"
                 checked={formData.emailRemindersEnabled}
                 onChange={e => setFormData({ ...formData, emailRemindersEnabled: e.target.checked })}
-                className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 cursor-pointer shrink-0"
+                className="w-4 h-4 text-indigo-600 rounded border-slate-300 dark:border-slate-600 focus:ring-indigo-500 cursor-pointer shrink-0"
               />
             </div>
 
@@ -616,13 +617,13 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
               <button
                 type="button"
                 onClick={cancelEdit}
-                className="px-4 py-2 rounded-xl text-slate-700 text-xs font-semibold hover:bg-slate-100 transition-colors"
+                className="px-4 py-2 rounded-xl text-slate-700 dark:text-slate-300 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-sm"
+                className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-sm cursor-pointer"
               >
                 <CheckCircle2 size={16} />
                 {isEditing ? 'Save Changes' : 'Save Client Profile'}
@@ -633,24 +634,24 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
       )}
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs">
         <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={16} />
           <input
             type="text"
             placeholder="Search clients by name, phone..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-600"
+            className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-xl outline-none focus:border-indigo-600 dark:focus:border-indigo-500"
           />
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto">
           <button
             onClick={() => setFilterType('all')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${filterType === 'all'
-                ? 'bg-slate-900 text-white'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${filterType === 'all'
+                ? 'bg-slate-900 dark:bg-indigo-600 text-white shadow-xs'
+                : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
               }`}
           >
             All Clients ({clients.length})
@@ -658,9 +659,9 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
 
           <button
             onClick={() => setFilterType('due')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${filterType === 'due'
-                ? 'bg-amber-600 text-white'
-                : 'bg-amber-50 text-amber-800 hover:bg-amber-100'
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer ${filterType === 'due'
+                ? 'bg-amber-600 text-white shadow-xs'
+                : 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50'
               }`}
           >
             <Clock size={12} /> Due / Action ({notificationClients.length})
@@ -668,9 +669,9 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
 
           <button
             onClick={() => setFilterType('uptodate')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${filterType === 'uptodate'
-                ? 'bg-emerald-600 text-white'
-                : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${filterType === 'uptodate'
+                ? 'bg-emerald-600 text-white shadow-xs'
+                : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50'
               }`}
           >
             Up to Date
@@ -681,12 +682,12 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
       {/* Client Profiles Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredClients.length === 0 ? (
-          <div className="col-span-full py-16 text-center bg-white rounded-2xl border border-slate-200 p-8 space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+          <div className="col-span-full py-16 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-8 space-y-3">
+            <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500 flex items-center justify-center mx-auto">
               <Search size={24} />
             </div>
-            <h3 className="text-base font-bold text-slate-800">No client profiles found</h3>
-            <p className="text-xs text-slate-500">
+            <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">No client profiles found</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               {clients.length === 0
                 ? "Get started by adding your first client profile."
                 : "Try adjusting your search query or filter selection."}
@@ -703,7 +704,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
             return (
               <div
                 key={client.id}
-                className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs hover:shadow-md transition-all group flex flex-col justify-between space-y-5"
+                className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-xs hover:shadow-md transition-all group flex flex-col justify-between space-y-5"
               >
                 <div className="space-y-4">
                   {/* Top row: Avatar & Status Badge */}
@@ -713,22 +714,22 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                         <img
                           src={getDriveDirectImageUrl(client.logoUrl)}
                           alt={client.name}
-                          className="w-12 h-12 rounded-xl object-cover shadow-sm shrink-0 bg-indigo-50"
+                          className="w-12 h-12 rounded-xl object-cover shadow-sm shrink-0 bg-indigo-50 dark:bg-indigo-950"
                           onError={(e) => {
                             e.currentTarget.onerror = null;
                             e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(client.name)}&background=e0e7ff&color=4338ca&size=128&rounded=true&bold=true`;
                           }}
                         />
                       ) : (
-                        <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-lg shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                        <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/60 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-lg shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
                           {client.name.charAt(0).toUpperCase()}
                         </div>
                       )}
                       <div>
-                        <h3 className="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors leading-snug">
+                        <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors leading-snug">
                           {client.name}
                         </h3>
-                        <p className="text-[11px] text-slate-400 font-mono">ID: {client.id.split('-')[0]}</p>
+                        <p className="text-[11px] text-slate-400 dark:text-slate-500 font-mono">ID: {client.id.split('-')[0]}</p>
                       </div>
                     </div>
 
@@ -740,21 +741,21 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                           const cInvoices = invoices.filter(inv => inv.clientId === client.id);
                           exportClientCSV(client, cWorkItems, cInvoices);
                         }}
-                        className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+                        className="p-1.5 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 rounded-lg transition-colors cursor-pointer"
                         title="Export Work History & Invoices to CSV"
                       >
                         <Download size={15} />
                       </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); handleEditClient(client); }}
-                        className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer"
+                        className="p-1.5 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 rounded-lg transition-colors cursor-pointer"
                         title="Edit Client Profile"
                       >
                         <Edit2 size={15} />
                       </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); handleDeleteClient(client.id, client.name); }}
-                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                        className="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg transition-colors cursor-pointer"
                         title="Delete Client"
                       >
                         <Trash2 size={15} />
@@ -768,35 +769,35 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                       <Clock size={12} /> {statusInfo.label}
                     </span>
                     {client.subClients && client.subClients.length > 0 && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60">
                         <Users size={12} /> {client.subClients.length} Sub-Clients
                       </span>
                     )}
                   </div>
 
                   {/* 30-Day Cycle Dates Row */}
-                  <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 grid grid-cols-2 gap-2 text-xs">
+                  <div className="bg-slate-50 dark:bg-slate-900/60 p-3.5 rounded-xl border border-slate-100 dark:border-slate-700/60 grid grid-cols-2 gap-2 text-xs">
                     <div>
-                      <span className="text-slate-400 block text-[10px] font-semibold uppercase tracking-wider">Prev Payment</span>
-                      <span className="font-bold text-slate-800">{formattedPrevDate}</span>
+                      <span className="text-slate-400 dark:text-slate-500 block text-[10px] font-semibold uppercase tracking-wider">Prev Payment</span>
+                      <span className="font-bold text-slate-800 dark:text-slate-200">{formattedPrevDate}</span>
                     </div>
 
-                    <div className="border-l border-slate-200 pl-2.5">
-                      <span className="text-slate-400 block text-[10px] font-semibold uppercase tracking-wider">Next Due</span>
-                      <span className="font-bold text-slate-900">{formattedNextDate}</span>
+                    <div className="border-l border-slate-200 dark:border-slate-700 pl-2.5">
+                      <span className="text-slate-400 dark:text-slate-500 block text-[10px] font-semibold uppercase tracking-wider">Next Due</span>
+                      <span className="font-bold text-slate-900 dark:text-slate-100">{formattedNextDate}</span>
                     </div>
                   </div>
 
                   {/* Financials & Rates */}
                   <div className="flex items-center justify-between text-xs pt-1">
                     <div>
-                      <span className="text-slate-400 block">Default Rate</span>
-                      <span className="font-semibold text-slate-700">₹{client.defaultRate.toLocaleString('en-IN')} / reel</span>
+                      <span className="text-slate-400 dark:text-slate-500 block">Default Rate</span>
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">₹{client.defaultRate.toLocaleString('en-IN')} / reel</span>
                     </div>
 
                     <div className="text-right">
-                      <span className="text-slate-400 block">Pending Balance</span>
-                      <span className={`font-bold ${financials.totalPendingAmount > 0 ? 'text-rose-600' : 'text-slate-700'}`}>
+                      <span className="text-slate-400 dark:text-slate-500 block">Pending Balance</span>
+                      <span className={`font-bold ${financials.totalPendingAmount > 0 ? 'text-rose-600' : 'text-slate-700 dark:text-slate-300'}`}>
                         ₹{financials.totalPendingAmount.toLocaleString('en-IN')}
                       </span>
                     </div>
@@ -807,7 +808,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                 <div className="flex items-center gap-2 pt-1">
                   <button
                     onClick={() => setSelectedClientId(client.id)}
-                    className="flex-1 flex items-center justify-center gap-2 bg-slate-900 hover:bg-indigo-600 text-white py-2.5 rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer"
+                    className="flex-1 flex items-center justify-center gap-2 bg-slate-900 hover:bg-indigo-600 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white py-2.5 rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer"
                   >
                     Open Dashboard
                     <ChevronRight size={14} />
@@ -819,10 +820,10 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                       const cInvoices = invoices.filter(inv => inv.clientId === client.id);
                       exportClientCSV(client, cWorkItems, cInvoices);
                     }}
-                    className="px-3.5 py-2.5 bg-slate-100 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-slate-700 hover:text-emerald-800 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+                    className="px-3.5 py-2.5 bg-slate-100 hover:bg-emerald-50 dark:bg-slate-700 dark:hover:bg-emerald-950/50 border border-slate-200 dark:border-slate-600 hover:border-emerald-300 dark:hover:border-emerald-600 text-slate-700 dark:text-slate-200 hover:text-emerald-800 dark:hover:text-emerald-300 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
                     title="Export Work History & Invoice Summary to CSV"
                   >
-                    <Download size={14} className="text-emerald-600" /> CSV
+                    <Download size={14} className="text-emerald-600 dark:text-emerald-400" /> CSV
                   </button>
                 </div>
               </div>

@@ -85,32 +85,32 @@ export default function ClientFeedbackForm() {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-sans text-slate-800">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-slate-100 p-8 text-center space-y-6 relative overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4 font-sans text-slate-800 dark:text-slate-200 transition-colors duration-150">
+        <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 p-8 text-center space-y-6 relative overflow-hidden animate-in fade-in zoom-in-95 duration-300">
           {/* Subtle design accents */}
           <div className="absolute top-0 inset-x-0 h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
           
-          <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto shadow-sm animate-bounce">
+          <div className="w-16 h-16 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/50 rounded-2xl flex items-center justify-center mx-auto shadow-sm animate-bounce">
             <CheckCircle2 className="w-10 h-10" />
           </div>
 
           <div className="space-y-2">
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center justify-center gap-1.5">
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight flex items-center justify-center gap-1.5">
               Thank You! <Sparkles className="w-5 h-5 text-indigo-500 animate-pulse" />
             </h1>
-            <p className="text-slate-500 text-sm leading-relaxed">
-              Your review for <span className="font-semibold text-slate-800">{freelancerName}</span> has been submitted successfully. Your feedback is highly appreciated!
+            <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+              Your review for <span className="font-semibold text-slate-800 dark:text-slate-200">{freelancerName}</span> has been submitted successfully. Your feedback is highly appreciated!
             </p>
           </div>
 
-          <div className="bg-slate-50 border border-slate-100 rounded-xl p-5 text-left space-y-3">
+          <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60 rounded-xl p-5 text-left space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Your Review</span>
               <div className="flex gap-0.5">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star 
                     key={star} 
-                    className={`w-4 h-4 ${star <= rating ? 'text-amber-500 fill-amber-400' : 'text-slate-200'}`} 
+                    className={`w-4 h-4 ${star <= rating ? 'text-amber-500 fill-amber-400' : 'text-slate-200 dark:text-slate-700'}`} 
                   />
                 ))}
               </div>
@@ -118,19 +118,19 @@ export default function ClientFeedbackForm() {
             
             <div className="space-y-1">
               {projectName && (
-                <div className="text-xs font-bold text-slate-700">Project: {projectName}</div>
+                <div className="text-xs font-bold text-slate-700 dark:text-slate-300">Project: {projectName}</div>
               )}
-              <p className="text-slate-600 text-sm italic leading-relaxed">"{feedbackText}"</p>
+              <p className="text-slate-600 dark:text-slate-300 text-sm italic leading-relaxed">"{feedbackText}"</p>
             </div>
-            <div className="text-[10px] text-slate-400 text-right font-medium">Submitted by {clientName}</div>
+            <div className="text-[10px] text-slate-400 dark:text-slate-500 text-right font-medium">Submitted by {clientName}</div>
           </div>
 
-          <div className="pt-2 border-t border-slate-100 flex flex-col items-center gap-1.5">
+          <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex flex-col items-center gap-1.5">
             <div className="flex items-center gap-1.5">
               <Logo className="w-5 h-5" />
-              <span className="text-xs font-bold text-slate-400 tracking-wider uppercase">CrestFlow Portal</span>
+              <span className="text-xs font-bold text-slate-400 dark:text-slate-500 tracking-wider uppercase">CrestFlow Portal</span>
             </div>
-            <p className="text-[10px] text-slate-400">Professional client workflow manager for video editors</p>
+            <p className="text-[10px] text-slate-400 dark:text-slate-500">Professional client workflow manager for video editors</p>
           </div>
         </div>
       </div>
@@ -138,8 +138,8 @@ export default function ClientFeedbackForm() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 font-sans text-slate-800">
-      <div className="max-w-lg w-full bg-white rounded-2xl shadow-xl border border-slate-200/60 overflow-hidden relative animate-in fade-in duration-300">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4 font-sans text-slate-800 dark:text-slate-200 transition-colors duration-150">
+      <div className="max-w-lg w-full bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200/60 dark:border-slate-800 overflow-hidden relative animate-in fade-in duration-300">
         
         {/* Banner with gradient accent */}
         <div className="h-2.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600"></div>
@@ -161,22 +161,22 @@ export default function ClientFeedbackForm() {
         {/* Content */}
         <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-6">
           <div className="space-y-2">
-            <h1 className="text-xl font-bold text-slate-900">Share Your Experience</h1>
-            <p className="text-slate-500 text-xs md:text-sm leading-relaxed">
-              Hi there! Please take a moment to leave a review for <span className="font-semibold text-indigo-600">{freelancerName}</span>. Your review helps build trust and improve future collaborations.
+            <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Share Your Experience</h1>
+            <p className="text-slate-500 dark:text-slate-400 text-xs md:text-sm leading-relaxed">
+              Hi there! Please take a moment to leave a review for <span className="font-semibold text-indigo-600 dark:text-indigo-400">{freelancerName}</span>. Your review helps build trust and improve future collaborations.
             </p>
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-100 text-red-700 p-4 rounded-xl text-xs font-semibold flex items-start gap-2.5">
-              <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+            <div className="bg-red-50 dark:bg-rose-950/40 border border-red-100 dark:border-rose-900/50 text-red-700 dark:text-rose-300 p-4 rounded-xl text-xs font-semibold flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 text-red-500 dark:text-rose-400 flex-shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
           {/* Star Selector */}
-          <div className="bg-slate-50 border border-slate-100 rounded-xl p-5 text-center space-y-3">
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+          <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60 rounded-xl p-5 text-center space-y-3">
+            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Rate Your Experience *
             </label>
             <div className="flex justify-center gap-2">
@@ -199,7 +199,7 @@ export default function ClientFeedbackForm() {
                       className={`w-9 h-9 transition-colors ${
                         isLit 
                           ? 'text-amber-500 fill-amber-400' 
-                          : 'text-slate-300 fill-none hover:text-amber-400'
+                          : 'text-slate-300 dark:text-slate-600 fill-none hover:text-amber-400'
                       }`} 
                     />
                   </button>
@@ -207,7 +207,7 @@ export default function ClientFeedbackForm() {
               })}
             </div>
             {rating > 0 && (
-              <span className="text-xs font-semibold text-amber-600 transition-all">
+              <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 transition-all">
                 {rating === 1 && '⭐ Poor'}
                 {rating === 2 && '⭐⭐ Fair'}
                 {rating === 3 && '⭐⭐⭐ Good'}
@@ -220,7 +220,7 @@ export default function ClientFeedbackForm() {
           {/* Input details */}
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
                 Your Name / Company *
               </label>
               <input
@@ -228,13 +228,13 @@ export default function ClientFeedbackForm() {
                 value={clientName}
                 onChange={(e) => setClientName(e.target.value)}
                 placeholder="e.g. John Doe / Pixel Studios"
-                className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 outline-none transition-all focus:border-indigo-500 focus:bg-white font-medium"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none transition-all focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-800 font-medium"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
                 Project Name (Optional)
               </label>
               <input
@@ -242,12 +242,12 @@ export default function ClientFeedbackForm() {
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
                 placeholder="e.g. August Commercial Reel / YouTube Video Edit"
-                className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 outline-none transition-all focus:border-indigo-500 focus:bg-white font-medium"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none transition-all focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-800 font-medium"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
                 Your Detailed Review *
               </label>
               <textarea
@@ -255,14 +255,14 @@ export default function ClientFeedbackForm() {
                 onChange={(e) => setFeedbackText(e.target.value)}
                 placeholder="Write about the quality of editing, communication, delivery speed, or overall experience..."
                 rows={4}
-                className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 outline-none transition-all focus:border-indigo-500 focus:bg-white leading-relaxed font-medium"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none transition-all focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-800 leading-relaxed font-medium"
                 required
               ></textarea>
             </div>
           </div>
 
           {/* Submit Button */}
-          <div className="pt-2 border-t border-slate-100 flex items-center justify-end">
+          <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end">
             <button
               type="submit"
               disabled={isSubmitting || !freelancerUid}
@@ -284,7 +284,7 @@ export default function ClientFeedbackForm() {
       </div>
 
       {/* Small footer */}
-      <div className="mt-6 flex flex-col items-center gap-1 text-slate-400">
+      <div className="mt-6 flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500">
         <div className="flex items-center gap-1.5 text-xs">
           <Logo className="w-4 h-4 opacity-50" />
           <span className="font-semibold uppercase tracking-wider">CrestFlow</span>

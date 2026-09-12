@@ -220,25 +220,25 @@ export default function AdminTab() {
 
   // Authenticated Admin Dashboard
   return (
-    <div className="p-6 md:p-8 space-y-8 bg-slate-50 min-h-screen text-slate-900">
+    <div className="p-6 md:p-8 space-y-8 bg-slate-50 dark:bg-slate-950 min-h-screen text-slate-900 dark:text-slate-100">
       {/* Admin Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Admin Dashboard</h1>
-          <p className="text-slate-500 text-sm mt-1">Manage active freelancers, view usage statistics, and configure user blocking policies.</p>
+          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Admin Dashboard</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage active freelancers, view usage statistics, and configure user blocking policies.</p>
         </div>
         <div className="flex items-center gap-2">
           {(window.location.pathname === '/admin' || window.location.hash === '#/admin' || window.location.hash === '#admin' || window.location.search.includes('admin=true')) && (
             <button
               onClick={() => { window.location.href = '/' }}
-              className="bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-lg text-xs font-semibold hover:bg-slate-50 transition-colors shadow"
+              className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 px-4 py-2 rounded-lg text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow cursor-pointer"
             >
               Back to Main Website
             </button>
           )}
           <button
             onClick={handleLogoutAdmin}
-            className="bg-slate-900 text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-slate-800 transition-colors shadow"
+            className="bg-slate-900 dark:bg-slate-700 text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-slate-800 dark:hover:bg-slate-600 transition-colors shadow cursor-pointer"
           >
             Lock Console
           </button>
@@ -247,40 +247,40 @@ export default function AdminTab() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center">
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-lg flex items-center justify-center">
             <Users className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">Total Freelancers</p>
-            <p className="text-2xl font-bold text-slate-900">{loadingProfiles ? '...' : profiles.length}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">Total Freelancers</p>
+            <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">{loadingProfiles ? '...' : profiles.length}</p>
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 bg-red-50 text-red-600 rounded-lg flex items-center justify-center">
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 rounded-lg flex items-center justify-center">
             <ShieldAlert className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">Blocked Users</p>
-            <p className="text-2xl font-bold text-slate-900">{loadingBlocked ? '...' : blockedList.length}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">Blocked Users</p>
+            <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">{loadingBlocked ? '...' : blockedList.length}</p>
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm col-span-1 sm:col-span-2 lg:col-span-1">
-          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Instant Block by UID</h3>
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-sm col-span-1 sm:col-span-2 lg:col-span-1">
+          <h3 className="text-xs font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider mb-2">Instant Block by UID</h3>
           <form onSubmit={handleManualBlock} className="flex gap-2">
             <input
               type="text"
               placeholder="Paste Firebase Auth UID"
-              className="flex-1 border border-slate-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-red-500 font-mono"
+              className="flex-1 border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-red-500 font-mono"
               value={manualUid}
               onChange={(e) => setManualUid(e.target.value)}
               required
             />
             <button
               type="submit"
-              className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 shadow-sm transition-colors"
+              className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 shadow-sm transition-colors cursor-pointer"
             >
               <Ban className="w-3.5 h-3.5" />
               Block
@@ -290,16 +290,16 @@ export default function AdminTab() {
       </div>
 
       {/* User Management Table */}
-      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
         {/* Table Controls */}
-        <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row gap-4 items-center justify-between">
-          <h3 className="font-semibold text-slate-900 text-base">Registered Freelancer Accounts</h3>
+        <div className="p-5 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 flex flex-col sm:flex-row gap-4 items-center justify-between">
+          <h3 className="font-semibold text-slate-900 dark:text-slate-100 text-base">Registered Freelancer Accounts</h3>
           <div className="relative w-full sm:w-72">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search by name, title, UPI or phone..."
-              className="w-full border border-slate-200 bg-white rounded-lg pl-9 pr-4 py-2 text-xs outline-none focus:border-indigo-500"
+              className="w-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-lg pl-9 pr-4 py-2 text-xs outline-none focus:border-indigo-500"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -309,18 +309,18 @@ export default function AdminTab() {
         {/* Profiles List */}
         <div className="overflow-x-auto">
           {loadingProfiles || loadingBlocked ? (
-            <div className="p-10 text-center text-slate-400 text-sm">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600 mx-auto mb-2"></div>
+            <div className="p-10 text-center text-slate-400 dark:text-slate-500 text-sm">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600 dark:border-indigo-400 mx-auto mb-2"></div>
               Loading database profiles...
             </div>
           ) : filteredProfiles.length === 0 ? (
-            <div className="p-10 text-center text-slate-400 text-sm">
+            <div className="p-10 text-center text-slate-400 dark:text-slate-500 text-sm">
               No freelancer profiles found matching your search.
             </div>
           ) : (
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50 text-slate-400 text-[10px] uppercase tracking-wider border-b border-slate-100">
+                <tr className="bg-slate-50 dark:bg-slate-900/60 text-slate-400 dark:text-slate-400 text-[10px] uppercase tracking-wider border-b border-slate-100 dark:border-slate-700">
                   <th className="p-4 font-bold">Freelancer</th>
                   <th className="p-4 font-bold">Professional Details</th>
                   <th className="p-4 font-bold">Billing Details</th>
@@ -328,34 +328,34 @@ export default function AdminTab() {
                   <th className="p-4 font-bold text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-xs">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 text-xs">
                 {filteredProfiles.map((p) => {
                   const blocked = isUserBlocked(p.id);
                   const isProcessing = actionLoading === p.id;
 
                   return (
-                    <tr key={p.id} className="hover:bg-slate-50/50 transition-colors">
+                    <tr key={p.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
                       <td className="p-4">
-                        <div className="font-semibold text-slate-900 text-sm">{p.name}</div>
-                        <div className="font-mono text-[10px] text-slate-400 mt-0.5 select-all" title="User UID">{p.id}</div>
-                        <div className="text-slate-400 text-[10px] mt-1">Joined: {new Date(p.createdAt).toLocaleDateString()}</div>
+                        <div className="font-semibold text-slate-900 dark:text-slate-100 text-sm">{p.name}</div>
+                        <div className="font-mono text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 select-all" title="User UID">{p.id}</div>
+                        <div className="text-slate-400 dark:text-slate-500 text-[10px] mt-1">Joined: {new Date(p.createdAt).toLocaleDateString()}</div>
                       </td>
                       <td className="p-4 space-y-1">
-                        <div className="font-medium text-slate-700">{p.professionalTitle}</div>
-                        <div className="text-slate-500 italic text-[11px]">{p.servicesDescription}</div>
+                        <div className="font-medium text-slate-700 dark:text-slate-300">{p.professionalTitle}</div>
+                        <div className="text-slate-500 dark:text-slate-400 italic text-[11px]">{p.servicesDescription}</div>
                       </td>
                       <td className="p-4 space-y-1">
-                        <div><span className="text-slate-400">Phone:</span> {p.phone}</div>
-                        <div><span className="text-slate-400">UPI:</span> <span className="font-mono bg-slate-50 px-1 py-0.5 rounded text-slate-700">{p.upiId}</span></div>
+                        <div><span className="text-slate-400 dark:text-slate-500">Phone:</span> <span className="text-slate-700 dark:text-slate-300">{p.phone}</span></div>
+                        <div><span className="text-slate-400 dark:text-slate-500">UPI:</span> <span className="font-mono bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-1 py-0.5 rounded text-slate-700 dark:text-slate-300">{p.upiId}</span></div>
                       </td>
                       <td className="p-4 text-center">
                         {blocked ? (
-                          <span className="inline-flex items-center gap-1 bg-red-50 text-red-700 px-2.5 py-1 rounded-full font-semibold text-[10px] uppercase tracking-wider">
+                          <span className="inline-flex items-center gap-1 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800/60 px-2.5 py-1 rounded-full font-semibold text-[10px] uppercase tracking-wider">
                             <UserX className="w-3 h-3" />
                             Blocked
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full font-semibold text-[10px] uppercase tracking-wider">
+                          <span className="inline-flex items-center gap-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 px-2.5 py-1 rounded-full font-semibold text-[10px] uppercase tracking-wider">
                             <UserCheck className="w-3 h-3" />
                             Active
                           </span>
@@ -366,7 +366,7 @@ export default function AdminTab() {
                           <button
                             onClick={() => handleUnblockUser(p.id)}
                             disabled={isProcessing}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-3 py-1.5 rounded-lg shadow-sm transition-colors active:scale-95 disabled:opacity-50 inline-flex items-center gap-1"
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-3 py-1.5 rounded-lg shadow-sm transition-colors active:scale-95 disabled:opacity-50 inline-flex items-center gap-1 cursor-pointer"
                           >
                             Unblock Access
                           </button>
@@ -374,7 +374,7 @@ export default function AdminTab() {
                           <button
                             onClick={() => handleBlockUser(p.id)}
                             disabled={isProcessing}
-                            className="bg-red-50 text-red-700 hover:bg-red-600 hover:text-white font-semibold text-xs px-3 py-1.5 rounded-lg transition-colors active:scale-95 disabled:opacity-50 inline-flex items-center gap-1"
+                            className="bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 hover:bg-red-600 hover:text-white border border-red-200 dark:border-red-800/60 font-semibold text-xs px-3 py-1.5 rounded-lg transition-colors active:scale-95 disabled:opacity-50 inline-flex items-center gap-1 cursor-pointer"
                           >
                             Block User
                           </button>

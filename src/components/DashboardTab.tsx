@@ -18,6 +18,7 @@ import StickyNotesWidget from './StickyNotesWidget';
 import PaymentDateModal from './PaymentDateModal';
 import AISummarizer from './AISummarizer';
 import { UserProfile } from '../types';
+import { useTheme } from '../context/ThemeContext';
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
@@ -28,6 +29,7 @@ interface DashboardTabProps {
 }
 
 export default function DashboardTab({ user, profile, onNavigateToClients }: DashboardTabProps) {
+  const { isDark } = useTheme();
   const { data: clients, addOrUpdateItem: updateClient } = useFirestore<Client>('clients', user?.uid);
   const { data: invoices, loading, addOrUpdateItem, removeItem, batchReplaceAll } = useFirestore<Invoice>('invoices', user?.uid);
   const { batchReplaceAll: batchReplaceClients } = useFirestore<any>('clients', user?.uid);
@@ -201,11 +203,11 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
   }, [selectedYear, workItems, invoices]);
 
   const getContributionColorClass = (count: number) => {
-    if (count === 0) return 'bg-slate-100 border border-slate-200';
-    if (count === 1) return 'bg-emerald-100 border border-emerald-200/40';
-    if (count === 2) return 'bg-emerald-300 border border-emerald-400/40';
-    if (count === 3) return 'bg-emerald-500 border border-emerald-400/50';
-    return 'bg-emerald-600 border border-emerald-500/50 shadow-2xs shadow-emerald-400/20';
+    if (count === 0) return 'bg-slate-100 dark:bg-slate-850 border border-slate-200 dark:border-slate-700';
+    if (count === 1) return 'bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-200/40 dark:border-emerald-800/50';
+    if (count === 2) return 'bg-emerald-300 dark:bg-emerald-800/80 border border-emerald-400/40 dark:border-emerald-700/60';
+    if (count === 3) return 'bg-emerald-500 dark:bg-emerald-600 border border-emerald-400/50 dark:border-emerald-500/60';
+    return 'bg-emerald-600 dark:bg-emerald-500 border border-emerald-500/50 dark:border-emerald-400/60 shadow-2xs shadow-emerald-400/20';
   };
 
   const handleRegisterFcmDevice = async () => {
@@ -492,8 +494,8 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
     <div className="p-8 max-w-7xl mx-auto space-y-8">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Dashboard</h2>
-          <p className="text-slate-500 mt-1">Overview of your monthly earnings, client payment cycles & due reminders.</p>
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Dashboard</h2>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">Overview of your monthly earnings, client payment cycles & due reminders.</p>
         </div>
         
         <div className="flex flex-wrap items-center gap-3">
@@ -507,14 +509,14 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
           ) : null}
           <button 
             onClick={handleExport}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded text-sm font-medium transition-colors shadow-sm"
+            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded text-sm font-medium transition-colors shadow-sm"
           >
             <DownloadCloud size={16} /> Export Sync
           </button>
           
           <button 
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded text-sm font-medium transition-colors shadow-sm"
+            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded text-sm font-medium transition-colors shadow-sm"
           >
             <UploadCloud size={16} /> Import Sync
           </button>
@@ -550,18 +552,18 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
 
 
       {!isNotificationDismissed && activeNotifications.length > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 shadow-sm space-y-4 relative">
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-2xl p-6 shadow-sm space-y-4 relative">
           <button
             onClick={() => setIsNotificationDismissed(true)}
-            className="absolute top-4 right-4 text-amber-700 hover:text-amber-950 hover:bg-amber-200/60 p-1.5 rounded-lg transition-colors cursor-pointer"
+            className="absolute top-4 right-4 text-amber-700 dark:text-amber-400 hover:text-amber-950 dark:hover:text-amber-200 hover:bg-amber-200/60 dark:hover:bg-amber-800/40 p-1.5 rounded-lg transition-colors cursor-pointer"
             title="Dismiss notification"
             aria-label="Close notification"
           >
             <X size={18} />
           </button>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pr-8">
-            <div className="flex items-center gap-2.5 text-amber-900 font-bold text-base">
-              <AlertTriangle className="text-amber-600 animate-bounce" size={20} />
+            <div className="flex items-center gap-2.5 text-amber-900 dark:text-amber-300 font-bold text-base">
+              <AlertTriangle className="text-amber-600 dark:text-amber-400 animate-bounce" size={20} />
               <span>Payment Cycle Reminders ({activeNotifications.length} Client(s) Need Follow-up)</span>
             </div>
             
@@ -600,18 +602,18 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
               return (
                 <div 
                   key={client.id}
-                  className="bg-white p-4 rounded-xl border border-amber-200 flex flex-col justify-between gap-3 shadow-xs"
+                  className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-amber-200 dark:border-amber-700/40 flex flex-col justify-between gap-3 shadow-xs"
                 >
                   <div>
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-bold text-slate-900 text-sm">{client.name}</span>
+                      <span className="font-bold text-slate-900 dark:text-slate-100 text-sm">{client.name}</span>
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${statusInfo.badgeClass}`}>
                         {statusInfo.label}
                       </span>
                     </div>
 
-                    <div className="text-xs text-slate-500 mt-2 space-y-0.5">
-                      <div>Due Date: <span className="font-semibold text-slate-800">{new Date(statusInfo.nextDueDate).toLocaleDateString('en-IN')}</span></div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400 mt-2 space-y-0.5">
+                      <div>Due Date: <span className="font-semibold text-slate-800 dark:text-slate-200">{new Date(statusInfo.nextDueDate).toLocaleDateString('en-IN')}</span></div>
                       {financials.totalPendingAmount > 0 && (
                         <div>Pending Balance: <span className="font-bold text-rose-600">₹{financials.totalPendingAmount.toLocaleString('en-IN')}</span></div>
                       )}
@@ -622,7 +624,7 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
                     </div>
                   </div>
 
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-1 flex-wrap">
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between gap-1 flex-wrap">
                     <div className="flex items-center gap-1">
                       <a
                         href={generateWhatsAppReminder(client, statusInfo)}
@@ -649,7 +651,7 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
                           navigator.clipboard.writeText(`Subject: ${emailData.subject}\n\n${emailData.body}`);
                           alert(`Email reminder template for ${client.name} copied to clipboard!`);
                         }}
-                        className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors"
+                        className="p-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-colors"
                         title="Copy Email Text to Clipboard"
                       >
                         <Copy size={13} />
@@ -682,54 +684,54 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
 
       {/* Metric Cards */}
       <div className="grid md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-start gap-4">
-          <div className="p-3 bg-emerald-100 text-emerald-600 rounded-lg">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-start gap-4">
+          <div className="p-3 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 rounded-lg">
             <IndianRupee size={24} />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">Total Earned This Month</p>
-            <h3 className="text-3xl font-bold text-slate-900">₹{metrics.totalEarned.toLocaleString('en-IN')}</h3>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Total Earned This Month</p>
+            <h3 className="text-3xl font-bold text-slate-900 dark:text-slate-100">₹{metrics.totalEarned.toLocaleString('en-IN')}</h3>
           </div>
         </div>
         
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-start gap-4">
-          <div className="p-3 bg-amber-100 text-amber-600 rounded-lg">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-start gap-4">
+          <div className="p-3 bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 rounded-lg">
             <Clock size={24} />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">Total Pending Invoices Amount</p>
-            <h3 className="text-3xl font-bold text-slate-900">₹{metrics.totalDue.toLocaleString('en-IN')}</h3>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Total Pending Invoices Amount</p>
+            <h3 className="text-3xl font-bold text-slate-900 dark:text-slate-100">₹{metrics.totalDue.toLocaleString('en-IN')}</h3>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-start gap-4">
-          <div className="p-3 bg-indigo-100 text-indigo-600 rounded-lg">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-start gap-4">
+          <div className="p-3 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-lg">
             <TrendingUp size={24} />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">Invoices This Month</p>
-            <h3 className="text-3xl font-bold text-slate-900">{metrics.totalInvoicesThisMonth}</h3>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Invoices This Month</p>
+            <h3 className="text-3xl font-bold text-slate-900 dark:text-slate-100">{metrics.totalInvoicesThisMonth}</h3>
           </div>
         </div>
       </div>
 
       {/* GitHub-style Activity Calendar Widget */}
-      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm text-slate-800 flex flex-col md:flex-row gap-6 relative">
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-sm text-slate-800 dark:text-slate-200 flex flex-col md:flex-row gap-6 relative">
         {/* Left: Calendar & Grid */}
         <div className="flex-1 flex flex-col gap-3 min-w-0">
           <div className="flex justify-between items-center">
-            <div className="text-sm font-semibold tracking-wide text-slate-700 flex items-center gap-2">
-              <Calendar size={16} className="text-indigo-600" />
+            <div className="text-sm font-semibold tracking-wide text-slate-700 dark:text-slate-300 flex items-center gap-2">
+              <Calendar size={16} className="text-indigo-600 dark:text-indigo-400" />
               <span>
                 {totalYearContributions} contributions in {selectedYear === new Date().getFullYear() ? 'the last year' : selectedYear}
               </span>
             </div>
           </div>
 
-          <div className="border border-slate-100 rounded-xl p-4 bg-slate-50/50">
+          <div className="border border-slate-100 dark:border-slate-700 rounded-xl p-4 bg-slate-50/50 dark:bg-slate-900/30">
             <div className="flex gap-2">
               {/* Day labels column */}
-              <div className="flex flex-col justify-between text-[10px] text-slate-500 pr-1 pt-[18px] pb-1 h-[94px] select-none shrink-0 font-medium">
+              <div className="flex flex-col justify-between text-[10px] text-slate-500 dark:text-slate-400 pr-1 pt-[18px] pb-1 h-[94px] select-none shrink-0 font-medium">
                 <span>Mon</span>
                 <span>Wed</span>
                 <span>Fri</span>
@@ -738,7 +740,7 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
               {/* Scrollable Month labels + Calendar Grid */}
               <div className="flex-1 overflow-x-auto select-none scrollbar-thin scrollbar-thumb-slate-350">
                 {/* Month labels header */}
-                <div className="flex justify-between w-full gap-[3.5px] text-[10px] text-slate-500 mb-1 min-w-[720px] font-semibold h-4">
+                <div className="flex justify-between w-full gap-[3.5px] text-[10px] text-slate-500 dark:text-slate-400 mb-1 min-w-[720px] font-semibold h-4">
                   {calendarGrid.map((week, wIdx) => {
                     const labelObj = monthLabels.find(ml => ml.index === wIdx);
                     return (
@@ -785,17 +787,17 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
           </div>
 
           {/* Bottom Legend & Helper Info */}
-          <div className="flex justify-between items-center text-[10px] text-slate-500 mt-1 px-1">
-            <span className="text-[10px] text-slate-500">
+          <div className="flex justify-between items-center text-[10px] text-slate-500 dark:text-slate-400 mt-1 px-1">
+            <span className="text-[10px] text-slate-500 dark:text-slate-400">
               Activity synced with work completions & paid invoice dates.
             </span>
             <div className="flex items-center gap-1.5 font-medium">
               <span>Less</span>
-              <div className="w-2.5 h-2.5 rounded-[2px] bg-slate-100 border border-slate-200"></div>
-              <div className="w-2.5 h-2.5 rounded-[2px] bg-emerald-100 border border-emerald-200/40"></div>
-              <div className="w-2.5 h-2.5 rounded-[2px] bg-emerald-300 border border-emerald-400/40"></div>
-              <div className="w-2.5 h-2.5 rounded-[2px] bg-emerald-500 border border-emerald-400/50"></div>
-              <div className="w-2.5 h-2.5 rounded-[2px] bg-emerald-600 border border-emerald-500/50 shadow-2xs shadow-emerald-400/20"></div>
+              <div className="w-2.5 h-2.5 rounded-[2px] bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"></div>
+              <div className="w-2.5 h-2.5 rounded-[2px] bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-200/40 dark:border-emerald-800/50"></div>
+              <div className="w-2.5 h-2.5 rounded-[2px] bg-emerald-300 dark:bg-emerald-800/80 border border-emerald-400/40 dark:border-emerald-700/60"></div>
+              <div className="w-2.5 h-2.5 rounded-[2px] bg-emerald-500 dark:bg-emerald-600 border border-emerald-400/50 dark:border-emerald-500/60"></div>
+              <div className="w-2.5 h-2.5 rounded-[2px] bg-emerald-600 dark:bg-emerald-500 border border-emerald-500/50 dark:border-emerald-400/60 shadow-2xs shadow-emerald-400/20"></div>
               <span>More</span>
             </div>
           </div>
@@ -810,7 +812,7 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
               className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer text-center whitespace-nowrap min-w-[60px] ${
                 selectedYear === year
                   ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 border border-slate-200'
+                  : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600 hover:text-slate-900 dark:hover:text-slate-100 border border-slate-200 dark:border-slate-600'
               }`}
             >
               {year}
@@ -822,17 +824,17 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
       {/* Analytics & Charts Section */}
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Recharts Monthly Earnings Line Chart */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+        <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
             <div>
-              <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wider">Monthly Earnings Trend</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Track paid earnings vs total invoiced revenue over time</p>
+              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Monthly Earnings Trend</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Track paid earnings vs total invoiced revenue over time</p>
             </div>
             <div className="flex items-center gap-4 text-xs">
-              <span className="flex items-center gap-1.5 font-medium text-emerald-700">
+              <span className="flex items-center gap-1.5 font-medium text-emerald-700 dark:text-emerald-400">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Paid Earnings
               </span>
-              <span className="flex items-center gap-1.5 font-medium text-indigo-600">
+              <span className="flex items-center gap-1.5 font-medium text-indigo-600 dark:text-indigo-400">
                 <span className="w-2.5 h-2.5 rounded-full bg-indigo-500"></span> Total Invoiced
               </span>
             </div>
@@ -841,21 +843,35 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
             {monthlyTrendData.some(m => m.totalInvoiced > 0 || m.paidEarnings > 0) ? (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={monthlyTrendData} margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? "#334155" : "#e2e8f0"} />
                   <XAxis 
                     dataKey="monthLabel" 
                     axisLine={false} 
                     tickLine={false} 
-                    tick={{ fontSize: 12, fill: '#64748b' }} 
+                    tick={{ fontSize: 12, fill: isDark ? '#94a3b8' : '#64748b' }} 
                   />
                   <YAxis 
                     axisLine={false} 
                     tickLine={false} 
-                    tick={{ fontSize: 12, fill: '#64748b' }}
+                    tick={{ fontSize: 12, fill: isDark ? '#94a3b8' : '#64748b' }}
                     tickFormatter={(val) => `₹${val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val}`}
                   />
                   <Tooltip 
-                    contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                    contentStyle={{
+                      borderRadius: '12px',
+                      border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
+                      backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                      color: isDark ? '#f8fafc' : '#0f172a',
+                      boxShadow: isDark ? '0 10px 15px -3px rgb(0 0 0 / 0.4)' : '0 10px 15px -3px rgb(0 0 0 / 0.1)'
+                    }}
+                    itemStyle={{
+                      color: isDark ? '#f8fafc' : '#0f172a'
+                    }}
+                    labelStyle={{
+                      color: isDark ? '#94a3b8' : '#64748b',
+                      fontWeight: 600,
+                      marginBottom: '4px'
+                    }}
                     formatter={(value: number, name: string) => [
                       `₹${Number(value).toLocaleString('en-IN')}`, 
                       name === 'paidEarnings' ? 'Paid Earnings' : 'Total Invoiced'
@@ -867,7 +883,7 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
                     name="paidEarnings"
                     stroke="#10b981" 
                     strokeWidth={3} 
-                    dot={{ r: 4, fill: '#10b981', strokeWidth: 2, stroke: '#ffffff' }}
+                    dot={{ r: 4, fill: '#10b981', strokeWidth: 2, stroke: isDark ? '#1e293b' : '#ffffff' }}
                     activeDot={{ r: 7, strokeWidth: 0 }} 
                   />
                   <Line 
@@ -877,12 +893,12 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
                     stroke="#6366f1" 
                     strokeWidth={2} 
                     strokeDasharray="4 4"
-                    dot={{ r: 3, fill: '#6366f1' }} 
+                    dot={{ r: 3, fill: '#6366f1', stroke: isDark ? '#1e293b' : '#ffffff' }} 
                   />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center text-sm text-gray-400 text-center py-12">
+              <div className="h-full flex items-center justify-center text-sm text-slate-400 dark:text-slate-500 text-center py-12">
                 No monthly invoice data yet.<br/>Generate invoices to render the earnings line chart.
               </div>
             )}
@@ -890,19 +906,32 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
         </div>
 
         {/* Client Distribution Bar Chart */}
-        <div className="lg:col-span-1 bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
-          <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-6">Client Revenue</h3>
+        <div className="lg:col-span-1 bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col">
+          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-6">Client Revenue</h3>
           <div className="flex-1 min-h-[280px]">
             {metrics.chartData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={metrics.chartData} layout="vertical" margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f3f4f6" />
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={isDark ? "#334155" : "#e2e8f0"} />
                   <XAxis type="number" hide />
-                  <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#4b5563' }} width={80} />
+                  <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: isDark ? '#94a3b8' : '#64748b' }} width={80} />
                   <Tooltip 
-                    cursor={{fill: '#f9fafb'}}
+                    cursor={{ fill: isDark ? 'rgba(51, 65, 85, 0.4)' : 'rgba(226, 232, 240, 0.6)' }}
                     formatter={(value: number) => [`₹${value.toLocaleString('en-IN')}`, 'Revenue']}
-                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                    contentStyle={{
+                      borderRadius: '8px',
+                      border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
+                      backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                      color: isDark ? '#f8fafc' : '#0f172a',
+                      boxShadow: isDark ? '0 4px 6px -1px rgb(0 0 0 / 0.4)' : '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                    }}
+                    itemStyle={{
+                      color: isDark ? '#f8fafc' : '#0f172a'
+                    }}
+                    labelStyle={{
+                      color: isDark ? '#94a3b8' : '#64748b',
+                      fontWeight: 600
+                    }}
                   />
                   <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24}>
                     {metrics.chartData.map((entry, index) => (
@@ -912,7 +941,7 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center text-sm text-gray-400 text-center py-12">
+              <div className="h-full flex items-center justify-center text-sm text-slate-400 dark:text-slate-500 text-center py-12">
                 No data available for this month.<br/>Generate invoices to see the chart.
               </div>
             )}
@@ -921,15 +950,15 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
       </div>
 
       {/* Recent Invoices Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-          <div className="p-6 border-b border-slate-200 flex justify-between items-center bg-white">
-            <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wider">Recent Invoices</h3>
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col">
+          <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-white dark:bg-slate-800">
+            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Recent Invoices</h3>
           </div>
           
           <div className="overflow-x-auto flex-1">
             <table className="w-full text-left border-collapse min-w-[600px]">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500 font-semibold">
+                <tr className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700 text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-semibold">
                   <th className="px-6 py-3">Date</th>
                   <th className="px-6 py-3">Client</th>
                   <th className="px-6 py-3 text-right">Amount</th>
@@ -937,19 +966,19 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
                   <th className="px-6 py-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                 {recentInvoices.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                    <td colSpan={5} className="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
                       No invoices generated yet.
                     </td>
                   </tr>
                 ) : recentInvoices.map((inv) => (
-                  <tr key={inv.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                  <tr key={inv.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-400">
                       {new Date(inv.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                     </td>
-                    <td className="px-6 py-4 font-medium text-gray-900">
+                    <td className="px-6 py-4 font-medium text-slate-900 dark:text-slate-100">
                       <div>{inv.clientName}</div>
                       {inv.discountAmount && (
                         <div className="text-xs text-rose-500 font-normal mt-0.5">
@@ -957,7 +986,7 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
                         </div>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-right font-medium text-gray-900">
+                    <td className="px-6 py-4 text-right font-medium text-slate-900 dark:text-slate-100">
                       ₹{inv.totalAmount.toLocaleString('en-IN')}
                     </td>
                     <td className="px-6 py-4 text-center">

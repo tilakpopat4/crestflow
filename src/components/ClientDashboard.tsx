@@ -325,12 +325,12 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
   const formattedNextDueDate = new Date(statusInfo.nextDueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
-      {/* Navigation Top Bar */}
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 text-slate-900 dark:text-slate-100">
+      {/* Top Action Bar with Back button and Quick Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <button
           onClick={onBack}
-          className="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 bg-white border border-slate-200 px-3.5 py-2 rounded-lg text-xs font-semibold shadow-sm transition-all hover:bg-slate-50 w-fit"
+          className="inline-flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3.5 py-2 rounded-lg text-xs font-semibold shadow-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-700 w-fit cursor-pointer"
         >
           <ArrowLeft size={16} />
           Back to Client Directory
@@ -341,14 +341,14 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
             onClick={handleCopyReviewLink}
             className={`flex items-center gap-1.5 px-3.5 py-2 border rounded-lg text-xs font-semibold transition-all shadow-sm cursor-pointer ${
               copiedReviewLink 
-                ? 'bg-emerald-50 border-emerald-200 text-emerald-700' 
-                : 'bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100/50'
+                ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300' 
+                : 'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-200 dark:border-indigo-900/60 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100/50 dark:hover:bg-indigo-900/50'
             }`}
             title="Copy feedback request link for this client"
           >
             {copiedReviewLink ? (
               <>
-                <CheckCircle2 size={14} className="text-emerald-600" /> Link Copied!
+                <CheckCircle2 size={14} className="text-emerald-600 dark:text-emerald-400" /> Link Copied!
               </>
             ) : (
               <>
@@ -359,7 +359,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
 
           <button
             onClick={() => setIsSubClientsModalOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-700 rounded-lg text-xs font-semibold transition-all shadow-sm cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-purple-50 dark:bg-purple-950/60 hover:bg-purple-100 dark:hover:bg-purple-900/50 border border-purple-200 dark:border-purple-800/60 text-purple-700 dark:text-purple-300 rounded-lg text-xs font-semibold transition-all shadow-sm cursor-pointer"
             title="Add or edit sub-clients for this client"
           >
             <Users size={14} /> Sub-Clients {client.subClients && client.subClients.length > 0 ? `(${client.subClients.length})` : ''}
@@ -367,14 +367,14 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
 
           <button
             onClick={() => onEditClient(client)}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-semibold transition-all shadow-sm"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-all shadow-sm cursor-pointer"
           >
             <Edit3 size={14} /> Edit Client Info
           </button>
           
           <button
             onClick={openPaymentModal}
-            className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-all shadow-sm"
+            className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-all shadow-sm cursor-pointer"
           >
             <Calendar size={14} /> Update Payment Date
           </button>
@@ -382,14 +382,14 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
       </div>
 
       {/* Main Client Profile Header Card */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm relative overflow-hidden">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm relative overflow-hidden">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="flex items-start gap-4">
             {client.logoUrl ? (
               <img 
                 src={getDriveDirectImageUrl(client.logoUrl)} 
                 alt={client.name} 
-                className="w-16 h-16 rounded-2xl object-cover shadow-md shrink-0 bg-indigo-50" 
+                className="w-16 h-16 rounded-2xl object-cover shadow-md shrink-0 bg-indigo-50 dark:bg-indigo-950" 
                 onError={(e) => {
                   e.currentTarget.onerror = null;
                   e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(client.name)}&background=6366f1&color=ffffff&size=128&rounded=true&bold=true`;
@@ -403,33 +403,33 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
 
             <div>
               <div className="flex items-center gap-3 flex-wrap">
-                <h1 className="text-2xl font-bold text-slate-900 tracking-tight">{client.name}</h1>
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">{client.name}</h1>
                 <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${statusInfo.badgeClass}`}>
                   <Clock size={12} /> {statusInfo.label}
                 </span>
               </div>
 
-              <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-slate-500">
+              <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-slate-500 dark:text-slate-400">
                 <span className="flex items-center gap-1.5">
-                  <Phone size={14} className="text-slate-400" /> {client.phone}
+                  <Phone size={14} className="text-slate-400 dark:text-slate-500" /> {client.phone}
                 </span>
                 {client.email && (
                   <span className="flex items-center gap-1.5">
-                    <Mail size={14} className="text-slate-400" /> {client.email}
+                    <Mail size={14} className="text-slate-400 dark:text-slate-500" /> {client.email}
                   </span>
                 )}
-                <span className="text-slate-400">
+                <span className="text-slate-400 dark:text-slate-500">
                   Client since: {client.clientFrom ? new Date(client.clientFrom + '-01').toLocaleDateString('en-IN', { month: 'short', year: 'numeric' }) : new Date(client.createdAt).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}
                 </span>
                 {client.instagram && (
-                  <a href={client.instagram.startsWith('http') ? client.instagram : `https://instagram.com/${client.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-pink-600 hover:underline">
+                  <a href={client.instagram.startsWith('http') ? client.instagram : `https://instagram.com/${client.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-pink-600 dark:text-pink-400 hover:underline">
                     Instagram
                   </a>
                 )}
               </div>
               {client.workExperience && (
-                <div className="mt-2 text-xs text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-100 max-w-lg">
-                  <span className="font-semibold text-slate-700">Experience/Notes:</span> {client.workExperience}
+                <div className="mt-2 text-xs text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-900/60 p-2 rounded-lg border border-slate-100 dark:border-slate-800 max-w-lg">
+                  <span className="font-semibold text-slate-700 dark:text-slate-200">Experience/Notes:</span> {client.workExperience}
                 </div>
               )}
             </div>
@@ -446,25 +446,25 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                   console.error(err);
                 }
               }}
-              className={`flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl border text-xs font-semibold transition-all ${
+              className={`flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
                 client.emailRemindersEnabled !== false 
-                  ? 'bg-indigo-50 border-indigo-200 text-indigo-800 hover:bg-indigo-100' 
-                  : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'
+                  ? 'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-200 dark:border-indigo-900/60 text-indigo-800 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/80' 
+                  : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
               }`}
               title="Toggle email reminders for overdue payments"
             >
               <div className="flex items-center gap-1.5">
-                <Mail size={14} className={client.emailRemindersEnabled !== false ? 'text-indigo-600' : 'text-slate-400'} />
+                <Mail size={14} className={client.emailRemindersEnabled !== false ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'} />
                 <span>Email Reminders: {client.emailRemindersEnabled !== false ? 'ON' : 'OFF'}</span>
               </div>
             </button>
 
             <button
               onClick={() => exportClientCSV(client, clientWorkItems, clientInvoices)}
-              className="flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer"
+              className="flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer"
               title="Export Client Work History & Invoice Summary as CSV file"
             >
-              <Download size={14} className="text-emerald-600" /> Export CSV Report
+              <Download size={14} className="text-emerald-600 dark:text-emerald-400" /> Export CSV Report
             </button>
 
             <a
@@ -483,18 +483,18 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
       {statusInfo.isNotificationRequired && (
         <div className={`p-5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
           statusInfo.severity === 'critical' 
-            ? 'bg-red-50 border-red-200 text-red-900' 
+            ? 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-900/50 text-red-900 dark:text-red-200' 
             : statusInfo.severity === 'urgent' 
-            ? 'bg-orange-50 border-orange-200 text-orange-900' 
+            ? 'bg-orange-50 dark:bg-orange-950/40 border-orange-200 dark:border-orange-900/50 text-orange-900 dark:text-orange-200' 
             : statusInfo.severity === 'delayed'
-            ? 'bg-purple-50 border-purple-200 text-purple-900'
-            : 'bg-amber-50 border-amber-200 text-amber-900'
+            ? 'bg-purple-50 dark:bg-purple-950/40 border-purple-200 dark:border-purple-900/50 text-purple-900 dark:text-purple-200'
+            : 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/50 text-amber-900 dark:text-amber-200'
         }`}>
           <div className="flex items-start gap-3">
             <div className={`p-2 rounded-lg shrink-0 ${
-              statusInfo.severity === 'critical' ? 'bg-red-100 text-red-600' :
-              statusInfo.severity === 'urgent' ? 'bg-orange-100 text-orange-600' :
-              statusInfo.severity === 'delayed' ? 'bg-purple-100 text-purple-600' : 'bg-amber-100 text-amber-600'
+              statusInfo.severity === 'critical' ? 'bg-red-100 dark:bg-red-900/60 text-red-600 dark:text-red-400' :
+              statusInfo.severity === 'urgent' ? 'bg-orange-100 dark:bg-orange-900/60 text-orange-600 dark:text-orange-400' :
+              statusInfo.severity === 'delayed' ? 'bg-purple-100 dark:bg-purple-900/60 text-purple-600 dark:text-purple-400' : 'bg-amber-100 dark:bg-amber-900/60 text-amber-600 dark:text-amber-400'
             }`}>
               <AlertTriangle size={20} />
             </div>
@@ -502,7 +502,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
               <div className="flex items-center gap-2">
                 <h4 className="text-sm font-bold">{statusInfo.notificationTitle}</h4>
                 {client.emailRemindersEnabled !== false && (
-                  <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-indigo-100 text-indigo-800 border border-indigo-200">
+                  <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-indigo-100 dark:bg-indigo-950/70 text-indigo-800 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
                     Email Reminders Active
                   </span>
                 )}
@@ -514,7 +514,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
           <div className="flex items-center gap-2 shrink-0 flex-wrap">
             <button
               onClick={openPaymentModal}
-              className="px-3 py-1.5 bg-white border border-current rounded-lg text-xs font-bold hover:opacity-90 shadow-sm"
+              className="px-3 py-1.5 bg-white dark:bg-slate-800 border border-current rounded-lg text-xs font-bold hover:opacity-90 shadow-sm cursor-pointer"
             >
               Record Payment
             </button>
@@ -548,64 +548,64 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
       {/* Dashboard Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Previous Payment Date */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-1">
-          <div className="flex justify-between items-center text-xs font-semibold text-slate-400 uppercase tracking-wider">
+        <div className="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-1">
+          <div className="flex justify-between items-center text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
             <span>Previous Payment Date</span>
-            <Calendar size={16} className="text-indigo-500" />
+            <Calendar size={16} className="text-indigo-500 dark:text-indigo-400" />
           </div>
-          <div className="text-xl font-bold text-slate-900">{formattedLastPaymentDate}</div>
+          <div className="text-xl font-bold text-slate-900 dark:text-slate-100">{formattedLastPaymentDate}</div>
           <button 
             onClick={openPaymentModal}
-            className="text-xs text-indigo-600 font-semibold hover:underline"
+            className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline cursor-pointer"
           >
             Change date
           </button>
         </div>
 
         {/* Next Payment Due Date */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-1">
-          <div className="flex justify-between items-center text-xs font-semibold text-slate-400 uppercase tracking-wider">
+        <div className="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-1">
+          <div className="flex justify-between items-center text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
             <span>Next Payment Due</span>
-            <Clock size={16} className="text-amber-500" />
+            <Clock size={16} className="text-amber-500 dark:text-amber-400" />
           </div>
-          <div className="text-xl font-bold text-slate-900">{formattedNextDueDate}</div>
-          <div className="text-xs font-medium text-slate-500">
+          <div className="text-xl font-bold text-slate-900 dark:text-slate-100">{formattedNextDueDate}</div>
+          <div className="text-xs font-medium text-slate-500 dark:text-slate-400">
             {statusInfo.daysRemaining === 0 ? 'Due Today!' : statusInfo.daysRemaining > 0 ? `In ${statusInfo.daysRemaining} days` : `${Math.abs(statusInfo.daysRemaining)} days overdue`}
           </div>
         </div>
 
         {/* Pending Due Balance */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-1">
-          <div className="flex justify-between items-center text-xs font-semibold text-slate-400 uppercase tracking-wider">
+        <div className="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-1">
+          <div className="flex justify-between items-center text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
             <span>Pending Balance</span>
-            <IndianRupee size={16} className="text-rose-500" />
+            <IndianRupee size={16} className="text-rose-500 dark:text-rose-400" />
           </div>
-          <div className="text-xl font-bold text-rose-600">₹{financials.totalPendingAmount.toLocaleString('en-IN')}</div>
-          <div className="text-xs text-slate-500">
+          <div className="text-xl font-bold text-rose-600 dark:text-rose-400">₹{financials.totalPendingAmount.toLocaleString('en-IN')}</div>
+          <div className="text-xs text-slate-500 dark:text-slate-400">
             {financials.pendingInvoices.length} pending inv, {financials.uninvoicedWork.length} un-invoiced
           </div>
         </div>
 
         {/* Lifetime Paid Billed */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-1">
-          <div className="flex justify-between items-center text-xs font-semibold text-slate-400 uppercase tracking-wider">
+        <div className="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-1">
+          <div className="flex justify-between items-center text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
             <span>Total Lifetime Billed</span>
-            <CheckCircle2 size={16} className="text-emerald-500" />
+            <CheckCircle2 size={16} className="text-emerald-500 dark:text-emerald-400" />
           </div>
-          <div className="text-xl font-bold text-emerald-600">₹{financials.paidTotal.toLocaleString('en-IN')}</div>
-          <div className="text-xs text-slate-500">From paid invoices</div>
+          <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">₹{financials.paidTotal.toLocaleString('en-IN')}</div>
+          <div className="text-xs text-slate-500 dark:text-slate-400">From paid invoices</div>
         </div>
       </div>
 
       {/* Tabs Navigation */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="border-b border-slate-200 px-6 pt-4 flex gap-6">
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+        <div className="border-b border-slate-200 dark:border-slate-700 px-6 pt-4 flex gap-6">
           <button
             onClick={() => setActiveTab('work')}
             className={`pb-4 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 flex items-center gap-2 ${
               activeTab === 'work'
-                ? 'border-indigo-600 text-indigo-600'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400'
+                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
             <ClipboardList size={16} /> Work Logs ({clientWorkItems.length})
@@ -615,8 +615,8 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
             onClick={() => setActiveTab('invoices')}
             className={`pb-4 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 flex items-center gap-2 ${
               activeTab === 'invoices'
-                ? 'border-indigo-600 text-indigo-600'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400'
+                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
             <FileText size={16} /> Invoices ({clientInvoices.length})
@@ -626,8 +626,8 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
             onClick={() => setActiveTab('settings')}
             className={`pb-4 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 flex items-center gap-2 ${
               activeTab === 'settings'
-                ? 'border-indigo-600 text-indigo-600'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400'
+                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
             <DollarSign size={16} /> Client Rates & Info
@@ -639,13 +639,13 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
           <div className="p-6 space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="text-lg font-bold text-slate-900">Work Logs for {client.name}</h3>
-                <p className="text-xs text-slate-500">Track all completed video edits and services specifically for this client.</p>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Work Logs for {client.name}</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Track all completed video edits and services specifically for this client.</p>
               </div>
 
               <button
                 onClick={() => setIsWorkFormOpen(true)}
-                className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition-all shadow-sm"
+                className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition-all shadow-sm cursor-pointer"
               >
                 <Plus size={14} /> Log Work for {client.name.split(' ')[0]}
               </button>
@@ -653,23 +653,23 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
 
             {/* Quick Add / Edit Work Modal inside Client Dashboard */}
             {isWorkFormOpen && (
-              <div className="bg-slate-50 p-5 rounded-xl border border-indigo-200 space-y-4 animate-in fade-in">
+              <div className="bg-slate-50 dark:bg-slate-900/80 p-5 rounded-xl border border-indigo-200 dark:border-indigo-900/60 space-y-4 animate-in fade-in">
                 <div className="flex justify-between items-center">
-                  <h4 className="text-sm font-bold text-slate-900">{editingWorkId ? 'Edit Work Entry' : 'Add New Work Entry'}</h4>
-                  <button onClick={handleCancelWorkForm} className="text-slate-400 hover:text-slate-600">✕</button>
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">{editingWorkId ? 'Edit Work Entry' : 'Add New Work Entry'}</h4>
+                  <button onClick={handleCancelWorkForm} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">✕</button>
                 </div>
 
                 <form onSubmit={handleSaveWorkLog} className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   {client.subClients && client.subClients.length > 0 && (
-                    <div className="md:col-span-4 bg-purple-50/70 p-3 rounded-xl border border-purple-200">
+                    <div className="md:col-span-4 bg-purple-50/70 dark:bg-purple-950/30 p-3 rounded-xl border border-purple-200 dark:border-purple-800/60">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <label className="text-xs font-bold text-purple-900 flex items-center gap-1">
-                          <Users size={14} className="text-purple-600" /> Issued Sub-Client (Optional)
+                        <label className="text-xs font-bold text-purple-900 dark:text-purple-300 flex items-center gap-1">
+                          <Users size={14} className="text-purple-600 dark:text-purple-400" /> Issued Sub-Client (Optional)
                         </label>
                         <button
                           type="button"
                           onClick={() => setIsSubClientsModalOpen(true)}
-                          className="text-xs font-semibold text-purple-700 hover:text-purple-900 underline flex items-center gap-1 w-fit"
+                          className="text-xs font-semibold text-purple-700 dark:text-purple-400 hover:text-purple-900 dark:hover:text-purple-300 underline flex items-center gap-1 w-fit cursor-pointer"
                         >
                           + Manage Sub-Clients
                         </button>
@@ -677,7 +677,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                       <select
                         value={workFormData.subClientId}
                         onChange={e => setWorkFormData({ ...workFormData, subClientId: e.target.value })}
-                        className="mt-1.5 w-full bg-white border border-purple-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-purple-500"
+                        className="mt-1.5 w-full bg-white dark:bg-slate-800 border border-purple-300 dark:border-purple-700 rounded-lg px-3 py-2 text-xs font-semibold text-slate-800 dark:text-slate-200 outline-none focus:ring-2 focus:ring-purple-500"
                       >
                         <option value="">-- Direct Parent Client ({client.name}) --</option>
                         {client.subClients.map(sc => (
@@ -690,60 +690,60 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                   )}
 
                   <div className="md:col-span-2 space-y-1">
-                    <label className="text-xs font-medium text-slate-600">Work Description *</label>
+                    <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Work Description *</label>
                     <input
                       type="text"
                       required
                       placeholder="e.g. Wedding Highlight Reel Edit"
                       value={workFormData.description}
                       onChange={e => setWorkFormData({ ...workFormData, description: e.target.value })}
-                      className="w-full bg-white border border-slate-200 rounded px-3 py-2 text-sm outline-none focus:border-indigo-500"
+                      className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-indigo-500"
                     />
                   </div>
 
                   <div className="md:col-span-2 space-y-1">
-                    <label className="text-xs font-medium text-slate-600">Video / Post Link (Optional)</label>
+                    <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Video / Post Link (Optional)</label>
                     <input
                       type="text"
                       placeholder="https://instagram.com/reel/... or YouTube / Drive link"
                       value={workFormData.videoUrl}
                       onChange={e => setWorkFormData({ ...workFormData, videoUrl: e.target.value })}
-                      className="w-full bg-white border border-slate-200 rounded px-3 py-2 text-sm outline-none focus:border-indigo-500 font-mono"
+                      className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-indigo-500 font-mono"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-slate-600">Quantity *</label>
+                    <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Quantity *</label>
                     <input
                       type="number"
                       required
                       min="1"
                       value={workFormData.quantity}
                       onChange={e => setWorkFormData({ ...workFormData, quantity: e.target.value })}
-                      className="w-full bg-white border border-slate-200 rounded px-3 py-2 text-sm outline-none focus:border-indigo-500"
+                      className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-indigo-500"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-slate-600">Rate (₹) *</label>
+                    <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Rate (₹) *</label>
                     <input
                       type="number"
                       required
                       min="0"
                       value={workFormData.rate}
                       onChange={e => setWorkFormData({ ...workFormData, rate: e.target.value })}
-                      className="w-full bg-white border border-slate-200 rounded px-3 py-2 text-sm outline-none focus:border-indigo-500"
+                      className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-indigo-500"
                     />
                   </div>
 
                   <div className="md:col-span-2 space-y-1">
-                    <label className="text-xs font-medium text-slate-600">Completion Date *</label>
+                    <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Completion Date *</label>
                     <input
                       type="date"
                       required
                       value={workFormData.date}
                       onChange={e => setWorkFormData({ ...workFormData, date: e.target.value })}
-                      className="w-full bg-white border border-slate-200 rounded px-3 py-2 text-sm outline-none focus:border-indigo-500"
+                      className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-500"
                     />
                   </div>
 
@@ -751,13 +751,13 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                     <button
                       type="button"
                       onClick={handleCancelWorkForm}
-                      className="px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-200 rounded"
+                      className="px-3 py-2 text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded cursor-pointer"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs font-semibold transition-all shadow-sm"
+                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs font-semibold transition-all shadow-sm cursor-pointer"
                     >
                       {editingWorkId ? 'Save Changes' : 'Save Work Log'}
                     </button>
@@ -769,15 +769,15 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
             {/* Sub-Client Filter Tabs if sub-clients exist */}
             {client.subClients && client.subClients.length > 0 && (
               <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                <span className="text-xs font-bold text-slate-500 flex items-center gap-1 shrink-0">
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1 shrink-0">
                   <Filter size={12} /> Filter Work:
                 </span>
                 <button
                   onClick={() => setSubClientFilter('all')}
                   className={`px-3 py-1 rounded-full text-xs font-semibold transition-all shrink-0 cursor-pointer ${
                     subClientFilter === 'all'
-                      ? 'bg-slate-900 text-white shadow-xs'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-xs'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                   }`}
                 >
                   All ({clientWorkItems.length})
@@ -786,8 +786,8 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                   onClick={() => setSubClientFilter('direct')}
                   className={`px-3 py-1 rounded-full text-xs font-semibold transition-all shrink-0 cursor-pointer ${
                     subClientFilter === 'direct'
-                      ? 'bg-indigo-600 text-white shadow-xs'
-                      : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200'
+                      ? 'bg-indigo-600 dark:bg-indigo-500 text-white shadow-xs'
+                      : 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 border border-indigo-200 dark:border-indigo-800'
                   }`}
                 >
                   Direct / Parent ({clientWorkItems.filter(i => !i.subClientId).length})
@@ -800,8 +800,8 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                       onClick={() => setSubClientFilter(sc.id)}
                       className={`px-3 py-1 rounded-full text-xs font-semibold transition-all shrink-0 cursor-pointer ${
                         subClientFilter === sc.id
-                          ? 'bg-purple-600 text-white shadow-xs'
-                          : 'bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200'
+                          ? 'bg-purple-600 dark:bg-purple-500 text-white shadow-xs'
+                          : 'bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50 border border-purple-200 dark:border-purple-800'
                       }`}
                     >
                       Sub: {sc.name} ({count})
@@ -812,10 +812,10 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
             )}
 
             {/* Work Items Table */}
-            <div className="overflow-x-auto border border-slate-200 rounded-xl">
+            <div className="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-xl">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  <tr className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                     <th className="p-3.5">Date</th>
                     <th className="p-3.5">Description / Sub-Client / Link</th>
                     <th className="p-3.5 text-right">Quantity & Rate</th>
@@ -824,10 +824,10 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                     <th className="p-3.5 text-right">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 text-sm">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm">
                   {filteredClientWorkItems.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="p-8 text-center text-slate-400">
+                      <td colSpan={6} className="p-8 text-center text-slate-400 dark:text-slate-500">
                         {subClientFilter !== 'all' 
                           ? 'No work items logged under this selected filter.' 
                           : 'No work items logged for this client yet.'}
@@ -837,16 +837,16 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                     filteredClientWorkItems.map(item => {
                       const videoUrl = extractVideoUrl(item);
                       return (
-                        <tr key={item.id} className="hover:bg-slate-50/50">
-                          <td className="p-3.5 text-slate-600">
+                        <tr key={item.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/30">
+                          <td className="p-3.5 text-slate-600 dark:text-slate-300">
                             {new Date(item.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                           </td>
                           <td className="p-3.5">
                             <div className="flex flex-col gap-1">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <span className="font-medium text-slate-900">{item.description}</span>
+                                <span className="font-medium text-slate-900 dark:text-slate-100">{item.description}</span>
                                 {item.subClientName && (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60">
                                     <Users size={10} /> Sub: {item.subClientName}
                                   </span>
                                 )}
@@ -857,27 +857,27 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   onClick={(e) => e.stopPropagation()}
-                                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition-all cursor-pointer shrink-0 w-fit"
+                                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border border-indigo-200 dark:border-indigo-800/60 transition-all cursor-pointer shrink-0 w-fit"
                                   title={`Open video/post: ${videoUrl}`}
                                 >
-                                  <Play size={10} className="fill-indigo-700" /> Open Video/Post <ExternalLink size={10} />
+                                  <Play size={10} className="fill-indigo-700 dark:fill-indigo-300" /> Open Video/Post <ExternalLink size={10} />
                                 </a>
                               )}
                             </div>
                           </td>
-                          <td className="p-3.5 text-right text-slate-600">
+                          <td className="p-3.5 text-right text-slate-600 dark:text-slate-300">
                             {item.quantity} × ₹{item.rate.toLocaleString('en-IN')}
                           </td>
-                          <td className="p-3.5 text-right font-bold text-slate-900">
+                          <td className="p-3.5 text-right font-bold text-slate-900 dark:text-slate-100">
                             ₹{(item.quantity * item.rate).toLocaleString('en-IN')}
                           </td>
                           <td className="p-3.5 text-center">
                             {item.status === 'Invoiced' ? (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                                 <CheckCircle2 size={12} /> Invoiced
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
                                 <Clock size={12} /> Uninvoiced
                               </span>
                             )}
@@ -888,7 +888,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                                 href={videoUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-xs text-indigo-600 hover:text-indigo-800 font-semibold inline-flex items-center gap-0.5 mr-2"
+                                className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-semibold inline-flex items-center gap-0.5 mr-2"
                                 title="Open video/post in new tab"
                               >
                                 <ExternalLink size={12} /> Open
@@ -896,13 +896,13 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                             )}
                             <button
                               onClick={() => handleStartEditWork(item)}
-                              className="text-xs text-indigo-600 hover:text-indigo-800 font-semibold"
+                              className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-semibold cursor-pointer"
                             >
                               Edit
                             </button>
                             <button
                               onClick={() => handleDeleteWork(item.id)}
-                              className="text-xs text-rose-500 hover:text-rose-700 font-semibold"
+                              className="text-xs text-rose-500 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 font-semibold cursor-pointer"
                             >
                               Delete
                             </button>
@@ -922,15 +922,15 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
           <div className="p-6 space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="text-lg font-bold text-slate-900">Invoices for {client.name}</h3>
-                <p className="text-xs text-slate-500">History of generated PDF invoices and payment statuses.</p>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Invoices for {client.name}</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">History of generated PDF invoices and payment statuses.</p>
               </div>
             </div>
 
-            <div className="overflow-x-auto border border-slate-200 rounded-xl">
+            <div className="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-xl">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  <tr className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                     <th className="p-3.5">Invoice Date</th>
                     <th className="p-3.5">Reels / Line Items</th>
                     <th className="p-3.5 text-right">Total Amount</th>
@@ -938,10 +938,10 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                     <th className="p-3.5 text-right">Email Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 text-sm">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm">
                   {clientInvoices.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="p-8 text-center text-slate-400">
+                      <td colSpan={5} className="p-8 text-center text-slate-400 dark:text-slate-500">
                         No invoices generated for this client yet.
                       </td>
                     </tr>
@@ -950,18 +950,18 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                       const emailData = generateInvoiceEmailDetails(client, inv, null);
 
                       return (
-                        <tr key={inv.id} className="hover:bg-slate-50/50">
-                          <td className="p-3.5 text-slate-600">
-                            <div className="font-semibold text-slate-900">#{inv.id.substring(0, 8).toUpperCase()}</div>
-                            <div className="text-xs text-slate-500">{new Date(inv.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
+                        <tr key={inv.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/30">
+                          <td className="p-3.5 text-slate-600 dark:text-slate-300">
+                            <div className="font-semibold text-slate-900 dark:text-slate-100">#{inv.id.substring(0, 8).toUpperCase()}</div>
+                            <div className="text-xs text-slate-500 dark:text-slate-400">{new Date(inv.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
                           </td>
-                          <td className="p-3.5 text-slate-900">
+                          <td className="p-3.5 text-slate-900 dark:text-slate-100">
                             <div className="font-medium">{inv.reels.length} item(s)</div>
-                            <div className="text-xs text-slate-500 truncate max-w-xs">
+                            <div className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-xs">
                               {inv.reels.map(r => r.title).join(', ')}
                             </div>
                           </td>
-                          <td className="p-3.5 text-right font-bold text-slate-900">
+                          <td className="p-3.5 text-right font-bold text-slate-900 dark:text-slate-100">
                             ₹{inv.totalAmount.toLocaleString('en-IN')}
                           </td>
                           <td className="p-3.5 text-center">
@@ -976,8 +976,8 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                               }}
                               className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border cursor-pointer transition-transform hover:scale-105 ${
                                 inv.status === 'Paid' 
-                                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' 
-                                  : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
+                                  ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/60' 
+                                  : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/60'
                               }`}
                               title={`Click to mark as ${inv.status === 'Paid' ? 'Pending' : 'Paid & update last payment date'}`}
                             >
@@ -999,7 +999,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                                   navigator.clipboard.writeText(`Subject: ${emailData.subject}\n\n${emailData.body}`);
                                   alert(`Invoice email details for ${client.name} copied to clipboard!`);
                                 }}
-                                className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors"
+                                className="p-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
                                 title="Copy Email Text to Clipboard"
                               >
                                 <Copy size={13} />
@@ -1021,39 +1021,39 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
           <div className="p-6 space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="text-lg font-bold text-slate-900">Rates & Contact Info</h3>
-                <p className="text-xs text-slate-500">Configured pricing rates for video services for this client.</p>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Rates & Contact Info</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Configured pricing rates for video services for this client.</p>
               </div>
 
               <button
                 onClick={() => onEditClient(client)}
-                className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition-all"
+                className="flex items-center gap-1.5 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer"
               >
                 <Edit3 size={14} /> Modify Rates
               </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
-                <span className="text-xs text-slate-500 font-medium">Default Reel Rate</span>
-                <div className="text-xl font-bold text-indigo-600">₹{client.defaultRate.toLocaleString('en-IN')}</div>
-                <span className="text-xs text-slate-400">Per video edit</span>
+              <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Default Reel Rate</span>
+                <div className="text-xl font-bold text-indigo-600 dark:text-indigo-400">₹{client.defaultRate.toLocaleString('en-IN')}</div>
+                <span className="text-xs text-slate-400 dark:text-slate-500">Per video edit</span>
               </div>
 
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
-                <span className="text-xs text-slate-500 font-medium">On Site Shoot Rate</span>
-                <div className="text-xl font-bold text-indigo-600">
+              <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">On Site Shoot Rate</span>
+                <div className="text-xl font-bold text-indigo-600 dark:text-indigo-400">
                   {client.onSiteShootRate ? `₹${client.onSiteShootRate.toLocaleString('en-IN')}` : 'Not Set'}
                 </div>
-                <span className="text-xs text-slate-400">Per shoot day</span>
+                <span className="text-xs text-slate-400 dark:text-slate-500">Per shoot day</span>
               </div>
 
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
-                <span className="text-xs text-slate-500 font-medium">Website Making Rate</span>
-                <div className="text-xl font-bold text-indigo-600">
+              <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Website Making Rate</span>
+                <div className="text-xl font-bold text-indigo-600 dark:text-indigo-400">
                   {client.websiteMakingRate ? `₹${client.websiteMakingRate.toLocaleString('en-IN')}` : 'Not Set'}
                 </div>
-                <span className="text-xs text-slate-400">Per website project</span>
+                <span className="text-xs text-slate-400 dark:text-slate-500">Per website project</span>
               </div>
             </div>
           </div>
@@ -1068,36 +1068,36 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full p-6 space-y-5 animate-in fade-in zoom-in-95 cursor-default"
+            className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl max-w-md w-full p-6 space-y-5 animate-in fade-in zoom-in-95 cursor-default"
           >
-            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-              <h3 className="text-lg font-bold text-slate-900">Update Previous Payment Date</h3>
+            <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-700 pb-3">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Update Previous Payment Date</h3>
               <button 
                 onClick={() => setIsUpdatingPaymentDate(false)}
-                className="text-slate-400 hover:text-slate-600 font-bold"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
-            <p className="text-xs text-slate-500 leading-relaxed">
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
               Recording the date when this client last paid updates the 30-day payment cycle. The next due date will automatically shift 30 days after this date.
             </p>
 
             <form onSubmit={handleSavePaymentDate} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700">Payment Received Date *</label>
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Payment Received Date *</label>
                 <input
                   type="date"
                   required
                   value={newPaymentDate}
                   onChange={e => setNewPaymentDate(e.target.value)}
-                  className="w-full border border-slate-200 rounded-xl p-3 text-sm bg-slate-50 outline-none focus:border-indigo-600 font-medium"
+                  className="w-full border border-slate-200 dark:border-slate-600 rounded-xl p-3 text-sm bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-600 font-medium"
                 />
               </div>
 
               {financials.pendingInvoices.length > 0 && (
-                <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 flex items-start gap-2 text-xs text-amber-900">
+                <div className="p-3 bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-800/60 flex items-start gap-2 text-xs text-amber-900 dark:text-amber-300">
                   <input
                     type="checkbox"
                     id="markPaidCheckbox"
@@ -1115,14 +1115,14 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                 <button
                   type="button"
                   onClick={() => setIsUpdatingPaymentDate(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
+                  className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl cursor-pointer"
                 >
                   Cancel
                 </button>
 
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold transition-all shadow-sm"
+                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold transition-all shadow-sm cursor-pointer"
                 >
                   Save & Update Cycle
                 </button>
@@ -1143,15 +1143,15 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-xl w-full p-6 space-y-6 animate-in fade-in zoom-in-95 cursor-default max-h-[90vh] overflow-y-auto"
+            className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl max-w-xl w-full p-6 space-y-6 animate-in fade-in zoom-in-95 cursor-default max-h-[90vh] overflow-y-auto"
           >
-            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+            <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-700 pb-3">
               <div>
-                <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                  <Users className="w-5 h-5 text-purple-600" /> Manage Sub-Clients
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <Users className="w-5 h-5 text-purple-600 dark:text-purple-400" /> Manage Sub-Clients
                 </h3>
-                <p className="text-xs text-slate-500">
-                  Assign sub-clients or branches to <strong className="text-slate-700">{client.name}</strong>.
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Assign sub-clients or branches to <strong className="text-slate-700 dark:text-slate-200">{client.name}</strong>.
                 </p>
               </div>
               <button 
@@ -1160,103 +1160,103 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                   setEditingSubClientId(null);
                   setSubClientForm({ name: '', code: '', notes: '' });
                 }}
-                className="text-slate-400 hover:text-slate-600 font-bold p-1 rounded-lg"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold p-1 rounded-lg cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
             {/* Form to Add / Edit Sub-Client */}
-            <form onSubmit={handleSaveSubClient} className="bg-purple-50/60 p-4 rounded-xl border border-purple-200 space-y-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-purple-900">
+            <form onSubmit={handleSaveSubClient} className="bg-purple-50/60 dark:bg-purple-950/30 p-4 rounded-xl border border-purple-200 dark:border-purple-800/60 space-y-3">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-purple-900 dark:text-purple-300">
                 {editingSubClientId ? 'Edit Sub-Client' : '+ Create New Sub-Client'}
               </h4>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Sub-Client Name *</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Sub-Client Name *</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Branch Alpha, Brand X, Project B"
                     value={subClientForm.name}
                     onChange={e => setSubClientForm({ ...subClientForm, name: e.target.value })}
-                    className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-purple-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Code / Tag (Optional)</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Code / Tag (Optional)</label>
                   <input
                     type="text"
                     placeholder="e.g. BR-01, NYC, DEPT-A"
                     value={subClientForm.code}
                     onChange={e => setSubClientForm({ ...subClientForm, code: e.target.value })}
-                    className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500 font-mono"
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-purple-500 font-mono"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Phone Number (Optional)</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Phone Number (Optional)</label>
                   <input
                     type="tel"
                     placeholder="e.g. +91 98765 43210"
                     value={subClientForm.phone}
                     onChange={e => setSubClientForm({ ...subClientForm, phone: e.target.value })}
-                    className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-purple-500"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Email Address (Optional)</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Email Address (Optional)</label>
                   <input
                     type="email"
                     placeholder="subclient@example.com"
                     value={subClientForm.email}
                     onChange={e => setSubClientForm({ ...subClientForm, email: e.target.value })}
-                    className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-purple-500"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Logo URL (Optional)</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Logo URL (Optional)</label>
                   <input
                     type="url"
                     placeholder="https://example.com/logo.png"
                     value={subClientForm.logoUrl}
                     onChange={e => setSubClientForm({ ...subClientForm, logoUrl: e.target.value })}
-                    className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-purple-500"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Instagram (Optional)</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Instagram (Optional)</label>
                   <input
                     type="text"
                     placeholder="@username or link"
                     value={subClientForm.instagram}
                     onChange={e => setSubClientForm({ ...subClientForm, instagram: e.target.value })}
-                    className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-purple-500"
                   />
                 </div>
                 
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Client From (Optional)</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Client From (Optional)</label>
                   <input
                     type="month"
                     value={subClientForm.clientFrom}
                     onChange={e => setSubClientForm({ ...subClientForm, clientFrom: e.target.value })}
-                    className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-purple-500"
                   />
                 </div>
                 
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Work Experience / Notes (Optional)</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Work Experience / Notes (Optional)</label>
                   <textarea
                     placeholder="Details about past projects, years of experience, etc."
                     value={subClientForm.workExperience}
                     onChange={e => setSubClientForm({ ...subClientForm, workExperience: e.target.value })}
-                    className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500 resize-none h-16"
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-purple-500 resize-none h-16"
                   />
                 </div>
               </div>
@@ -1269,7 +1269,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                       setEditingSubClientId(null);
                       setSubClientForm({ name: '', code: '', notes: '' });
                     }}
-                    className="px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-200 rounded-lg"
+                    className="px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg cursor-pointer"
                   >
                     Cancel Edit
                   </button>
@@ -1285,12 +1285,12 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
 
             {/* List of Sub-Clients */}
             <div className="space-y-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 Registered Sub-Clients ({client.subClients?.length || 0})
               </h4>
 
               {(!client.subClients || client.subClients.length === 0) ? (
-                <div className="p-6 text-center bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-400">
+                <div className="p-6 text-center bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-400 dark:text-slate-500">
                   No sub-clients added yet for {client.name}. Add sub-clients above to issue work logs specifically for them.
                 </div>
               ) : (
@@ -1303,56 +1303,56 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                     return (
                       <div 
                         key={sc.id}
-                        className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-3 hover:bg-purple-50/30 transition-colors"
+                        className="p-3.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-between gap-3 hover:bg-purple-50/30 dark:hover:bg-purple-950/20 transition-colors"
                       >
                         <div className="flex gap-3 min-w-0">
                           {sc.logoUrl ? (
                             <img 
                               src={getDriveDirectImageUrl(sc.logoUrl)} 
                               alt={sc.name} 
-                              className="w-10 h-10 rounded-lg object-cover shadow-sm shrink-0 bg-purple-50" 
+                              className="w-10 h-10 rounded-lg object-cover shadow-sm shrink-0 bg-purple-50 dark:bg-purple-950" 
                               onError={(e) => {
                                 e.currentTarget.onerror = null;
                                 e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(sc.name)}&background=f3e8ff&color=7e22ce&size=128&rounded=true&bold=true`;
                               }}
                             />
                           ) : (
-                            <div className="w-10 h-10 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold shadow-sm shrink-0">
+                            <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 flex items-center justify-center font-bold shadow-sm shrink-0">
                               {sc.name.charAt(0).toUpperCase()}
                             </div>
                           )}
                           <div className="space-y-1 min-w-0">
                             <div className="flex items-center gap-2">
-                              <span className="font-bold text-slate-900 text-sm">{sc.name}</span>
+                              <span className="font-bold text-slate-900 dark:text-slate-100 text-sm">{sc.name}</span>
                               {sc.code && (
-                                <span className="px-2 py-0.5 bg-slate-200 text-slate-700 rounded font-mono text-[11px] font-semibold">
+                                <span className="px-2 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded font-mono text-[11px] font-semibold">
                                   {sc.code}
                                 </span>
                               )}
                               {sc.instagram && (
-                                <a href={sc.instagram.startsWith('http') ? sc.instagram : `https://instagram.com/${sc.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="text-pink-600 hover:underline text-[10px] ml-1">
+                                <a href={sc.instagram.startsWith('http') ? sc.instagram : `https://instagram.com/${sc.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="text-pink-600 dark:text-pink-400 hover:underline text-[10px] ml-1">
                                   IG
                                 </a>
                               )}
                             </div>
                             {(sc.phone || sc.email) && (
-                              <div className="flex items-center gap-2 text-[10px] text-slate-500">
+                              <div className="flex items-center gap-2 text-[10px] text-slate-500 dark:text-slate-400">
                                 {sc.phone && <span>{sc.phone}</span>}
                                 {sc.phone && sc.email && <span>•</span>}
                                 {sc.email && <span>{sc.email}</span>}
                               </div>
                             )}
                             {sc.workExperience && (
-                              <div className="text-[10px] text-slate-600 truncate max-w-xs">
-                                <span className="font-semibold">Exp:</span> {sc.workExperience}
+                              <div className="text-[10px] text-slate-600 dark:text-slate-400 truncate max-w-xs">
+                                <span className="font-semibold text-slate-700 dark:text-slate-300">Exp:</span> {sc.workExperience}
                               </div>
                             )}
-                          <div className="flex items-center gap-3 text-xs text-slate-500">
+                          <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
                             <span>{scWorkLogs.length} work log(s)</span>
                             <span>•</span>
-                            <span className="font-semibold text-slate-700">Total: ₹{totalVal.toLocaleString('en-IN')}</span>
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">Total: ₹{totalVal.toLocaleString('en-IN')}</span>
                             {uninvoicedVal > 0 && (
-                              <span className="text-amber-700 font-medium bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 text-[11px]">
+                              <span className="text-amber-700 dark:text-amber-300 font-medium bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded border border-amber-200 dark:border-amber-800 text-[11px]">
                                 ₹{uninvoicedVal.toLocaleString('en-IN')} pending invoice
                               </span>
                             )}
@@ -1363,14 +1363,14 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                         <div className="flex items-center gap-1 shrink-0">
                           <button
                             onClick={() => handleEditSubClientClick(sc)}
-                            className="p-1.5 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                            className="p-1.5 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 rounded-lg transition-colors cursor-pointer"
                             title="Edit Sub-Client"
                           >
                             <Edit2 size={14} />
                           </button>
                           <button
                             onClick={() => handleDeleteSubClientClick(sc.id, sc.name)}
-                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                            className="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg transition-colors cursor-pointer"
                             title="Delete Sub-Client"
                           >
                             <Trash2 size={14} />
@@ -1383,7 +1383,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
               )}
             </div>
 
-            <div className="flex justify-end border-t border-slate-100 pt-3">
+            <div className="flex justify-end border-t border-slate-100 dark:border-slate-700 pt-3">
               <button
                 type="button"
                 onClick={() => {
@@ -1391,7 +1391,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                   setEditingSubClientId(null);
                   setSubClientForm({ name: '', code: '', notes: '' });
                 }}
-                className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold shadow-xs"
+                className="px-5 py-2 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white rounded-xl text-xs font-semibold shadow-xs cursor-pointer"
               >
                 Done
               </button>

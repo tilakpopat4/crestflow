@@ -176,31 +176,31 @@ export default function CsvImportModal({ isOpen, onClose, userId, onImportSucces
 
   return (
     <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
-      <div className="bg-white rounded-2xl max-w-md w-full shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        <div className="flex justify-between items-center p-5 border-b border-slate-100">
-          <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <FileType size={20} className="text-indigo-600" />
+      <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-md w-full shadow-xl overflow-hidden border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-200">
+        <div className="flex justify-between items-center p-5 border-b border-slate-100 dark:border-slate-700">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <FileType size={20} className="text-indigo-600 dark:text-indigo-400" />
             Import Client Report
           </h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors" disabled={isImporting}>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer" disabled={isImporting}>
             <X size={20} />
           </button>
         </div>
 
         <div className="p-6 space-y-4">
-          <p className="text-sm text-slate-600 leading-relaxed">
+          <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
             Upload a CSV report generated from this app to restore the client, their work history, and invoice records.
           </p>
 
           {error && (
-            <div className="p-3 bg-rose-50 text-rose-700 text-xs font-medium rounded-xl flex items-start gap-2">
+            <div className="p-3 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-xs font-medium rounded-xl flex items-start gap-2">
               <AlertTriangle size={16} className="shrink-0 mt-0.5" />
               {error}
             </div>
           )}
 
           {successMsg && (
-            <div className="p-3 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-xl flex items-start gap-2">
+            <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-medium rounded-xl flex items-start gap-2">
               <CheckCircle2 size={16} className="shrink-0 mt-0.5" />
               {successMsg}
             </div>
@@ -208,21 +208,21 @@ export default function CsvImportModal({ isOpen, onClose, userId, onImportSucces
 
           <label className="block">
             <div className={`border-2 border-dashed rounded-2xl p-8 text-center transition-colors cursor-pointer
-              ${isImporting ? 'border-slate-200 bg-slate-50 opacity-75 cursor-not-allowed' : 'border-indigo-200 bg-indigo-50/50 hover:bg-indigo-50'}`}
+              ${isImporting ? 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 opacity-75 cursor-not-allowed' : 'border-indigo-200 dark:border-indigo-800/80 bg-indigo-50/50 dark:bg-indigo-950/30 hover:bg-indigo-50 dark:hover:bg-indigo-950/50'}`}
             >
               {isImporting ? (
                 <div className="flex flex-col items-center gap-3">
-                  <Loader2 size={32} className="text-indigo-600 animate-spin" />
-                  <span className="text-sm font-semibold text-slate-700">Processing file...</span>
+                  <Loader2 size={32} className="text-indigo-600 dark:text-indigo-400 animate-spin" />
+                  <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Processing file...</span>
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-3">
-                  <div className="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center">
-                    <Upload size={20} className="text-indigo-600" />
+                  <div className="w-12 h-12 bg-white dark:bg-slate-700 rounded-full shadow-sm flex items-center justify-center">
+                    <Upload size={20} className="text-indigo-600 dark:text-indigo-400" />
                   </div>
                   <div>
-                    <span className="text-sm font-bold text-slate-900 block">Click to upload CSV</span>
-                    <span className="text-xs text-slate-500">Must be a Client Work History export</span>
+                    <span className="text-sm font-bold text-slate-900 dark:text-slate-100 block">Click to upload CSV</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">Must be a Client Work History export</span>
                   </div>
                 </div>
               )}

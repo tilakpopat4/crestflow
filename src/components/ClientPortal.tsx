@@ -228,21 +228,21 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
   // If no client profile is linked to this Google account
   if (clients.length === 0) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-sans text-slate-900">
-        <div className="max-w-md w-full bg-white border border-slate-200 rounded-3xl p-8 shadow-2xl text-center space-y-6">
-          <div className="w-14 h-14 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto shadow-xs">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4 font-sans text-slate-900 dark:text-slate-100 transition-colors duration-150">
+        <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-2xl text-center space-y-6">
+          <div className="w-14 h-14 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center mx-auto shadow-xs">
             <UserCheck size={28} />
           </div>
           
           <div className="space-y-2">
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">No Client Account Linked</h1>
-            <p className="text-slate-500 text-sm leading-relaxed">
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">No Client Account Linked</h1>
+            <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
               We couldn't find any client projects associated with your Google email:
             </p>
-            <div className="bg-slate-50 border border-slate-100 rounded-xl py-2 px-3 text-xs font-mono text-indigo-600 break-all font-semibold">
+            <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl py-2 px-3 text-xs font-mono text-indigo-600 dark:text-indigo-400 break-all font-semibold">
               {user.email}
             </div>
-            <p className="text-slate-400 text-xs mt-2">
+            <p className="text-slate-400 dark:text-slate-500 text-xs mt-2">
               Please contact your freelancer to ensure they have entered this email in your client profile on CrestFlow.
             </p>
           </div>
@@ -250,7 +250,7 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
           <div className="pt-2 space-y-2">
             <button
               onClick={onLogout}
-              className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-2"
+              className="w-full py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-2"
             >
               <LogOut size={14} />
               Sign Out
@@ -382,8 +382,8 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
             onClick={() => setActiveTab('review')}
             className={`py-3 px-3 sm:px-4 text-xs font-bold border-b-2 transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
               activeTab === 'review'
-                ? 'border-indigo-600 text-indigo-600'
-                : 'border-transparent text-slate-500 hover:text-slate-700'
+                ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
+                : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
             }`}
           >
             <Star size={14} />
@@ -396,23 +396,23 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full space-y-6">
 
         {/* Client Greeting Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xs">
           <div>
-            <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">{currentClient?.name}</h1>
-            <p className="text-xs text-slate-500 mt-1">
-              Logged in as <span className="font-semibold text-slate-700">{user.email}</span> • Client Portal
+            <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">{currentClient?.name}</h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Logged in as <span className="font-semibold text-slate-700 dark:text-slate-300">{user.email}</span> • Client Portal
             </p>
           </div>
 
           {freelancerProfile && (
-            <div className="flex items-center gap-3 bg-indigo-50/70 border border-indigo-100 p-3 rounded-2xl">
+            <div className="flex items-center gap-3 bg-indigo-50/70 dark:bg-indigo-950/50 border border-indigo-100 dark:border-indigo-900/50 p-3 rounded-2xl">
               <div className="w-10 h-10 bg-indigo-600 text-white font-bold rounded-xl flex items-center justify-center text-sm shadow-xs">
                 {freelancerProfile.name.charAt(0)}
               </div>
               <div className="text-xs">
-                <div className="font-bold text-slate-900">{freelancerProfile.name}</div>
-                <div className="text-indigo-600 font-medium">{freelancerProfile.professionalTitle}</div>
-                <div className="text-slate-400 text-[10px]">{freelancerProfile.phone}</div>
+                <div className="font-bold text-slate-900 dark:text-white">{freelancerProfile.name}</div>
+                <div className="text-indigo-600 dark:text-indigo-400 font-medium">{freelancerProfile.professionalTitle}</div>
+                <div className="text-slate-400 dark:text-slate-500 text-[10px]">{freelancerProfile.phone}</div>
               </div>
             </div>
           )}
@@ -426,14 +426,14 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
             {paymentStatus && (
               <div className={`p-5 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs ${
                 paymentStatus.isNotificationRequired
-                  ? 'bg-amber-50 border-amber-200 text-amber-900'
-                  : 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                  ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200'
+                  : 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200'
               }`}>
                 <div className="flex items-start gap-3">
                   {paymentStatus.isNotificationRequired ? (
-                    <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                    <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                   ) : (
-                    <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                    <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
                   )}
                   <div>
                     <div className="font-bold text-sm">
@@ -447,7 +447,7 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
                   </div>
                 </div>
 
-                <div className="text-xs font-semibold px-3 py-1.5 bg-white/80 rounded-xl border shrink-0 text-center">
+                <div className="text-xs font-semibold px-3 py-1.5 bg-white/80 dark:bg-slate-900/80 rounded-xl border border-slate-200/80 dark:border-slate-700/80 text-slate-800 dark:text-slate-200 shrink-0 text-center">
                   {paymentStatus.daysRemaining >= 0 
                     ? `${paymentStatus.daysRemaining} days remaining in cycle` 
                     : `Delayed by ${Math.abs(paymentStatus.daysRemaining)} days`}
@@ -457,61 +457,61 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
 
             {/* Financial & Work Metrics */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Work Delivered</span>
-                <div className="text-2xl font-extrabold text-slate-900">{totalQuantityDelivered} Units</div>
-                <p className="text-[11px] text-slate-400">Total videos / reels produced</p>
+              <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-1">
+                <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Total Work Delivered</span>
+                <div className="text-2xl font-extrabold text-slate-900 dark:text-slate-100">{totalQuantityDelivered} Units</div>
+                <p className="text-[11px] text-slate-400 dark:text-slate-500">Total videos / reels produced</p>
               </div>
 
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Invoiced</span>
-                <div className="text-2xl font-extrabold text-slate-900">₹{totalInvoicedAmount.toLocaleString('en-IN')}</div>
-                <p className="text-[11px] text-slate-400">Across {invoices.length} invoices</p>
+              <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-1">
+                <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Total Invoiced</span>
+                <div className="text-2xl font-extrabold text-slate-900 dark:text-slate-100">₹{totalInvoicedAmount.toLocaleString('en-IN')}</div>
+                <p className="text-[11px] text-slate-400 dark:text-slate-500">Across {invoices.length} invoices</p>
               </div>
 
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Paid</span>
-                <div className="text-2xl font-extrabold text-emerald-600">₹{totalPaidAmount.toLocaleString('en-IN')}</div>
-                <p className="text-[11px] text-slate-400">Completed payments</p>
+              <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-1">
+                <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Total Paid</span>
+                <div className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">₹{totalPaidAmount.toLocaleString('en-IN')}</div>
+                <p className="text-[11px] text-slate-400 dark:text-slate-500">Completed payments</p>
               </div>
 
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Pending Balance</span>
-                <div className={`text-2xl font-extrabold ${totalPendingBalance > 0 ? 'text-amber-600' : 'text-slate-900'}`}>
+              <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-1">
+                <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Pending Balance</span>
+                <div className={`text-2xl font-extrabold ${totalPendingBalance > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-slate-100'}`}>
                   ₹{totalPendingBalance.toLocaleString('en-IN')}
                 </div>
-                <p className="text-[11px] text-slate-400">Due for pending invoices</p>
+                <p className="text-[11px] text-slate-400 dark:text-slate-500">Due for pending invoices</p>
               </div>
             </div>
 
             {/* Recent Work Log Snapshot */}
-            <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-xs space-y-4">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 shadow-xs space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="font-bold text-slate-900 text-sm uppercase tracking-wider flex items-center gap-2">
-                  <Layers size={16} className="text-indigo-600" />
+                <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm uppercase tracking-wider flex items-center gap-2">
+                  <Layers size={16} className="text-indigo-600 dark:text-indigo-400" />
                   Recent Work Delivered
                 </h3>
                 <button
                   onClick={() => setActiveTab('work')}
-                  className="text-xs text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1 cursor-pointer"
+                  className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-bold flex items-center gap-1 cursor-pointer"
                 >
                   View Full Log <ArrowRight size={13} />
                 </button>
               </div>
 
               {workItems.length === 0 ? (
-                <div className="py-8 text-center text-slate-400 text-xs">No work items logged yet.</div>
+                <div className="py-8 text-center text-slate-400 dark:text-slate-500 text-xs">No work items logged yet.</div>
               ) : (
-                <div className="divide-y divide-slate-100">
+                <div className="divide-y divide-slate-100 dark:divide-slate-800">
                   {workItems.slice(0, 5).map(item => (
                     <div key={item.id} className="py-3 flex items-center justify-between gap-4 text-xs">
                       <div className="space-y-0.5">
-                        <div className="font-semibold text-slate-900">{item.description}</div>
-                        <div className="text-slate-400">{new Date(item.date).toLocaleDateString()} • Qty: {item.quantity}</div>
+                        <div className="font-semibold text-slate-900 dark:text-slate-100">{item.description}</div>
+                        <div className="text-slate-400 dark:text-slate-500">{new Date(item.date).toLocaleDateString()} • Qty: {item.quantity}</div>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                          item.status === 'Invoiced' ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-100 text-slate-600'
+                          item.status === 'Invoiced' ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
                         }`}>
                           {item.status}
                         </span>
@@ -520,7 +520,7 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
                             href={item.videoUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
+                            className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg transition-colors"
                             title="View Video Link"
                           >
                             <Play size={12} />
@@ -543,13 +543,13 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
             {/* Search & Status Filters */}
             <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
               <div className="relative w-full sm:w-72">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
                 <input
                   type="text"
                   placeholder="Search work descriptions..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs outline-none focus:border-indigo-500"
+                  className="w-full pl-9 pr-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-indigo-500"
                 />
               </div>
 
@@ -561,7 +561,7 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer flex-1 sm:flex-initial ${
                       workStatusFilter === status
                         ? 'bg-indigo-600 text-white'
-                        : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                        : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
                     }`}
                   >
                     {status === 'all' ? 'All Work' : status}
@@ -571,13 +571,13 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
             </div>
 
             {/* Work Items Table */}
-            <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xs overflow-hidden">
               {filteredWork.length === 0 ? (
-                <div className="py-12 text-center text-slate-400 text-xs">No work items matching your criteria.</div>
+                <div className="py-12 text-center text-slate-400 dark:text-slate-500 text-xs">No work items matching your criteria.</div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
-                    <thead className="bg-slate-50/80 border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider">
+                    <thead className="bg-slate-50/80 dark:bg-slate-800/80 border-b border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-400 font-bold uppercase tracking-wider">
                       <tr>
                         <th className="py-3.5 px-4">Date</th>
                         <th className="py-3.5 px-4">Description</th>
@@ -587,26 +587,26 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
                         <th className="py-3.5 px-4 text-right">Links</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                       {filteredWork.map(item => (
-                        <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="py-3 px-4 font-mono text-slate-500 whitespace-nowrap">
+                        <tr key={item.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
+                          <td className="py-3 px-4 font-mono text-slate-500 dark:text-slate-400 whitespace-nowrap">
                             {new Date(item.date).toLocaleDateString()}
                           </td>
-                          <td className="py-3 px-4 font-medium text-slate-900 max-w-xs">
+                          <td className="py-3 px-4 font-medium text-slate-900 dark:text-slate-100 max-w-xs">
                             {item.description}
                           </td>
-                          <td className="py-3 px-4 font-semibold text-slate-700">
+                          <td className="py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">
                             {item.quantity}
                           </td>
-                          <td className="py-3 px-4 font-mono text-slate-700">
+                          <td className="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">
                             ₹{item.rate.toLocaleString('en-IN')}
                           </td>
                           <td className="py-3 px-4">
                             <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                               item.status === 'Invoiced' 
-                                ? 'bg-indigo-50 text-indigo-700 border border-indigo-100' 
-                                : 'bg-slate-100 text-slate-600 border border-slate-200'
+                                ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900/50' 
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700'
                             }`}>
                               {item.status}
                             </span>
@@ -617,13 +617,13 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
                                 href={item.videoUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-[11px] font-bold transition-colors"
+                                className="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 rounded-lg text-[11px] font-bold transition-colors"
                               >
                                 <Play size={11} />
                                 Preview
                               </a>
                             ) : (
-                              <span className="text-slate-300">-</span>
+                              <span className="text-slate-300 dark:text-slate-600">-</span>
                             )}
                           </td>
                         </tr>
@@ -651,7 +651,7 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                       invoiceStatusFilter === status
                         ? 'bg-indigo-600 text-white'
-                        : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                        : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
                     }`}
                   >
                     {status === 'all' ? 'All Invoices' : status}
@@ -663,34 +663,34 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
             {/* Invoices Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredInvoices.length === 0 ? (
-                <div className="col-span-full py-12 text-center text-slate-400 text-xs bg-white rounded-3xl border border-slate-200">
+                <div className="col-span-full py-12 text-center text-slate-400 dark:text-slate-500 text-xs bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800">
                   No invoices found.
                 </div>
               ) : (
                 filteredInvoices.map(inv => (
-                  <div key={inv.id} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex flex-col justify-between gap-4 hover:border-indigo-200 transition-colors">
+                  <div key={inv.id} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-xs flex flex-col justify-between gap-4 hover:border-indigo-200 dark:hover:border-indigo-800 transition-colors">
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-mono text-slate-400">{new Date(inv.date).toLocaleDateString()}</span>
+                        <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500">{new Date(inv.date).toLocaleDateString()}</span>
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-                          inv.status === 'Paid' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-amber-50 text-amber-700 border border-amber-100'
+                          inv.status === 'Paid' ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-800/60' : 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-100 dark:border-amber-800/60'
                         }`}>
                           {inv.status}
                         </span>
                       </div>
 
-                      <div className="text-xl font-extrabold text-slate-900">
+                      <div className="text-xl font-extrabold text-slate-900 dark:text-slate-100">
                         ₹{inv.totalAmount.toLocaleString('en-IN')}
                       </div>
 
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
                         Contains {inv.reels?.length || 0} line item(s)
                       </p>
                     </div>
 
                     <button
                       onClick={() => setViewInvoice(inv)}
-                      className="w-full py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full py-2 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <FileText size={13} />
                       View Invoice Details
@@ -705,42 +705,42 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
 
         {/* 4. REVIEW TAB */}
         {activeTab === 'review' && (
-          <div className="max-w-xl mx-auto bg-white rounded-3xl border border-slate-200/80 p-8 shadow-xs space-y-6">
+          <div className="max-w-xl mx-auto bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-8 shadow-xs space-y-6">
             <div className="text-center space-y-2">
-              <div className="w-12 h-12 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center mx-auto shadow-xs">
+              <div className="w-12 h-12 bg-amber-50 dark:bg-amber-950/40 border border-amber-100 dark:border-amber-800/40 text-amber-500 dark:text-amber-400 rounded-2xl flex items-center justify-center mx-auto shadow-xs">
                 <Star size={24} className="fill-amber-400" />
               </div>
-              <h2 className="text-xl font-extrabold text-slate-900">Rate & Review Your Experience</h2>
-              <p className="text-xs text-slate-500">
+              <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">Rate & Review Your Experience</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Your feedback helps {freelancerProfile?.name || 'your freelancer'} improve their editing services and workflow.
               </p>
             </div>
 
             {checkingReview ? (
-              <div className="text-center text-xs text-slate-400 py-4">Checking review status...</div>
+              <div className="text-center text-xs text-slate-400 dark:text-slate-500 py-4">Checking review status...</div>
             ) : existingReview || reviewSuccess ? (
               // Already reviewed — show permanently, no option to re-submit
-              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center space-y-3">
-                <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto" />
-                <h3 className="font-bold text-emerald-900 text-sm">Review Already Submitted</h3>
-                <p className="text-xs text-emerald-700">You've already rated this freelancer. Only one review per client is allowed.</p>
+              <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 rounded-2xl p-6 text-center space-y-3">
+                <CheckCircle2 className="w-10 h-10 text-emerald-600 dark:text-emerald-400 mx-auto" />
+                <h3 className="font-bold text-emerald-900 dark:text-emerald-200 text-sm">Review Already Submitted</h3>
+                <p className="text-xs text-emerald-700 dark:text-emerald-400">You've already rated this freelancer. Only one review per client is allowed.</p>
                 {/* Show their submitted rating */}
                 <div className="flex items-center justify-center gap-1 pt-1">
                   {[1,2,3,4,5].map(s => (
                     <Star
                       key={s}
                       size={20}
-                      className={s <= (existingReview?.rating ?? reviewRating) ? 'text-amber-400 fill-amber-400' : 'text-slate-200'}
+                      className={s <= (existingReview?.rating ?? reviewRating) ? 'text-amber-400 fill-amber-400' : 'text-slate-200 dark:text-slate-700'}
                     />
                   ))}
                 </div>
                 {existingReview?.feedbackText && (
-                  <p className="text-xs italic text-slate-600 bg-white border border-slate-100 rounded-xl px-4 py-3 text-left">
+                  <p className="text-xs italic text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl px-4 py-3 text-left">
                     "{existingReview.feedbackText}"
                   </p>
                 )}
                 {existingReview?.createdAt && (
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500">
                     Submitted on {new Date(existingReview.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </p>
                 )}
@@ -748,18 +748,18 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
             ) : (
               <form onSubmit={handleReviewSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 text-center">Your Rating</label>
+                  <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 text-center">Your Rating</label>
                   <div className="flex items-center justify-center gap-2">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
                         key={star}
                         type="button"
                         onClick={() => setReviewRating(star)}
-                        className="p-1 text-slate-300 hover:text-amber-400 transition-colors cursor-pointer"
+                        className="p-1 text-slate-300 dark:text-slate-600 hover:text-amber-400 transition-colors cursor-pointer"
                       >
                         <Star 
                           size={28} 
-                          className={star <= reviewRating ? 'text-amber-400 fill-amber-400' : 'text-slate-200'} 
+                          className={star <= reviewRating ? 'text-amber-400 fill-amber-400' : 'text-slate-200 dark:text-slate-700'} 
                         />
                       </button>
                     ))}
@@ -767,14 +767,14 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Feedback / Testimonial *</label>
+                  <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Feedback / Testimonial *</label>
                   <textarea
                     required
                     rows={4}
                     placeholder="Share your thoughts on turnaround time, video quality, and communication..."
                     value={reviewText}
                     onChange={(e) => setReviewText(e.target.value)}
-                    className="w-full p-3.5 text-xs border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-indigo-500 focus:bg-white resize-none"
+                    className="w-full p-3.5 text-xs border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-800 resize-none"
                   />
                 </div>
 
@@ -802,16 +802,16 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
       {/* Invoice Detail Modal */}
       {viewInvoice && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 relative my-8 space-y-6">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 dark:border-slate-800 relative my-8 space-y-6">
             
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
               <div className="flex items-center gap-2">
                 <Logo className="w-7 h-7 rounded-lg" />
-                <span className="font-extrabold text-slate-900 text-base">Invoice Details</span>
+                <span className="font-extrabold text-slate-900 dark:text-white text-base">Invoice Details</span>
               </div>
               <button
                 onClick={() => setViewInvoice(null)}
-                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer"
+                className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -820,16 +820,16 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
             {/* Invoice Header */}
             <div className="grid grid-cols-2 gap-4 text-xs">
               <div>
-                <span className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Billed To:</span>
-                <div className="font-bold text-slate-900 text-sm mt-0.5">{currentClient?.name}</div>
-                <div className="text-slate-500">{user.email}</div>
+                <span className="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[10px]">Billed To:</span>
+                <div className="font-bold text-slate-900 dark:text-slate-100 text-sm mt-0.5">{currentClient?.name}</div>
+                <div className="text-slate-500 dark:text-slate-400">{user.email}</div>
               </div>
 
               <div className="text-right">
-                <span className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Invoice Date:</span>
-                <div className="font-mono text-slate-900 font-semibold mt-0.5">{new Date(viewInvoice.date).toLocaleDateString()}</div>
+                <span className="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[10px]">Invoice Date:</span>
+                <div className="font-mono text-slate-900 dark:text-slate-100 font-semibold mt-0.5">{new Date(viewInvoice.date).toLocaleDateString()}</div>
                 <span className={`inline-block mt-1 px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-                  viewInvoice.status === 'Paid' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-amber-50 text-amber-700 border border-amber-100'
+                  viewInvoice.status === 'Paid' ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-800/60' : 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-100 dark:border-amber-800/60'
                 }`}>
                   {viewInvoice.status}
                 </span>
@@ -837,9 +837,9 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
             </div>
 
             {/* Line items list */}
-            <div className="border border-slate-200 rounded-2xl overflow-hidden">
+            <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
               <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 text-slate-400 font-bold uppercase text-[10px]">
+                <thead className="bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-400 font-bold uppercase text-[10px]">
                   <tr>
                     <th className="py-2.5 px-3">Item Description</th>
                     <th className="py-2.5 px-3">Qty</th>
@@ -847,13 +847,13 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
                     <th className="py-2.5 px-3 text-right">Amount</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {viewInvoice.reels?.map((reel, idx) => (
                     <tr key={idx}>
-                      <td className="py-2.5 px-3 font-medium text-slate-900">{reel.title}</td>
-                      <td className="py-2.5 px-3 text-slate-600">{reel.quantity}</td>
-                      <td className="py-2.5 px-3 font-mono text-slate-600">₹{reel.rate}</td>
-                      <td className="py-2.5 px-3 font-mono font-semibold text-slate-900 text-right">
+                      <td className="py-2.5 px-3 font-medium text-slate-900 dark:text-slate-100">{reel.title}</td>
+                      <td className="py-2.5 px-3 text-slate-600 dark:text-slate-300">{reel.quantity}</td>
+                      <td className="py-2.5 px-3 font-mono text-slate-600 dark:text-slate-300">₹{reel.rate}</td>
+                      <td className="py-2.5 px-3 font-mono font-semibold text-slate-900 dark:text-slate-100 text-right">
                         ₹{(reel.quantity * reel.rate).toLocaleString('en-IN')}
                       </td>
                     </tr>
@@ -863,20 +863,20 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
             </div>
 
             {/* Totals */}
-            <div className="space-y-1.5 text-xs text-slate-600 border-t border-slate-100 pt-3">
+            <div className="space-y-1.5 text-xs text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-slate-800 pt-3">
               {viewInvoice.discountAmount && viewInvoice.discountAmount > 0 ? (
-                <div className="flex justify-between text-emerald-600">
+                <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
                   <span>Discount:</span>
                   <span>-₹{viewInvoice.discountAmount}</span>
                 </div>
               ) : null}
               {viewInvoice.extraCostAmount && viewInvoice.extraCostAmount > 0 ? (
-                <div className="flex justify-between text-slate-600">
+                <div className="flex justify-between text-slate-600 dark:text-slate-300">
                   <span>Extra Costs ({viewInvoice.extraCostDescription || 'Additional'}):</span>
                   <span>+₹{viewInvoice.extraCostAmount}</span>
                 </div>
               ) : null}
-              <div className="flex justify-between text-base font-extrabold text-slate-900 pt-2 border-t border-slate-100">
+              <div className="flex justify-between text-base font-extrabold text-slate-900 dark:text-white pt-2 border-t border-slate-100 dark:border-slate-800">
                 <span>Total Amount:</span>
                 <span>₹{viewInvoice.totalAmount.toLocaleString('en-IN')}</span>
               </div>
@@ -884,8 +884,8 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
 
             {/* UPI Payment Option if Pending */}
             {viewInvoice.status === 'Pending' && freelancerProfile?.upiId && (
-              <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex flex-col sm:flex-row items-center gap-4">
-                <div className="w-24 h-24 bg-white p-1 rounded-xl border border-slate-200 shrink-0 flex items-center justify-center">
+              <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 rounded-2xl p-4 flex flex-col sm:flex-row items-center gap-4">
+                <div className="w-24 h-24 bg-white p-1 rounded-xl border border-slate-200 dark:border-slate-700 shrink-0 flex items-center justify-center">
                   <img
                     src={generateUPIQrUrl(freelancerProfile.upiId, freelancerProfile.name, viewInvoice.totalAmount)}
                     alt="UPI Payment QR"
@@ -893,8 +893,8 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
                   />
                 </div>
                 <div className="space-y-2 text-center sm:text-left flex-1">
-                  <div className="text-xs font-bold text-slate-900">Scan & Pay via any UPI App</div>
-                  <div className="text-[11px] text-slate-500 font-mono">UPI ID: {freelancerProfile.upiId}</div>
+                  <div className="text-xs font-bold text-slate-900 dark:text-slate-100">Scan & Pay via any UPI App</div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">UPI ID: {freelancerProfile.upiId}</div>
                   <a
                     href={generateUPILink(freelancerProfile.upiId, freelancerProfile.name, viewInvoice.totalAmount)}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors"
@@ -909,7 +909,7 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
               <button
                 type="button"
                 onClick={() => window.print()}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer"
+                className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer"
               >
                 <Printer size={13} /> Print Invoice
               </button>
