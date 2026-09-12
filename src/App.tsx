@@ -228,8 +228,8 @@ export default function App() {
 
     if (loading || (user && (profilesLoading || isBlocked === null))) {
       return (
-        <div className="flex items-center justify-center h-screen w-full bg-slate-50">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+        <div className="flex items-center justify-center h-screen w-full bg-slate-50 dark:bg-slate-950">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 dark:border-indigo-400"></div>
       </div>
     );
   }
@@ -237,7 +237,7 @@ export default function App() {
   // Render blocked user screen if they are blocked
   if (user && isBlocked === true) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900 p-4 relative overflow-hidden font-sans text-slate-100">
+      <div className="min-h-screen flex items-center justify-center bg-slate-900 dark:bg-slate-950 p-4 relative overflow-hidden font-sans text-slate-100">
         {/* Subtle grid background */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20"></div>
         
@@ -275,20 +275,20 @@ export default function App() {
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center h-screen w-full bg-slate-50">
-        <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 text-center max-w-md w-full font-sans">
+      <div className="flex items-center justify-center h-screen w-full bg-slate-50 dark:bg-slate-950">
+        <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 text-center max-w-md w-full font-sans">
           <div className="flex items-center justify-center gap-2.5 mb-4">
             <Logo className="w-10 h-10 shadow-xs" />
-            <span className="text-xl font-bold text-slate-900 tracking-tight">CrestFlow</span>
+            <span className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">CrestFlow</span>
           </div>
 
           {!isAdminRoute && (
-            <div className="flex bg-slate-100 p-1 rounded-xl mb-6">
+            <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl mb-6">
               <button
                 type="button"
                 onClick={() => setIsClientPortalMode(false)}
                 className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                  !isClientPortalMode ? 'bg-white text-indigo-600 shadow-xs' : 'text-slate-500 hover:text-slate-700'
+                  !isClientPortalMode ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                 }`}
               >
                 Freelancer Login
@@ -297,7 +297,7 @@ export default function App() {
                 type="button"
                 onClick={() => setIsClientPortalMode(true)}
                 className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                  isClientPortalMode ? 'bg-white text-indigo-600 shadow-xs' : 'text-slate-500 hover:text-slate-700'
+                  isClientPortalMode ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                 }`}
               >
                 Client Portal
@@ -305,10 +305,10 @@ export default function App() {
             </div>
           )}
 
-          <h1 className="text-xl font-bold text-slate-800 mb-1">
+          <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-1">
             {isAdminRoute ? 'Admin Portal' : (isClientPortalMode ? 'Client Portal Sign In' : 'Welcome Back')}
           </h1>
-          <p className="text-slate-500 mb-6 text-sm">
+          <p className="text-slate-500 dark:text-slate-400 mb-6 text-sm">
             {isAdminRoute 
               ? 'Please sign in with Google to authenticate and load the Admin database console.' 
               : (isClientPortalMode 
@@ -334,15 +334,15 @@ export default function App() {
           {isAdminRoute && (
             <button
               onClick={() => { window.location.href = '/' }}
-              className="mt-4 text-xs text-indigo-600 hover:text-indigo-800 font-medium transition-colors border-none bg-transparent cursor-pointer"
+              className="mt-4 text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium transition-colors border-none bg-transparent cursor-pointer"
             >
               Back to Main Website
             </button>
           )}
-          <div className="mt-8 flex justify-center gap-4 text-xs text-slate-400">
-            <a href="/privacy-policy.html" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 hover:underline transition-colors">Privacy Policy</a>
+          <div className="mt-8 flex justify-center gap-4 text-xs text-slate-400 dark:text-slate-500">
+            <a href="/privacy-policy.html" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline transition-colors">Privacy Policy</a>
             <span>•</span>
-            <a href="/terms-of-service.html" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 hover:underline transition-colors">Terms of Service</a>
+            <a href="/terms-of-service.html" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline transition-colors">Terms of Service</a>
           </div>
         </div>
       </div>
@@ -365,7 +365,7 @@ export default function App() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row h-screen w-full bg-slate-50 text-slate-900 overflow-hidden font-sans">
+    <div className="flex flex-col md:flex-row h-screen w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-hidden font-sans transition-colors duration-150">
       <Sidebar 
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 

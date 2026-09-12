@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, X, Users, ClipboardList, FileText, ExternalLink, Play, ArrowRight, CheckCircle2, Clock } from 'lucide-react';
+import { Search, X, Users, ClipboardList, FileText, ExternalLink, Play, ArrowRight, CheckCircle2, Clock, Sun, Moon, Monitor } from 'lucide-react';
 import { User } from 'firebase/auth';
 import { useFirestore } from '../hooks/useFirestore';
 import { Client, WorkItem, Invoice } from '../types';
 import { Tab } from '../App';
 import Logo from './Logo';
+import { useTheme } from '../context/ThemeContext';
 
 interface GlobalHeaderProps {
   user: User | null;
@@ -23,13 +24,16 @@ export default function GlobalHeader({
   globalQuery,
   setGlobalQuery
 }: GlobalHeaderProps) {
+  const { theme, resolvedTheme, setTheme, toggleTheme } = useTheme();
+  const [showThemeMenu, setShowThemeMenu] = useState(false);
+  const themeMenuRef = useRef<HTMLDivElement>(null);
+
   const { data: clients } = useFirestore<Client>('clients', user?.uid);
   const { data: workItems } = useFirestore<WorkItem>('workItems', user?.uid);
   const { data: invoices } = useFirestore<Invoice>('invoices', user?.uid);
 
   const [isOpen, setIsOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<'all' | 'clients' | 'work' | 'invoices'>('all');
-  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -46,6 +50,7 @@ export default function GlobalHeader({
         setIsOpen(true);
       } else if (e.key === 'Escape') {
         setIsOpen(false);
+        setShowThemeMenu(false);
       }
     };
 
@@ -58,6 +63,9 @@ export default function GlobalHeader({
     const handleClickOutside = (e: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
         setIsOpen(false);
+      }
+      if (themeMenuRef.current && !themeMenuRef.current.contains(e.target as Node)) {
+        setShowThemeMenu(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -121,18 +129,18 @@ export default function GlobalHeader({
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 py-3 md:px-8 transition-all">
+    <header className="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 px-4 py-3 md:px-8 transition-all">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         {/* Mobile Logo Branding */}
         <div className="flex items-center gap-2 md:hidden">
           <Logo className="w-7 h-7" />
-          <span className="font-extrabold text-slate-900 tracking-tight text-base">CrestFlow</span>
+          <span className="font-extrabold text-slate-900 dark:text-white tracking-tight text-base">CrestFlow</span>
         </div>
 
         {/* Real-time Global Search Input */}
         <div ref={searchRef} className="relative flex-1 max-w-2xl mx-auto md:mx-0">
           <div className="relative flex items-center">
-            <Search size={18} className="absolute left-3.5 text-slate-400 pointer-events-none transition-colors group-focus-within:text-indigo-600" />
+            <Search size={18} className="absolute left-3.5 text-slate-400 dark:text-slate-500 pointer-events-none transition-colors group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400" />
             <input
               ref={inputRef}
               type="text"
@@ -143,7 +151,7 @@ export default function GlobalHeader({
               }}
               onFocus={() => setIsOpen(true)}
               placeholder="Search clients, work items, video links, invoices..."
-              className="w-full bg-slate-100/80 hover:bg-slate-100 focus:bg-white text-slate-900 text-xs md:text-sm pl-10 pr-20 py-2 md:py-2.5 rounded-xl border border-slate-200/80 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all placeholder:text-slate-400"
+              className="w-full bg-slate-100/80 dark:bg-slate-800/90 hover:bg-slate-100 dark:hover:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs md:text-sm pl-10 pr-20 py-2 md:py-2.5 rounded-xl border border-slate-200/80 dark:border-slate-700/80 focus:border-indigo-500 dark:focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
             />
             <div className="absolute right-3 flex items-center gap-1.5">
               {globalQuery ? (
@@ -152,13 +160,13 @@ export default function GlobalHeader({
                     setGlobalQuery('');
                     setIsOpen(false);
                   }}
-                  className="p-1 hover:bg-slate-200 rounded-full text-slate-400 hover:text-slate-600 transition-colors"
+                  className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
                   title="Clear search"
                 >
                   <X size={14} />
                 </button>
               ) : (
-                <kbd className="hidden sm:inline-flex items-center gap-0.5 px-2 py-0.5 text-[10px] font-mono font-semibold text-slate-400 bg-white border border-slate-200 rounded-md shadow-2xs pointer-events-none">
+                <kbd className="hidden sm:inline-flex items-center gap-0.5 px-2 py-0.5 text-[10px] font-mono font-semibold text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md shadow-2xs pointer-events-none">
                   ⌘K
                 </kbd>
               )}
@@ -167,16 +175,16 @@ export default function GlobalHeader({
 
           {/* Real-Time Filter Search Results Dropdown */}
           {isOpen && cleanQuery.length > 0 && (
-            <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[80vh] flex flex-col">
+            <div className="absolute left-0 right-0 top-full mt-2 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[80vh] flex flex-col">
               {/* Category Filter Chips */}
-              <div className="p-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between text-xs gap-2 shrink-0 overflow-x-auto">
+              <div className="p-3 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs gap-2 shrink-0 overflow-x-auto">
                 <div className="flex items-center gap-1.5 font-medium">
                   <button
                     onClick={() => setActiveCategory('all')}
                     className={`px-2.5 py-1 rounded-lg transition-colors ${
                       activeCategory === 'all'
-                        ? 'bg-slate-900 text-white font-semibold'
-                        : 'text-slate-600 hover:bg-slate-200'
+                        ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                     }`}
                   >
                     All ({totalResults})
@@ -186,7 +194,7 @@ export default function GlobalHeader({
                     className={`px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1 ${
                       activeCategory === 'clients'
                         ? 'bg-indigo-600 text-white font-semibold'
-                        : 'text-slate-600 hover:bg-slate-200'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                     }`}
                   >
                     <Users size={12} /> Clients ({filteredClients.length})
@@ -196,7 +204,7 @@ export default function GlobalHeader({
                     className={`px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1 ${
                       activeCategory === 'work'
                         ? 'bg-indigo-600 text-white font-semibold'
-                        : 'text-slate-600 hover:bg-slate-200'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                     }`}
                   >
                     <ClipboardList size={12} /> Work Logs ({filteredWork.length})
@@ -206,57 +214,57 @@ export default function GlobalHeader({
                     className={`px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1 ${
                       activeCategory === 'invoices'
                         ? 'bg-indigo-600 text-white font-semibold'
-                        : 'text-slate-600 hover:bg-slate-200'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                     }`}
                   >
                     <FileText size={12} /> Invoices ({filteredInvoices.length})
                   </button>
                 </div>
 
-                <span className="text-[11px] text-slate-400 font-medium shrink-0">
+                <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium shrink-0">
                   Real-time results
                 </span>
               </div>
 
               {/* Scrollable Results Body */}
-              <div className="overflow-y-auto p-2 space-y-4 divide-y divide-slate-100">
+              <div className="overflow-y-auto p-2 space-y-4 divide-y divide-slate-100 dark:divide-slate-800">
                 {totalResults === 0 ? (
-                  <div className="p-8 text-center text-slate-500 space-y-2">
-                    <Search className="w-8 h-8 text-slate-300 mx-auto" />
-                    <p className="text-sm font-semibold text-slate-700">No matching records found</p>
-                    <p className="text-xs text-slate-400">Try searching for a client name, project description, reel title, or invoice ID.</p>
+                  <div className="p-8 text-center text-slate-500 dark:text-slate-400 space-y-2">
+                    <Search className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto" />
+                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">No matching records found</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500">Try searching for a client name, project description, reel title, or invoice ID.</p>
                   </div>
                 ) : (
                   <>
                     {/* Clients Section */}
                     {(activeCategory === 'all' || activeCategory === 'clients') && filteredClients.length > 0 && (
                       <div className="pt-2 first:pt-0">
-                        <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                          <Users size={12} className="text-indigo-500" /> Clients ({filteredClients.length})
+                        <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                          <Users size={12} className="text-indigo-500 dark:text-indigo-400" /> Clients ({filteredClients.length})
                         </div>
                         <div className="mt-1 space-y-1">
                           {filteredClients.map(client => (
                             <button
                               key={client.id}
                               onClick={() => handleSelectClient(client)}
-                              className="w-full text-left p-3 hover:bg-indigo-50/70 rounded-xl transition-all flex items-center justify-between group cursor-pointer border border-transparent hover:border-indigo-100"
+                              className="w-full text-left p-3 hover:bg-indigo-50/70 dark:hover:bg-indigo-950/40 rounded-xl transition-all flex items-center justify-between group cursor-pointer border border-transparent hover:border-indigo-100 dark:hover:border-indigo-900/50"
                             >
                               <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-sm shrink-0">
+                                <div className="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-bold flex items-center justify-center text-sm shrink-0">
                                   {client.name.charAt(0).toUpperCase()}
                                 </div>
                                 <div>
-                                  <div className="font-semibold text-xs md:text-sm text-slate-900 group-hover:text-indigo-700 flex items-center gap-2">
+                                  <div className="font-semibold text-xs md:text-sm text-slate-900 dark:text-slate-100 group-hover:text-indigo-700 dark:group-hover:text-indigo-400 flex items-center gap-2">
                                     {client.name}
                                   </div>
-                                  <div className="text-[11px] text-slate-400 flex items-center gap-3 mt-0.5">
+                                  <div className="text-[11px] text-slate-400 dark:text-slate-500 flex items-center gap-3 mt-0.5">
                                     {client.email && <span>{client.email}</span>}
                                     {client.phone && <span>{client.phone}</span>}
                                     <span>Rate: ₹{client.defaultRate}/reel</span>
                                   </div>
                                 </div>
                               </div>
-                              <span className="text-xs font-semibold text-indigo-600 group-hover:translate-x-0.5 transition-transform flex items-center gap-1 shrink-0">
+                              <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-1 shrink-0">
                                 View Client <ArrowRight size={13} />
                               </span>
                             </button>
@@ -268,8 +276,8 @@ export default function GlobalHeader({
                     {/* Work Logs Section */}
                     {(activeCategory === 'all' || activeCategory === 'work') && filteredWork.length > 0 && (
                       <div className="pt-2 first:pt-0">
-                        <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                          <ClipboardList size={12} className="text-indigo-500" /> Work Logs ({filteredWork.length})
+                        <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                          <ClipboardList size={12} className="text-indigo-500 dark:text-indigo-400" /> Work Logs ({filteredWork.length})
                         </div>
                         <div className="mt-1 space-y-1">
                           {filteredWork.map(work => {
@@ -278,35 +286,35 @@ export default function GlobalHeader({
                               <button
                                 key={work.id}
                                 onClick={() => handleSelectWork(work)}
-                                className="w-full text-left p-3 hover:bg-indigo-50/70 rounded-xl transition-all flex items-center justify-between group cursor-pointer border border-transparent hover:border-indigo-100"
+                                className="w-full text-left p-3 hover:bg-indigo-50/70 dark:hover:bg-indigo-950/40 rounded-xl transition-all flex items-center justify-between group cursor-pointer border border-transparent hover:border-indigo-100 dark:hover:border-indigo-900/50"
                               >
                                 <div className="flex items-center gap-3 min-w-0 pr-2">
-                                  <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 font-bold flex items-center justify-center text-xs shrink-0">
-                                    <ClipboardList size={16} className="text-slate-600" />
+                                  <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold flex items-center justify-center text-xs shrink-0">
+                                    <ClipboardList size={16} className="text-slate-600 dark:text-slate-400" />
                                   </div>
                                   <div className="min-w-0">
-                                    <div className="font-semibold text-xs md:text-sm text-slate-900 group-hover:text-indigo-700 truncate">
+                                    <div className="font-semibold text-xs md:text-sm text-slate-900 dark:text-slate-100 group-hover:text-indigo-700 dark:group-hover:text-indigo-400 truncate">
                                       {work.description}
                                     </div>
-                                    <div className="text-[11px] text-slate-400 flex items-center gap-2.5 mt-0.5 flex-wrap">
-                                      <span className="font-medium text-slate-600">{client ? client.name : 'Unknown Client'}</span>
+                                    <div className="text-[11px] text-slate-400 dark:text-slate-500 flex items-center gap-2.5 mt-0.5 flex-wrap">
+                                      <span className="font-medium text-slate-600 dark:text-slate-400">{client ? client.name : 'Unknown Client'}</span>
                                       <span>•</span>
                                       <span>{new Date(work.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
                                       <span>•</span>
-                                      <span className="font-semibold text-slate-700">₹{(work.quantity * work.rate).toLocaleString('en-IN')}</span>
+                                      <span className="font-semibold text-slate-700 dark:text-slate-300">₹{(work.quantity * work.rate).toLocaleString('en-IN')}</span>
                                       {work.status === 'Invoiced' ? (
-                                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
                                           <CheckCircle2 size={10} /> Invoiced
                                         </span>
                                       ) : (
-                                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[10px] font-semibold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
                                           <Clock size={10} /> Uninvoiced
                                         </span>
                                       )}
                                     </div>
                                   </div>
                                 </div>
-                                <span className="text-xs font-semibold text-indigo-600 group-hover:translate-x-0.5 transition-transform flex items-center gap-1 shrink-0">
+                                <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-1 shrink-0">
                                   View Log <ArrowRight size={13} />
                                 </span>
                               </button>
@@ -319,40 +327,42 @@ export default function GlobalHeader({
                     {/* Invoices Section */}
                     {(activeCategory === 'all' || activeCategory === 'invoices') && filteredInvoices.length > 0 && (
                       <div className="pt-2 first:pt-0">
-                        <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                          <FileText size={12} className="text-indigo-500" /> Invoices ({filteredInvoices.length})
+                        <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                          <FileText size={12} className="text-indigo-500 dark:text-indigo-400" /> Invoices ({filteredInvoices.length})
                         </div>
                         <div className="mt-1 space-y-1">
                           {filteredInvoices.map(inv => (
                             <button
                               key={inv.id}
                               onClick={() => handleSelectInvoice(inv)}
-                              className="w-full text-left p-3 hover:bg-indigo-50/70 rounded-xl transition-all flex items-center justify-between group cursor-pointer border border-transparent hover:border-indigo-100"
+                              className="w-full text-left p-3 hover:bg-indigo-50/70 dark:hover:bg-indigo-950/40 rounded-xl transition-all flex items-center justify-between group cursor-pointer border border-transparent hover:border-indigo-100 dark:hover:border-indigo-900/50"
                             >
                               <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 font-mono text-xs font-bold flex items-center justify-center shrink-0">
+                                <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 font-mono text-xs font-bold flex items-center justify-center shrink-0">
                                   #{inv.id.substring(0, 4).toUpperCase()}
                                 </div>
                                 <div>
-                                  <div className="font-semibold text-xs md:text-sm text-slate-900 group-hover:text-indigo-700 flex items-center gap-2">
+                                  <div className="font-semibold text-xs md:text-sm text-slate-900 dark:text-slate-100 group-hover:text-indigo-700 dark:group-hover:text-indigo-400 flex items-center gap-2">
                                     <span>#{inv.id.substring(0, 8).toUpperCase()}</span>
-                                    <span className="text-slate-400 font-normal">•</span>
+                                    <span className="text-slate-400 dark:text-slate-600 font-normal">•</span>
                                     <span>{inv.clientName}</span>
                                   </div>
-                                  <div className="text-[11px] text-slate-400 flex items-center gap-2 mt-0.5">
+                                  <div className="text-[11px] text-slate-400 dark:text-slate-500 flex items-center gap-2 mt-0.5">
                                     <span>{new Date(inv.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                                     <span>•</span>
-                                    <span className="font-bold text-slate-900">₹{inv.totalAmount.toLocaleString('en-IN')}</span>
+                                    <span className="font-bold text-slate-900 dark:text-slate-200">₹{inv.totalAmount.toLocaleString('en-IN')}</span>
                                     <span>•</span>
                                     <span className={`font-semibold px-1.5 py-0.2 rounded text-[10px] ${
-                                      inv.status === 'Paid' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
+                                      inv.status === 'Paid'
+                                        ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400'
+                                        : 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400'
                                     }`}>
                                       {inv.status}
                                     </span>
                                   </div>
                                 </div>
                               </div>
-                              <span className="text-xs font-semibold text-indigo-600 group-hover:translate-x-0.5 transition-transform flex items-center gap-1 shrink-0">
+                              <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-1 shrink-0">
                                 View Invoice <ArrowRight size={13} />
                               </span>
                             </button>
@@ -363,6 +373,70 @@ export default function GlobalHeader({
                   </>
                 )}
               </div>
+            </div>
+          )}
+        </div>
+
+        {/* Theme Switcher Button & Dropdown */}
+        <div className="relative shrink-0" ref={themeMenuRef}>
+          <button
+            onClick={() => setShowThemeMenu(!showThemeMenu)}
+            className="p-2 md:px-3 md:py-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200/80 dark:border-slate-700/70 transition-all flex items-center gap-2 cursor-pointer shadow-2xs group"
+            title={`Current theme: ${theme === 'system' ? `Auto (${resolvedTheme})` : theme}. Click to change theme.`}
+            aria-label="Toggle Theme"
+          >
+            {resolvedTheme === 'dark' ? (
+              <Sun size={17} className="text-amber-400 group-hover:rotate-45 transition-transform duration-300" />
+            ) : (
+              <Moon size={17} className="text-indigo-600 group-hover:-rotate-12 transition-transform duration-300" />
+            )}
+            <span className="hidden lg:inline-block text-xs font-semibold capitalize">
+              {theme === 'system' ? `Auto (${resolvedTheme})` : theme}
+            </span>
+          </button>
+
+          {/* Theme Dropdown Menu */}
+          {showThemeMenu && (
+            <div className="absolute right-0 top-full mt-2 w-44 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-800 p-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                Theme Options
+              </div>
+
+              <button
+                onClick={() => { setTheme('light'); setShowThemeMenu(false); }}
+                className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                  theme === 'light'
+                    ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-semibold'
+                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                }`}
+              >
+                <Sun size={15} className="text-amber-500" />
+                <span>Light Theme</span>
+              </button>
+
+              <button
+                onClick={() => { setTheme('dark'); setShowThemeMenu(false); }}
+                className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                  theme === 'dark'
+                    ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-semibold'
+                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                }`}
+              >
+                <Moon size={15} className="text-indigo-400" />
+                <span>Dark Theme</span>
+              </button>
+
+              <button
+                onClick={() => { setTheme('system'); setShowThemeMenu(false); }}
+                className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                  theme === 'system'
+                    ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-semibold'
+                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                }`}
+              >
+                <Monitor size={15} className="text-slate-400" />
+                <span>System Auto</span>
+              </button>
             </div>
           )}
         </div>

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { User } from 'firebase/auth';
 import { UserProfile } from '../types';
-import { Settings, X, Save } from 'lucide-react';
+import { Settings, X, Save, Sun, Moon, Monitor } from 'lucide-react';
+import { useTheme, Theme } from '../context/ThemeContext';
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ export default function ProfileModal({
   onSave,
   isMandatory = false
 }: ProfileModalProps) {
+  const { theme, setTheme } = useTheme();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [upiId, setUpiId] = useState('');
@@ -83,15 +85,15 @@ export default function ProfileModal({
     <div
       id="profile-modal-overlay"
       onClick={() => { if (!isMandatory && onClose) onClose(); }}
-      className={`fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 ${!isMandatory ? 'cursor-pointer' : ''}`}
+      className={`fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 ${!isMandatory ? 'cursor-pointer' : ''}`}
     >
       <div
         id="profile-modal-container"
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-xl shadow-2xl border border-slate-200 max-w-md w-full max-h-[90vh] md:max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 cursor-default"
+        className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800 max-w-md w-full max-h-[90vh] md:max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 cursor-default"
       >
         {/* Header */}
-        <div className="bg-slate-900 text-white p-5 flex items-center justify-between">
+        <div className="bg-slate-900 text-white p-5 flex items-center justify-between border-b border-slate-800">
           <div className="flex items-center gap-2.5">
             <Settings className="w-5 h-5 text-indigo-400" />
             <h2 className="font-semibold text-lg">
@@ -111,23 +113,70 @@ export default function ProfileModal({
         {/* Content Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1">
           {isMandatory && (
-            <div className="bg-indigo-50 border border-indigo-100 text-indigo-800 p-3.5 rounded-lg text-xs leading-relaxed mb-2">
+            <div className="bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/50 text-indigo-800 dark:text-indigo-300 p-3.5 rounded-lg text-xs leading-relaxed mb-2">
               Welcome! Configure your name, phone number, and UPI ID for invoices and payment links.
             </div>
           )}
 
           {error && (
-            <div className="bg-red-50 border border-red-100 text-red-700 p-3 rounded-lg text-xs font-medium">
+            <div className="bg-red-50 dark:bg-red-950/60 border border-red-100 dark:border-red-900/50 text-red-700 dark:text-red-300 p-3 rounded-lg text-xs font-medium">
               {error}
             </div>
           )}
 
+          {/* Theme Preference Option */}
+          <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 p-3.5 rounded-xl space-y-2">
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              App Appearance / Theme Mode
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => setTheme('light')}
+                className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+                  theme === 'light'
+                    ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 border-indigo-500 shadow-xs'
+                    : 'bg-white/60 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-700'
+                }`}
+              >
+                <Sun size={14} className="text-amber-500" />
+                <span>Light</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setTheme('dark')}
+                className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+                  theme === 'dark'
+                    ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 border-indigo-500 shadow-xs'
+                    : 'bg-white/60 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-700'
+                }`}
+              >
+                <Moon size={14} className="text-indigo-400" />
+                <span>Dark</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setTheme('system')}
+                className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+                  theme === 'system'
+                    ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 border-indigo-500 shadow-xs'
+                    : 'bg-white/60 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-700'
+                }`}
+              >
+                <Monitor size={14} className="text-slate-400" />
+                <span>Auto</span>
+              </button>
+            </div>
+          </div>
+
           <div>
-            <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">Your Full Name *</label>
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Your Full Name *</label>
             <input
               type="text"
               placeholder="e.g. John Doe"
-              className="w-full border border-slate-200 rounded-lg px-3.5 py-2 text-sm bg-slate-50 outline-none transition-all focus:border-indigo-500 focus:bg-white"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-lg px-3.5 py-2 text-sm bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 outline-none transition-all focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -135,11 +184,11 @@ export default function ProfileModal({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">Professional Title *</label>
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Professional Title *</label>
             <input
               type="text"
               placeholder="e.g. Video Editor"
-              className="w-full border border-slate-200 rounded-lg px-3.5 py-2 text-sm bg-slate-50 outline-none transition-all focus:border-indigo-500 focus:bg-white"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-lg px-3.5 py-2 text-sm bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 outline-none transition-all focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900"
               value={professionalTitle}
               onChange={(e) => setProfessionalTitle(e.target.value)}
               required
@@ -147,11 +196,11 @@ export default function ProfileModal({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">Services Description *</label>
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Services Description *</label>
             <input
               type="text"
               placeholder="e.g. Video Editing Services"
-              className="w-full border border-slate-200 rounded-lg px-3.5 py-2 text-sm bg-slate-50 outline-none transition-all focus:border-indigo-500 focus:bg-white"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-lg px-3.5 py-2 text-sm bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 outline-none transition-all focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900"
               value={servicesDescription}
               onChange={(e) => setServicesDescription(e.target.value)}
               required
@@ -159,11 +208,11 @@ export default function ProfileModal({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">Phone Number *</label>
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Phone Number *</label>
             <input
               type="text"
               placeholder="e.g. +91 98765 43210"
-              className="w-full border border-slate-200 rounded-lg px-3.5 py-2 text-sm bg-slate-50 outline-none transition-all focus:border-indigo-500 focus:bg-white"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-lg px-3.5 py-2 text-sm bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 outline-none transition-all focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               required
@@ -171,37 +220,37 @@ export default function ProfileModal({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">UPI ID (for pay link & QR Code) *</label>
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">UPI ID (for pay link & QR Code) *</label>
             <input
               type="text"
               placeholder="e.g. name@upi"
-              className="w-full border border-slate-200 rounded-lg px-3.5 py-2 text-sm bg-slate-50 outline-none transition-all focus:border-indigo-500 focus:bg-white font-mono"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-lg px-3.5 py-2 text-sm bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 outline-none transition-all focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 font-mono"
               value={upiId}
               onChange={(e) => setUpiId(e.target.value)}
               required
             />
-            <p className="text-[10px] text-slate-400 mt-1">This UPI ID is used to generate custom payment links & UPI QR codes on invoices.</p>
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">This UPI ID is used to generate custom payment links & UPI QR codes on invoices.</p>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">Gemini API Key (Optional)</label>
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Gemini API Key (Optional)</label>
             <input
               type="password"
               placeholder="AI Work Summarizer API Key"
-              className="w-full border border-slate-200 rounded-lg px-3.5 py-2 text-sm bg-slate-50 outline-none transition-all focus:border-indigo-500 focus:bg-white font-mono"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-lg px-3.5 py-2 text-sm bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 outline-none transition-all focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 font-mono"
               value={geminiApiKey}
               onChange={(e) => setGeminiApiKey(e.target.value)}
             />
-            <p className="text-[10px] text-slate-400 mt-1">Add your own API key to use the AI Work Summarizer. Get one from Google AI Studio.</p>
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">Add your own API key to use the AI Work Summarizer. Get one from Google AI Studio.</p>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider font-sans">Your Referral & Services Link</label>
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider font-sans">Your Referral & Services Link</label>
             <div className="flex gap-2">
               <input
                 type="text"
                 readOnly
-                className="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-xs bg-slate-100 outline-none font-mono text-slate-600"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-xs bg-slate-100 dark:bg-slate-800 outline-none font-mono text-slate-600 dark:text-slate-300"
                 value={`${window.location.origin}/?freelancerId=${user.uid}`}
               />
               <button
@@ -215,15 +264,15 @@ export default function ProfileModal({
                 Copy Link
               </button>
             </div>
-            <p className="text-[10px] text-slate-400 mt-1">Share this profile link with clients. They can view your services and claim/inquire directly.</p>
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">Share this profile link with clients. They can view your services and claim/inquire directly.</p>
           </div>
 
-          <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
+          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
               disabled={isSaving}
-              className="px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 cursor-pointer"
+              className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 cursor-pointer"
             >
               Cancel
             </button>

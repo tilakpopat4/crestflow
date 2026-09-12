@@ -32,8 +32,11 @@ import {
   ShieldCheck,
   UserCheck,
   Sparkles,
-  QrCode
+  QrCode,
+  Sun,
+  Moon
 } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 interface ClientPortalProps {
   user: User;
@@ -42,6 +45,7 @@ interface ClientPortalProps {
 }
 
 export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: ClientPortalProps) {
+  const { resolvedTheme, toggleTheme } = useTheme();
   const [clients, setClients] = useState<Client[]>([]);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [freelancerProfile, setFreelancerProfile] = useState<UserProfile | null>(null);
@@ -270,29 +274,29 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
   });
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 flex flex-col selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 flex flex-col selection:bg-indigo-500 selection:text-white transition-colors duration-150">
       
       {/* Top Navbar */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+      <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <Logo className="w-8 h-8 rounded-xl shadow-xs" />
-              <span className="text-lg font-extrabold text-slate-900 tracking-tight">CrestFlow</span>
+              <span className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">CrestFlow</span>
             </div>
-            <span className="hidden sm:inline-block px-2.5 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-100 text-[11px] font-bold rounded-full uppercase tracking-wider">
+            <span className="hidden sm:inline-block px-2.5 py-0.5 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900/50 text-[11px] font-bold rounded-full uppercase tracking-wider">
               Client Portal
             </span>
           </div>
 
           {/* Center / Freelancer Info Badge */}
           {freelancerProfile && (
-            <div className="hidden md:flex items-center gap-2 bg-slate-50 border border-slate-200/80 px-3 py-1.5 rounded-full text-xs text-slate-600">
-              <Sparkles size={13} className="text-indigo-600" />
-              <span>Freelancer: <strong className="text-slate-900">{freelancerProfile.name}</strong></span>
-              <span className="text-slate-300">•</span>
-              <span className="text-indigo-600 font-medium">{freelancerProfile.professionalTitle}</span>
+            <div className="hidden md:flex items-center gap-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 px-3 py-1.5 rounded-full text-xs text-slate-600 dark:text-slate-300">
+              <Sparkles size={13} className="text-indigo-600 dark:text-indigo-400" />
+              <span>Freelancer: <strong className="text-slate-900 dark:text-white">{freelancerProfile.name}</strong></span>
+              <span className="text-slate-300 dark:text-slate-600">•</span>
+              <span className="text-indigo-600 dark:text-indigo-400 font-medium">{freelancerProfile.professionalTitle}</span>
             </div>
           )}
 
@@ -303,7 +307,7 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
               <select
                 value={selectedClientId || ''}
                 onChange={(e) => setSelectedClientId(e.target.value)}
-                className="text-xs font-semibold bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 outline-none"
+                className="text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-700 dark:text-slate-200 outline-none"
               >
                 {clients.map(c => (
                   <option key={c.id} value={c.id}>{c.name}</option>
@@ -311,11 +315,23 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
               </select>
             )}
 
-
+            {/* Theme Toggle Button */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer flex items-center justify-center"
+              title={`Switch Theme (Current: ${resolvedTheme})`}
+              aria-label="Toggle Theme"
+            >
+              {resolvedTheme === 'dark' ? (
+                <Sun size={15} className="text-amber-400" />
+              ) : (
+                <Moon size={15} className="text-indigo-600" />
+              )}
+            </button>
 
             <button
               onClick={onLogout}
-              className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-red-600 bg-slate-50 hover:bg-red-50 border border-slate-200 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 bg-slate-50 dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-950/40 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
               title="Sign Out"
             >
               <LogOut size={14} />

@@ -1,9 +1,10 @@
-import { LayoutDashboard, Users, FileText, LogOut, ClipboardList, Settings, ShieldCheck, MessageSquare } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, LogOut, ClipboardList, Settings, ShieldCheck, MessageSquare, Sun, Moon } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Tab } from '../App';
 import { User } from 'firebase/auth';
 import Logo from './Logo';
 import { UserProfile } from '../types';
+import { useTheme } from '../context/ThemeContext';
 
 interface SidebarProps {
   activeTab: Tab;
@@ -16,6 +17,8 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ activeTab, setActiveTab, user, onLogout, profile, onEditProfile, onSwitchToClient }: SidebarProps) {
+  const { resolvedTheme, toggleTheme } = useTheme();
+
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'clients', label: 'Clients', icon: Users },
@@ -25,7 +28,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout, profi
   ] as const;
 
   return (
-    <nav className="fixed md:relative bottom-0 left-0 w-full md:w-64 bg-slate-900 text-white flex md:flex-col md:h-full z-20">
+    <nav className="fixed md:relative bottom-0 left-0 w-full md:w-64 bg-slate-900 text-white flex md:flex-col md:h-full z-20 border-r border-slate-800/80">
       <div className="hidden md:block p-6 border-b border-slate-800/80 mb-2">
         <div className="flex items-center gap-3 mb-3">
           <Logo className="w-8 h-8 rounded-xl shadow-xs" />
@@ -58,12 +61,12 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout, profi
         })}
       </div>
 
-      <div className="hidden md:flex p-6 border-t border-slate-800 items-center justify-between">
-        <div className="flex items-center space-x-3 overflow-hidden">
+      <div className="hidden md:flex p-4 border-t border-slate-800 items-center justify-between gap-2">
+        <div className="flex items-center space-x-3 overflow-hidden flex-1 min-w-0">
           {user?.photoURL ? (
-            <img src={user.photoURL} alt="Profile" className="w-8 h-8 rounded-full" />
+            <img src={user.photoURL} alt="Profile" className="w-8 h-8 rounded-full shrink-0" />
           ) : (
-            <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-medium">
+            <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-medium shrink-0">
               {(profile?.name || user?.displayName)?.charAt(0) || 'U'}
             </div>
           )}
@@ -91,11 +94,26 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout, profi
           </div>
         </div>
 
-        {onLogout && (
-          <button onClick={onLogout} className="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition-colors" title="Sign out">
-            <LogOut size={16} />
+        <div className="flex items-center gap-1 shrink-0">
+          <button
+            onClick={toggleTheme}
+            className="text-slate-400 hover:text-amber-400 p-2 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
+            title={`Toggle Theme (Current: ${resolvedTheme})`}
+            aria-label="Toggle Theme"
+          >
+            {resolvedTheme === 'dark' ? (
+              <Sun size={16} className="text-amber-400" />
+            ) : (
+              <Moon size={16} className="text-slate-400 hover:text-indigo-300" />
+            )}
           </button>
-        )}
+
+          {onLogout && (
+            <button onClick={onLogout} className="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition-colors" title="Sign out">
+              <LogOut size={16} />
+            </button>
+          )}
+        </div>
       </div>
     </nav>
   );
