@@ -1115,6 +1115,33 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
   } | null>(null);
   const [paymentModalState, setPaymentModalState] = useState<{ invoiceId: string | null, isOpen: boolean }>({ invoiceId: null, isOpen: false });
 
+  // Dynamic preview scaling to fit any screen perfectly with zero overlapping
+  const previewContainerRef = useRef<HTMLDivElement>(null);
+  const [previewScale, setPreviewScale] = useState<number>(0.75);
+
+  useEffect(() => {
+    const updateScale = () => {
+      if (!previewContainerRef.current) return;
+      const containerWidth = previewContainerRef.current.clientWidth;
+      // Padding inside preview container (typically 32px to 48px)
+      const availableWidth = Math.max(200, containerWidth - 48);
+      const a4Width = 794; // 210mm in px at 96 DPI
+      const computedScale = Math.min(1, Math.max(0.25, availableWidth / a4Width));
+      setPreviewScale(computedScale);
+    };
+
+    updateScale();
+    const ro = new ResizeObserver(updateScale);
+    if (previewContainerRef.current) {
+      ro.observe(previewContainerRef.current);
+    }
+    window.addEventListener('resize', updateScale);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', updateScale);
+    };
+  }, []);
+
   const selectedClient = clients.find(c => c.id === selectedClientId);
 
   const toggleInvoiceStatus = (id: string) => {
@@ -1632,9 +1659,9 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
         <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">Create and export PDF invoices for your clients.</p>
       </div>
 
-      <div className="grid lg:grid-cols-12 gap-6 md:gap-8 items-start">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 md:gap-8 items-start">
         {/* Left Column - Form */}
-        <div className="lg:col-span-5 space-y-6">
+        <div className="xl:col-span-5 space-y-6">
           <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-2">
@@ -1977,7 +2004,10 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
         </div>
 
         {/* Right Column - A4 Preview Wrapper */}
-        <div className="lg:col-span-7 bg-slate-200 dark:bg-slate-900/80 p-4 sm:p-6 md:p-8 rounded-xl flex flex-col items-center shadow-inner min-h-[400px] border border-slate-300 dark:border-slate-800 relative">
+        <div 
+          ref={previewContainerRef}
+          className="xl:col-span-7 bg-slate-200 dark:bg-slate-900/80 p-3 sm:p-5 md:p-6 rounded-xl flex flex-col items-center shadow-inner min-h-[400px] border border-slate-300 dark:border-slate-800 relative w-full overflow-hidden"
+        >
           
           {/* Preview Mode Switcher & Quick Print Header */}
           <div className="w-full max-w-[210mm] flex flex-wrap items-center justify-between gap-3 mb-6 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md p-3 rounded-xl border border-slate-300 dark:border-slate-700 shadow-sm z-10">
@@ -2010,6 +2040,9 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
             </div>
 
             <div className="flex items-center gap-2">
+              <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 font-semibold px-2.5 py-1 bg-slate-100 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
+                {Math.round(previewScale * 100)}% Fit
+              </span>
               <button
                 type="button"
                 onClick={() => handlePrintWorkSummary()}
@@ -2022,22 +2055,41 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
             </div>
           </div>
 
-          {/* This wrapper scales the visual preview so it fits on screen without changing actual dimensions for PDF export */}
-          <div className="transform scale-[0.28] min-[360px]:scale-[0.32] min-[400px]:scale-[0.38] sm:scale-[0.55] md:scale-[0.75] lg:scale-[0.85] xl:scale-[0.9] origin-top transition-transform duration-300">
-
-            {/* The actual A4 element captured for live preview */}
+          {/* Scaled A4 Preview Box that takes exact scaled dimensions and prevents overflow */}
+          <div 
+            className="w-full flex justify-center items-start transition-all duration-200 ease-out"
+            style={{
+              height: `${Math.round(1123 * previewScale)}px`,
+              minHeight: `${Math.round(1123 * previewScale)}px`
+            }}
+          >
             <div
-              id="invoice-preview-capture"
-              className="bg-white shadow-2xl relative flex flex-col justify-between"
               style={{
-                width: '210mm',
-                minHeight: '297mm',
-                padding: '16mm 18mm',
-                fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-                color: '#0f172a',
-                boxSizing: 'border-box'
+                width: `${Math.round(794 * previewScale)}px`,
+                height: `${Math.round(1123 * previewScale)}px`,
+                position: 'relative',
+                overflow: 'visible'
               }}
+              className="shadow-2xl rounded-sm shrink-0"
             >
+              {/* The actual A4 element captured for live preview */}
+              <div
+                id="invoice-preview-capture"
+                className="bg-white relative flex flex-col justify-between"
+                style={{
+                  width: '210mm',
+                  minHeight: '297mm',
+                  padding: '16mm 18mm',
+                  fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+                  color: '#0f172a',
+                  boxSizing: 'border-box',
+                  transform: `scale(${previewScale})`,
+                  transformOrigin: 'top left',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0
+                }}
+              >
               <div>
                 {/* Top Accent Strip & Header */}
                 <div className="flex justify-between items-start border-b-2 border-slate-900 pb-6 mb-8">
@@ -2363,6 +2415,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
           </div>
         </div>
       </div>
+    </div>
 
       {/* Invoice History & Email Actions Section */}
       <div className="mt-12 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6 space-y-4">
