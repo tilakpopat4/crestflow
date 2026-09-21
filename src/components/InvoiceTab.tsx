@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Client, Reel, Invoice, WorkItem, UserProfile } from '../types';
-import { Plus, Trash2, Download, Receipt, FileCheck, Mail, Send, Copy, X, Check, MailCheck, CheckCircle2, AlertCircle, Loader2, FileText, Search, Calculator, Divide, Coins, History, Pencil, Printer, ListChecks } from 'lucide-react';
+import { Plus, Trash2, Download, Receipt, FileCheck, Mail, Send, Copy, X, Check, MailCheck, CheckCircle2, AlertCircle, Loader2, FileText, Search, Calculator, Divide, Coins, History, Pencil, Printer, ListChecks, IndianRupee } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { useFirestore } from '../hooks/useFirestore';
@@ -1052,6 +1052,17 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
   const { data: clients, loading: clientsLoading, addOrUpdateItem: updateClient } = useFirestore<Client>('clients', user?.uid);
   const { data: invoices, addOrUpdateItem: addInvoice } = useFirestore<Invoice>('invoices', user?.uid);
   const { data: workItems, addOrUpdateItem: updateWorkItem } = useFirestore<WorkItem>('workItems', user?.uid);
+
+  const totalEarnedTillToday = invoices
+    .filter(inv => inv.status === 'Paid')
+    .reduce((acc, inv) => acc + (inv.totalAmount || 0), 0);
+
+  const pendingAmount = invoices
+    .filter(inv => inv.status === 'Pending')
+    .reduce((acc, inv) => acc + (inv.totalAmount || 0), 0);
+
+  const totalInvoicedAmount = invoices.reduce((acc, inv) => acc + (inv.totalAmount || 0), 0);
+  const paidInvoicesCount = invoices.filter(inv => inv.status === 'Paid').length;
 
   const [selectedClientId, setSelectedClientId] = useState<string>('');
   const [invoiceSearchQuery, setInvoiceSearchQuery] = useState<string>(initialSearchQuery);
@@ -2565,9 +2576,72 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                     );
                   })}
               </tbody>
+              {invoices.length > 0 && (
+                <tfoot className="bg-slate-50 dark:bg-slate-900/80 border-t border-slate-200 dark:border-slate-700 font-semibold text-xs text-slate-800 dark:text-slate-200">
+                  <tr>
+                    <td colSpan={3} className="p-3.5 text-right font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                      Total Earned (Paid Invoices):
+                    </td>
+                    <td className="p-3.5 text-right font-black text-emerald-600 dark:text-emerald-400 text-sm">
+                      ₹{totalEarnedTillToday.toLocaleString('en-IN')}
+                    </td>
+                    <td colSpan={2} className="p-3.5 text-slate-500 dark:text-slate-400 text-xs">
+                      {paidInvoicesCount} Paid ({invoices.length} total)
+                    </td>
+                  </tr>
+                </tfoot>
+              )}
             </table>
           </div>
         )}
+
+        {/* Last Bar: Total Earned Till Today */}
+        <div className="mt-6 bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-700 dark:from-emerald-700 dark:via-teal-800 dark:to-indigo-900 text-white rounded-2xl p-5 md:p-6 shadow-lg flex flex-col md:flex-row items-center justify-between gap-5 relative overflow-hidden">
+          {/* Decorative background glow rings */}
+          <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-white/10 blur-2xl pointer-events-none" />
+          <div className="absolute -bottom-12 -left-12 w-48 h-48 rounded-full bg-emerald-400/20 blur-2xl pointer-events-none" />
+
+          <div className="flex items-center gap-4 relative z-10 w-full md:w-auto">
+            <div className="w-13 h-13 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white shadow-md shrink-0">
+              <IndianRupee size={26} className="stroke-[2.5]" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-extrabold uppercase tracking-wider bg-white/20 px-2.5 py-0.5 rounded-full backdrop-blur-xs">
+                  Lifetime Revenue
+                </span>
+                <span className="text-xs text-white/80">Paid Invoices Till Today</span>
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-black tracking-tight mt-1">
+                Total Earned Till Today:{' '}
+                <span className="text-emerald-200">₹{totalEarnedTillToday.toLocaleString('en-IN')}</span>
+              </h3>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 sm:gap-6 relative z-10 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-white/20 pt-3 md:pt-0">
+            <div className="text-left md:text-right">
+              <span className="text-[10px] uppercase font-bold text-white/70 block tracking-wider">Paid Invoices</span>
+              <span className="text-base font-bold">
+                {paidInvoicesCount} <span className="text-xs font-normal text-white/80">of {invoices.length}</span>
+              </span>
+            </div>
+            {pendingAmount > 0 && (
+              <div className="text-left md:text-right border-l border-white/20 pl-4 sm:pl-6">
+                <span className="text-[10px] uppercase font-bold text-amber-200 block tracking-wider">Pending Clearance</span>
+                <span className="text-base font-bold text-amber-100">
+                  ₹{pendingAmount.toLocaleString('en-IN')}
+                </span>
+              </div>
+            )}
+            <div className="text-left md:text-right border-l border-white/20 pl-4 sm:pl-6">
+              <span className="text-[10px] uppercase font-bold text-white/70 block tracking-wider">Total Invoiced</span>
+              <span className="text-base font-bold">
+                ₹{totalInvoicedAmount.toLocaleString('en-IN')}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Email Sent / Prepared Modal */}
