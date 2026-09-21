@@ -28,7 +28,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout, profi
   ] as const;
 
   return (
-    <nav className="fixed md:relative bottom-0 left-0 w-full md:w-64 bg-slate-900 text-white flex md:flex-col md:h-full z-20 border-r border-slate-800/80">
+    <nav className="fixed md:relative bottom-0 left-0 w-full md:w-64 bg-slate-900 text-white flex md:flex-col md:h-full z-20 border-r border-slate-800/80 border-t border-slate-800">
       <div className="hidden md:block p-6 border-b border-slate-800/80 mb-2">
         <div className="flex items-center gap-3 mb-3">
           <Logo className="w-8 h-8 rounded-xl shadow-xs" />
@@ -39,7 +39,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout, profi
         <p className="text-xs text-slate-400">Freelancing Client Manager</p>
       </div>
 
-      <div className="flex flex-row md:flex-col justify-around md:justify-start flex-1 px-1 md:px-4 py-2 md:py-0 md:space-y-1 overflow-x-hidden overflow-y-hidden md:overflow-y-auto">
+      <div className="flex flex-row md:flex-col justify-around md:justify-start flex-1 px-0.5 md:px-4 py-1 md:py-0 md:space-y-1 overflow-x-hidden overflow-y-hidden md:overflow-y-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
@@ -48,14 +48,14 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout, profi
               key={item.id}
               onClick={() => setActiveTab(item.id)}
               className={clsx(
-                "flex flex-col md:flex-row items-center md:space-x-3 px-1.5 md:px-3 py-1.5 md:py-2 rounded-lg transition-colors text-[10px] md:text-sm font-medium flex-1 md:flex-initial md:w-full md:max-w-none flex-shrink md:flex-shrink-0",
+                "flex flex-col md:flex-row items-center md:space-x-3 px-1 min-[380px]:px-1.5 md:px-3 py-1 min-[380px]:py-1.5 md:py-2 rounded-lg transition-colors text-[9px] min-[380px]:text-[10px] md:text-sm font-medium flex-1 md:flex-initial md:w-full md:max-w-none flex-shrink md:flex-shrink-0 min-w-0",
                 isActive
                   ? "bg-indigo-600 text-white shadow-sm"
                   : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
               )}
             >
-              <Icon size={18} className={clsx(isActive ? "text-white" : "text-slate-400", "mb-0.5 md:mb-0")} />
-              <span className="truncate">{item.label}</span>
+              <Icon size={16} className={clsx(isActive ? "text-white" : "text-slate-400", "mb-0.5 md:mb-0 shrink-0")} />
+              <span className="truncate w-full text-center md:text-left leading-tight">{item.label}</span>
             </button>
           );
         })}

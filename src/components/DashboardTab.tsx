@@ -494,11 +494,11 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 md:space-y-8">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Dashboard</h2>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">Overview of your monthly earnings, client payment cycles & due reminders.</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Dashboard</h2>
+          <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm md:text-base">Overview of your monthly earnings, client payment cycles & due reminders.</p>
         </div>
         
         <div className="flex flex-wrap items-center gap-3">
@@ -717,7 +717,7 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
       )}
 
       {/* Metric Cards */}
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
         <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-start gap-4">
           <div className="p-3 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 rounded-lg">
             <IndianRupee size={24} />
@@ -856,7 +856,7 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
       </div>
 
       {/* Analytics & Charts Section */}
-      <div className="grid lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         {/* Recharts Monthly Earnings Line Chart */}
         <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">

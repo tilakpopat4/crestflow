@@ -623,7 +623,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
 
       {/* Tabs Navigation */}
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
-        <div className="border-b border-slate-200 dark:border-slate-700 px-6 pt-4 flex gap-6">
+        <div className="border-b border-slate-200 dark:border-slate-700 px-4 md:px-6 pt-4 flex gap-4 md:gap-6 overflow-x-auto scrollbar-none -mb-px">
           <button
             onClick={() => setActiveTab('work')}
             className={`pb-4 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 flex items-center gap-2 ${

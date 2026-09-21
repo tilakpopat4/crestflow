@@ -11,12 +11,32 @@
     color-scheme: dark;
   }
 
+  html, body {
+    /* Prevent horizontal overflow on mobile */
+    overflow-x: hidden;
+    /* Use small viewport height on mobile to account for browser chrome */
+    min-height: 100svh;
+  }
+
   body {
     @apply bg-slate-50 text-slate-900 transition-colors duration-150;
   }
 
   html.dark body {
     @apply bg-slate-950 text-slate-100;
+  }
+}
+
+/* Safe area insets for notched iPhones (bottom nav) */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  /* Bottom navigation bar gets extra padding for home indicator */
+  nav.fixed.bottom-0 {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Main content area gets extra bottom padding to avoid nav overlap on mobile */
+  main {
+    padding-bottom: calc(env(safe-area-inset-bottom));
   }
 }
 
@@ -45,4 +65,29 @@ html.dark ::-webkit-scrollbar-thumb {
 
 html.dark ::-webkit-scrollbar-thumb:hover {
   background: rgba(100, 116, 139, 0.7);
+}
+
+/* Prevent tables from breaking mobile layout - they scroll horizontally instead */
+table {
+  min-width: 100%;
+}
+
+/* Touch-action improvements for mobile scrolling */
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hide scrollbar for horizontal tab navs without losing scroll functionality */
+.scrollbar-none {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE / Edge */
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Smooth mobile scrolling overscroll containment */
+.overflow-y-auto {
+  overscroll-behavior-y: contain;
 }

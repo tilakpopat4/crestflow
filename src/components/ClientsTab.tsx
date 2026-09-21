@@ -656,8 +656,8 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
       )}
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs">
-        <div className="relative w-full sm:w-80">
+      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs">
+        <div className="relative w-full">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={16} />
           <input
             type="text"
@@ -668,7 +668,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
           />
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto">
+        <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap gap-y-2">
           <button
             onClick={() => setFilterType('all')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${filterType === 'all'

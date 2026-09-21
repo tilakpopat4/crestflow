@@ -145,11 +145,11 @@ export default function GlobalHeader({
 
   return (
     <header className="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 px-4 py-3 md:px-8 transition-all">
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 md:gap-4">
         {/* Mobile Logo Branding */}
-        <div className="flex items-center gap-2 md:hidden">
-          <Logo className="w-7 h-7" />
-          <span className="font-extrabold text-slate-900 dark:text-white tracking-tight text-base">CrestFlow</span>
+        <div className="flex items-center gap-1.5 md:hidden shrink-0">
+          <Logo className="w-6 h-6 min-[380px]:w-7 min-[380px]:h-7" />
+          <span className="hidden min-[380px]:inline font-extrabold text-slate-900 dark:text-white tracking-tight text-sm md:text-base">CrestFlow</span>
         </div>
 
         {/* Real-time Global Search Input */}

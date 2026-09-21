@@ -1626,16 +1626,16 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
   }
 
   return (
-    <div className="p-8 max-w-[1600px] mx-auto">
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Invoice Generator</h2>
-        <p className="text-slate-500 mt-1">Create and export PDF invoices for your clients.</p>
+    <div className="p-4 md:p-8 max-w-[1600px] mx-auto">
+      <div className="mb-6 md:mb-8">
+        <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Invoice Generator</h2>
+        <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">Create and export PDF invoices for your clients.</p>
       </div>
 
-      <div className="grid xl:grid-cols-12 gap-8 items-start">
+      <div className="grid lg:grid-cols-12 gap-6 md:gap-8 items-start">
         {/* Left Column - Form */}
-        <div className="xl:col-span-5 space-y-6">
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+        <div className="lg:col-span-5 space-y-6">
+          <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-2">
                 <Receipt size={18} className="text-indigo-500" />
@@ -1697,7 +1697,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+          <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
               <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wider">Line Items</h3>
               <div className="flex flex-wrap gap-3">
@@ -1977,7 +1977,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
         </div>
 
         {/* Right Column - A4 Preview Wrapper */}
-        <div className="xl:col-span-7 bg-slate-200 dark:bg-slate-900/80 p-6 sm:p-8 rounded-xl flex flex-col items-center shadow-inner min-h-[600px] border border-slate-300 dark:border-slate-800 relative">
+        <div className="lg:col-span-7 bg-slate-200 dark:bg-slate-900/80 p-4 sm:p-6 md:p-8 rounded-xl flex flex-col items-center shadow-inner min-h-[400px] border border-slate-300 dark:border-slate-800 relative">
           
           {/* Preview Mode Switcher & Quick Print Header */}
           <div className="w-full max-w-[210mm] flex flex-wrap items-center justify-between gap-3 mb-6 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md p-3 rounded-xl border border-slate-300 dark:border-slate-700 shadow-sm z-10">
@@ -2023,7 +2023,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
           </div>
 
           {/* This wrapper scales the visual preview so it fits on screen without changing actual dimensions for PDF export */}
-          <div className="transform scale-[0.4] min-[400px]:scale-[0.45] sm:scale-[0.6] md:scale-[0.8] xl:scale-[0.9] origin-top transition-transform duration-300">
+          <div className="transform scale-[0.28] min-[360px]:scale-[0.32] min-[400px]:scale-[0.38] sm:scale-[0.55] md:scale-[0.75] lg:scale-[0.85] xl:scale-[0.9] origin-top transition-transform duration-300">
 
             {/* The actual A4 element captured for live preview */}
             <div
