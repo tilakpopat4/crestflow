@@ -411,21 +411,21 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
             <X size={16} />
           </button>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 pt-1">
             {notificationClients.map(({ client, statusInfo, financials }) => (
               <div
                 key={client.id}
-                className="bg-white dark:bg-slate-800 p-3.5 rounded-xl border border-amber-200 dark:border-amber-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
+                className="bg-white dark:bg-slate-800 p-3.5 rounded-xl border border-amber-200 dark:border-amber-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs min-w-0 overflow-hidden"
               >
-                <div className="w-full sm:w-auto">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-slate-900 dark:text-slate-100 text-xs">{client.name}</span>
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${statusInfo.badgeClass}`}>
+                <div className="w-full sm:w-auto min-w-0 flex-1">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="font-bold text-slate-900 dark:text-slate-100 text-xs truncate">{client.name}</span>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold shrink-0 ${statusInfo.badgeClass}`}>
                       {statusInfo.label}
                     </span>
                   </div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                    Due Date: {new Date(statusInfo.nextDueDate).toLocaleDateString('en-IN')}
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 truncate">
+                    Due: {new Date(statusInfo.nextDueDate).toLocaleDateString('en-IN')}
                     {financials.totalPendingAmount > 0 && (
                       <span className="font-semibold text-rose-600 ml-2">
                         ₹{financials.totalPendingAmount.toLocaleString('en-IN')} due
@@ -714,7 +714,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
       </div>
 
       {/* Client Profiles Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 min-[960px]:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
         {filteredClients.length === 0 ? (
           <div className="col-span-full py-16 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-8 space-y-3">
             <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500 flex items-center justify-center mx-auto">
@@ -738,40 +738,40 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
             return (
               <div
                 key={client.id}
-                className={`rounded-2xl border p-6 shadow-xs transition-all group flex flex-col justify-between space-y-5 ${
+                className={`rounded-2xl border p-4 sm:p-5 md:p-6 shadow-xs transition-all group flex flex-col justify-between space-y-4 md:space-y-5 overflow-hidden ${
                   client.isClosed
                     ? 'bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-700/50 opacity-75 hover:opacity-100'
                     : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:shadow-md'
                 }`}
               >
-                <div className="space-y-4">
+                <div className="space-y-4 min-w-0">
                   {/* Top row: Avatar & Status Badge */}
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3">
+                  <div className="flex items-start justify-between gap-2 min-w-0">
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
                       {client.logoUrl ? (
                         <img
                           src={getDriveDirectImageUrl(client.logoUrl)}
                           alt={client.name}
-                          className="w-12 h-12 rounded-xl object-cover shadow-sm shrink-0 bg-indigo-50 dark:bg-indigo-950"
+                          className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl object-cover shadow-sm shrink-0 bg-indigo-50 dark:bg-indigo-950"
                           onError={(e) => {
                             e.currentTarget.onerror = null;
                             e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(client.name)}&background=e0e7ff&color=4338ca&size=128&rounded=true&bold=true`;
                           }}
                         />
                       ) : (
-                        <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/60 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-lg shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/60 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-base sm:text-lg shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
                           {client.name.charAt(0).toUpperCase()}
                         </div>
                       )}
-                      <div>
-                        <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors leading-snug">
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors leading-snug truncate" title={client.name}>
                           {client.name}
                         </h3>
-                        <p className="text-[11px] text-slate-400 dark:text-slate-500 font-mono">ID: {client.id.split('-')[0]}</p>
+                        <p className="text-[11px] text-slate-400 dark:text-slate-500 font-mono truncate">ID: {client.id.split('-')[0]}</p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -779,41 +779,41 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                           const cInvoices = invoices.filter(inv => inv.clientId === client.id);
                           exportClientCSV(client, cWorkItems, cInvoices);
                         }}
-                        className="p-1.5 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 rounded-lg transition-colors cursor-pointer"
+                        className="p-1 sm:p-1.5 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 rounded-lg transition-colors cursor-pointer"
                         title="Export Work History & Invoices to CSV"
                       >
-                        <Download size={15} />
+                        <Download size={14} />
                       </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); handleEditClient(client); }}
-                        className="p-1.5 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 rounded-lg transition-colors cursor-pointer"
+                        className="p-1 sm:p-1.5 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 rounded-lg transition-colors cursor-pointer"
                         title="Edit Client Profile"
                       >
-                        <Edit2 size={15} />
+                        <Edit2 size={14} />
                       </button>
                       {client.isClosed ? (
                         <button
                           onClick={(e) => { e.stopPropagation(); handleReopenClient(client); }}
-                          className="p-1.5 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 rounded-lg transition-colors cursor-pointer"
+                          className="p-1 sm:p-1.5 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 rounded-lg transition-colors cursor-pointer"
                           title="Reopen Client"
                         >
-                          <ArchiveRestore size={15} />
+                          <ArchiveRestore size={14} />
                         </button>
                       ) : (
                         <button
                           onClick={(e) => { e.stopPropagation(); handleCloseClient(client); }}
-                          className="p-1.5 text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/50 rounded-lg transition-colors cursor-pointer"
+                          className="p-1 sm:p-1.5 text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/50 rounded-lg transition-colors cursor-pointer"
                           title="Close Work with Client"
                         >
-                          <Archive size={15} />
+                          <Archive size={14} />
                         </button>
                       )}
                       <button
                         onClick={(e) => { e.stopPropagation(); handleDeleteClient(client.id, client.name); }}
-                        className="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg transition-colors cursor-pointer"
+                        className="p-1 sm:p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg transition-colors cursor-pointer"
                         title="Delete Client"
                       >
-                        <Trash2 size={15} />
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   </div>
@@ -821,47 +821,48 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                   {/* Payment Status Pill & Sub-Clients Badge */}
                   <div className="flex items-center gap-2 flex-wrap">
                     {client.isClosed ? (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700">
-                        <Archive size={12} /> Closed
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 max-w-full">
+                        <Archive size={12} className="shrink-0" />
+                        <span className="truncate">Closed</span>
                         {client.closedAt && (
-                          <span className="font-normal opacity-70">&nbsp;· {new Date(client.closedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                          <span className="font-normal opacity-70 truncate">&nbsp;· {new Date(client.closedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                         )}
                       </span>
                     ) : (
                       <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${statusInfo.badgeClass}`}>
-                        <Clock size={12} /> {statusInfo.label}
+                        <Clock size={12} className="shrink-0" /> {statusInfo.label}
                       </span>
                     )}
                     {client.subClients && client.subClients.length > 0 && (
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60">
-                        <Users size={12} /> {client.subClients.length} Sub-Clients
+                        <Users size={12} className="shrink-0" /> {client.subClients.length} Sub-Clients
                       </span>
                     )}
                   </div>
 
                   {/* 30-Day Cycle Dates Row */}
-                  <div className="bg-slate-50 dark:bg-slate-900/60 p-3.5 rounded-xl border border-slate-100 dark:border-slate-700/60 grid grid-cols-2 gap-2 text-xs">
-                    <div>
-                      <span className="text-slate-400 dark:text-slate-500 block text-[10px] font-semibold uppercase tracking-wider">Prev Payment</span>
-                      <span className="font-bold text-slate-800 dark:text-slate-200">{formattedPrevDate}</span>
+                  <div className="bg-slate-50 dark:bg-slate-900/60 p-3 sm:p-3.5 rounded-xl border border-slate-100 dark:border-slate-700/60 grid grid-cols-2 gap-2 text-xs">
+                    <div className="min-w-0">
+                      <span className="text-slate-400 dark:text-slate-500 block text-[10px] font-semibold uppercase tracking-wider truncate">Prev Payment</span>
+                      <span className="font-bold text-slate-800 dark:text-slate-200 truncate block">{formattedPrevDate}</span>
                     </div>
 
-                    <div className="border-l border-slate-200 dark:border-slate-700 pl-2.5">
-                      <span className="text-slate-400 dark:text-slate-500 block text-[10px] font-semibold uppercase tracking-wider">Next Due</span>
-                      <span className="font-bold text-slate-900 dark:text-slate-100">{formattedNextDate}</span>
+                    <div className="border-l border-slate-200 dark:border-slate-700 pl-2.5 min-w-0">
+                      <span className="text-slate-400 dark:text-slate-500 block text-[10px] font-semibold uppercase tracking-wider truncate">Next Due</span>
+                      <span className="font-bold text-slate-900 dark:text-slate-100 truncate block">{formattedNextDate}</span>
                     </div>
                   </div>
 
                   {/* Financials & Rates */}
-                  <div className="flex items-center justify-between text-xs pt-1">
-                    <div>
-                      <span className="text-slate-400 dark:text-slate-500 block">Default Rate</span>
-                      <span className="font-semibold text-slate-700 dark:text-slate-300">₹{client.defaultRate.toLocaleString('en-IN')} / reel</span>
+                  <div className="flex items-center justify-between text-xs pt-1 gap-2">
+                    <div className="min-w-0">
+                      <span className="text-slate-400 dark:text-slate-500 block text-[11px] truncate">Default Rate</span>
+                      <span className="font-semibold text-slate-700 dark:text-slate-300 truncate block">₹{client.defaultRate.toLocaleString('en-IN')} / reel</span>
                     </div>
 
-                    <div className="text-right">
-                      <span className="text-slate-400 dark:text-slate-500 block">Pending Balance</span>
-                      <span className={`font-bold ${financials.totalPendingAmount > 0 ? 'text-rose-600' : 'text-slate-700 dark:text-slate-300'}`}>
+                    <div className="text-right min-w-0">
+                      <span className="text-slate-400 dark:text-slate-500 block text-[11px] truncate">Pending Balance</span>
+                      <span className={`font-bold truncate block ${financials.totalPendingAmount > 0 ? 'text-rose-600' : 'text-slate-700 dark:text-slate-300'}`}>
                         ₹{financials.totalPendingAmount.toLocaleString('en-IN')}
                       </span>
                     </div>
@@ -872,22 +873,22 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                 <div className="flex items-center gap-2 pt-1">
                   <button
                     onClick={() => setSelectedClientId(client.id)}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer ${
+                    className={`flex-1 min-w-0 flex items-center justify-center gap-1.5 sm:gap-2 py-2 sm:py-2.5 px-3 rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer ${
                       client.isClosed
                         ? 'bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300'
                         : 'bg-slate-900 hover:bg-indigo-600 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white'
                     }`}
                   >
-                    {client.isClosed ? 'View History' : 'Open Dashboard'}
-                    <ChevronRight size={14} />
+                    <span className="truncate">{client.isClosed ? 'View History' : 'Open Dashboard'}</span>
+                    <ChevronRight size={14} className="shrink-0" />
                   </button>
                   {client.isClosed ? (
                     <button
                       onClick={(e) => { e.stopPropagation(); handleReopenClient(client); }}
-                      className="px-3.5 py-2.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/60 border border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+                      className="px-3 sm:px-3.5 py-2 sm:py-2.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/60 border border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
                       title="Reopen Client"
                     >
-                      <ArchiveRestore size={14} /> Reopen
+                      <ArchiveRestore size={14} /> <span className="hidden min-[380px]:inline">Reopen</span>
                     </button>
                   ) : (
                     <button
@@ -897,10 +898,10 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                         const cInvoices = invoices.filter(inv => inv.clientId === client.id);
                         exportClientCSV(client, cWorkItems, cInvoices);
                       }}
-                      className="px-3.5 py-2.5 bg-slate-100 hover:bg-emerald-50 dark:bg-slate-700 dark:hover:bg-emerald-950/50 border border-slate-200 dark:border-slate-600 hover:border-emerald-300 dark:hover:border-emerald-600 text-slate-700 dark:text-slate-200 hover:text-emerald-800 dark:hover:text-emerald-300 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+                      className="px-3 sm:px-3.5 py-2 sm:py-2.5 bg-slate-100 hover:bg-emerald-50 dark:bg-slate-700 dark:hover:bg-emerald-950/50 border border-slate-200 dark:border-slate-600 hover:border-emerald-300 dark:hover:border-emerald-600 text-slate-700 dark:text-slate-200 hover:text-emerald-800 dark:hover:text-emerald-300 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
                       title="Export Work History & Invoice Summary to CSV"
                     >
-                      <Download size={14} className="text-emerald-600 dark:text-emerald-400" /> CSV
+                      <Download size={14} className="text-emerald-600 dark:text-emerald-400 shrink-0" /> <span>CSV</span>
                     </button>
                   )}
                 </div>

@@ -427,7 +427,7 @@ export default function App() {
           onEditProfile={() => setIsProfileModalOpen(true)}
           onOpenAnniversaryModal={() => setIsAnniversaryModalOpen(true)}
         />
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden">
           {activeTab === 'dashboard' && <DashboardTab user={user} profile={profile} onNavigateToClients={() => setActiveTab('clients')} />}
           {activeTab === 'clients' && <ClientsTab user={user} initialSearchQuery={globalSearchQuery} initialSelectedClientId={selectedClientIdFromSearch} />}
           {activeTab === 'work' && <WorkLogTab user={user} initialSearchQuery={globalSearchQuery} />}

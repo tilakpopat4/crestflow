@@ -717,34 +717,34 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
       )}
 
       {/* Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-start gap-4">
-          <div className="p-3 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 rounded-lg">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
+        <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-start gap-4 min-w-0">
+          <div className="p-3 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 rounded-lg shrink-0">
             <IndianRupee size={24} />
           </div>
-          <div>
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Total Earned This Month</p>
-            <h3 className="text-3xl font-bold text-slate-900 dark:text-slate-100">₹{metrics.totalEarned.toLocaleString('en-IN')}</h3>
+          <div className="min-w-0">
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider truncate">Total Earned This Month</p>
+            <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 truncate">₹{metrics.totalEarned.toLocaleString('en-IN')}</h3>
           </div>
         </div>
         
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-start gap-4">
-          <div className="p-3 bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 rounded-lg">
+        <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-start gap-4 min-w-0">
+          <div className="p-3 bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 rounded-lg shrink-0">
             <Clock size={24} />
           </div>
-          <div>
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Total Pending Invoices Amount</p>
-            <h3 className="text-3xl font-bold text-slate-900 dark:text-slate-100">₹{metrics.totalDue.toLocaleString('en-IN')}</h3>
+          <div className="min-w-0">
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider truncate">Total Pending Invoices Amount</p>
+            <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 truncate">₹{metrics.totalDue.toLocaleString('en-IN')}</h3>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-start gap-4">
-          <div className="p-3 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-lg">
+        <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-start gap-4 min-w-0 sm:col-span-2 xl:col-span-1">
+          <div className="p-3 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-lg shrink-0">
             <TrendingUp size={24} />
           </div>
-          <div>
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Invoices This Month</p>
-            <h3 className="text-3xl font-bold text-slate-900 dark:text-slate-100">{metrics.totalInvoicesThisMonth}</h3>
+          <div className="min-w-0">
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider truncate">Invoices This Month</p>
+            <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 truncate">{metrics.totalInvoicesThisMonth}</h3>
           </div>
         </div>
       </div>
