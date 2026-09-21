@@ -28,6 +28,8 @@ export interface Client {
   paymentCycleDays?: number; // default 30 days
   emailRemindersEnabled?: boolean; // toggle for overdue payment email reminders
   notes?: string;
+  isClosed?: boolean; // soft-archive: work is closed, data is preserved
+  closedAt?: number; // timestamp when client was closed
   createdAt: number;
   subClients?: SubClient[]; // List of sub-clients belonging to this client
 }

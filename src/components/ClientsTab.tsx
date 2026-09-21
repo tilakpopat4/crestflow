@@ -3,7 +3,7 @@ import { Client, Invoice, WorkItem, ServiceRequest } from '../types';
 import {
   Plus, Edit2, Trash2, CheckCircle2, X, Search, Calendar,
   Clock, Phone, Mail, ArrowRight, AlertTriangle, Send, ShieldAlert,
-  ChevronRight, Filter, Download, Users, UploadCloud, Briefcase, Instagram
+  ChevronRight, Filter, Download, Users, UploadCloud, Briefcase, Instagram, Archive, ArchiveRestore
 } from 'lucide-react';
 import { useFirestore } from '../hooks/useFirestore';
 import { User } from 'firebase/auth';
@@ -37,7 +37,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
-  const [filterType, setFilterType] = useState<'all' | 'due' | 'uptodate'>('all');
+  const [filterType, setFilterType] = useState<'all' | 'due' | 'uptodate' | 'closed'>('all');
   const [isNotificationDismissed, setIsNotificationDismissed] = useState(false);
 
   React.useEffect(() => {
@@ -74,7 +74,9 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
     financials: calculateClientFinancials(c.id, invoices, workItems)
   }));
 
-  const notificationClients = clientStatuses.filter(cs => cs.statusInfo.isNotificationRequired);
+  // Exclude closed clients from payment notifications
+  const notificationClients = clientStatuses.filter(cs => !cs.client.isClosed && cs.statusInfo.isNotificationRequired);
+  const closedClientsCount = clients.filter(c => c.isClosed).length;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -177,6 +179,23 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
     }
   };
 
+  const handleCloseClient = async (client: Client) => {
+    if (!confirm(`Close work with "${client.name}"?\n\nTheir data, invoices, and work history will be preserved — but they'll be marked as closed and excluded from active tracking.`)) return;
+    try {
+      await saveClient({ ...client, isClosed: true, closedAt: Date.now() });
+    } catch (err: any) {
+      alert('Failed to close client: ' + (err?.message || String(err)));
+    }
+  };
+
+  const handleReopenClient = async (client: Client) => {
+    try {
+      await saveClient({ ...client, isClosed: false, closedAt: undefined });
+    } catch (err: any) {
+      alert('Failed to reopen client: ' + (err?.message || String(err)));
+    }
+  };
+
   const cancelEdit = () => {
     setIsEditing(null);
     setFormData({
@@ -215,9 +234,12 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
       client.email?.toLowerCase().includes(searchQuery.toLowerCase());
     if (!matchesSearch) return false;
 
+    if (filterType === 'closed') return !!client.isClosed;
+    // Active-only filters — exclude closed clients
+    if (client.isClosed) return false;
     if (filterType === 'due') return statusInfo.isNotificationRequired || statusInfo.daysRemaining <= 3;
     if (filterType === 'uptodate') return !statusInfo.isNotificationRequired && statusInfo.daysRemaining > 3;
-    return true;
+    return true; // 'all' = all active clients
   });
 
   const handleAcceptRequest = async (request: ServiceRequest) => {
@@ -654,7 +676,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                 : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
               }`}
           >
-            All Clients ({clients.length})
+            Active ({clients.length - closedClientsCount})
           </button>
 
           <button
@@ -676,6 +698,18 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
           >
             Up to Date
           </button>
+
+          {closedClientsCount > 0 && (
+            <button
+              onClick={() => setFilterType('closed')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer ${filterType === 'closed'
+                  ? 'bg-slate-500 text-white shadow-xs'
+                  : 'bg-slate-100 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
+                }`}
+            >
+              <Archive size={12} /> Closed ({closedClientsCount})
+            </button>
+          )}
         </div>
       </div>
 
@@ -704,7 +738,11 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
             return (
               <div
                 key={client.id}
-                className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-xs hover:shadow-md transition-all group flex flex-col justify-between space-y-5"
+                className={`rounded-2xl border p-6 shadow-xs transition-all group flex flex-col justify-between space-y-5 ${
+                  client.isClosed
+                    ? 'bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-700/50 opacity-75 hover:opacity-100'
+                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:shadow-md'
+                }`}
               >
                 <div className="space-y-4">
                   {/* Top row: Avatar & Status Badge */}
@@ -753,6 +791,23 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                       >
                         <Edit2 size={15} />
                       </button>
+                      {client.isClosed ? (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleReopenClient(client); }}
+                          className="p-1.5 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 rounded-lg transition-colors cursor-pointer"
+                          title="Reopen Client"
+                        >
+                          <ArchiveRestore size={15} />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleCloseClient(client); }}
+                          className="p-1.5 text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/50 rounded-lg transition-colors cursor-pointer"
+                          title="Close Work with Client"
+                        >
+                          <Archive size={15} />
+                        </button>
+                      )}
                       <button
                         onClick={(e) => { e.stopPropagation(); handleDeleteClient(client.id, client.name); }}
                         className="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg transition-colors cursor-pointer"
@@ -765,9 +820,18 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
 
                   {/* Payment Status Pill & Sub-Clients Badge */}
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${statusInfo.badgeClass}`}>
-                      <Clock size={12} /> {statusInfo.label}
-                    </span>
+                    {client.isClosed ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700">
+                        <Archive size={12} /> Closed
+                        {client.closedAt && (
+                          <span className="font-normal opacity-70">&nbsp;· {new Date(client.closedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                        )}
+                      </span>
+                    ) : (
+                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${statusInfo.badgeClass}`}>
+                        <Clock size={12} /> {statusInfo.label}
+                      </span>
+                    )}
                     {client.subClients && client.subClients.length > 0 && (
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60">
                         <Users size={12} /> {client.subClients.length} Sub-Clients
@@ -808,23 +872,37 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                 <div className="flex items-center gap-2 pt-1">
                   <button
                     onClick={() => setSelectedClientId(client.id)}
-                    className="flex-1 flex items-center justify-center gap-2 bg-slate-900 hover:bg-indigo-600 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white py-2.5 rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer"
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer ${
+                      client.isClosed
+                        ? 'bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300'
+                        : 'bg-slate-900 hover:bg-indigo-600 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white'
+                    }`}
                   >
-                    Open Dashboard
+                    {client.isClosed ? 'View History' : 'Open Dashboard'}
                     <ChevronRight size={14} />
                   </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const cWorkItems = workItems.filter(item => item.clientId === client.id);
-                      const cInvoices = invoices.filter(inv => inv.clientId === client.id);
-                      exportClientCSV(client, cWorkItems, cInvoices);
-                    }}
-                    className="px-3.5 py-2.5 bg-slate-100 hover:bg-emerald-50 dark:bg-slate-700 dark:hover:bg-emerald-950/50 border border-slate-200 dark:border-slate-600 hover:border-emerald-300 dark:hover:border-emerald-600 text-slate-700 dark:text-slate-200 hover:text-emerald-800 dark:hover:text-emerald-300 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
-                    title="Export Work History & Invoice Summary to CSV"
-                  >
-                    <Download size={14} className="text-emerald-600 dark:text-emerald-400" /> CSV
-                  </button>
+                  {client.isClosed ? (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleReopenClient(client); }}
+                      className="px-3.5 py-2.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/60 border border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+                      title="Reopen Client"
+                    >
+                      <ArchiveRestore size={14} /> Reopen
+                    </button>
+                  ) : (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const cWorkItems = workItems.filter(item => item.clientId === client.id);
+                        const cInvoices = invoices.filter(inv => inv.clientId === client.id);
+                        exportClientCSV(client, cWorkItems, cInvoices);
+                      }}
+                      className="px-3.5 py-2.5 bg-slate-100 hover:bg-emerald-50 dark:bg-slate-700 dark:hover:bg-emerald-950/50 border border-slate-200 dark:border-slate-600 hover:border-emerald-300 dark:hover:border-emerald-600 text-slate-700 dark:text-slate-200 hover:text-emerald-800 dark:hover:text-emerald-300 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+                      title="Export Work History & Invoice Summary to CSV"
+                    >
+                      <Download size={14} className="text-emerald-600 dark:text-emerald-400" /> CSV
+                    </button>
+                  )}
                 </div>
               </div>
             );

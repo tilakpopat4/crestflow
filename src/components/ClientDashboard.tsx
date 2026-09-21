@@ -4,7 +4,7 @@ import {
   ArrowLeft, Calendar, Phone, Mail, Edit3, CheckCircle2, Clock, 
   IndianRupee, Plus, AlertTriangle, Send, FileText, ClipboardList,
   Sparkles, ShieldAlert, DollarSign, Copy, ExternalLink, Play, Download,
-  Users, Tag, Trash2, Edit2, Filter, MessageSquare
+  Users, Tag, Trash2, Edit2, Filter, MessageSquare, Archive
 } from 'lucide-react';
 import { User } from 'firebase/auth';
 import { useFirestore } from '../hooks/useFirestore';
@@ -381,6 +381,20 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
         </div>
       </div>
 
+      {/* Closed Client Banner */}
+      {client.isClosed && (
+        <div className="flex items-center gap-3 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-600 rounded-2xl px-5 py-3.5">
+          <Archive size={18} className="text-slate-500 dark:text-slate-400 shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-bold text-slate-700 dark:text-slate-200">This client is closed</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Work is no longer active. All history, invoices, and data are preserved in read-only view.
+              {client.closedAt && ` Closed on ${new Date(client.closedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}.`}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Main Client Profile Header Card */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm relative overflow-hidden">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
@@ -404,9 +418,15 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
             <div>
               <div className="flex items-center gap-3 flex-wrap">
                 <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">{client.name}</h1>
-                <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${statusInfo.badgeClass}`}>
-                  <Clock size={12} /> {statusInfo.label}
-                </span>
+                {client.isClosed ? (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border-slate-300 dark:border-slate-600">
+                    <Archive size={12} /> Closed
+                  </span>
+                ) : (
+                  <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${statusInfo.badgeClass}`}>
+                    <Clock size={12} /> {statusInfo.label}
+                  </span>
+                )}
               </div>
 
               <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-slate-500 dark:text-slate-400">
