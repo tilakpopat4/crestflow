@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, X, Users, ClipboardList, FileText, ExternalLink, Play, ArrowRight, CheckCircle2, Clock, Sun, Moon, Monitor } from 'lucide-react';
+import { Search, X, Users, ClipboardList, FileText, ExternalLink, Play, ArrowRight, CheckCircle2, Clock, Sun, Moon, Monitor, Flame, Sparkles, Trophy, Calendar, PartyPopper } from 'lucide-react';
 import { User } from 'firebase/auth';
 import { useFirestore } from '../hooks/useFirestore';
-import { Client, WorkItem, Invoice } from '../types';
+import { Client, WorkItem, Invoice, UserProfile } from '../types';
 import { Tab } from '../App';
 import Logo from './Logo';
 import { useTheme } from '../context/ThemeContext';
+import { calculateWorkJourney } from '../lib/anniversary';
 
 interface GlobalHeaderProps {
   user: User | null;
@@ -14,6 +15,9 @@ interface GlobalHeaderProps {
   onSearchSelect?: (type: 'client' | 'work' | 'invoice', id: string, query?: string) => void;
   globalQuery: string;
   setGlobalQuery: (query: string) => void;
+  profile?: UserProfile | null;
+  onEditProfile?: () => void;
+  onOpenAnniversaryModal?: () => void;
 }
 
 export default function GlobalHeader({
@@ -22,11 +26,18 @@ export default function GlobalHeader({
   setActiveTab,
   onSearchSelect,
   globalQuery,
-  setGlobalQuery
+  setGlobalQuery,
+  profile,
+  onEditProfile,
+  onOpenAnniversaryModal
 }: GlobalHeaderProps) {
   const { theme, resolvedTheme, setTheme, toggleTheme } = useTheme();
   const [showThemeMenu, setShowThemeMenu] = useState(false);
   const themeMenuRef = useRef<HTMLDivElement>(null);
+
+  const journey = calculateWorkJourney(profile?.freelanceStartDate);
+  const [showJourneyMenu, setShowJourneyMenu] = useState(false);
+  const journeyMenuRef = useRef<HTMLDivElement>(null);
 
   const { data: clients } = useFirestore<Client>('clients', user?.uid);
   const { data: workItems } = useFirestore<WorkItem>('workItems', user?.uid);
@@ -51,6 +62,7 @@ export default function GlobalHeader({
       } else if (e.key === 'Escape') {
         setIsOpen(false);
         setShowThemeMenu(false);
+        setShowJourneyMenu(false);
       }
     };
 
@@ -66,6 +78,9 @@ export default function GlobalHeader({
       }
       if (themeMenuRef.current && !themeMenuRef.current.contains(e.target as Node)) {
         setShowThemeMenu(false);
+      }
+      if (journeyMenuRef.current && !journeyMenuRef.current.contains(e.target as Node)) {
+        setShowJourneyMenu(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -375,6 +390,137 @@ export default function GlobalHeader({
               </div>
             </div>
           )}
+        </div>
+
+        {/* Worked Days / Career Journey Widget */}
+        <div className="relative shrink-0" ref={journeyMenuRef}>
+          {journey ? (
+            <>
+              <button
+                type="button"
+                onClick={() => setShowJourneyMenu(!showJourneyMenu)}
+                className={`py-1.5 px-2.5 md:px-3 md:py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 md:gap-2 transition-all cursor-pointer shadow-2xs border ${
+                  journey.currentAnniversary
+                    ? 'bg-gradient-to-r from-amber-500/15 via-orange-500/15 to-indigo-500/15 text-amber-700 dark:text-amber-300 border-amber-400/50 dark:border-amber-400/40 animate-pulse hover:border-amber-500'
+                    : 'bg-amber-50/80 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 hover:bg-amber-100/90 dark:hover:bg-amber-900/50 border-amber-200/80 dark:border-amber-800/60'
+                }`}
+                title={`Started: ${journey.startDateFormatted} (${journey.workedDays} days freelancing). Click for journey details.`}
+              >
+                {journey.currentAnniversary ? (
+                  <>
+                    <PartyPopper size={16} className="text-amber-500 animate-bounce" />
+                    <span className="font-bold text-amber-700 dark:text-amber-300">
+                      {journey.currentAnniversary.badge} <span className="hidden sm:inline">Milestone!</span>
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <Flame size={16} className="text-amber-500 fill-amber-500/20" />
+                    <span className="font-bold text-amber-700 dark:text-amber-300">
+                      {journey.workedDays}
+                    </span>
+                    <span className="hidden sm:inline text-slate-600 dark:text-slate-300 font-medium">
+                      days worked
+                    </span>
+                    <span className="sm:hidden text-slate-600 dark:text-slate-300 font-medium">
+                      d
+                    </span>
+                  </>
+                )}
+              </button>
+
+              {/* Journey Details Popover */}
+              {showJourneyMenu && (
+                <div className="absolute right-0 top-full mt-2 w-72 md:w-80 bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800 p-4 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center">
+                        <Flame size={16} />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">Freelancing Journey</h4>
+                        <p className="text-[10px] text-slate-400">Since {journey.startDateFormatted}</p>
+                      </div>
+                    </div>
+                    {onEditProfile && (
+                      <button
+                        type="button"
+                        onClick={() => { setShowJourneyMenu(false); onEditProfile(); }}
+                        className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                      >
+                        Edit Date
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="py-3 space-y-2.5">
+                    <div className="bg-slate-50 dark:bg-slate-800/60 rounded-xl p-3 border border-slate-200/60 dark:border-slate-800 flex items-center justify-between">
+                      <div>
+                        <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">Total Worked</span>
+                        <span className="text-lg font-black text-slate-900 dark:text-white">
+                          {journey.workedDays} <span className="text-xs font-normal text-slate-500">days</span>
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">Duration</span>
+                        <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">
+                          {journey.formattedDuration}
+                        </span>
+                      </div>
+                    </div>
+
+                    {journey.currentAnniversary && (
+                      <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-base">{journey.currentAnniversary.emoji}</span>
+                          <span className="text-xs font-bold text-amber-700 dark:text-amber-300">
+                            {journey.currentAnniversary.title}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed mb-2">
+                          {journey.currentAnniversary.description}
+                        </p>
+                        {onOpenAnniversaryModal && (
+                          <button
+                            type="button"
+                            onClick={() => { setShowJourneyMenu(false); onOpenAnniversaryModal(); }}
+                            className="w-full py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer"
+                          >
+                            View Celebration Card 🎉
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {journey.nextMilestone && (
+                      <div className="bg-indigo-50/70 dark:bg-indigo-950/40 rounded-xl p-3 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2">
+                          <Sparkles size={14} className="text-indigo-500 shrink-0" />
+                          <div className="text-[11px] text-slate-700 dark:text-slate-300">
+                            Next milestone: <strong className="font-semibold text-indigo-700 dark:text-indigo-300">{journey.nextMilestone.badge}</strong>
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-white dark:bg-slate-900 px-2 py-0.5 rounded-full shadow-2xs border border-indigo-100 dark:border-indigo-800">
+                          in {Math.abs(journey.nextMilestone.diffDays)}d
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : onEditProfile ? (
+            <button
+              type="button"
+              onClick={onEditProfile}
+              className="py-1.5 px-2.5 md:px-3 md:py-2 rounded-xl text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-300 bg-slate-100/70 dark:bg-slate-800/60 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 border border-dashed border-slate-300 dark:border-slate-700 hover:border-indigo-300 transition-all flex items-center gap-1.5 cursor-pointer"
+              title="Set your freelancing start date to track worked days"
+            >
+              <Calendar size={14} className="text-slate-400" />
+              <span className="hidden sm:inline">+ Start Date</span>
+              <span className="sm:hidden">+ Date</span>
+            </button>
+          ) : null}
         </div>
 
         {/* Theme Switcher Button & Dropdown */}

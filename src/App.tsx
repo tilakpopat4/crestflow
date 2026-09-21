@@ -24,6 +24,8 @@ import ClientFeedbackForm from './components/ClientFeedbackForm';
 import PublicFreelancerProfile from './components/PublicFreelancerProfile';
 import ClientPortal from './components/ClientPortal';
 import ReviewsTab from './components/ReviewsTab';
+import AnniversaryModal from './components/AnniversaryModal';
+import { calculateWorkJourney, isAnniversaryDismissed, dismissAnniversary } from './lib/anniversary';
 
 export type Tab = 'dashboard' | 'clients' | 'work' | 'invoice' | 'reviews' | 'admin';
 
@@ -42,6 +44,7 @@ export default function App() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [globalSearchQuery, setGlobalSearchQuery] = useState('');
   const [selectedClientIdFromSearch, setSelectedClientIdFromSearch] = useState<string | null>(null);
+  const [isAnniversaryModalOpen, setIsAnniversaryModalOpen] = useState(false);
   const checkIsAdminRoute = () => {
     return (
       window.location.pathname === '/admin' ||
@@ -133,6 +136,27 @@ export default function App() {
       }
     }
     setIsProfileModalOpen(false);
+  };
+
+  const journey = calculateWorkJourney(profile?.freelanceStartDate);
+
+  // Check and notify on career anniversaries (1 mo, 6 mos, 1 yr, etc.)
+  useEffect(() => {
+    if (!user || !profile?.freelanceStartDate) return;
+    const stats = calculateWorkJourney(profile.freelanceStartDate);
+    if (stats?.currentAnniversary) {
+      const alreadyDismissed = isAnniversaryDismissed(user.uid, stats.currentAnniversary.id);
+      if (!alreadyDismissed) {
+        setIsAnniversaryModalOpen(true);
+      }
+    }
+  }, [user?.uid, profile?.freelanceStartDate]);
+
+  const handleCloseAnniversaryModal = () => {
+    if (user && journey?.currentAnniversary) {
+      dismissAnniversary(user.uid, journey.currentAnniversary.id);
+    }
+    setIsAnniversaryModalOpen(false);
   };
 
   useEffect(() => {
@@ -396,6 +420,9 @@ export default function App() {
           }}
           globalQuery={globalSearchQuery}
           setGlobalQuery={setGlobalSearchQuery}
+          profile={profile}
+          onEditProfile={() => setIsProfileModalOpen(true)}
+          onOpenAnniversaryModal={() => setIsAnniversaryModalOpen(true)}
         />
         <div className="flex-1 overflow-y-auto">
           {activeTab === 'dashboard' && <DashboardTab user={user} profile={profile} onNavigateToClients={() => setActiveTab('clients')} />}
@@ -415,6 +442,16 @@ export default function App() {
           initialProfile={profile}
           onSave={handleSaveProfile}
           isMandatory={!profile && !localStorage.getItem(`crestflow_profile_completed_${user.uid}`)}
+        />
+      )}
+
+      {user && (
+        <AnniversaryModal
+          isOpen={isAnniversaryModalOpen}
+          onClose={handleCloseAnniversaryModal}
+          milestone={journey?.currentAnniversary || null}
+          stats={journey}
+          freelancerName={profile?.name || user.displayName || undefined}
         />
       )}
     </div>

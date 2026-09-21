@@ -3,7 +3,7 @@ import { Invoice, WorkItem, Client } from '../types';
 import { 
   BarChart, Bar, LineChart, Line, Legend, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell 
 } from 'recharts';
-import { IndianRupee, Clock, TrendingUp, CheckCircle2, DownloadCloud, UploadCloud, AlertTriangle, Send, Users, ArrowRight, Mail, Bell, Copy, Smartphone, X, Calendar } from 'lucide-react';
+import { IndianRupee, Clock, TrendingUp, CheckCircle2, DownloadCloud, UploadCloud, AlertTriangle, Send, Users, ArrowRight, Mail, Bell, Copy, Smartphone, X, Calendar, PartyPopper, Sparkles, Flame, Trophy } from 'lucide-react';
 import { User } from 'firebase/auth';
 import { useFirestore, safeStringify } from '../hooks/useFirestore';
 import { 
@@ -19,6 +19,7 @@ import PaymentDateModal from './PaymentDateModal';
 import AISummarizer from './AISummarizer';
 import { UserProfile } from '../types';
 import { useTheme } from '../context/ThemeContext';
+import { calculateWorkJourney } from '../lib/anniversary';
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
@@ -41,6 +42,8 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
     return Boolean(localStorage.getItem('fcm_device_token'));
   });
   const [isNotificationDismissed, setIsNotificationDismissed] = useState(false);
+  const [isAnnivBannerDismissed, setIsAnnivBannerDismissed] = useState(false);
+  const journey = calculateWorkJourney(profile?.freelanceStartDate);
   const [paymentModalState, setPaymentModalState] = useState<{ invoiceId: string | null, isOpen: boolean }>({ invoiceId: null, isOpen: false });
 
   const [selectedYear, setSelectedYear] = useState<number>(() => new Date().getFullYear());
@@ -550,6 +553,37 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
       )}
 
 
+
+      {/* Career Anniversary Milestone Banner if currently active */}
+      {journey?.currentAnniversary && !isAnnivBannerDismissed && (
+        <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-indigo-600 text-white p-5 rounded-2xl shadow-lg flex items-center justify-between gap-4 relative overflow-hidden animate-in fade-in slide-in-from-top-3 duration-300">
+          <div className="flex items-center gap-3.5 relative z-10">
+            <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-2xl shadow-sm shrink-0 animate-bounce">
+              {journey.currentAnniversary.emoji}
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-white/20 px-2.5 py-0.5 rounded-full">
+                  Career Anniversary Milestone
+                </span>
+                <span className="text-xs text-white/90 font-medium">
+                  {journey.workedDays} days freelancing
+                </span>
+              </div>
+              <h3 className="text-lg font-bold mt-0.5">{journey.currentAnniversary.title}!</h3>
+              <p className="text-xs text-white/90 max-w-xl">{journey.currentAnniversary.description}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsAnnivBannerDismissed(true)}
+            className="p-1.5 rounded-full bg-white/15 hover:bg-white/25 text-white transition-colors shrink-0 cursor-pointer"
+            title="Dismiss banner"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
 
       {!isNotificationDismissed && activeNotifications.length > 0 && (
         <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-2xl p-6 shadow-sm space-y-4 relative">

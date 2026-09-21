@@ -85,6 +85,7 @@ export interface UserProfile {
   ifscCode?: string;
   bankName?: string;
   geminiApiKey?: string;
+  freelanceStartDate?: string; // Freelancer's career start date in YYYY-MM-DD format
   createdAt: number;
 }
 

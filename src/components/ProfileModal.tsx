@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User } from 'firebase/auth';
 import { UserProfile } from '../types';
-import { Settings, X, Save, Sun, Moon, Monitor } from 'lucide-react';
+import { Settings, X, Save, Sun, Moon, Monitor, Calendar } from 'lucide-react';
 import { useTheme, Theme } from '../context/ThemeContext';
 
 interface ProfileModalProps {
@@ -28,6 +28,7 @@ export default function ProfileModal({
   const [professionalTitle, setProfessionalTitle] = useState('Video Editor Pro');
   const [servicesDescription, setServicesDescription] = useState('Video Editing Services');
   const [geminiApiKey, setGeminiApiKey] = useState('');
+  const [freelanceStartDate, setFreelanceStartDate] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -39,6 +40,7 @@ export default function ProfileModal({
       setProfessionalTitle(initialProfile?.professionalTitle || 'Video Editor');
       setServicesDescription(initialProfile?.servicesDescription || 'Video Editing Services');
       setGeminiApiKey(initialProfile?.geminiApiKey || '');
+      setFreelanceStartDate(initialProfile?.freelanceStartDate || '');
       setError('');
     }
   }, [isOpen, initialProfile, user]);
@@ -69,6 +71,7 @@ export default function ProfileModal({
         professionalTitle: professionalTitle.trim(),
         servicesDescription: servicesDescription.trim(),
         geminiApiKey: geminiApiKey.trim() || undefined,
+        freelanceStartDate: freelanceStartDate.trim() || undefined,
         createdAt: initialProfile?.createdAt || Date.now()
       };
       await onSave(updatedProfile);
@@ -230,6 +233,35 @@ export default function ProfileModal({
               required
             />
             <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">This UPI ID is used to generate custom payment links & UPI QR codes on invoices.</p>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider flex items-center justify-between">
+              <span className="flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-indigo-500" />
+                Freelancing Start Date (Work Journey)
+              </span>
+              {freelanceStartDate && (
+                <span className="text-[11px] text-amber-600 dark:text-amber-400 font-medium normal-case">
+                  {(() => {
+                    const start = new Date(freelanceStartDate);
+                    if (isNaN(start.getTime())) return '';
+                    const diffDays = Math.max(0, Math.floor((Date.now() - start.getTime()) / (1000 * 60 * 60 * 24)));
+                    return `${diffDays} days active`;
+                  })()}
+                </span>
+              )}
+            </label>
+            <input
+              type="date"
+              max={new Date().toISOString().split('T')[0]}
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-lg px-3.5 py-2 text-sm bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 outline-none transition-all focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900"
+              value={freelanceStartDate}
+              onChange={(e) => setFreelanceStartDate(e.target.value)}
+            />
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
+              Displays total worked days on the portal header and notifies you on career milestones & anniversaries (1 month, 6 months, 1 year, etc.).
+            </p>
           </div>
 
           <div>
