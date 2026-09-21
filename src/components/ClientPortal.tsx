@@ -37,6 +37,7 @@ import {
   Moon
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import MediaEmbedModal from './MediaEmbedModal';
 
 interface ClientPortalProps {
   user: User;
@@ -50,6 +51,7 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [freelancerProfile, setFreelancerProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [embedModalData, setEmbedModalData] = useState<{ isOpen: boolean; url: string; title: string; clientName?: string } | null>(null);
 
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [workItems, setWorkItems] = useState<WorkItem[]>([]);
@@ -516,15 +518,30 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
                           {item.status}
                         </span>
                         {item.videoUrl && (
-                          <a
-                            href={item.videoUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg transition-colors"
-                            title="View Video Link"
-                          >
-                            <Play size={12} />
-                          </a>
+                          <div className="flex items-center gap-1">
+                            <button
+                              type="button"
+                              onClick={() => setEmbedModalData({
+                                isOpen: true,
+                                url: item.videoUrl!,
+                                title: item.description,
+                                clientName: currentClient?.name
+                              })}
+                              className="p-1.5 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 rounded-lg transition-colors cursor-pointer"
+                              title="Watch Embedded Video"
+                            >
+                              <Play size={12} className="fill-indigo-600 dark:fill-indigo-400" />
+                            </button>
+                            <a
+                              href={item.videoUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                              title="Open link in Google Drive / external tab"
+                            >
+                              <ExternalLink size={12} />
+                            </a>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -613,15 +630,31 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
                           </td>
                           <td className="py-3 px-4 text-right">
                             {item.videoUrl ? (
-                              <a
-                                href={item.videoUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 rounded-lg text-[11px] font-bold transition-colors"
-                              >
-                                <Play size={11} />
-                                Preview
-                              </a>
+                              <div className="inline-flex items-center justify-end gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => setEmbedModalData({
+                                    isOpen: true,
+                                    url: item.videoUrl!,
+                                    title: item.description,
+                                    clientName: currentClient?.name
+                                  })}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[11px] font-bold transition-all shadow-2xs cursor-pointer active:scale-95"
+                                  title="Watch embedded video preview directly"
+                                >
+                                  <Play size={11} className="fill-white" />
+                                  <span>Watch Video</span>
+                                </button>
+                                <a
+                                  href={item.videoUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                                  title="Open in Google Drive / external tab"
+                                >
+                                  <ExternalLink size={13} />
+                                </a>
+                              </div>
                             ) : (
                               <span className="text-slate-300 dark:text-slate-600">-</span>
                             )}
@@ -926,6 +959,15 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
         </div>
       )}
 
+      {embedModalData && (
+        <MediaEmbedModal
+          isOpen={embedModalData.isOpen}
+          onClose={() => setEmbedModalData(null)}
+          url={embedModalData.url}
+          title={embedModalData.title}
+          clientName={embedModalData.clientName}
+        />
+      )}
     </div>
   );
 }

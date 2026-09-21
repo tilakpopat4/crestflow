@@ -4,7 +4,7 @@ import {
   ArrowLeft, Calendar, Phone, Mail, Edit3, CheckCircle2, Clock, 
   IndianRupee, Plus, AlertTriangle, Send, FileText, ClipboardList,
   Sparkles, ShieldAlert, DollarSign, Copy, ExternalLink, Play, Download,
-  Users, Tag, Trash2, Edit2, Filter, MessageSquare, Archive
+  Users, Tag, Trash2, Edit2, Filter, MessageSquare, Archive, UploadCloud
 } from 'lucide-react';
 import { User } from 'firebase/auth';
 import { useFirestore } from '../hooks/useFirestore';
@@ -18,6 +18,8 @@ import {
   triggerBrowserOverdueAlert
 } from '../lib/paymentUtils';
 import { generateUUID, extractVideoUrl, getDriveDirectImageUrl } from '../lib/utils';
+import GoogleDriveUploadModal from './GoogleDriveUploadModal';
+import MediaEmbedModal from './MediaEmbedModal';
 
 interface ClientDashboardProps {
   client: Client;
@@ -34,6 +36,8 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
 
   const profile = profiles[0] || null;
   const [copiedReviewLink, setCopiedReviewLink] = useState(false);
+  const [isDriveModalOpen, setIsDriveModalOpen] = useState(false);
+  const [embedModalData, setEmbedModalData] = useState<{ isOpen: boolean; url: string; title: string; clientName?: string } | null>(null);
 
   const handleCopyReviewLink = () => {
     if (!user) return;
@@ -663,12 +667,21 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                 <p className="text-xs text-slate-500 dark:text-slate-400">Track all completed video edits and services specifically for this client.</p>
               </div>
 
-              <button
-                onClick={() => setIsWorkFormOpen(true)}
-                className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition-all shadow-sm cursor-pointer"
-              >
-                <Plus size={14} /> Log Work for {client.name.split(' ')[0]}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsDriveModalOpen(true)}
+                  className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition-all shadow-sm cursor-pointer"
+                  title="Directly upload video to Google Drive with embeddable link"
+                >
+                  <UploadCloud size={14} /> Upload to Drive
+                </button>
+                <button
+                  onClick={() => setIsWorkFormOpen(true)}
+                  className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition-all shadow-sm cursor-pointer"
+                >
+                  <Plus size={14} /> Log Work for {client.name.split(' ')[0]}
+                </button>
+              </div>
             </div>
 
             {/* Quick Add / Edit Work Modal inside Client Dashboard */}
@@ -722,7 +735,16 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                   </div>
 
                   <div className="md:col-span-2 space-y-1">
-                    <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Video / Post Link (Optional)</label>
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Video / Post Link (Optional)</label>
+                      <button
+                        type="button"
+                        onClick={() => setIsDriveModalOpen(true)}
+                        className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 cursor-pointer"
+                      >
+                        <UploadCloud size={12} /> Upload to Drive
+                      </button>
+                    </div>
                     <input
                       type="text"
                       placeholder="https://instagram.com/reel/... or YouTube / Drive link"
@@ -872,16 +894,31 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                                 )}
                               </div>
                               {videoUrl && (
-                                <a
-                                  href={videoUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  onClick={(e) => e.stopPropagation()}
-                                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border border-indigo-200 dark:border-indigo-800/60 transition-all cursor-pointer shrink-0 w-fit"
-                                  title={`Open video/post: ${videoUrl}`}
-                                >
-                                  <Play size={10} className="fill-indigo-700 dark:fill-indigo-300" /> Open Video/Post <ExternalLink size={10} />
-                                </a>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => setEmbedModalData({
+                                      isOpen: true,
+                                      url: videoUrl,
+                                      title: item.description,
+                                      clientName: client.name
+                                    })}
+                                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border border-indigo-200 dark:border-indigo-800/60 transition-all cursor-pointer shrink-0 w-fit"
+                                    title="Watch embedded video preview"
+                                  >
+                                    <Play size={10} className="fill-indigo-700 dark:fill-indigo-300" /> Watch Video
+                                  </button>
+                                  <a
+                                    href={videoUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="text-[11px] text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 inline-flex items-center gap-0.5"
+                                    title={`Open external link: ${videoUrl}`}
+                                  >
+                                    <ExternalLink size={10} /> Link
+                                  </a>
+                                </div>
                               )}
                             </div>
                           </td>
@@ -1419,6 +1456,35 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
           </div>
         </div>
       )}
+
+      {/* Google Drive Direct Upload Modal */}
+      <GoogleDriveUploadModal
+        isOpen={isDriveModalOpen}
+        onClose={() => setIsDriveModalOpen(false)}
+        clients={[client]}
+        defaultClientId={client.id}
+        onWorkItemCreated={async (newWork) => {
+          await updateWorkItem(newWork);
+          setIsDriveModalOpen(false);
+        }}
+        onLinkGenerated={(result) => {
+          setWorkFormData(prev => ({
+            ...prev,
+            videoUrl: result.webViewLink,
+            description: prev.description.trim() ? prev.description : result.name
+          }));
+          setIsWorkFormOpen(true);
+        }}
+      />
+
+      {/* Embedded Media Player Modal */}
+      <MediaEmbedModal
+        isOpen={!!embedModalData?.isOpen}
+        onClose={() => setEmbedModalData(null)}
+        url={embedModalData?.url || ''}
+        title={embedModalData?.title || 'Video Deliverable'}
+        clientName={embedModalData?.clientName}
+      />
     </div>
   );
 }

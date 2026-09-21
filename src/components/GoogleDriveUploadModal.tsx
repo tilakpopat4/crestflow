@@ -1,0 +1,389 @@
+import React, { useState, useRef } from 'react';
+import { X, UploadCloud, CheckCircle2, AlertCircle, Loader2, Video, File, ExternalLink, Copy, Check, Play, FolderPlus } from 'lucide-react';
+import { uploadFileToGoogleDrive, GoogleDriveUploadResult } from '../lib/driveService';
+import { Client, WorkItem } from '../types';
+import { generateUUID } from '../lib/utils';
+
+interface GoogleDriveUploadModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  clients: Client[];
+  defaultClientId?: string;
+  onWorkItemCreated?: (workItem: WorkItem) => void;
+  onLinkGenerated?: (driveResult: GoogleDriveUploadResult) => void;
+}
+
+export default function GoogleDriveUploadModal({
+  isOpen,
+  onClose,
+  clients,
+  defaultClientId,
+  onWorkItemCreated,
+  onLinkGenerated
+}: GoogleDriveUploadModalProps) {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [clientId, setClientId] = useState<string>(defaultClientId || (clients[0]?.id || ''));
+  const [description, setDescription] = useState<string>('');
+  const [quantity, setQuantity] = useState<string>('1');
+  const [rate, setRate] = useState<string>('');
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [uploadResult, setUploadResult] = useState<GoogleDriveUploadResult | null>(null);
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  if (!isOpen) return null;
+
+  const handleFileChange = (file: File) => {
+    setSelectedFile(file);
+    setError(null);
+    setUploadResult(null);
+    setUploadProgress(0);
+    if (!description.trim()) {
+      // Auto-set clean description from filename
+      const cleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[_-]+/g, ' ');
+      setDescription(cleanName.charAt(0).toUpperCase() + cleanName.slice(1));
+    }
+  };
+
+  const handleStartUpload = async () => {
+    if (!selectedFile) {
+      setError('Please choose a video or file to upload.');
+      return;
+    }
+
+    setIsUploading(true);
+    setError(null);
+    setUploadProgress(0);
+
+    try {
+      const result = await uploadFileToGoogleDrive(selectedFile, (percent) => {
+        setUploadProgress(percent);
+      });
+
+      setUploadResult(result);
+
+      if (onLinkGenerated) {
+        onLinkGenerated(result);
+      }
+
+      // If client selected and callback provided, create work item directly
+      if (onWorkItemCreated && clientId) {
+        const clientObj = clients.find(c => c.id === clientId);
+        const itemRate = Number(rate) || (clientObj ? clientObj.defaultRate : 0);
+        const newWork: WorkItem = {
+          id: generateUUID(),
+          clientId: clientId,
+          description: description.trim() || selectedFile.name,
+          videoUrl: result.webViewLink,
+          quantity: Number(quantity) || 1,
+          rate: itemRate,
+          date: Date.now(),
+          status: 'Uninvoiced'
+        };
+        onWorkItemCreated(newWork);
+      }
+    } catch (err: any) {
+      console.error(err);
+      setError(err?.message || 'Upload to Google Drive failed. Please verify your Google account permissions.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleCopyLink = () => {
+    if (uploadResult?.webViewLink) {
+      navigator.clipboard.writeText(uploadResult.webViewLink);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
+    }
+  };
+
+  const formatBytes = (bytes: number) => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
+  };
+
+  return (
+    <div
+      id="drive-upload-modal-overlay"
+      onClick={() => { if (!isUploading) onClose(); }}
+      className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-6 cursor-pointer animate-in fade-in duration-200"
+    >
+      <div
+        id="drive-upload-card"
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden cursor-default flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-200"
+      >
+        {/* Header */}
+        <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-transparent">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-blue-500 text-white flex items-center justify-center shadow-md shrink-0">
+              <UploadCloud size={22} />
+            </div>
+            <div>
+              <h3 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-1.5">
+                Upload Directly to Google Drive
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Upload deliverable video & embed directly in client portal
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isUploading}
+            className="p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 cursor-pointer"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-5 overflow-y-auto">
+          {error && (
+            <div className="bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900/60 text-red-700 dark:text-red-300 p-3.5 rounded-xl text-xs flex items-start gap-2.5">
+              <AlertCircle size={16} className="shrink-0 mt-0.5" />
+              <div className="flex-1 leading-relaxed">{error}</div>
+            </div>
+          )}
+
+          {/* Success card if uploaded */}
+          {uploadResult && (
+            <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 rounded-2xl p-4.5 space-y-3">
+              <div className="flex items-center gap-2.5 text-emerald-800 dark:text-emerald-300">
+                <CheckCircle2 size={20} className="text-emerald-600 shrink-0" />
+                <div className="font-bold text-sm">Upload Successful to Google Drive!</div>
+              </div>
+              <p className="text-xs text-emerald-700 dark:text-emerald-400 leading-relaxed">
+                File is uploaded and permissions are set to anyone with link. Clients can now stream and view the embedded video directly on the portal!
+              </p>
+
+              <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-emerald-200/80 dark:border-emerald-900/60 flex items-center justify-between gap-3">
+                <div className="truncate text-xs font-mono text-slate-700 dark:text-slate-300">
+                  {uploadResult.webViewLink}
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCopyLink}
+                  className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shrink-0 transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  {copiedLink ? <Check size={13} /> : <Copy size={13} />}
+                  {copiedLink ? 'Copied' : 'Copy'}
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2 pt-1">
+                <a
+                  href={uploadResult.webViewLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold text-center transition-colors flex items-center justify-center gap-1.5"
+                >
+                  <ExternalLink size={13} /> Open in Drive
+                </a>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          )}
+
+          {!uploadResult && (
+            <>
+              {/* Drop / Select File Zone */}
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                onDragLeave={() => setIsDragging(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setIsDragging(false);
+                  if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                    handleFileChange(e.dataTransfer.files[0]);
+                  }
+                }}
+                className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all ${
+                  isDragging
+                    ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/40'
+                    : selectedFile
+                    ? 'border-emerald-400 bg-emerald-50/20 dark:bg-emerald-950/20'
+                    : 'border-slate-200 dark:border-slate-700 hover:border-indigo-400 bg-slate-50/50 dark:bg-slate-800/40'
+                }`}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="video/*,image/*,.pdf,.zip,.rar"
+                  className="hidden"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      handleFileChange(e.target.files[0]);
+                    }
+                  }}
+                />
+
+                {selectedFile ? (
+                  <div className="flex items-center justify-center gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                      <Video size={24} />
+                    </div>
+                    <div className="text-left">
+                      <div className="text-xs font-bold text-slate-900 dark:text-white truncate max-w-xs">
+                        {selectedFile.name}
+                      </div>
+                      <div className="text-[11px] text-slate-400">
+                        {formatBytes(selectedFile.size)} • Click to change file
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto shadow-2xs">
+                      <UploadCloud size={24} />
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                        Click to select a video / file
+                      </span>{' '}
+                      <span className="text-xs text-slate-500">or drag and drop here</span>
+                    </div>
+                    <p className="text-[11px] text-slate-400">
+                      Supports MP4, MOV, MKV, ProRes, Images, and Documents
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Progress Bar during Upload */}
+              {isUploading && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                      <Loader2 size={14} className="animate-spin text-indigo-600" /> Uploading to Google Drive...
+                    </span>
+                    <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                      {uploadProgress}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden">
+                    <div
+                      className="bg-gradient-to-r from-blue-500 to-indigo-600 h-full rounded-full transition-all duration-300"
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Form Details */}
+              <div className="space-y-3.5 text-left">
+                {clients.length > 0 && (
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                      Associate with Client (for work log)
+                    </label>
+                    <select
+                      value={clientId}
+                      onChange={(e) => {
+                        setClientId(e.target.value);
+                        const cl = clients.find(c => c.id === e.target.value);
+                        if (cl && !rate) setRate(String(cl.defaultRate));
+                      }}
+                      className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:border-indigo-500"
+                    >
+                      <option value="">None (Just generate link)</option>
+                      {clients.map(c => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Deliverable Description
+                  </label>
+                  <input
+                    type="text"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="e.g. Real Estate Tour Final Cut"
+                    className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:border-indigo-500"
+                  />
+                </div>
+
+                {clientId && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                        Quantity
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={quantity}
+                        onChange={(e) => setQuantity(e.target.value)}
+                        className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:border-indigo-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                        Rate (₹)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={rate}
+                        onChange={(e) => setRate(e.target.value)}
+                        placeholder="Optional"
+                        className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:border-indigo-500 font-mono"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-2.5 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  disabled={isUploading}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleStartUpload}
+                  disabled={isUploading || !selectedFile}
+                  className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-md disabled:opacity-50 flex items-center gap-2 cursor-pointer active:scale-98"
+                >
+                  {isUploading ? (
+                    <>
+                      <Loader2 size={14} className="animate-spin" />
+                      <span>Uploading to Drive ({uploadProgress}%)...</span>
+                    </>
+                  ) : (
+                    <>
+                      <UploadCloud size={15} />
+                      <span>Upload & Embed to Drive</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -33,6 +33,8 @@
 
 ### 🎬 Itemized Work Log & Deliverables Tracker
 - **Smart Work Logging:** Log daily deliverables with client association, quantity, custom rates, delivery dates, and status tracking (`Uninvoiced` vs `Invoiced`).
+- **Direct Google Drive Upload Integration:** Upload video edits, project files, and reels directly to Google Drive right from the app with OAuth token handling, resumable file uploading, real-time percentage progress bar, and automatic public-read permissions (`anyoneWithLink`).
+- **In-App Embedded Media Player:** Universal embedded video player (`MediaEmbedModal`) featuring native Google Drive iframe preview (`/preview`), YouTube, and Vimeo support so both clients and freelancers can stream videos directly within the portal without permissions issues or leaving the tab.
 - **Live Video Link Previews:** Automatic detection and extraction of links from Instagram Reels, YouTube Shorts/Videos, TikTok, Vimeo, and Google Drive.
 - **Optimized Google Drive Thumbnails:** Direct image/thumbnail resolution for Google Drive links avoiding third-party cookie restrictions.
 - **Batch Invoice Integration:** One-click import of uninvoiced items into cycle invoices based on date ranges.

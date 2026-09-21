@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, CheckCircle, Clock, Edit2, ArrowUpDown, ExternalLink, Play, Video, Search, X, Users } from 'lucide-react';
+import { Plus, Trash2, CheckCircle, Clock, Edit2, ArrowUpDown, ExternalLink, Play, Video, Search, X, Users, UploadCloud } from 'lucide-react';
 import { useFirestore } from '../hooks/useFirestore';
 import { Client, WorkItem } from '../types';
 import clsx from 'clsx';
 import { User } from 'firebase/auth';
 import { generateUUID, extractVideoUrl } from '../lib/utils';
+import GoogleDriveUploadModal from './GoogleDriveUploadModal';
+import MediaEmbedModal from './MediaEmbedModal';
 
 interface WorkLogTabProps {
   user: User;
@@ -17,6 +19,8 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
   const { data: invoices, loading: invoicesLoading, addOrUpdateItem: addOrUpdateInvoice, removeItem: removeInvoice } = useFirestore<any>('invoices', user.uid);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isDriveModalOpen, setIsDriveModalOpen] = useState(false);
+  const [embedModalData, setEmbedModalData] = useState<{ isOpen: boolean; url: string; title: string; clientName?: string } | null>(null);
   const [editingWorkId, setEditingWorkId] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
@@ -254,13 +258,25 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
             Sort: {sortOrder === 'asc' ? 'Oldest First' : 'Newest First'}
           </button>
           {!isFormOpen && (
-            <button 
-              onClick={() => setIsFormOpen(true)}
-              className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-xs font-semibold transition-colors shadow-xs cursor-pointer shrink-0"
-            >
-              <Plus size={15} />
-              Log Work
-            </button>
+            <div className="flex items-center gap-2">
+              <button 
+                type="button"
+                onClick={() => setIsDriveModalOpen(true)}
+                className="flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors shadow-xs cursor-pointer shrink-0"
+                title="Directly upload video/file to Google Drive and log as work deliverable"
+              >
+                <UploadCloud size={14} />
+                Upload to Drive
+              </button>
+
+              <button 
+                onClick={() => setIsFormOpen(true)}
+                className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-xs font-semibold transition-colors shadow-xs cursor-pointer shrink-0"
+              >
+                <Plus size={15} />
+                Log Work
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -340,13 +356,22 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Video / Post Link (Optional)</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Video / Post Link (Optional)</label>
+                <button
+                  type="button"
+                  onClick={() => setIsDriveModalOpen(true)}
+                  className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center gap-1 cursor-pointer"
+                >
+                  <UploadCloud size={13} /> Upload to Google Drive
+                </button>
+              </div>
               <input 
                 type="text"
                 className="w-full p-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm font-mono"
                 value={formData.videoUrl}
                 onChange={(e) => setFormData({...formData, videoUrl: e.target.value})}
-                placeholder="https://instagram.com/reel/... or YouTube / Google Drive link"
+                placeholder="https://drive.google.com/file/d/... or YouTube / Instagram link"
               />
             </div>
             
@@ -435,16 +460,23 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
                           <span className="font-medium text-slate-900 dark:text-slate-100">{work.description}</span>
                           <span className="text-xs text-slate-400 dark:text-slate-500">({work.quantity}x)</span>
                           {videoUrl && (
-                            <a
-                              href={videoUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={(e) => e.stopPropagation()}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const client = clients.find(c => c.id === work.clientId);
+                                setEmbedModalData({
+                                  isOpen: true,
+                                  url: videoUrl,
+                                  title: work.description,
+                                  clientName: client?.name
+                                });
+                              }}
                               className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 hover:text-indigo-900 dark:hover:text-indigo-200 border border-indigo-200 dark:border-indigo-800/60 transition-all shrink-0 cursor-pointer w-fit"
-                              title={`Open video/post: ${videoUrl}`}
+                              title={`Watch embedded preview: ${videoUrl}`}
                             >
-                              <Play size={11} className="fill-indigo-700 dark:fill-indigo-300" /> Open Video/Post <ExternalLink size={10} />
-                            </a>
+                              <Play size={11} className="fill-indigo-700 dark:fill-indigo-300" /> Watch Preview
+                            </button>
                           )}
                         </div>
                       </td>
@@ -464,14 +496,32 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
                       </td>
                       <td className="py-4 px-4 text-sm text-right flex justify-end items-center gap-1">
                         {videoUrl && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const client = clients.find(c => c.id === work.clientId);
+                              setEmbedModalData({
+                                isOpen: true,
+                                url: videoUrl,
+                                title: work.description,
+                                clientName: client?.name
+                              });
+                            }}
+                            className="p-1.5 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 rounded transition-colors cursor-pointer"
+                            title="Play embedded preview"
+                          >
+                            <Play size={15} />
+                          </button>
+                        )}
+                        {videoUrl && (
                           <a
                             href={videoUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="p-1.5 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 rounded transition-colors"
-                            title="Directly Open Video / Post in new tab"
+                            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors"
+                            title="Open link in Google Drive / external tab"
                           >
-                            <ExternalLink size={16} />
+                            <ExternalLink size={15} />
                           </a>
                         )}
                         <button 
@@ -496,6 +546,36 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
             </table>
           </div>
         </div>
+      )}
+
+      {/* Google Drive Upload Modal */}
+      <GoogleDriveUploadModal
+        isOpen={isDriveModalOpen}
+        onClose={() => setIsDriveModalOpen(false)}
+        clients={clients}
+        defaultClientId={formData.clientId}
+        onWorkItemCreated={async (newWork) => {
+          await addOrUpdateItem(newWork);
+          setIsDriveModalOpen(false);
+        }}
+        onLinkGenerated={(result) => {
+          setFormData(prev => ({
+            ...prev,
+            videoUrl: result.webViewLink,
+            description: prev.description.trim() ? prev.description : result.name
+          }));
+        }}
+      />
+
+      {/* Media Embed Player Modal */}
+      {embedModalData && (
+        <MediaEmbedModal
+          isOpen={embedModalData.isOpen}
+          onClose={() => setEmbedModalData(null)}
+          url={embedModalData.url}
+          title={embedModalData.title}
+          clientName={embedModalData.clientName}
+        />
       )}
     </div>
   );
