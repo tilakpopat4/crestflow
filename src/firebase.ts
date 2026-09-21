@@ -18,6 +18,7 @@ export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 googleProvider.addScope('https://www.googleapis.com/auth/gmail.send');
 googleProvider.addScope('https://www.googleapis.com/auth/gmail.compose');
+googleProvider.addScope('https://www.googleapis.com/auth/drive.file');
 
 export async function testFirestoreConnection() {
   try {

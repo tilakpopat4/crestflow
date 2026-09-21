@@ -20,6 +20,7 @@ import ProfileModal from './components/ProfileModal';
 import Logo from './components/Logo';
 import { ShieldAlert, LogOut } from 'lucide-react';
 import { setGmailAccessToken } from './lib/gmailService';
+import { setDriveAccessToken } from './lib/driveService';
 import ClientFeedbackForm from './components/ClientFeedbackForm';
 import PublicFreelancerProfile from './components/PublicFreelancerProfile';
 import ClientPortal from './components/ClientPortal';
@@ -205,10 +206,12 @@ export default function App() {
     try {
       googleProvider.addScope('https://www.googleapis.com/auth/gmail.send');
       googleProvider.addScope('https://www.googleapis.com/auth/gmail.compose');
+      googleProvider.addScope('https://www.googleapis.com/auth/drive.file');
       const res = await signInWithPopup(auth, googleProvider);
       const credential = GoogleAuthProvider.credentialFromResult(res);
       if (credential?.accessToken) {
         setGmailAccessToken(credential.accessToken);
+        setDriveAccessToken(credential.accessToken);
       }
     } catch (error: any) {
       console.error(error);

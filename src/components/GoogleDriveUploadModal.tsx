@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
-import { X, UploadCloud, CheckCircle2, AlertCircle, Loader2, Video, File, ExternalLink, Copy, Check, Play, FolderPlus } from 'lucide-react';
-import { uploadFileToGoogleDrive, GoogleDriveUploadResult } from '../lib/driveService';
+import React, { useState, useRef, useEffect } from 'react';
+import { X, UploadCloud, CheckCircle2, AlertCircle, Loader2, Video, File, ExternalLink, Copy, Check, Play, FolderPlus, KeyRound, Globe } from 'lucide-react';
+import { uploadFileToGoogleDrive, GoogleDriveUploadResult, getDriveAccessToken, acquireDriveAccessToken } from '../lib/driveService';
 import { Client, WorkItem } from '../types';
 import { generateUUID } from '../lib/utils';
 
@@ -32,7 +32,13 @@ export default function GoogleDriveUploadModal({
   const [uploadResult, setUploadResult] = useState<GoogleDriveUploadResult | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [isAuthorizing, setIsAuthorizing] = useState(false);
+  const [hasConnectedDrive, setHasConnectedDrive] = useState(() => !!getDriveAccessToken());
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setHasConnectedDrive(!!getDriveAccessToken());
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -45,6 +51,21 @@ export default function GoogleDriveUploadModal({
       // Auto-set clean description from filename
       const cleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[_-]+/g, ' ');
       setDescription(cleanName.charAt(0).toUpperCase() + cleanName.slice(1));
+    }
+  };
+
+  const handleConnectDrive = async () => {
+    setIsAuthorizing(true);
+    setError(null);
+    try {
+      await acquireDriveAccessToken(true);
+      setHasConnectedDrive(true);
+      setError(null);
+    } catch (err: any) {
+      console.error(err);
+      setError(err?.message || 'Failed to authorize Google Drive.');
+    } finally {
+      setIsAuthorizing(false);
     }
   };
 
@@ -63,6 +84,7 @@ export default function GoogleDriveUploadModal({
         setUploadProgress(percent);
       });
 
+      setHasConnectedDrive(true);
       setUploadResult(result);
 
       if (onLinkGenerated) {
@@ -109,6 +131,8 @@ export default function GoogleDriveUploadModal({
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
   };
 
+  const isPopupBlockedError = error && (error.toLowerCase().includes('popup') || error.toLowerCase().includes('blocked'));
+
   return (
     <div
       id="drive-upload-modal-overlay"
@@ -127,9 +151,16 @@ export default function GoogleDriveUploadModal({
               <UploadCloud size={22} />
             </div>
             <div>
-              <h3 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-1.5">
-                Upload Directly to Google Drive
-              </h3>
+              <div className="flex items-center gap-2">
+                <h3 className="font-bold text-base text-slate-900 dark:text-white">
+                  Upload Directly to Google Drive
+                </h3>
+                {hasConnectedDrive && (
+                  <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                    <CheckCircle2 size={11} /> Connected
+                  </span>
+                )}
+              </div>
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 Upload deliverable video & embed directly in client portal
               </p>
@@ -146,10 +177,78 @@ export default function GoogleDriveUploadModal({
         </div>
 
         <div className="p-6 space-y-5 overflow-y-auto">
-          {error && (
+          {/* Popup Blocked Assistance UI */}
+          {isPopupBlockedError ? (
+            <div className="bg-amber-50/90 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/80 rounded-2xl p-4.5 space-y-3 animate-in fade-in">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+                  <AlertCircle size={18} />
+                </div>
+                <div className="space-y-1.5 flex-1">
+                  <div className="font-bold text-xs text-amber-900 dark:text-amber-200 uppercase tracking-wide">
+                    Google Popup Blocked by Browser
+                  </div>
+                  <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
+                    Your browser prevented the Google Drive sign-in popup from opening. Follow these 2 steps:
+                  </p>
+                  <ol className="list-decimal list-inside text-xs text-amber-900/90 dark:text-amber-200 space-y-1 pl-1 font-medium">
+                    <li>
+                      Look at the <strong>far right of your browser's address (URL) bar</strong> and click the <strong>Pop-up blocked icon (🚫)</strong>.
+                    </li>
+                    <li>
+                      Select <strong>"Always allow pop-ups and redirects for this site"</strong> and click <strong>Done</strong>.
+                    </li>
+                  </ol>
+                </div>
+              </div>
+
+              <div className="pt-2 flex flex-wrap items-center gap-2 border-t border-amber-200/70 dark:border-amber-800/60">
+                <button
+                  type="button"
+                  onClick={handleConnectDrive}
+                  disabled={isAuthorizing}
+                  className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 disabled:opacity-50"
+                >
+                  {isAuthorizing ? <Loader2 size={13} className="animate-spin" /> : <UploadCloud size={13} />}
+                  <span>Authorize Google Drive</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setError(null)}
+                  className="px-3 py-2 text-xs font-semibold text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-xl cursor-pointer"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          ) : error ? (
             <div className="bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900/60 text-red-700 dark:text-red-300 p-3.5 rounded-xl text-xs flex items-start gap-2.5">
               <AlertCircle size={16} className="shrink-0 mt-0.5" />
               <div className="flex-1 leading-relaxed">{error}</div>
+            </div>
+          ) : null}
+
+          {/* Connect Drive prompt if not connected */}
+          {!hasConnectedDrive && !uploadResult && !isPopupBlockedError && (
+            <div className="bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 p-3.5 rounded-2xl flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-blue-600/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                  <KeyRound size={15} />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-slate-800 dark:text-slate-200">Google Drive Permission</div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400">1-click authorization to upload deliverables directly</div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleConnectDrive}
+                disabled={isAuthorizing}
+                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shrink-0 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              >
+                {isAuthorizing ? <Loader2 size={12} className="animate-spin" /> : <UploadCloud size={12} />}
+                <span>Connect</span>
+              </button>
             </div>
           )}
 

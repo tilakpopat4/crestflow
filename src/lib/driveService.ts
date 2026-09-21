@@ -1,13 +1,25 @@
 import { auth, googleProvider } from '../firebase';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 
-let cachedDriveAccessToken: string | null = null;
+const DRIVE_TOKEN_STORAGE_KEY = 'crestflow_drive_token';
+
+let cachedDriveAccessToken: string | null = (typeof window !== 'undefined' ? sessionStorage.getItem(DRIVE_TOKEN_STORAGE_KEY) : null);
 
 export function setDriveAccessToken(token: string | null) {
   cachedDriveAccessToken = token;
+  if (typeof window !== 'undefined') {
+    if (token) {
+      sessionStorage.setItem(DRIVE_TOKEN_STORAGE_KEY, token);
+    } else {
+      sessionStorage.removeItem(DRIVE_TOKEN_STORAGE_KEY);
+    }
+  }
 }
 
 export function getDriveAccessToken(): string | null {
+  if (!cachedDriveAccessToken && typeof window !== 'undefined') {
+    cachedDriveAccessToken = sessionStorage.getItem(DRIVE_TOKEN_STORAGE_KEY);
+  }
   return cachedDriveAccessToken;
 }
 
@@ -67,15 +79,18 @@ export function getDriveEmbedUrl(url: string | undefined | null): string | null 
  * Scope: https://www.googleapis.com/auth/drive.file (allows uploading & managing files created by this app)
  */
 export async function acquireDriveAccessToken(forcePrompt = false): Promise<string> {
-  if (cachedDriveAccessToken && !forcePrompt) {
-    return cachedDriveAccessToken;
+  const existingToken = getDriveAccessToken();
+  if (existingToken && !forcePrompt) {
+    return existingToken;
   }
 
   try {
-    // Add Google Drive scope for file creation & access
-    googleProvider.addScope('https://www.googleapis.com/auth/drive.file');
+    const driveProvider = new GoogleAuthProvider();
+    driveProvider.addScope('https://www.googleapis.com/auth/drive.file');
+    driveProvider.addScope('https://www.googleapis.com/auth/gmail.send');
+    driveProvider.addScope('https://www.googleapis.com/auth/gmail.compose');
 
-    const result = await signInWithPopup(auth, googleProvider);
+    const result = await signInWithPopup(auth, driveProvider);
     const credential = GoogleAuthProvider.credentialFromResult(result);
     const token = credential?.accessToken;
 
@@ -83,12 +98,19 @@ export async function acquireDriveAccessToken(forcePrompt = false): Promise<stri
       throw new Error('Google OAuth sign-in did not return an access token for Google Drive. Please try again.');
     }
 
-    cachedDriveAccessToken = token;
+    setDriveAccessToken(token);
     return token;
   } catch (err: any) {
     console.error('Failed to acquire Drive token via OAuth popup:', err);
     if (err?.code === 'auth/popup-blocked' || err?.message?.includes('popup')) {
-      throw new Error('Google OAuth popup was blocked. Please allow popups for this site to connect Google Drive.');
+      const isIframe = typeof window !== 'undefined' && window.self !== window.top;
+      if (isIframe) {
+        throw new Error('Google OAuth popup was blocked because this app is running in an embedded preview iframe. Please open the app in a new browser tab to connect Google Drive.');
+      }
+      throw new Error('Google OAuth popup was blocked by your browser. Please allow popups for this site (look for the popup-blocked icon in your browser address bar) and try again.');
+    }
+    if (err?.code === 'auth/popup-closed-by-user' || err?.code === 'auth/cancelled-popup-request') {
+      throw new Error('Google sign-in popup was closed before completion. Please try again.');
     }
     throw err;
   }
