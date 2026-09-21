@@ -132,6 +132,13 @@ export default function GoogleDriveUploadModal({
   };
 
   const isPopupBlockedError = error && (error.toLowerCase().includes('popup') || error.toLowerCase().includes('blocked'));
+  const isApiDisabledError = error && (
+    error.includes('Google Drive API has not been used') ||
+    error.includes('SERVICE_DISABLED') ||
+    error.includes('drive.googleapis.com') ||
+    error.includes('console.developers.google.com')
+  );
+  const activationUrl = "https://console.developers.google.com/apis/api/drive.googleapis.com/overview?project=960977935987";
 
   return (
     <div
@@ -177,8 +184,56 @@ export default function GoogleDriveUploadModal({
         </div>
 
         <div className="p-6 space-y-5 overflow-y-auto">
-          {/* Popup Blocked Assistance UI */}
-          {isPopupBlockedError ? (
+          {/* API Disabled in Google Cloud Assistance UI */}
+          {isApiDisabledError ? (
+            <div className="bg-amber-50/95 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700/80 rounded-2xl p-4.5 space-y-3.5 animate-in fade-in">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+                  <AlertCircle size={18} />
+                </div>
+                <div className="space-y-1.5 flex-1">
+                  <div className="font-bold text-xs text-amber-950 dark:text-amber-200 uppercase tracking-wide">
+                    Google Drive API Needs 1-Click Activation
+                  </div>
+                  <p className="text-xs text-amber-900/90 dark:text-amber-300 leading-relaxed">
+                    Google Cloud requires the <strong>Google Drive API</strong> to be turned on once for project <strong>960977935987</strong> (CrestFlow).
+                  </p>
+                  <ol className="list-decimal list-inside text-xs text-amber-900 dark:text-amber-200 space-y-1 pl-1 font-medium">
+                    <li>
+                      Click the blue button below to open Google Cloud Console.
+                    </li>
+                    <li>
+                      Click the blue <strong>"ENABLE"</strong> button on the page.
+                    </li>
+                    <li>
+                      Return to this modal and click <strong>"Retry Upload"</strong>!
+                    </li>
+                  </ol>
+                </div>
+              </div>
+
+              <div className="pt-2 flex flex-wrap items-center gap-2 border-t border-amber-200/80 dark:border-amber-800/70">
+                <a
+                  href={activationUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                >
+                  <ExternalLink size={13} />
+                  <span>Enable Google Drive API</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={handleStartUpload}
+                  disabled={isUploading}
+                  className="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  {isUploading ? <Loader2 size={13} className="animate-spin" /> : <UploadCloud size={13} />}
+                  <span>Retry Upload</span>
+                </button>
+              </div>
+            </div>
+          ) : isPopupBlockedError ? (
             <div className="bg-amber-50/90 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/80 rounded-2xl p-4.5 space-y-3 animate-in fade-in">
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 mt-0.5">

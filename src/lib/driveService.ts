@@ -150,8 +150,8 @@ export async function uploadFileToGoogleDrive(
     }
   );
 
-  // If token expired, re-authenticate and retry
-  if (initResponse.status === 401 || initResponse.status === 403) {
+  // If token expired (401 Unauthorized), re-authenticate and retry once
+  if (initResponse.status === 401) {
     console.warn('Google Drive token expired. Re-authorizing...');
     token = await acquireDriveAccessToken(true);
     initResponse = await fetch(
@@ -171,7 +171,16 @@ export async function uploadFileToGoogleDrive(
 
   if (!initResponse.ok) {
     const errText = await initResponse.text().catch(() => '');
-    throw new Error(`Failed to initiate Google Drive upload session (${initResponse.status}): ${errText}`);
+    let cleanMessage = `Failed to initiate Google Drive upload session (${initResponse.status})`;
+    try {
+      const parsed = JSON.parse(errText);
+      if (parsed?.error?.message) {
+        cleanMessage = parsed.error.message;
+      }
+    } catch {
+      if (errText) cleanMessage += `: ${errText}`;
+    }
+    throw new Error(cleanMessage);
   }
 
   const uploadUrl = initResponse.headers.get('Location');
