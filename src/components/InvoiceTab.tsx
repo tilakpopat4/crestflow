@@ -928,6 +928,61 @@ export async function generateOffscreenPdfBlob(params: {
 
   const restoreStyles = preprocessElementStylesForPdf(container);
 
+  // Helper: patch all stylesheets in the cloned document to remove oklch/oklab/color() functions
+  function patchClonedDocumentStylesheets(clonedDoc: Document) {
+    try {
+      const sheets = Array.from(clonedDoc.styleSheets);
+      for (const sheet of sheets) {
+        let rules: CSSRuleList | null = null;
+        try { rules = sheet.cssRules; } catch (e) { continue; }
+        if (!rules) continue;
+        for (let i = 0; i < rules.length; i++) {
+          const rule = rules[i];
+          try {
+            if (rule instanceof CSSStyleRule || rule instanceof CSSKeyframeRule) {
+              const style = (rule as any).style as CSSStyleDeclaration;
+              if (!style) continue;
+              for (let j = 0; j < style.length; j++) {
+                const prop = style[j];
+                const val = style.getPropertyValue(prop);
+                if (val && (val.includes('oklch') || val.includes('oklab') || val.includes('color('))) {
+                  const converted = replaceUnsupportedColorsWithRgb(val);
+                  if (converted !== val) {
+                    style.setProperty(prop, converted, style.getPropertyPriority(prop));
+                  }
+                }
+              }
+            } else if (rule instanceof CSSMediaRule || rule instanceof CSSSupportsRule || (rule as any).cssRules) {
+              // Recurse into nested rules (covers @media, @supports, @layer, etc.)
+              const innerRules = (rule as any).cssRules as CSSRuleList;
+              if (innerRules) {
+                for (let k = 0; k < innerRules.length; k++) {
+                  const inner = innerRules[k];
+                  const style = (inner as any).style as CSSStyleDeclaration;
+                  if (!style) continue;
+                  for (let j = 0; j < style.length; j++) {
+                    const prop = style[j];
+                    const val = style.getPropertyValue(prop);
+                    if (val && (val.includes('oklch') || val.includes('oklab') || val.includes('color('))) {
+                      const converted = replaceUnsupportedColorsWithRgb(val);
+                      if (converted !== val) {
+                        style.setProperty(prop, converted, style.getPropertyPriority(prop));
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          } catch (e) {
+            // Some rules may throw (e.g. cross-origin), skip
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('patchClonedDocumentStylesheets failed:', err);
+    }
+  }
+
   try {
     const canvas = await html2canvas(container, {
       scale: 2,
@@ -941,7 +996,13 @@ export async function generateOffscreenPdfBlob(params: {
       windowWidth: 794,
       width: 794,
       height: container.offsetHeight || 1123,
-      logging: false
+      logging: false,
+      onclone: (clonedDoc: Document, clonedElement: HTMLElement) => {
+        // Patch all stylesheets in the cloned document to remove unsupported color functions
+        patchClonedDocumentStylesheets(clonedDoc);
+        // Also patch element inline styles in the cloned tree
+        preprocessElementStylesForPdf(clonedElement);
+      }
     });
 
     const imgData = canvas.toDataURL('image/jpeg', 0.98);
