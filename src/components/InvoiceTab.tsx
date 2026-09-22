@@ -1199,7 +1199,10 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
           title: w.description,
           quantity: w.quantity,
           rate: w.rate,
-          videoUrl: w.videoUrl
+          videoUrl: w.videoUrl,
+          subClientId: w.subClientId,
+          subClientName: w.subClientName,
+          workItemId: w.id
         })));
         setLinkedWorkItemIds(uninvoicedWork.map(w => w.id));
       } else {

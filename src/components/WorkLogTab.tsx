@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, CheckCircle, Clock, Edit2, ArrowUpDown, ExternalLink, Play, Video, Search, X, Users, UploadCloud } from 'lucide-react';
+import { Plus, Trash2, CheckCircle, Clock, Edit2, ArrowUpDown, ExternalLink, Play, Search, X, Users, UploadCloud, Layers, CheckSquare } from 'lucide-react';
 import { useFirestore } from '../hooks/useFirestore';
-import { Client, WorkItem } from '../types';
+import { Client, WorkItem, Invoice } from '../types';
 import clsx from 'clsx';
 import { User } from 'firebase/auth';
 import { generateUUID, extractVideoUrl } from '../lib/utils';
 import GoogleDriveUploadModal from './GoogleDriveUploadModal';
 import MediaEmbedModal from './MediaEmbedModal';
+import BulkEditWorkModal from './BulkEditWorkModal';
 
 interface WorkLogTabProps {
   user: User;
@@ -24,6 +25,10 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
   const [editingWorkId, setEditingWorkId] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
+
+  // Multi-select state
+  const [selectedWorkIds, setSelectedWorkIds] = useState<Set<string>>(new Set());
+  const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false);
 
   useEffect(() => {
     if (initialSearchQuery !== undefined) {
@@ -101,10 +106,14 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
             if (invoice && invoice.reels) {
               let replaced = false;
               const updatedReels = invoice.reels.map((reel: any) => {
-                if (!replaced && reel.title === existing.description && reel.quantity === existing.quantity && reel.rate === existing.rate) {
+                const isMatch =
+                  (reel.workItemId && reel.workItemId === existing.id) ||
+                  (!replaced && reel.title === existing.description && reel.quantity === existing.quantity && reel.rate === existing.rate);
+                if (isMatch && !replaced) {
                   replaced = true;
                   return {
                     ...reel,
+                    workItemId: existing.id,
                     title: formData.description,
                     quantity: selectedQty,
                     rate: selectedRate,
@@ -118,7 +127,8 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
 
               const newSubtotal = updatedReels.reduce((sum: number, r: any) => sum + (r.quantity * r.rate), 0);
               const discount = invoice.discountAmount || 0;
-              const newTotal = Math.max(0, newSubtotal - discount);
+              const extraCost = invoice.extraCostAmount || 0;
+              const newTotal = Math.max(0, newSubtotal - discount + extraCost);
 
               await addOrUpdateInvoice({
                 ...invoice,
@@ -167,10 +177,13 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
           // Find the associated invoice
           const invoice = invoices.find(inv => inv.id === item.invoiceId);
           if (invoice) {
-            // Filter out the matching reel from invoice items
+            // Filter out the matching reel from invoice items using workItemId or fallback matching
             let matched = false;
             const updatedReels = invoice.reels.filter((reel: any) => {
-              if (!matched && reel.title === item.description && reel.quantity === item.quantity && reel.rate === item.rate) {
+              const isMatch =
+                (reel.workItemId && reel.workItemId === item.id) ||
+                (!matched && reel.title === item.description && reel.quantity === item.quantity && reel.rate === item.rate);
+              if (isMatch && !matched) {
                 matched = true;
                 return false;
               }
@@ -178,13 +191,13 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
             });
 
             if (updatedReels.length === 0) {
-              // If no reels are left, we delete the invoice
+              // If no reels are left, delete the invoice
               await removeInvoice(invoice.id);
             } else {
-              // Recalculate total amount and update invoice, keeping any existing discount
               const newSubtotal = updatedReels.reduce((sum: number, r: any) => sum + (r.quantity * r.rate), 0);
               const discount = invoice.discountAmount || 0;
-              const newTotal = Math.max(0, newSubtotal - discount);
+              const extraCost = invoice.extraCostAmount || 0;
+              const newTotal = Math.max(0, newSubtotal - discount + extraCost);
               await addOrUpdateInvoice({
                 ...invoice,
                 reels: updatedReels,
@@ -199,6 +212,76 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
         alert("Failed to delete work log: " + (err?.message || String(err)));
       }
     }
+  };
+
+  // ---- Bulk select helpers ----
+  const toggleSelectItem = (id: string) => {
+    setSelectedWorkIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedWorkIds.size === 0) return;
+    const itemsToDelete = workItems.filter(w => selectedWorkIds.has(w.id));
+    const invoicedCount = itemsToDelete.filter(w => w.status === 'Invoiced').length;
+    const msg = invoicedCount > 0
+      ? `You are about to delete ${itemsToDelete.length} work log(s), of which ${invoicedCount} are already invoiced. Their line items will also be removed from the associated invoices. Continue?`
+      : `Delete ${itemsToDelete.length} selected work log(s)? This cannot be undone.`;
+    if (!confirm(msg)) return;
+
+    try {
+      // Group invoiced items by invoiceId
+      const invoiceUpdates = new Map<string, any>();
+      for (const item of itemsToDelete) {
+        if (item.status === 'Invoiced' && item.invoiceId) {
+          const invoice = invoices.find(inv => inv.id === item.invoiceId);
+          if (invoice) {
+            const base = invoiceUpdates.get(item.invoiceId) || JSON.parse(JSON.stringify(invoice));
+            let matched = false;
+            base.reels = base.reels.filter((reel: any) => {
+              const isMatch =
+                (reel.workItemId && reel.workItemId === item.id) ||
+                (!matched && reel.title === item.description && reel.quantity === item.quantity && reel.rate === item.rate);
+              if (isMatch && !matched) { matched = true; return false; }
+              return true;
+            });
+            invoiceUpdates.set(item.invoiceId, base);
+          }
+        }
+      }
+
+      // Apply invoice updates or deletions
+      for (const [, inv] of invoiceUpdates) {
+        if (inv.reels.length === 0) {
+          await removeInvoice(inv.id);
+        } else {
+          const subtotal = inv.reels.reduce((s: number, r: any) => s + r.quantity * r.rate, 0);
+          const discount = inv.discountAmount || 0;
+          const extraCost = inv.extraCostAmount || 0;
+          await addOrUpdateInvoice({ ...inv, totalAmount: Math.max(0, subtotal - discount + extraCost) });
+        }
+      }
+
+      for (const item of itemsToDelete) {
+        await removeItem(item.id);
+      }
+      setSelectedWorkIds(new Set());
+    } catch (err: any) {
+      alert('Error deleting work logs: ' + (err?.message || String(err)));
+    }
+  };
+
+  const handleBulkSave = async (updatedWorkItems: WorkItem[], updatedInvoices: Invoice[]) => {
+    for (const inv of updatedInvoices) {
+      await addOrUpdateInvoice(inv);
+    }
+    for (const wi of updatedWorkItems) {
+      await addOrUpdateItem(wi);
+    }
+    setSelectedWorkIds(new Set());
   };
 
   if (clientsLoading || workLoading || invoicesLoading) {
@@ -220,6 +303,29 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
       ? (a.date - b.date || a.createdAt - b.createdAt) 
       : (b.date - a.date || b.createdAt - a.createdAt)
   );
+
+  const visibleIds = sortedWork.map(w => w.id);
+  const allVisibleSelected = visibleIds.length > 0 && visibleIds.every(id => selectedWorkIds.has(id));
+  const someVisibleSelected = visibleIds.some(id => selectedWorkIds.has(id)) && !allVisibleSelected;
+  const selectedCount = selectedWorkIds.size;
+  const selectedItems = workItems.filter(w => selectedWorkIds.has(w.id));
+  const selectedInvoicedCount = selectedItems.filter(w => w.status === 'Invoiced').length;
+
+  const handleSelectAll = () => {
+    if (allVisibleSelected) {
+      setSelectedWorkIds(prev => {
+        const next = new Set(prev);
+        visibleIds.forEach(id => next.delete(id));
+        return next;
+      });
+    } else {
+      setSelectedWorkIds(prev => {
+        const next = new Set(prev);
+        visibleIds.forEach(id => next.add(id));
+        return next;
+      });
+    }
+  };
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto">
@@ -430,6 +536,16 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700">
+                  <th className="py-3 pl-4 pr-2 w-10">
+                    <input
+                      type="checkbox"
+                      checked={allVisibleSelected}
+                      ref={(el) => { if (el) el.indeterminate = someVisibleSelected; }}
+                      onChange={handleSelectAll}
+                      className="w-4 h-4 rounded text-indigo-600 border-slate-300 dark:border-slate-600 cursor-pointer focus:ring-indigo-500"
+                      title="Select all visible"
+                    />
+                  </th>
                   <th className="py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Date</th>
                   <th className="py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Client</th>
                   <th className="py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Description / Video Link</th>
@@ -442,8 +558,23 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
                 {sortedWork.map(work => {
                   const client = clients.find(c => c.id === work.clientId);
                   const videoUrl = extractVideoUrl(work);
+                  const isSelected = selectedWorkIds.has(work.id);
                   return (
-                    <tr key={work.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                    <tr
+                      key={work.id}
+                      className={clsx(
+                        'hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors',
+                        isSelected && 'bg-indigo-50/60 dark:bg-indigo-950/20'
+                      )}
+                    >
+                      <td className="py-4 pl-4 pr-2">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleSelectItem(work.id)}
+                          className="w-4 h-4 rounded text-indigo-600 border-slate-300 dark:border-slate-600 cursor-pointer focus:ring-indigo-500"
+                        />
+                      </td>
                       <td className="py-4 px-4 text-sm text-slate-600 dark:text-slate-400">
                         {new Date(work.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
                       </td>
@@ -546,6 +677,55 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
             </table>
           </div>
         </div>
+      )}
+
+      {/* Bulk Actions Floating Toolbar */}
+      {selectedCount > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 px-5 py-3 bg-slate-900 dark:bg-slate-950 text-white rounded-2xl shadow-2xl border border-slate-700 animate-fadeIn">
+          <div className="flex items-center gap-2">
+            <CheckSquare size={16} className="text-indigo-400" />
+            <span className="text-sm font-semibold">{selectedCount} selected</span>
+            {selectedInvoicedCount > 0 && (
+              <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-600/30">
+                {selectedInvoicedCount} invoiced
+              </span>
+            )}
+          </div>
+          <div className="w-px h-5 bg-slate-600" />
+          <button
+            onClick={() => setIsBulkEditModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-colors cursor-pointer"
+          >
+            <Layers size={13} />
+            Bulk Edit
+          </button>
+          <button
+            onClick={handleBulkDelete}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-red-600/80 hover:bg-red-500 text-white rounded-lg transition-colors cursor-pointer"
+          >
+            <Trash2 size={13} />
+            Delete All
+          </button>
+          <button
+            onClick={() => setSelectedWorkIds(new Set())}
+            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors cursor-pointer"
+            title="Deselect all"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
+
+      {/* Bulk Edit Modal */}
+      {isBulkEditModalOpen && (
+        <BulkEditWorkModal
+          isOpen={isBulkEditModalOpen}
+          onClose={() => setIsBulkEditModalOpen(false)}
+          selectedItems={selectedItems}
+          clients={clients}
+          invoices={invoices}
+          onSave={handleBulkSave}
+        />
       )}
 
       {/* Google Drive Upload Modal */}

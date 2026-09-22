@@ -42,6 +42,7 @@ export interface Reel {
   subClientId?: string;
   subClientName?: string;
   videoUrl?: string;
+  workItemId?: string;
 }
 
 export interface WorkItem {
