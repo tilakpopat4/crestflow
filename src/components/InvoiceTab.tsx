@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Client, Reel, Invoice, WorkItem, UserProfile } from '../types';
-import { Plus, Trash2, Download, Receipt, FileCheck, Mail, Send, Copy, X, Check, MailCheck, CheckCircle2, AlertCircle, Loader2, FileText, Search, Calculator, Divide, Coins, History, Pencil, Printer, ListChecks, IndianRupee, Archive } from 'lucide-react';
+import { Plus, Trash2, Download, Receipt, FileCheck, Mail, Send, Copy, X, Check, MailCheck, CheckCircle2, AlertCircle, Loader2, FileText, Search, Calculator, Divide, Coins, History, Pencil, Printer, ListChecks, IndianRupee, Archive, Clock, Sparkles } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { useFirestore } from '../hooks/useFirestore';
@@ -13,6 +13,8 @@ import { QRCodeSVG } from 'qrcode.react';
 import ReactDOMServer from 'react-dom/server';
 import { sendEmailWithPdfAttachment, acquireGmailAccessToken } from '../lib/gmailService';
 import PaymentDateModal from './PaymentDateModal';
+import ScheduleInvoiceModal from './ScheduleInvoiceModal';
+import { executeAutoInvoiceCheck } from '../lib/autoInvoiceService';
 
 // Helper functions to parse and convert oklab/oklch/color() colors to standard rgb/rgba,
 // which prevents crashes in html2canvas (used by html2pdf.js) under Tailwind CSS v4.
@@ -1133,6 +1135,33 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
     gmailStatus?: { sending: boolean; success?: boolean; error?: string; messageId?: string };
   } | null>(null);
   const [paymentModalState, setPaymentModalState] = useState<{ invoiceId: string | null, isOpen: boolean }>({ invoiceId: null, isOpen: false });
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+
+  const activeSchedulesCount = useMemo(() => {
+    return clients.filter(c => !c.isClosed && c.autoInvoiceEnabled).length;
+  }, [clients]);
+
+  // Automated 6:00 AM Auto-Invoice Engine (runs background check during session)
+  useEffect(() => {
+    if (clientsLoading || !clients || clients.length === 0) return;
+
+    const checkAndRunAutoInvoices = () => {
+      executeAutoInvoiceCheck({
+        clients,
+        workItems,
+        invoices,
+        addInvoice,
+        updateWorkItem,
+        updateClient
+      }).catch(err => {
+        console.warn("[Auto-Invoice Engine] Background check error:", err);
+      });
+    };
+
+    checkAndRunAutoInvoices();
+    const intervalId = setInterval(checkAndRunAutoInvoices, 30000);
+    return () => clearInterval(intervalId);
+  }, [clients, workItems, invoices, clientsLoading, addInvoice, updateWorkItem, updateClient]);
 
   // Dynamic preview scaling to fit any screen perfectly with zero overlapping
   const previewContainerRef = useRef<HTMLDivElement>(null);
@@ -1676,9 +1705,27 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
 
   return (
     <div className="p-4 md:p-8 max-w-[1600px] mx-auto">
-      <div className="mb-6 md:mb-8">
-        <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Invoice Generator</h2>
-        <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">Create and export PDF invoices for your clients.</p>
+      <div className="mb-6 md:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Invoice Generator</h2>
+          <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">Create, export, and auto-schedule 6:00 AM invoices for your clients.</p>
+        </div>
+        <div className="flex items-center gap-2.5">
+          <button
+            type="button"
+            onClick={() => setIsScheduleModalOpen(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white shadow-sm hover:shadow transition-all cursor-pointer"
+            title="Schedule automatic morning 6:00 AM invoice generation for clients"
+          >
+            <Clock size={16} className="text-indigo-200" />
+            <span>Schedule Auto-Invoice</span>
+            {activeSchedulesCount > 0 && (
+              <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-white/20 text-white">
+                {activeSchedulesCount} Active
+              </span>
+            )}
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 md:gap-8 items-start">
@@ -1713,10 +1760,25 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                   <option value="" disabled>-- Choose a saved client --</option>
                   {clients.filter(c => !c.isClosed || c.id === selectedClientId).map(c => (
                     <option key={c.id} value={c.id}>
-                      {c.name}{c.isClosed ? ' (Closed)' : ''}
+                      {c.name}{c.isClosed ? ' (Closed)' : ''}{c.autoInvoiceEnabled ? ' (⏰ 6 AM Auto)' : ''}
                     </option>
                   ))}
                 </select>
+                {selectedClient?.autoInvoiceEnabled && (
+                  <div className="mt-1.5 flex items-center justify-between text-[11px] text-indigo-700 dark:text-indigo-300 bg-indigo-50/80 dark:bg-indigo-950/40 px-2.5 py-1 rounded-lg border border-indigo-200/60 dark:border-indigo-800/60">
+                    <span className="flex items-center gap-1 font-medium">
+                      <Clock size={12} className="text-indigo-600 dark:text-indigo-400" />
+                      Auto-invoicing active at 6:00 AM
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setIsScheduleModalOpen(true)}
+                      className="font-bold underline hover:text-indigo-900 dark:hover:text-indigo-200 cursor-pointer"
+                    >
+                      Edit Schedule
+                    </button>
+                  </div>
+                )}
                 {clients.length === 0 && (
                   <p className="text-xs text-amber-600 mt-1">Please add a client in the Clients tab first.</p>
                 )}
@@ -2543,7 +2605,18 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                     return (
                       <tr key={inv.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
                         <td className="p-3.5 font-mono text-xs text-slate-700 dark:text-slate-300">
-                          <div className="font-bold text-slate-900 dark:text-slate-100">#{inv.id.substring(0, 8).toUpperCase()}</div>
+                          <div className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5 flex-wrap">
+                            <span>#{inv.id.substring(0, 8).toUpperCase()}</span>
+                            {inv.isAutoGenerated && (
+                              <span
+                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800"
+                                title="Auto-generated on scheduled date at 6:00 AM"
+                              >
+                                <Sparkles size={10} className="text-indigo-500" />
+                                Auto 6 AM
+                              </span>
+                            )}
+                          </div>
                           <div className="text-[11px] text-slate-400 dark:text-slate-500">
                             {new Date(inv.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                           </div>
@@ -2952,6 +3025,18 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
           />
         );
       })()}
+
+      <ScheduleInvoiceModal
+        isOpen={isScheduleModalOpen}
+        onClose={() => setIsScheduleModalOpen(false)}
+        clients={clients}
+        workItems={workItems}
+        invoices={invoices}
+        initialClientId={selectedClientId || undefined}
+        onUpdateClient={updateClient}
+        onAddInvoice={addInvoice}
+        onUpdateWorkItem={updateWorkItem}
+      />
     </div>
   );
 }

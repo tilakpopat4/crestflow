@@ -20,6 +20,7 @@ import AISummarizer from './AISummarizer';
 import { UserProfile } from '../types';
 import { useTheme } from '../context/ThemeContext';
 import { calculateWorkJourney } from '../lib/anniversary';
+import { executeAutoInvoiceCheck } from '../lib/autoInvoiceService';
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
@@ -285,6 +286,28 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
     const intervalId = setInterval(checkAndTrigger6PmReminders, 30000);
     return () => clearInterval(intervalId);
   }, [activeNotifications, user?.uid]);
+
+  // Automated 6:00 AM Auto-Invoice Engine (runs background check during session)
+  React.useEffect(() => {
+    if (!clients || clients.length === 0) return;
+
+    const runAutoInvoiceCheck = () => {
+      executeAutoInvoiceCheck({
+        clients,
+        workItems,
+        invoices,
+        addInvoice: addOrUpdateItem,
+        updateWorkItem,
+        updateClient
+      }).catch(err => {
+        console.warn("[Dashboard Auto-Invoice Engine] Check failed:", err);
+      });
+    };
+
+    runAutoInvoiceCheck();
+    const intervalId = setInterval(runAutoInvoiceCheck, 30000);
+    return () => clearInterval(intervalId);
+  }, [clients, workItems, invoices, addOrUpdateItem, updateWorkItem, updateClient]);
 
   // Calculate metrics for current month & overall pending amounts
   const metrics = useMemo(() => {

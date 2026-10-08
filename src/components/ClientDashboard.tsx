@@ -22,6 +22,8 @@ import GoogleDriveUploadModal from './GoogleDriveUploadModal';
 import MediaEmbedModal from './MediaEmbedModal';
 import { DateInput } from './DateInput';
 import { formatLocalDateToYMD, parseYMDToTimestamp } from '../lib/dateUtils';
+import ScheduleInvoiceModal from './ScheduleInvoiceModal';
+import { getAutoInvoiceScheduleInfo } from '../lib/autoInvoiceService';
 
 interface ClientDashboardProps {
   client: Client;
@@ -62,6 +64,8 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
     formatLocalDateToYMD(new Date())
   );
   const [markPendingAsPaid, setMarkPendingAsPaid] = useState(true);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const scheduleInfo = getAutoInvoiceScheduleInfo(client);
 
   const openPaymentModal = () => {
     setNewPaymentDate(formatLocalDateToYMD(new Date()));
@@ -462,6 +466,22 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
           </div>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            {/* 6:00 AM Auto-Invoice Schedule Button */}
+            {!client.isClosed && (
+              <button
+                onClick={() => setIsScheduleModalOpen(true)}
+                className={`flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+                  client.autoInvoiceEnabled
+                    ? 'bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-950/60 dark:to-violet-950/60 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 hover:from-indigo-100 hover:to-violet-100'
+                    : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
+                }`}
+                title="Configure automatic morning 6:00 AM invoice generation schedule"
+              >
+                <Clock size={14} className={client.autoInvoiceEnabled ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'} />
+                <span>{client.autoInvoiceEnabled ? 'Auto 6 AM: Active' : 'Schedule Auto-Invoice'}</span>
+              </button>
+            )}
+
             {/* Quick Email Reminders Toggle */}
             <button
               onClick={async () => {
@@ -598,6 +618,19 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
           <div className="text-xs font-medium text-slate-500 dark:text-slate-400">
             {statusInfo.daysRemaining === 0 ? 'Due Today!' : statusInfo.daysRemaining > 0 ? `In ${statusInfo.daysRemaining} days` : `${Math.abs(statusInfo.daysRemaining)} days overdue`}
           </div>
+          {client.autoInvoiceEnabled && (
+            <div className="pt-1 mt-1 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between text-[11px] text-indigo-600 dark:text-indigo-400">
+              <span className="flex items-center gap-1 font-medium">
+                <Sparkles size={11} /> Auto-invoice: 6 AM
+              </span>
+              <button
+                onClick={() => setIsScheduleModalOpen(true)}
+                className="font-bold underline cursor-pointer"
+              >
+                {scheduleInfo.nextRunDateFormatted}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Pending Due Balance */}
@@ -978,11 +1011,20 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
         {/* Tab 2: Invoices */}
         {activeTab === 'invoices' && (
           <div className="p-6 space-y-6">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center flex-wrap gap-3">
               <div>
                 <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Invoices for {client.name}</h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">History of generated PDF invoices and payment statuses.</p>
               </div>
+              {!client.isClosed && (
+                <button
+                  onClick={() => setIsScheduleModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 transition-all cursor-pointer"
+                >
+                  <Clock size={13} className="text-indigo-600 dark:text-indigo-400" />
+                  <span>{client.autoInvoiceEnabled ? 'Schedule: Active (6:00 AM)' : 'Schedule Auto-Invoice'}</span>
+                </button>
+              )}
             </div>
 
             <div className="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-xl">
@@ -1010,7 +1052,15 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                       return (
                         <tr key={inv.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/30">
                           <td className="p-3.5 text-slate-600 dark:text-slate-300">
-                            <div className="font-semibold text-slate-900 dark:text-slate-100">#{inv.id.substring(0, 8).toUpperCase()}</div>
+                            <div className="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5 flex-wrap">
+                              <span>#{inv.id.substring(0, 8).toUpperCase()}</span>
+                              {inv.isAutoGenerated && (
+                                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800" title="Auto-generated on scheduled date at 6:00 AM">
+                                  <Sparkles size={10} className="text-indigo-500" />
+                                  Auto 6 AM
+                                </span>
+                              )}
+                            </div>
                             <div className="text-xs text-slate-500 dark:text-slate-400">{new Date(inv.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
                           </td>
                           <td className="p-3.5 text-slate-900 dark:text-slate-100">
@@ -1484,6 +1534,19 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
         url={embedModalData?.url || ''}
         title={embedModalData?.title || 'Video Deliverable'}
         clientName={embedModalData?.clientName}
+      />
+
+      {/* 6:00 AM Auto-Invoice Schedule Modal */}
+      <ScheduleInvoiceModal
+        isOpen={isScheduleModalOpen}
+        onClose={() => setIsScheduleModalOpen(false)}
+        clients={[client]}
+        workItems={workItems}
+        invoices={invoices}
+        initialClientId={client.id}
+        onUpdateClient={updateClient}
+        onAddInvoice={updateInvoice}
+        onUpdateWorkItem={updateWorkItem}
       />
     </div>
   );
