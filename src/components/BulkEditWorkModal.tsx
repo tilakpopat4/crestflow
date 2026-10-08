@@ -4,6 +4,8 @@ import {
   Building2, Link as LinkIcon, Info, Users, IndianRupee, Layers
 } from 'lucide-react';
 import { Client, Invoice, Reel, WorkItem } from '../types';
+import { DateInput } from './DateInput';
+import { formatLocalDateToYMD, parseYMDToTimestamp } from '../lib/dateUtils';
 
 interface BulkEditWorkModalProps {
   isOpen: boolean;
@@ -28,7 +30,7 @@ export default function BulkEditWorkModal({
   const [rateValue, setRateValue] = useState('');
 
   const [updateDate, setUpdateDate] = useState(false);
-  const [dateValue, setDateValue] = useState(new Date().toISOString().split('T')[0]);
+  const [dateValue, setDateValue] = useState(formatLocalDateToYMD(new Date()));
 
   const [updateQuantity, setUpdateQuantity] = useState(false);
   const [quantityValue, setQuantityValue] = useState('1');
@@ -124,7 +126,7 @@ export default function BulkEditWorkModal({
 
         let date = item.date;
         if (updateDate && dateValue) {
-          date = new Date(dateValue).getTime();
+          date = parseYMDToTimestamp(dateValue);
         }
 
         let quantity = item.quantity;
@@ -341,12 +343,11 @@ export default function BulkEditWorkModal({
             </label>
 
             {updateDate && (
-              <div className="mt-3 pl-6 animate-fadeIn">
-                <input
-                  type="date"
+              <div className="mt-3 pl-6 animate-fadeIn max-w-xs">
+                <DateInput
                   value={dateValue}
-                  onChange={(e) => setDateValue(e.target.value)}
-                  className="max-w-xs px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none"
+                  onChange={(val) => setDateValue(val)}
+                  className="px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none"
                 />
               </div>
             )}

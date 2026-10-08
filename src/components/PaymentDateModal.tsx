@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Calendar } from 'lucide-react';
+import { DateInput } from './DateInput';
+import { formatLocalDateToYMD, parseYMDToTimestamp } from '../lib/dateUtils';
 
 interface PaymentDateModalProps {
   isOpen: boolean;
@@ -24,10 +26,7 @@ export default function PaymentDateModal({
 
   useEffect(() => {
     if (isOpen) {
-      const d = defaultDate ? new Date(defaultDate) : new Date();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      setDateStr(`${d.getFullYear()}-${month}-${day}`);
+      setDateStr(formatLocalDateToYMD(defaultDate || new Date()));
     }
   }, [isOpen, defaultDate]);
 
@@ -36,10 +35,7 @@ export default function PaymentDateModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (dateStr) {
-      // Use local timezone to parse the date string (YYYY-MM-DD)
-      const parts = dateStr.split('-');
-      const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]), 12, 0, 0);
-      onConfirm(d.getTime());
+      onConfirm(parseYMDToTimestamp(dateStr));
     }
   };
 
@@ -75,12 +71,11 @@ export default function PaymentDateModal({
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
               Payment Received On
             </label>
-            <input
-              type="date"
+            <DateInput
               value={dateStr}
-              onChange={e => setDateStr(e.target.value)}
+              onChange={val => setDateStr(val)}
               required
-              className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-800 dark:text-slate-100 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-shadow"
+              className="px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-800 dark:text-slate-100 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-shadow"
             />
           </div>
 

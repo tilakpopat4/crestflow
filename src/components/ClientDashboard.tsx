@@ -20,6 +20,8 @@ import {
 import { generateUUID, extractVideoUrl, getDriveDirectImageUrl } from '../lib/utils';
 import GoogleDriveUploadModal from './GoogleDriveUploadModal';
 import MediaEmbedModal from './MediaEmbedModal';
+import { DateInput } from './DateInput';
+import { formatLocalDateToYMD, parseYMDToTimestamp } from '../lib/dateUtils';
 
 interface ClientDashboardProps {
   client: Client;
@@ -57,12 +59,12 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
   // Payment Date update state
   const [isUpdatingPaymentDate, setIsUpdatingPaymentDate] = useState(false);
   const [newPaymentDate, setNewPaymentDate] = useState<string>(
-    new Date().toISOString().split('T')[0]
+    formatLocalDateToYMD(new Date())
   );
   const [markPendingAsPaid, setMarkPendingAsPaid] = useState(true);
 
   const openPaymentModal = () => {
-    setNewPaymentDate(new Date().toISOString().split('T')[0]);
+    setNewPaymentDate(formatLocalDateToYMD(new Date()));
     setIsUpdatingPaymentDate(true);
   };
 
@@ -158,7 +160,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
     videoUrl: '',
     quantity: '1',
     rate: String(client.defaultRate),
-    date: new Date().toISOString().split('T')[0]
+    date: formatLocalDateToYMD(new Date())
   });
 
   // Calculate financials & payment status
@@ -179,7 +181,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
   const handleSavePaymentDate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const selectedTimestamp = new Date(newPaymentDate).getTime();
+      const selectedTimestamp = parseYMDToTimestamp(newPaymentDate);
       const updatedClient: Client = {
         ...client,
         lastPaymentDate: selectedTimestamp
@@ -210,7 +212,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
       videoUrl: item.videoUrl || '',
       quantity: String(item.quantity),
       rate: String(item.rate),
-      date: new Date(item.date).toISOString().split('T')[0]
+      date: formatLocalDateToYMD(item.date)
     });
     setIsWorkFormOpen(true);
   };
@@ -223,7 +225,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
       videoUrl: '',
       quantity: '1',
       rate: String(client.defaultRate),
-      date: new Date().toISOString().split('T')[0]
+      date: formatLocalDateToYMD(new Date())
     });
     setIsWorkFormOpen(false);
   };
@@ -234,7 +236,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
     try {
       const selectedRate = Number(workFormData.rate) || client.defaultRate;
       const selectedQty = Number(workFormData.quantity);
-      const selectedDate = new Date(workFormData.date).getTime();
+      const selectedDate = parseYMDToTimestamp(workFormData.date);
       const trimmedVideoUrl = workFormData.videoUrl.trim() || undefined;
 
       // Find subclient details if selected
@@ -780,12 +782,11 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
 
                   <div className="md:col-span-2 space-y-1">
                     <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Completion Date *</label>
-                    <input
-                      type="date"
+                    <DateInput
                       required
                       value={workFormData.date}
-                      onChange={e => setWorkFormData({ ...workFormData, date: e.target.value })}
-                      className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-500"
+                      onChange={val => setWorkFormData({ ...workFormData, date: val })}
+                      className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-500"
                     />
                   </div>
 
@@ -1144,12 +1145,11 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
             <form onSubmit={handleSavePaymentDate} className="space-y-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Payment Received Date *</label>
-                <input
-                  type="date"
+                <DateInput
                   required
                   value={newPaymentDate}
-                  onChange={e => setNewPaymentDate(e.target.value)}
-                  className="w-full border border-slate-200 dark:border-slate-600 rounded-xl p-3 text-sm bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-600 font-medium"
+                  onChange={val => setNewPaymentDate(val)}
+                  className="border border-slate-200 dark:border-slate-600 rounded-xl p-3 text-sm bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-600 font-medium"
                 />
               </div>
 

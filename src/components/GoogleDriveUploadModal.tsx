@@ -103,7 +103,8 @@ export default function GoogleDriveUploadModal({
           quantity: Number(quantity) || 1,
           rate: itemRate,
           date: Date.now(),
-          status: 'Uninvoiced'
+          status: 'Uninvoiced',
+          createdAt: Date.now()
         };
         onWorkItemCreated(newWork);
       }

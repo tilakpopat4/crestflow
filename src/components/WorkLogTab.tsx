@@ -8,6 +8,8 @@ import { generateUUID, extractVideoUrl } from '../lib/utils';
 import GoogleDriveUploadModal from './GoogleDriveUploadModal';
 import MediaEmbedModal from './MediaEmbedModal';
 import BulkEditWorkModal from './BulkEditWorkModal';
+import { DateInput } from './DateInput';
+import { formatLocalDateToYMD, parseYMDToTimestamp } from '../lib/dateUtils';
 
 interface WorkLogTabProps {
   user: User;
@@ -42,7 +44,7 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
     videoUrl: '',
     quantity: '1',
     rate: '',
-    date: new Date().toISOString().split('T')[0]
+    date: formatLocalDateToYMD(new Date())
   });
 
   const handleEditWork = (work: WorkItem) => {
@@ -54,7 +56,7 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
       videoUrl: work.videoUrl || '',
       quantity: String(work.quantity),
       rate: String(work.rate),
-      date: new Date(work.date).toISOString().split('T')[0]
+      date: formatLocalDateToYMD(work.date)
     });
     setIsFormOpen(true);
   };
@@ -68,7 +70,7 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
       videoUrl: '',
       quantity: '1',
       rate: '',
-      date: new Date().toISOString().split('T')[0]
+      date: formatLocalDateToYMD(new Date())
     });
     setIsFormOpen(false);
   };
@@ -80,7 +82,7 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
     const client = clients.find(c => c.id === formData.clientId);
     const selectedSub = client?.subClients?.find(sc => sc.id === formData.subClientId);
     const selectedRate = Number(formData.rate) || (client ? client.defaultRate : 0);
-    const selectedDate = new Date(formData.date).getTime();
+    const selectedDate = parseYMDToTimestamp(formData.date);
     const selectedQty = Number(formData.quantity);
     const trimmedVideoUrl = formData.videoUrl.trim() || undefined;
 
@@ -439,12 +441,11 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Date Completed</label>
-                <input 
-                  type="date"
+                <DateInput 
                   required
-                  className="w-full p-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                  className="p-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
                   value={formData.date}
-                  onChange={(e) => setFormData({...formData, date: e.target.value})}
+                  onChange={(val) => setFormData({...formData, date: val})}
                 />
               </div>
             </div>
