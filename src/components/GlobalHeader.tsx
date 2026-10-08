@@ -99,6 +99,7 @@ export default function GlobalHeader({
   // Filter work items
   const filteredWork = cleanQuery ? workItems.filter(w => {
     const client = clients.find(c => c.id === w.clientId);
+    if (client?.isClosed) return false;
     const clientName = client ? client.name.toLowerCase() : '';
     return w.description.toLowerCase().includes(cleanQuery) ||
       clientName.includes(cleanQuery) ||
@@ -107,6 +108,8 @@ export default function GlobalHeader({
 
   // Filter invoices
   const filteredInvoices = cleanQuery ? invoices.filter(inv => {
+    const client = clients.find(c => c.id === inv.clientId || c.name === inv.clientName);
+    if (client?.isClosed) return false;
     const invoiceNo = inv.id.substring(0, 8).toLowerCase();
     const itemsText = inv.reels ? inv.reels.map(r => r.title).join(' ').toLowerCase() : '';
     return inv.clientName.toLowerCase().includes(cleanQuery) ||

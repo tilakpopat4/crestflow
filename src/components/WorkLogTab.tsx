@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, CheckCircle, Clock, Edit2, ArrowUpDown, ExternalLink, Play, Search, X, Users, UploadCloud, Layers, CheckSquare } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Plus, Trash2, CheckCircle, Clock, Edit2, ArrowUpDown, ExternalLink, Play, Search, X, Users, UploadCloud, Layers, CheckSquare, Archive } from 'lucide-react';
 import { useFirestore } from '../hooks/useFirestore';
 import { Client, WorkItem, Invoice } from '../types';
 import clsx from 'clsx';
@@ -31,6 +31,7 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
   // Multi-select state
   const [selectedWorkIds, setSelectedWorkIds] = useState<Set<string>>(new Set());
   const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false);
+  const [showClosed, setShowClosed] = useState(false);
 
   useEffect(() => {
     if (initialSearchQuery !== undefined) {
@@ -290,7 +291,12 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
     return <div className="p-8 flex justify-center items-center h-full"><p className="text-slate-500 dark:text-slate-400">Loading work logs...</p></div>;
   }
 
+  const closedClientIds = useMemo(() => new Set(clients.filter(c => c.isClosed).map(c => c.id)), [clients]);
+
   const filteredWork = workItems.filter(w => {
+    const isClosedClient = closedClientIds.has(w.clientId);
+    if (!showClosed && isClosedClient) return false;
+
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase().trim();
     const client = clients.find(c => c.id === w.clientId);
@@ -365,6 +371,23 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
             <ArrowUpDown size={14} />
             Sort: {sortOrder === 'asc' ? 'Oldest First' : 'Newest First'}
           </button>
+
+          {closedClientIds.size > 0 && (
+            <button
+              type="button"
+              onClick={() => setShowClosed(prev => !prev)}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer shrink-0 ${
+                showClosed
+                  ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 border border-purple-300 dark:border-purple-700'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 border border-transparent dark:border-slate-700'
+              }`}
+              title={showClosed ? "Hide work logs of closed clients" : "Show work logs of closed clients"}
+            >
+              <Archive size={13} />
+              {showClosed ? 'Hide Closed' : `Show Closed (${closedClientIds.size})`}
+            </button>
+          )}
+
           {!isFormOpen && (
             <div className="flex items-center gap-2">
               <button 
@@ -410,7 +433,7 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
                   }}
                 >
                   <option value="">Select Client</option>
-                  {clients.map(c => (
+                  {clients.filter(c => !c.isClosed).map(c => (
                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
                 </select>

@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Client, Reel, Invoice, WorkItem, UserProfile } from '../types';
-import { Plus, Trash2, Download, Receipt, FileCheck, Mail, Send, Copy, X, Check, MailCheck, CheckCircle2, AlertCircle, Loader2, FileText, Search, Calculator, Divide, Coins, History, Pencil, Printer, ListChecks, IndianRupee } from 'lucide-react';
+import { Plus, Trash2, Download, Receipt, FileCheck, Mail, Send, Copy, X, Check, MailCheck, CheckCircle2, AlertCircle, Loader2, FileText, Search, Calculator, Divide, Coins, History, Pencil, Printer, ListChecks, IndianRupee, Archive } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { useFirestore } from '../hooks/useFirestore';
@@ -1053,16 +1053,35 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
   const { data: invoices, addOrUpdateItem: addInvoice } = useFirestore<Invoice>('invoices', user?.uid);
   const { data: workItems, addOrUpdateItem: updateWorkItem } = useFirestore<WorkItem>('workItems', user?.uid);
 
-  const totalEarnedTillToday = invoices
+  const [showClosed, setShowClosed] = useState(false);
+  const closedClientIds = useMemo(() => new Set(clients.filter(c => c.isClosed).map(c => c.id)), [clients]);
+  const closedClientNames = useMemo(() => new Set(clients.filter(c => c.isClosed).map(c => c.name.toLowerCase())), [clients]);
+
+  const activeInvoices = useMemo(() => {
+    return invoices.filter(inv => {
+      const isClosed = closedClientIds.has(inv.clientId) || closedClientNames.has(inv.clientName.toLowerCase());
+      return !isClosed;
+    });
+  }, [invoices, closedClientIds, closedClientNames]);
+
+  const displayedInvoices = useMemo(() => {
+    return invoices.filter(inv => {
+      const isClosed = closedClientIds.has(inv.clientId) || closedClientNames.has(inv.clientName.toLowerCase());
+      if (!showClosed && isClosed) return false;
+      return true;
+    });
+  }, [invoices, closedClientIds, closedClientNames, showClosed]);
+
+  const totalEarnedTillToday = activeInvoices
     .filter(inv => inv.status === 'Paid')
     .reduce((acc, inv) => acc + (inv.totalAmount || 0), 0);
 
-  const pendingAmount = invoices
+  const pendingAmount = activeInvoices
     .filter(inv => inv.status === 'Pending')
     .reduce((acc, inv) => acc + (inv.totalAmount || 0), 0);
 
-  const totalInvoicedAmount = invoices.reduce((acc, inv) => acc + (inv.totalAmount || 0), 0);
-  const paidInvoicesCount = invoices.filter(inv => inv.status === 'Paid').length;
+  const totalInvoicedAmount = activeInvoices.reduce((acc, inv) => acc + (inv.totalAmount || 0), 0);
+  const paidInvoicesCount = activeInvoices.filter(inv => inv.status === 'Paid').length;
 
   const [selectedClientId, setSelectedClientId] = useState<string>('');
   const [invoiceSearchQuery, setInvoiceSearchQuery] = useState<string>(initialSearchQuery);
@@ -1692,8 +1711,10 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                   onChange={handleClientChange}
                 >
                   <option value="" disabled>-- Choose a saved client --</option>
-                  {clients.map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
+                  {clients.filter(c => !c.isClosed || c.id === selectedClientId).map(c => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}{c.isClosed ? ' (Closed)' : ''}
+                    </option>
                   ))}
                 </select>
                 {clients.length === 0 && (
@@ -2454,13 +2475,29 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
               )}
             </div>
 
+            {closedClientIds.size > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowClosed(prev => !prev)}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors cursor-pointer shrink-0 ${
+                  showClosed
+                    ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 border border-purple-300 dark:border-purple-700'
+                    : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600'
+                }`}
+                title={showClosed ? "Hide invoices of closed clients" : "Show invoices of closed clients"}
+              >
+                <Archive size={12} />
+                {showClosed ? 'Hide Closed' : `Show Closed (${closedClientIds.size})`}
+              </button>
+            )}
+
             <span className="text-xs font-semibold px-2.5 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-full border border-slate-200 dark:border-slate-600 shrink-0">
-              {invoices.length} Invoices
+              {displayedInvoices.length} Invoices
             </span>
           </div>
         </div>
 
-        {invoices.length === 0 ? (
+        {displayedInvoices.length === 0 ? (
           <div className="py-12 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl text-center text-slate-400 dark:text-slate-500 space-y-1">
             <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">No invoices generated yet</p>
             <p className="text-[11px]">Select a client above and click "Download PDF Invoice" to generate an invoice & send email.</p>
@@ -2479,7 +2516,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm">
-                {invoices
+                {displayedInvoices
                   .filter(inv => {
                     if (!invoiceSearchQuery.trim()) return true;
                     const q = invoiceSearchQuery.toLowerCase().trim();

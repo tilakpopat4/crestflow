@@ -62,6 +62,21 @@ export function getPaymentStatusInfo(
   const financials = calculateClientFinancials(client.id, invoices, workItems);
   const totalPendingAmount = financials.totalPendingAmount;
 
+  if (client.isClosed) {
+    return {
+      nextDueDate,
+      daysRemaining,
+      code: 'UP_TO_DATE',
+      label: 'Closed',
+      badgeClass: 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700',
+      isNotificationRequired: false,
+      notificationTitle: '',
+      notificationMessage: '',
+      severity: 'ok',
+      totalPendingAmount: 0
+    };
+  }
+
   let code: PaymentStatusInfo['code'] = 'UP_TO_DATE';
   let label = `Due in ${daysRemaining} days`;
   let badgeClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';

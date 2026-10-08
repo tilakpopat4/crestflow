@@ -506,7 +506,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
       </div>
 
       {/* Payment Reminder / Alert Notification Banner (when notification is required) */}
-      {statusInfo.isNotificationRequired && (
+      {!client.isClosed && statusInfo.isNotificationRequired && (
         <div className={`p-5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
           statusInfo.severity === 'critical' 
             ? 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-900/50 text-red-900 dark:text-red-200' 

@@ -244,7 +244,7 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
   }, [clients, invoices, workItems]);
 
   const activeNotifications = useMemo(() => {
-    return clientStatuses.filter(cs => cs.statusInfo.isNotificationRequired);
+    return clientStatuses.filter(cs => !cs.client.isClosed && cs.statusInfo.isNotificationRequired);
   }, [clientStatuses]);
 
   // Automated 6:00 PM FCM Payment Due Push Notification Engine
@@ -257,7 +257,7 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
       // Trigger automatically once per day at or after 6:00 PM (18:00) for clients with coming/overdue payment
       if (currentHour >= 18) {
         activeNotifications.forEach(({ client, statusInfo }) => {
-          if (client.emailRemindersEnabled === false) return;
+          if (client.isClosed || client.emailRemindersEnabled === false) return;
 
           const sentKey = `fcm_6pm_sent_${client.id}_${dateKey}`;
           const alreadySent = localStorage.getItem(sentKey);
@@ -317,9 +317,13 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
       }
     });
 
-    // 2. Calculate Total Pending Invoices Amount
+    // 2. Calculate Total Pending Invoices Amount (exclude closed clients)
     const totalDue = invoices
-      .filter(inv => inv.status === 'Pending')
+      .filter(inv => {
+        if (inv.status !== 'Pending') return false;
+        const clientObj = clients.find(c => c.id === inv.clientId || c.name === inv.clientName);
+        return !clientObj?.isClosed;
+      })
       .reduce((sum, inv) => sum + (Number(inv.totalAmount) || 0), 0);
 
     const chartData = Array.from(clientRevenueMap.entries())
@@ -327,7 +331,7 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
       .sort((a, b) => b.value - a.value);
 
     return { totalEarned, totalDue, totalInvoicesThisMonth, chartData };
-  }, [invoices]);
+  }, [invoices, clients]);
 
   // Compute monthly earnings trend for line chart
   const monthlyTrendData = useMemo(() => {
@@ -487,7 +491,14 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
     }
   };
 
-  const recentInvoices = [...invoices].sort((a, b) => b.date - a.date);
+  const recentInvoices = useMemo(() => {
+    return invoices
+      .filter(inv => {
+        const clientObj = clients.find(c => c.id === inv.clientId || c.name === inv.clientName);
+        return !clientObj?.isClosed;
+      })
+      .sort((a, b) => b.date - a.date);
+  }, [invoices, clients]);
 
   if (loading) {
     return <div className="p-8 max-w-7xl mx-auto text-center py-20"><div className="animate-pulse flex items-center justify-center space-x-2"><div className="w-2 h-2 bg-indigo-600 rounded-full"></div><div className="w-2 h-2 bg-indigo-600 rounded-full"></div><div className="w-2 h-2 bg-indigo-600 rounded-full"></div></div></div>;
