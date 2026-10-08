@@ -1064,7 +1064,16 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                             <div className="text-xs text-slate-500 dark:text-slate-400">{new Date(inv.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
                           </td>
                           <td className="p-3.5 text-slate-900 dark:text-slate-100">
-                            <div className="font-medium">{inv.reels.length} item(s)</div>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="font-medium">
+                                {inv.invoiceType === 'monthly_retainer' ? '1 Retainer' : `${inv.reels.length} item(s)`}
+                              </span>
+                              {inv.invoiceType === 'monthly_retainer' && (
+                                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                                  📅 Monthly Retainer
+                                </span>
+                              )}
+                            </div>
                             <div className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-xs">
                               {inv.reels.map(r => r.title).join(', ')}
                             </div>
@@ -1141,7 +1150,21 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="p-4 bg-purple-50/60 dark:bg-purple-950/40 rounded-xl border border-purple-200 dark:border-purple-800 space-y-1">
+                <span className="text-xs text-purple-700 dark:text-purple-300 font-bold uppercase tracking-wider">
+                  Payment Basis
+                </span>
+                <div className="text-base font-bold text-purple-900 dark:text-purple-100 flex items-center gap-1.5">
+                  {client.paymentBasis === 'monthly_retainer' ? '📅 Monthly Retainer' : '🎬 Per Reel'}
+                </div>
+                <span className="text-xs text-purple-600/80 dark:text-purple-400 block">
+                  {client.paymentBasis === 'monthly_retainer'
+                    ? `Fixed ₹${(client.monthlyRetainerAmount || client.defaultRate || 0).toLocaleString('en-IN')}/mo`
+                    : 'Billed per deliverable'}
+                </span>
+              </div>
+
               <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
                 <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Default Reel Rate</span>
                 <div className="text-xl font-bold text-indigo-600 dark:text-indigo-400">₹{client.defaultRate.toLocaleString('en-IN')}</div>

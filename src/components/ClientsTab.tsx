@@ -60,6 +60,8 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
     instagram: '',
     clientFrom: '',
     workExperience: '',
+    paymentBasis: 'per_reel' as 'per_reel' | 'monthly_retainer',
+    monthlyRetainerAmount: '',
     defaultRate: '',
     onSiteShootRate: '',
     websiteMakingRate: '',
@@ -85,6 +87,10 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
         ? new Date(formData.lastPaymentDate).getTime()
         : Date.now();
 
+      const rateVal = formData.paymentBasis === 'monthly_retainer' && formData.monthlyRetainerAmount
+        ? Number(formData.monthlyRetainerAmount)
+        : Number(formData.defaultRate);
+
       if (isEditing) {
         const existing = clients.find(c => c.id === isEditing);
         if (existing) {
@@ -97,7 +103,9 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
             instagram: formData.instagram,
             clientFrom: formData.clientFrom,
             workExperience: formData.workExperience,
-            defaultRate: Number(formData.defaultRate),
+            paymentBasis: formData.paymentBasis,
+            monthlyRetainerAmount: formData.paymentBasis === 'monthly_retainer' && formData.monthlyRetainerAmount ? Number(formData.monthlyRetainerAmount) : undefined,
+            defaultRate: rateVal,
             lastPaymentDate: paymentDateTimestamp,
             emailRemindersEnabled: formData.emailRemindersEnabled
           };
@@ -121,7 +129,9 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
           instagram: formData.instagram,
           clientFrom: formData.clientFrom,
           workExperience: formData.workExperience,
-          defaultRate: Number(formData.defaultRate),
+          paymentBasis: formData.paymentBasis,
+          monthlyRetainerAmount: formData.paymentBasis === 'monthly_retainer' && formData.monthlyRetainerAmount ? Number(formData.monthlyRetainerAmount) : undefined,
+          defaultRate: rateVal,
           lastPaymentDate: paymentDateTimestamp,
           emailRemindersEnabled: formData.emailRemindersEnabled,
           createdAt: Date.now()
@@ -140,6 +150,8 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
         instagram: '',
         clientFrom: '',
         workExperience: '',
+        paymentBasis: 'per_reel',
+        monthlyRetainerAmount: '',
         defaultRate: '',
         onSiteShootRate: '',
         websiteMakingRate: '',
@@ -155,6 +167,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
 
   const handleEditClient = (c: Client) => {
     setIsEditing(c.id);
+    const isMonthly = c.paymentBasis === 'monthly_retainer' || Boolean(c.monthlyRetainerAmount && c.monthlyRetainerAmount > 0);
     setFormData({
       name: c.name,
       phone: c.phone,
@@ -163,6 +176,8 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
       instagram: c.instagram || '',
       clientFrom: c.clientFrom || '',
       workExperience: c.workExperience || '',
+      paymentBasis: isMonthly ? 'monthly_retainer' : 'per_reel',
+      monthlyRetainerAmount: c.monthlyRetainerAmount ? String(c.monthlyRetainerAmount) : (isMonthly ? String(c.defaultRate) : ''),
       defaultRate: String(c.defaultRate),
       onSiteShootRate: c.onSiteShootRate ? String(c.onSiteShootRate) : '',
       websiteMakingRate: c.websiteMakingRate ? String(c.websiteMakingRate) : '',
@@ -204,7 +219,10 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
       email: '',
       logoUrl: '',
       instagram: '',
+      clientFrom: '',
       workExperience: '',
+      paymentBasis: 'per_reel',
+      monthlyRetainerAmount: '',
       defaultRate: '',
       onSiteShootRate: '',
       websiteMakingRate: '',
@@ -574,19 +592,91 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
               />
             </div>
 
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Default Rate per Reel/Video (₹) *</label>
-              <input
-                required
-                type="number"
-                min="0"
-                step="1"
-                value={formData.defaultRate}
-                onChange={e => setFormData({ ...formData, defaultRate: e.target.value })}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none transition-colors focus:border-indigo-600 dark:focus:border-indigo-400"
-                placeholder="e.g. 1500"
-              />
+            {/* Payment Basis Selection */}
+            <div className="space-y-1.5 md:col-span-2">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                Payment Basis / Billing Type *
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, paymentBasis: 'per_reel' })}
+                  className={`p-3 rounded-xl border text-left flex items-start gap-2.5 transition-all cursor-pointer ${
+                    formData.paymentBasis === 'per_reel'
+                      ? 'border-indigo-600 bg-indigo-50/60 dark:bg-indigo-950/40 text-indigo-900 dark:text-indigo-200 shadow-2xs'
+                      : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300 hover:border-slate-300'
+                  }`}
+                >
+                  <div className={`p-1.5 rounded-lg shrink-0 text-sm ${formData.paymentBasis === 'per_reel' ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}`}>
+                    🎬
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold">Per Reel / Deliverable</div>
+                    <div className="text-[11px] opacity-75 mt-0.5">Calculated per reel or deliverable item</div>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, paymentBasis: 'monthly_retainer' })}
+                  className={`p-3 rounded-xl border text-left flex items-start gap-2.5 transition-all cursor-pointer ${
+                    formData.paymentBasis === 'monthly_retainer'
+                      ? 'border-indigo-600 bg-indigo-50/60 dark:bg-indigo-950/40 text-indigo-900 dark:text-indigo-200 shadow-2xs'
+                      : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300 hover:border-slate-300'
+                  }`}
+                >
+                  <div className={`p-1.5 rounded-lg shrink-0 text-sm ${formData.paymentBasis === 'monthly_retainer' ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}`}>
+                    📅
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold">Monthly Basis (Fixed Amount)</div>
+                    <div className="text-[11px] opacity-75 mt-0.5">Fixed monthly fee, no per-reel math needed</div>
+                  </div>
+                </button>
+              </div>
             </div>
+
+            {formData.paymentBasis === 'monthly_retainer' ? (
+              <div className="space-y-1.5 md:col-span-2 p-3.5 bg-indigo-50/40 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40 rounded-xl">
+                <label className="block text-xs font-semibold text-indigo-950 dark:text-indigo-200">
+                  Fixed Monthly Retainer Amount (₹) *
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">₹</span>
+                  <input
+                    required
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={formData.monthlyRetainerAmount || formData.defaultRate}
+                    onChange={e => setFormData({ 
+                      ...formData, 
+                      monthlyRetainerAmount: e.target.value,
+                      defaultRate: e.target.value 
+                    })}
+                    className="w-full border border-indigo-200 dark:border-indigo-800 rounded-xl pl-8 pr-3.5 py-2.5 text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 outline-none transition-colors focus:border-indigo-600"
+                    placeholder="e.g. 25000"
+                  />
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                  Invoices for this client will automatically bill this exact fixed amount each month without requiring per-reel calculation.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Default Rate per Reel/Video (₹) *</label>
+                <input
+                  required
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={formData.defaultRate}
+                  onChange={e => setFormData({ ...formData, defaultRate: e.target.value })}
+                  className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none transition-colors focus:border-indigo-600 dark:focus:border-indigo-400"
+                  placeholder="e.g. 1500"
+                />
+              </div>
+            )}
 
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">On Site Shoot Rate (₹)</label>
@@ -838,6 +928,11 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                         <Users size={12} className="shrink-0" /> {client.subClients.length} Sub-Clients
                       </span>
                     )}
+                    {client.paymentBasis === 'monthly_retainer' && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60">
+                        📅 Monthly Basis
+                      </span>
+                    )}
                   </div>
 
                   {/* 30-Day Cycle Dates Row */}
@@ -856,8 +951,13 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                   {/* Financials & Rates */}
                   <div className="flex items-center justify-between text-xs pt-1 gap-2">
                     <div className="min-w-0">
-                      <span className="text-slate-400 dark:text-slate-500 block text-[11px] truncate">Default Rate</span>
-                      <span className="font-semibold text-slate-700 dark:text-slate-300 truncate block">₹{client.defaultRate.toLocaleString('en-IN')} / reel</span>
+                      <span className="text-slate-400 dark:text-slate-500 block text-[11px] truncate">
+                        {client.paymentBasis === 'monthly_retainer' ? 'Monthly Retainer' : 'Default Rate'}
+                      </span>
+                      <span className="font-semibold text-slate-700 dark:text-slate-300 truncate block">
+                        ₹{(client.paymentBasis === 'monthly_retainer' ? (client.monthlyRetainerAmount || client.defaultRate) : client.defaultRate).toLocaleString('en-IN')}
+                        {client.paymentBasis === 'monthly_retainer' ? ' / mo' : ' / reel'}
+                      </span>
                     </div>
 
                     <div className="text-right min-w-0">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Client, Reel, Invoice, WorkItem, UserProfile } from '../types';
-import { Plus, Trash2, Download, Receipt, FileCheck, Mail, Send, Copy, X, Check, MailCheck, CheckCircle2, AlertCircle, Loader2, FileText, Search, Calculator, Divide, Coins, History, Pencil, Printer, ListChecks, IndianRupee, Archive, Clock, Sparkles } from 'lucide-react';
+import { Plus, Trash2, Download, Receipt, FileCheck, Mail, Send, Copy, X, Check, MailCheck, CheckCircle2, AlertCircle, Loader2, FileText, Search, Calculator, Divide, Coins, History, Pencil, Printer, ListChecks, IndianRupee, Archive, Clock, Sparkles, Calendar } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { useFirestore } from '../hooks/useFirestore';
@@ -1118,6 +1118,9 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
   const [isSendingGmail, setIsSendingGmail] = useState(false);
   const [previewMode, setPreviewMode] = useState<'standard' | 'work-only'>('standard');
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+  const [invoiceBillingMode, setInvoiceBillingMode] = useState<'per_reel' | 'monthly_retainer'>('per_reel');
+  const [monthlyRetainerInput, setMonthlyRetainerInput] = useState<string>('');
+  const [monthlyServiceDescription, setMonthlyServiceDescription] = useState<string>('');
   const [emailModalData, setEmailModalData] = useState<{
     isOpen: boolean;
     clientName: string;
@@ -1136,6 +1139,21 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
   } | null>(null);
   const [paymentModalState, setPaymentModalState] = useState<{ invoiceId: string | null, isOpen: boolean }>({ invoiceId: null, isOpen: false });
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+
+  const effectiveReels = useMemo<Reel[]>(() => {
+    if (invoiceBillingMode === 'monthly_retainer') {
+      const fixedRate = Number(monthlyRetainerInput) || 0;
+      const monthStr = dateFrom ? new Date(dateFrom).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) : new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+      const desc = monthlyServiceDescription.trim() || `Monthly Video Editing & Content Creation Retainer (${monthStr})`;
+      return [{
+        id: reels[0]?.id || 'monthly-retainer-item',
+        title: desc,
+        quantity: 1,
+        rate: fixedRate
+      }];
+    }
+    return reels;
+  }, [invoiceBillingMode, monthlyRetainerInput, monthlyServiceDescription, dateFrom, reels]);
 
   const activeSchedulesCount = useMemo(() => {
     return clients.filter(c => !c.isClosed && c.autoInvoiceEnabled).length;
@@ -1261,7 +1279,19 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
   }, [selectedClientId, dateFrom, dateTo, workItems]);
 
   const handleClientChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedClientId(e.target.value);
+    const newId = e.target.value;
+    setSelectedClientId(newId);
+    const clientObj = clients.find(c => c.id === newId);
+    if (clientObj) {
+      if (clientObj.paymentBasis === 'monthly_retainer' || (clientObj.monthlyRetainerAmount && clientObj.monthlyRetainerAmount > 0)) {
+        setInvoiceBillingMode('monthly_retainer');
+        setMonthlyRetainerInput(String(clientObj.monthlyRetainerAmount || clientObj.defaultRate || ''));
+        const monthStr = dateFrom ? new Date(dateFrom).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) : new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+        setMonthlyServiceDescription(`Monthly Video Editing & Content Creation Retainer (${monthStr})`);
+      } else {
+        setInvoiceBillingMode('per_reel');
+      }
+    }
   };
 
   const addItem = (defaultTitle: string, defaultRate: number) => {
@@ -1351,6 +1381,9 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
   };
 
   const calculateTotal = () => {
+    if (invoiceBillingMode === 'monthly_retainer') {
+      return Number(monthlyRetainerInput) || 0;
+    }
     return reels.reduce((sum, reel) => sum + (reel.quantity * reel.rate), 0);
   };
 
@@ -1374,6 +1407,13 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
   const handleEditInvoice = (inv: Invoice) => {
     setSelectedClientId(inv.clientId);
     setReels(inv.reels.map(r => ({ ...r, id: generateUUID() })));
+    if (inv.invoiceType === 'monthly_retainer' || (inv.reels.length === 1 && (inv.reels[0].title.toLowerCase().includes('retainer') || inv.reels[0].title.toLowerCase().includes('monthly')))) {
+      setInvoiceBillingMode('monthly_retainer');
+      setMonthlyRetainerInput(String(inv.reels[0]?.rate || inv.totalAmount));
+      setMonthlyServiceDescription(inv.reels[0]?.title || '');
+    } else {
+      setInvoiceBillingMode('per_reel');
+    }
     if (inv.discountAmount !== undefined) {
       setDiscountAmount(inv.discountAmount.toString());
     } else {
@@ -1433,9 +1473,10 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
       date: Date.now(),
       clientId: targetClient?.id || '',
       clientName: targetClient?.name || 'Client',
-      reels: [...reels],
+      reels: [...effectiveReels],
       totalAmount: grandTotal,
-      status: 'Pending'
+      status: 'Pending',
+      invoiceType: invoiceBillingMode
     };
 
     if (!targetClient && !inv) {
@@ -1443,7 +1484,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
       return;
     }
 
-    if (!inv && reels.length === 0) {
+    if (!inv && effectiveReels.length === 0) {
       alert("No work items found to print.");
       return;
     }
@@ -1470,9 +1511,10 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
       date: Date.now(),
       clientId: targetClient?.id || '',
       clientName: targetClient?.name || 'Client',
-      reels: [...reels],
+      reels: [...effectiveReels],
       totalAmount: grandTotal,
-      status: 'Pending'
+      status: 'Pending',
+      invoiceType: invoiceBillingMode
     };
 
     if (!targetClient && !inv) {
@@ -1480,7 +1522,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
       return;
     }
 
-    if (!inv && reels.length === 0) {
+    if (!inv && effectiveReels.length === 0) {
       alert("No work items found to download.");
       return;
     }
@@ -1521,8 +1563,15 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
       return;
     }
 
-    if (reels.some(r => !r.title.trim())) {
-      alert("Please provide a title for all reels.");
+    const targetReels = invoiceBillingMode === 'monthly_retainer' ? effectiveReels : reels;
+
+    if (targetReels.some(r => !r.title.trim())) {
+      alert("Please provide a title for the invoice items.");
+      return;
+    }
+
+    if (invoiceBillingMode === 'monthly_retainer' && (!monthlyRetainerInput || Number(monthlyRetainerInput) <= 0)) {
+      alert("Please enter a valid monthly retainer amount.");
       return;
     }
 
@@ -1534,9 +1583,11 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
         date: Date.now(),
         clientId: selectedClient.id,
         clientName: selectedClient.name,
-        reels: [...reels],
+        reels: [...targetReels],
         totalAmount: grandTotal,
         status: 'Pending',
+        invoiceType: invoiceBillingMode,
+        billingMonth: new Date(dateFrom).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }),
         ...(selectedClient.lastPaymentDate ? { lastPaymentDate: selectedClient.lastPaymentDate } : {}),
         ...(discount > 0 ? {
           discountAmount: discount,
@@ -1811,144 +1862,247 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
           </div>
 
           <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
-              <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wider">Line Items</h3>
-              <div className="flex flex-wrap gap-3">
-                <button
-                  onClick={() => addItem('', selectedClient ? selectedClient.defaultRate : 0)}
-                  className="text-indigo-600 text-xs font-semibold underline hover:text-indigo-700 flex items-center gap-1"
-                >
-                  <Plus size={14} /> Add Reel
-                </button>
-                <button
-                  onClick={() => addItem('On Site Shoot', selectedClient?.onSiteShootRate || 0)}
-                  className="text-indigo-600 text-xs font-semibold underline hover:text-indigo-700 flex items-center gap-1"
-                >
-                  <Plus size={14} /> Add On Site Shoot
-                </button>
-                <button
-                  onClick={() => addItem('Website Making', selectedClient?.websiteMakingRate || 0)}
-                  className="text-indigo-600 text-xs font-semibold underline hover:text-indigo-700 flex items-center gap-1"
-                >
-                  <Plus size={14} /> Add Website
-                </button>
-              </div>
+            {/* Billing Mode Switcher */}
+            <div className="mb-6 p-1.5 bg-slate-100 dark:bg-slate-900/60 rounded-xl flex items-center gap-1.5 border border-slate-200 dark:border-slate-700">
+              <button
+                type="button"
+                onClick={() => setInvoiceBillingMode('per_item')}
+                className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                  invoiceBillingMode === 'per_item'
+                    ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                }`}
+              >
+                <span>🎬 Per Reel / Deliverables</span>
+                <span className="text-[10px] font-normal px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                  Calculated
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setInvoiceBillingMode('monthly_retainer');
+                  if (!monthlyRetainerInput && selectedClient?.monthlyRetainerAmount) {
+                    setMonthlyRetainerInput(String(selectedClient.monthlyRetainerAmount));
+                  }
+                }}
+                className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                  invoiceBillingMode === 'monthly_retainer'
+                    ? 'bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-400 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                }`}
+              >
+                <span>📅 Monthly Basis (Fixed Retainer)</span>
+                <span className="text-[10px] font-normal px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300">
+                  Flat Amount
+                </span>
+              </button>
             </div>
 
-            {/* Quick Set Direct Grand Total */}
-            <div className="mb-5 p-3.5 bg-gradient-to-r from-indigo-50/90 to-purple-50/90 border border-indigo-100 rounded-xl">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <span className="text-xs font-bold text-indigo-900 uppercase tracking-wider flex items-center gap-1.5">
-                    <Calculator size={15} className="text-indigo-600" />
-                    Direct Grand Total Split
-                  </span>
-                  <p className="text-[11px] text-slate-600 mt-0.5">
-                    Enter target grand total to divide equally across all {reels.length} item{reels.length === 1 ? '' : 's'}.
-                  </p>
+            {invoiceBillingMode === 'monthly_retainer' ? (
+              /* Monthly Retainer Section */
+              <div className="p-4 sm:p-5 rounded-xl border border-purple-200 dark:border-purple-800/60 bg-gradient-to-br from-purple-50/60 via-indigo-50/30 to-white dark:from-purple-950/30 dark:via-indigo-950/10 dark:to-slate-800 space-y-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-purple-900 dark:text-purple-300 uppercase tracking-wider">
+                      <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
+                      Monthly Basis Payment Mode
+                    </span>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                      Bills a single flat retainer amount for the billing cycle. No individual per-reel calculation is required.
+                    </p>
+                  </div>
+                  {selectedClient?.monthlyRetainerAmount && (
+                    <span className="text-xs font-semibold px-2 py-1 rounded bg-purple-100 dark:bg-purple-900/80 text-purple-700 dark:text-purple-300 shrink-0">
+                      Default: ₹{selectedClient.monthlyRetainerAmount.toLocaleString('en-IN')}/mo
+                    </span>
+                  )}
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-500">₹</span>
+
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5 pt-2">
+                  <div className="md:col-span-8">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      Service / Retainer Description
+                    </label>
                     <input
-                      type="number"
-                      min="0"
-                      placeholder="e.g. 10000"
-                      value={directGrandTotalInput}
-                      onChange={(e) => setDirectGrandTotalInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          handleApplyDirectGrandTotal();
-                        }
-                      }}
-                      className="w-32 sm:w-36 pl-7 pr-2 py-1.5 text-sm font-semibold border border-indigo-200 rounded-lg bg-white text-slate-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 shadow-xs"
+                      type="text"
+                      value={monthlyServiceDescription}
+                      onChange={(e) => setMonthlyServiceDescription(e.target.value)}
+                      placeholder="e.g. Monthly Video Production & Editing Retainer"
+                      className="w-full border border-purple-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100 dark:focus:ring-purple-950"
                     />
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleApplyDirectGrandTotal}
-                    className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-lg text-xs font-semibold transition-colors shadow-xs whitespace-nowrap flex items-center gap-1.5"
-                    title="Divide grand total into clean whole numbers equally"
-                  >
-                    <Divide size={13} />
-                    Split Equally
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleRoundFigures}
-                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-lg text-xs font-semibold transition-colors shadow-xs whitespace-nowrap flex items-center gap-1.5"
-                    title="Round prices to nearest hundred (>150 rounds to 200, <150 rounds to 100)"
-                  >
-                    <Coins size={13} />
-                    Round Figures
-                  </button>
-                </div>
-              </div>
-            </div>
 
-            <div className="space-y-4">
-              {reels.map((reel, index) => (
-                <div key={reel.id} className="p-4 bg-slate-50 rounded border border-slate-100 relative group">
-                  {reels.length > 1 && (
-                    <button
-                      onClick={() => removeReel(reel.id)}
-                      className="absolute -top-2 -right-2 p-1.5 bg-white border border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  )}
-
-                  <div className="grid grid-cols-12 gap-3">
-                    <div className="col-span-12">
-                      <label className="block text-xs font-medium text-slate-500 mb-1">Description</label>
-                      <input
-                        type="text"
-                        value={reel.title}
-                        onChange={(e) => updateReel(reel.id, 'title', e.target.value)}
-                        placeholder="e.g. Wedding Highlight Reel"
-                        className="w-full border border-slate-200 rounded px-3 py-2 text-sm bg-white outline-none transition-colors focus:border-indigo-500"
-                      />
-                    </div>
-                    <div className="col-span-12">
-                      <label className="block text-xs font-medium text-slate-500 mb-1">Content / Video URL (Optional)</label>
-                      <input
-                        type="url"
-                        value={reel.videoUrl || ''}
-                        onChange={(e) => updateReel(reel.id, 'videoUrl', e.target.value)}
-                        placeholder="e.g. https://instagram.com/reel/... or drive link"
-                        className="w-full border border-slate-200 rounded px-3 py-2 text-sm bg-white outline-none transition-colors focus:border-indigo-500"
-                      />
-                    </div>
-                    <div className="col-span-6 md:col-span-4">
-                      <label className="block text-xs font-medium text-slate-500 mb-1">Quantity</label>
-                      <input
-                        type="number"
-                        min="1"
-                        value={reel.quantity}
-                        onChange={(e) => updateReel(reel.id, 'quantity', Number(e.target.value))}
-                        className="w-full border border-slate-200 rounded px-3 py-2 text-sm bg-white outline-none transition-colors focus:border-indigo-500"
-                      />
-                    </div>
-                    <div className="col-span-6 md:col-span-4">
-                      <label className="block text-xs font-medium text-slate-500 mb-1">Rate (₹)</label>
+                  <div className="md:col-span-4">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      Fixed Amount (₹) <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">₹</span>
                       <input
                         type="number"
                         min="0"
-                        value={reel.rate}
-                        onChange={(e) => updateReel(reel.id, 'rate', Number(e.target.value))}
-                        className="w-full border border-slate-200 rounded px-3 py-2 text-sm bg-white outline-none transition-colors focus:border-indigo-500"
+                        value={monthlyRetainerInput}
+                        onChange={(e) => setMonthlyRetainerInput(e.target.value)}
+                        placeholder="e.g. 25000"
+                        className="w-full pl-7 pr-3 py-2 text-sm font-bold border border-purple-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-purple-900 dark:text-purple-300 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100 dark:focus:ring-purple-950"
                       />
-                    </div>
-                    <div className="col-span-12 md:col-span-4 flex flex-col justify-end">
-                      <div className="px-3 py-2 bg-white border border-slate-200 rounded text-sm font-medium text-right text-slate-900 bg-slate-100/50">
-                        ₹{(reel.quantity * reel.rate).toLocaleString('en-IN')}
-                      </div>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
+
+                <div className="p-3 bg-purple-100/60 dark:bg-purple-950/40 rounded-lg text-xs text-purple-900 dark:text-purple-200 flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    <span>💡</span>
+                    <span>
+                      All pending work logs within the selected billing period will automatically be linked and marked as <strong>Invoiced</strong> when you download or record this invoice.
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* Per-Item Line Items */
+              <>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+                  <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Line Items</h3>
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      onClick={() => addItem('', selectedClient ? selectedClient.defaultRate : 0)}
+                      className="text-indigo-600 dark:text-indigo-400 text-xs font-semibold underline hover:text-indigo-700 flex items-center gap-1 cursor-pointer"
+                    >
+                      <Plus size={14} /> Add Reel
+                    </button>
+                    <button
+                      onClick={() => addItem('On Site Shoot', selectedClient?.onSiteShootRate || 0)}
+                      className="text-indigo-600 dark:text-indigo-400 text-xs font-semibold underline hover:text-indigo-700 flex items-center gap-1 cursor-pointer"
+                    >
+                      <Plus size={14} /> Add On Site Shoot
+                    </button>
+                    <button
+                      onClick={() => addItem('Website Making', selectedClient?.websiteMakingRate || 0)}
+                      className="text-indigo-600 dark:text-indigo-400 text-xs font-semibold underline hover:text-indigo-700 flex items-center gap-1 cursor-pointer"
+                    >
+                      <Plus size={14} /> Add Website
+                    </button>
+                  </div>
+                </div>
+
+                {/* Quick Set Direct Grand Total */}
+                <div className="mb-5 p-3.5 bg-gradient-to-r from-indigo-50/90 to-purple-50/90 dark:from-slate-900 dark:to-slate-800/80 border border-indigo-100 dark:border-slate-700 rounded-xl">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <span className="text-xs font-bold text-indigo-900 dark:text-indigo-300 uppercase tracking-wider flex items-center gap-1.5">
+                        <Calculator size={15} className="text-indigo-600 dark:text-indigo-400" />
+                        Direct Grand Total Split
+                      </span>
+                      <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">
+                        Enter target grand total to divide equally across all {reels.length} item{reels.length === 1 ? '' : 's'}.
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-500">₹</span>
+                        <input
+                          type="number"
+                          min="0"
+                          placeholder="e.g. 10000"
+                          value={directGrandTotalInput}
+                          onChange={(e) => setDirectGrandTotalInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleApplyDirectGrandTotal();
+                            }
+                          }}
+                          className="w-32 sm:w-36 pl-7 pr-2 py-1.5 text-sm font-semibold border border-indigo-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 shadow-xs"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleApplyDirectGrandTotal}
+                        className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-lg text-xs font-semibold transition-colors shadow-xs whitespace-nowrap flex items-center gap-1.5 cursor-pointer"
+                        title="Divide grand total into clean whole numbers equally"
+                      >
+                        <Divide size={13} />
+                        Split Equally
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleRoundFigures}
+                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-lg text-xs font-semibold transition-colors shadow-xs whitespace-nowrap flex items-center gap-1.5 cursor-pointer"
+                        title="Round prices to nearest hundred (>150 rounds to 200, <150 rounds to 100)"
+                      >
+                        <Coins size={13} />
+                        Round Figures
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {reels.map((reel, index) => (
+                    <div key={reel.id} className="p-4 bg-slate-50 dark:bg-slate-900/40 rounded border border-slate-100 dark:border-slate-700/60 relative group">
+                      {reels.length > 1 && (
+                        <button
+                          onClick={() => removeReel(reel.id)}
+                          className="absolute -top-2 -right-2 p-1.5 bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900 text-red-500 hover:bg-red-50 hover:text-red-600 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
+
+                      <div className="grid grid-cols-12 gap-3">
+                        <div className="col-span-12">
+                          <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Description</label>
+                          <input
+                            type="text"
+                            value={reel.title}
+                            onChange={(e) => updateReel(reel.id, 'title', e.target.value)}
+                            placeholder="e.g. Wedding Highlight Reel"
+                            className="w-full border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:text-slate-100 outline-none transition-colors focus:border-indigo-500"
+                          />
+                        </div>
+                        <div className="col-span-12">
+                          <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Content / Video URL (Optional)</label>
+                          <input
+                            type="url"
+                            value={reel.videoUrl || ''}
+                            onChange={(e) => updateReel(reel.id, 'videoUrl', e.target.value)}
+                            placeholder="e.g. https://instagram.com/reel/... or drive link"
+                            className="w-full border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:text-slate-100 outline-none transition-colors focus:border-indigo-500"
+                          />
+                        </div>
+                        <div className="col-span-6 md:col-span-4">
+                          <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Quantity</label>
+                          <input
+                            type="number"
+                            min="1"
+                            value={reel.quantity}
+                            onChange={(e) => updateReel(reel.id, 'quantity', Number(e.target.value))}
+                            className="w-full border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:text-slate-100 outline-none transition-colors focus:border-indigo-500"
+                          />
+                        </div>
+                        <div className="col-span-6 md:col-span-4">
+                          <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Rate (₹)</label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={reel.rate}
+                            onChange={(e) => updateReel(reel.id, 'rate', Number(e.target.value))}
+                            className="w-full border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:text-slate-100 outline-none transition-colors focus:border-indigo-500"
+                          />
+                        </div>
+                        <div className="col-span-12 md:col-span-4 flex flex-col justify-end">
+                          <div className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm font-medium text-right text-slate-900 dark:text-slate-100 bg-slate-100/50 dark:bg-slate-900/50">
+                            ₹{(reel.quantity * reel.rate).toLocaleString('en-IN')}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
 
             {/* Adjustments Fields */}
             <div className="mt-6 pt-6 border-t border-slate-100 space-y-4">
@@ -2264,7 +2418,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                           <div className="flex justify-between items-center">
                             <span className="text-slate-500 font-medium">Total Deliverables:</span>
                             <span className="font-bold text-indigo-600">
-                              {reels.reduce((s, r) => s + (r.quantity || 1), 0)} Item(s)
+                              {effectiveReels.reduce((s, r) => s + (r.quantity || 1), 0)} Item(s)
                             </span>
                           </div>
                         ) : (
@@ -2303,7 +2457,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200">
-                      {reels.map((reel, idx) => (
+                      {effectiveReels.map((reel, idx) => (
                         <tr key={reel.id} className="hover:bg-slate-50/50 transition-colors">
                           <td className="py-4 px-3 text-sm font-semibold text-slate-400 text-center">
                             {String(idx + 1).padStart(2, '0')}
@@ -2352,7 +2506,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                       </p>
                     </div>
                     <span className="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-bold uppercase tracking-wider">
-                      ✓ Completed ({reels.reduce((s, r) => s + (r.quantity || 1), 0)} items)
+                      ✓ Completed ({effectiveReels.reduce((s, r) => s + (r.quantity || 1), 0)} items)
                     </span>
                   </div>
                 ) : (
@@ -2628,7 +2782,16 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                           )}
                         </td>
                         <td className="p-3.5 text-slate-600 dark:text-slate-300">
-                          <div className="font-semibold text-xs text-slate-800 dark:text-slate-200">{inv.reels.length} item(s)</div>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-semibold text-xs text-slate-800 dark:text-slate-200">
+                              {inv.invoiceType === 'monthly_retainer' ? '1 Retainer' : `${inv.reels.length} item(s)`}
+                            </span>
+                            {inv.invoiceType === 'monthly_retainer' && (
+                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                                📅 Monthly Retainer
+                              </span>
+                            )}
+                          </div>
                           <div className="text-[11px] text-slate-400 dark:text-slate-500 truncate max-w-xs">
                             {inv.reels.map(r => r.title).join(', ')}
                           </div>
