@@ -32,6 +32,7 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
   const [selectedWorkIds, setSelectedWorkIds] = useState<Set<string>>(new Set());
   const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false);
   const [showClosed, setShowClosed] = useState(false);
+  const closedClientIds = useMemo(() => new Set((clients || []).filter(c => c.isClosed).map(c => c.id)), [clients]);
 
   useEffect(() => {
     if (initialSearchQuery !== undefined) {
@@ -290,8 +291,6 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
   if (clientsLoading || workLoading || invoicesLoading) {
     return <div className="p-8 flex justify-center items-center h-full"><p className="text-slate-500 dark:text-slate-400">Loading work logs...</p></div>;
   }
-
-  const closedClientIds = useMemo(() => new Set(clients.filter(c => c.isClosed).map(c => c.id)), [clients]);
 
   const filteredWork = workItems.filter(w => {
     const isClosedClient = closedClientIds.has(w.clientId);
