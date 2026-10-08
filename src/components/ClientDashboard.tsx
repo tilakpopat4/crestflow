@@ -238,7 +238,8 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
   const handleSaveWorkLog = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const selectedRate = Number(workFormData.rate) || client.defaultRate;
+      const isMonthlyClient = client.paymentBasis === 'monthly_retainer';
+      const selectedRate = isMonthlyClient ? 0 : (Number(workFormData.rate) || client.defaultRate);
       const selectedQty = Number(workFormData.quantity);
       const selectedDate = parseYMDToTimestamp(workFormData.date);
       const trimmedVideoUrl = workFormData.videoUrl.trim() || undefined;
@@ -801,17 +802,26 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                     />
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Rate (₹) *</label>
-                    <input
-                      type="number"
-                      required
-                      min="0"
-                      value={workFormData.rate}
-                      onChange={e => setWorkFormData({ ...workFormData, rate: e.target.value })}
-                      className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-indigo-500"
-                    />
-                  </div>
+                  {client.paymentBasis === 'monthly_retainer' ? (
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Billing Basis</label>
+                      <div className="p-2 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60 rounded text-xs font-semibold text-purple-700 dark:text-purple-300 flex items-center gap-1.5 h-[38px]">
+                        <span>📅 Monthly Retainer</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Rate (₹) *</label>
+                      <input
+                        type="number"
+                        required
+                        min="0"
+                        value={workFormData.rate}
+                        onChange={e => setWorkFormData({ ...workFormData, rate: e.target.value })}
+                        className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-indigo-500"
+                      />
+                    </div>
+                  )}
 
                   <div className="md:col-span-2 space-y-1">
                     <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Completion Date *</label>
@@ -894,8 +904,8 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                   <tr className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                     <th className="p-3.5">Date</th>
                     <th className="p-3.5">Description / Sub-Client / Link</th>
-                    <th className="p-3.5 text-right">Quantity & Rate</th>
-                    <th className="p-3.5 text-right">Total</th>
+                    <th className="p-3.5 text-right">{client.paymentBasis === 'monthly_retainer' ? 'Quantity' : 'Quantity & Rate'}</th>
+                    <th className="p-3.5 text-right">{client.paymentBasis === 'monthly_retainer' ? 'Billing' : 'Total'}</th>
                     <th className="p-3.5 text-center">Status</th>
                     <th className="p-3.5 text-right">Action</th>
                   </tr>
@@ -957,10 +967,18 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                             </div>
                           </td>
                           <td className="p-3.5 text-right text-slate-600 dark:text-slate-300">
-                            {item.quantity} × ₹{item.rate.toLocaleString('en-IN')}
+                            {client.paymentBasis === 'monthly_retainer' 
+                              ? `${item.quantity} item${item.quantity === 1 ? '' : 's'}`
+                              : `${item.quantity} × ₹${item.rate.toLocaleString('en-IN')}`}
                           </td>
                           <td className="p-3.5 text-right font-bold text-slate-900 dark:text-slate-100">
-                            ₹{(item.quantity * item.rate).toLocaleString('en-IN')}
+                            {client.paymentBasis === 'monthly_retainer' ? (
+                              <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                                Covered in Retainer
+                              </span>
+                            ) : (
+                              `₹${(item.quantity * item.rate).toLocaleString('en-IN')}`
+                            )}
                           </td>
                           <td className="p-3.5 text-center">
                             {item.status === 'Invoiced' ? (

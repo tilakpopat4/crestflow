@@ -83,7 +83,8 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
     
     const client = clients.find(c => c.id === formData.clientId);
     const selectedSub = client?.subClients?.find(sc => sc.id === formData.subClientId);
-    const selectedRate = Number(formData.rate) || (client ? client.defaultRate : 0);
+    const isMonthlyClient = client?.paymentBasis === 'monthly_retainer';
+    const selectedRate = isMonthlyClient ? 0 : (Number(formData.rate) || (client ? client.defaultRate : 0));
     const selectedDate = parseYMDToTimestamp(formData.date);
     const selectedQty = Number(formData.quantity);
     const trimmedVideoUrl = formData.videoUrl.trim() || undefined;
@@ -428,7 +429,13 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
                   onChange={(e) => {
                     const clientId = e.target.value;
                     const client = clients.find(c => c.id === clientId);
-                    setFormData({...formData, clientId, subClientId: '', rate: client ? String(client.defaultRate) : ''});
+                    const isMonthly = client?.paymentBasis === 'monthly_retainer';
+                    setFormData({
+                      ...formData,
+                      clientId,
+                      subClientId: '',
+                      rate: isMonthly ? '0' : (client ? String(client.defaultRate) : '')
+                    });
                   }}
                 >
                   <option value="">Select Client</option>
@@ -504,29 +511,63 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
               />
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Quantity</label>
-                <input 
-                  type="number"
-                  min="1"
-                  required
-                  className="w-full p-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-                  value={formData.quantity}
-                  onChange={(e) => setFormData({...formData, quantity: e.target.value})}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Rate (₹)</label>
-                <input 
-                  type="number"
-                  required
-                  className="w-full p-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-                  value={formData.rate}
-                  onChange={(e) => setFormData({...formData, rate: e.target.value})}
-                />
-              </div>
-            </div>
+            {(() => {
+              const selClient = clients.find(c => c.id === formData.clientId);
+              const isMonthly = selClient?.paymentBasis === 'monthly_retainer';
+
+              if (isMonthly) {
+                return (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Quantity</label>
+                      <input 
+                        type="number"
+                        min="1"
+                        required
+                        className="w-full p-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                        value={formData.quantity}
+                        onChange={(e) => setFormData({...formData, quantity: e.target.value})}
+                      />
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-full p-2.5 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60 rounded-lg text-xs text-purple-900 dark:text-purple-300 flex items-center gap-2">
+                        <span className="text-base">📅</span>
+                        <div>
+                          <strong className="block font-semibold">Monthly Basis Client</strong>
+                          <span>Covered by monthly retainer (₹{(selClient?.monthlyRetainerAmount || 0).toLocaleString('en-IN')}/mo). No per-reel rate is needed.</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Quantity</label>
+                    <input 
+                      type="number"
+                      min="1"
+                      required
+                      className="w-full p-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                      value={formData.quantity}
+                      onChange={(e) => setFormData({...formData, quantity: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Rate (₹)</label>
+                    <input 
+                      type="number"
+                      required
+                      className="w-full p-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                      value={formData.rate}
+                      onChange={(e) => setFormData({...formData, rate: e.target.value})}
+                    />
+                  </div>
+                </div>
+              );
+            })()}
             
             <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-700">
               <button 
@@ -635,7 +676,13 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
                         </div>
                       </td>
                       <td className="py-4 px-4 text-sm font-medium text-slate-900 dark:text-slate-100">
-                        ₹{(work.quantity * work.rate).toLocaleString('en-IN')}
+                        {client?.paymentBasis === 'monthly_retainer' ? (
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                            📅 Monthly Retainer
+                          </span>
+                        ) : (
+                          `₹${(work.quantity * work.rate).toLocaleString('en-IN')}`
+                        )}
                       </td>
                       <td className="py-4 px-4 text-sm">
                         {work.status === 'Invoiced' ? (

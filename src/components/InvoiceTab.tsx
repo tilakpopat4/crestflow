@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Client, Reel, Invoice, WorkItem, UserProfile } from '../types';
+import { Client, Reel, Invoice, WorkItem, UserProfile, InvoiceDeliverable } from '../types';
 import { Plus, Trash2, Download, Receipt, FileCheck, Mail, Send, Copy, X, Check, MailCheck, CheckCircle2, AlertCircle, Loader2, FileText, Search, Calculator, Divide, Coins, History, Pencil, Printer, ListChecks, IndianRupee, Archive, Clock, Sparkles, Calendar } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -15,6 +15,7 @@ import { sendEmailWithPdfAttachment, acquireGmailAccessToken } from '../lib/gmai
 import PaymentDateModal from './PaymentDateModal';
 import ScheduleInvoiceModal from './ScheduleInvoiceModal';
 import { executeAutoInvoiceCheck } from '../lib/autoInvoiceService';
+import { formatLocalDateToYMD } from '../lib/dateUtils';
 
 // Helper functions to parse and convert oklab/oklch/color() colors to standard rgb/rgba,
 // which prevents crashes in html2canvas (used by html2pdf.js) under Tailwind CSS v4.
@@ -392,6 +393,7 @@ export function renderDocumentHtml(params: {
   qrDataUrl?: string;
   customUpiId?: string;
   hideFinance?: boolean;
+  deliverables?: InvoiceDeliverable[];
 }): string {
   const invoiceNo = params.invoice.id.length > 8
     ? `INV-${params.invoice.id.substring(0, 8).toUpperCase()}`
@@ -423,7 +425,25 @@ export function renderDocumentHtml(params: {
   const discount = params.invoice.discountAmount || 0;
   const extraCost = params.invoice.extraCostAmount || 0;
   const grandTotal = Math.max(0, params.invoice.totalAmount);
-  const totalDeliverablesCount = reels.reduce((s, r) => s + (r.quantity || 1), 0);
+
+  const isMonthlyRetainer = params.invoice.invoiceType === 'monthly_retainer';
+
+  const deliverablesList: InvoiceDeliverable[] = (params.deliverables && params.deliverables.length > 0)
+    ? params.deliverables
+    : (params.invoice.deliverables && params.invoice.deliverables.length > 0)
+    ? params.invoice.deliverables
+    : (reels.length > 0 && reels.some(r => r.workItemId))
+    ? reels.map(r => ({
+        id: r.workItemId,
+        title: r.title,
+        quantity: r.quantity,
+        videoUrl: r.videoUrl
+      }))
+    : [];
+
+  const totalDeliverablesCount = isMonthlyRetainer
+    ? (deliverablesList.reduce((s, d) => s + (d.quantity || 1), 0) || 1)
+    : reels.reduce((s, r) => s + (r.quantity || 1), 0);
 
   const isWorkSummary = !!params.hideFinance;
 
@@ -567,7 +587,34 @@ export function renderDocumentHtml(params: {
     `;
   }
 
-  // Full Standard Invoice
+  // Full Standard Invoice or Monthly Retainer Invoice
+  const baseRetainerAmount = isMonthlyRetainer
+    ? (reels[0]?.rate || params.invoice.totalAmount)
+    : subtotal;
+
+  const monthlyDeliverablesRowsHtml = deliverablesList.length > 0
+    ? deliverablesList.map((d, idx) => `
+      <tr style="border-bottom: 1px solid #e2e8f0;">
+        <td style="padding: 10px 10px; font-size: 13px; color: #64748b; text-align: center; font-weight: 600;">${String(idx + 1).padStart(2, '0')}</td>
+        <td style="padding: 10px 10px; font-size: 12px; color: #64748b; text-align: center;">
+          ${d.date ? new Date(d.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '—'}
+        </td>
+        <td style="padding: 10px 12px; font-size: 13px; color: #0f172a; font-weight: 600;">
+          ${d.title || 'Video Editing Deliverable'}
+          ${d.videoUrl ? `<br/><a href="${d.videoUrl}" target="_blank" rel="noopener noreferrer" style="color: #4f46e5; text-decoration: underline; font-size: 11px; font-weight: normal; word-break: break-all;">${d.videoUrl}</a>` : ''}
+        </td>
+        <td style="padding: 10px 10px; font-size: 13px; color: #334155; text-align: center; font-weight: 700;">${d.quantity || 1}</td>
+      </tr>
+    `).join('')
+    : `
+      <tr>
+        <td style="padding: 12px 10px; font-size: 13px; color: #64748b; text-align: center;">01</td>
+        <td style="padding: 12px 10px; font-size: 12px; color: #64748b; text-align: center;">${issueDateStr}</td>
+        <td style="padding: 12px 12px; font-size: 13px; color: #0f172a; font-weight: 600;">${reels[0]?.title || 'Monthly Video Editing & Creative Retainer'}</td>
+        <td style="padding: 12px 10px; font-size: 13px; color: #334155; text-align: center; font-weight: 700;">1 Month</td>
+      </tr>
+    `;
+
   const itemsRowsHtml = reels.length === 0
     ? `
       <tr>
@@ -652,6 +699,38 @@ export function renderDocumentHtml(params: {
       </div>
 
       <!-- Items Table -->
+      ${isMonthlyRetainer ? `
+      <!-- Monthly Basis Deliverables Table (without rates) -->
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; box-sizing: border-box;">
+        <thead>
+          <tr style="background-color: #0f172a; color: #ffffff;">
+            <th style="padding: 10px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; width: 44px; border-top-left-radius: 8px;">#</th>
+            <th style="padding: 10px 10px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; width: 85px;">Date</th>
+            <th style="padding: 10px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: left;">Work Done / Deliverable Description</th>
+            <th style="padding: 10px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; width: 70px; border-top-right-radius: 8px;">Qty</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${monthlyDeliverablesRowsHtml}
+        </tbody>
+      </table>
+
+      <!-- Monthly Package Deliverables Banner -->
+      <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
+        <div>
+          <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #6366f1;">MONTHLY RETAINER PACKAGE</div>
+          <div style="font-size: 12px; color: #475569; margin-top: 2px;">
+            Fixed retainer fee covering all listed creative deliverables across billing cycle (${billingPeriodStr})
+          </div>
+        </div>
+        <div style="text-align: right;">
+          <span style="display: inline-block; background-color: #f3e8ff; color: #7e22ce; border: 1px solid #d8b4fe; font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.5px;">
+            ✓ ${deliverablesList.length} Deliverable(s) Included
+          </span>
+        </div>
+      </div>
+      ` : `
+      <!-- Per Reel Line Items Table -->
       <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; box-sizing: border-box;">
         <thead>
           <tr style="background-color: #0f172a; color: #ffffff;">
@@ -666,14 +745,17 @@ export function renderDocumentHtml(params: {
           ${itemsRowsHtml}
         </tbody>
       </table>
+      `}
 
       <!-- Subtotal & Total Due -->
       <div style="display: flex; justify-content: flex-end; margin-bottom: 20px; width: 100%; box-sizing: border-box;">
         <div style="width: 290px;">
           <table style="width: 100%; font-size: 12px; color: #475569; margin-bottom: 6px;">
             <tr>
-              <td style="padding: 3px 0; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b;">Subtotal</td>
-              <td style="padding: 3px 0; text-align: right; font-weight: 700; color: #0f172a;">₹${subtotal.toLocaleString('en-IN')}</td>
+              <td style="padding: 3px 0; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b;">
+                ${isMonthlyRetainer ? 'Monthly Retainer' : 'Subtotal'}
+              </td>
+              <td style="padding: 3px 0; text-align: right; font-weight: 700; color: #0f172a;">₹${baseRetainerAmount.toLocaleString('en-IN')}</td>
             </tr>
             ${extraCost > 0 ? `
             <tr>
@@ -849,6 +931,7 @@ export async function generateOffscreenPdfBlob(params: {
   qrCodeUrl?: string;
   customUpiId?: string;
   hideFinance?: boolean;
+  deliverables?: InvoiceDeliverable[];
 }): Promise<Blob> {
   const container = document.createElement('div');
   container.style.position = 'fixed';
@@ -1155,6 +1238,27 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
     return reels;
   }, [invoiceBillingMode, monthlyRetainerInput, monthlyServiceDescription, dateFrom, reels]);
 
+  const currentBillingDeliverables = useMemo<InvoiceDeliverable[]>(() => {
+    if (!selectedClientId) return [];
+    const logs = workItems.filter(w => {
+      if (w.clientId !== selectedClientId) return false;
+      if (linkedWorkItemIds.length > 0) {
+        return linkedWorkItemIds.includes(w.id);
+      }
+      if (w.status !== 'Uninvoiced') return false;
+      const dStr = formatLocalDateToYMD(new Date(w.date));
+      return dStr >= dateFrom && dStr <= dateTo;
+    });
+    logs.sort((a, b) => (a.date - b.date) || (a.createdAt - b.createdAt));
+    return logs.map(w => ({
+      id: w.id,
+      title: w.description,
+      quantity: w.quantity || 1,
+      videoUrl: w.videoUrl,
+      date: w.date
+    }));
+  }, [selectedClientId, workItems, linkedWorkItemIds, dateFrom, dateTo]);
+
   const activeSchedulesCount = useMemo(() => {
     return clients.filter(c => !c.isClosed && c.autoInvoiceEnabled).length;
   }, [clients]);
@@ -1447,7 +1551,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
         invoice: inv,
         client: clientObj,
         profile,
-        customUpiId
+        customUpiId,
+        deliverables: inv.deliverables
       });
       const url = URL.createObjectURL(pdfBlob);
       const a = document.createElement('a');
@@ -1489,13 +1594,18 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
       return;
     }
 
+    const effectiveDeliverables = (inv?.deliverables && inv.deliverables.length > 0)
+      ? inv.deliverables
+      : currentBillingDeliverables;
+
     const htmlContent = renderDocumentHtml({
       invoice: targetInvoice,
       client: targetClient,
       profile,
       dateFrom,
       dateTo,
-      hideFinance: true
+      hideFinance: true,
+      deliverables: effectiveDeliverables
     });
 
     const clientNameStr = (targetClient?.name || targetInvoice.clientName || 'Client').replace(/\s+/g, '_');
@@ -1527,6 +1637,10 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
       return;
     }
 
+    const effectiveDeliverables = (inv?.deliverables && inv.deliverables.length > 0)
+      ? inv.deliverables
+      : currentBillingDeliverables;
+
     setIsGeneratingSummary(true);
     try {
       const pdfBlob = await generateOffscreenPdfBlob({
@@ -1535,7 +1649,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
         profile,
         dateFrom,
         dateTo,
-        hideFinance: true
+        hideFinance: true,
+        deliverables: effectiveDeliverables
       });
 
       const clientNameStr = (targetClient?.name || targetInvoice.clientName || 'Client').replace(/\s+/g, '_');
@@ -1578,6 +1693,14 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
     setIsGenerating(true);
 
     try {
+      const deliverablesSnapshot: InvoiceDeliverable[] = currentBillingDeliverables.map(d => ({
+        id: d.id,
+        title: d.title,
+        quantity: d.quantity,
+        videoUrl: d.videoUrl,
+        date: d.date
+      }));
+
       const newInvoice: Invoice = {
         id: generateUUID(),
         date: Date.now(),
@@ -1588,6 +1711,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
         status: 'Pending',
         invoiceType: invoiceBillingMode,
         billingMonth: new Date(dateFrom).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }),
+        linkedWorkItemIds: [...linkedWorkItemIds],
+        deliverables: invoiceBillingMode === 'monthly_retainer' ? deliverablesSnapshot : undefined,
         ...(selectedClient.lastPaymentDate ? { lastPaymentDate: selectedClient.lastPaymentDate } : {}),
         ...(discount > 0 ? {
           discountAmount: discount,
@@ -1608,7 +1733,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
         profile,
         dateFrom,
         dateTo,
-        customUpiId
+        customUpiId,
+        deliverables: invoiceBillingMode === 'monthly_retainer' ? deliverablesSnapshot : undefined
       });
 
       // 2. Trigger browser download
@@ -1713,7 +1839,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
         currentPdfBlob = await generateOffscreenPdfBlob({
           invoice: emailModalData.invoiceObj,
           client: emailModalData.clientObj,
-          profile
+          profile,
+          deliverables: emailModalData.invoiceObj.deliverables
         });
       }
 
@@ -1863,41 +1990,62 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
 
           <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
             {/* Billing Mode Switcher */}
-            <div className="mb-6 p-1.5 bg-slate-100 dark:bg-slate-900/60 rounded-xl flex items-center gap-1.5 border border-slate-200 dark:border-slate-700">
-              <button
-                type="button"
-                onClick={() => setInvoiceBillingMode('per_item')}
-                className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                  invoiceBillingMode === 'per_item'
-                    ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                }`}
-              >
-                <span>🎬 Per Reel / Deliverables</span>
-                <span className="text-[10px] font-normal px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
-                  Calculated
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setInvoiceBillingMode('monthly_retainer');
-                  if (!monthlyRetainerInput && selectedClient?.monthlyRetainerAmount) {
-                    setMonthlyRetainerInput(String(selectedClient.monthlyRetainerAmount));
-                  }
-                }}
-                className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                  invoiceBillingMode === 'monthly_retainer'
-                    ? 'bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-400 shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                }`}
-              >
-                <span>📅 Monthly Basis (Fixed Retainer)</span>
-                <span className="text-[10px] font-normal px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300">
-                  Flat Amount
-                </span>
-              </button>
-            </div>
+            {selectedClient?.paymentBasis === 'monthly_retainer' ? (
+              <div className="mb-6 p-3.5 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 rounded-xl flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-purple-600 animate-pulse shrink-0"></span>
+                  <div>
+                    <span className="text-xs font-bold text-purple-900 dark:text-purple-300 block">
+                      Monthly Basis Client (Fixed Retainer)
+                    </span>
+                    <span className="text-[11px] text-purple-700/80 dark:text-purple-400">
+                      Single flat retainer fee per billing cycle. Per-reel calculation is disabled.
+                    </span>
+                  </div>
+                </div>
+                {selectedClient?.monthlyRetainerAmount && (
+                  <span className="text-xs font-bold text-purple-800 dark:text-purple-200 bg-purple-100 dark:bg-purple-900/80 px-2.5 py-1 rounded-lg shrink-0">
+                    ₹{selectedClient.monthlyRetainerAmount.toLocaleString('en-IN')}/mo
+                  </span>
+                )}
+              </div>
+            ) : (
+              <div className="mb-6 p-1.5 bg-slate-100 dark:bg-slate-900/60 rounded-xl flex items-center gap-1.5 border border-slate-200 dark:border-slate-700">
+                <button
+                  type="button"
+                  onClick={() => setInvoiceBillingMode('per_reel')}
+                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                    invoiceBillingMode === 'per_reel'
+                      ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                  }`}
+                >
+                  <span>🎬 Per Reel / Deliverables</span>
+                  <span className="text-[10px] font-normal px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                    Calculated
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setInvoiceBillingMode('monthly_retainer');
+                    if (!monthlyRetainerInput && selectedClient?.monthlyRetainerAmount) {
+                      setMonthlyRetainerInput(String(selectedClient.monthlyRetainerAmount));
+                    }
+                  }}
+                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                    invoiceBillingMode === 'monthly_retainer'
+                      ? 'bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-400 shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                  }`}
+                >
+                  <span>📅 Monthly Basis (Fixed Retainer)</span>
+                  <span className="text-[10px] font-normal px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300">
+                    Flat Amount
+                  </span>
+                </button>
+              </div>
+            )}
 
             {invoiceBillingMode === 'monthly_retainer' ? (
               /* Monthly Retainer Section */
@@ -1949,6 +2097,57 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                       />
                     </div>
                   </div>
+                </div>
+
+                {/* Included Deliverables List (Rates Hidden) */}
+                <div className="pt-2 border-t border-purple-200/60 dark:border-purple-800/60">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                      Included Work Deliverables ({currentBillingDeliverables.length})
+                    </span>
+                    <span className="text-[11px] text-purple-700 dark:text-purple-400 font-medium">
+                      Rates hidden • Included in retainer
+                    </span>
+                  </div>
+                  {currentBillingDeliverables.length > 0 ? (
+                    <div className="border border-purple-100 dark:border-purple-900/60 rounded-lg overflow-hidden max-h-48 overflow-y-auto bg-white dark:bg-slate-900">
+                      <table className="w-full text-left text-xs">
+                        <thead className="bg-purple-50/70 dark:bg-purple-950/60 text-purple-900 dark:text-purple-300 border-b border-purple-100 dark:border-purple-900/60">
+                          <tr>
+                            <th className="py-1.5 px-2.5 font-semibold w-8 text-center">#</th>
+                            <th className="py-1.5 px-2 font-semibold w-24">Date</th>
+                            <th className="py-1.5 px-2 font-semibold">Deliverable Description</th>
+                            <th className="py-1.5 px-2 font-semibold text-center w-12">Qty</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-purple-50 dark:divide-slate-800">
+                          {currentBillingDeliverables.map((item, idx) => (
+                            <tr key={item.id || idx}>
+                              <td className="py-1.5 px-2.5 text-center text-slate-400">{String(idx + 1).padStart(2, '0')}</td>
+                              <td className="py-1.5 px-2 text-slate-500 whitespace-nowrap">
+                                {item.date ? new Date(item.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '—'}
+                              </td>
+                              <td className="py-1.5 px-2 font-medium text-slate-800 dark:text-slate-200">
+                                <div>{item.title}</div>
+                                {item.videoUrl && (
+                                  <a href={item.videoUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] text-indigo-500 underline truncate block max-w-xs">
+                                    {item.videoUrl}
+                                  </a>
+                                )}
+                              </td>
+                              <td className="py-1.5 px-2 text-center font-bold text-slate-700 dark:text-slate-300">
+                                {item.quantity}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="p-3 text-center border border-dashed border-purple-200 dark:border-purple-800 rounded-lg text-xs text-slate-500 dark:text-slate-400">
+                      No uninvoiced work logs logged within this date range yet. Work logs added in this cycle will automatically show here without rates.
+                    </div>
+                  )}
                 </div>
 
                 <div className="p-3 bg-purple-100/60 dark:bg-purple-950/40 rounded-lg text-xs text-purple-900 dark:text-purple-200 flex items-center justify-between flex-wrap gap-2">
@@ -2159,7 +2358,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
 
             <div className="mt-6 pt-6 border-t border-slate-100 space-y-2">
               <div className="flex justify-between items-center text-sm text-slate-500">
-                <span>Subtotal</span>
+                <span>{invoiceBillingMode === 'monthly_retainer' ? 'Monthly Retainer' : 'Subtotal'}</span>
                 <span>₹{total.toLocaleString('en-IN')}</span>
               </div>
               {extraCost > 0 && (
@@ -2442,13 +2641,16 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                     <thead>
                       <tr className="bg-slate-900 text-white rounded-lg">
                         <th className="py-3 px-3 font-bold text-xs uppercase tracking-wider text-slate-200 rounded-l-lg w-12 text-center">#</th>
+                        {invoiceBillingMode === 'monthly_retainer' && (
+                          <th className="py-3 px-3 font-bold text-xs uppercase tracking-wider text-slate-200 w-28 text-center">Date</th>
+                        )}
                         <th className="py-3 px-3 font-bold text-xs uppercase tracking-wider text-slate-200">
-                          {previewMode === 'work-only' ? 'Work Done / Deliverable Description' : 'Item Description'}
+                          {previewMode === 'work-only' || invoiceBillingMode === 'monthly_retainer' ? 'Work Done / Deliverable Description' : 'Item Description'}
                         </th>
-                        <th className={`py-3 px-3 font-bold text-xs uppercase tracking-wider text-slate-200 text-center ${previewMode === 'work-only' ? 'w-24 rounded-r-lg' : 'w-20'}`}>
+                        <th className={`py-3 px-3 font-bold text-xs uppercase tracking-wider text-slate-200 text-center ${previewMode === 'work-only' || invoiceBillingMode === 'monthly_retainer' ? 'w-24 rounded-r-lg' : 'w-20'}`}>
                           Qty
                         </th>
-                        {previewMode !== 'work-only' && (
+                        {previewMode !== 'work-only' && invoiceBillingMode !== 'monthly_retainer' && (
                           <>
                             <th className="py-3 px-3 font-bold text-xs uppercase tracking-wider text-slate-200 text-right w-32">Rate</th>
                             <th className="py-3 px-3 font-bold text-xs uppercase tracking-wider text-slate-200 text-right rounded-r-lg w-36">Total Amount</th>
@@ -2457,44 +2659,104 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200">
-                      {effectiveReels.map((reel, idx) => (
-                        <tr key={reel.id} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="py-4 px-3 text-sm font-semibold text-slate-400 text-center">
-                            {String(idx + 1).padStart(2, '0')}
-                          </td>
-                          <td className="py-4 px-3 text-base font-semibold text-slate-900">
-                            <div>{reel.title || <span className="text-slate-400 italic font-normal">Item description...</span>}</div>
-                            {reel.videoUrl && (
-                              <div className="mt-1">
-                                <a
-                                  href={reel.videoUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-xs text-indigo-600 font-medium underline break-all hover:text-indigo-800"
-                                >
-                                  {reel.videoUrl}
-                                </a>
-                              </div>
+                      {invoiceBillingMode === 'monthly_retainer' ? (
+                        currentBillingDeliverables.length > 0 ? (
+                          currentBillingDeliverables.map((d, idx) => (
+                            <tr key={d.id || idx} className="hover:bg-slate-50/50 transition-colors">
+                              <td className="py-3.5 px-3 text-sm font-semibold text-slate-400 text-center">
+                                {String(idx + 1).padStart(2, '0')}
+                              </td>
+                              <td className="py-3.5 px-3 text-xs text-slate-500 text-center whitespace-nowrap">
+                                {d.date ? new Date(d.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '—'}
+                              </td>
+                              <td className="py-3.5 px-3 text-base font-semibold text-slate-900">
+                                <div>{d.title || <span className="text-slate-400 italic font-normal">Deliverable...</span>}</div>
+                                {d.videoUrl && (
+                                  <div className="mt-1">
+                                    <a
+                                      href={d.videoUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-xs text-indigo-600 font-medium underline break-all hover:text-indigo-800"
+                                    >
+                                      {d.videoUrl}
+                                    </a>
+                                  </div>
+                                )}
+                              </td>
+                              <td className="py-3.5 px-3 text-base text-center font-bold text-slate-700">
+                                {d.quantity || 1}
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr className="hover:bg-slate-50/50 transition-colors">
+                            <td className="py-4 px-3 text-sm font-semibold text-slate-400 text-center">01</td>
+                            <td className="py-4 px-3 text-xs text-slate-500 text-center whitespace-nowrap">
+                              {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
+                            </td>
+                            <td className="py-4 px-3 text-base font-semibold text-slate-900">
+                              <div>{monthlyServiceDescription || 'Monthly Video Editing & Creative Retainer'}</div>
+                            </td>
+                            <td className="py-4 px-3 text-base text-center font-bold text-slate-700">
+                              1 Month
+                            </td>
+                          </tr>
+                        )
+                      ) : (
+                        effectiveReels.map((reel, idx) => (
+                          <tr key={reel.id} className="hover:bg-slate-50/50 transition-colors">
+                            <td className="py-4 px-3 text-sm font-semibold text-slate-400 text-center">
+                              {String(idx + 1).padStart(2, '0')}
+                            </td>
+                            <td className="py-4 px-3 text-base font-semibold text-slate-900">
+                              <div>{reel.title || <span className="text-slate-400 italic font-normal">Item description...</span>}</div>
+                              {reel.videoUrl && (
+                                <div className="mt-1">
+                                  <a
+                                    href={reel.videoUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-xs text-indigo-600 font-medium underline break-all hover:text-indigo-800"
+                                  >
+                                    {reel.videoUrl}
+                                  </a>
+                                </div>
+                              )}
+                            </td>
+                            <td className="py-4 px-3 text-base text-center font-bold text-slate-700">
+                              {reel.quantity}
+                            </td>
+                            {previewMode !== 'work-only' && (
+                              <>
+                                <td className="py-4 px-3 text-base text-right font-medium text-slate-700">
+                                  ₹{reel.rate.toLocaleString('en-IN')}
+                                </td>
+                                <td className="py-4 px-3 text-base text-right font-bold text-slate-900">
+                                  ₹{(reel.quantity * reel.rate).toLocaleString('en-IN')}
+                                </td>
+                              </>
                             )}
-                          </td>
-                          <td className="py-4 px-3 text-base text-center font-bold text-slate-700">
-                            {reel.quantity}
-                          </td>
-                          {previewMode !== 'work-only' && (
-                            <>
-                              <td className="py-4 px-3 text-base text-right font-medium text-slate-700">
-                                ₹{reel.rate.toLocaleString('en-IN')}
-                              </td>
-                              <td className="py-4 px-3 text-base text-right font-bold text-slate-900">
-                                ₹{(reel.quantity * reel.rate).toLocaleString('en-IN')}
-                              </td>
-                            </>
-                          )}
-                        </tr>
-                      ))}
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
+
+                {invoiceBillingMode === 'monthly_retainer' && previewMode !== 'work-only' && (
+                  <div className="bg-purple-50/70 border border-purple-200 rounded-xl p-3.5 mb-6 flex justify-between items-center avoid-break">
+                    <div>
+                      <span className="text-xs font-bold uppercase tracking-wider text-purple-800 block">Monthly Retainer Package</span>
+                      <p className="text-xs text-slate-600 mt-0.5">
+                        Fixed monthly fee covering all creative deliverables across billing period.
+                      </p>
+                    </div>
+                    <span className="px-3 py-1 bg-purple-100 text-purple-700 border border-purple-300 rounded-full text-xs font-bold uppercase tracking-wider">
+                      ✓ {currentBillingDeliverables.length} Deliverable(s) Included
+                    </span>
+                  </div>
+                )}
 
                 {/* Totals Section (For Full Invoice) OR Deliverables Summary (For Work Summary) */}
                 {previewMode === 'work-only' ? (
@@ -2506,14 +2768,16 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                       </p>
                     </div>
                     <span className="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-bold uppercase tracking-wider">
-                      ✓ Completed ({effectiveReels.reduce((s, r) => s + (r.quantity || 1), 0)} items)
+                      ✓ Completed ({invoiceBillingMode === 'monthly_retainer' ? currentBillingDeliverables.length : effectiveReels.reduce((s, r) => s + (r.quantity || 1), 0)} items)
                     </span>
                   </div>
                 ) : (
                   <div className="flex justify-end mb-10 avoid-break" style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
                     <div className="w-72 sm:w-80 space-y-2">
                       <div className="flex justify-between items-center py-1.5 px-3 text-sm text-slate-600">
-                        <span className="font-semibold uppercase tracking-wider text-xs text-slate-500">Subtotal</span>
+                        <span className="font-semibold uppercase tracking-wider text-xs text-slate-500">
+                          {invoiceBillingMode === 'monthly_retainer' ? 'Monthly Retainer' : 'Subtotal'}
+                        </span>
                         <span className="font-bold text-slate-900">₹{total.toLocaleString('en-IN')}</span>
                       </div>
 
@@ -2852,7 +3116,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                                   pdfBlob = await generateOffscreenPdfBlob({
                                     invoice: inv,
                                     client: clientObj,
-                                    profile
+                                    profile,
+                                    deliverables: inv.deliverables
                                   });
                                 } catch (e) {
                                   console.warn("Could not pre-generate PDF blob for history invoice:", e);
