@@ -430,11 +430,11 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
               <div className="flex items-center gap-3 flex-wrap">
                 <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">{client.name}</h1>
                 {client.isClosed ? (
-                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border-slate-300 dark:border-slate-600">
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">
                     <Archive size={12} /> Closed
                   </span>
                 ) : (
-                  <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${statusInfo.badgeClass}`}>
+                  <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${statusInfo.badgeClass}`}>
                     <Clock size={12} /> {statusInfo.label}
                   </span>
                 )}
@@ -932,7 +932,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                               <div className="flex items-center gap-2 flex-wrap">
                                 <span className="font-medium text-slate-900 dark:text-slate-100">{item.description}</span>
                                 {item.subClientName && (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60">
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300">
                                     <Users size={10} /> Sub: {item.subClientName}
                                   </span>
                                 )}
@@ -947,7 +947,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                                       title: item.description,
                                       clientName: client.name
                                     })}
-                                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border border-indigo-200 dark:border-indigo-800/60 transition-all cursor-pointer shrink-0 w-fit"
+                                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-all cursor-pointer shrink-0 w-fit"
                                     title="Watch embedded video preview"
                                   >
                                     <Play size={10} className="fill-indigo-700 dark:fill-indigo-300" /> Watch Video
@@ -973,7 +973,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                           </td>
                           <td className="p-3.5 text-right font-bold text-slate-900 dark:text-slate-100">
                             {client.paymentBasis === 'monthly_retainer' ? (
-                              <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                              <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300">
                                 Covered in Retainer
                               </span>
                             ) : (
@@ -982,11 +982,11 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                           </td>
                           <td className="p-3.5 text-center">
                             {item.status === 'Invoiced' ? (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300">
                                 <CheckCircle2 size={12} /> Invoiced
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300">
                                 <Clock size={12} /> Uninvoiced
                               </span>
                             )}
@@ -1073,7 +1073,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                             <div className="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5 flex-wrap">
                               <span>#{inv.id.substring(0, 8).toUpperCase()}</span>
                               {inv.isAutoGenerated && (
-                                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800" title="Auto-generated on scheduled date at 6:00 AM">
+                                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400" title="Auto-generated on scheduled date at 6:00 AM">
                                   <Sparkles size={10} className="text-indigo-500" />
                                   Auto 6 AM
                                 </span>
@@ -1087,7 +1087,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                                 {inv.invoiceType === 'monthly_retainer' ? '1 Retainer' : `${inv.reels.length} item(s)`}
                               </span>
                               {inv.invoiceType === 'monthly_retainer' && (
-                                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300">
                                   📅 Monthly Retainer
                                 </span>
                               )}

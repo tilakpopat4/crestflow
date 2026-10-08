@@ -911,7 +911,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                   {/* Payment Status Pill & Sub-Clients Badge */}
                   <div className="flex items-center gap-2 flex-wrap">
                     {client.isClosed ? (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 max-w-full">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 max-w-full">
                         <Archive size={12} className="shrink-0" />
                         <span className="truncate">Closed</span>
                         {client.closedAt && (
@@ -919,17 +919,17 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                         )}
                       </span>
                     ) : (
-                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${statusInfo.badgeClass}`}>
+                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${statusInfo.badgeClass}`}>
                         <Clock size={12} className="shrink-0" /> {statusInfo.label}
                       </span>
                     )}
                     {client.subClients && client.subClients.length > 0 && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300">
                         <Users size={12} className="shrink-0" /> {client.subClients.length} Sub-Clients
                       </span>
                     )}
                     {client.paymentBasis === 'monthly_retainer' && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300">
                         📅 Monthly Basis
                       </span>
                     )}

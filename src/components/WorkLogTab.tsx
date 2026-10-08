@@ -645,7 +645,7 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
                       <td className="py-4 px-4 text-sm font-medium text-slate-900 dark:text-slate-100">
                         <div>{client?.name || 'Unknown Client'}</div>
                         {work.subClientName && (
-                          <div className="inline-flex items-center gap-1 text-[11px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60 px-2 py-0.5 rounded mt-0.5">
+                          <div className="inline-flex items-center gap-1 text-[11px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 px-2 py-0.5 rounded mt-0.5">
                             <Users size={10} /> Sub: {work.subClientName}
                           </div>
                         )}
@@ -667,7 +667,7 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
                                   clientName: client?.name
                                 });
                               }}
-                              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 hover:text-indigo-900 dark:hover:text-indigo-200 border border-indigo-200 dark:border-indigo-800/60 transition-all shrink-0 cursor-pointer w-fit"
+                              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 hover:text-indigo-900 dark:hover:text-indigo-200 transition-all shrink-0 cursor-pointer w-fit"
                               title={`Watch embedded preview: ${videoUrl}`}
                             >
                               <Play size={11} className="fill-indigo-700 dark:fill-indigo-300" /> Watch Preview
@@ -677,7 +677,7 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
                       </td>
                       <td className="py-4 px-4 text-sm font-medium text-slate-900 dark:text-slate-100">
                         {client?.paymentBasis === 'monthly_retainer' ? (
-                          <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300">
                             📅 Monthly Retainer
                           </span>
                         ) : (
@@ -686,11 +686,11 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
                       </td>
                       <td className="py-4 px-4 text-sm">
                         {work.status === 'Invoiced' ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-950/50 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-800/60">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-950/50 text-green-800 dark:text-green-300">
                             <CheckCircle size={12} /> Invoiced
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300">
                             <Clock size={12} /> Pending
                           </span>
                         )}
