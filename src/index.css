@@ -5,6 +5,7 @@
 @layer base {
   :root {
     color-scheme: light dark;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   }
 
   html.dark {
@@ -16,10 +17,12 @@
     overflow-x: hidden;
     /* Use small viewport height on mobile to account for browser chrome */
     min-height: 100svh;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   }
 
   body {
     @apply bg-slate-50 text-slate-900 transition-colors duration-150;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -27,6 +30,11 @@
 
   html.dark body {
     @apply bg-slate-950 text-slate-100;
+  }
+
+  :focus-visible {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
   }
 }
 

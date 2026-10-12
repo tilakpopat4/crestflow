@@ -51,7 +51,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout, profi
               onClick={() => setActiveTab(item.id)}
               whileTap={shouldReduceMotion ? undefined : { scale: 0.96 }}
               className={clsx(
-                "relative flex flex-col md:flex-row items-center md:space-x-3 px-1 min-[380px]:px-1.5 md:px-3 py-1 min-[380px]:py-1.5 md:py-2 rounded-lg text-[9px] min-[380px]:text-[10px] md:text-sm font-medium flex-1 md:flex-initial md:w-full md:max-w-none flex-shrink md:flex-shrink-0 min-w-0 transition-colors duration-150 outline-none select-none cursor-pointer",
+                "relative flex flex-col md:flex-row items-center md:space-x-3 px-1 min-[380px]:px-1.5 md:px-3 py-1.5 min-[380px]:py-2 md:py-2.5 rounded-xl text-[9px] min-[380px]:text-[10px] md:text-sm font-medium flex-1 md:flex-initial md:w-full md:max-w-none flex-shrink md:flex-shrink-0 min-w-0 min-h-[44px] justify-center md:justify-start transition-colors duration-150 outline-none select-none cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900",
                 isActive
                   ? "text-white"
                   : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
@@ -60,7 +60,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout, profi
               {isActive && (
                 <motion.div
                   layoutId="sidebarActiveTabIndicator"
-                  className="absolute inset-0 bg-indigo-600 rounded-lg shadow-sm -z-0"
+                  className="absolute inset-0 bg-indigo-600 rounded-xl shadow-sm -z-0"
                   transition={
                     shouldReduceMotion
                       ? { duration: 0 }

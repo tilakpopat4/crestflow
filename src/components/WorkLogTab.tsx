@@ -595,7 +595,7 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
           <p className="text-slate-500 dark:text-slate-400">Start logging your edits and services to easily generate invoices later.</p>
         </div>
       ) : (
-        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm contain-paint">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>

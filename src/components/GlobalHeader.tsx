@@ -180,8 +180,9 @@ export default function GlobalHeader({
                     setGlobalQuery('');
                     setIsOpen(false);
                   }}
-                  className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                  className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                   title="Clear search"
+                  aria-label="Clear search"
                 >
                   <X size={14} />
                 </button>
