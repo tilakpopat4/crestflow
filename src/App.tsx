@@ -13,7 +13,7 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import { useFirestore, safeStringify } from './hooks/useFirestore';
 import { UserProfile } from './types';
 import Logo from './components/Logo';
-import { ShieldAlert, LogOut } from 'lucide-react';
+import { ShieldAlert, LogOut, Film, Calendar, FileText } from 'lucide-react';
 import { setGmailAccessToken } from './lib/gmailService';
 import { setDriveAccessToken } from './lib/driveService';
 import { calculateWorkJourney, isAnniversaryDismissed, dismissAnniversary } from './lib/anniversary';
@@ -395,73 +395,166 @@ export default function App() {
 
   if (!user) {
     return (
-      <div className="min-h-screen w-full bg-slate-50 dark:bg-slate-950 flex flex-col justify-between font-sans">
-        <div className="flex-1 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 p-8 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 text-center max-w-md w-full">
-            <div className="flex items-center justify-center gap-2.5 mb-4">
-              <Logo className="w-10 h-10 shadow-xs" />
-              <span className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">CrestFlow</span>
+      <div className="min-h-screen w-full bg-slate-50 dark:bg-slate-950 flex flex-col justify-between font-sans relative overflow-x-hidden selection:bg-indigo-500 selection:text-white">
+        {/* Safe Zone & Framing Overlay for Creators */}
+        <div className="absolute inset-4 md:inset-8 border border-slate-200/60 dark:border-slate-800/60 pointer-events-none z-0 hidden sm:flex flex-col justify-between p-3 select-none">
+          <div className="flex justify-between items-center text-[10px] font-mono text-slate-400 dark:text-slate-600 uppercase tracking-widest">
+            <span className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-600 inline-block"></span>
+              REC • 24.00 FPS
+            </span>
+            <span>TC 01:00:00:00</span>
+            <span>4K DCI • REC.709</span>
+          </div>
+          <div className="flex justify-between text-[10px] font-mono text-slate-400 dark:text-slate-600 uppercase tracking-widest">
+            <span>ASPECT 16:9</span>
+            <span>SAFE AREA 90%</span>
+          </div>
+          {/* Corner Framing Brackets */}
+          <div className="absolute top-0 left-0 w-3.5 h-3.5 border-t-2 border-l-2 border-slate-300 dark:border-slate-700"></div>
+          <div className="absolute top-0 right-0 w-3.5 h-3.5 border-t-2 border-r-2 border-slate-300 dark:border-slate-700"></div>
+          <div className="absolute bottom-0 left-0 w-3.5 h-3.5 border-b-2 border-l-2 border-slate-300 dark:border-slate-700"></div>
+          <div className="absolute bottom-0 right-0 w-3.5 h-3.5 border-b-2 border-r-2 border-slate-300 dark:border-slate-700"></div>
+        </div>
+
+        {/* Content Area */}
+        <div className="flex-1 flex items-center justify-center p-4 md:p-8 lg:p-12 relative z-10 max-w-6xl mx-auto w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center w-full">
+            {/* Left Column: Context for Creators */}
+            <div className="lg:col-span-7 space-y-6">
+              <div>
+                <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-mono uppercase tracking-wider mb-3">
+                  <Film size={12} className="text-indigo-600 dark:text-indigo-400" />
+                  Built for Video Editors & Creators
+                </div>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100 leading-tight">
+                  Manage your clients, deliverables, and invoices in one calm workspace.
+                </h1>
+                <p className="mt-3 text-sm md:text-base text-slate-600 dark:text-slate-400 leading-relaxed max-w-xl">
+                  CrestFlow replaces messy spreadsheets and WhatsApp threads with a purpose-built system for creative freelancers.
+                </p>
+              </div>
+
+              {/* Feature Highlights */}
+              <div className="space-y-4 pt-1">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 shrink-0 mt-0.5">
+                    <Film size={16} />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      Deliverable & Revision Tracking
+                    </h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                      Log edits, reel cuts, Google Drive preview links, and client approval states with zero friction.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 shrink-0 mt-0.5">
+                    <Calendar size={16} />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      Retainer & Recurring Cycles
+                    </h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                      Keep client monthly retainers organized with automatic 30-day payment cycle tracking and timely reminders.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 shrink-0 mt-0.5">
+                    <FileText size={16} />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      Automated Invoicing & Gmail Delivery
+                    </h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                      Turn logged work into clean, professional PDF invoices and send them directly via your connected Gmail.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Workflow Tags */}
+              <div className="pt-2 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                <span className="font-mono text-[11px] uppercase tracking-wider text-slate-400 dark:text-slate-500">Workflow:</span>
+                {['Premiere Pro', 'DaVinci Resolve', 'After Effects', 'Final Cut Pro'].map((app) => (
+                  <span
+                    key={app}
+                    className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 text-[11px] font-medium"
+                  >
+                    {app}
+                  </span>
+                ))}
+              </div>
             </div>
 
-            {!isAdminRoute && (
-              <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl mb-6">
-                <button
-                  type="button"
-                  onClick={() => setIsClientPortalMode(false)}
-                  className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                    !isClientPortalMode ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                  }`}
-                >
-                  Freelancer Login
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsClientPortalMode(true)}
-                  className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                    isClientPortalMode ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                  }`}
-                >
-                  Client Portal
-                </button>
-              </div>
-            )}
+            {/* Right Column: Sign In Card */}
+            <div className="lg:col-span-5 w-full max-w-md mx-auto">
+              <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 text-center">
+                <div className="flex items-center justify-center gap-2.5 mb-5">
+                  <Logo className="w-10 h-10 shadow-xs" />
+                  <span className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">CrestFlow</span>
+                </div>
 
-            <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-1">
-              {isAdminRoute ? 'Admin Portal' : (isClientPortalMode ? 'Client Portal Sign In' : 'Welcome Back')}
-            </h1>
-            <p className="text-slate-500 dark:text-slate-400 mb-6 text-sm">
-              {isAdminRoute 
-                ? 'Please sign in with Google to authenticate and load the Admin database console.' 
-                : (isClientPortalMode 
-                    ? 'Sign in with your Google account to view your project work logs, invoices, and payment status.'
-                    : 'Sign in to access your CrestFlow Freelancing Dashboard and cloud sync.')}
-            </p>
-            <button 
-              onClick={handleLogin}
-              disabled={isSigningIn}
-              className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white py-2.5 rounded-xl font-medium transition-colors cursor-pointer disabled:cursor-not-allowed shadow-sm"
-            >
-              {isSigningIn ? (
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-              ) : (
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
-                </svg>
-              )}
-              {isSigningIn 
-                ? 'Signing In...' 
-                : (isAdminRoute ? 'Admin Sign In' : (isClientPortalMode ? 'Sign in to Client Portal' : 'Sign in with Google'))}
-            </button>
-            {isAdminRoute && (
-              <button
-                onClick={() => { window.location.href = '/' }}
-                className="mt-4 text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium transition-colors border-none bg-transparent cursor-pointer"
-              >
-                Back to Main Website
-              </button>
-            )}
+                <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-1">
+                  {isAdminRoute ? 'Admin Portal' : 'Creator Sign In'}
+                </h2>
+                <p className="text-slate-500 dark:text-slate-400 mb-6 text-xs sm:text-sm leading-relaxed">
+                  {isAdminRoute 
+                    ? 'Please sign in with Google to authenticate and load the Admin database console.' 
+                    : 'Sign in with your Google account to access your freelancing workspace, clients, and active deliverables.'}
+                </p>
+
+                <button 
+                  onClick={handleLogin}
+                  disabled={isSigningIn}
+                  className="w-full flex items-center justify-center gap-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white py-2.5 px-4 rounded-lg font-medium text-sm transition-colors cursor-pointer disabled:cursor-not-allowed shadow-sm border-none"
+                >
+                  {isSigningIn ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  ) : (
+                    <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                      <path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
+                    </svg>
+                  )}
+                  <span>{isSigningIn ? 'Signing In...' : (isAdminRoute ? 'Admin Sign In' : 'Sign in with Google')}</span>
+                </button>
+
+                {isAdminRoute && (
+                  <button
+                    onClick={() => { window.location.href = '/' }}
+                    className="mt-4 text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium transition-colors border-none bg-transparent cursor-pointer"
+                  >
+                    Back to Main Website
+                  </button>
+                )}
+
+                <div className="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800 text-center">
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500">
+                    Need assistance?{' '}
+                    <a
+                      href="/contact"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleSupportingNavigate('contact');
+                      }}
+                      className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 underline"
+                    >
+                      Contact support
+                    </a>
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+
         <Footer variant="minimal" onNavigate={handleSupportingNavigate} />
       </div>
     );
