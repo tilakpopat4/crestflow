@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, FileText, LogOut, ClipboardList, Settings, ShieldCheck, MessageSquare, Sun, Moon } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, LogOut, ClipboardList, ShieldCheck, MessageSquare, Sun, Moon } from 'lucide-react';
 import { clsx } from 'clsx';
 import { motion, useReducedMotion } from 'motion/react';
 import { Tab } from '../App';
@@ -78,7 +78,12 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout, profi
       </div>
 
       <div className="hidden md:flex p-4 border-t border-slate-800 items-center justify-between gap-2">
-        <div className="flex items-center space-x-3 overflow-hidden flex-1 min-w-0">
+        <button
+          type="button"
+          onClick={onEditProfile}
+          className="flex items-center space-x-3 overflow-hidden flex-1 min-w-0 p-1 -m-1 rounded-lg hover:bg-slate-800/60 transition-colors text-left cursor-pointer border-none bg-transparent outline-none focus-visible:ring-1 focus-visible:ring-slate-400 group"
+          title="Open Profile Settings"
+        >
           {user?.photoURL ? (
             <img src={user.photoURL} alt="Profile" className="w-8 h-8 rounded-full shrink-0" />
           ) : (
@@ -87,28 +92,14 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout, profi
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-white truncate">{profile?.name || user?.displayName || 'User Account'}</p>
-            <div className="flex items-center gap-2 mt-0.5">
-              {onEditProfile && (
-                <button
-                  onClick={onEditProfile}
-                  className="text-[10px] text-slate-400 hover:text-indigo-400 flex items-center gap-1 transition-colors outline-none cursor-pointer"
-                >
-                  <Settings size={10} />
-                  Profile
-                </button>
-              )}
-              {onSwitchToClient && (
-                <button
-                  onClick={onSwitchToClient}
-                  className="text-[10px] text-indigo-400 hover:text-indigo-300 transition-colors outline-none cursor-pointer"
-                >
-                  • Client View
-                </button>
-              )}
-            </div>
+            <p className="text-sm font-medium text-white truncate group-hover:text-slate-200 transition-colors">
+              {profile?.name || user?.displayName || 'User Account'}
+            </p>
+            <p className="text-xs text-slate-400 truncate mt-0.5">
+              {profile?.professionalTitle || user?.email || 'View Profile'}
+            </p>
           </div>
-        </div>
+        </button>
 
         <div className="flex items-center gap-1 shrink-0">
           <button
