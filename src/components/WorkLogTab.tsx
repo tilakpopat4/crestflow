@@ -340,7 +340,7 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
           <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Work Log</h2>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">Log completed edits and services before generating invoices.</p>
+          <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">Track deliverables and services.</p>
         </div>
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           {/* Work Log Filter Search Bar */}

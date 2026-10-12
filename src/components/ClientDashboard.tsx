@@ -340,19 +340,19 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 text-slate-900 dark:text-slate-100">
       {/* Top Action Bar with Back button and Quick Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <button
           onClick={onBack}
-          className="inline-flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3.5 py-2 rounded-lg text-xs font-semibold shadow-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-700 w-fit cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition-all hover:bg-slate-50 dark:hover:bg-slate-700 w-fit cursor-pointer"
         >
-          <ArrowLeft size={16} />
-          Back to Client Directory
+          <ArrowLeft size={14} />
+          Back
         </button>
 
         <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={handleCopyReviewLink}
-            className={`flex items-center gap-1.5 px-3.5 py-2 border rounded-lg text-xs font-semibold transition-all shadow-sm cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-xs font-semibold transition-all shadow-2xs cursor-pointer ${
               copiedReviewLink 
                 ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300' 
                 : 'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-200 dark:border-indigo-900/60 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100/50 dark:hover:bg-indigo-900/50'
@@ -361,35 +361,35 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
           >
             {copiedReviewLink ? (
               <>
-                <CheckCircle2 size={14} className="text-emerald-600 dark:text-emerald-400" /> Link Copied!
+                <CheckCircle2 size={13} className="text-emerald-600 dark:text-emerald-400" /> Link Copied!
               </>
             ) : (
               <>
-                <MessageSquare size={14} /> Request Review
+                <MessageSquare size={13} /> Request Review
               </>
             )}
           </button>
 
           <button
             onClick={() => setIsSubClientsModalOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-purple-50 dark:bg-purple-950/60 hover:bg-purple-100 dark:hover:bg-purple-900/50 border border-purple-200 dark:border-purple-800/60 text-purple-700 dark:text-purple-300 rounded-lg text-xs font-semibold transition-all shadow-sm cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 dark:bg-purple-950/60 hover:bg-purple-100 dark:hover:bg-purple-900/50 border border-purple-200 dark:border-purple-800/60 text-purple-700 dark:text-purple-300 rounded-lg text-xs font-semibold transition-all shadow-2xs cursor-pointer"
             title="Add or edit sub-clients for this client"
           >
-            <Users size={14} /> Sub-Clients {client.subClients && client.subClients.length > 0 ? `(${client.subClients.length})` : ''}
+            <Users size={13} /> Sub-Clients {client.subClients && client.subClients.length > 0 ? `(${client.subClients.length})` : ''}
           </button>
 
           <button
             onClick={() => onEditClient(client)}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-all shadow-sm cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-all shadow-2xs cursor-pointer"
           >
-            <Edit3 size={14} /> Edit Client Info
+            <Edit3 size={13} /> Edit Client
           </button>
           
           <button
             onClick={openPaymentModal}
-            className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-all shadow-sm cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-all shadow-2xs cursor-pointer"
           >
-            <Calendar size={14} /> Update Payment Date
+            <Calendar size={13} /> Record Payment
           </button>
         </div>
       </div>
@@ -468,24 +468,22 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            {/* 6:00 AM Auto-Invoice Schedule Button */}
+          <div className="flex flex-wrap items-center gap-2">
             {!client.isClosed && (
               <button
                 onClick={() => setIsScheduleModalOpen(true)}
-                className={`flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${
                   client.autoInvoiceEnabled
-                    ? 'bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-950/60 dark:to-violet-950/60 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 hover:from-indigo-100 hover:to-violet-100'
-                    : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
+                    ? 'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300'
+                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
                 }`}
                 title="Configure automatic morning 6:00 AM invoice generation schedule"
               >
-                <Clock size={14} className={client.autoInvoiceEnabled ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'} />
-                <span>{client.autoInvoiceEnabled ? 'Auto 6 AM: Active' : 'Schedule Auto-Invoice'}</span>
+                <Clock size={13} className={client.autoInvoiceEnabled ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'} />
+                <span>{client.autoInvoiceEnabled ? 'Auto 6 AM Active' : 'Auto-Invoice'}</span>
               </button>
             )}
 
-            {/* Quick Email Reminders Toggle */}
             <button
               onClick={async () => {
                 try {
@@ -495,34 +493,32 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                   console.error(err);
                 }
               }}
-              className={`flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${
                 client.emailRemindersEnabled !== false 
-                  ? 'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-200 dark:border-indigo-900/60 text-indigo-800 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/80' 
-                  : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
+                  ? 'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-200 dark:border-indigo-900/60 text-indigo-800 dark:text-indigo-300' 
+                  : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
               }`}
               title="Toggle email reminders for overdue payments"
             >
-              <div className="flex items-center gap-1.5">
-                <Mail size={14} className={client.emailRemindersEnabled !== false ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'} />
-                <span>Email Reminders: {client.emailRemindersEnabled !== false ? 'ON' : 'OFF'}</span>
-              </div>
+              <Mail size={13} className={client.emailRemindersEnabled !== false ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'} />
+              <span>Email: {client.emailRemindersEnabled !== false ? 'ON' : 'OFF'}</span>
             </button>
 
             <button
               onClick={() => exportClientCSV(client, clientWorkItems, clientInvoices)}
-              className="flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer"
-              title="Export Client Work History & Invoice Summary as CSV file"
+              className="flex items-center gap-1.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-2xs cursor-pointer"
+              title="Export client history as CSV"
             >
-              <Download size={14} className="text-emerald-600 dark:text-emerald-400" /> Export CSV Report
+              <Download size={13} className="text-slate-500" /> Export CSV
             </button>
 
             <a
               href={generateWhatsAppReminder(client, statusInfo)}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-sm"
+              className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-2xs"
             >
-              <Send size={14} /> Send WhatsApp Reminder
+              <Send size={13} /> WhatsApp
             </a>
           </div>
         </div>
@@ -748,24 +744,21 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
             {activeTab === 'work' && (
           <div className="p-6 space-y-6">
             <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Work Logs for {client.name}</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Track all completed video edits and services specifically for this client.</p>
-              </div>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Work Logs</h3>
 
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsDriveModalOpen(true)}
-                  className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition-all shadow-sm cursor-pointer"
+                  className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
                   title="Directly upload video to Google Drive with embeddable link"
                 >
-                  <UploadCloud size={14} /> Upload to Drive
+                  <UploadCloud size={13} /> Upload Drive
                 </button>
                 <button
                   onClick={() => setIsWorkFormOpen(true)}
-                  className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition-all shadow-sm cursor-pointer"
+                  className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-2xs cursor-pointer"
                 >
-                  <Plus size={14} /> Log Work for {client.name.split(' ')[0]}
+                  <Plus size={13} /> Log Work
                 </button>
               </div>
             </div>
@@ -1080,10 +1073,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
         {activeTab === 'invoices' && (
           <div className="p-6 space-y-6">
             <div className="flex justify-between items-center flex-wrap gap-3">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Invoices for {client.name}</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">History of generated PDF invoices and payment statuses.</p>
-              </div>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Invoices</h3>
               {!client.isClosed && (
                 <button
                   onClick={() => setIsScheduleModalOpen(true)}
@@ -1205,10 +1195,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
         {activeTab === 'settings' && (
           <div className="p-6 space-y-6">
             <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Rates & Contact Info</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Configured pricing rates for video services for this client.</p>
-              </div>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Rates & Pricing</h3>
 
               <button
                 onClick={() => onEditClient(client)}

@@ -3,7 +3,7 @@ import { Invoice, WorkItem, Client } from '../types';
 import { 
   BarChart, Bar, LineChart, Line, Legend, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell 
 } from 'recharts';
-import { IndianRupee, Clock, TrendingUp, CheckCircle2, DownloadCloud, UploadCloud, AlertTriangle, Send, Users, ArrowRight, Mail, Bell, Copy, Smartphone, X, PartyPopper, Sparkles, Flame, Trophy } from 'lucide-react';
+import { IndianRupee, Clock, TrendingUp, CheckCircle2, DownloadCloud, UploadCloud, AlertTriangle, Send, Users, ArrowRight, Mail, Bell, Copy, Smartphone, X, PartyPopper, Sparkles, Flame, Trophy, StickyNote as StickyNoteIcon } from 'lucide-react';
 import { User } from 'firebase/auth';
 import { useFirestore, safeStringify } from '../hooks/useFirestore';
 import { 
@@ -44,6 +44,7 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
   });
   const [isNotificationDismissed, setIsNotificationDismissed] = useState(false);
   const [isAnnivBannerDismissed, setIsAnnivBannerDismissed] = useState(false);
+  const [activeWorkspaceTool, setActiveWorkspaceTool] = useState<'none' | 'notes' | 'ai'>('none');
   const journey = calculateWorkJourney(profile?.freelanceStartDate);
   const [paymentModalState, setPaymentModalState] = useState<{ invoiceId: string | null, isOpen: boolean }>({ invoiceId: null, isOpen: false });
 
@@ -364,33 +365,33 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 md:space-y-8">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Dashboard</h2>
-          <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm md:text-base">Overview of your monthly earnings, client payment cycles & due reminders.</p>
+          <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">Financial overview & payment cycles.</p>
         </div>
         
-        <div className="flex flex-wrap items-center gap-3">
-          {(localStorage.getItem('clients') || localStorage.getItem('monthlyWork')) ? (
+        <div className="flex items-center gap-2">
+          {localStorage.getItem('clients') || localStorage.getItem('monthlyWork') ? (
             <button 
               onClick={migrateLocalData}
-              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-sm font-medium transition-colors shadow-sm"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition-colors shadow-2xs"
             >
-              <UploadCloud size={16} /> Migrate Local Data
+              <UploadCloud size={14} /> Migrate Data
             </button>
           ) : null}
           <button 
             onClick={handleExport}
-            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded text-sm font-medium transition-colors shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
           >
-            <DownloadCloud size={16} /> Export Sync
+            <DownloadCloud size={14} /> Export
           </button>
           
           <button 
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded text-sm font-medium transition-colors shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
           >
-            <UploadCloud size={16} /> Import Sync
+            <UploadCloud size={14} /> Import
           </button>
           <input 
             type="file" 
@@ -414,14 +415,12 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
           </div>
           <button
             onClick={() => setToastAlert(null)}
-            className="text-slate-400 hover:text-white p-1 rounded-lg transition-colors"
+            className="text-slate-400 hover:text-white p-1 rounded-lg transition-colors cursor-pointer"
           >
             ✕
           </button>
         </div>
       )}
-
-
 
       {/* Career Anniversary Milestone Banner if currently active */}
       {journey?.currentAnniversary && !isAnnivBannerDismissed && (
@@ -455,49 +454,48 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
       )}
 
       {!isNotificationDismissed && activeNotifications.length > 0 && (
-        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-2xl p-6 shadow-sm space-y-4 relative">
+        <div className="bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-800/40 rounded-xl p-4 sm:p-5 shadow-xs space-y-3 relative">
           <button
             onClick={() => setIsNotificationDismissed(true)}
-            className="absolute top-4 right-4 text-amber-700 dark:text-amber-400 hover:text-amber-950 dark:hover:text-amber-200 hover:bg-amber-200/60 dark:hover:bg-amber-800/40 p-1.5 rounded-lg transition-colors cursor-pointer"
+            className="absolute top-3.5 right-3.5 text-amber-700 dark:text-amber-400 hover:text-amber-950 dark:hover:text-amber-200 p-1 rounded-md transition-colors cursor-pointer"
             title="Dismiss notification"
             aria-label="Close notification"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pr-8">
-            <div className="flex items-center gap-2.5 text-amber-900 dark:text-amber-300 font-bold text-base">
-              <AlertTriangle className="text-amber-600 dark:text-amber-400 animate-bounce" size={20} />
-              <span>Payment Cycle Reminders ({activeNotifications.length} Client(s) Need Follow-up)</span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pr-8">
+            <div className="flex items-center gap-2 text-amber-900 dark:text-amber-300 font-bold text-sm">
+              <AlertTriangle className="text-amber-600 dark:text-amber-400 shrink-0" size={16} />
+              <span>Payment Reminders ({activeNotifications.length})</span>
             </div>
             
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-2">
               {!isFcmRegistered ? (
                 <button
                   onClick={handleRegisterFcmDevice}
                   disabled={isFcmRegistering}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg transition-colors shadow-xs disabled:opacity-50 cursor-pointer"
-                  title="Register this device for Firebase Cloud Messaging (FCM) push notifications"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg transition-colors shadow-2xs disabled:opacity-50 cursor-pointer"
                 >
-                  <Smartphone size={13} /> {isFcmRegistering ? 'Registering...' : 'Register FCM Device'}
+                  <Smartphone size={12} /> {isFcmRegistering ? 'Registering...' : 'Enable Push'}
                 </button>
               ) : (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-100 text-emerald-800 text-xs font-medium rounded-md border border-emerald-200">
-                  <Bell size={12} className="text-emerald-600" /> Auto 6:00 PM Push Active
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-[11px] font-medium rounded">
+                  <Bell size={11} className="text-emerald-600" /> Push Active
                 </span>
               )}
 
               {onNavigateToClients && (
                 <button 
                   onClick={onNavigateToClients}
-                  className="text-xs font-bold text-amber-800 hover:underline flex items-center gap-1 cursor-pointer"
+                  className="text-xs font-semibold text-amber-800 dark:text-amber-300 hover:underline flex items-center gap-1 cursor-pointer"
                 >
-                  View Directory <ArrowRight size={12} />
+                  Directory <ArrowRight size={11} />
                 </button>
               )}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="divide-y divide-amber-200/50 dark:divide-amber-800/30">
             {activeNotifications.map(({ client, statusInfo, financials }) => {
               const emailData = generateEmailReminder(client, statusInfo);
               const isEmailEnabled = client.emailRemindersEnabled !== false;
@@ -505,78 +503,63 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
               return (
                 <div 
                   key={client.id}
-                  className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-amber-200 dark:border-amber-700/40 flex flex-col justify-between gap-3 shadow-xs"
+                  className="py-3 first:pt-1 last:pb-0 flex flex-col md:flex-row md:items-center justify-between gap-3"
                 >
-                  <div>
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-bold text-slate-900 dark:text-slate-100 text-sm">{client.name}</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate">{client.name}</span>
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${statusInfo.badgeClass}`}>
                         {statusInfo.label}
                       </span>
                     </div>
 
-                    <div className="text-xs text-slate-500 dark:text-slate-400 mt-2 space-y-0.5">
-                      <div>Due Date: <span className="font-semibold text-slate-800 dark:text-slate-200">{new Date(statusInfo.nextDueDate).toLocaleDateString('en-IN')}</span></div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-3 flex-wrap">
+                      <span>Due: <strong className="text-slate-700 dark:text-slate-300">{new Date(statusInfo.nextDueDate).toLocaleDateString('en-IN')}</strong></span>
                       {financials.totalPendingAmount > 0 && (
-                        <div>Pending Balance: <span className="font-bold text-rose-600">₹{financials.totalPendingAmount.toLocaleString('en-IN')}</span></div>
+                        <span>Pending: <strong className="text-rose-600 dark:text-rose-400">₹{financials.totalPendingAmount.toLocaleString('en-IN')}</strong></span>
                       )}
-                      <div className="pt-1 flex items-center gap-1.5 text-[11px]">
-                        <span className={`w-2 h-2 rounded-full ${isEmailEnabled ? 'bg-indigo-500' : 'bg-slate-300'}`}></span>
-                        <span className="text-slate-600">Email Reminders: <strong className={isEmailEnabled ? 'text-indigo-700' : 'text-slate-500'}>{isEmailEnabled ? 'Enabled' : 'Disabled'}</strong></span>
-                      </div>
                     </div>
                   </div>
 
-                  <div className="pt-2 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between gap-1 flex-wrap">
-                    <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <a
+                      href={generateWhatsAppReminder(client, statusInfo)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition-colors"
+                      title="Send WhatsApp Reminder"
+                    >
+                      <Send size={12} /> WhatsApp
+                    </a>
+
+                    {isEmailEnabled && (
                       <a
-                        href={generateWhatsAppReminder(client, statusInfo)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition-colors"
-                        title="Send WhatsApp Reminder"
+                        href={emailData.mailtoLink}
+                        className="p-1.5 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 rounded-lg text-xs transition-colors"
+                        title="Draft Email Reminder"
                       >
-                        <Send size={13} />
+                        <Mail size={13} />
                       </a>
-
-                      {isEmailEnabled && (
-                        <a
-                          href={emailData.mailtoLink}
-                          className="p-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors"
-                          title="Draft Email Reminder"
-                        >
-                          <Mail size={13} />
-                        </a>
-                      )}
-
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(`Subject: ${emailData.subject}\n\n${emailData.body}`);
-                          alert(`Email reminder template for ${client.name} copied to clipboard!`);
-                        }}
-                        className="p-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-colors"
-                        title="Copy Email Text to Clipboard"
-                      >
-                        <Copy size={13} />
-                      </button>
-
-                      <button
-                        onClick={() => triggerBrowserOverdueAlert(client.name, statusInfo.label, statusInfo.notificationMessage, user?.uid)}
-                        className="p-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
-                        title="Trigger FCM Device Notification"
-                      >
-                        <Bell size={13} />
-                      </button>
-                    </div>
-
-                    {onNavigateToClients && (
-                      <button
-                        onClick={onNavigateToClients}
-                        className="text-[11px] font-semibold text-indigo-600 hover:underline"
-                      >
-                        Open Profile
-                      </button>
                     )}
+
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(`Subject: ${emailData.subject}\n\n${emailData.body}`);
+                        alert(`Email reminder template for ${client.name} copied!`);
+                      }}
+                      className="p-1.5 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-amber-100/50 dark:hover:bg-amber-900/30 rounded-lg text-xs transition-colors cursor-pointer"
+                      title="Copy Email Text"
+                    >
+                      <Copy size={13} />
+                    </button>
+
+                    <button
+                      onClick={() => triggerBrowserOverdueAlert(client.name, statusInfo.label, statusInfo.notificationMessage, user?.uid)}
+                      className="p-1.5 text-amber-600 dark:text-amber-400 hover:bg-amber-100/50 dark:hover:bg-amber-900/30 rounded-lg text-xs transition-colors cursor-pointer"
+                      title="Trigger Device Notification"
+                    >
+                      <Bell size={13} />
+                    </button>
                   </div>
                 </div>
               );
@@ -827,11 +810,51 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
           </div>
         </div>
 
-      {/* Sticky Notes Widget */}
-      <StickyNotesWidget user={user} clients={clients} />
+      {/* Workspace Utilities: Progressive Disclosure */}
+      <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div>
+            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Workspace Tools</h3>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Quick access to scratchpad notes and Gemini AI summaries</p>
+          </div>
+          <div className="inline-flex p-0.5 bg-slate-100 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
+            <button
+              type="button"
+              onClick={() => setActiveWorkspaceTool(prev => prev === 'notes' ? 'none' : 'notes')}
+              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeWorkspaceTool === 'notes'
+                  ? 'bg-white dark:bg-slate-800 text-amber-700 dark:text-amber-400 shadow-2xs'
+                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
+              }`}
+            >
+              <StickyNoteIcon size={13} /> Notes {activeWorkspaceTool === 'notes' ? '(Active)' : ''}
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveWorkspaceTool(prev => prev === 'ai' ? 'none' : 'ai')}
+              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeWorkspaceTool === 'ai'
+                  ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-2xs'
+                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
+              }`}
+            >
+              <Sparkles size={13} /> AI Summarizer {activeWorkspaceTool === 'ai' ? '(Active)' : ''}
+            </button>
+          </div>
+        </div>
 
-      {/* AI Summarizer Widget */}
-      <AISummarizer clients={clients} workItems={workItems} profile={profile} />
+        {activeWorkspaceTool === 'notes' && (
+          <div className="animate-in fade-in duration-200">
+            <StickyNotesWidget user={user} clients={clients} />
+          </div>
+        )}
+
+        {activeWorkspaceTool === 'ai' && (
+          <div className="animate-in fade-in duration-200">
+            <AISummarizer clients={clients} workItems={workItems} profile={profile} />
+          </div>
+        )}
+      </div>
 
       {(() => {
         const modalInv = invoices.find(i => i.id === paymentModalState.invoiceId);

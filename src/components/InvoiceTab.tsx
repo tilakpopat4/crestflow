@@ -1889,7 +1889,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
       <div className="mb-6 md:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Invoice Generator</h2>
-          <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">Create, export, and auto-schedule 6:00 AM invoices for your clients.</p>
+          <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">Create and export client invoices.</p>
         </div>
         <div className="flex items-center gap-2.5">
           <button
@@ -1914,7 +1914,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
         <div className="xl:col-span-5 space-y-6">
           <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-2">
                 <Receipt size={18} className="text-indigo-500" />
                 Invoice Details
               </h3>
@@ -1986,7 +1986,6 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                     />
                   </div>
                 </div>
-                <p className="text-xs text-slate-400">Automatically loads uninvoiced work within this custom date span.</p>
               </div>
             </div>
           </div>
@@ -1999,10 +1998,10 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                   <span className="w-2.5 h-2.5 rounded-full bg-purple-600 animate-pulse shrink-0"></span>
                   <div>
                     <span className="text-xs font-bold text-purple-900 dark:text-purple-300 block">
-                      Monthly Basis Client (Fixed Retainer)
+                      Monthly Retainer Client
                     </span>
                     <span className="text-[11px] text-purple-700/80 dark:text-purple-400">
-                      Single flat retainer fee per billing cycle. Per-reel calculation is disabled.
+                      Single flat retainer fee per billing cycle.
                     </span>
                   </div>
                 </div>
@@ -2023,10 +2022,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
                 >
-                  <span>🎬 Per Reel / Deliverables</span>
-                  <span className="text-[10px] font-normal px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
-                    Calculated
-                  </span>
+                  <span>🎬 Per Reel / Item</span>
                 </button>
                 <button
                   type="button"
@@ -2042,10 +2038,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
                 >
-                  <span>📅 Monthly Basis (Fixed Retainer)</span>
-                  <span className="text-[10px] font-normal px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300">
-                    Flat Amount
-                  </span>
+                  <span>📅 Monthly Retainer</span>
                 </button>
               </div>
             )}
@@ -2057,11 +2050,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                   <div>
                     <span className="inline-flex items-center gap-1.5 text-xs font-bold text-purple-900 dark:text-purple-300 uppercase tracking-wider">
                       <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
-                      Monthly Basis Payment Mode
+                      Monthly Retainer Mode
                     </span>
-                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-                      Bills a single flat retainer amount for the billing cycle. No individual per-reel calculation is required.
-                    </p>
                   </div>
                   {selectedClient?.monthlyRetainerAmount && (
                     <span className="text-xs font-semibold px-2 py-1 rounded bg-purple-100 dark:bg-purple-900/80 text-purple-700 dark:text-purple-300 shrink-0">
@@ -2148,18 +2138,9 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                     </div>
                   ) : (
                     <div className="p-3 text-center border border-dashed border-purple-200 dark:border-purple-800 rounded-lg text-xs text-slate-500 dark:text-slate-400">
-                      No uninvoiced work logs logged within this date range yet. Work logs added in this cycle will automatically show here without rates.
+                      No uninvoiced deliverables in this date span.
                     </div>
                   )}
-                </div>
-
-                <div className="p-3 bg-purple-100/60 dark:bg-purple-950/40 rounded-lg text-xs text-purple-900 dark:text-purple-200 flex items-center justify-between flex-wrap gap-2">
-                  <div className="flex items-center gap-2">
-                    <span>💡</span>
-                    <span>
-                      All pending work logs within the selected billing period will automatically be linked and marked as <strong>Invoiced</strong> when you download or record this invoice.
-                    </span>
-                  </div>
                 </div>
               </div>
             ) : (
@@ -2407,7 +2388,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                 ) : (
                   <>
                     <Download size={16} />
-                    Download PDF Invoice (With Prices)
+                    Download PDF Invoice
                   </>
                 )}
               </button>
@@ -2418,25 +2399,25 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                   onClick={() => handlePrintWorkSummary()}
                   disabled={!selectedClient || reels.length === 0}
                   className="flex justify-center items-center gap-1.5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 text-white px-3 py-2 rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer"
-                  title="Print clean work done list without financial digits (prices/rates/totals)"
+                  title="Print summary of work completed"
                 >
                   <Printer size={14} className="text-emerald-400" />
-                  Print Work List (No Digits)
+                  Print Summary
                 </button>
 
                 <button
                   type="button"
                   onClick={() => handleDownloadWorkSummaryPdf()}
                   disabled={isGeneratingSummary || !selectedClient || reels.length === 0}
-                  className="flex justify-center items-center gap-1.5 bg-slate-100 hover:bg-slate-200 disabled:bg-slate-100 text-slate-700 disabled:text-slate-400 px-3 py-2 rounded-xl text-xs font-semibold transition-all border border-slate-200 cursor-pointer"
-                  title="Download PDF statement of work done without financial digits"
+                  className="flex justify-center items-center gap-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 disabled:bg-slate-100 text-slate-700 dark:text-slate-200 disabled:text-slate-400 px-3 py-2 rounded-xl text-xs font-semibold transition-all border border-slate-200 dark:border-slate-600 cursor-pointer"
+                  title="Download work summary without financial details"
                 >
                   {isGeneratingSummary ? (
                     <Loader2 size={14} className="animate-spin text-indigo-600" />
                   ) : (
-                    <FileText size={14} className="text-slate-600" />
+                    <FileText size={14} className="text-slate-600 dark:text-slate-300" />
                   )}
-                  Work Summary PDF
+                  Summary PDF
                 </button>
               </div>
             </div>
@@ -2454,7 +2435,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
           {/* Preview Mode Switcher & Quick Print Header */}
           <div className="w-full max-w-[210mm] flex flex-wrap items-center justify-between gap-3 mb-6 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md p-3 rounded-xl border border-slate-300 dark:border-slate-700 shadow-sm z-10">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Preview Mode:</span>
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Preview:</span>
               <div className="inline-flex bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
                 <button
                   type="button"
@@ -2465,7 +2446,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
                 >
-                  <Receipt size={13} /> Full Invoice (With Prices)
+                  <Receipt size={13} /> Full Invoice
                 </button>
                 <button
                   type="button"
@@ -2476,7 +2457,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
                 >
-                  <ListChecks size={13} /> Work Done Only (No Digits)
+                  <ListChecks size={13} /> Deliverables Only
                 </button>
               </div>
             </div>
@@ -2490,9 +2471,9 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                 onClick={() => handlePrintWorkSummary()}
                 disabled={!selectedClient || reels.length === 0}
                 className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
-                title="Print Work Done Statement without financial digits"
+                title="Print Work Summary"
               >
-                <Printer size={13} className="text-emerald-400" /> Print Work Done
+                <Printer size={13} className="text-emerald-400" /> Print Summary
               </button>
             </div>
           </div>
