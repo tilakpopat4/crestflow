@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { Search, X, Users, ClipboardList, FileText, ExternalLink, Play, ArrowRight, CheckCircle2, Clock, Sun, Moon, Monitor, Flame, Sparkles, Trophy, Calendar, PartyPopper } from 'lucide-react';
 import { User } from 'firebase/auth';
 import { useFirestore } from '../hooks/useFirestore';
@@ -45,6 +46,7 @@ export default function GlobalHeader({
 
   const [isOpen, setIsOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<'all' | 'clients' | 'work' | 'invoices'>('all');
+  const shouldReduceMotion = useReducedMotion();
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -197,46 +199,44 @@ export default function GlobalHeader({
               {/* Category Filter Chips */}
               <div className="p-3 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs gap-2 shrink-0 overflow-x-auto">
                 <div className="flex items-center gap-1.5 font-medium">
-                  <button
-                    onClick={() => setActiveCategory('all')}
-                    className={`px-2.5 py-1 rounded-lg transition-colors ${
-                      activeCategory === 'all'
-                        ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold'
-                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-                    }`}
-                  >
-                    All ({totalResults})
-                  </button>
-                  <button
-                    onClick={() => setActiveCategory('clients')}
-                    className={`px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1 ${
-                      activeCategory === 'clients'
-                        ? 'bg-indigo-600 text-white font-semibold'
-                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-                    }`}
-                  >
-                    <Users size={12} /> Clients ({filteredClients.length})
-                  </button>
-                  <button
-                    onClick={() => setActiveCategory('work')}
-                    className={`px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1 ${
-                      activeCategory === 'work'
-                        ? 'bg-indigo-600 text-white font-semibold'
-                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-                    }`}
-                  >
-                    <ClipboardList size={12} /> Work Logs ({filteredWork.length})
-                  </button>
-                  <button
-                    onClick={() => setActiveCategory('invoices')}
-                    className={`px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1 ${
-                      activeCategory === 'invoices'
-                        ? 'bg-indigo-600 text-white font-semibold'
-                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-                    }`}
-                  >
-                    <FileText size={12} /> Invoices ({filteredInvoices.length})
-                  </button>
+                  {[
+                    { id: 'all' as const, label: `All (${totalResults})`, icon: null },
+                    { id: 'clients' as const, label: `Clients (${filteredClients.length})`, icon: Users },
+                    { id: 'work' as const, label: `Work Logs (${filteredWork.length})`, icon: ClipboardList },
+                    { id: 'invoices' as const, label: `Invoices (${filteredInvoices.length})`, icon: FileText },
+                  ].map((cat) => {
+                    const Icon = cat.icon;
+                    const isSelected = activeCategory === cat.id;
+                    return (
+                      <motion.button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => setActiveCategory(cat.id)}
+                        whileTap={shouldReduceMotion ? undefined : { scale: 0.96 }}
+                        className={`relative px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1 cursor-pointer outline-none select-none ${
+                          isSelected
+                            ? 'text-white'
+                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-700/60'
+                        }`}
+                      >
+                        {isSelected && (
+                          <motion.div
+                            layoutId="searchCategoryFilterIndicator"
+                            className="absolute inset-0 bg-indigo-600 rounded-lg shadow-2xs -z-0"
+                            transition={
+                              shouldReduceMotion
+                                ? { duration: 0 }
+                                : { type: 'spring', stiffness: 450, damping: 35 }
+                            }
+                          />
+                        )}
+                        <span className="relative z-10 flex items-center gap-1">
+                          {Icon && <Icon size={12} />}
+                          {cat.label}
+                        </span>
+                      </motion.button>
+                    );
+                  })}
                 </div>
 
                 <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium shrink-0">

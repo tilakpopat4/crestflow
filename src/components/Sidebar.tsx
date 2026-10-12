@@ -1,5 +1,6 @@
 import { LayoutDashboard, Users, FileText, LogOut, ClipboardList, Settings, ShieldCheck, MessageSquare, Sun, Moon } from 'lucide-react';
 import { clsx } from 'clsx';
+import { motion, useReducedMotion } from 'motion/react';
 import { Tab } from '../App';
 import { User } from 'firebase/auth';
 import Logo from './Logo';
@@ -18,6 +19,7 @@ interface SidebarProps {
 
 export default function Sidebar({ activeTab, setActiveTab, user, onLogout, profile, onEditProfile, onSwitchToClient }: SidebarProps) {
   const { resolvedTheme, toggleTheme } = useTheme();
+  const shouldReduceMotion = useReducedMotion();
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -44,19 +46,33 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout, profi
           const Icon = item.icon;
           const isActive = activeTab === item.id;
           return (
-            <button
+            <motion.button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
+              whileTap={shouldReduceMotion ? undefined : { scale: 0.96 }}
               className={clsx(
-                "flex flex-col md:flex-row items-center md:space-x-3 px-1 min-[380px]:px-1.5 md:px-3 py-1 min-[380px]:py-1.5 md:py-2 rounded-lg transition-colors text-[9px] min-[380px]:text-[10px] md:text-sm font-medium flex-1 md:flex-initial md:w-full md:max-w-none flex-shrink md:flex-shrink-0 min-w-0",
+                "relative flex flex-col md:flex-row items-center md:space-x-3 px-1 min-[380px]:px-1.5 md:px-3 py-1 min-[380px]:py-1.5 md:py-2 rounded-lg text-[9px] min-[380px]:text-[10px] md:text-sm font-medium flex-1 md:flex-initial md:w-full md:max-w-none flex-shrink md:flex-shrink-0 min-w-0 transition-colors duration-150 outline-none select-none cursor-pointer",
                 isActive
-                  ? "bg-indigo-600 text-white shadow-sm"
-                  : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                  ? "text-white"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
               )}
             >
-              <Icon size={16} className={clsx(isActive ? "text-white" : "text-slate-400", "mb-0.5 md:mb-0 shrink-0")} />
-              <span className="truncate w-full text-center md:text-left leading-tight">{item.label}</span>
-            </button>
+              {isActive && (
+                <motion.div
+                  layoutId="sidebarActiveTabIndicator"
+                  className="absolute inset-0 bg-indigo-600 rounded-lg shadow-sm -z-0"
+                  transition={
+                    shouldReduceMotion
+                      ? { duration: 0 }
+                      : { type: 'spring', stiffness: 450, damping: 35 }
+                  }
+                />
+              )}
+              <span className="relative z-10 flex flex-col md:flex-row items-center md:space-x-3 w-full justify-center md:justify-start">
+                <Icon size={16} className={clsx(isActive ? "text-white" : "text-slate-400", "mb-0.5 md:mb-0 shrink-0 transition-colors")} />
+                <span className="truncate w-full text-center md:text-left leading-tight">{item.label}</span>
+              </span>
+            </motion.button>
           );
         })}
       </div>

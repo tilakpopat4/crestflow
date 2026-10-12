@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import Sidebar from './components/Sidebar';
 import DashboardTab from './components/DashboardTab';
 import ClientsTab from './components/ClientsTab';
@@ -38,6 +39,7 @@ export default function App() {
     return window.location.search.includes('portal=client') || window.location.hash.includes('portal');
   });
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -427,13 +429,27 @@ export default function App() {
           onEditProfile={() => setIsProfileModalOpen(true)}
           onOpenAnniversaryModal={() => setIsAnniversaryModalOpen(true)}
         />
-        <div className="flex-1 overflow-y-auto overflow-x-hidden">
-          {activeTab === 'dashboard' && <DashboardTab user={user} profile={profile} onNavigateToClients={() => setActiveTab('clients')} />}
-          {activeTab === 'clients' && <ClientsTab user={user} initialSearchQuery={globalSearchQuery} initialSelectedClientId={selectedClientIdFromSearch} />}
-          {activeTab === 'work' && <WorkLogTab user={user} initialSearchQuery={globalSearchQuery} />}
-          {activeTab === 'invoice' && <InvoiceTab user={user} profile={profile} initialSearchQuery={globalSearchQuery} />}
-          {activeTab === 'reviews' && <ReviewsTab user={user} profile={profile} />}
-          {activeTab === 'admin' && <AdminTab />}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden relative flex flex-col">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={activeTab}
+              initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 7 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -5 }}
+              transition={{
+                duration: shouldReduceMotion ? 0.01 : 0.18,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+              className="flex-1 w-full flex flex-col"
+            >
+              {activeTab === 'dashboard' && <DashboardTab user={user} profile={profile} onNavigateToClients={() => setActiveTab('clients')} />}
+              {activeTab === 'clients' && <ClientsTab user={user} initialSearchQuery={globalSearchQuery} initialSelectedClientId={selectedClientIdFromSearch} />}
+              {activeTab === 'work' && <WorkLogTab user={user} initialSearchQuery={globalSearchQuery} />}
+              {activeTab === 'invoice' && <InvoiceTab user={user} profile={profile} initialSearchQuery={globalSearchQuery} />}
+              {activeTab === 'reviews' && <ReviewsTab user={user} profile={profile} />}
+              {activeTab === 'admin' && <AdminTab />}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </main>
 

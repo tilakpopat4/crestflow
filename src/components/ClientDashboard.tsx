@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { Client, Invoice, WorkItem, SubClient, UserProfile } from '../types';
 import { 
   ArrowLeft, Calendar, Phone, Mail, Edit3, CheckCircle2, Clock, 
@@ -57,6 +58,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
   };
 
   const [activeTab, setActiveTab] = useState<'work' | 'invoices' | 'settings'>('work');
+  const shouldReduceMotion = useReducedMotion();
   
   // Payment Date update state
   const [isUpdatingPaymentDate, setIsUpdatingPaymentDate] = useState(false);
@@ -660,42 +662,90 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
       {/* Tabs Navigation */}
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
         <div className="border-b border-slate-200 dark:border-slate-700 px-4 md:px-6 pt-4 flex gap-4 md:gap-6 overflow-x-auto scrollbar-none -mb-px">
-          <button
+          <motion.button
             onClick={() => setActiveTab('work')}
-            className={`pb-4 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 flex items-center gap-2 ${
+            whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
+            className={`relative pb-4 text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2 outline-none cursor-pointer select-none ${
               activeTab === 'work'
-                ? 'border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400'
-                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                ? 'text-indigo-600 dark:text-indigo-400'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
             <ClipboardList size={16} /> Work Logs ({clientWorkItems.length})
-          </button>
+            {activeTab === 'work' && (
+              <motion.div
+                layoutId="clientDashboardTabIndicator"
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 dark:bg-indigo-400 rounded-full"
+                transition={
+                  shouldReduceMotion
+                    ? { duration: 0 }
+                    : { type: 'spring', stiffness: 450, damping: 35 }
+                }
+              />
+            )}
+          </motion.button>
 
-          <button
+          <motion.button
             onClick={() => setActiveTab('invoices')}
-            className={`pb-4 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 flex items-center gap-2 ${
+            whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
+            className={`relative pb-4 text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2 outline-none cursor-pointer select-none ${
               activeTab === 'invoices'
-                ? 'border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400'
-                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                ? 'text-indigo-600 dark:text-indigo-400'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
             <FileText size={16} /> Invoices ({clientInvoices.length})
-          </button>
+            {activeTab === 'invoices' && (
+              <motion.div
+                layoutId="clientDashboardTabIndicator"
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 dark:bg-indigo-400 rounded-full"
+                transition={
+                  shouldReduceMotion
+                    ? { duration: 0 }
+                    : { type: 'spring', stiffness: 450, damping: 35 }
+                }
+              />
+            )}
+          </motion.button>
 
-          <button
+          <motion.button
             onClick={() => setActiveTab('settings')}
-            className={`pb-4 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 flex items-center gap-2 ${
+            whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
+            className={`relative pb-4 text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2 outline-none cursor-pointer select-none ${
               activeTab === 'settings'
-                ? 'border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400'
-                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                ? 'text-indigo-600 dark:text-indigo-400'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
             <DollarSign size={16} /> Client Rates & Info
-          </button>
+            {activeTab === 'settings' && (
+              <motion.div
+                layoutId="clientDashboardTabIndicator"
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 dark:bg-indigo-400 rounded-full"
+                transition={
+                  shouldReduceMotion
+                    ? { duration: 0 }
+                    : { type: 'spring', stiffness: 450, damping: 35 }
+                }
+              />
+            )}
+          </motion.button>
         </div>
 
-        {/* Tab 1: Work Logs */}
-        {activeTab === 'work' && (
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={activeTab}
+            initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
+            transition={{
+              duration: shouldReduceMotion ? 0.01 : 0.18,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+            className="w-full"
+          >
+            {/* Tab 1: Work Logs */}
+            {activeTab === 'work' && (
           <div className="p-6 space-y-6">
             <div className="flex justify-between items-center">
               <div>
@@ -1207,6 +1257,8 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
             </div>
           </div>
         )}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {/* Update Payment Date Modal */}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { User } from 'firebase/auth';
 import { db } from '../firebase';
 import { collection, query, where, onSnapshot, doc, getDoc, setDoc, getDocs } from 'firebase/firestore';
@@ -58,6 +59,7 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
   
   // Tabs
   const [activeTab, setActiveTab] = useState<'overview' | 'work' | 'invoices' | 'review'>('overview');
+  const shouldReduceMotion = useReducedMotion();
   
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState('');
@@ -343,54 +345,102 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
         </div>
 
         {/* Navigation Tabs */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-1 sm:space-x-4 border-t border-slate-100 overflow-x-auto">
-          <button
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-1 sm:space-x-4 border-t border-slate-100 dark:border-slate-800 overflow-x-auto scrollbar-none">
+          <motion.button
             onClick={() => setActiveTab('overview')}
-            className={`py-3 px-3 sm:px-4 text-xs font-bold border-b-2 transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+            whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
+            className={`relative py-3 px-3 sm:px-4 text-xs font-bold transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1.5 outline-none select-none ${
               activeTab === 'overview'
-                ? 'border-indigo-600 text-indigo-600'
-                : 'border-transparent text-slate-500 hover:text-slate-700'
+                ? 'text-indigo-600 dark:text-indigo-400'
+                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
             }`}
           >
             <Briefcase size={14} />
-            Overview
-          </button>
+            <span>Overview</span>
+            {activeTab === 'overview' && (
+              <motion.div
+                layoutId="clientPortalTabIndicator"
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 dark:bg-indigo-400 rounded-full"
+                transition={
+                  shouldReduceMotion
+                    ? { duration: 0 }
+                    : { type: 'spring', stiffness: 450, damping: 35 }
+                }
+              />
+            )}
+          </motion.button>
 
-          <button
+          <motion.button
             onClick={() => setActiveTab('work')}
-            className={`py-3 px-3 sm:px-4 text-xs font-bold border-b-2 transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+            whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
+            className={`relative py-3 px-3 sm:px-4 text-xs font-bold transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1.5 outline-none select-none ${
               activeTab === 'work'
-                ? 'border-indigo-600 text-indigo-600'
-                : 'border-transparent text-slate-500 hover:text-slate-700'
+                ? 'text-indigo-600 dark:text-indigo-400'
+                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
             }`}
           >
             <Layers size={14} />
-            Work Log ({workItems.length})
-          </button>
+            <span>Work Log ({workItems.length})</span>
+            {activeTab === 'work' && (
+              <motion.div
+                layoutId="clientPortalTabIndicator"
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 dark:bg-indigo-400 rounded-full"
+                transition={
+                  shouldReduceMotion
+                    ? { duration: 0 }
+                    : { type: 'spring', stiffness: 450, damping: 35 }
+                }
+              />
+            )}
+          </motion.button>
 
-          <button
+          <motion.button
             onClick={() => setActiveTab('invoices')}
-            className={`py-3 px-3 sm:px-4 text-xs font-bold border-b-2 transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+            whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
+            className={`relative py-3 px-3 sm:px-4 text-xs font-bold transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1.5 outline-none select-none ${
               activeTab === 'invoices'
-                ? 'border-indigo-600 text-indigo-600'
-                : 'border-transparent text-slate-500 hover:text-slate-700'
+                ? 'text-indigo-600 dark:text-indigo-400'
+                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
             }`}
           >
             <FileText size={14} />
-            Invoices ({invoices.length})
-          </button>
+            <span>Invoices ({invoices.length})</span>
+            {activeTab === 'invoices' && (
+              <motion.div
+                layoutId="clientPortalTabIndicator"
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 dark:bg-indigo-400 rounded-full"
+                transition={
+                  shouldReduceMotion
+                    ? { duration: 0 }
+                    : { type: 'spring', stiffness: 450, damping: 35 }
+                }
+              />
+            )}
+          </motion.button>
 
-          <button
+          <motion.button
             onClick={() => setActiveTab('review')}
-            className={`py-3 px-3 sm:px-4 text-xs font-bold border-b-2 transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+            whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
+            className={`relative py-3 px-3 sm:px-4 text-xs font-bold transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1.5 outline-none select-none ${
               activeTab === 'review'
-                ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
-                : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                ? 'text-indigo-600 dark:text-indigo-400'
+                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
             }`}
           >
             <Star size={14} />
-            Rate & Review
-          </button>
+            <span>Rate & Review</span>
+            {activeTab === 'review' && (
+              <motion.div
+                layoutId="clientPortalTabIndicator"
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 dark:bg-indigo-400 rounded-full"
+                transition={
+                  shouldReduceMotion
+                    ? { duration: 0 }
+                    : { type: 'spring', stiffness: 450, damping: 35 }
+                }
+              />
+            )}
+          </motion.button>
         </div>
       </header>
 
@@ -420,8 +470,20 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
           )}
         </div>
 
-        {/* 1. OVERVIEW TAB */}
-        {activeTab === 'overview' && (
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={activeTab}
+            initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
+            transition={{
+              duration: shouldReduceMotion ? 0.01 : 0.18,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+            className="w-full space-y-6"
+          >
+            {/* 1. OVERVIEW TAB */}
+            {activeTab === 'overview' && (
           <div className="space-y-6">
             
             {/* Payment Cycle Alert Banner */}
@@ -829,6 +891,8 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
             )}
           </div>
         )}
+          </motion.div>
+        </AnimatePresence>
 
       </main>
 
