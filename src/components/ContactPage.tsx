@@ -34,7 +34,7 @@ export default function ContactPage() {
     setErrors({});
 
     // Since no backend contact email service exists, wire directly to mailto: link
-    const supportEmail = '{{SUPPORT_EMAIL}}';
+    const supportEmail = 'work.tilakpopatfilms@gmail.com';
     const emailSubject = encodeURIComponent(`[CrestFlow Contact] ${subject.trim()}`);
     const emailBody = encodeURIComponent(
       `Name: ${name.trim()}\nEmail: ${email.trim()}\n\nMessage:\n${message.trim()}`
@@ -164,10 +164,10 @@ export default function ContactPage() {
                 Support Email
               </span>
               <a
-                href="mailto:{{SUPPORT_EMAIL}}"
+                href="mailto:work.tilakpopatfilms@gmail.com"
                 className="text-slate-900 dark:text-slate-100 hover:underline"
               >
-                {'{{SUPPORT_EMAIL}}'}
+                work.tilakpopatfilms@gmail.com
               </a>
             </div>
 
@@ -182,8 +182,8 @@ export default function ContactPage() {
               <span className="font-semibold text-slate-700 dark:text-slate-300 block mb-0.5">
                 Business Details
               </span>
-              <p className="text-slate-900 dark:text-slate-100">{'{{BUSINESS_NAME}}'}</p>
-              <p className="text-slate-500 dark:text-slate-400 mt-0.5">{'{{BUSINESS_ADDRESS}}'}</p>
+              <p className="text-slate-900 dark:text-slate-100">Tilak Popat Films</p>
+              <p className="text-slate-500 dark:text-slate-400 mt-0.5">Gandhinagar, Gujarat, 382421</p>
             </div>
           </div>
         </div>

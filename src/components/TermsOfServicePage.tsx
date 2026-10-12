@@ -33,7 +33,7 @@ export default function TermsOfServicePage({ onNavigate }: TermsOfServicePagePro
               1. Acceptance of Terms
             </h2>
             <p>
-              By accessing, registering for, or using the CrestFlow application ("Service"), operated by <strong className="text-slate-900 dark:text-slate-100">{'{{BUSINESS_NAME}}'}</strong> ("we", "us", or "our"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, you may not access or use the Service.
+              By accessing, registering for, or using the CrestFlow application ("Service"), operated by <strong className="text-slate-900 dark:text-slate-100">Tilak Popat Films</strong> ("we", "us", or "our"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, you may not access or use the Service.
             </p>
           </section>
 
@@ -128,7 +128,7 @@ export default function TermsOfServicePage({ onNavigate }: TermsOfServicePagePro
               9. Governing Law
             </h2>
             <p>
-              These Terms shall be governed by and construed in accordance with the laws of <strong className="text-slate-900 dark:text-slate-100">{'{{GOVERNING_LAW_JURISDICTION}}'}</strong>, without regard to its conflict of law principles. Any legal suit, action, or proceeding arising out of or related to these Terms shall be instituted exclusively in the competent courts of that jurisdiction.
+              These Terms shall be governed by and construed in accordance with the laws of <strong className="text-slate-900 dark:text-slate-100">Gujarat, India</strong>, without regard to its conflict of law principles. Any legal suit, action, or proceeding arising out of or related to these Terms shall be instituted exclusively in the competent courts of that jurisdiction.
             </p>
           </section>
 
@@ -140,9 +140,9 @@ export default function TermsOfServicePage({ onNavigate }: TermsOfServicePagePro
               If you have any questions about these Terms of Service, please contact:
             </p>
             <div className="mt-3 space-y-1 text-slate-700 dark:text-slate-300">
-              <p><strong className="text-slate-900 dark:text-slate-100">{'{{BUSINESS_NAME}}'}</strong></p>
-              <p>Email: <a href="mailto:{{SUPPORT_EMAIL}}" className="text-slate-900 dark:text-slate-100 hover:underline">{'{{SUPPORT_EMAIL}}'}</a></p>
-              <p>Address: {'{{BUSINESS_ADDRESS}}'}</p>
+              <p><strong className="text-slate-900 dark:text-slate-100">Tilak Popat Films</strong></p>
+              <p>Email: <a href="mailto:work.tilakpopatfilms@gmail.com" className="text-slate-900 dark:text-slate-100 hover:underline">work.tilakpopatfilms@gmail.com</a></p>
+              <p>Address: Gandhinagar, Gujarat, 382421</p>
               <p className="mt-2">
                 You may also submit inquiries through our{' '}
                 <a href="/contact" onClick={handleContactLink} className="text-slate-900 dark:text-slate-100 hover:underline font-medium">
