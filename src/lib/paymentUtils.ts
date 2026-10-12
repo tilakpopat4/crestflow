@@ -88,7 +88,7 @@ export function getPaymentStatusInfo(
   if (daysRemaining === 3) {
     code = 'DUE_IN_3_DAYS';
     label = 'Payment Due in 3 Days';
-    badgeClass = 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 animate-pulse';
+    badgeClass = 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 font-semibold';
     isNotificationRequired = true;
     severity = 'warning';
     notificationTitle = `Payment Due in 3 Days: ${client.name}`;
@@ -96,7 +96,7 @@ export function getPaymentStatusInfo(
   } else if (daysRemaining === 2 || daysRemaining === 1) {
     code = 'DUE_IN_1_DAY';
     label = daysRemaining === 1 ? 'Payment Due Tomorrow!' : 'Payment Due in 2 Days';
-    badgeClass = 'bg-orange-50 dark:bg-orange-950/50 text-orange-700 dark:text-orange-300 animate-pulse';
+    badgeClass = 'bg-orange-50 dark:bg-orange-950/50 text-orange-700 dark:text-orange-300 font-semibold';
     isNotificationRequired = true;
     severity = 'urgent';
     notificationTitle = `Payment Due ${daysRemaining === 1 ? 'Tomorrow' : 'in 2 Days'}: ${client.name}`;
@@ -104,7 +104,7 @@ export function getPaymentStatusInfo(
   } else if (daysRemaining === 0) {
     code = 'DUE_TODAY';
     label = 'Payment DUE TODAY!';
-    badgeClass = 'bg-red-100 dark:bg-red-950/50 text-red-800 dark:text-red-300 font-bold animate-bounce';
+    badgeClass = 'bg-red-100 dark:bg-red-950/50 text-red-800 dark:text-red-300 font-bold';
     isNotificationRequired = true;
     severity = 'critical';
     notificationTitle = `Payment DUE TODAY: ${client.name}`;
@@ -112,7 +112,7 @@ export function getPaymentStatusInfo(
   } else if (daysRemaining === -2) {
     code = 'OVERDUE_2_DAYS';
     label = 'Delayed Notification (2nd Day Overdue)';
-    badgeClass = 'bg-purple-100 dark:bg-purple-950/50 text-purple-800 dark:text-purple-300 font-bold animate-pulse';
+    badgeClass = 'bg-purple-100 dark:bg-purple-950/50 text-purple-800 dark:text-purple-300 font-bold';
     isNotificationRequired = true;
     severity = 'delayed';
     notificationTitle = `Delayed Payment (Day 2 Overdue): ${client.name}`;

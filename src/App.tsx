@@ -287,8 +287,8 @@ export default function App() {
         {/* Subtle grid background */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20"></div>
         
-        <div className="max-w-md w-full bg-slate-800 border border-slate-700 rounded-2xl p-8 shadow-2xl relative z-10 text-center space-y-6">
-          <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl flex items-center justify-center mx-auto animate-pulse">
+        <div className="max-w-md w-full bg-slate-800 border border-slate-700 rounded-xl p-8 shadow-2xl relative z-10 text-center space-y-6">
+          <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl flex items-center justify-center mx-auto">
             <ShieldAlert className="w-8 h-8" />
           </div>
           
@@ -308,7 +308,7 @@ export default function App() {
           <div className="pt-2">
             <button
               onClick={handleLogout}
-              className="w-full flex items-center justify-center gap-2 bg-slate-700 hover:bg-slate-600 active:scale-98 text-white py-2.5 rounded-xl text-sm font-semibold transition-all shadow"
+              className="w-full flex items-center justify-center gap-2 bg-slate-700 hover:bg-slate-600 text-white py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-xs"
             >
               <LogOut className="w-4 h-4" />
               Sign Out & Switch Account
@@ -322,7 +322,7 @@ export default function App() {
   if (!user) {
     return (
       <div className="flex items-center justify-center h-screen w-full bg-slate-50 dark:bg-slate-950">
-        <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 text-center max-w-md w-full font-sans">
+        <div className="bg-white dark:bg-slate-900 p-8 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 text-center max-w-md w-full font-sans">
           <div className="flex items-center justify-center gap-2.5 mb-4">
             <Logo className="w-10 h-10 shadow-xs" />
             <span className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">CrestFlow</span>

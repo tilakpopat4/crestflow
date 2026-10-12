@@ -405,9 +405,9 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
 
       {/* Toast Notification Floating Banner */}
       {toastAlert && (
-        <div className="fixed top-5 right-5 z-50 max-w-sm w-full bg-slate-900 text-white rounded-2xl p-4 shadow-2xl border border-indigo-500/50 animate-in fade-in slide-in-from-top-4 flex items-start gap-3">
-          <div className="p-2 bg-indigo-500/20 text-indigo-400 rounded-xl shrink-0 mt-0.5">
-            <Bell size={18} className="animate-bounce" />
+        <div className="fixed top-5 right-5 z-50 max-w-sm w-full bg-slate-900 text-white rounded-xl p-4 shadow-xl border border-slate-800 animate-in fade-in slide-in-from-top-4 flex items-start gap-3">
+          <div className="p-2 bg-indigo-500/20 text-indigo-400 rounded-lg shrink-0 mt-0.5">
+            <Bell size={18} />
           </div>
           <div className="flex-1 space-y-0.5">
             <h5 className="text-xs font-bold text-indigo-300 uppercase tracking-wider">{toastAlert.title}</h5>
@@ -424,28 +424,28 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
 
       {/* Career Anniversary Milestone Banner if currently active */}
       {journey?.currentAnniversary && !isAnnivBannerDismissed && (
-        <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-indigo-600 text-white p-5 rounded-2xl shadow-lg flex items-center justify-between gap-4 relative overflow-hidden animate-in fade-in slide-in-from-top-3 duration-300">
+        <div className="bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-100 p-4 sm:p-5 rounded-xl border border-amber-200 dark:border-amber-800/60 shadow-xs flex items-center justify-between gap-4 relative overflow-hidden animate-in fade-in duration-200">
           <div className="flex items-center gap-3.5 relative z-10">
-            <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-2xl shadow-sm shrink-0 animate-bounce">
+            <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/60 border border-amber-300 dark:border-amber-700/60 flex items-center justify-center text-xl shrink-0">
               {journey.currentAnniversary.emoji}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider bg-white/20 px-2.5 py-0.5 rounded-full">
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 border border-amber-300/60 dark:border-amber-700/60 px-2 py-0.5 rounded-md">
                   Career Anniversary Milestone
                 </span>
-                <span className="text-xs text-white/90 font-medium">
+                <span className="text-xs text-amber-800 dark:text-amber-300/80 font-medium">
                   {journey.workedDays} days freelancing
                 </span>
               </div>
-              <h3 className="text-lg font-bold mt-0.5">{journey.currentAnniversary.title}!</h3>
-              <p className="text-xs text-white/90 max-w-xl">{journey.currentAnniversary.description}</p>
+              <h3 className="text-base font-bold mt-0.5 text-amber-950 dark:text-amber-100">{journey.currentAnniversary.title}!</h3>
+              <p className="text-xs text-amber-800 dark:text-amber-300/90 max-w-xl">{journey.currentAnniversary.description}</p>
             </div>
           </div>
           <button
             type="button"
             onClick={() => setIsAnnivBannerDismissed(true)}
-            className="p-1.5 rounded-full bg-white/15 hover:bg-white/25 text-white transition-colors shrink-0 cursor-pointer"
+            className="p-1.5 rounded-lg text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/60 transition-colors shrink-0 cursor-pointer"
             title="Dismiss banner"
           >
             <X size={16} />

@@ -88,7 +88,7 @@ export default function ProfileModal({
     <div
       id="profile-modal-overlay"
       onClick={() => { if (!isMandatory && onClose) onClose(); }}
-      className={`fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 ${!isMandatory ? 'cursor-pointer' : ''}`}
+      className={`fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 ${!isMandatory ? 'cursor-pointer' : ''}`}
     >
       <div
         id="profile-modal-container"
@@ -311,7 +311,7 @@ export default function ProfileModal({
             <button
               type="submit"
               disabled={isSaving}
-              className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm hover:shadow active:scale-95 disabled:opacity-50 cursor-pointer"
+              className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg text-sm font-semibold transition-colors shadow-xs disabled:opacity-50 cursor-pointer"
             >
               <Save className="w-4 h-4" />
               {isSaving ? 'Saving...' : 'Save Profile'}

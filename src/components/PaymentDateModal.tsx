@@ -40,9 +40,9 @@ export default function PaymentDateModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in">
+    <div className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 animate-in fade-in">
       <div 
-        className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-sm p-6 shadow-2xl border border-slate-200 dark:border-slate-700"
+        className="bg-white dark:bg-slate-800 rounded-xl w-full max-w-sm p-6 shadow-xl border border-slate-200 dark:border-slate-700"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-5">

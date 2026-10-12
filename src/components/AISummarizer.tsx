@@ -46,8 +46,8 @@ export default function AISummarizer({ clients, workItems, profile }: AISummariz
   };
 
   return (
-    <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-slate-900 dark:to-indigo-950/40 rounded-xl border border-indigo-100 dark:border-indigo-900/50 shadow-sm overflow-hidden flex flex-col mt-8">
-      <div className="p-6 border-b border-indigo-100/50 dark:border-indigo-900/40 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
+    <div className="bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden flex flex-col mt-8">
+      <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-800/80">
         <div>
           <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
             <Sparkles className="text-indigo-600 dark:text-indigo-400" size={20} />
@@ -67,13 +67,13 @@ export default function AISummarizer({ clients, workItems, profile }: AISummariz
               value={targetDate}
               onChange={(e) => setTargetDate(e.target.value)}
               max={new Date().toISOString().split('T')[0]}
-              className="pl-9 w-full rounded-lg border-slate-200 dark:border-slate-700 text-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 py-2 shadow-sm transition-all"
+              className="pl-9 w-full rounded-lg border-slate-200 dark:border-slate-700 text-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 py-2 shadow-xs transition-colors"
             />
           </div>
           <button
             onClick={handleGenerate}
             disabled={isGenerating}
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-70 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-md active:scale-95 whitespace-nowrap cursor-pointer"
+            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-70 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-xs whitespace-nowrap cursor-pointer"
           >
             {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
             {isGenerating ? 'Generating...' : 'Generate'}
@@ -81,7 +81,7 @@ export default function AISummarizer({ clients, workItems, profile }: AISummariz
         </div>
       </div>
       
-      <div className="p-6 bg-white/40 dark:bg-slate-900/40">
+      <div className="p-6 bg-white dark:bg-slate-900">
         {error && (
           <div className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 rounded-lg text-sm mb-4">
             {error}

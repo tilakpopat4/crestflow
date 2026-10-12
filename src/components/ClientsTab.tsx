@@ -350,9 +350,9 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
         const pendingRequests = serviceRequests.filter(req => req.status === 'pending');
         if (pendingRequests.length === 0) return null;
         return (
-          <div className="bg-gradient-to-r from-indigo-50/50 to-purple-50/50 dark:from-indigo-950/40 dark:to-purple-950/40 border border-indigo-100 dark:border-indigo-900/40 rounded-2xl p-5 shadow-sm space-y-4">
-            <div className="flex items-center gap-2.5 text-indigo-900 dark:text-indigo-200 font-bold text-sm">
-              <Briefcase className="text-indigo-600 dark:text-indigo-400 animate-pulse" size={20} />
+          <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs space-y-4">
+            <div className="flex items-center gap-2.5 text-slate-900 dark:text-slate-100 font-bold text-sm">
+              <Briefcase className="text-indigo-600 dark:text-indigo-400" size={20} />
               <span>Incoming Service Inquiries / Leads ({pendingRequests.length})</span>
             </div>
             
@@ -410,10 +410,10 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
 
       {/* Global Payment Reminders Bar across clients (if any client has payment due or delayed) */}
       {!isNotificationDismissed && notificationClients.length > 0 && (
-        <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-2xl p-5 shadow-sm space-y-3 relative">
+        <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-xl p-5 shadow-xs space-y-3 relative">
           <div className="flex items-center justify-between pr-8">
             <div className="flex items-center gap-2.5 text-amber-900 dark:text-amber-300 font-bold text-sm">
-              <AlertTriangle className="text-amber-600 dark:text-amber-400 animate-bounce" size={20} />
+              <AlertTriangle className="text-amber-600 dark:text-amber-400" size={20} />
               <span>Payment Cycle Reminders ({notificationClients.length} Action Required)</span>
             </div>
             <div className="flex items-center gap-2">

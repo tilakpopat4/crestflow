@@ -1895,7 +1895,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
           <button
             type="button"
             onClick={() => setIsScheduleModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white shadow-sm hover:shadow transition-all cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs transition-colors cursor-pointer"
             title="Schedule automatic morning 6:00 AM invoice generation for clients"
           >
             <Clock size={16} className="text-indigo-200" />
@@ -1995,7 +1995,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
             {selectedClient?.paymentBasis === 'monthly_retainer' ? (
               <div className="mb-6 p-3.5 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 rounded-xl flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-purple-600 animate-pulse shrink-0"></span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-purple-600 shrink-0"></span>
                   <div>
                     <span className="text-xs font-bold text-purple-900 dark:text-purple-300 block">
                       Monthly Retainer Client
@@ -2045,11 +2045,11 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
 
             {invoiceBillingMode === 'monthly_retainer' ? (
               /* Monthly Retainer Section */
-              <div className="p-4 sm:p-5 rounded-xl border border-purple-200 dark:border-purple-800/60 bg-gradient-to-br from-purple-50/60 via-indigo-50/30 to-white dark:from-purple-950/30 dark:via-indigo-950/10 dark:to-slate-800 space-y-4">
+              <div className="p-4 sm:p-5 rounded-xl border border-purple-200 dark:border-purple-800/60 bg-purple-50/50 dark:bg-purple-950/30 space-y-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <span className="inline-flex items-center gap-1.5 text-xs font-bold text-purple-900 dark:text-purple-300 uppercase tracking-wider">
-                      <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
+                      <span className="w-2 h-2 rounded-full bg-purple-500"></span>
                       Monthly Retainer Mode
                     </span>
                   </div>
@@ -2171,7 +2171,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                 </div>
 
                 {/* Quick Set Direct Grand Total */}
-                <div className="mb-5 p-3.5 bg-gradient-to-r from-indigo-50/90 to-purple-50/90 dark:from-slate-900 dark:to-slate-800/80 border border-indigo-100 dark:border-slate-700 rounded-xl">
+                <div className="mb-5 p-3.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
                       <span className="text-xs font-bold text-indigo-900 dark:text-indigo-300 uppercase tracking-wider flex items-center gap-1.5">
@@ -2378,7 +2378,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
               <button
                 onClick={handleDownload}
                 disabled={isGenerating || !selectedClient}
-                className="w-full flex justify-center items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm active:scale-[0.99] cursor-pointer"
+                className="w-full flex justify-center items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-xs cursor-pointer"
               >
                 {isGenerating ? (
                   <>
@@ -2433,7 +2433,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
         >
           
           {/* Preview Mode Switcher & Quick Print Header */}
-          <div className="w-full max-w-[210mm] flex flex-wrap items-center justify-between gap-3 mb-6 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md p-3 rounded-xl border border-slate-300 dark:border-slate-700 shadow-sm z-10">
+          <div className="w-full max-w-[210mm] flex flex-wrap items-center justify-between gap-3 mb-6 bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-300 dark:border-slate-700 shadow-sm z-10">
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Preview:</span>
               <div className="inline-flex bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
@@ -3050,7 +3050,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                         <td className="p-3.5 text-center">
                           <button
                             onClick={() => toggleInvoiceStatus(inv.id)}
-                            className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold cursor-pointer transition-transform hover:scale-105 ${inv.status === 'Paid'
+                            className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold cursor-pointer transition-colors ${inv.status === 'Paid'
                               ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/60'
                               : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/60'
                               }`}
@@ -3174,47 +3174,43 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
         )}
 
         {/* Last Bar: Total Earned Till Today */}
-        <div className="mt-6 bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-700 dark:from-emerald-700 dark:via-teal-800 dark:to-indigo-900 text-white rounded-2xl p-5 md:p-6 shadow-lg flex flex-col md:flex-row items-center justify-between gap-5 relative overflow-hidden">
-          {/* Decorative background glow rings */}
-          <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-white/10 blur-2xl pointer-events-none" />
-          <div className="absolute -bottom-12 -left-12 w-48 h-48 rounded-full bg-emerald-400/20 blur-2xl pointer-events-none" />
-
+        <div className="mt-6 bg-slate-900 text-white rounded-xl p-5 md:p-6 border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-5 relative overflow-hidden">
           <div className="flex items-center gap-4 relative z-10 w-full md:w-auto">
-            <div className="w-13 h-13 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white shadow-md shrink-0">
-              <IndianRupee size={26} className="stroke-[2.5]" />
+            <div className="w-12 h-12 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-emerald-400 shrink-0">
+              <IndianRupee size={24} className="stroke-[2.5]" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider bg-white/20 px-2.5 py-0.5 rounded-full backdrop-blur-xs">
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700 px-2.5 py-0.5 rounded-md">
                   Lifetime Revenue
                 </span>
-                <span className="text-xs text-white/80">Paid Invoices Till Today</span>
+                <span className="text-xs text-slate-400">Paid Invoices Till Today</span>
               </div>
-              <h3 className="text-2xl sm:text-3xl font-black tracking-tight mt-1">
+              <h3 className="text-2xl sm:text-3xl font-black tracking-tight mt-1 text-white">
                 Total Earned Till Today:{' '}
-                <span className="text-emerald-200">₹{totalEarnedTillToday.toLocaleString('en-IN')}</span>
+                <span className="text-emerald-400">₹{totalEarnedTillToday.toLocaleString('en-IN')}</span>
               </h3>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 sm:gap-6 relative z-10 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-white/20 pt-3 md:pt-0">
+          <div className="flex items-center gap-4 sm:gap-6 relative z-10 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-slate-800 pt-3 md:pt-0">
             <div className="text-left md:text-right">
-              <span className="text-[10px] uppercase font-bold text-white/70 block tracking-wider">Paid Invoices</span>
-              <span className="text-base font-bold">
-                {paidInvoicesCount} <span className="text-xs font-normal text-white/80">of {invoices.length}</span>
+              <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Paid Invoices</span>
+              <span className="text-base font-bold text-white">
+                {paidInvoicesCount} <span className="text-xs font-normal text-slate-400">of {invoices.length}</span>
               </span>
             </div>
             {pendingAmount > 0 && (
-              <div className="text-left md:text-right border-l border-white/20 pl-4 sm:pl-6">
-                <span className="text-[10px] uppercase font-bold text-amber-200 block tracking-wider">Pending Clearance</span>
-                <span className="text-base font-bold text-amber-100">
+              <div className="text-left md:text-right border-l border-slate-800 pl-4 sm:pl-6">
+                <span className="text-[10px] uppercase font-bold text-amber-400 block tracking-wider">Pending Clearance</span>
+                <span className="text-base font-bold text-amber-300">
                   ₹{pendingAmount.toLocaleString('en-IN')}
                 </span>
               </div>
             )}
-            <div className="text-left md:text-right border-l border-white/20 pl-4 sm:pl-6">
-              <span className="text-[10px] uppercase font-bold text-white/70 block tracking-wider">Total Invoiced</span>
-              <span className="text-base font-bold">
+            <div className="text-left md:text-right border-l border-slate-800 pl-4 sm:pl-6">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Total Invoiced</span>
+              <span className="text-base font-bold text-white">
                 ₹{totalInvoicedAmount.toLocaleString('en-IN')}
               </span>
             </div>
@@ -3226,7 +3222,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
       {emailModalData && emailModalData.isOpen && (
         <div
           onClick={() => setEmailModalData(null)}
-          className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in cursor-pointer"
+          className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 animate-in fade-in cursor-pointer"
         >
           <div
             onClick={(e) => e.stopPropagation()}

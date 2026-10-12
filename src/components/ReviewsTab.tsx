@@ -163,7 +163,7 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
               <>
                 <button
                   onClick={() => handleCopyLink(selectedClient)}
-                  className="flex-1 flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer active:scale-95"
+                  className="flex-1 flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
                 >
                   {copiedClientId === selectedClient.id ? (
                     <>
@@ -179,7 +179,7 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
                 </button>
                 <button
                   onClick={() => handleEmailRequest(selectedClient)}
-                  className="flex-1 flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer active:scale-95 shadow-sm"
+                  className="flex-1 flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer shadow-xs"
                 >
                   <Mail className="w-3.5 h-3.5" />
                   <span>Email Client</span>
@@ -334,7 +334,7 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
       {reviewToDelete && (
         <div 
           onClick={() => setReviewToDelete(null)}
-          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 cursor-pointer"
+          className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 cursor-pointer"
         >
           <div 
             onClick={(e) => e.stopPropagation()}
@@ -360,7 +360,7 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
                     setReviewToDelete(null);
                   }
                 }}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold transition-all shadow active:scale-95 cursor-pointer"
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold transition-colors shadow-xs cursor-pointer"
               >
                 Delete
               </button>

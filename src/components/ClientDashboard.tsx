@@ -423,7 +423,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                 }}
               />
             ) : (
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white flex items-center justify-center font-black text-2xl shadow-md shrink-0">
+              <div className="w-16 h-16 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-2xl shadow-xs shrink-0">
                 {client.name.charAt(0).toUpperCase()}
               </div>
             )}
@@ -1149,7 +1149,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                                   await updateClient({ ...client, lastPaymentDate: pDate });
                                 }
                               }}
-                              className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border cursor-pointer transition-transform hover:scale-105 ${
+                              className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border cursor-pointer transition-colors ${
                                 inv.status === 'Paid' 
                                   ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/60' 
                                   : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/60'
@@ -1252,7 +1252,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
       {isUpdatingPaymentDate && (
         <div 
           onClick={() => setIsUpdatingPaymentDate(false)}
-          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 cursor-pointer"
+          className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 cursor-pointer"
         >
           <div 
             onClick={(e) => e.stopPropagation()}
@@ -1326,7 +1326,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
             setEditingSubClientId(null);
             setSubClientForm({ name: '', code: '', notes: '' });
           }}
-          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 cursor-pointer"
+          className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 cursor-pointer"
         >
           <div 
             onClick={(e) => e.stopPropagation()}

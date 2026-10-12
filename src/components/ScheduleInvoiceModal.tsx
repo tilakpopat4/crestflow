@@ -129,9 +129,9 @@ export default function ScheduleInvoiceModal({
   const scheduledClients = activeClients.filter(c => c.autoInvoiceEnabled);
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in overflow-y-auto">
+    <div className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 animate-in fade-in overflow-y-auto">
       <div 
-        className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-xl shadow-2xl border border-slate-200 dark:border-slate-700 my-8 overflow-hidden"
+        className="bg-white dark:bg-slate-800 rounded-xl w-full max-w-xl shadow-xl border border-slate-200 dark:border-slate-700 my-8 overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}

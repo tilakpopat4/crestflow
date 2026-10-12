@@ -312,11 +312,11 @@ export default function StickyNotesWidget({ user, clients }: StickyNotesWidgetPr
       {isModalOpen && (
         <div 
           onClick={handleCloseModal}
-          className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in cursor-pointer"
+          className="fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-50 animate-in fade-in cursor-pointer"
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="bg-white dark:bg-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-200 dark:border-slate-700 space-y-5 cursor-default"
+            className="bg-white dark:bg-slate-800 rounded-xl max-w-lg w-full p-6 shadow-xl border border-slate-200 dark:border-slate-700 space-y-5 cursor-default"
           >
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-4">
               <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
@@ -370,8 +370,8 @@ export default function StickyNotesWidget({ user, clients }: StickyNotesWidgetPr
                         key={color}
                         type="button"
                         onClick={() => setFormData({ ...formData, color })}
-                        className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${style.bg} ${
-                          isSelected ? 'border-slate-900 dark:border-slate-100 scale-110 shadow-xs' : 'border-slate-200 dark:border-slate-700 hover:scale-105'
+                        className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-colors ${style.bg} ${
+                          isSelected ? 'border-slate-900 dark:border-slate-100 ring-2 ring-slate-400' : 'border-slate-200 dark:border-slate-700'
                         } cursor-pointer`}
                         title={color}
                       >

@@ -25,42 +25,38 @@ export default function AnniversaryModal({
     <div
       id="anniversary-modal-overlay"
       onClick={onClose}
-      className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 cursor-pointer animate-in fade-in duration-200"
+      className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 cursor-pointer animate-in fade-in duration-200"
     >
       <div
         id="anniversary-modal-card"
         onClick={(e) => e.stopPropagation()}
-        className="bg-white dark:bg-slate-900 border border-amber-500/30 dark:border-amber-500/20 text-slate-900 dark:text-slate-100 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden cursor-default relative animate-in zoom-in-95 duration-200"
+        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 rounded-xl shadow-xl max-w-md w-full overflow-hidden cursor-default relative animate-in zoom-in-95 duration-200"
       >
-        {/* Top celebratory decorative banner */}
-        <div className="relative bg-gradient-to-br from-amber-500 via-orange-500 to-indigo-600 p-7 text-white text-center overflow-hidden">
-          {/* Background glowing rings */}
-          <div className="absolute -top-10 -right-10 w-36 h-36 rounded-full bg-white/10 blur-xl pointer-events-none" />
-          <div className="absolute -bottom-10 -left-10 w-36 h-36 rounded-full bg-amber-400/20 blur-xl pointer-events-none" />
-
+        {/* Top header banner */}
+        <div className="relative bg-slate-900 p-6 text-white text-center border-b border-slate-800">
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-4 right-4 text-white/80 hover:text-white bg-black/20 hover:bg-black/30 p-1.5 rounded-full transition-all cursor-pointer"
+            className="absolute top-4 right-4 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 p-1.5 rounded-lg transition-colors cursor-pointer"
             title="Close"
           >
             <X size={16} />
           </button>
 
-          {/* Floating Emoji / Trophy */}
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm border border-white/30 shadow-lg text-3xl mb-3 animate-bounce duration-1000">
+          {/* Milestone Badge Icon */}
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-slate-800 border border-slate-700 text-3xl mb-3">
             {milestone.emoji || '🎉'}
           </div>
 
-          <div className="inline-block px-3 py-0.5 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-bold uppercase tracking-wider mb-1.5">
-            {isExactToday ? 'Milestone Reached Today!' : 'Recent Career Milestone'}
+          <div className="inline-block px-3 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-amber-300 text-[11px] font-bold uppercase tracking-wider mb-1.5">
+            {isExactToday ? 'Milestone Reached Today' : 'Recent Career Milestone'}
           </div>
 
-          <h2 className="text-2xl font-extrabold tracking-tight">
+          <h2 className="text-xl font-bold tracking-tight text-white">
             {milestone.title}
           </h2>
 
-          <p className="text-white/90 text-xs mt-1.5 max-w-xs mx-auto leading-relaxed">
+          <p className="text-slate-300 text-xs mt-1.5 max-w-xs mx-auto leading-relaxed">
             {milestone.description}
           </p>
         </div>
@@ -69,32 +65,32 @@ export default function AnniversaryModal({
         <div className="p-6 space-y-5">
           {freelancerName && (
             <p className="text-center text-xs text-slate-500 dark:text-slate-400">
-              Honoring <strong className="text-slate-800 dark:text-slate-200">{freelancerName}</strong> for dedicated client craftsmanship!
+              Honoring <strong className="text-slate-800 dark:text-slate-200">{freelancerName}</strong> for dedicated client craftsmanship
             </p>
           )}
 
           {/* Stats Box */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 rounded-xl p-3.5 text-center">
-              <span className="text-[10px] uppercase font-bold tracking-wider text-amber-600 dark:text-amber-400 block mb-0.5">
+            <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-xl p-3.5 text-center">
+              <span className="text-[10px] uppercase font-bold tracking-wider text-amber-700 dark:text-amber-300 block mb-0.5">
                 Days Freelancing
               </span>
-              <span className="text-2xl font-black text-amber-700 dark:text-amber-300">
+              <span className="text-2xl font-black text-amber-800 dark:text-amber-200">
                 {stats.workedDays}
               </span>
-              <span className="text-[11px] text-amber-600/80 dark:text-amber-400/80 block mt-0.5 font-medium">
+              <span className="text-[11px] text-amber-700/80 dark:text-amber-300/80 block mt-0.5 font-medium">
                 {stats.formattedDuration}
               </span>
             </div>
 
-            <div className="bg-indigo-500/5 dark:bg-indigo-500/10 border border-indigo-500/20 rounded-xl p-3.5 text-center">
-              <span className="text-[10px] uppercase font-bold tracking-wider text-indigo-600 dark:text-indigo-400 block mb-0.5">
+            <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl p-3.5 text-center">
+              <span className="text-[10px] uppercase font-bold tracking-wider text-slate-600 dark:text-slate-400 block mb-0.5">
                 Started Working
               </span>
-              <span className="text-sm font-bold text-indigo-900 dark:text-indigo-200 mt-1 block">
+              <span className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-1 block">
                 {stats.startDateFormatted}
               </span>
-              <span className="text-[11px] text-indigo-600/80 dark:text-indigo-400/80 block mt-0.5 font-medium">
+              <span className="text-[11px] text-slate-600 dark:text-slate-400 block mt-0.5 font-medium">
                 {milestone.badge} Milestone
               </span>
             </div>
@@ -119,9 +115,9 @@ export default function AnniversaryModal({
           <button
             type="button"
             onClick={onClose}
-            className="w-full py-2.5 px-4 bg-gradient-to-r from-amber-500 to-indigo-600 hover:from-amber-600 hover:to-indigo-700 text-white text-sm font-bold rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+            className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
           >
-            <span>Celebrate & Keep Hustling</span>
+            <span>Continue</span>
             <ArrowRight size={16} />
           </button>
         </div>

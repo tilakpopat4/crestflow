@@ -34,7 +34,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout, profi
       <div className="hidden md:block p-6 border-b border-slate-800/80 mb-2">
         <div className="flex items-center gap-3 mb-3">
           <Logo className="w-8 h-8 rounded-xl shadow-xs" />
-          <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
+          <span className="text-xl font-bold tracking-tight text-white">
             CrestFlow
           </span>
         </div>

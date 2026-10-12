@@ -44,12 +44,12 @@ export default function MediaEmbedModal({
     <div
       id="media-embed-modal-overlay"
       onClick={onClose}
-      className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-6 cursor-pointer animate-in fade-in duration-200"
+      className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-3 sm:p-6 cursor-pointer animate-in fade-in duration-200"
     >
       <div
         id="media-embed-card"
         onClick={(e) => e.stopPropagation()}
-        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 rounded-3xl shadow-2xl max-w-4xl w-full overflow-hidden cursor-default flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-200"
+        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 rounded-xl shadow-xl max-w-4xl w-full overflow-hidden cursor-default flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-200"
       >
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-800/40">

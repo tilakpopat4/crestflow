@@ -197,7 +197,7 @@ export default function AdminTab() {
 
             <button
               type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-98 text-white py-3 rounded-xl text-sm font-semibold transition-all shadow-lg shadow-indigo-600/10 flex items-center justify-center gap-2"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl text-sm font-semibold transition-colors shadow-sm flex items-center justify-center gap-2"
             >
               <Unlock className="w-4 h-4" />
               Unlock Console
@@ -366,7 +366,7 @@ export default function AdminTab() {
                           <button
                             onClick={() => handleUnblockUser(p.id)}
                             disabled={isProcessing}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-3 py-1.5 rounded-lg shadow-sm transition-colors active:scale-95 disabled:opacity-50 inline-flex items-center gap-1 cursor-pointer"
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-3 py-1.5 rounded-lg shadow-xs transition-colors disabled:opacity-50 inline-flex items-center gap-1 cursor-pointer"
                           >
                             Unblock Access
                           </button>
@@ -374,7 +374,7 @@ export default function AdminTab() {
                           <button
                             onClick={() => handleBlockUser(p.id)}
                             disabled={isProcessing}
-                            className="bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 hover:bg-red-600 hover:text-white border border-red-200 dark:border-red-800/60 font-semibold text-xs px-3 py-1.5 rounded-lg transition-colors active:scale-95 disabled:opacity-50 inline-flex items-center gap-1 cursor-pointer"
+                            className="bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 hover:bg-red-600 hover:text-white border border-red-200 dark:border-red-800/60 font-semibold text-xs px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 inline-flex items-center gap-1 cursor-pointer"
                           >
                             Block User
                           </button>

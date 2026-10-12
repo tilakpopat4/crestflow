@@ -183,7 +183,7 @@ export default function IntroScreen({ onComplete }: IntroScreenProps) {
                   stiffness: 120,
                   damping: 14
                 }}
-                className="font-display font-extrabold text-5xl md:text-7xl tracking-wider bg-gradient-to-r from-slate-900 via-indigo-950 to-indigo-600 dark:from-white dark:via-indigo-200 dark:to-indigo-400 bg-clip-text text-transparent"
+                className="font-display font-extrabold text-5xl md:text-7xl tracking-wider text-slate-900 dark:text-white"
               >
                 {letter}
               </motion.span>
@@ -198,7 +198,7 @@ export default function IntroScreen({ onComplete }: IntroScreenProps) {
             className="text-xs md:text-sm font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500 mt-2 font-display flex items-center gap-1.5"
           >
             Creative Workspace
-            <Sparkles className="w-3.5 h-3.5 text-indigo-500 animate-pulse" />
+            <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
             Client Directory
           </motion.p>
         </div>
@@ -273,7 +273,7 @@ export default function IntroScreen({ onComplete }: IntroScreenProps) {
           {/* Progress bar track */}
           <div className="w-full bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-full h-2 relative overflow-hidden">
             <motion.div 
-              className="bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 h-full rounded-full"
+              className="bg-indigo-600 h-full rounded-full"
               style={{ width: `${percent}%` }}
               transition={{ ease: 'easeOut' }}
             />

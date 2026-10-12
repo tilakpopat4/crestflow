@@ -86,17 +86,14 @@ export default function ClientFeedbackForm() {
   if (isSuccess) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4 font-sans text-slate-800 dark:text-slate-200 transition-colors duration-150">
-        <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 p-8 text-center space-y-6 relative overflow-hidden animate-in fade-in zoom-in-95 duration-300">
-          {/* Subtle design accents */}
-          <div className="absolute top-0 inset-x-0 h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
-          
-          <div className="w-16 h-16 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/50 rounded-2xl flex items-center justify-center mx-auto shadow-sm animate-bounce">
-            <CheckCircle2 className="w-10 h-10" />
+        <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-800 p-8 text-center space-y-6 relative overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+          <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/50 rounded-xl flex items-center justify-center mx-auto shadow-xs">
+            <CheckCircle2 className="w-9 h-9" />
           </div>
 
           <div className="space-y-2">
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight flex items-center justify-center gap-1.5">
-              Thank You! <Sparkles className="w-5 h-5 text-indigo-500 animate-pulse" />
+              Thank You! <Sparkles className="w-5 h-5 text-indigo-500" />
             </h1>
             <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
               Your review for <span className="font-semibold text-slate-800 dark:text-slate-200">{freelancerName}</span> has been submitted successfully. Your feedback is highly appreciated!
@@ -139,11 +136,7 @@ export default function ClientFeedbackForm() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4 font-sans text-slate-800 dark:text-slate-200 transition-colors duration-150">
-      <div className="max-w-lg w-full bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200/60 dark:border-slate-800 overflow-hidden relative animate-in fade-in duration-300">
-        
-        {/* Banner with gradient accent */}
-        <div className="h-2.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600"></div>
-
+      <div className="max-w-lg w-full bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden relative animate-in fade-in duration-300">
         {/* Header */}
         <div className="p-6 md:p-8 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
           <div className="flex items-center gap-3">
@@ -192,7 +185,7 @@ export default function ClientFeedbackForm() {
                     }}
                     onMouseEnter={() => setHoveredRating(star)}
                     onMouseLeave={() => setHoveredRating(0)}
-                    className="p-1 transition-all active:scale-90 hover:scale-115 cursor-pointer outline-none"
+                    className="p-1 transition-colors cursor-pointer outline-none"
                     title={`Rate ${star} Stars`}
                   >
                     <Star 
@@ -266,7 +259,7 @@ export default function ClientFeedbackForm() {
             <button
               type="submit"
               disabled={isSubmitting || !freelancerUid}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-xl text-sm transition-all shadow-sm hover:shadow active:scale-98 disabled:opacity-50 cursor-pointer"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-xl text-sm transition-colors shadow-xs disabled:opacity-50 cursor-pointer"
             >
               {isSubmitting ? (
                 <>

@@ -172,7 +172,7 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
                 href={submittedWhatsAppUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition-all shadow flex items-center justify-center gap-2 active:scale-98"
+                className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition-colors shadow-xs flex items-center justify-center gap-2"
               >
                 <MessageCircle className="w-4 h-4" />
                 Open WhatsApp Chat
@@ -377,7 +377,7 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl text-xs font-bold transition-all shadow-md active:scale-98 disabled:opacity-50 flex-1 md:flex-none cursor-pointer"
+                  className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl text-xs font-semibold transition-colors shadow-xs disabled:opacity-50 flex-1 md:flex-none cursor-pointer"
                 >
                   {isSubmitting ? (
                     <>

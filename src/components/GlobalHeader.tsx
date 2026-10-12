@@ -149,7 +149,7 @@ export default function GlobalHeader({
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 px-4 py-3 md:px-8 transition-all">
+    <header className="sticky top-0 z-30 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 py-3 md:px-8 transition-colors">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 md:gap-4">
         {/* Mobile Logo Branding */}
         <div className="flex items-center gap-1.5 md:hidden shrink-0">
@@ -403,16 +403,16 @@ export default function GlobalHeader({
               <button
                 type="button"
                 onClick={() => setShowJourneyMenu(!showJourneyMenu)}
-                className={`py-1.5 px-2.5 md:px-3 md:py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 md:gap-2 transition-all cursor-pointer shadow-2xs border ${
+                className={`py-1.5 px-2.5 md:px-3 md:py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 md:gap-2 transition-colors cursor-pointer border ${
                   journey.currentAnniversary
-                    ? 'bg-gradient-to-r from-amber-500/15 via-orange-500/15 to-indigo-500/15 text-amber-700 dark:text-amber-300 border-amber-400/50 dark:border-amber-400/40 animate-pulse hover:border-amber-500'
+                    ? 'bg-amber-100/90 dark:bg-amber-950/60 text-amber-800 dark:text-amber-200 border-amber-300 dark:border-amber-700/60 hover:border-amber-400'
                     : 'bg-amber-50/80 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 hover:bg-amber-100/90 dark:hover:bg-amber-900/50 border-amber-200/80 dark:border-amber-800/60'
                 }`}
                 title={`Started: ${journey.startDateFormatted} (${journey.workedDays} days freelancing). Click for journey details.`}
               >
                 {journey.currentAnniversary ? (
                   <>
-                    <PartyPopper size={16} className="text-amber-500 animate-bounce" />
+                    <PartyPopper size={16} className="text-amber-600 dark:text-amber-400" />
                     <span className="font-bold text-amber-700 dark:text-amber-300">
                       {journey.currentAnniversary.badge} <span className="hidden sm:inline">Milestone!</span>
                     </span>

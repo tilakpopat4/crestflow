@@ -701,7 +701,7 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
                                     title: item.description,
                                     clientName: currentClient?.name
                                   })}
-                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[11px] font-bold transition-all shadow-2xs cursor-pointer active:scale-95"
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[11px] font-bold transition-colors shadow-2xs cursor-pointer"
                                   title="Watch embedded video preview directly"
                                 >
                                   <Play size={11} className="fill-white" />
@@ -898,8 +898,8 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
 
       {/* Invoice Detail Modal */}
       {viewInvoice && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 dark:border-slate-800 relative my-8 space-y-6">
+        <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-50 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 rounded-xl max-w-xl w-full p-6 sm:p-8 shadow-xl border border-slate-200 dark:border-slate-800 relative my-8 space-y-6">
             
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
               <div className="flex items-center gap-2">

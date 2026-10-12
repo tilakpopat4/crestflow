@@ -176,8 +176,8 @@ export default function CsvImportModal({ isOpen, onClose, userId, onImportSucces
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
-      <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-md w-full shadow-xl overflow-hidden border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-[9999] p-4">
+      <div className="bg-white dark:bg-slate-800 rounded-xl max-w-md w-full shadow-xl overflow-hidden border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-200">
         <div className="flex justify-between items-center p-5 border-b border-slate-100 dark:border-slate-700">
           <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
             <FileType size={20} className="text-indigo-600 dark:text-indigo-400" />
