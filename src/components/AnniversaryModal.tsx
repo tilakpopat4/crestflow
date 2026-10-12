@@ -44,8 +44,8 @@ export default function AnniversaryModal({
           </button>
 
           {/* Milestone Badge Icon */}
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-slate-800 border border-slate-700 text-3xl mb-3">
-            {milestone.emoji || '🎉'}
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 mb-3">
+            <Trophy size={28} />
           </div>
 
           <div className="inline-block px-3 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-amber-300 text-[11px] font-bold uppercase tracking-wider mb-1.5">

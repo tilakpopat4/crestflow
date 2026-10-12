@@ -20,15 +20,15 @@ export interface WorkJourneyStats {
 }
 
 const MILESTONES: { months: number; id: string; badge: string; title: string; emoji: string; description: string }[] = [
-  { months: 1, id: '1_month', badge: '1 Month', title: '1 Month Milestone', emoji: '🌱', description: 'Congratulations on completing your first month of freelancing!' },
-  { months: 3, id: '3_months', badge: '3 Months', title: '3 Months Milestone', emoji: '🎯', description: 'Quarter milestone reached! Your freelancing foundation is getting stronger every day.' },
-  { months: 6, id: '6_months', badge: '6 Months', title: '6 Months Milestone', emoji: '⚡', description: 'Half a year of freelancing! Half-year anniversary of building your independent career.' },
-  { months: 9, id: '9_months', badge: '9 Months', title: '9 Months Milestone', emoji: '🚀', description: 'Three quarters in! Consistent hustle and exceptional client work.' },
-  { months: 12, id: '1_year', badge: '1 Year', title: '1 Year Anniversary', emoji: '🏆', description: 'Happy 1 Year Freelancing Anniversary! A full year of independence, growth, and excellence.' },
-  { months: 18, id: '1_5_years', badge: '1.5 Years', title: '1.5 Years Anniversary', emoji: '✨', description: '18 months of freelancing excellence! Halfway to year two.' },
-  { months: 24, id: '2_years', badge: '2 Years', title: '2 Years Anniversary', emoji: '👑', description: 'Happy 2 Years Anniversary! Two incredible years mastering your craft as an independent pro.' },
-  { months: 30, id: '2_5_years', badge: '2.5 Years', title: '2.5 Years Anniversary', emoji: '🌟', description: 'Two and a half years of freelancing triumph! Keep reaching new heights.' },
-  { months: 36, id: '3_years', badge: '3 Years', title: '3 Years Anniversary', emoji: '💎', description: 'Happy 3 Years Anniversary! A three-year freelancing legacy built on trust and skill.' },
+  { months: 1, id: '1_month', badge: '1 Month', title: '1 Month Milestone', emoji: '', description: 'Congratulations on completing your first month of freelancing!' },
+  { months: 3, id: '3_months', badge: '3 Months', title: '3 Months Milestone', emoji: '', description: 'Quarter milestone reached! Your freelancing foundation is getting stronger every day.' },
+  { months: 6, id: '6_months', badge: '6 Months', title: '6 Months Milestone', emoji: '', description: 'Half a year of freelancing! Half-year anniversary of building your independent career.' },
+  { months: 9, id: '9_months', badge: '9 Months', title: '9 Months Milestone', emoji: '', description: 'Three quarters in! Consistent hustle and exceptional client work.' },
+  { months: 12, id: '1_year', badge: '1 Year', title: '1 Year Anniversary', emoji: '', description: 'Happy 1 Year Freelancing Anniversary! A full year of independence, growth, and excellence.' },
+  { months: 18, id: '1_5_years', badge: '1.5 Years', title: '1.5 Years Anniversary', emoji: '', description: '18 months of freelancing excellence! Halfway to year two.' },
+  { months: 24, id: '2_years', badge: '2 Years', title: '2 Years Anniversary', emoji: '', description: 'Happy 2 Years Anniversary! Two incredible years mastering your craft as an independent pro.' },
+  { months: 30, id: '2_5_years', badge: '2.5 Years', title: '2.5 Years Anniversary', emoji: '', description: 'Two and a half years of freelancing triumph! Keep reaching new heights.' },
+  { months: 36, id: '3_years', badge: '3 Years', title: '3 Years Anniversary', emoji: '', description: 'Happy 3 Years Anniversary! A three-year freelancing legacy built on trust and skill.' },
 ];
 
 // Dynamically extend for years 4 to 30
@@ -38,7 +38,7 @@ for (let y = 4; y <= 30; y++) {
     id: `${y}_years`,
     badge: `${y} Years`,
     title: `${y} Years Anniversary`,
-    emoji: y % 5 === 0 ? '🎖️' : '🔥',
+    emoji: '',
     description: `Happy ${y} Years Freelancing Anniversary! An extraordinary testament to your mastery and dedication.`
   });
   MILESTONES.push({
@@ -46,7 +46,7 @@ for (let y = 4; y <= 30; y++) {
     id: `${y}_5_years`,
     badge: `${y}.5 Years`,
     title: `${y}.5 Years Anniversary`,
-    emoji: '💫',
+    emoji: '',
     description: `${y} and a half years of independent freelancing excellence!`
   });
 }

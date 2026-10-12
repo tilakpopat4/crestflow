@@ -417,29 +417,29 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
             onClick={() => setToastAlert(null)}
             className="text-slate-400 hover:text-white p-1 rounded-lg transition-colors cursor-pointer"
           >
-            ✕
+            <X size={16} />
           </button>
         </div>
       )}
 
       {/* Career Anniversary Milestone Banner if currently active */}
       {journey?.currentAnniversary && !isAnnivBannerDismissed && (
-        <div className="bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-100 p-4 sm:p-5 rounded-xl border border-amber-200 dark:border-amber-800/60 shadow-xs flex items-center justify-between gap-4 relative overflow-hidden animate-in fade-in duration-200">
+        <div className="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between gap-4 relative overflow-hidden animate-in fade-in duration-200">
           <div className="flex items-center gap-3.5 relative z-10">
-            <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/60 border border-amber-300 dark:border-amber-700/60 flex items-center justify-center text-xl shrink-0">
-              {journey.currentAnniversary.emoji}
+            <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+              <Award size={20} />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 border border-amber-300/60 dark:border-amber-700/60 px-2 py-0.5 rounded-md">
+                <span className="text-[10px] font-medium uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded">
                   Career Anniversary Milestone
                 </span>
-                <span className="text-xs text-amber-800 dark:text-amber-300/80 font-medium">
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                   {journey.workedDays} days freelancing
                 </span>
               </div>
-              <h3 className="text-base font-bold mt-0.5 text-amber-950 dark:text-amber-100">{journey.currentAnniversary.title}!</h3>
-              <p className="text-xs text-amber-800 dark:text-amber-300/90 max-w-xl">{journey.currentAnniversary.description}</p>
+              <h3 className="text-base font-bold mt-0.5 text-slate-900 dark:text-slate-100">{journey.currentAnniversary.title}!</h3>
+              <p className="text-xs text-slate-600 dark:text-slate-400 max-w-xl">{journey.currentAnniversary.description}</p>
             </div>
           </div>
           <button
@@ -775,30 +775,28 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
                       <button
                         onClick={() => toggleInvoiceStatus(inv.id)}
                         title="Click to toggle payment status"
-                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer border ${
+                        className={`inline-flex items-center text-[13px] font-medium cursor-pointer transition-colors ${
                           inv.status === 'Paid' 
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' 
-                            : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
+                            ? 'text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300' 
+                            : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100'
                         }`}
                       >
-                        {inv.status === 'Paid' && <CheckCircle2 size={12} />}
+                        <span className={`w-1.5 h-1.5 rounded-full mr-1.5 inline-block shrink-0 ${
+                          inv.status === 'Paid' ? 'bg-indigo-600 dark:bg-indigo-400' : 'bg-slate-400 dark:bg-slate-500'
+                        }`} />
                         {inv.status}
                       </button>
                     </td>
                     <td className="px-6 py-4 text-right space-x-3">
                       <button
                         onClick={() => toggleInvoiceStatus(inv.id)}
-                        className={`text-xs font-semibold hover:underline ${
-                          inv.status === 'Paid' 
-                            ? 'text-amber-600 hover:text-amber-800' 
-                            : 'text-emerald-600 hover:text-emerald-800'
-                        }`}
+                        className="text-xs font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 hover:underline cursor-pointer"
                       >
                         {inv.status === 'Paid' ? 'Mark Pending' : 'Approve Payment'}
                       </button>
                       <button
                         onClick={() => deleteInvoice(inv.id)}
-                        className="text-xs text-red-500 hover:text-red-700 font-medium hover:underline"
+                        className="text-xs text-red-600 hover:text-red-700 font-medium hover:underline cursor-pointer"
                       >
                         Delete
                       </button>

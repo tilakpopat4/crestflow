@@ -607,8 +607,8 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                       : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300 hover:border-slate-300'
                   }`}
                 >
-                  <div className={`p-1.5 rounded-lg shrink-0 text-sm ${formData.paymentBasis === 'per_reel' ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}`}>
-                    🎬
+                  <div className={`p-1.5 rounded-lg shrink-0 text-sm flex items-center justify-center ${formData.paymentBasis === 'per_reel' ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}`}>
+                    <Film size={14} />
                   </div>
                   <div>
                     <div className="text-xs font-bold">Per Reel / Deliverable</div>
@@ -625,8 +625,8 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                       : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300 hover:border-slate-300'
                   }`}
                 >
-                  <div className={`p-1.5 rounded-lg shrink-0 text-sm ${formData.paymentBasis === 'monthly_retainer' ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}`}>
-                    📅
+                  <div className={`p-1.5 rounded-lg shrink-0 text-sm flex items-center justify-center ${formData.paymentBasis === 'monthly_retainer' ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}`}>
+                    <Calendar size={14} />
                   </div>
                   <div>
                     <div className="text-xs font-bold">Monthly Basis (Fixed Amount)</div>
@@ -929,8 +929,8 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                       </span>
                     )}
                     {client.paymentBasis === 'monthly_retainer' && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300">
-                        📅 Monthly Basis
+                      <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                        Monthly Retainer
                       </span>
                     )}
                   </div>

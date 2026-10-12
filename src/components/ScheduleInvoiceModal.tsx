@@ -173,7 +173,7 @@ export default function ScheduleInvoiceModal({
             >
               {activeClients.map(c => (
                 <option key={c.id} value={c.id}>
-                  {c.name} {c.autoInvoiceEnabled ? '✓ (Scheduled)' : ''}
+                  {c.name} {c.autoInvoiceEnabled ? '(Scheduled)' : ''}
                 </option>
               ))}
             </select>

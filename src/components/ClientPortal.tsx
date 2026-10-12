@@ -574,9 +574,10 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
                         <div className="text-slate-400 dark:text-slate-500">{new Date(item.date).toLocaleDateString()} • Qty: {item.quantity}</div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                          item.status === 'Invoiced' ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                        <span className={`text-[12px] font-medium flex items-center gap-1 ${
+                          item.status === 'Invoiced' ? 'text-slate-700 dark:text-slate-300' : 'text-slate-500 dark:text-slate-400'
                         }`}>
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500" />
                           {item.status}
                         </span>
                         {item.videoUrl && (
@@ -589,10 +590,10 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
                                 title: item.description,
                                 clientName: currentClient?.name
                               })}
-                              className="p-1.5 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 rounded-lg transition-colors cursor-pointer"
+                              className="p-1 text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-200 transition-colors cursor-pointer"
                               title="Watch Embedded Video"
                             >
-                              <Play size={12} className="fill-indigo-600 dark:fill-indigo-400" />
+                              <Play size={14} />
                             </button>
                             <a
                               href={item.videoUrl}
@@ -682,11 +683,14 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
                             ₹{item.rate.toLocaleString('en-IN')}
                           </td>
                           <td className="py-3 px-4">
-                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                            <span className={`text-[13px] font-medium flex items-center gap-1.5 ${
                               item.status === 'Invoiced' 
-                                ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900/50' 
-                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700'
+                                ? 'text-slate-700 dark:text-slate-300' 
+                                : 'text-slate-500 dark:text-slate-400'
                             }`}>
+                              <span className={`w-1.5 h-1.5 rounded-full ${
+                                item.status === 'Invoiced' ? 'bg-slate-500' : 'bg-slate-400 dark:bg-slate-500'
+                              }`} />
                               {item.status}
                             </span>
                           </td>
@@ -701,11 +705,11 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
                                     title: item.description,
                                     clientName: currentClient?.name
                                   })}
-                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[11px] font-bold transition-colors shadow-2xs cursor-pointer"
+                                  className="text-xs font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 inline-flex items-center gap-1.5 transition-colors cursor-pointer"
                                   title="Watch embedded video preview directly"
                                 >
-                                  <Play size={11} className="fill-white" />
-                                  <span>Watch Video</span>
+                                  <Play size={14} />
+                                  <span>Watch Preview</span>
                                 </button>
                                 <a
                                   href={item.videoUrl}
@@ -767,9 +771,14 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500">{new Date(inv.date).toLocaleDateString()}</span>
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-                          inv.status === 'Paid' ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-800/60' : 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-100 dark:border-amber-800/60'
+                        <span className={`text-[13px] font-medium flex items-center gap-1.5 ${
+                          inv.status === 'Paid'
+                            ? 'text-indigo-600 dark:text-indigo-400'
+                            : 'text-slate-700 dark:text-slate-300'
                         }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${
+                            inv.status === 'Paid' ? 'bg-indigo-600 dark:bg-indigo-400' : 'bg-slate-400 dark:bg-slate-500'
+                          }`} />
                           {inv.status}
                         </span>
                       </div>

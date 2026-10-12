@@ -339,9 +339,9 @@ export default function StickyNotesWidget({ user, clients }: StickyNotesWidgetPr
                   onChange={(e) => setFormData({ ...formData, clientId: e.target.value })}
                   className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-900"
                 >
-                  <option value="general">📌 General / Quick Snippet (No Client)</option>
+                  <option value="general">General / Quick Snippet (No Client)</option>
                   {clients.map(c => (
-                    <option key={c.id} value={c.id}>👤 {c.name}</option>
+                    <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
                 </select>
               </div>

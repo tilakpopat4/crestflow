@@ -216,7 +216,7 @@ export async function triggerBrowserOverdueAlert(clientName: string, statusLabel
   // Fallback to standard Notification API
   if ('Notification' in window) {
     if (Notification.permission === 'granted') {
-      new Notification(`🚨 FCM Device Alert: ${clientName}`, {
+      new Notification(`FCM Device Alert: ${clientName}`, {
         body: `${statusLabel} - ${message}`,
         icon: '/app_logo_icon.png',
         badge: '/icon.svg'
@@ -225,7 +225,7 @@ export async function triggerBrowserOverdueAlert(clientName: string, statusLabel
     } else if (Notification.permission !== 'denied') {
       const permission = await Notification.requestPermission();
       if (permission === 'granted') {
-        new Notification(`🚨 FCM Device Alert: ${clientName}`, {
+        new Notification(`FCM Device Alert: ${clientName}`, {
           body: `${statusLabel} - ${message}`,
           icon: '/app_logo_icon.png',
           badge: '/icon.svg'
@@ -236,7 +236,7 @@ export async function triggerBrowserOverdueAlert(clientName: string, statusLabel
   }
 
   // Fallback to standard alert modal
-  alert(`🚨 OVERDUE PAYMENT DEVICE ALERT (FCM) 🚨\n\nClient: ${clientName}\nStatus: ${statusLabel}\n\nDetails: ${message}`);
+  alert(`OVERDUE PAYMENT DEVICE ALERT (FCM)\n\nClient: ${clientName}\nStatus: ${statusLabel}\n\nDetails: ${message}`);
   return false;
 }
 

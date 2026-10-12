@@ -111,7 +111,7 @@ export async function triggerFcmPaymentReminder(
     deviceToken = regResult.token;
   }
 
-  const title = `🚨 FCM Device Alert: ${clientName}`;
+  const title = `FCM Device Alert: ${clientName}`;
   const body = `${statusLabel}\n${message}`;
 
   let notificationSent = false;

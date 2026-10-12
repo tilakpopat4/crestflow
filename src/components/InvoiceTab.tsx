@@ -551,8 +551,8 @@ export function renderDocumentHtml(params: {
             </div>
           </div>
           <div style="text-align: right;">
-            <span style="display: inline-block; background-color: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.5px;">
-              ✓ Completed (${totalDeliverablesCount} items)
+            <span style="display: inline-block; background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;">
+              Completed (${totalDeliverablesCount} items)
             </span>
           </div>
         </div>
@@ -722,8 +722,8 @@ export function renderDocumentHtml(params: {
           </div>
         </div>
         <div style="text-align: right;">
-          <span style="display: inline-block; background-color: #f3e8ff; color: #7e22ce; border: 1px solid #d8b4fe; font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.5px;">
-            ✓ ${deliverablesList.length} Deliverable(s) Included
+          <span style="display: inline-block; background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; font-size: 10px; font-weight: 600; padding: 4px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;">
+            ${deliverablesList.length} Deliverable(s) Included
           </span>
         </div>
       </div>
@@ -2022,7 +2022,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
                 >
-                  <span>🎬 Per Reel / Item</span>
+                  <span>Per Reel / Item</span>
                 </button>
                 <button
                   type="button"
@@ -2032,13 +2032,13 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                       setMonthlyRetainerInput(String(selectedClient.monthlyRetainerAmount));
                     }
                   }}
-                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer ${
                     invoiceBillingMode === 'monthly_retainer'
-                      ? 'bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-400 shadow-xs'
+                      ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-xs'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
                 >
-                  <span>📅 Monthly Retainer</span>
+                  <span>Monthly Retainer</span>
                 </button>
               </div>
             )}
@@ -2736,8 +2736,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                         Fixed monthly fee covering all creative deliverables across billing period.
                       </p>
                     </div>
-                    <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-bold uppercase tracking-wider">
-                      ✓ {currentBillingDeliverables.length} Deliverable(s) Included
+                    <span className="px-2.5 py-1 bg-slate-100 text-slate-700 rounded text-xs font-medium">
+                      {currentBillingDeliverables.length} Deliverable(s) Included
                     </span>
                   </div>
                 )}
@@ -2751,8 +2751,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                         Completed for <strong className="text-slate-800">{selectedClient?.name || 'Client'}</strong> ({dateFrom && dateTo ? `${new Date(dateFrom).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })} – ${new Date(dateTo).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}` : 'Current Cycle'})
                       </p>
                     </div>
-                    <span className="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs font-bold uppercase tracking-wider">
-                      ✓ Completed ({invoiceBillingMode === 'monthly_retainer' ? currentBillingDeliverables.length : effectiveReels.reduce((s, r) => s + (r.quantity || 1), 0)} items)
+                    <span className="px-2.5 py-1 bg-slate-100 text-slate-700 rounded text-xs font-medium">
+                      Completed ({invoiceBillingMode === 'monthly_retainer' ? currentBillingDeliverables.length : effectiveReels.reduce((s, r) => s + (r.quantity || 1), 0)} items)
                     </span>
                   </div>
                 ) : (
@@ -3035,8 +3035,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                               {inv.invoiceType === 'monthly_retainer' ? '1 Retainer' : `${inv.reels.length} item(s)`}
                             </span>
                             {inv.invoiceType === 'monthly_retainer' && (
-                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300">
-                                📅 Monthly Retainer
+                              <span className="text-[12px] font-medium text-slate-600 dark:text-slate-400">
+                                Monthly Retainer
                               </span>
                             )}
                           </div>
@@ -3050,12 +3050,16 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                         <td className="p-3.5 text-center">
                           <button
                             onClick={() => toggleInvoiceStatus(inv.id)}
-                            className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold cursor-pointer transition-colors ${inv.status === 'Paid'
-                              ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/60'
-                              : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/60'
-                              }`}
+                            className={`inline-flex items-center text-[13px] font-medium cursor-pointer transition-colors ${
+                              inv.status === 'Paid'
+                                ? 'text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300'
+                                : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100'
+                            }`}
                             title={`Click to mark as ${inv.status === 'Paid' ? 'Pending' : 'Paid & update last payment date'}`}
                           >
+                            <span className={`w-1.5 h-1.5 rounded-full mr-1.5 inline-block shrink-0 ${
+                              inv.status === 'Paid' ? 'bg-indigo-600 dark:bg-indigo-400' : 'bg-slate-400 dark:bg-slate-500'
+                            }`} />
                             {inv.status}
                           </button>
                         </td>
@@ -3305,7 +3309,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-slate-700 flex items-center justify-between">
                       <span>Attached Document</span>
-                      <span className="text-[10px] text-emerald-600 font-semibold">✓ Included in Gmail Send</span>
+                      <span className="text-[11px] text-slate-500 font-medium">Included in Gmail Send</span>
                     </label>
                     <div className="px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-lg flex items-center justify-between text-xs font-mono text-slate-700 h-[38px]">
                       <div className="flex items-center gap-1.5 truncate pr-2">

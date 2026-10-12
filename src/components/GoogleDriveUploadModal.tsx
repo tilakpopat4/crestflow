@@ -249,7 +249,7 @@ export default function GoogleDriveUploadModal({
                   </p>
                   <ol className="list-decimal list-inside text-xs text-amber-900/90 dark:text-amber-200 space-y-1 pl-1 font-medium">
                     <li>
-                      Look at the <strong>far right of your browser's address (URL) bar</strong> and click the <strong>Pop-up blocked icon (🚫)</strong>.
+                      Look at the <strong>far right of your browser's address (URL) bar</strong> and click the <strong>Pop-up blocked icon</strong>.
                     </li>
                     <li>
                       Select <strong>"Always allow pop-ups and redirects for this site"</strong> and click <strong>Done</strong>.

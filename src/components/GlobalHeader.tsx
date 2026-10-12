@@ -371,11 +371,14 @@ export default function GlobalHeader({
                                     <span>•</span>
                                     <span className="font-bold text-slate-900 dark:text-slate-200">₹{inv.totalAmount.toLocaleString('en-IN')}</span>
                                     <span>•</span>
-                                    <span className={`font-semibold px-1.5 py-0.2 rounded text-[10px] ${
+                                    <span className={`text-[12px] font-medium flex items-center gap-1 ${
                                       inv.status === 'Paid'
-                                        ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400'
-                                        : 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400'
+                                        ? 'text-indigo-600 dark:text-indigo-400'
+                                        : 'text-slate-700 dark:text-slate-300'
                                     }`}>
+                                      <span className={`w-1.5 h-1.5 rounded-full ${
+                                        inv.status === 'Paid' ? 'bg-indigo-600 dark:bg-indigo-400' : 'bg-slate-500'
+                                      }`} />
                                       {inv.status}
                                     </span>
                                   </div>
@@ -403,34 +406,19 @@ export default function GlobalHeader({
               <button
                 type="button"
                 onClick={() => setShowJourneyMenu(!showJourneyMenu)}
-                className={`py-1.5 px-2.5 md:px-3 md:py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 md:gap-2 transition-colors cursor-pointer border ${
-                  journey.currentAnniversary
-                    ? 'bg-amber-100/90 dark:bg-amber-950/60 text-amber-800 dark:text-amber-200 border-amber-300 dark:border-amber-700/60 hover:border-amber-400'
-                    : 'bg-amber-50/80 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 hover:bg-amber-100/90 dark:hover:bg-amber-900/50 border-amber-200/80 dark:border-amber-800/60'
-                }`}
-                title={`Started: ${journey.startDateFormatted} (${journey.workedDays} days freelancing). Click for journey details.`}
+                className="py-1.5 px-2 md:py-2 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors cursor-pointer flex items-center gap-1.5"
+                title={`Started: ${journey.startDateFormatted} (${journey.workedDays} days freelancing). Click for details.`}
               >
-                {journey.currentAnniversary ? (
-                  <>
-                    <PartyPopper size={16} className="text-amber-600 dark:text-amber-400" />
-                    <span className="font-bold text-amber-700 dark:text-amber-300">
-                      {journey.currentAnniversary.badge} <span className="hidden sm:inline">Milestone!</span>
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <Flame size={16} className="text-amber-500 fill-amber-500/20" />
-                    <span className="font-bold text-amber-700 dark:text-amber-300">
-                      {journey.workedDays}
-                    </span>
-                    <span className="hidden sm:inline text-slate-600 dark:text-slate-300 font-medium">
-                      days worked
-                    </span>
-                    <span className="sm:hidden text-slate-600 dark:text-slate-300 font-medium">
-                      d
-                    </span>
-                  </>
-                )}
+                <Calendar size={14} className="text-slate-500 dark:text-slate-400" />
+                <span className="font-medium text-slate-700 dark:text-slate-300">
+                  {journey.workedDays}
+                </span>
+                <span className="hidden sm:inline text-slate-500 dark:text-slate-400">
+                  days worked
+                </span>
+                <span className="sm:hidden text-slate-500 dark:text-slate-400">
+                  d
+                </span>
               </button>
 
               {/* Journey Details Popover */}
@@ -488,9 +476,9 @@ export default function GlobalHeader({
                           <button
                             type="button"
                             onClick={() => { setShowJourneyMenu(false); onOpenAnniversaryModal(); }}
-                            className="w-full py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer"
+                            className="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium transition-colors cursor-pointer"
                           >
-                            View Celebration Card 🎉
+                            View Celebration Card
                           </button>
                         )}
                       </div>

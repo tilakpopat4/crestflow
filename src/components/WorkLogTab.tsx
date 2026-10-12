@@ -530,11 +530,10 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
                       />
                     </div>
                     <div className="flex items-center">
-                      <div className="w-full p-2.5 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60 rounded-lg text-xs text-purple-900 dark:text-purple-300 flex items-center gap-2">
-                        <span className="text-base">📅</span>
+                      <div className="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs text-slate-700 dark:text-slate-300 flex items-center gap-2">
                         <div>
                           <strong className="block font-semibold">Monthly Basis Client</strong>
-                          <span>Covered by monthly retainer (₹{(selClient?.monthlyRetainerAmount || 0).toLocaleString('en-IN')}/mo). No per-reel rate is needed.</span>
+                          <span className="text-slate-600 dark:text-slate-400">Covered by monthly retainer (₹{(selClient?.monthlyRetainerAmount || 0).toLocaleString('en-IN')}/mo). No per-reel rate is needed.</span>
                         </div>
                       </div>
                     </div>
@@ -645,8 +644,8 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
                       <td className="py-4 px-4 text-sm font-medium text-slate-900 dark:text-slate-100">
                         <div>{client?.name || 'Unknown Client'}</div>
                         {work.subClientName && (
-                          <div className="inline-flex items-center gap-1 text-[11px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 px-2 py-0.5 rounded mt-0.5">
-                            <Users size={10} /> Sub: {work.subClientName}
+                          <div className="text-[12px] text-slate-500 dark:text-slate-400 font-normal mt-0.5">
+                            {work.subClientName}
                           </div>
                         )}
                       </td>
@@ -667,31 +666,33 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
                                   clientName: client?.name
                                 });
                               }}
-                              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 hover:text-indigo-900 dark:hover:text-indigo-200 transition-all shrink-0 cursor-pointer w-fit"
+                              className="text-xs font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 inline-flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
                               title={`Watch embedded preview: ${videoUrl}`}
                             >
-                              <Play size={11} className="fill-indigo-700 dark:fill-indigo-300" /> Watch Preview
+                              <Play size={14} /> Watch Preview
                             </button>
                           )}
                         </div>
                       </td>
                       <td className="py-4 px-4 text-sm font-medium text-slate-900 dark:text-slate-100">
                         {client?.paymentBasis === 'monthly_retainer' ? (
-                          <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300">
-                            📅 Monthly Retainer
+                          <span className="text-[13px] font-normal text-slate-600 dark:text-slate-400">
+                            Monthly Retainer
                           </span>
                         ) : (
                           `₹${(work.quantity * work.rate).toLocaleString('en-IN')}`
                         )}
                       </td>
-                      <td className="py-4 px-4 text-sm">
+                      <td className="py-4 px-4 text-[13px] font-medium">
                         {work.status === 'Invoiced' ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-950/50 text-green-800 dark:text-green-300">
-                            <CheckCircle size={12} /> Invoiced
+                          <span className="inline-flex items-center text-slate-700 dark:text-slate-300">
+                            <span className="w-1.5 h-1.5 rounded-full bg-slate-500 mr-1.5 inline-block" />
+                            Invoiced
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300">
-                            <Clock size={12} /> Pending
+                          <span className="inline-flex items-center text-slate-500 dark:text-slate-400">
+                            <span className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500 mr-1.5 inline-block" />
+                            Pending
                           </span>
                         )}
                       </td>

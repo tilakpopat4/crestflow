@@ -5,7 +5,7 @@ import {
   ArrowLeft, Calendar, Phone, Mail, Edit3, CheckCircle2, Clock, 
   IndianRupee, Plus, AlertTriangle, Send, FileText, ClipboardList,
   Sparkles, ShieldAlert, DollarSign, Copy, ExternalLink, Play, Download,
-  Users, Tag, Trash2, Edit2, Filter, MessageSquare, Archive, UploadCloud
+  Users, Tag, Trash2, Edit2, Filter, MessageSquare, Archive, UploadCloud, X
 } from 'lucide-react';
 import { User } from 'firebase/auth';
 import { useFirestore } from '../hooks/useFirestore';
@@ -768,7 +768,9 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
               <div className="bg-slate-50 dark:bg-slate-900/80 p-5 rounded-xl border border-indigo-200 dark:border-indigo-900/60 space-y-4 animate-in fade-in">
                 <div className="flex justify-between items-center">
                   <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">{editingWorkId ? 'Edit Work Entry' : 'Add New Work Entry'}</h4>
-                  <button onClick={handleCancelWorkForm} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">✕</button>
+                  <button onClick={handleCancelWorkForm} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <X size={16} />
+                  </button>
                 </div>
 
                 <form onSubmit={handleSaveWorkLog} className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -848,8 +850,8 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                   {client.paymentBasis === 'monthly_retainer' ? (
                     <div className="space-y-1">
                       <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Billing Basis</label>
-                      <div className="p-2 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60 rounded text-xs font-semibold text-purple-700 dark:text-purple-300 flex items-center gap-1.5 h-[38px]">
-                        <span>📅 Monthly Retainer</span>
+                      <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center h-[38px]">
+                        <span>Monthly Retainer</span>
                       </div>
                     </div>
                   ) : (
@@ -926,14 +928,14 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                   return (
                     <button
                       key={sc.id}
-                      onClick={() => setSubClientFilter(sc.id)}
-                      className={`px-3 py-1 rounded-full text-xs font-semibold transition-all shrink-0 cursor-pointer ${
+                      onClick={() => setSubClientFilter(subClientFilter === sc.id ? 'all' : sc.id)}
+                      className={`px-3 py-1 rounded text-xs font-medium transition-colors shrink-0 cursor-pointer ${
                         subClientFilter === sc.id
-                          ? 'bg-purple-600 dark:bg-purple-500 text-white shadow-xs'
-                          : 'bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50 border border-purple-200 dark:border-purple-800'
+                          ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                       }`}
                     >
-                      Sub: {sc.name} ({count})
+                      {sc.name} ({count})
                     </button>
                   );
                 })}
@@ -975,8 +977,8 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                               <div className="flex items-center gap-2 flex-wrap">
                                 <span className="font-medium text-slate-900 dark:text-slate-100">{item.description}</span>
                                 {item.subClientName && (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300">
-                                    <Users size={10} /> Sub: {item.subClientName}
+                                  <span className="text-[12px] text-slate-500 dark:text-slate-400 font-normal">
+                                    {item.subClientName}
                                   </span>
                                 )}
                               </div>
@@ -990,10 +992,10 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                                       title: item.description,
                                       clientName: client.name
                                     })}
-                                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-all cursor-pointer shrink-0 w-fit"
+                                    className="text-xs font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 inline-flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
                                     title="Watch embedded video preview"
                                   >
-                                    <Play size={10} className="fill-indigo-700 dark:fill-indigo-300" /> Watch Video
+                                    <Play size={14} /> Watch Preview
                                   </button>
                                   <a
                                     href={videoUrl}
@@ -1127,8 +1129,8 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                                 {inv.invoiceType === 'monthly_retainer' ? '1 Retainer' : `${inv.reels.length} item(s)`}
                               </span>
                               {inv.invoiceType === 'monthly_retainer' && (
-                                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300">
-                                  📅 Monthly Retainer
+                                <span className="text-[12px] font-medium text-slate-600 dark:text-slate-400">
+                                  Monthly Retainer
                                 </span>
                               )}
                             </div>
@@ -1149,13 +1151,16 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                                   await updateClient({ ...client, lastPaymentDate: pDate });
                                 }
                               }}
-                              className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border cursor-pointer transition-colors ${
+                              className={`inline-flex items-center text-[13px] font-medium cursor-pointer transition-colors ${
                                 inv.status === 'Paid' 
-                                  ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/60' 
-                                  : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/60'
+                                  ? 'text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300' 
+                                  : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100'
                               }`}
                               title={`Click to mark as ${inv.status === 'Paid' ? 'Pending' : 'Paid & update last payment date'}`}
                             >
+                              <span className={`w-1.5 h-1.5 rounded-full mr-1.5 inline-block shrink-0 ${
+                                inv.status === 'Paid' ? 'bg-indigo-600 dark:bg-indigo-400' : 'bg-slate-400 dark:bg-slate-500'
+                              }`} />
                               {inv.status}
                             </button>
                           </td>
@@ -1206,14 +1211,14 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="p-4 bg-purple-50/60 dark:bg-purple-950/40 rounded-xl border border-purple-200 dark:border-purple-800 space-y-1">
-                <span className="text-xs text-purple-700 dark:text-purple-300 font-bold uppercase tracking-wider">
+              <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">
                   Payment Basis
                 </span>
-                <div className="text-base font-bold text-purple-900 dark:text-purple-100 flex items-center gap-1.5">
-                  {client.paymentBasis === 'monthly_retainer' ? '📅 Monthly Retainer' : '🎬 Per Reel'}
+                <div className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                  {client.paymentBasis === 'monthly_retainer' ? 'Monthly Retainer' : 'Per Reel'}
                 </div>
-                <span className="text-xs text-purple-600/80 dark:text-purple-400 block">
+                <span className="text-xs text-slate-500 dark:text-slate-400 block">
                   {client.paymentBasis === 'monthly_retainer'
                     ? `Fixed ₹${(client.monthlyRetainerAmount || client.defaultRate || 0).toLocaleString('en-IN')}/mo`
                     : 'Billed per deliverable'}
@@ -1264,7 +1269,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                 onClick={() => setIsUpdatingPaymentDate(false)}
                 className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold cursor-pointer"
               >
-                ✕
+                <X size={16} />
               </button>
             </div>
 
@@ -1349,7 +1354,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                 }}
                 className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold p-1 rounded-lg cursor-pointer"
               >
-                ✕
+                <X size={16} />
               </button>
             </div>
 
