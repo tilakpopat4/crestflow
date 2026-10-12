@@ -396,25 +396,16 @@ export default function App() {
   if (!user) {
     return (
       <div className="min-h-screen w-full bg-slate-50 dark:bg-slate-950 flex flex-col justify-between font-sans relative overflow-x-hidden selection:bg-indigo-500 selection:text-white">
-        {/* Safe Zone & Framing Overlay for Creators */}
-        <div className="absolute inset-4 md:inset-8 border border-slate-200/60 dark:border-slate-800/60 pointer-events-none z-0 hidden sm:flex flex-col justify-between p-3 select-none">
-          <div className="flex justify-between items-center text-[10px] font-mono text-slate-400 dark:text-slate-600 uppercase tracking-widest">
-            <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-600 inline-block"></span>
-              REC • 24.00 FPS
-            </span>
-            <span>TC 01:00:00:00</span>
-            <span>4K DCI • REC.709</span>
-          </div>
-          <div className="flex justify-between text-[10px] font-mono text-slate-400 dark:text-slate-600 uppercase tracking-widest">
-            <span>ASPECT 16:9</span>
-            <span>SAFE AREA 90%</span>
-          </div>
-          {/* Corner Framing Brackets */}
-          <div className="absolute top-0 left-0 w-3.5 h-3.5 border-t-2 border-l-2 border-slate-300 dark:border-slate-700"></div>
-          <div className="absolute top-0 right-0 w-3.5 h-3.5 border-t-2 border-r-2 border-slate-300 dark:border-slate-700"></div>
-          <div className="absolute bottom-0 left-0 w-3.5 h-3.5 border-b-2 border-l-2 border-slate-300 dark:border-slate-700"></div>
-          <div className="absolute bottom-0 right-0 w-3.5 h-3.5 border-b-2 border-r-2 border-slate-300 dark:border-slate-700"></div>
+        {/* Subtle SVG Grid Background */}
+        <div className="absolute inset-0 pointer-events-none z-0 opacity-40 dark:opacity-20 overflow-hidden">
+          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="creator-grid" width="32" height="32" patternUnits="userSpaceOnUse">
+                <path d="M 32 0 L 0 0 0 32" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-slate-300 dark:text-slate-700" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#creator-grid)" />
+          </svg>
         </div>
 
         {/* Content Area */}
@@ -436,52 +427,68 @@ export default function App() {
               </div>
 
               {/* Feature Highlights */}
-              <div className="space-y-4 pt-1">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 shrink-0 mt-0.5">
-                    <Film size={16} />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                  <div className="p-1.5 w-fit rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 mb-2">
+                    <Film size={15} />
                   </div>
-                  <div>
-                    <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                      Deliverable & Revision Tracking
-                    </h2>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
-                      Log edits, reel cuts, Google Drive preview links, and client approval states with zero friction.
-                    </p>
-                  </div>
+                  <h2 className="text-xs font-semibold text-slate-900 dark:text-slate-100">Deliverables</h2>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-normal">
+                    Reels, longform edits & Drive links.
+                  </p>
                 </div>
 
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 shrink-0 mt-0.5">
-                    <Calendar size={16} />
+                <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                  <div className="p-1.5 w-fit rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 mb-2">
+                    <Calendar size={15} />
                   </div>
-                  <div>
-                    <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                      Retainer & Recurring Cycles
-                    </h2>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
-                      Keep client monthly retainers organized with automatic 30-day payment cycle tracking and timely reminders.
-                    </p>
-                  </div>
+                  <h2 className="text-xs font-semibold text-slate-900 dark:text-slate-100">Retainers</h2>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-normal">
+                    30-day recurring payment cycles.
+                  </p>
                 </div>
 
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 shrink-0 mt-0.5">
-                    <FileText size={16} />
+                <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                  <div className="p-1.5 w-fit rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 mb-2">
+                    <FileText size={15} />
                   </div>
-                  <div>
-                    <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                      Automated Invoicing & Gmail Delivery
-                    </h2>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
-                      Turn logged work into clean, professional PDF invoices and send them directly via your connected Gmail.
-                    </p>
+                  <h2 className="text-xs font-semibold text-slate-900 dark:text-slate-100">Invoicing</h2>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-normal">
+                    One-click PDFs via connected Gmail.
+                  </p>
+                </div>
+              </div>
+
+              {/* Sample Deliverable Workspace Preview */}
+              <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 text-xs space-y-3 shadow-2xs">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">Active Deliverables</span>
+                    <span className="text-[11px] text-slate-400">Sample project view</span>
+                  </div>
+                  <span className="text-[11px] font-medium text-slate-500">Monthly Retainer</span>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between p-2 rounded bg-slate-50 dark:bg-slate-800/60">
+                    <div className="space-y-0.5">
+                      <p className="font-medium text-slate-700 dark:text-slate-300">YouTube Longform - Ep 14 (Rough Cut)</p>
+                      <p className="text-[11px] text-slate-400">DaVinci Resolve • 4K DCI • Turnaround: 2 days</p>
+                    </div>
+                    <span className="text-slate-700 dark:text-slate-300 font-medium text-[13px]">Invoiced</span>
+                  </div>
+                  <div className="flex items-center justify-between p-2 rounded bg-slate-50 dark:bg-slate-800/60">
+                    <div className="space-y-0.5">
+                      <p className="font-medium text-slate-700 dark:text-slate-300">Instagram Reels Batch (3 Videos)</p>
+                      <p className="text-[11px] text-slate-400">Premiere Pro • 9:16 Vertical • Client approved</p>
+                    </div>
+                    <span className="text-indigo-600 dark:text-indigo-400 font-medium text-[13px]">Paid</span>
                   </div>
                 </div>
               </div>
 
               {/* Workflow Tags */}
-              <div className="pt-2 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+              <div className="pt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                 <span className="font-mono text-[11px] uppercase tracking-wider text-slate-400 dark:text-slate-500">Workflow:</span>
                 {['Premiere Pro', 'DaVinci Resolve', 'After Effects', 'Final Cut Pro'].map((app) => (
                   <span
