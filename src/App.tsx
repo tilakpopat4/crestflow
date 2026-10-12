@@ -3,31 +3,39 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import Sidebar from './components/Sidebar';
-import DashboardTab from './components/DashboardTab';
-import ClientsTab from './components/ClientsTab';
-import InvoiceTab from './components/InvoiceTab';
-import { WorkLogTab } from './components/WorkLogTab';
-import AdminTab from './components/AdminTab';
 import GlobalHeader from './components/GlobalHeader';
 import { auth, googleProvider, db } from './firebase';
 import { signInWithPopup, onAuthStateChanged, User, signOut, GoogleAuthProvider } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { useFirestore, safeStringify } from './hooks/useFirestore';
 import { UserProfile } from './types';
-import ProfileModal from './components/ProfileModal';
 import Logo from './components/Logo';
 import { ShieldAlert, LogOut } from 'lucide-react';
 import { setGmailAccessToken } from './lib/gmailService';
 import { setDriveAccessToken } from './lib/driveService';
-import ClientFeedbackForm from './components/ClientFeedbackForm';
-import PublicFreelancerProfile from './components/PublicFreelancerProfile';
-import ClientPortal from './components/ClientPortal';
-import ReviewsTab from './components/ReviewsTab';
-import AnniversaryModal from './components/AnniversaryModal';
 import { calculateWorkJourney, isAnniversaryDismissed, dismissAnniversary } from './lib/anniversary';
+
+const DashboardTab = lazy(() => import('./components/DashboardTab'));
+const ClientsTab = lazy(() => import('./components/ClientsTab'));
+const InvoiceTab = lazy(() => import('./components/InvoiceTab'));
+const WorkLogTab = lazy(() => import('./components/WorkLogTab').then(m => ({ default: m.WorkLogTab })));
+const ReviewsTab = lazy(() => import('./components/ReviewsTab'));
+const AdminTab = lazy(() => import('./components/AdminTab'));
+const ClientPortal = lazy(() => import('./components/ClientPortal'));
+const PublicFreelancerProfile = lazy(() => import('./components/PublicFreelancerProfile'));
+const ClientFeedbackForm = lazy(() => import('./components/ClientFeedbackForm'));
+const ProfileModal = lazy(() => import('./components/ProfileModal'));
+const AnniversaryModal = lazy(() => import('./components/AnniversaryModal'));
+
+const ViewLoadingFallback = () => (
+  <div className="flex-1 flex flex-col items-center justify-center p-12 min-h-[300px] animate-in fade-in duration-200">
+    <div className="w-8 h-8 rounded-full border-2 border-indigo-600 dark:border-indigo-400 border-t-transparent animate-spin mb-3" />
+    <span className="text-xs font-medium text-slate-400 dark:text-slate-500">Loading view...</span>
+  </div>
+);
 
 export type Tab = 'dashboard' | 'clients' | 'work' | 'invoice' | 'reviews' | 'admin';
 
@@ -237,20 +245,26 @@ export default function App() {
   const isFeedbackRoute = window.location.search.includes('feedback=true');
 
   if (isFeedbackRoute) {
-    return <ClientFeedbackForm />;
+    return (
+      <Suspense fallback={<ViewLoadingFallback />}>
+        <ClientFeedbackForm />
+      </Suspense>
+    );
   }
 
   if (freelancerId) {
     return (
-      <PublicFreelancerProfile 
-        freelancerId={freelancerId} 
-        onClose={() => {
-          const url = new URL(window.location.href);
-          url.searchParams.delete('freelancerId');
-          window.history.replaceState({}, '', url.pathname + url.search);
-          setFreelancerId(null);
-        }}
-      />
+      <Suspense fallback={<ViewLoadingFallback />}>
+        <PublicFreelancerProfile 
+          freelancerId={freelancerId} 
+          onClose={() => {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('freelancerId');
+            window.history.replaceState({}, '', url.pathname + url.search);
+            setFreelancerId(null);
+          }}
+        />
+      </Suspense>
     );
   }
 
@@ -379,17 +393,23 @@ export default function App() {
   }
 
   if (isAdminRoute) {
-    return <AdminTab />;
+    return (
+      <Suspense fallback={<ViewLoadingFallback />}>
+        <AdminTab />
+      </Suspense>
+    );
   }
 
   // Render Client Portal if user is in client mode
   if (isClientPortalMode) {
     return (
-      <ClientPortal 
-        user={user} 
-        onLogout={handleLogout} 
-        onSwitchToFreelancer={() => setIsClientPortalMode(false)} 
-      />
+      <Suspense fallback={<ViewLoadingFallback />}>
+        <ClientPortal 
+          user={user} 
+          onLogout={handleLogout} 
+          onSwitchToFreelancer={() => setIsClientPortalMode(false)} 
+        />
+      </Suspense>
     );
   }
 
@@ -430,48 +450,54 @@ export default function App() {
           onOpenAnniversaryModal={() => setIsAnniversaryModalOpen(true)}
         />
         <div className="flex-1 overflow-y-auto overflow-x-hidden relative flex flex-col">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={activeTab}
-              initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 7 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -5 }}
-              transition={{
-                duration: shouldReduceMotion ? 0.01 : 0.18,
-                ease: [0.22, 1, 0.36, 1],
-              }}
-              className="flex-1 w-full flex flex-col"
-            >
-              {activeTab === 'dashboard' && <DashboardTab user={user} profile={profile} onNavigateToClients={() => setActiveTab('clients')} />}
-              {activeTab === 'clients' && <ClientsTab user={user} initialSearchQuery={globalSearchQuery} initialSelectedClientId={selectedClientIdFromSearch} />}
-              {activeTab === 'work' && <WorkLogTab user={user} initialSearchQuery={globalSearchQuery} />}
-              {activeTab === 'invoice' && <InvoiceTab user={user} profile={profile} initialSearchQuery={globalSearchQuery} />}
-              {activeTab === 'reviews' && <ReviewsTab user={user} profile={profile} />}
-              {activeTab === 'admin' && <AdminTab />}
-            </motion.div>
-          </AnimatePresence>
+          <Suspense fallback={<ViewLoadingFallback />}>
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={activeTab}
+                initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 7 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -5 }}
+                transition={{
+                  duration: shouldReduceMotion ? 0.01 : 0.18,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+                className="flex-1 w-full flex flex-col"
+              >
+                {activeTab === 'dashboard' && <DashboardTab user={user} profile={profile} onNavigateToClients={() => setActiveTab('clients')} />}
+                {activeTab === 'clients' && <ClientsTab user={user} initialSearchQuery={globalSearchQuery} initialSelectedClientId={selectedClientIdFromSearch} />}
+                {activeTab === 'work' && <WorkLogTab user={user} initialSearchQuery={globalSearchQuery} />}
+                {activeTab === 'invoice' && <InvoiceTab user={user} profile={profile} initialSearchQuery={globalSearchQuery} />}
+                {activeTab === 'reviews' && <ReviewsTab user={user} profile={profile} />}
+                {activeTab === 'admin' && <AdminTab />}
+              </motion.div>
+            </AnimatePresence>
+          </Suspense>
         </div>
       </main>
 
-      {user && (
-        <ProfileModal 
-          isOpen={isProfileModalOpen}
-          onClose={handleCloseProfileModal}
-          user={user}
-          initialProfile={profile}
-          onSave={handleSaveProfile}
-          isMandatory={!profile && !localStorage.getItem(`crestflow_profile_completed_${user.uid}`)}
-        />
+      {user && isProfileModalOpen && (
+        <Suspense fallback={null}>
+          <ProfileModal 
+            isOpen={isProfileModalOpen}
+            onClose={handleCloseProfileModal}
+            user={user}
+            initialProfile={profile}
+            onSave={handleSaveProfile}
+            isMandatory={!profile && !localStorage.getItem(`crestflow_profile_completed_${user.uid}`)}
+          />
+        </Suspense>
       )}
 
-      {user && (
-        <AnniversaryModal
-          isOpen={isAnniversaryModalOpen}
-          onClose={handleCloseAnniversaryModal}
-          milestone={journey?.currentAnniversary || null}
-          stats={journey}
-          freelancerName={profile?.name || user.displayName || undefined}
-        />
+      {user && isAnniversaryModalOpen && (
+        <Suspense fallback={null}>
+          <AnniversaryModal
+            isOpen={isAnniversaryModalOpen}
+            onClose={handleCloseAnniversaryModal}
+            milestone={journey?.currentAnniversary || null}
+            stats={journey}
+            freelancerName={profile?.name || user.displayName || undefined}
+          />
+        </Suspense>
       )}
     </div>
   );

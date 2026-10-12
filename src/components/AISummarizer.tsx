@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Client, WorkItem, UserProfile } from '../types';
-import { generateWorkSummary } from '../lib/geminiService';
 import { Sparkles, Copy, Calendar, Loader2 } from 'lucide-react';
 
 interface AISummarizerProps {
@@ -28,6 +27,7 @@ export default function AISummarizer({ clients, workItems, profile }: AISummariz
       // Set to end of the day
       upToDate.setHours(23, 59, 59, 999);
       
+      const { generateWorkSummary } = await import('../lib/geminiService');
       const generatedText = await generateWorkSummary(clients, workItems, upToDate, profile);
       setSummary(generatedText);
     } catch (err: any) {

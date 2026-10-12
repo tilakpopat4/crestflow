@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { X, Upload, FileType, CheckCircle2, AlertTriangle, Loader2 } from 'lucide-react';
-import Papa from 'papaparse';
 import { Client, Invoice, WorkItem } from '../types';
 import { generateUUID } from '../lib/utils';
 import { db } from '../firebase';
@@ -21,13 +20,15 @@ export default function CsvImportModal({ isOpen, onClose, userId, onImportSucces
 
   if (!isOpen) return null;
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !userId) return;
 
     setIsImporting(true);
     setError(null);
     setSuccessMsg(null);
+
+    const { default: Papa } = await import('papaparse');
 
     Papa.parse(file, {
       complete: async (results) => {

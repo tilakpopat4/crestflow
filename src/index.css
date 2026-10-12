@@ -20,6 +20,9 @@
 
   body {
     @apply bg-slate-50 text-slate-900 transition-colors duration-150;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   html.dark body {
@@ -90,4 +93,15 @@ table {
 /* Smooth mobile scrolling overscroll containment */
 .overflow-y-auto {
   overscroll-behavior-y: contain;
+}
+
+/* Content-visibility optimization for rendering long work/invoice tables without layout freeze */
+.content-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 300px;
+}
+
+/* Contain layout and paint for independent cards & widgets */
+.contain-paint {
+  contain: paint;
 }
