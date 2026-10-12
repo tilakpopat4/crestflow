@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
-import { Search, X, Users, ClipboardList, FileText, ExternalLink, Play, ArrowRight, CheckCircle2, Clock, Sun, Moon, Monitor, Flame, Sparkles, Trophy, Calendar, PartyPopper } from 'lucide-react';
+import { Search, X, Users, ClipboardList, FileText, ExternalLink, Play, ArrowRight, CheckCircle2, Clock, Sun, Moon, Monitor, Award, Calendar } from 'lucide-react';
 import { User } from 'firebase/auth';
 import { useFirestore } from '../hooks/useFirestore';
 import { Client, WorkItem, Invoice, UserProfile } from '../types';
@@ -8,6 +8,7 @@ import { Tab } from '../App';
 import Logo from './Logo';
 import { useTheme } from '../context/ThemeContext';
 import { calculateWorkJourney } from '../lib/anniversary';
+import StatusBadge from './StatusBadge';
 
 interface GlobalHeaderProps {
   user: User | null;
@@ -321,15 +322,8 @@ export default function GlobalHeader({
                                       <span>{new Date(work.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
                                       <span>•</span>
                                       <span className="font-semibold text-slate-700 dark:text-slate-300">₹{(work.quantity * work.rate).toLocaleString('en-IN')}</span>
-                                      {work.status === 'Invoiced' ? (
-                                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-                                          <CheckCircle2 size={10} /> Invoiced
-                                        </span>
-                                      ) : (
-                                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[10px] font-semibold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
-                                          <Clock size={10} /> Uninvoiced
-                                        </span>
-                                      )}
+                                      <span>•</span>
+                                      <StatusBadge status={work.status === 'Invoiced' ? 'Invoiced' : 'Pending'} />
                                     </div>
                                   </div>
                                 </div>
@@ -357,7 +351,7 @@ export default function GlobalHeader({
                               className="w-full text-left p-3 hover:bg-indigo-50/70 dark:hover:bg-indigo-950/40 rounded-xl transition-all flex items-center justify-between group cursor-pointer border border-transparent hover:border-indigo-100 dark:hover:border-indigo-900/50"
                             >
                               <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 font-mono text-xs font-bold flex items-center justify-center shrink-0">
+                                <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono text-xs font-bold flex items-center justify-center shrink-0">
                                   #{inv.id.substring(0, 4).toUpperCase()}
                                 </div>
                                 <div>
@@ -371,16 +365,7 @@ export default function GlobalHeader({
                                     <span>•</span>
                                     <span className="font-bold text-slate-900 dark:text-slate-200">₹{inv.totalAmount.toLocaleString('en-IN')}</span>
                                     <span>•</span>
-                                    <span className={`text-[12px] font-medium flex items-center gap-1 ${
-                                      inv.status === 'Paid'
-                                        ? 'text-indigo-600 dark:text-indigo-400'
-                                        : 'text-slate-700 dark:text-slate-300'
-                                    }`}>
-                                      <span className={`w-1.5 h-1.5 rounded-full ${
-                                        inv.status === 'Paid' ? 'bg-indigo-600 dark:bg-indigo-400' : 'bg-slate-500'
-                                      }`} />
-                                      {inv.status}
-                                    </span>
+                                    <StatusBadge status={inv.status} />
                                   </div>
                                 </div>
                               </div>
@@ -426,8 +411,8 @@ export default function GlobalHeader({
                 <div className="absolute right-0 top-full mt-2 w-72 md:w-80 bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800 p-4 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                   <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                     <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center">
-                        <Flame size={16} />
+                      <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center">
+                        <Award size={16} />
                       </div>
                       <div>
                         <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">Freelancing Journey</h4>
@@ -455,21 +440,21 @@ export default function GlobalHeader({
                       </div>
                       <div className="text-right">
                         <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">Duration</span>
-                        <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">
+                        <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                           {journey.formattedDuration}
                         </span>
                       </div>
                     </div>
 
                     {journey.currentAnniversary && (
-                      <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3">
+                      <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl p-3">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-base">{journey.currentAnniversary.emoji}</span>
-                          <span className="text-xs font-bold text-amber-700 dark:text-amber-300">
+                          <Award size={14} className="text-indigo-600 dark:text-indigo-400 shrink-0" />
+                          <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
                             {journey.currentAnniversary.title}
                           </span>
                         </div>
-                        <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed mb-2">
+                        <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed mb-2">
                           {journey.currentAnniversary.description}
                         </p>
                         {onOpenAnniversaryModal && (
@@ -485,14 +470,14 @@ export default function GlobalHeader({
                     )}
 
                     {journey.nextMilestone && (
-                      <div className="bg-indigo-50/70 dark:bg-indigo-950/40 rounded-xl p-3 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-between text-xs">
+                      <div className="bg-slate-50 dark:bg-slate-800/80 rounded-xl p-3 border border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs">
                         <div className="flex items-center gap-2">
-                          <Sparkles size={14} className="text-indigo-500 shrink-0" />
+                          <Calendar size={14} className="text-slate-500 dark:text-slate-400 shrink-0" />
                           <div className="text-[11px] text-slate-700 dark:text-slate-300">
-                            Next milestone: <strong className="font-semibold text-indigo-700 dark:text-indigo-300">{journey.nextMilestone.badge}</strong>
+                            Next milestone: <strong className="font-semibold text-slate-900 dark:text-white">{journey.nextMilestone.badge}</strong>
                           </div>
                         </div>
-                        <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-white dark:bg-slate-900 px-2 py-0.5 rounded-full shadow-2xs border border-indigo-100 dark:border-indigo-800">
+                        <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
                           in {Math.abs(journey.nextMilestone.diffDays)}d
                         </span>
                       </div>

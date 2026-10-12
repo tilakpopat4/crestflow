@@ -9,12 +9,11 @@ interface StickyNotesWidgetProps {
   clients: Client[];
 }
 
-const COLOR_MAP: Record<StickyNote['color'], { bg: string; border: string; text: string; badge: string; pin: string; dot: string }> = {
+const COLOR_MAP: Record<StickyNote['color'], { bg: string; border: string; text: string; pin: string; dot: string }> = {
   yellow: {
     bg: 'bg-amber-50 dark:bg-amber-950/40',
     border: 'border-amber-200 dark:border-amber-800/60 hover:border-amber-300 dark:hover:border-amber-700',
     text: 'text-amber-950 dark:text-amber-100',
-    badge: 'bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 border-amber-300 dark:border-amber-700',
     pin: 'text-amber-500 dark:text-amber-400',
     dot: 'bg-amber-400'
   },
@@ -22,7 +21,6 @@ const COLOR_MAP: Record<StickyNote['color'], { bg: string; border: string; text:
     bg: 'bg-sky-50 dark:bg-sky-950/40',
     border: 'border-sky-200 dark:border-sky-800/60 hover:border-sky-300 dark:hover:border-sky-700',
     text: 'text-sky-950 dark:text-sky-100',
-    badge: 'bg-sky-100 dark:bg-sky-900/60 text-sky-800 dark:text-sky-200 border-sky-300 dark:border-sky-700',
     pin: 'text-sky-500 dark:text-sky-400',
     dot: 'bg-sky-400'
   },
@@ -30,7 +28,6 @@ const COLOR_MAP: Record<StickyNote['color'], { bg: string; border: string; text:
     bg: 'bg-emerald-50 dark:bg-emerald-950/40',
     border: 'border-emerald-200 dark:border-emerald-800/60 hover:border-emerald-300 dark:hover:border-emerald-700',
     text: 'text-emerald-950 dark:text-emerald-100',
-    badge: 'bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 border-emerald-300 dark:border-emerald-700',
     pin: 'text-emerald-500 dark:text-emerald-400',
     dot: 'bg-emerald-400'
   },
@@ -38,7 +35,6 @@ const COLOR_MAP: Record<StickyNote['color'], { bg: string; border: string; text:
     bg: 'bg-pink-50 dark:bg-pink-950/40',
     border: 'border-pink-200 dark:border-pink-800/60 hover:border-pink-300 dark:hover:border-pink-700',
     text: 'text-pink-950 dark:text-pink-100',
-    badge: 'bg-pink-100 dark:bg-pink-900/60 text-pink-800 dark:text-pink-200 border-pink-300 dark:border-pink-700',
     pin: 'text-pink-500 dark:text-pink-400',
     dot: 'bg-pink-400'
   },
@@ -46,7 +42,6 @@ const COLOR_MAP: Record<StickyNote['color'], { bg: string; border: string; text:
     bg: 'bg-purple-50 dark:bg-purple-950/40',
     border: 'border-purple-200 dark:border-purple-800/60 hover:border-purple-300 dark:hover:border-purple-700',
     text: 'text-purple-950 dark:text-purple-100',
-    badge: 'bg-purple-100 dark:bg-purple-900/60 text-purple-800 dark:text-purple-200 border-purple-300 dark:border-purple-700',
     pin: 'text-purple-500 dark:text-purple-400',
     dot: 'bg-purple-400'
   }
@@ -175,13 +170,13 @@ export default function StickyNotesWidget({ user, clients }: StickyNotesWidgetPr
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 rounded-lg">
+          <div className="p-2.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg">
             <NoteIcon size={20} />
           </div>
           <div>
             <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
               Sticky Notes
-              <span className="text-xs font-semibold px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-full border border-slate-200 dark:border-slate-600">
+              <span className="text-xs font-medium px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded">
                 {notes.length}
               </span>
             </h3>
@@ -261,7 +256,7 @@ export default function StickyNotesWidget({ user, clients }: StickyNotesWidgetPr
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5">
                       <Pin size={14} className={`${style.pin} rotate-45 shrink-0`} />
-                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${style.badge}`}>
+                      <span className="text-[10px] font-medium uppercase tracking-wider px-2 py-0.5 rounded bg-black/5 dark:bg-white/10 text-slate-700 dark:text-slate-300">
                         {client ? client.name : 'General Note'}
                       </span>
                     </div>

@@ -3,6 +3,7 @@ import { db } from '../firebase';
 import { doc, getDoc, collection, setDoc } from 'firebase/firestore';
 import { UserProfile, ServiceRequest } from '../types';
 import Logo from './Logo';
+import Footer from './Footer';
 import { 
   Sparkles, 
   CheckCircle2, 
@@ -151,7 +152,7 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 p-4 text-center transition-colors duration-150">
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 max-w-md w-full shadow-2xl space-y-6">
-          <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto shadow-sm">
+          <div className="w-16 h-16 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center mx-auto shadow-sm">
             <CheckCircle2 className="w-10 h-10" />
           </div>
           <div className="space-y-2">
@@ -197,8 +198,7 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 md:p-12 relative overflow-hidden font-sans text-slate-900 dark:text-slate-100 selection:bg-indigo-500 selection:text-white transition-colors duration-150">
       {/* Decorative background grids and blobs */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f0_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f0_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none opacity-60 dark:opacity-30 z-0"></div>
-      <div className="absolute top-0 left-1/4 w-[400px] h-[400px] bg-indigo-200/20 dark:bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none z-0"></div>
-      <div className="absolute bottom-0 right-1/4 w-[350px] h-[350px] bg-purple-200/20 dark:bg-purple-500/10 rounded-full blur-[100px] pointer-events-none z-0"></div>
+      <div className="absolute top-0 left-1/4 w-[400px] h-[400px] bg-slate-200/20 dark:bg-slate-800/10 rounded-full blur-[100px] pointer-events-none z-0"></div>
 
       <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative z-10">
         
@@ -213,9 +213,12 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
           <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6 relative overflow-hidden">
             {/* Header info */}
             <div>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/50 text-indigo-700 dark:text-indigo-300 text-xs font-semibold rounded-full mb-4">
-                <Briefcase className="w-3.5 h-3.5" /> Open for Bookings
-              </span>
+              <div className="mb-3">
+                <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400 inline-flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400" />
+                  Open for Bookings
+                </span>
+              </div>
               <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">{profile.name}</h1>
               <p className="text-indigo-600 dark:text-indigo-400 font-bold text-sm tracking-wide uppercase mt-1">{profile.professionalTitle}</p>
             </div>
@@ -396,6 +399,7 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
           </div>
         </div>
       </div>
+      <Footer variant="minimal" className="mt-12 relative z-10" />
     </div>
   );
 }

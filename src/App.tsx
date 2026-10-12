@@ -18,6 +18,8 @@ import { setGmailAccessToken } from './lib/gmailService';
 import { setDriveAccessToken } from './lib/driveService';
 import { calculateWorkJourney, isAnniversaryDismissed, dismissAnniversary } from './lib/anniversary';
 
+import Footer from './components/Footer';
+
 const DashboardTab = lazy(() => import('./components/DashboardTab'));
 const ClientsTab = lazy(() => import('./components/ClientsTab'));
 const InvoiceTab = lazy(() => import('./components/InvoiceTab'));
@@ -29,6 +31,9 @@ const PublicFreelancerProfile = lazy(() => import('./components/PublicFreelancer
 const ClientFeedbackForm = lazy(() => import('./components/ClientFeedbackForm'));
 const ProfileModal = lazy(() => import('./components/ProfileModal'));
 const AnniversaryModal = lazy(() => import('./components/AnniversaryModal'));
+const PrivacyPolicyPage = lazy(() => import('./components/PrivacyPolicyPage'));
+const TermsOfServicePage = lazy(() => import('./components/TermsOfServicePage'));
+const ContactPage = lazy(() => import('./components/ContactPage'));
 
 const ViewLoadingFallback = () => (
   <div className="flex-1 flex flex-col items-center justify-center p-12 min-h-[360px] animate-in fade-in duration-150 select-none">
@@ -59,6 +64,15 @@ export default function App() {
   const [globalSearchQuery, setGlobalSearchQuery] = useState('');
   const [selectedClientIdFromSearch, setSelectedClientIdFromSearch] = useState<string | null>(null);
   const [isAnniversaryModalOpen, setIsAnniversaryModalOpen] = useState(false);
+  const checkSupportingRoute = (): 'privacy' | 'terms' | 'contact' | null => {
+    const path = window.location.pathname;
+    const hash = window.location.hash;
+    if (path === '/privacy' || hash === '#/privacy' || hash === '#privacy') return 'privacy';
+    if (path === '/terms' || hash === '#/terms' || hash === '#terms') return 'terms';
+    if (path === '/contact' || hash === '#/contact' || hash === '#contact') return 'contact';
+    return null;
+  };
+
   const checkIsAdminRoute = () => {
     return (
       window.location.pathname === '/admin' ||
@@ -69,11 +83,13 @@ export default function App() {
   };
 
   const [isAdminRoute, setIsAdminRoute] = useState(checkIsAdminRoute());
+  const [supportingRoute, setSupportingRoute] = useState<'privacy' | 'terms' | 'contact' | null>(checkSupportingRoute());
 
   // Handle browser back/forward buttons or direct path modifications
   useEffect(() => {
     const handleLocationChange = () => {
       setIsAdminRoute(checkIsAdminRoute());
+      setSupportingRoute(checkSupportingRoute());
     };
     window.addEventListener('popstate', handleLocationChange);
     window.addEventListener('hashchange', handleLocationChange);
@@ -82,6 +98,21 @@ export default function App() {
       window.removeEventListener('hashchange', handleLocationChange);
     };
   }, []);
+
+  const handleSupportingNavigate = (route: 'privacy' | 'terms' | 'contact') => {
+    setSupportingRoute(route);
+  };
+
+  const handleTabChange = (tab: Tab, query?: string) => {
+    if (supportingRoute) {
+      setSupportingRoute(null);
+      window.history.pushState({}, '', '/');
+    }
+    if (query !== undefined) {
+      setGlobalSearchQuery(query);
+    }
+    setActiveTab(tab);
+  };
 
   // Load user profile from profiles collection in Firestore
   const { data: profiles, loading: profilesLoading, addOrUpdateItem: firestoreSaveProfile } = useFirestore<UserProfile>('profiles', user?.uid);
@@ -319,78 +350,119 @@ export default function App() {
     );
   }
 
+  if (supportingRoute && !user) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-150">
+        <header className="sticky top-0 z-30 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 py-3 md:px-8 transition-colors">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <a
+              href="/"
+              onClick={(e) => {
+                e.preventDefault();
+                setSupportingRoute(null);
+                window.history.pushState({}, '', '/');
+              }}
+              className="flex items-center gap-2 cursor-pointer"
+            >
+              <Logo className="w-6 h-6 md:w-7 md:h-7" />
+              <span className="font-extrabold text-slate-900 dark:text-white tracking-tight text-sm md:text-base">
+                CrestFlow
+              </span>
+            </a>
+            <button
+              type="button"
+              onClick={() => {
+                setSupportingRoute(null);
+                window.history.pushState({}, '', '/');
+              }}
+              className="text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+            >
+              Sign In
+            </button>
+          </div>
+        </header>
+        <main className="flex-1 flex flex-col">
+          <Suspense fallback={<ViewLoadingFallback />}>
+            {supportingRoute === 'privacy' && <PrivacyPolicyPage onNavigate={handleSupportingNavigate} />}
+            {supportingRoute === 'terms' && <TermsOfServicePage onNavigate={handleSupportingNavigate} />}
+            {supportingRoute === 'contact' && <ContactPage />}
+          </Suspense>
+        </main>
+        <Footer onNavigate={handleSupportingNavigate} />
+      </div>
+    );
+  }
+
   if (!user) {
     return (
-      <div className="flex items-center justify-center h-screen w-full bg-slate-50 dark:bg-slate-950">
-        <div className="bg-white dark:bg-slate-900 p-8 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 text-center max-w-md w-full font-sans">
-          <div className="flex items-center justify-center gap-2.5 mb-4">
-            <Logo className="w-10 h-10 shadow-xs" />
-            <span className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">CrestFlow</span>
-          </div>
-
-          {!isAdminRoute && (
-            <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl mb-6">
-              <button
-                type="button"
-                onClick={() => setIsClientPortalMode(false)}
-                className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                  !isClientPortalMode ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                }`}
-              >
-                Freelancer Login
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsClientPortalMode(true)}
-                className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                  isClientPortalMode ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                }`}
-              >
-                Client Portal
-              </button>
+      <div className="min-h-screen w-full bg-slate-50 dark:bg-slate-950 flex flex-col justify-between font-sans">
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 p-8 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 text-center max-w-md w-full">
+            <div className="flex items-center justify-center gap-2.5 mb-4">
+              <Logo className="w-10 h-10 shadow-xs" />
+              <span className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">CrestFlow</span>
             </div>
-          )}
 
-          <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-1">
-            {isAdminRoute ? 'Admin Portal' : (isClientPortalMode ? 'Client Portal Sign In' : 'Welcome Back')}
-          </h1>
-          <p className="text-slate-500 dark:text-slate-400 mb-6 text-sm">
-            {isAdminRoute 
-              ? 'Please sign in with Google to authenticate and load the Admin database console.' 
-              : (isClientPortalMode 
-                  ? 'Sign in with your Google account to view your project work logs, invoices, and payment status.'
-                  : 'Sign in to access your CrestFlow Freelancing Dashboard and cloud sync.')}
-          </p>
-          <button 
-            onClick={handleLogin}
-            disabled={isSigningIn}
-            className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white py-2.5 rounded-xl font-medium transition-colors cursor-pointer disabled:cursor-not-allowed shadow-sm"
-          >
-            {isSigningIn ? (
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-            ) : (
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
-                <path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
-              </svg>
+            {!isAdminRoute && (
+              <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl mb-6">
+                <button
+                  type="button"
+                  onClick={() => setIsClientPortalMode(false)}
+                  className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                    !isClientPortalMode ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                  }`}
+                >
+                  Freelancer Login
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsClientPortalMode(true)}
+                  className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                    isClientPortalMode ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                  }`}
+                >
+                  Client Portal
+                </button>
+              </div>
             )}
-            {isSigningIn 
-              ? 'Signing In...' 
-              : (isAdminRoute ? 'Admin Sign In' : (isClientPortalMode ? 'Sign in to Client Portal' : 'Sign in with Google'))}
-          </button>
-          {isAdminRoute && (
-            <button
-              onClick={() => { window.location.href = '/' }}
-              className="mt-4 text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium transition-colors border-none bg-transparent cursor-pointer"
+
+            <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-1">
+              {isAdminRoute ? 'Admin Portal' : (isClientPortalMode ? 'Client Portal Sign In' : 'Welcome Back')}
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400 mb-6 text-sm">
+              {isAdminRoute 
+                ? 'Please sign in with Google to authenticate and load the Admin database console.' 
+                : (isClientPortalMode 
+                    ? 'Sign in with your Google account to view your project work logs, invoices, and payment status.'
+                    : 'Sign in to access your CrestFlow Freelancing Dashboard and cloud sync.')}
+            </p>
+            <button 
+              onClick={handleLogin}
+              disabled={isSigningIn}
+              className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white py-2.5 rounded-xl font-medium transition-colors cursor-pointer disabled:cursor-not-allowed shadow-sm"
             >
-              Back to Main Website
+              {isSigningIn ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              ) : (
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
+                </svg>
+              )}
+              {isSigningIn 
+                ? 'Signing In...' 
+                : (isAdminRoute ? 'Admin Sign In' : (isClientPortalMode ? 'Sign in to Client Portal' : 'Sign in with Google'))}
             </button>
-          )}
-          <div className="mt-8 flex justify-center gap-4 text-xs text-slate-400 dark:text-slate-500">
-            <a href="/privacy-policy.html" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline transition-colors">Privacy Policy</a>
-            <span>•</span>
-            <a href="/terms-of-service.html" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline transition-colors">Terms of Service</a>
+            {isAdminRoute && (
+              <button
+                onClick={() => { window.location.href = '/' }}
+                className="mt-4 text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium transition-colors border-none bg-transparent cursor-pointer"
+              >
+                Back to Main Website
+              </button>
+            )}
           </div>
         </div>
+        <Footer variant="minimal" onNavigate={handleSupportingNavigate} />
       </div>
     );
   }
@@ -419,8 +491,8 @@ export default function App() {
   return (
     <div className="flex flex-col md:flex-row h-screen w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-hidden font-sans transition-colors duration-150">
       <Sidebar 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
+        activeTab={supportingRoute ? ('' as any) : activeTab} 
+        setActiveTab={handleTabChange} 
         user={user} 
         onLogout={handleLogout} 
         profile={profile}
@@ -430,12 +502,13 @@ export default function App() {
       <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative pb-20 md:pb-0">
         <GlobalHeader
           user={user}
-          activeTab={activeTab}
-          setActiveTab={(tab, query) => {
-            if (query !== undefined) setGlobalSearchQuery(query);
-            setActiveTab(tab);
-          }}
+          activeTab={supportingRoute ? ('' as any) : activeTab}
+          setActiveTab={handleTabChange}
           onSearchSelect={(type, id, query) => {
+            if (supportingRoute) {
+              setSupportingRoute(null);
+              window.history.pushState({}, '', '/');
+            }
             if (query !== undefined) setGlobalSearchQuery(query);
             if (type === 'client') {
               setSelectedClientIdFromSearch(id);
@@ -453,28 +526,34 @@ export default function App() {
           onOpenAnniversaryModal={() => setIsAnniversaryModalOpen(true)}
         />
         <div className="flex-1 overflow-y-auto overflow-x-hidden relative flex flex-col">
-          <Suspense fallback={<ViewLoadingFallback />}>
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={activeTab}
-                initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 7 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -5 }}
-                transition={{
-                  duration: shouldReduceMotion ? 0.01 : 0.18,
-                  ease: [0.22, 1, 0.36, 1],
-                }}
-                className="flex-1 w-full flex flex-col"
-              >
-                {activeTab === 'dashboard' && <DashboardTab user={user} profile={profile} onNavigateToClients={() => setActiveTab('clients')} />}
-                {activeTab === 'clients' && <ClientsTab user={user} initialSearchQuery={globalSearchQuery} initialSelectedClientId={selectedClientIdFromSearch} />}
-                {activeTab === 'work' && <WorkLogTab user={user} initialSearchQuery={globalSearchQuery} />}
-                {activeTab === 'invoice' && <InvoiceTab user={user} profile={profile} initialSearchQuery={globalSearchQuery} />}
-                {activeTab === 'reviews' && <ReviewsTab user={user} profile={profile} />}
-                {activeTab === 'admin' && <AdminTab />}
-              </motion.div>
-            </AnimatePresence>
-          </Suspense>
+          <div className="flex-1 flex flex-col">
+            <Suspense fallback={<ViewLoadingFallback />}>
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={supportingRoute || activeTab}
+                  initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 7 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -5 }}
+                  transition={{
+                    duration: shouldReduceMotion ? 0.01 : 0.18,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                  className="flex-1 w-full flex flex-col"
+                >
+                  {supportingRoute === 'privacy' && <PrivacyPolicyPage onNavigate={handleSupportingNavigate} />}
+                  {supportingRoute === 'terms' && <TermsOfServicePage onNavigate={handleSupportingNavigate} />}
+                  {supportingRoute === 'contact' && <ContactPage />}
+                  {!supportingRoute && activeTab === 'dashboard' && <DashboardTab user={user} profile={profile} onNavigateToClients={() => setActiveTab('clients')} />}
+                  {!supportingRoute && activeTab === 'clients' && <ClientsTab user={user} initialSearchQuery={globalSearchQuery} initialSelectedClientId={selectedClientIdFromSearch} />}
+                  {!supportingRoute && activeTab === 'work' && <WorkLogTab user={user} initialSearchQuery={globalSearchQuery} />}
+                  {!supportingRoute && activeTab === 'invoice' && <InvoiceTab user={user} profile={profile} initialSearchQuery={globalSearchQuery} />}
+                  {!supportingRoute && activeTab === 'reviews' && <ReviewsTab user={user} profile={profile} />}
+                  {!supportingRoute && activeTab === 'admin' && <AdminTab />}
+                </motion.div>
+              </AnimatePresence>
+            </Suspense>
+          </div>
+          <Footer onNavigate={handleSupportingNavigate} />
         </div>
       </main>
 

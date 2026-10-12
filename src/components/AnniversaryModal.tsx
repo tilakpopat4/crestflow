@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Trophy, Sparkles, Calendar, ArrowRight, PartyPopper } from 'lucide-react';
+import { X, Trophy, Award, Calendar, ArrowRight } from 'lucide-react';
 import { AnniversaryMilestone, WorkJourneyStats } from '../lib/anniversary';
 
 interface AnniversaryModalProps {
@@ -48,7 +48,7 @@ export default function AnniversaryModal({
             <Trophy size={28} />
           </div>
 
-          <div className="inline-block px-3 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-amber-300 text-[11px] font-bold uppercase tracking-wider mb-1.5">
+          <div className="inline-block px-3 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-slate-300 text-[11px] font-bold uppercase tracking-wider mb-1.5">
             {isExactToday ? 'Milestone Reached Today' : 'Recent Career Milestone'}
           </div>
 
@@ -71,14 +71,14 @@ export default function AnniversaryModal({
 
           {/* Stats Box */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-xl p-3.5 text-center">
-              <span className="text-[10px] uppercase font-bold tracking-wider text-amber-700 dark:text-amber-300 block mb-0.5">
+            <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl p-3.5 text-center">
+              <span className="text-[10px] uppercase font-bold tracking-wider text-slate-600 dark:text-slate-400 block mb-0.5">
                 Days Freelancing
               </span>
-              <span className="text-2xl font-black text-amber-800 dark:text-amber-200">
+              <span className="text-2xl font-black text-slate-900 dark:text-slate-100">
                 {stats.workedDays}
               </span>
-              <span className="text-[11px] text-amber-700/80 dark:text-amber-300/80 block mt-0.5 font-medium">
+              <span className="text-[11px] text-slate-600 dark:text-slate-400 block mt-0.5 font-medium">
                 {stats.formattedDuration}
               </span>
             </div>
@@ -100,12 +100,12 @@ export default function AnniversaryModal({
           {stats.nextMilestone && (
             <div className="bg-slate-50 dark:bg-slate-800/60 rounded-xl p-3 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between text-xs">
               <div className="flex items-center gap-2">
-                <Sparkles size={15} className="text-amber-500 shrink-0" />
+                <Award size={15} className="text-slate-500 dark:text-slate-400 shrink-0" />
                 <span className="text-slate-600 dark:text-slate-300">
                   Next target: <strong className="text-slate-900 dark:text-white">{stats.nextMilestone.title}</strong>
                 </span>
               </div>
-              <span className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-full">
+              <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
                 in {Math.abs(stats.nextMilestone.diffDays)} days
               </span>
             </div>

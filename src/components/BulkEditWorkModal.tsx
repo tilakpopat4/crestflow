@@ -236,8 +236,8 @@ export default function BulkEditWorkModal({
             <div>
               <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                 Bulk Edit Work Logs
-                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300">
-                  {selectedItems.length} selected
+                <span className="text-xs font-normal text-slate-500 dark:text-slate-400">
+                  ({selectedItems.length} selected)
                 </span>
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -256,9 +256,9 @@ export default function BulkEditWorkModal({
 
         {/* Invoiced Sync Notification Banner */}
         {hasInvoiced && (
-          <div className="mx-6 mt-5 p-3.5 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 rounded-xl flex items-start gap-3">
-            <Info size={18} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-            <div className="text-xs text-amber-800 dark:text-amber-200">
+          <div className="mx-6 mt-5 p-3.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl flex items-start gap-3">
+            <Info size={18} className="text-slate-500 dark:text-slate-400 shrink-0 mt-0.5" />
+            <div className="text-xs text-slate-700 dark:text-slate-300">
               <span className="font-bold">Automatic Invoice Sync Active:</span> {invoicedItems.length} of the {selectedItems.length} selected logs belong to {affectedInvoices.length} existing listed invoice(s). Any edits to Rate, Quantity, Description, or Sub-Client will automatically be synchronized into the line items and grand totals of their respective invoices.
             </div>
           </div>
@@ -474,13 +474,13 @@ export default function BulkEditWorkModal({
 
                   {selectedClientObj?.subClients && selectedClientObj.subClients.length > 0 && (
                     <div>
-                      <label className="block text-xs font-medium text-purple-700 dark:text-purple-300 mb-1 flex items-center gap-1">
+                      <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
                         <Users size={11} /> Assign Sub-Client (Optional)
                       </label>
                       <select
                         value={selectedSubClientId}
                         onChange={(e) => setSelectedSubClientId(e.target.value)}
-                        className="w-full p-2 text-xs rounded-lg border border-purple-300 dark:border-purple-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-purple-500 outline-none"
+                        className="w-full p-2 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none"
                       >
                         <option value="">Direct Parent ({selectedClientObj.name})</option>
                         {selectedClientObj.subClients.map(sc => (

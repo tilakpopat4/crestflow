@@ -18,6 +18,7 @@ import {
 } from '../lib/paymentUtils';
 import ClientDashboard from './ClientDashboard';
 import CsvImportModal from './CsvImportModal';
+import StatusBadge from './StatusBadge';
 
 interface ClientsTabProps {
   user: User | null;
@@ -366,7 +367,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                         <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Contact: {req.contactName}</p>
                       </div>
                       {req.proposedRate && (
-                        <span className="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-900/60 rounded text-[11px] font-bold">
+                        <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
                           ₹{req.proposedRate}/reel
                         </span>
                       )}
@@ -410,19 +411,19 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
 
       {/* Global Payment Reminders Bar across clients (if any client has payment due or delayed) */}
       {!isNotificationDismissed && notificationClients.length > 0 && (
-        <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-xl p-5 shadow-xs space-y-3 relative">
+        <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs space-y-3 relative">
           <div className="flex items-center justify-between pr-8">
-            <div className="flex items-center gap-2.5 text-amber-900 dark:text-amber-300 font-bold text-sm">
-              <AlertTriangle className="text-amber-600 dark:text-amber-400" size={20} />
+            <div className="flex items-center gap-2.5 text-slate-900 dark:text-slate-100 font-bold text-sm">
+              <AlertTriangle className="text-red-600 dark:text-red-400" size={20} />
               <span>Payment Cycle Reminders ({notificationClients.length} Action Required)</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-amber-700 dark:text-amber-400 font-medium">30-Day Recurring Cycle Alerts</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">30-Day Recurring Cycle Alerts</span>
             </div>
           </div>
           <button
             onClick={() => setIsNotificationDismissed(true)}
-            className="absolute top-4 right-4 text-amber-700 dark:text-amber-400 hover:text-amber-950 dark:hover:text-amber-200 hover:bg-amber-200/60 dark:hover:bg-amber-900/40 p-1.5 rounded-lg transition-colors cursor-pointer"
+            className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 p-1.5 rounded-lg transition-colors cursor-pointer"
             title="Dismiss notification"
             aria-label="Close notification"
           >
@@ -433,14 +434,12 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
             {notificationClients.map(({ client, statusInfo, financials }) => (
               <div
                 key={client.id}
-                className="bg-white dark:bg-slate-800 p-3.5 rounded-xl border border-amber-200 dark:border-amber-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs min-w-0 overflow-hidden"
+                className="bg-white dark:bg-slate-800 p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs min-w-0 overflow-hidden"
               >
                 <div className="w-full sm:w-auto min-w-0 flex-1">
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="font-bold text-slate-900 dark:text-slate-100 text-xs truncate">{client.name}</span>
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold shrink-0 ${statusInfo.badgeClass}`}>
-                      {statusInfo.label}
-                    </span>
+                    <StatusBadge status={statusInfo.code} label={statusInfo.label} />
                   </div>
                   <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 truncate">
                     Due: {new Date(statusInfo.nextDueDate).toLocaleDateString('en-IN')}
@@ -463,7 +462,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                     href={generateWhatsAppReminder(client, statusInfo)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold transition-colors"
+                    className="p-1.5 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white rounded text-xs font-semibold transition-colors"
                     title="Send WhatsApp Reminder"
                   >
                     <Send size={12} />
@@ -479,7 +478,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                   )}
                   <button
                     onClick={() => triggerBrowserOverdueAlert(client.name, statusInfo.label, statusInfo.notificationMessage, user?.uid)}
-                    className="p-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded text-xs font-semibold transition-colors cursor-pointer"
+                    className="p-1.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 rounded text-xs font-semibold transition-colors cursor-pointer"
                     title="Trigger FCM Device Push Notification"
                   >
                     <AlertTriangle size={12} />
@@ -771,20 +770,22 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
 
           <button
             onClick={() => setFilterType('due')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer ${filterType === 'due'
-                ? 'bg-amber-600 text-white shadow-xs'
-                : 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50'
-              }`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer ${
+              filterType === 'due'
+                ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+            }`}
           >
             <Clock size={12} /> Due / Action ({notificationClients.length})
           </button>
 
           <button
             onClick={() => setFilterType('uptodate')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${filterType === 'uptodate'
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50'
-              }`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+              filterType === 'uptodate'
+                ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+            }`}
           >
             Up to Date
           </button>
@@ -869,7 +870,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                           const cInvoices = invoices.filter(inv => inv.clientId === client.id);
                           exportClientCSV(client, cWorkItems, cInvoices);
                         }}
-                        className="p-1 sm:p-1.5 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 rounded-lg transition-colors cursor-pointer"
+                        className="p-1 sm:p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer"
                         title="Export Work History & Invoices to CSV"
                       >
                         <Download size={14} />
@@ -884,7 +885,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                       {client.isClosed ? (
                         <button
                           onClick={(e) => { e.stopPropagation(); handleReopenClient(client); }}
-                          className="p-1 sm:p-1.5 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 rounded-lg transition-colors cursor-pointer"
+                          className="p-1 sm:p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer"
                           title="Reopen Client"
                         >
                           <ArchiveRestore size={14} />
@@ -892,7 +893,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                       ) : (
                         <button
                           onClick={(e) => { e.stopPropagation(); handleCloseClient(client); }}
-                          className="p-1 sm:p-1.5 text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/50 rounded-lg transition-colors cursor-pointer"
+                          className="p-1 sm:p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer"
                           title="Close Work with Client"
                         >
                           <Archive size={14} />
@@ -911,21 +912,16 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                   {/* Payment Status Pill & Sub-Clients Badge */}
                   <div className="flex items-center gap-2 flex-wrap">
                     {client.isClosed ? (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 max-w-full">
-                        <Archive size={12} className="shrink-0" />
-                        <span className="truncate">Closed</span>
-                        {client.closedAt && (
-                          <span className="font-normal opacity-70 truncate">&nbsp;· {new Date(client.closedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-                        )}
-                      </span>
+                      <StatusBadge 
+                        status="Closed" 
+                        label={`Closed${client.closedAt ? ` · ${new Date(client.closedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}` : ''}`} 
+                      />
                     ) : (
-                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${statusInfo.badgeClass}`}>
-                        <Clock size={12} className="shrink-0" /> {statusInfo.label}
-                      </span>
+                      <StatusBadge status={statusInfo.code} label={statusInfo.label} />
                     )}
                     {client.subClients && client.subClients.length > 0 && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300">
-                        <Users size={12} className="shrink-0" /> {client.subClients.length} Sub-Clients
+                      <span className="text-xs text-slate-500 dark:text-slate-400 font-normal inline-flex items-center gap-1">
+                        <Users size={12} className="shrink-0 text-slate-400" /> {client.subClients.length} Sub-Clients
                       </span>
                     )}
                     {client.paymentBasis === 'monthly_retainer' && (
@@ -985,7 +981,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                   {client.isClosed ? (
                     <button
                       onClick={(e) => { e.stopPropagation(); handleReopenClient(client); }}
-                      className="px-3 sm:px-3.5 py-2 sm:py-2.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/60 border border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+                      className="px-3 sm:px-3.5 py-2 sm:py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
                       title="Reopen Client"
                     >
                       <ArchiveRestore size={14} /> <span className="hidden min-[380px]:inline">Reopen</span>
@@ -998,10 +994,10 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                         const cInvoices = invoices.filter(inv => inv.clientId === client.id);
                         exportClientCSV(client, cWorkItems, cInvoices);
                       }}
-                      className="px-3 sm:px-3.5 py-2 sm:py-2.5 bg-slate-100 hover:bg-emerald-50 dark:bg-slate-700 dark:hover:bg-emerald-950/50 border border-slate-200 dark:border-slate-600 hover:border-emerald-300 dark:hover:border-emerald-600 text-slate-700 dark:text-slate-200 hover:text-emerald-800 dark:hover:text-emerald-300 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+                      className="px-3 sm:px-3.5 py-2 sm:py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
                       title="Export Work History & Invoice Summary to CSV"
                     >
-                      <Download size={14} className="text-emerald-600 dark:text-emerald-400 shrink-0" /> <span>CSV</span>
+                      <Download size={14} className="text-slate-500 dark:text-slate-400 shrink-0" /> <span>CSV</span>
                     </button>
                   )}
                 </div>

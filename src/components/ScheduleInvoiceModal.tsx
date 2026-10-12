@@ -143,7 +143,7 @@ export default function ScheduleInvoiceModal({
             <div>
               <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                 Schedule Automatic Invoicing
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 dark:bg-indigo-900/60 dark:text-indigo-300">
+                <span className="text-[10px] uppercase font-medium tracking-wider px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
                   6:00 AM Engine
                 </span>
               </h3>
@@ -314,14 +314,14 @@ export default function ScheduleInvoiceModal({
               )}
 
               {/* Next run preview banner */}
-              <div className="p-3.5 bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60 rounded-xl flex items-start gap-2.5 text-xs text-emerald-900 dark:text-emerald-300">
-                <Sparkles size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl flex items-start gap-2.5 text-xs text-slate-800 dark:text-slate-200">
+                <Clock size={16} className="text-slate-500 dark:text-slate-400 shrink-0 mt-0.5" />
                 <div>
                   <span className="font-bold">Next Automated Generation:</span>{' '}
                   <span className="font-semibold underline">
                     {currentScheduleInfo?.nextRunDateFormatted} at 6:00 AM
                   </span>
-                  <p className="text-[11px] text-emerald-700 dark:text-emerald-400 mt-0.5">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                     {currentScheduleInfo?.description}. Uninvoiced work logs will be compiled automatically.
                   </p>
                 </div>
@@ -389,7 +389,7 @@ export default function ScheduleInvoiceModal({
                       <span className="text-slate-400 text-[11px] ml-1.5">({info.description})</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                      <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400">
                         {info.nextRunDateFormatted} @ 6:00 AM
                       </span>
                       <button

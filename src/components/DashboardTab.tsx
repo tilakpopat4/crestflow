@@ -3,7 +3,7 @@ import { Invoice, WorkItem, Client } from '../types';
 import { 
   BarChart, Bar, LineChart, Line, Legend, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell 
 } from 'recharts';
-import { IndianRupee, Clock, TrendingUp, CheckCircle2, DownloadCloud, UploadCloud, AlertTriangle, Send, Users, ArrowRight, Mail, Bell, Copy, Smartphone, X, PartyPopper, Sparkles, Flame, Trophy, StickyNote as StickyNoteIcon } from 'lucide-react';
+import { IndianRupee, Clock, TrendingUp, CheckCircle2, DownloadCloud, UploadCloud, AlertTriangle, Send, Users, ArrowRight, Mail, Bell, Copy, Smartphone, X, FileText, StickyNote as StickyNoteIcon } from 'lucide-react';
 import { User } from 'firebase/auth';
 import { useFirestore, safeStringify } from '../hooks/useFirestore';
 import { 
@@ -21,8 +21,7 @@ import { UserProfile } from '../types';
 import { useTheme } from '../context/ThemeContext';
 import { calculateWorkJourney } from '../lib/anniversary';
 import { executeAutoInvoiceCheck } from '../lib/autoInvoiceService';
-
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
+import StatusBadge from './StatusBadge';
 
 interface DashboardTabProps {
   user: User | null;
@@ -375,7 +374,7 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
           {localStorage.getItem('clients') || localStorage.getItem('monthlyWork') ? (
             <button 
               onClick={migrateLocalData}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition-colors shadow-2xs"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors shadow-2xs"
             >
               <UploadCloud size={14} /> Migrate Data
             </button>
@@ -445,7 +444,7 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
           <button
             type="button"
             onClick={() => setIsAnnivBannerDismissed(true)}
-            className="p-1.5 rounded-lg text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/60 transition-colors shrink-0 cursor-pointer"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0 cursor-pointer"
             title="Dismiss banner"
           >
             <X size={16} />
@@ -454,18 +453,18 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
       )}
 
       {!isNotificationDismissed && activeNotifications.length > 0 && (
-        <div className="bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-800/40 rounded-xl p-4 sm:p-5 shadow-xs space-y-3 relative">
+        <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-xs space-y-3 relative">
           <button
             onClick={() => setIsNotificationDismissed(true)}
-            className="absolute top-3.5 right-3.5 text-amber-700 dark:text-amber-400 hover:text-amber-950 dark:hover:text-amber-200 p-1 rounded-md transition-colors cursor-pointer"
+            className="absolute top-3.5 right-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-md transition-colors cursor-pointer"
             title="Dismiss notification"
             aria-label="Close notification"
           >
             <X size={16} />
           </button>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pr-8">
-            <div className="flex items-center gap-2 text-amber-900 dark:text-amber-300 font-bold text-sm">
-              <AlertTriangle className="text-amber-600 dark:text-amber-400 shrink-0" size={16} />
+            <div className="flex items-center gap-2 text-slate-900 dark:text-slate-100 font-bold text-sm">
+              <AlertTriangle className="text-red-600 dark:text-red-400 shrink-0" size={16} />
               <span>Payment Reminders ({activeNotifications.length})</span>
             </div>
             
@@ -479,15 +478,15 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
                   <Smartphone size={12} /> {isFcmRegistering ? 'Registering...' : 'Enable Push'}
                 </button>
               ) : (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-[11px] font-medium rounded">
-                  <Bell size={11} className="text-emerald-600" /> Push Active
+                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                  <Bell size={11} className="text-slate-400" /> Push Active
                 </span>
               )}
 
               {onNavigateToClients && (
                 <button 
                   onClick={onNavigateToClients}
-                  className="text-xs font-semibold text-amber-800 dark:text-amber-300 hover:underline flex items-center gap-1 cursor-pointer"
+                  className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   Directory <ArrowRight size={11} />
                 </button>
@@ -495,7 +494,7 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
             </div>
           </div>
 
-          <div className="divide-y divide-amber-200/50 dark:divide-amber-800/30">
+          <div className="divide-y divide-slate-200/50 dark:divide-slate-800/30">
             {activeNotifications.map(({ client, statusInfo, financials }) => {
               const emailData = generateEmailReminder(client, statusInfo);
               const isEmailEnabled = client.emailRemindersEnabled !== false;
@@ -508,9 +507,7 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate">{client.name}</span>
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${statusInfo.badgeClass}`}>
-                        {statusInfo.label}
-                      </span>
+                      <StatusBadge status={statusInfo.code} label={statusInfo.label} />
                     </div>
 
                     <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-3 flex-wrap">
@@ -526,7 +523,7 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
                       href={generateWhatsAppReminder(client, statusInfo)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition-colors"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white rounded-lg text-xs font-semibold transition-colors"
                       title="Send WhatsApp Reminder"
                     >
                       <Send size={12} /> WhatsApp
@@ -547,7 +544,7 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
                         navigator.clipboard.writeText(`Subject: ${emailData.subject}\n\n${emailData.body}`);
                         alert(`Email reminder template for ${client.name} copied!`);
                       }}
-                      className="p-1.5 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-amber-100/50 dark:hover:bg-amber-900/30 rounded-lg text-xs transition-colors cursor-pointer"
+                      className="p-1.5 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-xs transition-colors cursor-pointer"
                       title="Copy Email Text"
                     >
                       <Copy size={13} />
@@ -555,7 +552,7 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
 
                     <button
                       onClick={() => triggerBrowserOverdueAlert(client.name, statusInfo.label, statusInfo.notificationMessage, user?.uid)}
-                      className="p-1.5 text-amber-600 dark:text-amber-400 hover:bg-amber-100/50 dark:hover:bg-amber-900/30 rounded-lg text-xs transition-colors cursor-pointer"
+                      className="p-1.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-xs transition-colors cursor-pointer"
                       title="Trigger Device Notification"
                     >
                       <Bell size={13} />
@@ -571,7 +568,7 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
       {/* Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
         <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-start gap-4 min-w-0">
-          <div className="p-3 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 rounded-lg shrink-0">
+          <div className="p-3 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-lg shrink-0">
             <IndianRupee size={24} />
           </div>
           <div className="min-w-0">
@@ -581,7 +578,7 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
         </div>
         
         <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-start gap-4 min-w-0">
-          <div className="p-3 bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 rounded-lg shrink-0">
+          <div className="p-3 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg shrink-0">
             <Clock size={24} />
           </div>
           <div className="min-w-0">
@@ -613,11 +610,11 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Track paid earnings vs total invoiced revenue over time</p>
             </div>
             <div className="flex items-center gap-4 text-xs">
-              <span className="flex items-center gap-1.5 font-medium text-emerald-700 dark:text-emerald-400">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Paid Earnings
-              </span>
               <span className="flex items-center gap-1.5 font-medium text-indigo-600 dark:text-indigo-400">
-                <span className="w-2.5 h-2.5 rounded-full bg-indigo-500"></span> Total Invoiced
+                <span className="w-2.5 h-2.5 rounded-full bg-indigo-600"></span> Paid Earnings
+              </span>
+              <span className="flex items-center gap-1.5 font-medium text-slate-600 dark:text-slate-400">
+                <span className="w-2.5 h-2.5 rounded-full bg-slate-400"></span> Total Invoiced
               </span>
             </div>
           </div>
@@ -663,19 +660,19 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
                     type="monotone" 
                     dataKey="paidEarnings" 
                     name="paidEarnings"
-                    stroke="#10b981" 
+                    stroke="#4F46E5" 
                     strokeWidth={3} 
-                    dot={{ r: 4, fill: '#10b981', strokeWidth: 2, stroke: isDark ? '#1e293b' : '#ffffff' }}
+                    dot={{ r: 4, fill: '#4F46E5', strokeWidth: 2, stroke: isDark ? '#1e293b' : '#ffffff' }}
                     activeDot={{ r: 7, strokeWidth: 0 }} 
                   />
                   <Line 
                     type="monotone" 
                     dataKey="totalInvoiced" 
                     name="totalInvoiced"
-                    stroke="#6366f1" 
+                    stroke="#94a3b8" 
                     strokeWidth={2} 
                     strokeDasharray="4 4"
-                    dot={{ r: 3, fill: '#6366f1', stroke: isDark ? '#1e293b' : '#ffffff' }} 
+                    dot={{ r: 3, fill: '#94a3b8', stroke: isDark ? '#1e293b' : '#ffffff' }} 
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -715,11 +712,7 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
                       fontWeight: 600
                     }}
                   />
-                  <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24}>
-                    {metrics.chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Bar>
+                  <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24} fill="#4F46E5" />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -772,20 +765,11 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
                       ₹{inv.totalAmount.toLocaleString('en-IN')}
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <button
+                      <StatusBadge
+                        status={inv.status}
                         onClick={() => toggleInvoiceStatus(inv.id)}
                         title="Click to toggle payment status"
-                        className={`inline-flex items-center text-[13px] font-medium cursor-pointer transition-colors ${
-                          inv.status === 'Paid' 
-                            ? 'text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300' 
-                            : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100'
-                        }`}
-                      >
-                        <span className={`w-1.5 h-1.5 rounded-full mr-1.5 inline-block shrink-0 ${
-                          inv.status === 'Paid' ? 'bg-indigo-600 dark:bg-indigo-400' : 'bg-slate-400 dark:bg-slate-500'
-                        }`} />
-                        {inv.status}
-                      </button>
+                      />
                     </td>
                     <td className="px-6 py-4 text-right space-x-3">
                       <button
@@ -821,7 +805,7 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
               onClick={() => setActiveWorkspaceTool(prev => prev === 'notes' ? 'none' : 'notes')}
               className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeWorkspaceTool === 'notes'
-                  ? 'bg-white dark:bg-slate-800 text-amber-700 dark:text-amber-400 shadow-2xs'
+                  ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-2xs'
                   : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
               }`}
             >
@@ -836,7 +820,7 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
                   : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
               }`}
             >
-              <Sparkles size={13} /> AI Summarizer {activeWorkspaceTool === 'ai' ? '(Active)' : ''}
+              <FileText size={13} /> AI Summarizer {activeWorkspaceTool === 'ai' ? '(Active)' : ''}
             </button>
           </div>
         </div>

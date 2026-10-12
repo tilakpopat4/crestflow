@@ -164,8 +164,9 @@ export default function GoogleDriveUploadModal({
                   Upload Directly to Google Drive
                 </h3>
                 {hasConnectedDrive && (
-                  <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
-                    <CheckCircle2 size={11} /> Connected
+                  <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300">
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-500 shrink-0" />
+                    Connected
                   </span>
                 )}
               </div>
@@ -187,19 +188,19 @@ export default function GoogleDriveUploadModal({
         <div className="p-6 space-y-5 overflow-y-auto">
           {/* API Disabled in Google Cloud Assistance UI */}
           {isApiDisabledError ? (
-            <div className="bg-amber-50/95 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700/80 rounded-2xl p-4.5 space-y-3.5 animate-in fade-in">
+            <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-4.5 space-y-3.5 animate-in fade-in">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+                <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center shrink-0 mt-0.5">
                   <AlertCircle size={18} />
                 </div>
                 <div className="space-y-1.5 flex-1">
-                  <div className="font-bold text-xs text-amber-950 dark:text-amber-200 uppercase tracking-wide">
+                  <div className="font-bold text-xs text-slate-900 dark:text-slate-100 uppercase tracking-wide">
                     Google Drive API Needs 1-Click Activation
                   </div>
-                  <p className="text-xs text-amber-900/90 dark:text-amber-300 leading-relaxed">
+                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                     Google Cloud requires the <strong>Google Drive API</strong> to be turned on once for project <strong>960977935987</strong> (CrestFlow).
                   </p>
-                  <ol className="list-decimal list-inside text-xs text-amber-900 dark:text-amber-200 space-y-1 pl-1 font-medium">
+                  <ol className="list-decimal list-inside text-xs text-slate-600 dark:text-slate-400 space-y-1 pl-1 font-medium">
                     <li>
                       Click the blue button below to open Google Cloud Console.
                     </li>
@@ -213,7 +214,7 @@ export default function GoogleDriveUploadModal({
                 </div>
               </div>
 
-              <div className="pt-2 flex flex-wrap items-center gap-2 border-t border-amber-200/80 dark:border-amber-800/70">
+              <div className="pt-2 flex flex-wrap items-center gap-2 border-t border-slate-200 dark:border-slate-800">
                 <a
                   href={activationUrl}
                   target="_blank"
@@ -227,7 +228,7 @@ export default function GoogleDriveUploadModal({
                   type="button"
                   onClick={handleStartUpload}
                   disabled={isUploading}
-                  className="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
                   {isUploading ? <Loader2 size={13} className="animate-spin" /> : <UploadCloud size={13} />}
                   <span>Retry Upload</span>
@@ -235,19 +236,19 @@ export default function GoogleDriveUploadModal({
               </div>
             </div>
           ) : isPopupBlockedError ? (
-            <div className="bg-amber-50/90 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/80 rounded-2xl p-4.5 space-y-3 animate-in fade-in">
+            <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-4.5 space-y-3 animate-in fade-in">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+                <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center shrink-0 mt-0.5">
                   <AlertCircle size={18} />
                 </div>
                 <div className="space-y-1.5 flex-1">
-                  <div className="font-bold text-xs text-amber-900 dark:text-amber-200 uppercase tracking-wide">
+                  <div className="font-bold text-xs text-slate-900 dark:text-slate-100 uppercase tracking-wide">
                     Google Popup Blocked by Browser
                   </div>
-                  <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
+                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                     Your browser prevented the Google Drive sign-in popup from opening. Follow these 2 steps:
                   </p>
-                  <ol className="list-decimal list-inside text-xs text-amber-900/90 dark:text-amber-200 space-y-1 pl-1 font-medium">
+                  <ol className="list-decimal list-inside text-xs text-slate-600 dark:text-slate-400 space-y-1 pl-1 font-medium">
                     <li>
                       Look at the <strong>far right of your browser's address (URL) bar</strong> and click the <strong>Pop-up blocked icon</strong>.
                     </li>
@@ -258,12 +259,12 @@ export default function GoogleDriveUploadModal({
                 </div>
               </div>
 
-              <div className="pt-2 flex flex-wrap items-center gap-2 border-t border-amber-200/70 dark:border-amber-800/60">
+              <div className="pt-2 flex flex-wrap items-center gap-2 border-t border-slate-200 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={handleConnectDrive}
                   disabled={isAuthorizing}
-                  className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
                   {isAuthorizing ? <Loader2 size={13} className="animate-spin" /> : <UploadCloud size={13} />}
                   <span>Authorize Google Drive</span>
@@ -271,7 +272,7 @@ export default function GoogleDriveUploadModal({
                 <button
                   type="button"
                   onClick={() => setError(null)}
-                  className="px-3 py-2 text-xs font-semibold text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-xl cursor-pointer"
+                  className="px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xl cursor-pointer"
                 >
                   Dismiss
                 </button>
@@ -310,23 +311,23 @@ export default function GoogleDriveUploadModal({
 
           {/* Success card if uploaded */}
           {uploadResult && (
-            <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 rounded-2xl p-4.5 space-y-3">
-              <div className="flex items-center gap-2.5 text-emerald-800 dark:text-emerald-300">
-                <CheckCircle2 size={20} className="text-emerald-600 shrink-0" />
+            <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-4.5 space-y-3">
+              <div className="flex items-center gap-2.5 text-slate-900 dark:text-slate-100">
+                <CheckCircle2 size={20} className="text-indigo-600 dark:text-indigo-400 shrink-0" />
                 <div className="font-bold text-sm">Upload Successful to Google Drive!</div>
               </div>
-              <p className="text-xs text-emerald-700 dark:text-emerald-400 leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                 File is uploaded and permissions are set to anyone with link. Clients can now stream and view the embedded video directly on the portal!
               </p>
 
-              <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-emerald-200/80 dark:border-emerald-900/60 flex items-center justify-between gap-3">
+              <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3">
                 <div className="truncate text-xs font-mono text-slate-700 dark:text-slate-300">
                   {uploadResult.webViewLink}
                 </div>
                 <button
                   type="button"
                   onClick={handleCopyLink}
-                  className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shrink-0 transition-colors flex items-center gap-1 cursor-pointer"
+                  className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shrink-0 transition-colors flex items-center gap-1 cursor-pointer"
                 >
                   {copiedLink ? <Check size={13} /> : <Copy size={13} />}
                   {copiedLink ? 'Copied' : 'Copy'}
@@ -345,7 +346,7 @@ export default function GoogleDriveUploadModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+                  className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold transition-colors cursor-pointer"
                 >
                   Done
                 </button>
@@ -371,7 +372,7 @@ export default function GoogleDriveUploadModal({
                   isDragging
                     ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/40'
                     : selectedFile
-                    ? 'border-emerald-400 bg-emerald-50/20 dark:bg-emerald-950/20'
+                    ? 'border-indigo-500 bg-indigo-50/20 dark:bg-indigo-950/20'
                     : 'border-slate-200 dark:border-slate-700 hover:border-indigo-400 bg-slate-50/50 dark:bg-slate-800/40'
                 }`}
               >

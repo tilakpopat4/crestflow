@@ -3,6 +3,7 @@ import { db } from '../firebase';
 import { collection, onSnapshot, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { UserProfile } from '../types';
 import { Users, ShieldAlert, Lock, Unlock, Search, Trash2, Ban, CheckCircle, UserX, UserCheck } from 'lucide-react';
+import StatusBadge from './StatusBadge';
 
 interface BlockedUser {
   id: string;
@@ -349,24 +350,14 @@ export default function AdminTab() {
                         <div><span className="text-slate-400 dark:text-slate-500">UPI:</span> <span className="font-mono bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-1 py-0.5 rounded text-slate-700 dark:text-slate-300">{p.upiId}</span></div>
                       </td>
                       <td className="p-4 text-center">
-                        {blocked ? (
-                          <span className="inline-flex items-center gap-1 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800/60 px-2.5 py-1 rounded-full font-semibold text-[10px] uppercase tracking-wider">
-                            <UserX className="w-3 h-3" />
-                            Blocked
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 px-2.5 py-1 rounded-full font-semibold text-[10px] uppercase tracking-wider">
-                            <UserCheck className="w-3 h-3" />
-                            Active
-                          </span>
-                        )}
+                        <StatusBadge status={blocked ? 'Blocked' : 'Active'} />
                       </td>
                       <td className="p-4 text-right">
                         {blocked ? (
                           <button
                             onClick={() => handleUnblockUser(p.id)}
                             disabled={isProcessing}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-3 py-1.5 rounded-lg shadow-xs transition-colors disabled:opacity-50 inline-flex items-center gap-1 cursor-pointer"
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 inline-flex items-center gap-1 cursor-pointer"
                           >
                             Unblock Access
                           </button>
@@ -374,7 +365,7 @@ export default function AdminTab() {
                           <button
                             onClick={() => handleBlockUser(p.id)}
                             disabled={isProcessing}
-                            className="bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 hover:bg-red-600 hover:text-white border border-red-200 dark:border-red-800/60 font-semibold text-xs px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 inline-flex items-center gap-1 cursor-pointer"
+                            className="bg-red-600 hover:bg-red-700 text-white font-medium text-xs px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 inline-flex items-center gap-1 cursor-pointer"
                           >
                             Block User
                           </button>

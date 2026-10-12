@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { generateUUID } from '../lib/utils';
-import { Star, CheckCircle2, MessageSquare, AlertCircle, Loader2, Sparkles } from 'lucide-react';
+import { Star, CheckCircle2, MessageSquare, AlertCircle, Loader2 } from 'lucide-react';
 import Logo from './Logo';
+import Footer from './Footer';
 
 export default function ClientFeedbackForm() {
   const [freelancerUid, setFreelancerUid] = useState('');
@@ -87,13 +88,13 @@ export default function ClientFeedbackForm() {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4 font-sans text-slate-800 dark:text-slate-200 transition-colors duration-150">
         <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-800 p-8 text-center space-y-6 relative overflow-hidden animate-in fade-in zoom-in-95 duration-300">
-          <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/50 rounded-xl flex items-center justify-center mx-auto shadow-xs">
+          <div className="w-14 h-14 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/50 rounded-xl flex items-center justify-center mx-auto shadow-xs">
             <CheckCircle2 className="w-9 h-9" />
           </div>
 
           <div className="space-y-2">
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight flex items-center justify-center gap-1.5">
-              Thank You! <Sparkles className="w-5 h-5 text-indigo-500" />
+              Thank You!
             </h1>
             <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
               Your review for <span className="font-semibold text-slate-800 dark:text-slate-200">{freelancerName}</span> has been submitted successfully. Your feedback is highly appreciated!
@@ -146,9 +147,7 @@ export default function ClientFeedbackForm() {
               <span className="text-[9px] text-indigo-400 font-bold uppercase tracking-wider mt-1">Client Feedback Portal</span>
             </div>
           </div>
-          <div className="bg-indigo-600/20 text-indigo-400 text-[10px] font-bold px-2.5 py-1 rounded-full border border-indigo-500/20 flex items-center gap-1">
-            <MessageSquare className="w-3 h-3" /> Leave Review
-          </div>
+          <span className="text-xs text-slate-400 font-medium">Leave Review</span>
         </div>
 
         {/* Content */}
@@ -200,12 +199,12 @@ export default function ClientFeedbackForm() {
               })}
             </div>
             {rating > 0 && (
-              <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 transition-all">
-                {rating === 1 && '⭐ Poor'}
-                {rating === 2 && '⭐⭐ Fair'}
-                {rating === 3 && '⭐⭐⭐ Good'}
-                {rating === 4 && '⭐⭐⭐⭐ Very Good'}
-                {rating === 5 && '⭐⭐⭐⭐⭐ Excellent!'}
+              <span className="text-xs font-medium text-slate-600 dark:text-slate-400 transition-all">
+                {rating === 1 && 'Poor'}
+                {rating === 2 && 'Fair'}
+                {rating === 3 && 'Good'}
+                {rating === 4 && 'Very Good'}
+                {rating === 5 && 'Excellent'}
               </span>
             )}
           </div>
@@ -276,14 +275,8 @@ export default function ClientFeedbackForm() {
         </form>
       </div>
 
-      {/* Small footer */}
-      <div className="mt-6 flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500">
-        <div className="flex items-center gap-1.5 text-xs">
-          <Logo className="w-4 h-4 opacity-50" />
-          <span className="font-semibold uppercase tracking-wider">CrestFlow</span>
-        </div>
-        <p className="text-[10px]">Secure & instant client relations platform.</p>
-      </div>
+      {/* Footer */}
+      <Footer variant="minimal" className="mt-6 border-none bg-transparent" />
     </div>
   );
 }

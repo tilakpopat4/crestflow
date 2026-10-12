@@ -201,8 +201,8 @@ export default function CsvImportModal({ isOpen, onClose, userId, onImportSucces
           )}
 
           {successMsg && (
-            <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-medium rounded-xl flex items-start gap-2">
-              <CheckCircle2 size={16} className="shrink-0 mt-0.5" />
+            <div className="p-3 bg-slate-50 dark:bg-slate-900/60 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-800 text-xs font-medium rounded-xl flex items-start gap-2">
+              <CheckCircle2 size={16} className="text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
               {successMsg}
             </div>
           )}

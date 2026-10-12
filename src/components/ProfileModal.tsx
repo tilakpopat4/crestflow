@@ -242,7 +242,7 @@ export default function ProfileModal({
                 Freelancing Start Date (Work Journey)
               </span>
               {freelanceStartDate && (
-                <span className="text-[11px] text-amber-600 dark:text-amber-400 font-medium normal-case">
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium normal-case">
                   {(() => {
                     const start = new Date(freelanceStartDate);
                     if (isNaN(start.getTime())) return '';

@@ -14,6 +14,7 @@ import PaymentDateModal from './PaymentDateModal';
 import ScheduleInvoiceModal from './ScheduleInvoiceModal';
 import { executeAutoInvoiceCheck } from '../lib/autoInvoiceService';
 import { formatLocalDateToYMD } from '../lib/dateUtils';
+import StatusBadge from './StatusBadge';
 
 // Helper functions to parse and convert oklab/oklch/color() colors to standard rgb/rgba,
 // which prevents crashes in html2canvas (used by html2pdf.js) under Tailwind CSS v4.
@@ -1901,7 +1902,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
             <Clock size={16} className="text-indigo-200" />
             <span>Schedule Auto-Invoice</span>
             {activeSchedulesCount > 0 && (
-              <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-white/20 text-white">
+              <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-white/20 text-white">
                 {activeSchedulesCount} Active
               </span>
             )}
@@ -1922,7 +1923,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                 <button
                   type="button"
                   onClick={() => setEditingInvoiceId(null)}
-                  className="px-2 py-0.5 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded text-xs font-semibold flex items-center gap-1 transition-colors"
+                  className="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded text-xs font-medium flex items-center gap-1 transition-colors"
                   title="Exit edit mode and reset"
                 >
                   <Pencil size={11} /> Editing Mode <X size={12} />
@@ -1961,7 +1962,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                   </div>
                 )}
                 {clients.length === 0 && (
-                  <p className="text-xs text-amber-600 mt-1">Please add a client in the Clients tab first.</p>
+                  <p className="text-xs text-slate-500 mt-1">Please add a client in the Clients tab first.</p>
                 )}
               </div>
 
@@ -1993,20 +1994,20 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
           <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
             {/* Billing Mode Switcher */}
             {selectedClient?.paymentBasis === 'monthly_retainer' ? (
-              <div className="mb-6 p-3.5 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 rounded-xl flex items-center justify-between gap-3">
+              <div className="mb-6 p-3.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-purple-600 shrink-0"></span>
+                  <span className="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-500 shrink-0"></span>
                   <div>
-                    <span className="text-xs font-bold text-purple-900 dark:text-purple-300 block">
+                    <span className="text-xs font-bold text-slate-900 dark:text-slate-100 block">
                       Monthly Retainer Client
                     </span>
-                    <span className="text-[11px] text-purple-700/80 dark:text-purple-400">
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400">
                       Single flat retainer fee per billing cycle.
                     </span>
                   </div>
                 </div>
                 {selectedClient?.monthlyRetainerAmount && (
-                  <span className="text-xs font-bold text-purple-800 dark:text-purple-200 bg-purple-100 dark:bg-purple-900/80 px-2.5 py-1 rounded-lg shrink-0">
+                  <span className="text-xs font-medium text-slate-600 dark:text-slate-400 shrink-0">
                     ₹{selectedClient.monthlyRetainerAmount.toLocaleString('en-IN')}/mo
                   </span>
                 )}
@@ -2045,16 +2046,16 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
 
             {invoiceBillingMode === 'monthly_retainer' ? (
               /* Monthly Retainer Section */
-              <div className="p-4 sm:p-5 rounded-xl border border-purple-200 dark:border-purple-800/60 bg-purple-50/50 dark:bg-purple-950/30 space-y-4">
+              <div className="p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60 space-y-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-purple-900 dark:text-purple-300 uppercase tracking-wider">
-                      <span className="w-2 h-2 rounded-full bg-purple-500"></span>
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                      <span className="w-2 h-2 rounded-full bg-slate-400"></span>
                       Monthly Retainer Mode
                     </span>
                   </div>
                   {selectedClient?.monthlyRetainerAmount && (
-                    <span className="text-xs font-semibold px-2 py-1 rounded bg-purple-100 dark:bg-purple-900/80 text-purple-700 dark:text-purple-300 shrink-0">
+                    <span className="text-xs font-medium text-slate-600 dark:text-slate-400 shrink-0">
                       Default: ₹{selectedClient.monthlyRetainerAmount.toLocaleString('en-IN')}/mo
                     </span>
                   )}
@@ -2070,7 +2071,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                       value={monthlyServiceDescription}
                       onChange={(e) => setMonthlyServiceDescription(e.target.value)}
                       placeholder="e.g. Monthly Video Production & Editing Retainer"
-                      className="w-full border border-purple-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100 dark:focus:ring-purple-950"
+                      className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-950"
                     />
                   </div>
 
@@ -2086,26 +2087,26 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                         value={monthlyRetainerInput}
                         onChange={(e) => setMonthlyRetainerInput(e.target.value)}
                         placeholder="e.g. 25000"
-                        className="w-full pl-7 pr-3 py-2 text-sm font-bold border border-purple-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-purple-900 dark:text-purple-300 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100 dark:focus:ring-purple-950"
+                        className="w-full pl-7 pr-3 py-2 text-sm font-bold border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-950"
                       />
                     </div>
                   </div>
                 </div>
 
                 {/* Included Deliverables List (Rates Hidden) */}
-                <div className="pt-2 border-t border-purple-200/60 dark:border-purple-800/60">
+                <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                       Included Work Deliverables ({currentBillingDeliverables.length})
                     </span>
-                    <span className="text-[11px] text-purple-700 dark:text-purple-400 font-medium">
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                       Rates hidden • Included in retainer
                     </span>
                   </div>
                   {currentBillingDeliverables.length > 0 ? (
-                    <div className="border border-purple-100 dark:border-purple-900/60 rounded-lg overflow-hidden max-h-48 overflow-y-auto bg-white dark:bg-slate-900">
+                    <div className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden max-h-48 overflow-y-auto bg-white dark:bg-slate-900">
                       <table className="w-full text-left text-xs">
-                        <thead className="bg-purple-50/70 dark:bg-purple-950/60 text-purple-900 dark:text-purple-300 border-b border-purple-100 dark:border-purple-900/60">
+                        <thead className="bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700">
                           <tr>
                             <th className="py-1.5 px-2.5 font-semibold w-8 text-center">#</th>
                             <th className="py-1.5 px-2 font-semibold w-24">Date</th>
@@ -2113,7 +2114,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                             <th className="py-1.5 px-2 font-semibold text-center w-12">Qty</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-purple-50 dark:divide-slate-800">
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                           {currentBillingDeliverables.map((item, idx) => (
                             <tr key={item.id || idx}>
                               <td className="py-1.5 px-2.5 text-center text-slate-400">{String(idx + 1).padStart(2, '0')}</td>
@@ -2137,7 +2138,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                       </table>
                     </div>
                   ) : (
-                    <div className="p-3 text-center border border-dashed border-purple-200 dark:border-purple-800 rounded-lg text-xs text-slate-500 dark:text-slate-400">
+                    <div className="p-3 text-center border border-dashed border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-500 dark:text-slate-400">
                       No uninvoiced deliverables in this date span.
                     </div>
                   )}
@@ -2212,7 +2213,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                       <button
                         type="button"
                         onClick={handleRoundFigures}
-                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-lg text-xs font-semibold transition-colors shadow-xs whitespace-nowrap flex items-center gap-1.5 cursor-pointer"
+                        className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold transition-colors shadow-xs whitespace-nowrap flex items-center gap-1.5 cursor-pointer"
                         title="Round prices to nearest hundred (>150 rounds to 200, <150 rounds to 100)"
                       >
                         <Coins size={13} />
@@ -2363,7 +2364,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                   <button
                     type="button"
                     onClick={handleRoundFigures}
-                    className="px-2 py-0.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded text-[11px] font-semibold transition-colors flex items-center gap-1 shadow-2xs"
+                    className="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded text-[11px] font-semibold transition-colors flex items-center gap-1"
                     title="Round item prices to nearest hundred (>150 -> 200, <150 -> 100)"
                   >
                     <Coins size={12} />
@@ -2401,7 +2402,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                   className="flex justify-center items-center gap-1.5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 text-white px-3 py-2 rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer"
                   title="Print summary of work completed"
                 >
-                  <Printer size={14} className="text-emerald-400" />
+                  <Printer size={14} className="text-slate-400" />
                   Print Summary
                 </button>
 
@@ -2453,7 +2454,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                   onClick={() => setPreviewMode('work-only')}
                   className={`px-3 py-1 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
                     previewMode === 'work-only'
-                      ? 'bg-emerald-600 text-white shadow-xs'
+                      ? 'bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-400 shadow-xs'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
                 >
@@ -2473,7 +2474,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                 className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
                 title="Print Work Summary"
               >
-                <Printer size={13} className="text-emerald-400" /> Print Summary
+                <Printer size={13} className="text-slate-400" /> Print Summary
               </button>
             </div>
           </div>
@@ -2729,9 +2730,9 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                 </div>
 
                 {invoiceBillingMode === 'monthly_retainer' && previewMode !== 'work-only' && (
-                  <div className="bg-purple-50/70 border border-purple-200 rounded-xl p-3.5 mb-6 flex justify-between items-center avoid-break">
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 mb-6 flex justify-between items-center avoid-break">
                     <div>
-                      <span className="text-xs font-bold uppercase tracking-wider text-purple-800 block">Monthly Retainer Package</span>
+                      <span className="text-xs font-bold uppercase tracking-wider text-slate-800 block">Monthly Retainer Package</span>
                       <p className="text-xs text-slate-600 mt-0.5">
                         Fixed monthly fee covering all creative deliverables across billing period.
                       </p>
@@ -2881,7 +2882,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                           </div>
                         ) : (
                           <div className="w-32 h-32 flex flex-col items-center justify-center text-slate-400 text-xs italic bg-slate-50 rounded-lg">
-                            <AlertCircle className="w-5 h-5 mb-1 text-amber-500" />
+                            <AlertCircle className="w-5 h-5 mb-1 text-slate-400" />
                             <span>Enter UPI ID</span>
                           </div>
                         )}
@@ -2943,10 +2944,10 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
               <button
                 type="button"
                 onClick={() => setShowClosed(prev => !prev)}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors cursor-pointer shrink-0 ${
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer shrink-0 ${
                   showClosed
-                    ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 border border-purple-300 dark:border-purple-700'
-                    : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600'
+                    ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                 }`}
                 title={showClosed ? "Hide invoices of closed clients" : "Show invoices of closed clients"}
               >
@@ -2955,7 +2956,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
               </button>
             )}
 
-            <span className="text-xs font-semibold px-2.5 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-full border border-slate-200 dark:border-slate-600 shrink-0">
+            <span className="text-xs font-medium px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded shrink-0">
               {displayedInvoices.length} Invoices
             </span>
           </div>
@@ -3048,20 +3049,11 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                           ₹{inv.totalAmount.toLocaleString('en-IN')}
                         </td>
                         <td className="p-3.5 text-center">
-                          <button
+                          <StatusBadge
+                            status={inv.status}
                             onClick={() => toggleInvoiceStatus(inv.id)}
-                            className={`inline-flex items-center text-[13px] font-medium cursor-pointer transition-colors ${
-                              inv.status === 'Paid'
-                                ? 'text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300'
-                                : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100'
-                            }`}
                             title={`Click to mark as ${inv.status === 'Paid' ? 'Pending' : 'Paid & update last payment date'}`}
-                          >
-                            <span className={`w-1.5 h-1.5 rounded-full mr-1.5 inline-block shrink-0 ${
-                              inv.status === 'Paid' ? 'bg-indigo-600 dark:bg-indigo-400' : 'bg-slate-400 dark:bg-slate-500'
-                            }`} />
-                            {inv.status}
-                          </button>
+                          />
                         </td>
                         <td className="p-3.5 text-right">
                           <div className="flex items-center justify-end gap-1.5">
@@ -3164,7 +3156,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                     <td colSpan={3} className="p-3.5 text-right font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                       Total Earned (Paid Invoices):
                     </td>
-                    <td className="p-3.5 text-right font-black text-emerald-600 dark:text-emerald-400 text-sm">
+                    <td className="p-3.5 text-right font-black text-indigo-600 dark:text-indigo-400 text-sm">
                       ₹{totalEarnedTillToday.toLocaleString('en-IN')}
                     </td>
                     <td colSpan={2} className="p-3.5 text-slate-500 dark:text-slate-400 text-xs">
@@ -3180,7 +3172,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
         {/* Last Bar: Total Earned Till Today */}
         <div className="mt-6 bg-slate-900 text-white rounded-xl p-5 md:p-6 border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-5 relative overflow-hidden">
           <div className="flex items-center gap-4 relative z-10 w-full md:w-auto">
-            <div className="w-12 h-12 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-emerald-400 shrink-0">
+            <div className="w-12 h-12 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-indigo-400 shrink-0">
               <IndianRupee size={24} className="stroke-[2.5]" />
             </div>
             <div>
@@ -3192,7 +3184,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
               </div>
               <h3 className="text-2xl sm:text-3xl font-black tracking-tight mt-1 text-white">
                 Total Earned Till Today:{' '}
-                <span className="text-emerald-400">₹{totalEarnedTillToday.toLocaleString('en-IN')}</span>
+                <span className="text-indigo-400">₹{totalEarnedTillToday.toLocaleString('en-IN')}</span>
               </h3>
             </div>
           </div>
@@ -3206,8 +3198,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
             </div>
             {pendingAmount > 0 && (
               <div className="text-left md:text-right border-l border-slate-800 pl-4 sm:pl-6">
-                <span className="text-[10px] uppercase font-bold text-amber-400 block tracking-wider">Pending Clearance</span>
-                <span className="text-base font-bold text-amber-300">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Pending Clearance</span>
+                <span className="text-base font-bold text-white">
                   ₹{pendingAmount.toLocaleString('en-IN')}
                 </span>
               </div>
@@ -3242,7 +3234,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                     Invoice Email & Gmail Delivery for {emailModalData.clientName}
                   </h3>
                   <p className="text-xs text-slate-500">
-                    Cycle: <span className="font-semibold text-slate-700">{emailModalData.monthCycleStr}</span> • Amount: <span className="font-bold text-emerald-600">₹{emailModalData.totalAmount.toLocaleString('en-IN')}</span>
+                    Cycle: <span className="font-semibold text-slate-700">{emailModalData.monthCycleStr}</span> • Amount: <span className="font-bold text-slate-900">₹{emailModalData.totalAmount.toLocaleString('en-IN')}</span>
                   </p>
                 </div>
               </div>
@@ -3262,29 +3254,29 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                 <span>Sending Invoice PDF directly to <strong>{emailModalData.clientEmail || 'client'}</strong> via Gmail API...</span>
               </div>
             ) : emailModalData.gmailStatus?.success ? (
-              <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900 flex items-center justify-between">
+              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <CheckCircle2 className="text-emerald-600 w-5 h-5 shrink-0" />
+                  <CheckCircle2 className="text-indigo-600 w-5 h-5 shrink-0" />
                   <div>
                     <p className="font-bold">Invoice PDF successfully sent via Gmail!</p>
-                    <p className="text-[11px] text-emerald-700">Delivered to <strong>{emailModalData.clientEmail}</strong> with PDF attached.</p>
+                    <p className="text-[11px] text-slate-600">Delivered to <strong>{emailModalData.clientEmail}</strong> with PDF attached.</p>
                   </div>
                 </div>
-                <span className="text-[10px] bg-emerald-100 text-emerald-800 font-mono font-bold px-2 py-0.5 rounded">Gmail API</span>
+                <span className="text-[10px] bg-slate-100 text-slate-700 font-mono font-medium px-2 py-0.5 rounded">Gmail API</span>
               </div>
             ) : (
-              <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 space-y-1">
+              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 space-y-1">
                 <div className="flex items-center justify-between">
-                  <p className="font-bold text-amber-900 flex items-center gap-1.5">
-                    <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" /> Gmail Automatic Delivery Status:
+                  <p className="font-bold text-slate-900 flex items-center gap-1.5">
+                    <AlertCircle className="w-4 h-4 text-slate-500 shrink-0" /> Gmail Automatic Delivery Status:
                   </p>
                   {emailModalData.gmailStatus?.error && (
-                    <span className="text-[10px] text-rose-600 font-mono font-semibold max-w-xs truncate" title={emailModalData.gmailStatus.error}>
+                    <span className="text-[10px] text-red-600 font-mono font-semibold max-w-xs truncate" title={emailModalData.gmailStatus.error}>
                       {emailModalData.gmailStatus.error}
                     </span>
                   )}
                 </div>
-                <p className="text-[11px] leading-relaxed text-amber-800">
+                <p className="text-[11px] leading-relaxed text-slate-600">
                   {emailModalData.clientEmail
                     ? "Click 'Send Invoice PDF via Gmail' below to authorize Gmail and send the attached PDF directly to your client."
                     : "Please enter your client's email address below, then click 'Send Invoice PDF via Gmail'."}

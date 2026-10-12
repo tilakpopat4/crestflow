@@ -10,6 +10,7 @@ import MediaEmbedModal from './MediaEmbedModal';
 import BulkEditWorkModal from './BulkEditWorkModal';
 import { DateInput } from './DateInput';
 import { formatLocalDateToYMD, parseYMDToTimestamp } from '../lib/dateUtils';
+import StatusBadge from './StatusBadge';
 
 interface WorkLogTabProps {
   user: User;
@@ -376,10 +377,10 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
             <button
               type="button"
               onClick={() => setShowClosed(prev => !prev)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer shrink-0 ${
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer shrink-0 ${
                 showClosed
-                  ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 border border-purple-300 dark:border-purple-700'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 border border-transparent dark:border-slate-700'
+                  ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
               title={showClosed ? "Hide work logs of closed clients" : "Show work logs of closed clients"}
             >
@@ -448,12 +449,12 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
                   const selClient = clients.find(c => c.id === formData.clientId);
                   if (selClient?.subClients && selClient.subClients.length > 0) {
                     return (
-                      <div className="mt-2.5 bg-purple-50 dark:bg-purple-950/30 p-2.5 rounded-lg border border-purple-200 dark:border-purple-800/60">
-                        <label className="block text-xs font-bold text-purple-900 dark:text-purple-300 mb-1 flex items-center gap-1">
-                          <Users size={12} className="text-purple-600 dark:text-purple-400" /> Assign Sub-Client (Optional)
+                      <div className="mt-2.5 bg-slate-50 dark:bg-slate-900/60 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
+                          <Users size={12} className="text-slate-500 dark:text-slate-400" /> Assign Sub-Client (Optional)
                         </label>
                         <select
-                          className="w-full p-2 border border-purple-300 dark:border-purple-700 rounded-md text-xs bg-white dark:bg-slate-800 font-medium text-slate-800 dark:text-slate-200 outline-none focus:ring-2 focus:ring-purple-500"
+                          className="w-full p-2 border border-slate-300 dark:border-slate-700 rounded-md text-xs bg-white dark:bg-slate-800 font-medium text-slate-800 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500"
                           value={formData.subClientId}
                           onChange={(e) => setFormData({ ...formData, subClientId: e.target.value })}
                         >
@@ -684,17 +685,7 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
                         )}
                       </td>
                       <td className="py-4 px-4 text-[13px] font-medium">
-                        {work.status === 'Invoiced' ? (
-                          <span className="inline-flex items-center text-slate-700 dark:text-slate-300">
-                            <span className="w-1.5 h-1.5 rounded-full bg-slate-500 mr-1.5 inline-block" />
-                            Invoiced
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center text-slate-500 dark:text-slate-400">
-                            <span className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500 mr-1.5 inline-block" />
-                            Pending
-                          </span>
-                        )}
+                        <StatusBadge status={work.status === 'Invoiced' ? 'Invoiced' : 'Pending'} />
                       </td>
                       <td className="py-4 px-4 text-sm text-right flex justify-end items-center gap-1">
                         {videoUrl && (
@@ -757,8 +748,8 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
             <CheckSquare size={16} className="text-indigo-400" />
             <span className="text-sm font-semibold">{selectedCount} selected</span>
             {selectedInvoicedCount > 0 && (
-              <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-600/30">
-                {selectedInvoicedCount} invoiced
+              <span className="text-xs text-slate-400 font-normal">
+                ({selectedInvoicedCount} invoiced)
               </span>
             )}
           </div>

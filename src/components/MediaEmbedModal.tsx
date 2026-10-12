@@ -64,7 +64,7 @@ export default function MediaEmbedModal({
               <div className="flex items-center gap-2 text-[11px] text-slate-400 dark:text-slate-500">
                 {clientName && <span>Client: <strong className="text-slate-700 dark:text-slate-300">{clientName}</strong></span>}
                 {isDrive && (
-                  <span className="inline-flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400">
+                  <span className="inline-flex items-center gap-1 font-medium text-slate-500 dark:text-slate-400">
                     • Google Drive Video
                   </span>
                 )}
