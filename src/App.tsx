@@ -553,7 +553,7 @@ export default function App() {
           </div>
         </div>
 
-        <Footer variant="minimal" onNavigate={handleSupportingNavigate} />
+        <Footer variant="minimal" transparent onNavigate={handleSupportingNavigate} />
       </div>
     );
   }
