@@ -397,7 +397,7 @@ export default function App() {
     return (
       <div 
         className="min-h-screen w-full flex flex-col justify-between font-sans relative overflow-x-hidden selection:bg-indigo-500 selection:text-white bg-cover bg-center bg-no-repeat bg-slate-900"
-        style={{ backgroundImage: 'url(/onboarding-bg.png)' }}
+        style={{ backgroundImage: 'url(/onboarding-bg.webp)' }}
       >
         {/* Content Area */}
         <div className="flex-1 flex items-center justify-center p-4 md:p-8 lg:p-12 relative z-10 max-w-6xl mx-auto w-full">
