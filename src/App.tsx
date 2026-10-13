@@ -19,6 +19,7 @@ import { setDriveAccessToken } from './lib/driveService';
 import { calculateWorkJourney, isAnniversaryDismissed, dismissAnniversary } from './lib/anniversary';
 
 import Footer from './components/Footer';
+import ErrorBoundary from './components/ErrorBoundary';
 
 const DashboardTab = lazy(() => import('./components/DashboardTab'));
 const ClientsTab = lazy(() => import('./components/ClientsTab'));
@@ -615,34 +616,37 @@ export default function App() {
           profile={profile}
           onEditProfile={() => setIsProfileModalOpen(true)}
           onOpenAnniversaryModal={() => setIsAnniversaryModalOpen(true)}
+          onLogout={handleLogout}
         />
         <div className="flex-1 overflow-y-auto overflow-x-hidden relative flex flex-col">
           <div className="flex-1 flex flex-col">
-            <Suspense fallback={<ViewLoadingFallback />}>
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={supportingRoute || activeTab}
-                  initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 7 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -5 }}
-                  transition={{
-                    duration: shouldReduceMotion ? 0.01 : 0.18,
-                    ease: [0.22, 1, 0.36, 1],
-                  }}
-                  className="flex-1 w-full flex flex-col"
-                >
-                  {supportingRoute === 'privacy' && <PrivacyPolicyPage onNavigate={handleSupportingNavigate} />}
-                  {supportingRoute === 'terms' && <TermsOfServicePage onNavigate={handleSupportingNavigate} />}
-                  {supportingRoute === 'contact' && <ContactPage />}
-                  {!supportingRoute && activeTab === 'dashboard' && <DashboardTab user={user} profile={profile} onNavigateToClients={() => setActiveTab('clients')} />}
-                  {!supportingRoute && activeTab === 'clients' && <ClientsTab user={user} initialSearchQuery={globalSearchQuery} initialSelectedClientId={selectedClientIdFromSearch} />}
-                  {!supportingRoute && activeTab === 'work' && <WorkLogTab user={user} initialSearchQuery={globalSearchQuery} />}
-                  {!supportingRoute && activeTab === 'invoice' && <InvoiceTab user={user} profile={profile} initialSearchQuery={globalSearchQuery} />}
-                  {!supportingRoute && activeTab === 'reviews' && <ReviewsTab user={user} profile={profile} />}
-                  {!supportingRoute && activeTab === 'admin' && <AdminTab />}
-                </motion.div>
-              </AnimatePresence>
-            </Suspense>
+            <ErrorBoundary fallbackTitle="Unable to display this tab">
+              <Suspense fallback={<ViewLoadingFallback />}>
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.div
+                    key={supportingRoute || activeTab}
+                    initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 7 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -5 }}
+                    transition={{
+                      duration: shouldReduceMotion ? 0.01 : 0.18,
+                      ease: [0.22, 1, 0.36, 1],
+                    }}
+                    className="flex-1 w-full flex flex-col"
+                  >
+                    {supportingRoute === 'privacy' && <PrivacyPolicyPage onNavigate={handleSupportingNavigate} />}
+                    {supportingRoute === 'terms' && <TermsOfServicePage onNavigate={handleSupportingNavigate} />}
+                    {supportingRoute === 'contact' && <ContactPage />}
+                    {!supportingRoute && activeTab === 'dashboard' && <DashboardTab user={user} profile={profile} onNavigateToClients={() => setActiveTab('clients')} />}
+                    {!supportingRoute && activeTab === 'clients' && <ClientsTab user={user} initialSearchQuery={globalSearchQuery} initialSelectedClientId={selectedClientIdFromSearch} />}
+                    {!supportingRoute && activeTab === 'work' && <WorkLogTab user={user} initialSearchQuery={globalSearchQuery} />}
+                    {!supportingRoute && activeTab === 'invoice' && <InvoiceTab user={user} profile={profile} initialSearchQuery={globalSearchQuery} />}
+                    {!supportingRoute && activeTab === 'reviews' && <ReviewsTab user={user} profile={profile} />}
+                    {!supportingRoute && activeTab === 'admin' && <AdminTab />}
+                  </motion.div>
+                </AnimatePresence>
+              </Suspense>
+            </ErrorBoundary>
           </div>
           <Footer onNavigate={handleSupportingNavigate} />
         </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
-import { Search, X, Users, ClipboardList, FileText, ExternalLink, Play, ArrowRight, CheckCircle2, Clock, Sun, Moon, Monitor, Award, Calendar } from 'lucide-react';
+import { Search, X, Users, ClipboardList, FileText, ExternalLink, Play, ArrowRight, CheckCircle2, Clock, Sun, Moon, Monitor, Award, Calendar, LogOut } from 'lucide-react';
 import { User } from 'firebase/auth';
 import { useFirestore } from '../hooks/useFirestore';
 import { Client, WorkItem, Invoice, UserProfile } from '../types';
@@ -20,6 +20,7 @@ interface GlobalHeaderProps {
   profile?: UserProfile | null;
   onEditProfile?: () => void;
   onOpenAnniversaryModal?: () => void;
+  onLogout?: () => void;
 }
 
 export default function GlobalHeader({
@@ -31,7 +32,8 @@ export default function GlobalHeader({
   setGlobalQuery,
   profile,
   onEditProfile,
-  onOpenAnniversaryModal
+  onOpenAnniversaryModal,
+  onLogout
 }: GlobalHeaderProps) {
   const { theme, resolvedTheme, setTheme, toggleTheme } = useTheme();
   const [showThemeMenu, setShowThemeMenu] = useState(false);
@@ -561,6 +563,39 @@ export default function GlobalHeader({
                 <span>System Auto</span>
               </button>
             </div>
+          )}
+        </div>
+
+        {/* Mobile Profile & Logout Controls */}
+        <div className="flex md:hidden items-center gap-1.5 shrink-0">
+          {onEditProfile && (
+            <button
+              type="button"
+              onClick={onEditProfile}
+              className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              title="Open Profile Settings"
+              aria-label="Open Profile Settings"
+            >
+              {user?.photoURL ? (
+                <img src={user.photoURL} alt="Profile" className="w-7 h-7 rounded-full object-cover border border-slate-200 dark:border-slate-700" />
+              ) : (
+                <div className="w-7 h-7 rounded-full bg-slate-700 text-white flex items-center justify-center text-xs font-semibold">
+                  {(profile?.name || user?.displayName)?.charAt(0) || 'U'}
+                </div>
+              )}
+            </button>
+          )}
+
+          {onLogout && (
+            <button
+              type="button"
+              onClick={onLogout}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              title="Sign Out"
+              aria-label="Sign Out"
+            >
+              <LogOut size={16} />
+            </button>
           )}
         </div>
       </div>

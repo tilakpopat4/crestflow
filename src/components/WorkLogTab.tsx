@@ -343,16 +343,16 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
           <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Work Log</h2>
           <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">Track deliverables and services.</p>
         </div>
-        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
           {/* Work Log Filter Search Bar */}
-          <div className="relative flex-1 md:w-64">
+          <div className="relative flex-1 min-w-[180px] w-full sm:w-auto">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search work or client..."
-              className="w-full bg-white dark:bg-slate-800 text-xs pl-9 pr-7 py-2 rounded-lg border border-slate-200 dark:border-slate-700 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500 outline-none text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+              className="w-full bg-white dark:bg-slate-800 text-xs pl-9 pr-7 py-2.5 sm:py-2 rounded-lg border border-slate-200 dark:border-slate-700 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500 outline-none text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
             />
             {searchQuery && (
               <button
@@ -364,52 +364,54 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
             )}
           </div>
 
-          <button
-            onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
-            className="flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-transparent dark:border-slate-700 rounded-lg text-xs font-semibold transition-colors cursor-pointer shrink-0"
-            title="Toggle sort order"
-          >
-            <ArrowUpDown size={14} />
-            Sort: {sortOrder === 'asc' ? 'Oldest First' : 'Newest First'}
-          </button>
-
-          {closedClientIds.size > 0 && (
+          <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
             <button
-              type="button"
-              onClick={() => setShowClosed(prev => !prev)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer shrink-0 ${
-                showClosed
-                  ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-              }`}
-              title={showClosed ? "Hide work logs of closed clients" : "Show work logs of closed clients"}
+              onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-transparent dark:border-slate-700 rounded-lg text-xs font-semibold transition-colors cursor-pointer shrink-0"
+              title="Toggle sort order"
             >
-              <Archive size={13} />
-              {showClosed ? 'Hide Closed' : `Show Closed (${closedClientIds.size})`}
+              <ArrowUpDown size={14} />
+              <span>Sort: {sortOrder === 'asc' ? 'Oldest First' : 'Newest First'}</span>
             </button>
-          )}
 
-          {!isFormOpen && (
-            <div className="flex items-center gap-2">
-              <button 
+            {closedClientIds.size > 0 && (
+              <button
                 type="button"
-                onClick={() => setIsDriveModalOpen(true)}
-                className="flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors shadow-xs cursor-pointer shrink-0"
-                title="Directly upload video/file to Google Drive and log as work deliverable"
+                onClick={() => setShowClosed(prev => !prev)}
+                className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer shrink-0 ${
+                  showClosed
+                    ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                }`}
+                title={showClosed ? "Hide work logs of closed clients" : "Show work logs of closed clients"}
               >
-                <UploadCloud size={14} />
-                Upload to Drive
+                <Archive size={13} />
+                <span>{showClosed ? 'Hide Closed' : `Show Closed (${closedClientIds.size})`}</span>
               </button>
+            )}
 
-              <button 
-                onClick={() => setIsFormOpen(true)}
-                className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-xs font-semibold transition-colors shadow-xs cursor-pointer shrink-0"
-              >
-                <Plus size={15} />
-                Log Work
-              </button>
-            </div>
-          )}
+            {!isFormOpen && (
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button 
+                  type="button"
+                  onClick={() => setIsDriveModalOpen(true)}
+                  className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2.5 sm:py-2 rounded-lg text-xs font-semibold transition-colors shadow-xs cursor-pointer shrink-0"
+                  title="Directly upload video/file to Google Drive and log as work deliverable"
+                >
+                  <UploadCloud size={14} />
+                  <span>Upload to Drive</span>
+                </button>
+
+                <button 
+                  onClick={() => setIsFormOpen(true)}
+                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 sm:py-2 rounded-lg text-xs font-semibold transition-colors shadow-xs cursor-pointer shrink-0"
+                >
+                  <Plus size={15} />
+                  <span>Log Work</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -597,7 +599,7 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
       ) : (
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm contain-paint">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse min-w-[700px]">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700">
                   <th className="py-3 pl-4 pr-2 w-10">

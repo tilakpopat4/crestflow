@@ -221,7 +221,7 @@ export default function AdminTab() {
 
   // Authenticated Admin Dashboard
   return (
-    <div className="p-6 md:p-8 space-y-8 bg-slate-50 dark:bg-slate-950 min-h-screen text-slate-900 dark:text-slate-100">
+    <div className="p-4 sm:p-6 md:p-8 space-y-8 bg-slate-50 dark:bg-slate-950 min-h-screen text-slate-900 dark:text-slate-100">
       {/* Admin Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
         <div>
@@ -319,7 +319,7 @@ export default function AdminTab() {
               No freelancer profiles found matching your search.
             </div>
           ) : (
-            <table className="w-full text-left border-collapse">
+            <table className="w-full min-w-[640px] text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-900/60 text-slate-400 dark:text-slate-400 text-[10px] uppercase tracking-wider border-b border-slate-100 dark:border-slate-700">
                   <th className="p-4 font-bold">Freelancer</th>

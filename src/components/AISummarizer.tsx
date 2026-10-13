@@ -108,7 +108,7 @@ export default function AISummarizer({ clients, workItems, profile }: AISummariz
             <div className="absolute -top-3 -right-3">
               <button
                 onClick={handleCopy}
-                className="p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full shadow-sm text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-slate-700 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 cursor-pointer"
+                className="p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full shadow-sm text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-slate-700 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 cursor-pointer"
                 title="Copy to clipboard"
               >
                 {copied ? <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 px-1">Copied!</span> : <Copy size={16} />}

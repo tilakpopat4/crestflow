@@ -332,11 +332,14 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
     }
   };
 
-  const formattedLastPaymentDate = client.lastPaymentDate
+  const formattedLastPaymentDate = client.lastPaymentDate && !isNaN(new Date(client.lastPaymentDate).getTime())
     ? new Date(client.lastPaymentDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
     : 'Not Recorded';
 
-  const formattedNextDueDate = new Date(statusInfo.nextDueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  const nextDueTime = new Date(statusInfo.nextDueDate).getTime();
+  const formattedNextDueDate = !isNaN(nextDueTime)
+    ? new Date(statusInfo.nextDueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+    : '—';
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 text-slate-900 dark:text-slate-100">
@@ -936,7 +939,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
 
             {/* Work Items Table */}
             <div className="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-xl">
-              <table className="w-full text-left border-collapse">
+              <table className="w-full min-w-[680px] text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                     <th className="p-3.5">Date</th>
@@ -1075,7 +1078,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
             </div>
 
             <div className="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-xl">
-              <table className="w-full text-left border-collapse">
+              <table className="w-full min-w-[680px] text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                     <th className="p-3.5">Invoice Date</th>

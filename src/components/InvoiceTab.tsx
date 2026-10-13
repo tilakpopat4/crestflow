@@ -1289,25 +1289,36 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
     return () => clearInterval(intervalId);
   }, [clients, workItems, invoices, clientsLoading, addInvoice, updateWorkItem, updateClient]);
 
-  // Dynamic preview scaling to fit any screen perfectly with zero overlapping
+  // Dynamic preview scaling to fit any screen perfectly with zero overlapping & no content truncation
   const previewContainerRef = useRef<HTMLDivElement>(null);
+  const invoiceCaptureRef = useRef<HTMLDivElement>(null);
   const [previewScale, setPreviewScale] = useState<number>(0.75);
+  const [actualCaptureHeight, setActualCaptureHeight] = useState<number>(1123);
+  const [isZoomMode, setIsZoomMode] = useState<boolean>(false);
 
   useEffect(() => {
     const updateScale = () => {
       if (!previewContainerRef.current) return;
       const containerWidth = previewContainerRef.current.clientWidth;
-      // Padding inside preview container (typically 32px to 48px)
-      const availableWidth = Math.max(200, containerWidth - 48);
+      // Responsive padding: 24px on mobile phones, 48px on tablets and desktop
+      const padding = window.innerWidth < 640 ? 24 : 48;
+      const availableWidth = Math.max(160, containerWidth - padding);
       const a4Width = 794; // 210mm in px at 96 DPI
-      const computedScale = Math.min(1, Math.max(0.25, availableWidth / a4Width));
+      const computedScale = Math.min(1, Math.max(0.2, availableWidth / a4Width));
       setPreviewScale(computedScale);
+
+      if (invoiceCaptureRef.current) {
+        setActualCaptureHeight(Math.max(1123, invoiceCaptureRef.current.offsetHeight));
+      }
     };
 
     updateScale();
     const ro = new ResizeObserver(updateScale);
     if (previewContainerRef.current) {
       ro.observe(previewContainerRef.current);
+    }
+    if (invoiceCaptureRef.current) {
+      ro.observe(invoiceCaptureRef.current);
     }
     window.addEventListener('resize', updateScale);
     return () => {
@@ -1885,6 +1896,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
     return <div className="p-8 max-w-[1600px] mx-auto text-center py-20"><div className="animate-pulse flex items-center justify-center space-x-2"><div className="w-2 h-2 bg-indigo-600 rounded-full"></div><div className="w-2 h-2 bg-indigo-600 rounded-full"></div><div className="w-2 h-2 bg-indigo-600 rounded-full"></div></div></div>;
   }
 
+  const effectiveScale = isZoomMode ? (typeof window !== 'undefined' && window.innerWidth < 768 ? 0.9 : 1) : previewScale;
+
   return (
     <div className="p-4 md:p-8 max-w-[1600px] mx-auto">
       <div className="mb-6 md:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -2229,7 +2242,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                       {reels.length > 1 && (
                         <button
                           onClick={() => removeReel(reel.id)}
-                          className="absolute -top-2 -right-2 p-1.5 bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900 text-red-500 hover:bg-red-50 hover:text-red-600 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                          className="absolute -top-2 -right-2 p-1.5 bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900 text-red-500 hover:bg-red-50 hover:text-red-600 rounded-full shadow-sm opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity cursor-pointer"
                         >
                           <Trash2 size={14} />
                         </button>
@@ -2430,18 +2443,18 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
         {/* Right Column - A4 Preview Wrapper */}
         <div 
           ref={previewContainerRef}
-          className="xl:col-span-7 bg-slate-200 dark:bg-slate-900/80 p-3 sm:p-5 md:p-6 rounded-xl flex flex-col items-center shadow-inner min-h-[400px] border border-slate-300 dark:border-slate-800 relative w-full overflow-hidden"
+          className="xl:col-span-7 bg-slate-200 dark:bg-slate-900/80 p-3 sm:p-5 md:p-6 rounded-xl flex flex-col items-center shadow-inner min-h-[400px] border border-slate-300 dark:border-slate-800 relative w-full overflow-x-auto touch-pan-x touch-pan-y scrollbar-thin"
         >
           
           {/* Preview Mode Switcher & Quick Print Header */}
-          <div className="w-full max-w-[210mm] flex flex-wrap items-center justify-between gap-3 mb-6 bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-300 dark:border-slate-700 shadow-sm z-10">
-            <div className="flex items-center gap-2">
+          <div className="w-full max-w-[210mm] flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6 bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-300 dark:border-slate-700 shadow-sm z-10">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Preview:</span>
               <div className="inline-flex bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
                 <button
                   type="button"
                   onClick={() => setPreviewMode('standard')}
-                  className={`px-3 py-1 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
                     previewMode === 'standard'
                       ? 'bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-400 shadow-xs'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
@@ -2452,26 +2465,50 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                 <button
                   type="button"
                   onClick={() => setPreviewMode('work-only')}
-                  className={`px-3 py-1 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
                     previewMode === 'work-only'
                       ? 'bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-400 shadow-xs'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
                 >
-                  <ListChecks size={13} /> Deliverables Only
+                  <ListChecks size={13} /> Deliverables
                 </button>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 font-semibold px-2.5 py-1 bg-slate-100 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
-                {Math.round(previewScale * 100)}% Fit
-              </span>
+            <div className="flex items-center gap-2 flex-wrap justify-between sm:justify-end">
+              <div className="inline-flex bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
+                <button
+                  type="button"
+                  onClick={() => setIsZoomMode(false)}
+                  className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                    !isZoomMode
+                      ? 'bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-400 shadow-xs'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                  }`}
+                  title="Fit to screen width"
+                >
+                  Fit ({Math.round(previewScale * 100)}%)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsZoomMode(true)}
+                  className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                    isZoomMode
+                      ? 'bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-400 shadow-xs'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                  }`}
+                  title="Actual size with horizontal and vertical scroll"
+                >
+                  100% Zoom
+                </button>
+              </div>
+
               <button
                 type="button"
                 onClick={() => handlePrintWorkSummary()}
                 disabled={!selectedClient || reels.length === 0}
-                className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer shrink-0"
                 title="Print Work Summary"
               >
                 <Printer size={13} className="text-slate-400" /> Print Summary
@@ -2479,18 +2516,18 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
             </div>
           </div>
 
-          {/* Scaled A4 Preview Box that takes exact scaled dimensions and prevents overflow */}
+          {/* Scaled A4 Preview Box that takes dynamic measured dimensions and prevents truncation */}
           <div 
-            className="w-full flex justify-center items-start transition-all duration-200 ease-out"
+            className="w-full flex justify-center items-start transition-all duration-200 ease-out py-1"
             style={{
-              height: `${Math.round(1123 * previewScale)}px`,
-              minHeight: `${Math.round(1123 * previewScale)}px`
+              height: `${Math.round(actualCaptureHeight * effectiveScale)}px`,
+              minHeight: `${Math.round(actualCaptureHeight * effectiveScale)}px`
             }}
           >
             <div
               style={{
-                width: `${Math.round(794 * previewScale)}px`,
-                height: `${Math.round(1123 * previewScale)}px`,
+                width: `${Math.round(794 * effectiveScale)}px`,
+                height: `${Math.round(actualCaptureHeight * effectiveScale)}px`,
                 position: 'relative',
                 overflow: 'visible'
               }}
@@ -2498,6 +2535,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
             >
               {/* The actual A4 element captured for live preview */}
               <div
+                ref={invoiceCaptureRef}
                 id="invoice-preview-capture"
                 className="bg-white relative flex flex-col justify-between"
                 style={{
@@ -2507,7 +2545,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                   fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
                   color: '#0f172a',
                   boxSizing: 'border-box',
-                  transform: `scale(${previewScale})`,
+                  transform: `scale(${effectiveScale})`,
                   transformOrigin: 'top left',
                   position: 'absolute',
                   top: 0,
@@ -2969,7 +3007,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
           </div>
         ) : (
           <div className="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-xl">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse min-w-[780px]">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   <th className="p-3.5">Invoice No / Date</th>

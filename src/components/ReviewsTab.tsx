@@ -211,11 +211,11 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
         </div>
 
         {/* Star Rating Filter */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-xs font-semibold">
+        <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto pb-1 sm:pb-0 scrollbar-none w-full md:w-auto">
+          <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-xs font-semibold shrink-0">
             <Filter className="w-3.5 h-3.5" /> Filter:
           </div>
-          <div className="flex gap-1">
+          <div className="flex gap-1 shrink-0">
             <button
               onClick={() => setRatingFilter('all')}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
@@ -253,10 +253,10 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
               className="bg-white dark:bg-slate-800 rounded-xl shadow-xs border border-slate-200 dark:border-slate-700 p-6 flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-md transition-all duration-200 relative group animate-in fade-in"
             >
               
-              {/* Delete button (only visible on hover or mobile) */}
+              {/* Delete button (always visible on mobile touch, hover on desktop) */}
               <button
                 onClick={() => setReviewToDelete(review.id)}
-                className="absolute right-4 top-4 text-slate-300 dark:text-slate-600 hover:text-red-600 dark:hover:text-red-400 p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-all opacity-0 group-hover:opacity-100 md:opacity-0 focus:opacity-100 cursor-pointer"
+                className="absolute right-4 top-4 text-slate-300 dark:text-slate-600 hover:text-red-600 dark:hover:text-red-400 p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 cursor-pointer"
                 title="Delete testimonial"
               >
                 <Trash2 className="w-4 h-4" />

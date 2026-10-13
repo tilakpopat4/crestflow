@@ -15,8 +15,15 @@ export interface PaymentStatusInfo {
 }
 
 export function getNextPaymentDueDate(client: Client): number {
-  const baseDate = client.lastPaymentDate || client.createdAt || Date.now();
-  const cycleDays = client.paymentCycleDays || 30;
+  let baseDate = Date.now();
+  if (client.lastPaymentDate) {
+    const parsed = typeof client.lastPaymentDate === 'number' ? client.lastPaymentDate : new Date(client.lastPaymentDate).getTime();
+    if (!isNaN(parsed)) baseDate = parsed;
+  } else if (client.createdAt) {
+    const parsed = typeof client.createdAt === 'number' ? client.createdAt : new Date(client.createdAt).getTime();
+    if (!isNaN(parsed)) baseDate = parsed;
+  }
+  const cycleDays = Number(client.paymentCycleDays) || 30;
   return baseDate + cycleDays * 24 * 60 * 60 * 1000;
 }
 

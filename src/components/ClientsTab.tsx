@@ -3,7 +3,7 @@ import { Client, Invoice, WorkItem, ServiceRequest } from '../types';
 import {
   Plus, Edit2, Trash2, CheckCircle2, X, Search, Calendar,
   Clock, Phone, Mail, ArrowRight, AlertTriangle, Send, ShieldAlert,
-  ChevronRight, Filter, Download, Users, UploadCloud, Briefcase, Instagram, Archive, ArchiveRestore
+  ChevronRight, Filter, Download, Users, UploadCloud, Briefcase, Instagram, Archive, ArchiveRestore, Film
 } from 'lucide-react';
 import { useFirestore } from '../hooks/useFirestore';
 import { User } from 'firebase/auth';
@@ -84,13 +84,17 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const paymentDateTimestamp = formData.lastPaymentDate
-        ? new Date(formData.lastPaymentDate).getTime()
-        : Date.now();
+      let paymentDateTimestamp = Date.now();
+      if (formData.lastPaymentDate) {
+        const parsed = new Date(formData.lastPaymentDate).getTime();
+        if (!isNaN(parsed)) {
+          paymentDateTimestamp = parsed;
+        }
+      }
 
       const rateVal = formData.paymentBasis === 'monthly_retainer' && formData.monthlyRetainerAmount
-        ? Number(formData.monthlyRetainerAmount)
-        : Number(formData.defaultRate);
+        ? Number(formData.monthlyRetainerAmount) || 0
+        : Number(formData.defaultRate) || 0;
 
       if (isEditing) {
         const existing = clients.find(c => c.id === isEditing);
@@ -757,7 +761,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
           />
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap gap-y-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 scrollbar-none shrink-0">
           <button
             onClick={() => setFilterType('all')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${filterType === 'all'
@@ -820,11 +824,14 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
           </div>
         ) : (
           filteredClients.map(({ client, statusInfo, financials }) => {
-            const formattedPrevDate = client.lastPaymentDate
+            const formattedPrevDate = client.lastPaymentDate && !isNaN(new Date(client.lastPaymentDate).getTime())
               ? new Date(client.lastPaymentDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })
               : 'Not set';
 
-            const formattedNextDate = new Date(statusInfo.nextDueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+            const nextDueTime = new Date(statusInfo.nextDueDate).getTime();
+            const formattedNextDate = !isNaN(nextDueTime)
+              ? new Date(statusInfo.nextDueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })
+              : '—';
 
             return (
               <div

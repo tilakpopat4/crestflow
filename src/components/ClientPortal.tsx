@@ -649,7 +649,7 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
                 <div className="py-12 text-center text-slate-400 dark:text-slate-500 text-xs">No work items matching your criteria.</div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
+                  <table className="w-full min-w-[620px] text-left text-xs">
                     <thead className="bg-slate-50/80 dark:bg-slate-800/80 border-b border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-400 font-bold uppercase tracking-wider">
                       <tr>
                         <th className="py-3.5 px-4">Date</th>
@@ -917,8 +917,8 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
             </div>
 
             {/* Line items list */}
-            <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
-              <table className="w-full text-left text-xs">
+            <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-x-auto">
+              <table className="w-full min-w-[420px] text-left text-xs">
                 <thead className="bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-400 font-bold uppercase text-[10px]">
                   <tr>
                     <th className="py-2.5 px-3">Item Description</th>
