@@ -116,8 +116,11 @@ export default function ProfileModal({
         {/* Content Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1">
           {isMandatory && (
-            <div className="bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/50 text-indigo-800 dark:text-indigo-300 p-3.5 rounded-lg text-xs leading-relaxed mb-2">
-              Welcome! Configure your name, phone number, and UPI ID for invoices and payment links.
+            <div className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 p-3.5 rounded-lg text-xs leading-relaxed mb-2 space-y-1">
+              <p className="font-bold text-slate-900 dark:text-slate-100">Welcome to CrestFlow</p>
+              <p className="text-slate-600 dark:text-slate-400">
+                Your name, professional title, and UPI ID are used to automatically generate payment QR codes and brand your client invoices. You can customize them now or update them anytime.
+              </p>
             </div>
           )}
 
@@ -306,7 +309,7 @@ export default function ProfileModal({
               disabled={isSaving}
               className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 cursor-pointer"
             >
-              Cancel
+              {isMandatory ? 'Skip for Now' : 'Cancel'}
             </button>
             <button
               type="submit"

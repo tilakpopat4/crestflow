@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Client, Reel, Invoice, WorkItem, UserProfile, InvoiceDeliverable } from '../types';
-import { Plus, Trash2, Download, Receipt, FileCheck, Mail, Send, Copy, X, Check, MailCheck, CheckCircle2, AlertCircle, Loader2, FileText, Search, Calculator, Divide, Coins, History, Pencil, Printer, ListChecks, IndianRupee, Archive, Clock, Sparkles, Calendar } from 'lucide-react';
+import { Plus, Trash2, Download, Receipt, FileCheck, Mail, Send, Copy, X, Check, MailCheck, CheckCircle2, AlertCircle, Loader2, FileText, Search, Calculator, Divide, Coins, History, Pencil, Printer, ListChecks, IndianRupee, Archive, Clock, Sparkles, Calendar, Users } from 'lucide-react';
 import { useFirestore } from '../hooks/useFirestore';
 import { User } from 'firebase/auth';
 import { generateUUID } from '../lib/utils';
@@ -1135,9 +1135,10 @@ interface InvoiceTabProps {
   user: User | null;
   profile: UserProfile | null;
   initialSearchQuery?: string;
+  onNavigateToClients?: () => void;
 }
 
-export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: InvoiceTabProps) {
+export default function InvoiceTab({ user, profile, initialSearchQuery = '', onNavigateToClients }: InvoiceTabProps) {
   const { data: clients, loading: clientsLoading, addOrUpdateItem: updateClient } = useFirestore<Client>('clients', user?.uid);
   const { data: invoices, addOrUpdateItem: addInvoice } = useFirestore<Invoice>('invoices', user?.uid);
   const { data: workItems, addOrUpdateItem: updateWorkItem } = useFirestore<WorkItem>('workItems', user?.uid);
@@ -1975,7 +1976,18 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
                   </div>
                 )}
                 {clients.length === 0 && (
-                  <p className="text-xs text-slate-500 mt-1">Please add a client in the Clients tab first.</p>
+                  <div className="mt-2 p-3 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-slate-600 dark:text-slate-400 flex items-center justify-between gap-3">
+                    <span>No clients available. Add a client first to generate an invoice.</span>
+                    {onNavigateToClients && (
+                      <button
+                        type="button"
+                        onClick={onNavigateToClients}
+                        className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs font-semibold transition-colors cursor-pointer shrink-0"
+                      >
+                        Add Client
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
 
@@ -3001,9 +3013,25 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '' }: I
         </div>
 
         {displayedInvoices.length === 0 ? (
-          <div className="py-12 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl text-center text-slate-400 dark:text-slate-500 space-y-1">
-            <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">No invoices generated yet</p>
-            <p className="text-[11px]">Select a client above and click "Download PDF Invoice" to generate an invoice & send email.</p>
+          <div className="py-12 px-4 border border-slate-200 dark:border-slate-700 rounded-xl text-center text-slate-500 dark:text-slate-400 space-y-3 max-w-md mx-auto my-4 bg-white dark:bg-slate-800 shadow-xs">
+            <Receipt className="mx-auto h-10 w-10 text-slate-400 dark:text-slate-500" />
+            <div className="space-y-1">
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">No invoices generated yet</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {clients.length === 0
+                  ? "Add a client first, then create invoices with payment QR codes and breakdown."
+                  : "Choose a client in the generator above and click 'Download PDF Invoice'."}
+              </p>
+            </div>
+            {clients.length === 0 && onNavigateToClients && (
+              <button
+                type="button"
+                onClick={onNavigateToClients}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+              >
+                <Users size={13} /> Add First Client
+              </button>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-xl">

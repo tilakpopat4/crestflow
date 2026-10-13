@@ -637,10 +637,32 @@ export default function App() {
                     {supportingRoute === 'privacy' && <PrivacyPolicyPage onNavigate={handleSupportingNavigate} />}
                     {supportingRoute === 'terms' && <TermsOfServicePage onNavigate={handleSupportingNavigate} />}
                     {supportingRoute === 'contact' && <ContactPage />}
-                    {!supportingRoute && activeTab === 'dashboard' && <DashboardTab user={user} profile={profile} onNavigateToClients={() => setActiveTab('clients')} />}
+                    {!supportingRoute && activeTab === 'dashboard' && (
+                      <DashboardTab
+                        user={user}
+                        profile={profile}
+                        onNavigateToClients={() => setActiveTab('clients')}
+                        onNavigateToWork={() => setActiveTab('work')}
+                        onNavigateToInvoices={() => setActiveTab('invoice')}
+                        onEditProfile={() => setIsProfileModalOpen(true)}
+                      />
+                    )}
                     {!supportingRoute && activeTab === 'clients' && <ClientsTab user={user} initialSearchQuery={globalSearchQuery} initialSelectedClientId={selectedClientIdFromSearch} />}
-                    {!supportingRoute && activeTab === 'work' && <WorkLogTab user={user} initialSearchQuery={globalSearchQuery} />}
-                    {!supportingRoute && activeTab === 'invoice' && <InvoiceTab user={user} profile={profile} initialSearchQuery={globalSearchQuery} />}
+                    {!supportingRoute && activeTab === 'work' && (
+                      <WorkLogTab
+                        user={user}
+                        initialSearchQuery={globalSearchQuery}
+                        onNavigateToClients={() => setActiveTab('clients')}
+                      />
+                    )}
+                    {!supportingRoute && activeTab === 'invoice' && (
+                      <InvoiceTab
+                        user={user}
+                        profile={profile}
+                        initialSearchQuery={globalSearchQuery}
+                        onNavigateToClients={() => setActiveTab('clients')}
+                      />
+                    )}
                     {!supportingRoute && activeTab === 'reviews' && <ReviewsTab user={user} profile={profile} />}
                     {!supportingRoute && activeTab === 'admin' && <AdminTab />}
                   </motion.div>

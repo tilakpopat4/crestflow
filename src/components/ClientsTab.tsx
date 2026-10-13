@@ -810,17 +810,55 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
 
       {/* Client Profiles Grid */}
       <div className="grid grid-cols-1 min-[960px]:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
-        {filteredClients.length === 0 ? (
-          <div className="col-span-full py-16 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-8 space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500 flex items-center justify-center mx-auto">
+        {clients.length === 0 ? (
+          <div className="col-span-full py-16 px-6 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-8 space-y-4 max-w-xl mx-auto my-4 shadow-xs">
+            <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-400 flex items-center justify-center mx-auto">
+              <Users size={24} />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">No client profiles yet</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                Add your clients to track payment cycle dates, manage agreed rates (per-reel or monthly retainers), and automate invoicing with WhatsApp and email reminders.
+              </p>
+            </div>
+            <div className="flex items-center justify-center gap-2 pt-1 flex-wrap">
+              <button
+                type="button"
+                onClick={() => setIsFormOpen(true)}
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+              >
+                <Plus size={14} /> Add First Client
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsImportModalOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+              >
+                <UploadCloud size={14} /> Import from CSV
+              </button>
+            </div>
+          </div>
+        ) : filteredClients.length === 0 ? (
+          <div className="col-span-full py-16 px-6 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-8 space-y-4 max-w-xl mx-auto my-4 shadow-xs">
+            <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-400 flex items-center justify-center mx-auto">
               <Search size={24} />
             </div>
-            <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">No client profiles found</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              {clients.length === 0
-                ? "Get started by adding your first client profile."
-                : "Try adjusting your search query or filter selection."}
-            </p>
+            <div className="space-y-1">
+              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">No matching clients found</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                No clients match your filter or search query "{searchQuery}".
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setSearchQuery('');
+                setFilterType('all');
+              }}
+              className="px-3.5 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+            >
+              Reset Filters
+            </button>
           </div>
         ) : (
           filteredClients.map(({ client, statusInfo, financials }) => {

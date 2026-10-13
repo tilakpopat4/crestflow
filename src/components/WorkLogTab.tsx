@@ -15,9 +15,10 @@ import StatusBadge from './StatusBadge';
 interface WorkLogTabProps {
   user: User;
   initialSearchQuery?: string;
+  onNavigateToClients?: () => void;
 }
 
-export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
+export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients }: WorkLogTabProps) {
   const { data: clients, loading: clientsLoading } = useFirestore<Client>('clients', user.uid);
   const { data: workItems, loading: workLoading, addOrUpdateItem, removeItem } = useFirestore<WorkItem>('workItems', user.uid);
   const { data: invoices, loading: invoicesLoading, addOrUpdateItem: addOrUpdateInvoice, removeItem: removeInvoice } = useFirestore<any>('invoices', user.uid);
@@ -591,10 +592,76 @@ export function WorkLogTab({ user, initialSearchQuery = '' }: WorkLogTabProps) {
       )}
 
       {sortedWork.length === 0 ? (
-        <div className="text-center py-16 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-          <Clock className="mx-auto h-12 w-12 text-slate-300 dark:text-slate-600 mb-4" />
-          <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100 mb-1">No work logged yet</h3>
-          <p className="text-slate-500 dark:text-slate-400">Start logging your edits and services to easily generate invoices later.</p>
+        <div className="text-center py-16 px-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-4 max-w-xl mx-auto my-4 shadow-xs">
+          {clients.length === 0 ? (
+            <>
+              <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-400 flex items-center justify-center mx-auto">
+                <Users size={24} />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">Add a client before logging work</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Every deliverable is linked to a client so rates, retainers, and invoice statements calculate automatically.
+                </p>
+              </div>
+              {onNavigateToClients && (
+                <button
+                  type="button"
+                  onClick={onNavigateToClients}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                >
+                  <Users size={14} /> Add First Client
+                </button>
+              )}
+            </>
+          ) : workItems.length === 0 ? (
+            <>
+              <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-400 flex items-center justify-center mx-auto">
+                <Clock size={24} />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">No work logged yet</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Record video deliverables, reels, or editing projects to effortlessly generate invoices and keep track of uninvoiced work.
+                </p>
+              </div>
+              <div className="flex items-center justify-center gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setIsFormOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                >
+                  <Plus size={14} /> Log Work Item
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsDriveModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                >
+                  <UploadCloud size={14} /> Upload to Drive
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-400 flex items-center justify-center mx-auto">
+                <Search size={24} />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">No matching work items</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  No deliverables match your search query "{searchQuery}".
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+              >
+                Clear Search
+              </button>
+            </>
+          )}
         </div>
       ) : (
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm contain-paint">

@@ -22,14 +22,25 @@ import { useTheme } from '../context/ThemeContext';
 import { calculateWorkJourney } from '../lib/anniversary';
 import { executeAutoInvoiceCheck } from '../lib/autoInvoiceService';
 import StatusBadge from './StatusBadge';
+import GettingStartedCard from './GettingStartedCard';
 
 interface DashboardTabProps {
   user: User | null;
   profile?: UserProfile | null;
   onNavigateToClients?: () => void;
+  onNavigateToWork?: () => void;
+  onNavigateToInvoices?: () => void;
+  onEditProfile?: () => void;
 }
 
-export default function DashboardTab({ user, profile, onNavigateToClients }: DashboardTabProps) {
+export default function DashboardTab({
+  user,
+  profile,
+  onNavigateToClients,
+  onNavigateToWork,
+  onNavigateToInvoices,
+  onEditProfile
+}: DashboardTabProps) {
   const { isDark } = useTheme();
   const { data: clients, addOrUpdateItem: updateClient } = useFirestore<Client>('clients', user?.uid);
   const { data: invoices, loading, addOrUpdateItem, removeItem, batchReplaceAll } = useFirestore<Invoice>('invoices', user?.uid);
@@ -452,6 +463,19 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
         </div>
       )}
 
+      {/* Onboarding Getting Started Guide */}
+      <GettingStartedCard
+        userId={user?.uid}
+        profile={profile}
+        clients={clients}
+        invoices={invoices}
+        workItems={workItems}
+        onEditProfile={onEditProfile}
+        onNavigateToClients={onNavigateToClients}
+        onNavigateToWork={onNavigateToWork}
+        onNavigateToInvoices={onNavigateToInvoices}
+      />
+
       {!isNotificationDismissed && activeNotifications.length > 0 && (
         <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-xs space-y-3 relative">
           <button
@@ -677,8 +701,17 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
                 </LineChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center text-sm text-slate-400 dark:text-slate-500 text-center py-12">
-                No monthly invoice data yet.<br/>Generate invoices to render the earnings line chart.
+              <div className="h-full flex flex-col items-center justify-center text-sm text-slate-400 dark:text-slate-500 text-center py-12 space-y-2">
+                <p>No monthly invoice data yet.<br/>Generate invoices to render the earnings line chart.</p>
+                {onNavigateToInvoices && (
+                  <button
+                    type="button"
+                    onClick={onNavigateToInvoices}
+                    className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                  >
+                    Go to Invoicing &rarr;
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -716,8 +749,17 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center text-sm text-slate-400 dark:text-slate-500 text-center py-12">
-                No data available for this month.<br/>Generate invoices to see the chart.
+              <div className="h-full flex flex-col items-center justify-center text-sm text-slate-400 dark:text-slate-500 text-center py-12 space-y-2">
+                <p>No data available for this month.<br/>Generate invoices to see client distribution.</p>
+                {onNavigateToClients && (
+                  <button
+                    type="button"
+                    onClick={onNavigateToClients}
+                    className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                  >
+                    Manage Clients &rarr;
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -745,7 +787,18 @@ export default function DashboardTab({ user, profile, onNavigateToClients }: Das
                 {recentInvoices.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
-                      No invoices generated yet.
+                      <div className="flex flex-col items-center justify-center space-y-2">
+                        <p>No invoices generated yet.</p>
+                        {onNavigateToInvoices && (
+                          <button
+                            type="button"
+                            onClick={onNavigateToInvoices}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors cursor-pointer"
+                          >
+                            Create Your First Invoice
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ) : recentInvoices.map((inv) => (
