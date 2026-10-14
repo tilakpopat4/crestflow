@@ -211,14 +211,14 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
         </div>
 
         {/* Star Rating Filter */}
-        <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto pb-1 sm:pb-0 scrollbar-none w-full md:w-auto">
+        <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto pb-1 sm:pb-0 scrollbar-none w-full md:w-auto shrink-0">
           <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-xs font-semibold shrink-0">
-            <Filter className="w-3.5 h-3.5" /> Filter:
+            <Filter className="w-3.5 h-3.5 shrink-0" /> Filter:
           </div>
-          <div className="flex gap-1 shrink-0">
+          <div className="flex items-center gap-1 shrink-0 min-w-max">
             <button
               onClick={() => setRatingFilter('all')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                 ratingFilter === 'all'
                   ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
                   : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
@@ -230,13 +230,13 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
               <button
                 key={r}
                 onClick={() => setRatingFilter(r)}
-                className={`flex items-center gap-0.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                className={`flex items-center gap-0.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                   ratingFilter === r
                     ? 'bg-indigo-600 text-white'
                     : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                 }`}
               >
-                {r} <Star className="w-3 h-3 fill-current" />
+                {r} <Star className="w-3 h-3 fill-current shrink-0" />
               </button>
             ))}
           </div>

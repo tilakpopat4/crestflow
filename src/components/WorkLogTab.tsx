@@ -368,47 +368,47 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
           <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
             <button
               onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
-              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-transparent dark:border-slate-700 rounded-lg text-xs font-semibold transition-colors cursor-pointer shrink-0"
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-transparent dark:border-slate-700 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
               title="Toggle sort order"
             >
-              <ArrowUpDown size={14} />
-              <span>Sort: {sortOrder === 'asc' ? 'Oldest First' : 'Newest First'}</span>
+              <ArrowUpDown size={14} className="shrink-0" />
+              <span className="truncate">Sort: {sortOrder === 'asc' ? 'Oldest First' : 'Newest First'}</span>
             </button>
 
             {closedClientIds.size > 0 && (
               <button
                 type="button"
                 onClick={() => setShowClosed(prev => !prev)}
-                className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer shrink-0 ${
+                className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                   showClosed
                     ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                 }`}
                 title={showClosed ? "Hide work logs of closed clients" : "Show work logs of closed clients"}
               >
-                <Archive size={13} />
-                <span>{showClosed ? 'Hide Closed' : `Show Closed (${closedClientIds.size})`}</span>
+                <Archive size={13} className="shrink-0" />
+                <span className="truncate">{showClosed ? 'Hide Closed' : `Show Closed (${closedClientIds.size})`}</span>
               </button>
             )}
 
             {!isFormOpen && (
-              <div className="flex items-center gap-2 w-full sm:w-auto">
+              <div className="grid grid-cols-2 gap-2 w-full sm:flex sm:items-center sm:w-auto">
                 <button 
                   type="button"
                   onClick={() => setIsDriveModalOpen(true)}
-                  className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2.5 sm:py-2 rounded-lg text-xs font-semibold transition-colors shadow-xs cursor-pointer shrink-0"
+                  className="w-full sm:w-auto flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs font-semibold transition-colors shadow-xs cursor-pointer truncate"
                   title="Directly upload video/file to Google Drive and log as work deliverable"
                 >
-                  <UploadCloud size={14} />
-                  <span>Upload to Drive</span>
+                  <UploadCloud size={14} className="shrink-0" />
+                  <span className="truncate">Upload to Drive</span>
                 </button>
 
                 <button 
                   onClick={() => setIsFormOpen(true)}
-                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 sm:py-2 rounded-lg text-xs font-semibold transition-colors shadow-xs cursor-pointer shrink-0"
+                  className="w-full sm:w-auto flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors shadow-xs cursor-pointer truncate"
                 >
-                  <Plus size={15} />
-                  <span>Log Work</span>
+                  <Plus size={15} className="shrink-0" />
+                  <span className="truncate">Log Work</span>
                 </button>
               </div>
             )}
@@ -665,7 +665,136 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
         </div>
       ) : (
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm contain-paint">
-          <div className="overflow-x-auto">
+          {/* Mobile Header Bar */}
+          <div className="md:hidden flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-400">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={allVisibleSelected}
+                ref={(el) => { if (el) el.indeterminate = someVisibleSelected; }}
+                onChange={handleSelectAll}
+                className="w-4 h-4 rounded text-indigo-600 border-slate-300 dark:border-slate-600 cursor-pointer focus:ring-indigo-500"
+              />
+              <span>Select All ({sortedWork.length})</span>
+            </label>
+            <span className="text-[11px] font-normal text-slate-500">
+              {selectedCount > 0 ? `${selectedCount} selected` : 'Deliverables'}
+            </span>
+          </div>
+
+          {/* Mobile Work Cards View */}
+          <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-700/60">
+            {sortedWork.map(work => {
+              const client = clients.find(c => c.id === work.clientId);
+              const videoUrl = extractVideoUrl(work);
+              const isSelected = selectedWorkIds.has(work.id);
+              const formattedDate = new Date(work.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+              const isMonthly = client?.paymentBasis === 'monthly_retainer';
+              const amountText = isMonthly ? 'Monthly Retainer' : `₹${(work.quantity * work.rate).toLocaleString('en-IN')}`;
+
+              return (
+                <div
+                  key={work.id}
+                  className={clsx(
+                    'p-4 space-y-3 transition-colors',
+                    isSelected && 'bg-indigo-50/50 dark:bg-indigo-950/20'
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-2.5">
+                    <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleSelectItem(work.id)}
+                        className="w-4 h-4 mt-0.5 rounded text-indigo-600 border-slate-300 dark:border-slate-600 cursor-pointer focus:ring-indigo-500 shrink-0"
+                      />
+                      <div className="min-w-0">
+                        <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate">
+                          {client?.name || 'Unknown Client'}
+                        </h4>
+                        {work.subClientName && (
+                          <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                            {work.subClientName}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <StatusBadge status={work.status === 'Invoiced' ? 'Invoiced' : 'Pending'} />
+                  </div>
+
+                  <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-3 border border-slate-100 dark:border-slate-800 space-y-1.5">
+                    <div className="flex items-center justify-between gap-2 text-xs">
+                      <span className="font-medium text-slate-900 dark:text-slate-100 break-words flex-1">
+                        {work.description} <span className="text-slate-400 dark:text-slate-500 font-normal">({work.quantity}x)</span>
+                      </span>
+                      <span className="font-semibold text-slate-900 dark:text-slate-100 shrink-0">
+                        {amountText}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 pt-1">
+                      <span>{formattedDate}</span>
+                      {videoUrl && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEmbedModalData({
+                              isOpen: true,
+                              url: videoUrl,
+                              title: work.description,
+                              clientName: client?.name
+                            });
+                          }}
+                          className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
+                        >
+                          <Play size={12} /> Watch Preview
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="text-[11px] text-slate-400 font-mono">
+                      #{work.id.substring(0, 6)}
+                    </span>
+                    <div className="flex items-center gap-1">
+                      {videoUrl && (
+                        <a
+                          href={videoUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-1.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-colors"
+                          title="Open external link"
+                        >
+                          <ExternalLink size={15} />
+                        </a>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => handleEditWork(work)}
+                        className="p-1.5 text-slate-600 dark:text-slate-400 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-colors cursor-pointer"
+                        title="Edit Work Log"
+                      >
+                        <Edit2 size={15} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => deleteWork(work)}
+                        className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40 rounded transition-colors cursor-pointer"
+                        title="Delete Work Log"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[700px]">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700">
@@ -812,7 +941,7 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
 
       {/* Bulk Actions Floating Toolbar */}
       {selectedCount > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 px-5 py-3 bg-slate-900 dark:bg-slate-950 text-white rounded-2xl shadow-2xl border border-slate-700 animate-fadeIn">
+        <div className="fixed bottom-20 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 sm:gap-3 px-3.5 sm:px-5 py-2.5 sm:py-3 bg-slate-900 dark:bg-slate-950 text-white rounded-2xl shadow-2xl border border-slate-700 animate-fadeIn max-w-[calc(100vw-2rem)]">
           <div className="flex items-center gap-2">
             <CheckSquare size={16} className="text-indigo-400" />
             <span className="text-sm font-semibold">{selectedCount} selected</span>

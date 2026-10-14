@@ -416,13 +416,13 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
       {/* Global Payment Reminders Bar across clients (if any client has payment due or delayed) */}
       {!isNotificationDismissed && notificationClients.length > 0 && (
         <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs space-y-3 relative">
-          <div className="flex items-center justify-between pr-8">
-            <div className="flex items-center gap-2.5 text-slate-900 dark:text-slate-100 font-bold text-sm">
-              <AlertTriangle className="text-red-600 dark:text-red-400" size={20} />
-              <span>Payment Cycle Reminders ({notificationClients.length} Action Required)</span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2 pr-8">
+            <div className="flex items-center gap-2 text-slate-900 dark:text-slate-100 font-bold text-sm">
+              <AlertTriangle className="text-red-600 dark:text-red-400 shrink-0" size={18} />
+              <span className="break-words">Payment Cycle Reminders ({notificationClients.length} Action Required)</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">30-Day Recurring Cycle Alerts</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium pl-6 sm:pl-0">30-Day Recurring Cycle Alerts</span>
             </div>
           </div>
           <button
@@ -764,7 +764,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
         <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 scrollbar-none shrink-0">
           <button
             onClick={() => setFilterType('all')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${filterType === 'all'
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 ${filterType === 'all'
                 ? 'bg-slate-900 dark:bg-indigo-600 text-white shadow-xs'
                 : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
               }`}
@@ -774,18 +774,18 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
 
           <button
             onClick={() => setFilterType('due')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer whitespace-nowrap shrink-0 ${
               filterType === 'due'
                 ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
             }`}
           >
-            <Clock size={12} /> Due / Action ({notificationClients.length})
+            <Clock size={12} className="shrink-0" /> Due / Action ({notificationClients.length})
           </button>
 
           <button
             onClick={() => setFilterType('uptodate')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
               filterType === 'uptodate'
                 ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -797,12 +797,12 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
           {closedClientsCount > 0 && (
             <button
               onClick={() => setFilterType('closed')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer ${filterType === 'closed'
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap shrink-0 ${filterType === 'closed'
                   ? 'bg-slate-500 text-white shadow-xs'
                   : 'bg-slate-100 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
                 }`}
             >
-              <Archive size={12} /> Closed ({closedClientsCount})
+              <Archive size={12} className="shrink-0" /> Closed ({closedClientsCount})
             </button>
           )}
         </div>

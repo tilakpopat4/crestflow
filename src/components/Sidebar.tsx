@@ -30,7 +30,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout, profi
   ] as const;
 
   return (
-    <nav className="fixed md:relative bottom-0 left-0 w-full md:w-64 bg-slate-900 text-white flex md:flex-col md:h-full z-20 border-r border-slate-800/80 border-t border-slate-800">
+    <nav className="fixed md:relative bottom-0 left-0 w-full md:w-64 bg-slate-900 text-white flex md:flex-col md:h-full z-20 border-r border-slate-800/80 border-t border-slate-800 pb-[max(env(safe-area-inset-bottom),4px)] md:pb-0">
       <div className="hidden md:block p-6 border-b border-slate-800/80 mb-2">
         <div className="flex items-center gap-3 mb-3">
           <Logo className="w-8 h-8 rounded-xl shadow-xs" />

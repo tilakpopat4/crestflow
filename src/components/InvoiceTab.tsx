@@ -2208,8 +2208,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
                         Enter target grand total to divide equally across all {reels.length} item{reels.length === 1 ? '' : 's'}.
                       </p>
                     </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <div className="relative">
+                    <div className="grid grid-cols-1 sm:flex sm:flex-wrap sm:items-center gap-2 w-full sm:w-auto">
+                      <div className="relative w-full sm:w-36">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-500">₹</span>
                         <input
                           type="number"
@@ -2223,27 +2223,29 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
                               handleApplyDirectGrandTotal();
                             }
                           }}
-                          className="w-32 sm:w-36 pl-7 pr-2 py-1.5 text-sm font-semibold border border-indigo-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 shadow-xs"
+                          className="w-full pl-7 pr-2 py-1.5 text-sm font-semibold border border-indigo-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 shadow-xs"
                         />
                       </div>
-                      <button
-                        type="button"
-                        onClick={handleApplyDirectGrandTotal}
-                        className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-lg text-xs font-semibold transition-colors shadow-xs whitespace-nowrap flex items-center gap-1.5 cursor-pointer"
-                        title="Divide grand total into clean whole numbers equally"
-                      >
-                        <Divide size={13} />
-                        Split Equally
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleRoundFigures}
-                        className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold transition-colors shadow-xs whitespace-nowrap flex items-center gap-1.5 cursor-pointer"
-                        title="Round prices to nearest hundred (>150 rounds to 200, <150 rounds to 100)"
-                      >
-                        <Coins size={13} />
-                        Round Figures
-                      </button>
+                      <div className="grid grid-cols-2 gap-2 w-full sm:w-auto sm:flex sm:items-center">
+                        <button
+                          type="button"
+                          onClick={handleApplyDirectGrandTotal}
+                          className="w-full sm:w-auto px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-lg text-xs font-semibold transition-colors shadow-xs whitespace-nowrap flex items-center justify-center gap-1.5 cursor-pointer"
+                          title="Divide grand total into clean whole numbers equally"
+                        >
+                          <Divide size={13} className="shrink-0" />
+                          <span className="truncate">Split Equally</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleRoundFigures}
+                          className="w-full sm:w-auto px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold transition-colors shadow-xs whitespace-nowrap flex items-center justify-center gap-1.5 cursor-pointer"
+                          title="Round prices to nearest hundred (>150 rounds to 200, <150 rounds to 100)"
+                        >
+                          <Coins size={13} className="shrink-0" />
+                          <span className="truncate">Round Figures</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

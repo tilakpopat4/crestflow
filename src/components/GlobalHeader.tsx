@@ -152,18 +152,18 @@ export default function GlobalHeader({
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 py-3 md:px-8 transition-colors">
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 md:gap-4">
+    <header className="sticky top-0 z-30 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-3 py-2.5 md:px-8 md:py-3 transition-colors">
+      <div className="max-w-7xl mx-auto flex flex-wrap md:flex-nowrap items-center justify-between gap-2 md:gap-4">
         {/* Mobile Logo Branding */}
         <div className="flex items-center gap-1.5 md:hidden shrink-0">
           <Logo className="w-6 h-6 min-[380px]:w-7 min-[380px]:h-7" />
-          <span className="hidden min-[380px]:inline font-extrabold text-slate-900 dark:text-white tracking-tight text-sm md:text-base">CrestFlow</span>
+          <span className="font-extrabold text-slate-900 dark:text-white tracking-tight text-sm">CrestFlow</span>
         </div>
 
-        {/* Real-time Global Search Input */}
-        <div ref={searchRef} className="relative flex-1 max-w-2xl mx-auto md:mx-0">
+        {/* Real-time Global Search Input (Full width on mobile, max-w-2xl on desktop) */}
+        <div ref={searchRef} className="relative w-full md:w-auto md:flex-1 md:max-w-2xl mx-auto md:mx-0 order-last md:order-none min-w-0">
           <div className="relative flex items-center">
-            <Search size={18} className="absolute left-3.5 text-slate-400 dark:text-slate-500 pointer-events-none transition-colors group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400" />
+            <Search size={16} className="absolute left-3 text-slate-400 dark:text-slate-500 pointer-events-none transition-colors group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400 shrink-0" />
             <input
               ref={inputRef}
               type="text"
@@ -174,7 +174,7 @@ export default function GlobalHeader({
               }}
               onFocus={() => setIsOpen(true)}
               placeholder="Search clients, work items, video links, invoices..."
-              className="w-full bg-slate-100/80 dark:bg-slate-800/90 hover:bg-slate-100 dark:hover:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs md:text-sm pl-10 pr-20 py-2 md:py-2.5 rounded-xl border border-slate-200/80 dark:border-slate-700/80 focus:border-indigo-500 dark:focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
+              className="w-full bg-slate-100/80 dark:bg-slate-800/90 hover:bg-slate-100 dark:hover:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs md:text-sm pl-9 pr-10 md:pr-20 py-2 md:py-2.5 rounded-xl border border-slate-200/80 dark:border-slate-700/80 focus:border-indigo-500 dark:focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
             />
             <div className="absolute right-3 flex items-center gap-1.5">
               {globalQuery ? (
@@ -386,8 +386,10 @@ export default function GlobalHeader({
           )}
         </div>
 
-        {/* Worked Days / Career Journey Widget */}
-        <div className="relative shrink-0" ref={journeyMenuRef}>
+        {/* Right Actions Bar (Streak, Theme, Profile, Logout) */}
+        <div className="flex items-center gap-1 sm:gap-2 md:gap-3 shrink-0 ml-auto md:ml-0">
+          {/* Worked Days / Career Journey Widget */}
+          <div className="relative shrink-0" ref={journeyMenuRef}>
           {journey ? (
             <>
               <button
@@ -599,6 +601,7 @@ export default function GlobalHeader({
           )}
         </div>
       </div>
-    </header>
-  );
+    </div>
+  </header>
+);
 }
