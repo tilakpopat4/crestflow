@@ -24,11 +24,12 @@ export default function Footer({
     // Allow opening in new tab via Ctrl/Cmd/middle click
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
     e.preventDefault();
-    window.history.pushState({}, '', path);
-    window.dispatchEvent(new PopStateEvent('popstate'));
     if (onNavigate) {
       onNavigate(route);
+      return;
     }
+    window.history.pushState({}, '', path);
+    window.dispatchEvent(new PopStateEvent('popstate'));
   };
 
   if (variant === 'minimal') {

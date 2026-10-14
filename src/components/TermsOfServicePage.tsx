@@ -10,11 +10,12 @@ export default function TermsOfServicePage({ onNavigate }: TermsOfServicePagePro
   const handleContactLink = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
     e.preventDefault();
-    window.history.pushState({}, '', '/contact');
-    window.dispatchEvent(new PopStateEvent('popstate'));
     if (onNavigate) {
       onNavigate('contact');
+      return;
     }
+    window.history.pushState({}, '', '/contact');
+    window.dispatchEvent(new PopStateEvent('popstate'));
   };
 
   return (

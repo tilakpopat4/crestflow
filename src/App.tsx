@@ -292,15 +292,7 @@ export default function App() {
   if (freelancerId) {
     return (
       <Suspense fallback={<ViewLoadingFallback />}>
-        <PublicFreelancerProfile 
-          freelancerId={freelancerId} 
-          onClose={() => {
-            const url = new URL(window.location.href);
-            url.searchParams.delete('freelancerId');
-            window.history.replaceState({}, '', url.pathname + url.search);
-            setFreelancerId(null);
-          }}
-        />
+        <PublicFreelancerProfile freelancerId={freelancerId} />
       </Suspense>
     );
   }

@@ -23,10 +23,9 @@ import {
 
 interface PublicFreelancerProfileProps {
   freelancerId: string;
-  onClose?: () => void;
 }
 
-export default function PublicFreelancerProfile({ freelancerId, onClose }: PublicFreelancerProfileProps) {
+export default function PublicFreelancerProfile({ freelancerId }: PublicFreelancerProfileProps) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,14 +45,7 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submittedWhatsAppUrl, setSubmittedWhatsAppUrl] = useState<string | null>(null);
 
-  const [supportingRoute, setSupportingRoute] = useState<SupportingRoute | null>(() => {
-    const path = window.location.pathname;
-    const hash = window.location.hash;
-    if (path === '/privacy' || hash === '#/privacy' || hash === '#privacy') return 'privacy';
-    if (path === '/terms' || hash === '#/terms' || hash === '#terms') return 'terms';
-    if (path === '/contact' || hash === '#/contact' || hash === '#contact') return 'contact';
-    return null;
-  });
+  const [supportingRoute, setSupportingRoute] = useState<SupportingRoute | null>(null);
 
   useEffect(() => {
     const prevTitle = document.title;
@@ -67,39 +59,12 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
     };
   }, [profile?.name]);
 
-  useEffect(() => {
-    const handleLocationChange = () => {
-      const path = window.location.pathname;
-      const hash = window.location.hash;
-      if (path === '/privacy' || hash === '#/privacy' || hash === '#privacy') {
-        setSupportingRoute('privacy');
-      } else if (path === '/terms' || hash === '#/terms' || hash === '#terms') {
-        setSupportingRoute('terms');
-      } else if (path === '/contact' || hash === '#/contact' || hash === '#contact') {
-        setSupportingRoute('contact');
-      } else {
-        setSupportingRoute(null);
-      }
-    };
-
-    window.addEventListener('popstate', handleLocationChange);
-    window.addEventListener('hashchange', handleLocationChange);
-    return () => {
-      window.removeEventListener('popstate', handleLocationChange);
-      window.removeEventListener('hashchange', handleLocationChange);
-    };
-  }, []);
-
   const handleNavigateSupporting = (route: SupportingRoute) => {
     setSupportingRoute(route);
-    window.history.pushState({}, '', `/${route}`);
   };
 
   const handleCloseSupportingModal = () => {
     setSupportingRoute(null);
-    const searchParams = new URLSearchParams(window.location.search);
-    searchParams.set('freelancerId', freelancerId);
-    window.history.pushState({}, '', `/?${searchParams.toString()}`);
   };
 
   useEffect(() => {
@@ -211,15 +176,7 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
           <AlertCircle className="w-8 h-8" />
         </div>
         <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">Oops! Something went wrong</h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm max-w-md mb-6">{error}</p>
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="px-5 py-2.5 bg-slate-900 dark:bg-slate-800 text-white rounded-xl text-sm font-semibold hover:bg-slate-800 dark:hover:bg-slate-700 transition-colors shadow"
-          >
-            Go to Homepage
-          </button>
-        )}
+        <p className="text-slate-500 dark:text-slate-400 text-sm max-w-md">{error}</p>
       </div>
     );
   }
@@ -256,14 +213,23 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
               </a>
             )}
 
-            {onClose && (
-              <button
-                onClick={onClose}
-                className="w-full py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold transition-all cursor-pointer"
-              >
-                Back to CrestFlow
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() => {
+                setIsSubmitted(false);
+                setClientName('');
+                setContactName('');
+                setContactPhone('');
+                setContactEmail('');
+                setProjectDetails('');
+                setInstagram('');
+                setProposedRate('');
+                setSubmittedWhatsAppUrl(null);
+              }}
+              className="w-full py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold transition-all cursor-pointer"
+            >
+              Submit Another Response
+            </button>
           </div>
         </div>
       </div>
@@ -450,15 +416,21 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
               </div>
 
               <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-4">
-                {onClose && (
-                  <button
-                    type="button"
-                    onClick={onClose}
-                    className="px-4 py-2.5 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-bold transition-colors cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setClientName('');
+                    setContactName('');
+                    setContactPhone('');
+                    setContactEmail('');
+                    setProjectDetails('');
+                    setInstagram('');
+                    setProposedRate('');
+                  }}
+                  className="px-4 py-2.5 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                >
+                  Clear Form
+                </button>
                 
                 <button
                   type="submit"
