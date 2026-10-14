@@ -275,7 +275,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
         email: request.contactEmail,
         defaultRate: request.proposedRate || 1500,
         createdAt: Date.now(),
-        notes: `Referral service claim submitted on ${new Date(request.createdAt).toLocaleDateString()}:\n${request.projectDetails}`
+        notes: `Client onboarding request submitted on ${new Date(request.createdAt).toLocaleDateString()}:\n${request.projectDetails}`
       };
 
       if (request.instagram) {
@@ -358,7 +358,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
           <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs space-y-4">
             <div className="flex items-center gap-2.5 text-slate-900 dark:text-slate-100 font-bold text-sm">
               <Briefcase className="text-indigo-600 dark:text-indigo-400" size={20} />
-              <span>Incoming Service Inquiries / Leads ({pendingRequests.length})</span>
+              <span>Incoming Client Onboardings / Inquiries ({pendingRequests.length})</span>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

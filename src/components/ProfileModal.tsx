@@ -280,7 +280,7 @@ export default function ProfileModal({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider font-sans">Your Referral & Services Link</label>
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider font-sans">Your Client Onboarding Link</label>
             <div className="flex gap-2">
               <input
                 type="text"
@@ -292,14 +292,14 @@ export default function ProfileModal({
                 type="button"
                 onClick={() => {
                   navigator.clipboard.writeText(`${window.location.origin}/?freelancerId=${user.uid}`);
-                  alert("Referral link copied to clipboard!");
+                  alert("Onboarding link copied to clipboard!");
                 }}
                 className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer"
               >
                 Copy Link
               </button>
             </div>
-            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">Share this profile link with clients. They can view your services and claim/inquire directly.</p>
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">Share this onboarding link with clients. They can view your services and submit onboarding details directly.</p>
           </div>
 
           <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">

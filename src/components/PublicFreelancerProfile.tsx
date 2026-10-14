@@ -4,6 +4,7 @@ import { doc, getDoc, collection, setDoc } from 'firebase/firestore';
 import { UserProfile, ServiceRequest } from '../types';
 import Logo from './Logo';
 import Footer from './Footer';
+import SupportingInfoModal, { SupportingRoute } from './SupportingInfoModal';
 import { 
   Sparkles, 
   CheckCircle2, 
@@ -41,6 +42,62 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submittedWhatsAppUrl, setSubmittedWhatsAppUrl] = useState<string | null>(null);
+
+  const [supportingRoute, setSupportingRoute] = useState<SupportingRoute | null>(() => {
+    const path = window.location.pathname;
+    const hash = window.location.hash;
+    if (path === '/privacy' || hash === '#/privacy' || hash === '#privacy') return 'privacy';
+    if (path === '/terms' || hash === '#/terms' || hash === '#terms') return 'terms';
+    if (path === '/contact' || hash === '#/contact' || hash === '#contact') return 'contact';
+    return null;
+  });
+
+  useEffect(() => {
+    const prevTitle = document.title;
+    if (profile?.name) {
+      document.title = `${profile.name} - Client Onboarding | CrestFlow`;
+    } else {
+      document.title = 'Client Onboarding | CrestFlow';
+    }
+    return () => {
+      document.title = prevTitle;
+    };
+  }, [profile?.name]);
+
+  useEffect(() => {
+    const handleLocationChange = () => {
+      const path = window.location.pathname;
+      const hash = window.location.hash;
+      if (path === '/privacy' || hash === '#/privacy' || hash === '#privacy') {
+        setSupportingRoute('privacy');
+      } else if (path === '/terms' || hash === '#/terms' || hash === '#terms') {
+        setSupportingRoute('terms');
+      } else if (path === '/contact' || hash === '#/contact' || hash === '#contact') {
+        setSupportingRoute('contact');
+      } else {
+        setSupportingRoute(null);
+      }
+    };
+
+    window.addEventListener('popstate', handleLocationChange);
+    window.addEventListener('hashchange', handleLocationChange);
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      window.removeEventListener('hashchange', handleLocationChange);
+    };
+  }, []);
+
+  const handleNavigateSupporting = (route: SupportingRoute) => {
+    setSupportingRoute(route);
+    window.history.pushState({}, '', `/${route}`);
+  };
+
+  const handleCloseSupportingModal = () => {
+    setSupportingRoute(null);
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set('freelancerId', freelancerId);
+    window.history.pushState({}, '', `/?${searchParams.toString()}`);
+  };
 
   useEffect(() => {
     async function fetchProfile() {
@@ -102,7 +159,7 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
       if (profile.phone) {
         const cleanPhone = profile.phone.replace(/[^0-9]/g, '');
         const formattedPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
-        const msg = `Hi ${profile.name},\n\nI've submitted a Service Request for *${clientName.trim()}*.\n\n*Contact:* ${contactName.trim()} (${contactPhone.trim()})\n*Email:* ${contactEmail.trim()}${proposedRate ? `\n*Proposed Rate:* ₹${proposedRate}/reel` : ''}\n\n*Project Details:*\n${projectDetails.trim()}\n\nLooking forward to working with you!`;
+        const msg = `Hi ${profile.name},\n\nI've submitted my Onboarding Request for *${clientName.trim()}*.\n\n*Contact:* ${contactName.trim()} (${contactPhone.trim()})\n*Email:* ${contactEmail.trim()}${proposedRate ? `\n*Proposed Rate:* ₹${proposedRate}/reel` : ''}\n\n*Project Details:*\n${projectDetails.trim()}\n\nLooking forward to working with you!`;
         const waUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(msg)}`;
         setSubmittedWhatsAppUrl(waUrl);
 
@@ -156,9 +213,9 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
             <CheckCircle2 className="w-10 h-10" />
           </div>
           <div className="space-y-2">
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Inquiry Submitted!</h1>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Onboarding Submitted!</h1>
             <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
-              Your service request has been sent to <strong>{profile.name}</strong>. Redirecting to WhatsApp to send a confirmation...
+              Your onboarding details have been sent to <strong>{profile.name}</strong>. Redirecting to WhatsApp to send a confirmation...
             </p>
           </div>
           <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 text-left space-y-2 text-xs text-slate-600 dark:text-slate-300">
@@ -245,18 +302,18 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
                 <div className="w-8 h-8 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl flex items-center justify-center shrink-0">
                   <Mail className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                 </div>
-                <span>Contact via referral form</span>
+                <span>Contact via onboarding form</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right Side: Claim Form */}
+        {/* Right Side: Onboarding Form */}
         <div className="lg:col-span-7">
           <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6">
             <div>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Claim / Inquiry Form</h2>
-              <p className="text-slate-500 dark:text-slate-400 text-xs mt-1">Submit your project details to request services from this freelancer.</p>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Client Onboarding</h2>
+              <p className="text-slate-500 dark:text-slate-400 text-xs mt-1">Submit your project details and requirements to get onboarded.</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -385,11 +442,11 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
                   {isSubmitting ? (
                     <>
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      Submitting Request...
+                      Submitting Onboarding...
                     </>
                   ) : (
                     <>
-                      Submit Service Request
+                      Submit Onboarding Request
                       <ArrowRight className="w-3.5 h-3.5" />
                     </>
                   )}
@@ -399,7 +456,16 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
           </div>
         </div>
       </div>
-      <Footer variant="minimal" className="mt-12 relative z-10" />
+      <Footer 
+        variant="minimal" 
+        className="mt-12 relative z-10" 
+        onNavigate={handleNavigateSupporting}
+      />
+      <SupportingInfoModal
+        route={supportingRoute}
+        onClose={handleCloseSupportingModal}
+        onNavigate={handleNavigateSupporting}
+      />
     </div>
   );
 }

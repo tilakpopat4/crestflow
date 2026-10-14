@@ -91,6 +91,8 @@ export default function App() {
     const handleLocationChange = () => {
       setIsAdminRoute(checkIsAdminRoute());
       setSupportingRoute(checkSupportingRoute());
+      setFreelancerId(new URLSearchParams(window.location.search).get('freelancerId'));
+      setIsClientPortalMode(window.location.search.includes('portal=client') || window.location.hash.includes('portal'));
     };
     window.addEventListener('popstate', handleLocationChange);
     window.addEventListener('hashchange', handleLocationChange);
