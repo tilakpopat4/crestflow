@@ -184,29 +184,29 @@ export default function PublicFreelancerProfile({ freelancerId }: PublicFreelanc
   if (isSubmitted) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 p-4 text-center transition-colors duration-150">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 max-w-md w-full shadow-2xl space-y-6">
-          <div className="w-16 h-16 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center mx-auto shadow-sm">
-            <CheckCircle2 className="w-10 h-10" />
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 md:p-8 max-w-md w-full shadow-xs space-y-5">
+          <div className="w-12 h-12 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center mx-auto shadow-xs">
+            <CheckCircle2 className="w-8 h-8" />
           </div>
-          <div className="space-y-2">
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Onboarding Submitted!</h1>
-            <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+          <div className="space-y-1.5">
+            <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Onboarding Submitted!</h1>
+            <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed">
               Your onboarding details have been sent to <strong>{profile.name}</strong>. Redirecting to WhatsApp to send a confirmation...
             </p>
           </div>
-          <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 text-left space-y-2 text-xs text-slate-600 dark:text-slate-300">
+          <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700 rounded-lg p-3.5 text-left space-y-2 text-xs text-slate-600 dark:text-slate-300">
             <div className="flex justify-between"><span className="text-slate-400 dark:text-slate-500">Freelancer:</span> <span className="font-semibold text-slate-950 dark:text-slate-100">{profile.name}</span></div>
             <div className="flex justify-between"><span className="text-slate-400 dark:text-slate-500">Client / Company:</span> <span className="font-semibold text-slate-950 dark:text-slate-100">{clientName}</span></div>
             <div className="flex justify-between"><span className="text-slate-400 dark:text-slate-500">Contact Email:</span> <span className="font-semibold text-slate-950 dark:text-slate-100">{contactEmail}</span></div>
           </div>
           
-          <div className="space-y-2.5 pt-2">
+          <div className="space-y-2 pt-1">
             {submittedWhatsAppUrl && (
               <a
                 href={submittedWhatsAppUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition-colors shadow-xs flex items-center justify-center gap-2"
+                className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-medium transition-colors shadow-xs flex items-center justify-center gap-2"
               >
                 <MessageCircle className="w-4 h-4" />
                 Open WhatsApp Chat
@@ -226,7 +226,7 @@ export default function PublicFreelancerProfile({ freelancerId }: PublicFreelanc
                 setProposedRate('');
                 setSubmittedWhatsAppUrl(null);
               }}
-              className="w-full py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold transition-all cursor-pointer"
+              className="w-full py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-medium transition-colors cursor-pointer border-0"
             >
               Submit Another Response
             </button>
@@ -237,62 +237,58 @@ export default function PublicFreelancerProfile({ freelancerId }: PublicFreelanc
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 md:p-12 relative overflow-hidden font-sans text-slate-900 dark:text-slate-100 selection:bg-indigo-500 selection:text-white transition-colors duration-150">
-      {/* Decorative background grids and blobs */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f0_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f0_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none opacity-60 dark:opacity-30 z-0"></div>
-      <div className="absolute top-0 left-1/4 w-[400px] h-[400px] bg-slate-200/20 dark:bg-slate-800/10 rounded-full blur-[100px] pointer-events-none z-0"></div>
-
-      <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative z-10">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 md:p-12 font-sans text-slate-900 dark:text-slate-100 transition-colors duration-150">
+      <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
         {/* Left Side: Freelancer Profile Info */}
-        <div className="lg:col-span-5 space-y-6">
+        <div className="lg:col-span-5 space-y-4">
           
           <div className="flex items-center gap-2.5">
-            <Logo className="w-8 h-8 rounded-xl shadow-xs" />
-            <span className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">CrestFlow</span>
+            <Logo className="w-7 h-7 rounded-lg" />
+            <span className="text-base font-bold text-slate-900 dark:text-white tracking-tight">CrestFlow</span>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6 relative overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-xs space-y-4">
             {/* Header info */}
             <div>
-              <div className="mb-3">
+              <div className="mb-2">
                 <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400 inline-flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400" />
                   Open for Bookings
                 </span>
               </div>
-              <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">{profile.name}</h1>
-              <p className="text-indigo-600 dark:text-indigo-400 font-bold text-sm tracking-wide uppercase mt-1">{profile.professionalTitle}</p>
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">{profile.name}</h1>
+              <p className="text-indigo-600 dark:text-indigo-400 font-semibold text-xs tracking-wider uppercase mt-0.5">{profile.professionalTitle}</p>
             </div>
 
             {/* Description */}
-            <div className="space-y-2">
-              <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+            <div className="space-y-1.5">
+              <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                 <Briefcase className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" /> Services Provided
               </h3>
-              <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed whitespace-pre-line bg-slate-50 dark:bg-slate-800/60 border border-slate-100/60 dark:border-slate-700/60 p-4 rounded-2xl">
+              <p className="text-slate-600 dark:text-slate-300 text-xs leading-relaxed whitespace-pre-line bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 p-3.5 rounded-lg">
                 {profile.servicesDescription}
               </p>
             </div>
 
             {/* Contact Info */}
-            <div className="pt-5 border-t border-slate-100 dark:border-slate-800 space-y-3">
-              <div className="flex items-center gap-3 text-xs text-slate-600 dark:text-slate-300">
-                <div className="w-8 h-8 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl flex items-center justify-center shrink-0">
-                  <Phone className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+            <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2.5">
+              <div className="flex items-center gap-2.5 text-xs text-slate-600 dark:text-slate-300">
+                <div className="w-7 h-7 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-lg flex items-center justify-center shrink-0">
+                  <Phone className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                 </div>
                 <span>{profile.phone}</span>
               </div>
-              <div className="flex items-center gap-3 text-xs text-slate-600 dark:text-slate-300">
-                <div className="w-8 h-8 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl flex items-center justify-center shrink-0">
-                  <Mail className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+              <div className="flex items-center gap-2.5 text-xs text-slate-600 dark:text-slate-300">
+                <div className="w-7 h-7 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-lg flex items-center justify-center shrink-0">
+                  <Mail className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                 </div>
                 <span>Contact via onboarding form</span>
               </div>
             </div>
           </div>
 
-          {/* Work Experience & Clients Showcase */}
+          {/* Work Experience Showcase */}
           <FreelancerExperienceAndClients 
             profile={profile} 
             clients={clients} 
@@ -302,16 +298,16 @@ export default function PublicFreelancerProfile({ freelancerId }: PublicFreelanc
 
         {/* Right Side: Onboarding Form */}
         <div className="lg:col-span-7">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 md:p-8 shadow-xs space-y-6">
             <div>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Client Onboarding</h2>
-              <p className="text-slate-500 dark:text-slate-400 text-xs mt-1">Submit your project details and requirements to get onboarded.</p>
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Client Onboarding</h2>
+              <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">Submit your project details and requirements to get onboarded.</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Company / Client Name *</label>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 uppercase tracking-wider">Company / Client Name *</label>
                   <div className="relative">
                     <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-4 h-4" />
                     <input 
@@ -320,13 +316,13 @@ export default function PublicFreelancerProfile({ freelancerId }: PublicFreelanc
                       placeholder="e.g. Acme Studio"
                       value={clientName}
                       onChange={(e) => setClientName(e.target.value)}
-                      className="w-full pl-9 pr-3.5 py-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-800"
+                      className="w-full pl-9 pr-3.5 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none transition-colors duration-120 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Contact Person Name *</label>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 uppercase tracking-wider">Contact Person Name *</label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-4 h-4" />
                     <input 
@@ -335,7 +331,7 @@ export default function PublicFreelancerProfile({ freelancerId }: PublicFreelanc
                       placeholder="e.g. Jane Smith"
                       value={contactName}
                       onChange={(e) => setContactName(e.target.value)}
-                      className="w-full pl-9 pr-3.5 py-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-800"
+                      className="w-full pl-9 pr-3.5 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none transition-colors duration-120 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900"
                     />
                   </div>
                 </div>
@@ -343,7 +339,7 @@ export default function PublicFreelancerProfile({ freelancerId }: PublicFreelanc
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Phone Number *</label>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 uppercase tracking-wider">Phone Number *</label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-4 h-4" />
                     <input 
@@ -352,13 +348,13 @@ export default function PublicFreelancerProfile({ freelancerId }: PublicFreelanc
                       placeholder="e.g. +91 98765 43210"
                       value={contactPhone}
                       onChange={(e) => setContactPhone(e.target.value)}
-                      className="w-full pl-9 pr-3.5 py-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-800"
+                      className="w-full pl-9 pr-3.5 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none transition-colors duration-120 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Email Address *</label>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 uppercase tracking-wider">Email Address *</label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-4 h-4" />
                     <input 
@@ -367,7 +363,7 @@ export default function PublicFreelancerProfile({ freelancerId }: PublicFreelanc
                       placeholder="e.g. client@example.com"
                       value={contactEmail}
                       onChange={(e) => setContactEmail(e.target.value)}
-                      className="w-full pl-9 pr-3.5 py-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-800"
+                      className="w-full pl-9 pr-3.5 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none transition-colors duration-120 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900"
                     />
                   </div>
                 </div>
@@ -375,7 +371,7 @@ export default function PublicFreelancerProfile({ freelancerId }: PublicFreelanc
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Instagram / Website Link</label>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 uppercase tracking-wider">Instagram / Website Link</label>
                   <div className="relative">
                     <Instagram className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-4 h-4" />
                     <input 
@@ -383,13 +379,13 @@ export default function PublicFreelancerProfile({ freelancerId }: PublicFreelanc
                       placeholder="e.g. https://instagram.com/brand"
                       value={instagram}
                       onChange={(e) => setInstagram(e.target.value)}
-                      className="w-full pl-9 pr-3.5 py-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-800"
+                      className="w-full pl-9 pr-3.5 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none transition-colors duration-120 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Proposed Rate (₹ per reel / Optional)</label>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 uppercase tracking-wider">Proposed Rate (₹ per reel / Optional)</label>
                   <div className="relative">
                     <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-4 h-4" />
                     <input 
@@ -397,21 +393,21 @@ export default function PublicFreelancerProfile({ freelancerId }: PublicFreelanc
                       placeholder={`e.g. 2000 (Default: ₹${profile.defaultRate || 1500})`}
                       value={proposedRate}
                       onChange={(e) => setProposedRate(e.target.value)}
-                      className="w-full pl-9 pr-3.5 py-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-800"
+                      className="w-full pl-9 pr-3.5 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none transition-colors duration-120 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900"
                     />
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Project / Requirements Details *</label>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 uppercase tracking-wider">Project / Requirements Details *</label>
                 <textarea 
                   required
                   rows={4}
                   placeholder="Describe your editing needs, video style, frequency, and other guidelines..."
                   value={projectDetails}
                   onChange={(e) => setProjectDetails(e.target.value)}
-                  className="w-full p-3.5 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-800 resize-none leading-relaxed"
+                  className="w-full p-3 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none transition-colors duration-120 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 resize-none leading-relaxed"
                 />
               </div>
 
@@ -427,7 +423,7 @@ export default function PublicFreelancerProfile({ freelancerId }: PublicFreelanc
                     setInstagram('');
                     setProposedRate('');
                   }}
-                  className="px-4 py-2.5 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                  className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-medium transition-colors duration-120 cursor-pointer border-0"
                 >
                   Clear Form
                 </button>
@@ -435,7 +431,7 @@ export default function PublicFreelancerProfile({ freelancerId }: PublicFreelanc
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl text-xs font-semibold transition-colors shadow-xs disabled:opacity-50 flex-1 md:flex-none cursor-pointer"
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium transition-colors duration-120 shadow-xs disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer border-0"
                 >
                   {isSubmitting ? (
                     <>
