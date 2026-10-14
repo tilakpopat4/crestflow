@@ -237,8 +237,8 @@ export default function PublicFreelancerProfile({ freelancerId }: PublicFreelanc
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 md:p-10 font-sans text-slate-900 dark:text-slate-100 transition-colors duration-150">
-      <div className="max-w-5xl mx-auto space-y-5">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col font-sans text-slate-900 dark:text-slate-100 transition-colors duration-150">
+      <main className="flex-1 max-w-5xl w-full mx-auto p-4 md:p-10 space-y-5">
         
         {/* Brand Header */}
         <div className="flex items-center gap-2.5">
@@ -459,18 +459,17 @@ export default function PublicFreelancerProfile({ freelancerId }: PublicFreelanc
             </div>
           </div>
         </div>
+      </main>
 
-        <Footer 
-          variant="minimal" 
-          className="mt-8" 
-          onNavigate={handleNavigateSupporting}
-        />
-        <SupportingInfoModal
-          route={supportingRoute}
-          onClose={handleCloseSupportingModal}
-          onNavigate={handleNavigateSupporting}
-        />
-      </div>
+      <Footer 
+        variant="minimal" 
+        onNavigate={handleNavigateSupporting}
+      />
+      <SupportingInfoModal
+        route={supportingRoute}
+        onClose={handleCloseSupportingModal}
+        onNavigate={handleNavigateSupporting}
+      />
     </div>
   );
 }
