@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
-import { doc, getDoc, collection, setDoc } from 'firebase/firestore';
-import { UserProfile, ServiceRequest } from '../types';
+import { doc, getDoc, collection, setDoc, query, where, getDocs } from 'firebase/firestore';
+import { UserProfile, ServiceRequest, Client } from '../types';
 import Logo from './Logo';
 import Footer from './Footer';
 import SupportingInfoModal, { SupportingRoute } from './SupportingInfoModal';
+import FreelancerExperienceAndClients from './FreelancerExperienceAndClients';
 import { 
   Sparkles, 
   CheckCircle2, 
@@ -29,6 +30,8 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [clientsLoading, setClientsLoading] = useState(true);
 
   // Form State
   const [clientName, setClientName] = useState('');
@@ -100,7 +103,7 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
   };
 
   useEffect(() => {
-    async function fetchProfile() {
+    async function fetchFreelancerData() {
       try {
         setLoading(true);
         setError(null);
@@ -112,6 +115,22 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
         } else {
           setError("Freelancer profile not found. Please verify the link.");
         }
+
+        // Fetch clients for this freelancer
+        try {
+          setClientsLoading(true);
+          const q = query(collection(db, 'clients'), where('userId', '==', freelancerId));
+          const clientsSnap = await getDocs(q);
+          const clientList: Client[] = [];
+          clientsSnap.forEach((cSnap) => {
+            clientList.push({ id: cSnap.id, ...cSnap.data() } as Client);
+          });
+          setClients(clientList);
+        } catch (clientErr) {
+          console.warn("Could not load clients for profile:", clientErr);
+        } finally {
+          setClientsLoading(false);
+        }
       } catch (err: any) {
         console.error(err);
         setError("Failed to load freelancer profile. Please check your internet connection.");
@@ -121,7 +140,7 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
     }
 
     if (freelancerId) {
-      fetchProfile();
+      fetchFreelancerData();
     }
   }, [freelancerId]);
 
@@ -306,6 +325,13 @@ export default function PublicFreelancerProfile({ freelancerId, onClose }: Publi
               </div>
             </div>
           </div>
+
+          {/* Work Experience & Clients Showcase */}
+          <FreelancerExperienceAndClients 
+            profile={profile} 
+            clients={clients} 
+            loading={clientsLoading} 
+          />
         </div>
 
         {/* Right Side: Onboarding Form */}

@@ -110,6 +110,7 @@ export interface UserProfile {
   bankName?: string;
   geminiApiKey?: string;
   freelanceStartDate?: string; // Freelancer's career start date in YYYY-MM-DD format
+  workExperienceBio?: string; // Optional career overview / work experience bio
   createdAt: number;
 }
 

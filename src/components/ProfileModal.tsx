@@ -29,6 +29,7 @@ export default function ProfileModal({
   const [servicesDescription, setServicesDescription] = useState('Video Editing Services');
   const [geminiApiKey, setGeminiApiKey] = useState('');
   const [freelanceStartDate, setFreelanceStartDate] = useState('');
+  const [workExperienceBio, setWorkExperienceBio] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -41,6 +42,7 @@ export default function ProfileModal({
       setServicesDescription(initialProfile?.servicesDescription || 'Video Editing Services');
       setGeminiApiKey(initialProfile?.geminiApiKey || '');
       setFreelanceStartDate(initialProfile?.freelanceStartDate || '');
+      setWorkExperienceBio(initialProfile?.workExperienceBio || '');
       setError('');
     }
   }, [isOpen, initialProfile, user]);
@@ -72,6 +74,7 @@ export default function ProfileModal({
         servicesDescription: servicesDescription.trim(),
         geminiApiKey: geminiApiKey.trim() || undefined,
         freelanceStartDate: freelanceStartDate.trim() || undefined,
+        workExperienceBio: workExperienceBio.trim() || undefined,
         createdAt: initialProfile?.createdAt || Date.now()
       };
       await onSave(updatedProfile);
@@ -265,6 +268,18 @@ export default function ProfileModal({
             <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
               Displays total worked days on the portal header and notifies you on career milestones & anniversaries (1 month, 6 months, 1 year, etc.).
             </p>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Work Experience & Bio (Optional)</label>
+            <textarea
+              rows={3}
+              placeholder="e.g. 3+ years editing reels, YouTube longform, and commercial video campaigns for 20+ clients..."
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-lg px-3.5 py-2 text-sm bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 outline-none transition-all focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 resize-none leading-relaxed"
+              value={workExperienceBio}
+              onChange={(e) => setWorkExperienceBio(e.target.value)}
+            />
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">Shown on your public client onboarding page under your work experience section.</p>
           </div>
 
           <div>

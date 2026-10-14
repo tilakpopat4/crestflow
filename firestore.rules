@@ -69,7 +69,7 @@ service cloud.firestore {
 
     // Path Rules
     match /clients/{clientId} {
-      allow read: if isSignedIn();
+      allow read: if true;
       allow delete: if isOwner(resource.data.userId);
       allow create: if isOwner(incoming().userId) && isValidId(clientId) && isValidClient(incoming());
       allow update: if isOwner(existing().userId) && isOwner(incoming().userId) && isValidClient(incoming());
