@@ -436,7 +436,8 @@ export function renderDocumentHtml(params: {
         id: r.workItemId,
         title: r.title,
         quantity: r.quantity,
-        videoUrl: r.videoUrl
+        videoUrl: r.videoUrl,
+        date: (r as any).date || params.invoice.date
       }))
     : [];
 
@@ -445,408 +446,436 @@ export function renderDocumentHtml(params: {
     : reels.reduce((s, r) => s + (r.quantity || 1), 0);
 
   const isWorkSummary = !!params.hideFinance;
-
-  if (isWorkSummary) {
-    const itemsRowsHtml = reels.length === 0
-      ? `
-        <tr>
-          <td style="padding: 12px 10px; font-size: 13px; color: #64748b; text-align: center;">01</td>
-          <td style="padding: 12px 12px; font-size: 13px; color: #0f172a; font-weight: 600;">Video Editing / Content Creation Services</td>
-          <td style="padding: 12px 10px; font-size: 13px; color: #334155; text-align: center; font-weight: 700;">1</td>
-        </tr>
-      `
-      : reels.map((r, idx) => `
-        <tr style="border-bottom: 1px solid #e2e8f0;">
-          <td style="padding: 11px 10px; font-size: 13px; color: #64748b; text-align: center; font-weight: 600;">${String(idx + 1).padStart(2, '0')}</td>
-          <td style="padding: 11px 12px; font-size: 13px; color: #0f172a; font-weight: 600;">
-            ${r.title || 'Video Editing Work Item'}
-            ${r.videoUrl ? `<br/><a href="${r.videoUrl}" target="_blank" rel="noopener noreferrer" style="color: #4f46e5; text-decoration: underline; font-size: 11px; font-weight: normal; word-break: break-all;">${r.videoUrl}</a>` : ''}
-          </td>
-          <td style="padding: 11px 10px; font-size: 13px; color: #334155; text-align: center; font-weight: 700;">${r.quantity || 1}</td>
-        </tr>
-      `).join('');
-
-    return `
-      <div style="background: #ffffff; color: #0f172a; font-family: Inter, system-ui, -apple-system, sans-serif; box-sizing: border-box; width: 100%;">
-        
-        <!-- Top Header Block -->
-        <div style="border-bottom: 2px solid #0f172a; padding-bottom: 16px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-start; width: 100%; box-sizing: border-box;">
-          <div style="width: 58%;">
-            <div style="font-size: 22px; font-weight: 900; text-transform: uppercase; color: #0f172a; letter-spacing: -0.5px; line-height: 1.2;">
-              ${senderName}
-            </div>
-            <div style="font-size: 11px; font-weight: 800; color: #4f46e5; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px;">
-              ${senderTitle}
-            </div>
-            ${senderPhone ? `<div style="font-size: 12px; font-weight: 600; color: #475569; margin-top: 6px;"><b>PHONE:</b> ${senderPhone}</div>` : ''}
-          </div>
-          <div style="width: 40%; text-align: right;">
-            <div style="font-size: 24px; font-weight: 900; color: #0f172a; text-transform: uppercase; letter-spacing: -0.5px; line-height: 1.1;">
-              WORK SUMMARY
-            </div>
-            <div style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px;">
-              Work Done Statement
-            </div>
-            <div style="font-size: 12px; font-family: monospace; font-weight: 700; color: #475569; margin-top: 4px;">
-              #WRK-${params.invoice.id.substring(0, 8).toUpperCase()}
-            </div>
-          </div>
-        </div>
-
-        <!-- Prepared For & Summary Overview Section -->
-        <div style="display: flex; gap: 16px; margin-bottom: 20px; width: 100%; box-sizing: border-box;">
-          <!-- Prepared For Card -->
-          <div style="flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; box-sizing: border-box;">
-            <span style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; display: block; margin-bottom: 6px;">
-              PREPARED FOR
-            </span>
-            <div style="font-size: 17px; font-weight: 900; color: #0f172a; margin-bottom: 4px;">
-              ${params.client?.name || params.invoice.clientName}
-            </div>
-            ${params.client?.phone ? `<div style="font-size: 12px; color: #475569; margin-top: 2px;">Ph: ${params.client.phone}</div>` : ''}
-            ${params.client?.email ? `<div style="font-size: 12px; color: #475569; margin-top: 2px;">Email: ${params.client.email}</div>` : ''}
-          </div>
-
-          <!-- Statement Overview Card -->
-          <div style="flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; box-sizing: border-box;">
-            <span style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; display: block; margin-bottom: 6px;">
-              PERIOD OVERVIEW
-            </span>
-            <table style="width: 100%; font-size: 12px; color: #334155; border-collapse: collapse;">
-              <tr>
-                <td style="color: #64748b; padding: 2px 0; font-weight: 500;">Issue Date:</td>
-                <td style="text-align: right; font-weight: 700; color: #0f172a; padding: 2px 0;">${issueDateStr}</td>
-              </tr>
-              <tr>
-                <td style="color: #64748b; padding: 2px 0; font-weight: 500;">Work Period:</td>
-                <td style="text-align: right; font-weight: 600; color: #1e293b; padding: 2px 0;">${billingPeriodStr}</td>
-              </tr>
-              <tr>
-                <td style="color: #64748b; padding: 2px 0; font-weight: 500;">Total Deliverables:</td>
-                <td style="text-align: right; font-weight: 700; color: #4f46e5; padding: 2px 0;">${totalDeliverablesCount} Item(s)</td>
-              </tr>
-            </table>
-          </div>
-        </div>
-
-        <!-- Items Table (Without Financial Digits) -->
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; box-sizing: border-box;">
-          <thead>
-            <tr style="background-color: #0f172a; color: #ffffff;">
-              <th style="padding: 10px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; width: 44px; border-top-left-radius: 8px;">#</th>
-              <th style="padding: 10px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: left;">Work Done / Deliverable Description</th>
-              <th style="padding: 10px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; width: 80px; border-top-right-radius: 8px;">Qty</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${itemsRowsHtml}
-          </tbody>
-        </table>
-
-        <!-- Work Summary Banner -->
-        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 18px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
-          <div>
-            <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #4f46e5;">DELIVERABLES SUMMARY</div>
-            <div style="font-size: 12px; color: #475569; margin-top: 2px;">
-              Completed for <strong>${params.client?.name || params.invoice.clientName}</strong> across cycle (${billingPeriodStr})
-            </div>
-          </div>
-          <div style="text-align: right;">
-            <span style="display: inline-block; background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;">
-              Completed (${totalDeliverablesCount} items)
-            </span>
-          </div>
-        </div>
-
-        <!-- Note & Verification Section -->
-        <div style="border-top: 2px solid #0f172a; padding-top: 16px; display: flex; justify-content: space-between; align-items: flex-start; width: 100%; box-sizing: border-box;">
-          <div style="width: 65%;">
-            <div style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #0f172a; margin-bottom: 4px;">
-              VERIFICATION & CONFIRMATION
-            </div>
-            <p style="font-size: 11px; color: #64748b; line-height: 1.5; margin: 0;">
-              This statement confirms completion and delivery of the listed creative deliverables for the specified date period.
-            </p>
-          </div>
-          <div style="width: 30%; text-align: right;">
-            <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8;">
-              PREPARED BY
-            </div>
-            <div style="font-size: 13px; font-weight: 800; color: #0f172a; margin-top: 2px;">
-              ${senderName}
-            </div>
-          </div>
-        </div>
-
-        <div style="margin-top: 18px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 9px; color: #94a3b8; display: flex; justify-content: space-between;">
-          <span>This is a computer-generated work delivery summary statement.</span>
-          <span>Generated on ${issueDateStr}</span>
-        </div>
-      </div>
-    `;
-  }
-
-  // Full Standard Invoice or Monthly Retainer Invoice
   const baseRetainerAmount = isMonthlyRetainer
     ? (reels[0]?.rate || params.invoice.totalAmount)
     : subtotal;
 
-  const monthlyDeliverablesRowsHtml = deliverablesList.length > 0
-    ? deliverablesList.map((d, idx) => `
-      <tr style="border-bottom: 1px solid #e2e8f0;">
-        <td style="padding: 10px 10px; font-size: 13px; color: #64748b; text-align: center; font-weight: 600;">${String(idx + 1).padStart(2, '0')}</td>
-        <td style="padding: 10px 10px; font-size: 12px; color: #64748b; text-align: center;">
-          ${d.date ? new Date(d.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '—'}
-        </td>
-        <td style="padding: 10px 12px; font-size: 13px; color: #0f172a; font-weight: 600;">
-          ${d.title || 'Video Editing Deliverable'}
-          ${d.videoUrl ? `<br/><a href="${d.videoUrl}" target="_blank" rel="noopener noreferrer" style="color: #4f46e5; text-decoration: underline; font-size: 11px; font-weight: normal; word-break: break-all;">${d.videoUrl}</a>` : ''}
-        </td>
-        <td style="padding: 10px 10px; font-size: 13px; color: #334155; text-align: center; font-weight: 700;">${d.quantity || 1}</td>
-      </tr>
-    `).join('')
-    : `
-      <tr>
-        <td style="padding: 12px 10px; font-size: 13px; color: #64748b; text-align: center;">01</td>
-        <td style="padding: 12px 10px; font-size: 12px; color: #64748b; text-align: center;">${issueDateStr}</td>
-        <td style="padding: 12px 12px; font-size: 13px; color: #0f172a; font-weight: 600;">${reels[0]?.title || 'Monthly Video Editing & Creative Retainer'}</td>
-        <td style="padding: 12px 10px; font-size: 13px; color: #334155; text-align: center; font-weight: 700;">1 Month</td>
-      </tr>
-    `;
+  const clientName = params.client?.name || params.invoice.clientName || 'Client';
+  const clientPhone = params.client?.phone;
+  const clientEmail = params.client?.email;
 
-  const itemsRowsHtml = reels.length === 0
-    ? `
-      <tr>
-        <td style="padding: 10px 10px; font-size: 13px; color: #64748b; text-align: center;">01</td>
-        <td style="padding: 10px 10px; font-size: 13px; color: #0f172a; font-weight: 600;">Video Editing / Content Creation Services</td>
-        <td style="padding: 10px 10px; font-size: 13px; color: #334155; text-align: center;">1</td>
-        <td style="padding: 10px 10px; font-size: 13px; color: #334155; text-align: right;">₹${grandTotal.toLocaleString('en-IN')}</td>
-        <td style="padding: 10px 10px; font-size: 13px; color: #0f172a; font-weight: 700; text-align: right;">₹${grandTotal.toLocaleString('en-IN')}</td>
-      </tr>
-    `
-    : reels.map((r, idx) => `
-      <tr style="border-bottom: 1px solid #e2e8f0;">
-        <td style="padding: 10px 10px; font-size: 13px; color: #64748b; text-align: center;">${String(idx + 1).padStart(2, '0')}</td>
-        <td style="padding: 10px 10px; font-size: 13px; color: #0f172a; font-weight: 600;">
-          ${r.title || 'Video Editing Work Item'}
-          ${r.videoUrl ? `<br/><a href="${r.videoUrl}" target="_blank" rel="noopener noreferrer" style="color: #4f46e5; text-decoration: underline; font-size: 11px; font-weight: normal; word-break: break-all;">${r.videoUrl}</a>` : ''}
-        </td>
-        <td style="padding: 10px 10px; font-size: 13px; color: #334155; text-align: center;">${r.quantity}</td>
-        <td style="padding: 10px 10px; font-size: 13px; color: #334155; text-align: right;">₹${r.rate.toLocaleString('en-IN')}</td>
-        <td style="padding: 10px 10px; font-size: 13px; color: #0f172a; font-weight: 700; text-align: right;">₹${(r.quantity * r.rate).toLocaleString('en-IN')}</td>
-      </tr>
-    `).join('');
+  // Determine items to paginate
+  const allItems: any[] = isWorkSummary
+    ? (deliverablesList.length > 0 ? deliverablesList : reels)
+    : (isMonthlyRetainer ? (deliverablesList.length > 0 ? deliverablesList : [{ id: '1', title: reels[0]?.title || 'Monthly Video Editing & Creative Retainer', quantity: 1, date: params.invoice.date }]) : (reels.length > 0 ? reels : [{ id: '1', title: 'Video Editing / Content Creation Services', quantity: 1, rate: grandTotal }]));
 
-  return `
-    <div style="background: #ffffff; color: #0f172a; font-family: Inter, system-ui, -apple-system, sans-serif; box-sizing: border-box; width: 100%;">
-      
-      <!-- Top Header Block -->
-      <div style="border-bottom: 2px solid #0f172a; padding-bottom: 16px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-start; width: 100%; box-sizing: border-box;">
-        <div style="width: 60%;">
-          <div style="font-size: 22px; font-weight: 900; text-transform: uppercase; color: #0f172a; letter-spacing: -0.5px; line-height: 1.2;">
-            ${senderName}
-          </div>
-          <div style="font-size: 11px; font-weight: 800; color: #4f46e5; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px;">
-            ${senderTitle}
-          </div>
-          ${senderPhone ? `<div style="font-size: 12px; font-weight: 600; color: #475569; margin-top: 6px;"><b>PHONE:</b> ${senderPhone}</div>` : ''}
-        </div>
-        <div style="width: 38%; text-align: right;">
-          <div style="font-size: 28px; font-weight: 900; color: #0f172a; text-transform: uppercase; letter-spacing: -0.5px; line-height: 1;">
-            INVOICE
-          </div>
-          <div style="font-size: 13px; font-family: monospace; font-weight: 700; color: #475569; margin-top: 6px;">
-            #${invoiceNo}
-          </div>
-        </div>
-      </div>
+  const singlePageLimit = isWorkSummary ? 15 : 12;
 
-      <!-- Billed To & Overview Section -->
-      <div style="display: flex; gap: 16px; margin-bottom: 20px; width: 100%; box-sizing: border-box;">
-        <!-- Billed To Card -->
-        <div style="flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; box-sizing: border-box;">
-          <span style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; display: block; margin-bottom: 6px;">
-            BILLED TO
-          </span>
-          <div style="font-size: 17px; font-weight: 900; color: #0f172a; margin-bottom: 4px;">
-            ${params.client?.name || params.invoice.clientName}
-          </div>
-          ${params.client?.phone ? `<div style="font-size: 12px; color: #475569; margin-top: 2px;">Ph: ${params.client.phone}</div>` : ''}
-          ${params.client?.email ? `<div style="font-size: 12px; color: #475569; margin-top: 2px;">Email: ${params.client.email}</div>` : ''}
-        </div>
+  const pagesData: any[][] = [];
+  if (allItems.length <= singlePageLimit) {
+    pagesData.push(allItems);
+  } else if (allItems.length <= 24) {
+    // 2 pages: distribute evenly across both pages for balanced layout
+    const page1Count = Math.ceil(allItems.length / 2);
+    pagesData.push(allItems.slice(0, page1Count));
+    pagesData.push(allItems.slice(page1Count));
+  } else {
+    // 3+ pages:
+    const page1Limit = isWorkSummary ? 18 : 15;
+    const subsequentLimit = isWorkSummary ? 20 : 16;
+    pagesData.push(allItems.slice(0, page1Limit));
+    let remaining = allItems.slice(page1Limit);
+    while (remaining.length > 0) {
+      pagesData.push(remaining.slice(0, subsequentLimit));
+      remaining = remaining.slice(subsequentLimit);
+    }
+  }
 
-        <!-- Overview Card -->
-        <div style="flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; box-sizing: border-box;">
-          <span style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; display: block; margin-bottom: 6px;">
-            INVOICE OVERVIEW
-          </span>
-          <table style="width: 100%; font-size: 12px; color: #334155; border-collapse: collapse;">
-            <tr>
-              <td style="color: #64748b; padding: 2px 0; font-weight: 500;">Issue Date:</td>
-              <td style="text-align: right; font-weight: 700; color: #0f172a; padding: 2px 0;">${issueDateStr}</td>
-            </tr>
-            <tr>
-              <td style="color: #64748b; padding: 2px 0; font-weight: 500;">Billing Period:</td>
-              <td style="text-align: right; font-weight: 600; color: #1e293b; padding: 2px 0;">${billingPeriodStr}</td>
-            </tr>
-            <tr>
-              <td style="color: #64748b; padding: 2px 0; font-weight: 500;">Last Payment Date:</td>
-              <td style="text-align: right; font-weight: 600; color: #1e293b; padding: 2px 0;">${lastPaymentStr}</td>
-            </tr>
-          </table>
-        </div>
-      </div>
+  const totalPages = pagesData.length;
 
-      <!-- Items Table -->
-      ${isMonthlyRetainer ? `
-      <!-- Monthly Basis Deliverables Table (without rates) -->
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; box-sizing: border-box;">
-        <thead>
-          <tr style="background-color: #0f172a; color: #ffffff;">
-            <th style="padding: 10px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; width: 44px; border-top-left-radius: 8px;">#</th>
-            <th style="padding: 10px 10px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; width: 85px;">Date</th>
-            <th style="padding: 10px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: left;">Work Done / Deliverable Description</th>
-            <th style="padding: 10px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; width: 70px; border-top-right-radius: 8px;">Qty</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${monthlyDeliverablesRowsHtml}
-        </tbody>
-      </table>
+  const pagesHtml = pagesData.map((pageItems, pageIdx) => {
+    const isFirstPage = pageIdx === 0;
+    const isLastPage = pageIdx === totalPages - 1;
+    const itemOffset = pagesData.slice(0, pageIdx).reduce((acc, p) => acc + p.length, 0);
 
-      <!-- Monthly Package Deliverables Banner -->
-      <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
-        <div>
-          <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #6366f1;">MONTHLY RETAINER PACKAGE</div>
-          <div style="font-size: 12px; color: #475569; margin-top: 2px;">
-            Fixed retainer fee covering all listed creative deliverables across billing cycle (${billingPeriodStr})
-          </div>
-        </div>
-        <div style="text-align: right;">
-          <span style="display: inline-block; background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; font-size: 10px; font-weight: 600; padding: 4px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;">
-            ${deliverablesList.length} Deliverable(s) Included
-          </span>
-        </div>
-      </div>
-      ` : `
-      <!-- Per Reel Line Items Table -->
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; box-sizing: border-box;">
-        <thead>
-          <tr style="background-color: #0f172a; color: #ffffff;">
-            <th style="padding: 10px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; width: 44px; border-top-left-radius: 8px;">#</th>
-            <th style="padding: 10px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: left;">Item Description / Work Log</th>
-            <th style="padding: 10px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; width: 50px;">Qty</th>
-            <th style="padding: 10px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: right; width: 90px;">Rate</th>
-            <th style="padding: 10px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: right; width: 110px; border-top-right-radius: 8px;">Total Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${itemsRowsHtml}
-        </tbody>
-      </table>
-      `}
-
-      <!-- Subtotal & Total Due -->
-      <div style="display: flex; justify-content: flex-end; margin-bottom: 20px; width: 100%; box-sizing: border-box;">
-        <div style="width: 290px;">
-          <table style="width: 100%; font-size: 12px; color: #475569; margin-bottom: 6px;">
-            <tr>
-              <td style="padding: 3px 0; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b;">
-                ${isMonthlyRetainer ? 'Monthly Retainer' : 'Subtotal'}
-              </td>
-              <td style="padding: 3px 0; text-align: right; font-weight: 700; color: #0f172a;">₹${baseRetainerAmount.toLocaleString('en-IN')}</td>
-            </tr>
-            ${extraCost > 0 ? `
-            <tr>
-              <td style="padding: 3px 0; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #0f172a;">
-                Extra Cost (${params.invoice.extraCostDescription || 'Additional Expenses'})
-              </td>
-              <td style="padding: 3px 0; text-align: right; font-weight: 700; color: #0f172a;">
-                +₹${extraCost.toLocaleString('en-IN')}
-              </td>
-            </tr>
-            ` : ''}
-            ${discount > 0 ? `
-            <tr>
-              <td style="padding: 3px 0; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #e11d48;">
-                Deduction (${params.invoice.discountDescription || 'Discount'})
-              </td>
-              <td style="padding: 3px 0; text-align: right; font-weight: 700; color: #e11d48;">
-                -₹${discount.toLocaleString('en-IN')}
-              </td>
-            </tr>
-            ` : ''}
-          </table>
-
-          <div style="background-color: #0f172a; color: #ffffff; padding: 12px 16px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
-            <div>
-              <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #a5b4fc;">TOTAL DUE</div>
-              <div style="font-size: 10px; color: #94a3b8; margin-top: 1px;">Payable via UPI / Bank</div>
+    // Header HTML
+    const pageHeaderHtml = isFirstPage
+      ? `
+        <div style="border-bottom: 2px solid #0f172a; padding-bottom: 10px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-start; width: 100%; box-sizing: border-box;">
+          <div style="width: 60%;">
+            <div style="font-size: 20px; font-weight: 800; text-transform: uppercase; color: #0f172a; letter-spacing: -0.3px; line-height: 1.2;">
+              ${senderName}
             </div>
-            <div style="font-size: 22px; font-weight: 900; color: #ffffff; letter-spacing: -0.5px;">₹${grandTotal.toLocaleString('en-IN')}</div>
+            <div style="font-size: 10.5px; font-weight: 700; color: #4f46e5; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 3px;">
+              ${senderTitle}
+            </div>
+            ${senderPhone ? `<div style="font-size: 11.5px; font-weight: 500; color: #475569; margin-top: 4px;">PHONE: ${senderPhone}</div>` : ''}
+          </div>
+          <div style="width: 38%; text-align: right;">
+            <div style="font-size: 24px; font-weight: 900; color: #0f172a; text-transform: uppercase; letter-spacing: -0.5px; line-height: 1;">
+              ${isWorkSummary ? 'WORK SUMMARY' : 'INVOICE'}
+            </div>
+            <div style="font-size: 12px; font-family: monospace; font-weight: 700; color: #475569; margin-top: 5px;">
+              #${isWorkSummary ? `WRK-${params.invoice.id.substring(0, 8).toUpperCase()}` : invoiceNo}
+            </div>
           </div>
         </div>
-      </div>
-
-      <!-- Payment Info & QR Code Section -->
-      <div style="border-top: 2px solid #0f172a; padding-top: 16px; display: flex; gap: 16px; align-items: flex-start; width: 100%; box-sizing: border-box;">
-        <div style="flex: 1;">
-          <div style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #0f172a; margin-bottom: 8px;">
-            PAYMENT INFORMATION
+      `
+      : `
+        <div style="border-bottom: 2px solid #0f172a; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box;">
+          <div>
+            <span style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase;">${senderName}</span>
+            <span style="font-size: 11px; color: #64748b; margin-left: 10px; font-family: monospace; font-weight: 600;">#${isWorkSummary ? `WRK-${params.invoice.id.substring(0, 8).toUpperCase()}` : invoiceNo} (Continued)</span>
           </div>
-          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; font-size: 12px; color: #1e293b;">
-            <table style="width: 100%; border-collapse: collapse;">
+          <div style="font-size: 11px; font-weight: 700; color: #64748b;">
+            Page ${pageIdx + 1} of ${totalPages}
+          </div>
+        </div>
+      `;
+
+    // Overview Card (Page 1 only)
+    const pageOverviewHtml = isFirstPage
+      ? `
+        <div style="display: flex; gap: 12px; margin-bottom: 12px; width: 100%; box-sizing: border-box;">
+          <!-- Prepared / Billed To Card -->
+          <div style="flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; box-sizing: border-box;">
+            <span style="font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: #94a3b8; display: block; margin-bottom: 3px;">
+              ${isWorkSummary ? 'PREPARED FOR' : 'BILLED TO'}
+            </span>
+            <div style="font-size: 15px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">
+              ${clientName}
+            </div>
+            ${clientPhone ? `<div style="font-size: 11.5px; color: #475569; line-height: 1.35;">Ph: ${clientPhone}</div>` : ''}
+            ${clientEmail ? `<div style="font-size: 11.5px; color: #475569; line-height: 1.35;">Email: ${clientEmail}</div>` : ''}
+          </div>
+
+          <!-- Overview Card -->
+          <div style="flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; box-sizing: border-box;">
+            <span style="font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: #94a3b8; display: block; margin-bottom: 3px;">
+              ${isWorkSummary ? 'PERIOD OVERVIEW' : 'INVOICE OVERVIEW'}
+            </span>
+            <table style="width: 100%; font-size: 11.5px; color: #334155; border-collapse: collapse;">
               <tr>
-                <td style="padding: 3px 0; color: #64748b; font-size: 10px; font-weight: 700; text-transform: uppercase; width: 38%;">Payment Method:</td>
-                <td style="padding: 3px 0; font-weight: 600; color: #0f172a;">UPI Transfer</td>
+                <td style="color: #64748b; padding: 1.5px 0; font-weight: 500;">Issue Date:</td>
+                <td style="text-align: right; font-weight: 700; color: #0f172a; padding: 1.5px 0;">${issueDateStr}</td>
               </tr>
               <tr>
-                <td style="padding: 3px 0; color: #64748b; font-size: 10px; font-weight: 700; text-transform: uppercase;">UPI ID:</td>
-                <td style="padding: 3px 0; font-family: monospace; font-weight: 700; color: #4f46e5;">${upiId}</td>
+                <td style="color: #64748b; padding: 1.5px 0; font-weight: 500;">${isWorkSummary ? 'Work Period:' : 'Billing Period:'}</td>
+                <td style="text-align: right; font-weight: 600; color: #1e293b; padding: 1.5px 0;">${billingPeriodStr}</td>
               </tr>
+              ${isWorkSummary ? `
               <tr>
-                <td style="padding: 3px 0; color: #64748b; font-size: 10px; font-weight: 700; text-transform: uppercase;">Payee Name:</td>
-                <td style="padding: 3px 0; font-weight: 600; color: #0f172a;">${senderName}</td>
+                <td style="color: #64748b; padding: 1.5px 0; font-weight: 500;">Total Deliverables:</td>
+                <td style="text-align: right; font-weight: 700; color: #4f46e5; padding: 1.5px 0;">${totalDeliverablesCount} Item(s)</td>
               </tr>
-              ${params.profile?.accountNumber ? `
+              ` : `
               <tr>
-                <td style="padding: 3px 0; color: #64748b; font-size: 10px; font-weight: 700; text-transform: uppercase;">Bank Account:</td>
-                <td style="padding: 3px 0; font-family: monospace; font-weight: 600;">${params.profile.accountNumber}</td>
+                <td style="color: #64748b; padding: 1.5px 0; font-weight: 500;">Last Payment Date:</td>
+                <td style="text-align: right; font-weight: 600; color: #1e293b; padding: 1.5px 0;">${lastPaymentStr}</td>
               </tr>
-              <tr>
-                <td style="padding: 3px 0; color: #64748b; font-size: 10px; font-weight: 700; text-transform: uppercase;">IFSC / Bank:</td>
-                <td style="padding: 3px 0; font-weight: 600;">${params.profile.ifscCode || ''} ${params.profile.bankName ? `(${params.profile.bankName})` : ''}</td>
-              </tr>
-              ` : ''}
+              `}
             </table>
           </div>
-          <p style="font-size: 11px; color: #64748b; font-style: italic; margin-top: 8px;">
-            Thank you for your business! Please process payment within 7 days of receiving this invoice statement.
-          </p>
         </div>
+      `
+      : '';
 
-        <!-- QR Code Card -->
-        <div style="width: 140px; text-align: center;">
-          <div style="background: #ffffff; border: 2px solid #e2e8f0; border-radius: 12px; padding: 10px; margin: 0 auto;">
-            <div id="pdf-qr-wrapper" style="width: 110px; height: 110px; margin: 0 auto; background: #ffffff;">
-              ${params.qrDataUrl ? `<img src="${params.qrDataUrl}" style="width: 110px; height: 110px; border-radius: 6px; display: block; margin: 0;" alt="Scan to Pay" />` : '<div style="width: 110px; height: 110px; line-height: 110px; font-size: 11px; color: #94a3b8; text-align: center;">Scan to Pay</div>'}
+    // Table rows
+    let tableRowsHtml = '';
+    if (isWorkSummary) {
+      tableRowsHtml = pageItems.map((item, idx) => {
+        const itemIdx = itemOffset + idx;
+        const subClientTag = item.subClientName
+          ? `<span style="display: inline-block; font-size: 9.5px; font-weight: 600; color: #475569; background-color: #f1f5f9; padding: 1px 5px; border-radius: 3px; margin-left: 6px; vertical-align: middle;">${item.subClientName}</span>`
+          : '';
+        const videoLink = item.videoUrl
+          ? `<div style="margin-top: 2px;"><a href="${item.videoUrl}" target="_blank" rel="noopener noreferrer" style="color: #4f46e5; text-decoration: none; font-size: 10.5px; font-weight: 600;">View Deliverable &nearr;</a></div>`
+          : '';
+        return `
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 6.5px 10px; font-size: 11.5px; color: #64748b; text-align: center; font-weight: 600;">${String(itemIdx + 1).padStart(2, '0')}</td>
+            <td style="padding: 6.5px 12px; font-size: 11.5px; color: #0f172a; font-weight: 600; line-height: 1.35;">
+              <span>${item.title || 'Video Editing Work Item'}</span>${subClientTag}
+              ${videoLink}
+            </td>
+            <td style="padding: 6.5px 10px; font-size: 11.5px; color: #334155; text-align: center; font-weight: 700;">${item.quantity || 1}</td>
+          </tr>
+        `;
+      }).join('');
+    } else if (isMonthlyRetainer) {
+      tableRowsHtml = pageItems.map((d, idx) => {
+        const itemIdx = itemOffset + idx;
+        const dateStr = d.date ? new Date(d.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '—';
+        const subClientTag = d.subClientName
+          ? `<span style="display: inline-block; font-size: 9.5px; font-weight: 600; color: #475569; background-color: #f1f5f9; padding: 1px 5px; border-radius: 3px; margin-left: 6px; vertical-align: middle;">${d.subClientName}</span>`
+          : '';
+        const videoLink = d.videoUrl
+          ? `<div style="margin-top: 2px;"><a href="${d.videoUrl}" target="_blank" rel="noopener noreferrer" style="color: #4f46e5; text-decoration: none; font-size: 10.5px; font-weight: 600;">View Deliverable &nearr;</a></div>`
+          : '';
+        return `
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 6.5px 10px; font-size: 11.5px; color: #64748b; text-align: center; font-weight: 600;">${String(itemIdx + 1).padStart(2, '0')}</td>
+            <td style="padding: 6.5px 10px; font-size: 11px; color: #64748b; text-align: center; white-space: nowrap;">${dateStr}</td>
+            <td style="padding: 6.5px 12px; font-size: 11.5px; color: #0f172a; font-weight: 600; line-height: 1.35;">
+              <span>${d.title || 'Video Editing Deliverable'}</span>${subClientTag}
+              ${videoLink}
+            </td>
+            <td style="padding: 6.5px 10px; font-size: 11.5px; color: #334155; text-align: center; font-weight: 700;">${d.quantity || 1}</td>
+          </tr>
+        `;
+      }).join('');
+    } else {
+      tableRowsHtml = pageItems.map((r, idx) => {
+        const itemIdx = itemOffset + idx;
+        const subClientTag = r.subClientName
+          ? `<span style="display: inline-block; font-size: 9.5px; font-weight: 600; color: #475569; background-color: #f1f5f9; padding: 1px 5px; border-radius: 3px; margin-left: 6px; vertical-align: middle;">${r.subClientName}</span>`
+          : '';
+        const videoLink = r.videoUrl
+          ? `<div style="margin-top: 2px;"><a href="${r.videoUrl}" target="_blank" rel="noopener noreferrer" style="color: #4f46e5; text-decoration: none; font-size: 10.5px; font-weight: 600;">View Deliverable &nearr;</a></div>`
+          : '';
+        return `
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 6.5px 10px; font-size: 11.5px; color: #64748b; text-align: center; font-weight: 600;">${String(itemIdx + 1).padStart(2, '0')}</td>
+            <td style="padding: 6.5px 12px; font-size: 11.5px; color: #0f172a; font-weight: 600; line-height: 1.35;">
+              <span>${r.title || 'Video Editing Work Item'}</span>${subClientTag}
+              ${videoLink}
+            </td>
+            <td style="padding: 6.5px 10px; font-size: 11.5px; color: #334155; text-align: center;">${r.quantity}</td>
+            <td style="padding: 6.5px 10px; font-size: 11.5px; color: #334155; text-align: right;">₹${(r.rate || 0).toLocaleString('en-IN')}</td>
+            <td style="padding: 6.5px 10px; font-size: 11.5px; color: #0f172a; font-weight: 700; text-align: right;">₹${((r.quantity || 1) * (r.rate || 0)).toLocaleString('en-IN')}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Table Header HTML
+    const tableHeaderHtml = isWorkSummary
+      ? `
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 8px; box-sizing: border-box;">
+          <thead>
+            <tr style="background-color: #0f172a; color: #ffffff;">
+              <th style="padding: 7px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; width: 36px; border-top-left-radius: 6px;">#</th>
+              <th style="padding: 7px 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: left;">Work Done / Deliverable Description</th>
+              <th style="padding: 7px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; width: 60px; border-top-right-radius: 6px;">Qty</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRowsHtml}
+          </tbody>
+        </table>
+      `
+      : isMonthlyRetainer
+      ? `
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 8px; box-sizing: border-box;">
+          <thead>
+            <tr style="background-color: #0f172a; color: #ffffff;">
+              <th style="padding: 7px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; width: 36px; border-top-left-radius: 6px;">#</th>
+              <th style="padding: 7px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; width: 75px;">Date</th>
+              <th style="padding: 7px 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: left;">Work Done / Deliverable Description</th>
+              <th style="padding: 7px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; width: 50px; border-top-right-radius: 6px;">Qty</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRowsHtml}
+          </tbody>
+        </table>
+      `
+      : `
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 8px; box-sizing: border-box;">
+          <thead>
+            <tr style="background-color: #0f172a; color: #ffffff;">
+              <th style="padding: 7px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; width: 36px; border-top-left-radius: 6px;">#</th>
+              <th style="padding: 7px 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: left;">Item Description / Work Log</th>
+              <th style="padding: 7px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; width: 45px;">Qty</th>
+              <th style="padding: 7px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: right; width: 85px;">Rate</th>
+              <th style="padding: 7px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: right; width: 100px; border-top-right-radius: 6px;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRowsHtml}
+          </tbody>
+        </table>
+      `;
+
+    // Bottom section HTML
+    let bottomSectionHtml = '';
+    if (isLastPage) {
+      if (isWorkSummary) {
+        bottomSectionHtml = `
+          <!-- Work Summary Banner -->
+          <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
+            <div>
+              <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: #4f46e5;">DELIVERABLES SUMMARY</div>
+              <div style="font-size: 11.5px; color: #475569; margin-top: 2px;">
+                Completed for <strong>${clientName}</strong> across cycle (${billingPeriodStr})
+              </div>
             </div>
-            <div style="font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-top: 6px; text-align: center;">
-              Scan to Pay ₹${grandTotal.toLocaleString('en-IN')}
+            <div style="text-align: right;">
+              <span style="display: inline-block; background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; font-size: 10.5px; font-weight: 600; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;">
+                Completed (${totalDeliverablesCount} items)
+              </span>
             </div>
           </div>
+
+          <!-- Note & Verification Section -->
+          <div style="border-top: 2px solid #0f172a; padding-top: 12px; display: flex; justify-content: space-between; align-items: flex-start; width: 100%; box-sizing: border-box;">
+            <div style="width: 65%;">
+              <div style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.8px; color: #0f172a; margin-bottom: 3px;">
+                VERIFICATION & CONFIRMATION
+              </div>
+              <p style="font-size: 10.5px; color: #64748b; line-height: 1.45; margin: 0;">
+                This statement confirms completion and delivery of the listed creative deliverables for the specified date period.
+              </p>
+            </div>
+            <div style="width: 30%; text-align: right;">
+              <div style="font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: #94a3b8;">
+                PREPARED BY
+              </div>
+              <div style="font-size: 12.5px; font-weight: 800; color: #0f172a; margin-top: 2px;">
+                ${senderName}
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        bottomSectionHtml = `
+          ${isMonthlyRetainer ? `
+          <!-- Monthly Package Deliverables Banner -->
+          <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
+            <div>
+              <div style="font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: #4f46e5;">MONTHLY RETAINER PACKAGE</div>
+              <div style="font-size: 11px; color: #475569; margin-top: 1px;">
+                Fixed retainer fee covering all listed creative deliverables across billing cycle (${billingPeriodStr})
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <span style="display: inline-block; background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; font-size: 9.5px; font-weight: 600; padding: 2px 7px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;">
+                ${deliverablesList.length} Deliverable(s) Included
+              </span>
+            </div>
+          </div>
+          ` : ''}
+
+          <!-- Subtotal & Total Due -->
+          <div style="display: flex; justify-content: flex-end; margin-bottom: 10px; width: 100%; box-sizing: border-box;">
+            <div style="width: 270px;">
+              <table style="width: 100%; font-size: 11px; color: #475569; margin-bottom: 4px;">
+                <tr>
+                  <td style="padding: 2px 0; font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: #64748b;">
+                    ${isMonthlyRetainer ? 'Monthly Retainer' : 'Subtotal'}
+                  </td>
+                  <td style="padding: 2px 0; text-align: right; font-weight: 700; color: #0f172a;">₹${baseRetainerAmount.toLocaleString('en-IN')}</td>
+                </tr>
+                ${extraCost > 0 ? `
+                <tr>
+                  <td style="padding: 2px 0; font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: #0f172a;">
+                    Extra Cost (${params.invoice.extraCostDescription || 'Additional Expenses'})
+                  </td>
+                  <td style="padding: 2px 0; text-align: right; font-weight: 700; color: #0f172a;">
+                    +₹${extraCost.toLocaleString('en-IN')}
+                  </td>
+                </tr>
+                ` : ''}
+                ${discount > 0 ? `
+                <tr>
+                  <td style="padding: 2px 0; font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: #e11d48;">
+                    Deduction (${params.invoice.discountDescription || 'Discount'})
+                  </td>
+                  <td style="padding: 2px 0; text-align: right; font-weight: 700; color: #e11d48;">
+                    -₹${discount.toLocaleString('en-IN')}
+                  </td>
+                </tr>
+                ` : ''}
+              </table>
+
+              <div style="background-color: #0f172a; color: #ffffff; padding: 8px 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: #cbd5e1;">TOTAL DUE</div>
+                  <div style="font-size: 9px; color: #94a3b8; margin-top: 1px;">Payable via UPI / Bank</div>
+                </div>
+                <div style="font-size: 19px; font-weight: 900; color: #ffffff; letter-spacing: -0.5px;">₹${grandTotal.toLocaleString('en-IN')}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Payment Info & QR Code Section -->
+          <div style="border-top: 2px solid #0f172a; padding-top: 10px; display: flex; gap: 12px; align-items: flex-start; width: 100%; box-sizing: border-box;">
+            <div style="flex: 1;">
+              <div style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.8px; color: #0f172a; margin-bottom: 4px;">
+                PAYMENT INFORMATION
+              </div>
+              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; font-size: 11px; color: #1e293b;">
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td style="padding: 2px 0; color: #64748b; font-size: 9.5px; font-weight: 700; text-transform: uppercase; width: 36%;">Payment Method:</td>
+                    <td style="padding: 2px 0; font-weight: 600; color: #0f172a;">UPI Transfer</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 2px 0; color: #64748b; font-size: 9.5px; font-weight: 700; text-transform: uppercase;">UPI ID:</td>
+                    <td style="padding: 2px 0; font-family: monospace; font-weight: 700; color: #4f46e5;">${upiId}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 2px 0; color: #64748b; font-size: 9.5px; font-weight: 700; text-transform: uppercase;">Payee Name:</td>
+                    <td style="padding: 2px 0; font-weight: 600; color: #0f172a;">${senderName}</td>
+                  </tr>
+                  ${params.profile?.accountNumber ? `
+                  <tr>
+                    <td style="padding: 2px 0; color: #64748b; font-size: 9.5px; font-weight: 700; text-transform: uppercase;">Bank Account:</td>
+                    <td style="padding: 2px 0; font-family: monospace; font-weight: 600;">${params.profile.accountNumber}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 2px 0; color: #64748b; font-size: 9.5px; font-weight: 700; text-transform: uppercase;">IFSC / Bank:</td>
+                    <td style="padding: 2px 0; font-weight: 600;">${params.profile.ifscCode || ''} ${params.profile.bankName ? `(${params.profile.bankName})` : ''}</td>
+                  </tr>
+                  ` : ''}
+                </table>
+              </div>
+              <p style="font-size: 10px; color: #64748b; font-style: italic; margin-top: 4px; margin-bottom: 0;">
+                Thank you for your business! Please process payment within 7 days of receiving this invoice statement.
+              </p>
+            </div>
+
+            <!-- QR Code Card -->
+            <div style="width: 120px; text-align: center; flex-shrink: 0;">
+              <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 6px; margin: 0 auto;">
+                <div id="pdf-qr-wrapper" style="width: 86px; height: 86px; margin: 0 auto; background: #ffffff;">
+                  ${params.qrDataUrl ? `<img src="${params.qrDataUrl}" style="width: 86px; height: 86px; border-radius: 4px; display: block; margin: 0;" alt="Scan to Pay" />` : '<div style="width: 86px; height: 86px; line-height: 86px; font-size: 10px; color: #94a3b8; text-align: center;">Scan to Pay</div>'}
+                </div>
+                <div style="font-size: 8.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-top: 3px; text-align: center;">
+                  Scan to Pay ₹${grandTotal.toLocaleString('en-IN')}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    } else {
+      bottomSectionHtml = `
+        <div style="padding: 8px 12px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; text-align: center; font-size: 10.5px; font-weight: 600; color: #64748b; margin-bottom: 8px;">
+          Continued on next page &rarr;
+        </div>
+      `;
+    }
+
+    const pageFooterBar = `
+      <div style="margin-top: 10px; padding-top: 6px; border-top: 1px solid #e2e8f0; font-size: 8.5px; color: #94a3b8; display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box;">
+        <span>${isWorkSummary ? 'This is a computer-generated work delivery summary statement.' : 'This is a computer-generated invoice statement.'}</span>
+        <span>Generated on ${issueDateStr}${totalPages > 1 ? ` • Page ${pageIdx + 1} of ${totalPages}` : ''}</span>
+      </div>
+    `;
+
+    return `
+      <div class="pdf-page" style="width: 794px; min-height: 1123px; max-height: 1123px; padding: 24px 30px; background: #ffffff; color: #0f172a; font-family: Inter, system-ui, -apple-system, sans-serif; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; position: relative;">
+        <!-- Top Section -->
+        <div style="width: 100%;">
+          ${pageHeaderHtml}
+          ${pageOverviewHtml}
+          ${tableHeaderHtml}
+        </div>
+
+        <!-- Bottom Section -->
+        <div style="width: 100%; margin-top: auto;">
+          ${bottomSectionHtml}
+          ${pageFooterBar}
         </div>
       </div>
+    `;
+  }).join('');
 
-      <div style="margin-top: 18px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 9px; color: #94a3b8; display: flex; justify-content: space-between;">
-        <span>This is a computer-generated invoice statement.</span>
-        <span>Generated on ${issueDateStr}</span>
-      </div>
-    </div>
-  `;
+  return pagesHtml;
 }
 
-export function printDocumentHtml(htmlContent: string, documentTitle: string = 'Work_Summary') {
+export function printDocumentHtml(htmlContent: string, documentTitle: string = 'Invoice') {
   const printIframe = document.createElement('iframe');
   printIframe.style.position = 'fixed';
   printIframe.style.right = '0';
@@ -875,7 +904,7 @@ export function printDocumentHtml(htmlContent: string, documentTitle: string = '
         <style>
           @page {
             size: A4 portrait;
-            margin: 10mm 12mm;
+            margin: 0mm;
           }
           * {
             box-sizing: border-box;
@@ -889,23 +918,35 @@ export function printDocumentHtml(htmlContent: string, documentTitle: string = '
             font-family: Inter, system-ui, -apple-system, sans-serif;
             color: #0f172a;
           }
-          @media print {
-            body {
-              width: 100%;
-            }
+          .pdf-page {
+            width: 210mm !important;
+            height: 296.5mm !important;
+            min-height: 296.5mm !important;
+            max-height: 296.5mm !important;
+            padding: 24px 30px !important;
+            box-sizing: border-box !important;
+            page-break-after: always;
+            break-after: page;
+            background: #ffffff;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
+            overflow: hidden !important;
+          }
+          .pdf-page:last-child {
+            page-break-after: avoid !important;
+            break-after: avoid !important;
           }
         </style>
       </head>
       <body>
-        <div style="padding: 16px 20px;">
-          ${htmlContent}
-        </div>
+        ${htmlContent}
       </body>
     </html>
   `);
   doc.close();
 
-  setTimeout(() => {
+  const triggerPrint = () => {
     try {
       printIframe.contentWindow?.focus();
       printIframe.contentWindow?.print();
@@ -918,7 +959,29 @@ export function printDocumentHtml(htmlContent: string, documentTitle: string = '
         }
       }, 2000);
     }
-  }, 400);
+  };
+
+  const images = Array.from(doc.images || []);
+  if (images.length === 0) {
+    setTimeout(triggerPrint, 350);
+  } else {
+    let loaded = 0;
+    const checkAllLoaded = () => {
+      loaded++;
+      if (loaded >= images.length) {
+        setTimeout(triggerPrint, 200);
+      }
+    };
+    images.forEach(img => {
+      if (img.complete) {
+        checkAllLoaded();
+      } else {
+        img.onload = checkAllLoaded;
+        img.onerror = checkAllLoaded;
+      }
+    });
+    setTimeout(triggerPrint, 1500);
+  }
 }
 
 export async function generateOffscreenPdfBlob(params: {
@@ -941,7 +1004,7 @@ export async function generateOffscreenPdfBlob(params: {
   container.style.backgroundColor = '#ffffff';
   container.style.color = '#0f172a';
   container.style.boxSizing = 'border-box';
-  container.style.padding = '32px 36px';
+  container.style.padding = '0px';
   container.style.fontFamily = 'Inter, system-ui, -apple-system, sans-serif';
   container.style.opacity = '1';
   container.style.visibility = 'visible';
@@ -1037,7 +1100,6 @@ export async function generateOffscreenPdfBlob(params: {
                 }
               }
             } else if (rule instanceof CSSMediaRule || rule instanceof CSSSupportsRule || (rule as any).cssRules) {
-              // Recurse into nested rules (covers @media, @supports, @layer, etc.)
               const innerRules = (rule as any).cssRules as CSSRuleList;
               if (innerRules) {
                 for (let k = 0; k < innerRules.length; k++) {
@@ -1073,28 +1135,8 @@ export async function generateOffscreenPdfBlob(params: {
       import('jspdf'),
     ]);
 
-    const canvas = await html2canvas(container, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: '#ffffff',
-      x: 0,
-      y: 0,
-      scrollX: 0,
-      scrollY: 0,
-      windowWidth: 794,
-      width: 794,
-      height: container.offsetHeight || 1123,
-      logging: false,
-      onclone: (clonedDoc: Document, clonedElement: HTMLElement) => {
-        // Patch all stylesheets in the cloned document to remove unsupported color functions
-        patchClonedDocumentStylesheets(clonedDoc);
-        // Also patch element inline styles in the cloned tree
-        preprocessElementStylesForPdf(clonedElement);
-      }
-    });
-
-    const imgData = canvas.toDataURL('image/jpeg', 0.98);
+    const pageElements = Array.from(container.querySelectorAll<HTMLElement>('.pdf-page'));
+    const elementsToRender = pageElements.length > 0 ? pageElements : [container];
 
     const pdf = new jsPDF({
       orientation: 'portrait',
@@ -1105,20 +1147,28 @@ export async function generateOffscreenPdfBlob(params: {
 
     const pdfWidth = pdf.internal.pageSize.getWidth(); // 210 mm
     const pdfHeight = pdf.internal.pageSize.getHeight(); // 297 mm
-    const imgWidth = pdfWidth;
-    const imgHeight = (canvas.height * pdfWidth) / canvas.width;
 
-    let heightLeft = imgHeight;
-    let position = 0;
+    for (let i = 0; i < elementsToRender.length; i++) {
+      if (i > 0) {
+        pdf.addPage();
+      }
+      const el = elementsToRender[i];
+      const canvas = await html2canvas(el, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        width: 794,
+        height: 1123,
+        logging: false,
+        onclone: (clonedDoc: Document, clonedElement: HTMLElement) => {
+          patchClonedDocumentStylesheets(clonedDoc);
+          preprocessElementStylesForPdf(clonedElement);
+        }
+      });
 
-    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pdfHeight;
-
-    while (heightLeft > 5) {
-      position = heightLeft - pdfHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pdfHeight;
+      const imgData = canvas.toDataURL('image/jpeg', 0.98);
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
     }
 
     const pdfBlob = pdf.output('blob');
@@ -1587,7 +1637,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
     }
   };
 
-  const handlePrintWorkSummary = (inv?: Invoice, clientObj?: Client) => {
+  const handlePrintDocument = async (inv?: Invoice, clientObj?: Client, hideFinanceOverride?: boolean) => {
+    const isWorkSummary = hideFinanceOverride !== undefined ? hideFinanceOverride : previewMode === 'work-only';
     const targetClient = clientObj || selectedClient;
     const targetInvoice: Invoice = inv || {
       id: generateUUID(),
@@ -1597,11 +1648,19 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
       reels: [...effectiveReels],
       totalAmount: grandTotal,
       status: 'Pending',
-      invoiceType: invoiceBillingMode
+      invoiceType: invoiceBillingMode,
+      ...(discount > 0 ? {
+        discountAmount: discount,
+        discountDescription: discountDescription.trim() || 'Discount'
+      } : {}),
+      ...(extraCost > 0 ? {
+        extraCostAmount: extraCost,
+        extraCostDescription: extraCostDescription.trim() || 'Extra Expenses'
+      } : {})
     };
 
     if (!targetClient && !inv) {
-      alert("Please select a client first to print the work summary.");
+      alert("Please select a client first.");
       return;
     }
 
@@ -1614,20 +1673,45 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
       ? inv.deliverables
       : currentBillingDeliverables;
 
+    let qrDataUrl = '';
+    const senderName = profile?.name || 'Tilak Popat';
+    const upiId = (customUpiId && customUpiId.trim())
+      || (profile?.upiId && profile.upiId !== 'Not specified' ? profile.upiId.trim() : '')
+      || 'tilakpopat2007-1@okaxis';
+
+    if (!isWorkSummary && upiId) {
+      try {
+        const invShortId = targetInvoice.id ? targetInvoice.id.substring(0, 8) : 'INV';
+        const res = await generateUpiQrCodeDataUrl(upiId, senderName, targetInvoice.totalAmount, `Payment for Invoice #${invShortId}`);
+        if (res && res.pngDataUrl) {
+          qrDataUrl = res.pngDataUrl;
+        }
+      } catch (e) {
+        console.warn("QR code generation for print failed:", e);
+      }
+    }
+
     const htmlContent = renderDocumentHtml({
       invoice: targetInvoice,
       client: targetClient,
       profile,
       dateFrom,
       dateTo,
-      hideFinance: true,
+      qrDataUrl,
+      customUpiId,
+      hideFinance: isWorkSummary,
       deliverables: effectiveDeliverables
     });
 
     const clientNameStr = (targetClient?.name || targetInvoice.clientName || 'Client').replace(/\s+/g, '_');
-    const printDocTitle = `Work_Summary_${clientNameStr}_${new Date().toLocaleDateString('en-IN').replace(/\//g, '-')}`;
+    const docPrefix = isWorkSummary ? 'Work_Summary' : 'Invoice';
+    const printDocTitle = `${docPrefix}_${clientNameStr}_${new Date().toLocaleDateString('en-IN').replace(/\//g, '-')}`;
 
     printDocumentHtml(htmlContent, printDocTitle);
+  };
+
+  const handlePrintWorkSummary = (inv?: Invoice, clientObj?: Client) => {
+    handlePrintDocument(inv, clientObj, true);
   };
 
   const handleDownloadWorkSummaryPdf = async (inv?: Invoice, clientObj?: Client) => {
@@ -2424,28 +2508,24 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <button
                   type="button"
-                  onClick={() => handlePrintWorkSummary()}
-                  disabled={!selectedClient || reels.length === 0}
+                  onClick={() => handlePrintDocument(undefined, undefined, false)}
+                  disabled={!selectedClient || effectiveReels.length === 0}
                   className="flex justify-center items-center gap-1.5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 text-white px-3 py-2 rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer"
-                  title="Print summary of work completed"
+                  title="Print official invoice statement"
                 >
                   <Printer size={14} className="text-slate-400" />
-                  Print Summary
+                  Print Invoice
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => handleDownloadWorkSummaryPdf()}
-                  disabled={isGeneratingSummary || !selectedClient || reels.length === 0}
+                  onClick={() => handlePrintWorkSummary()}
+                  disabled={!selectedClient || effectiveReels.length === 0}
                   className="flex justify-center items-center gap-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 disabled:bg-slate-100 text-slate-700 dark:text-slate-200 disabled:text-slate-400 px-3 py-2 rounded-xl text-xs font-semibold transition-all border border-slate-200 dark:border-slate-600 cursor-pointer"
-                  title="Download work summary without financial details"
+                  title="Print work deliverables list without financial details"
                 >
-                  {isGeneratingSummary ? (
-                    <Loader2 size={14} className="animate-spin text-indigo-600" />
-                  ) : (
-                    <FileText size={14} className="text-slate-600 dark:text-slate-300" />
-                  )}
-                  Summary PDF
+                  <ListChecks size={14} className="text-slate-600 dark:text-slate-300" />
+                  Print Summary
                 </button>
               </div>
             </div>
@@ -2520,12 +2600,12 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
 
               <button
                 type="button"
-                onClick={() => handlePrintWorkSummary()}
-                disabled={!selectedClient || reels.length === 0}
+                onClick={() => handlePrintDocument()}
+                disabled={!selectedClient || effectiveReels.length === 0}
                 className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer shrink-0"
-                title="Print Work Summary"
+                title={previewMode === 'work-only' ? 'Print Work Summary' : 'Print Invoice'}
               >
-                <Printer size={13} className="text-slate-400" /> Print Summary
+                <Printer size={13} className="text-slate-400" /> {previewMode === 'work-only' ? 'Print Summary' : 'Print Invoice'}
               </button>
             </div>
           </div>
@@ -2709,14 +2789,16 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
                               <td className="py-3.5 px-3 text-base font-semibold text-slate-900">
                                 <div>{d.title || <span className="text-slate-400 italic font-normal">Deliverable...</span>}</div>
                                 {d.videoUrl && (
-                                  <div className="mt-1">
+                                  <div className="mt-0.5">
                                     <a
                                       href={d.videoUrl}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="text-xs text-indigo-600 font-medium underline break-all hover:text-indigo-800"
+                                      className="text-xs text-indigo-600 dark:text-indigo-400 font-medium hover:underline inline-flex items-center gap-1"
+                                      title={d.videoUrl}
                                     >
-                                      {d.videoUrl}
+                                      <span>View Deliverable</span>
+                                      <span className="text-[10px]">↗</span>
                                     </a>
                                   </div>
                                 )}
@@ -2749,14 +2831,16 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
                             <td className="py-4 px-3 text-base font-semibold text-slate-900">
                               <div>{reel.title || <span className="text-slate-400 italic font-normal">Item description...</span>}</div>
                               {reel.videoUrl && (
-                                <div className="mt-1">
+                                <div className="mt-0.5">
                                   <a
                                     href={reel.videoUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-xs text-indigo-600 font-medium underline break-all hover:text-indigo-800"
+                                    className="text-xs text-indigo-600 dark:text-indigo-400 font-medium hover:underline inline-flex items-center gap-1"
+                                    title={reel.videoUrl}
                                   >
-                                    {reel.videoUrl}
+                                    <span>View Deliverable</span>
+                                    <span className="text-[10px]">↗</span>
                                   </a>
                                 </div>
                               )}
@@ -3148,12 +3232,12 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
                             </button>
 
                             <button
-                              onClick={() => handlePrintWorkSummary(inv, clientObj)}
+                              onClick={() => handlePrintDocument(inv, clientObj, false)}
                               className="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer"
-                              title="Print Work Summary statement without financial digits"
+                              title="Print official invoice statement"
                             >
                               <Printer size={13} className="text-slate-600 dark:text-slate-300" />
-                              Work List
+                              Print
                             </button>
 
                             <button
