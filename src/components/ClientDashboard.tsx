@@ -269,33 +269,56 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
           // If item is invoiced, update the corresponding invoice reel details as well
           if (existing.status === 'Invoiced' && existing.invoiceId) {
             const invoice = invoices.find(inv => inv.id === existing.invoiceId);
-            if (invoice && invoice.reels) {
-              let replaced = false;
-              const updatedReels = invoice.reels.map((reel: any) => {
-                if (!replaced && reel.title === existing.description && reel.quantity === existing.quantity && reel.rate === existing.rate) {
-                  replaced = true;
-                  return {
-                    ...reel,
-                    title: workFormData.description,
-                    quantity: selectedQty,
-                    rate: selectedRate,
-                    subClientId,
-                    subClientName,
-                    videoUrl: trimmedVideoUrl
-                  };
+            if (invoice) {
+              if (invoice.invoiceType === 'monthly_retainer') {
+                if (invoice.deliverables && invoice.deliverables.length > 0) {
+                  const updatedDeliverables = invoice.deliverables.map((deliv: any) => {
+                    const isMatch = deliv.id === existing.id || deliv.workItemId === existing.id;
+                    if (isMatch) {
+                      return {
+                        ...deliv,
+                        title: workFormData.description,
+                        quantity: selectedQty,
+                        subClientId,
+                        subClientName,
+                        videoUrl: trimmedVideoUrl
+                      };
+                    }
+                    return deliv;
+                  });
+                  await updateInvoice({
+                    ...invoice,
+                    deliverables: updatedDeliverables
+                  });
                 }
-                return reel;
-              });
+              } else if (invoice.reels) {
+                let replaced = false;
+                const updatedReels = invoice.reels.map((reel: any) => {
+                  if (!replaced && reel.title === existing.description && reel.quantity === existing.quantity && reel.rate === existing.rate) {
+                    replaced = true;
+                    return {
+                      ...reel,
+                      title: workFormData.description,
+                      quantity: selectedQty,
+                      rate: selectedRate,
+                      subClientId,
+                      subClientName,
+                      videoUrl: trimmedVideoUrl
+                    };
+                  }
+                  return reel;
+                });
 
-              const newSubtotal = updatedReels.reduce((sum: number, r: any) => sum + (r.quantity * r.rate), 0);
-              const discount = invoice.discountAmount || 0;
-              const newTotal = Math.max(0, newSubtotal - discount);
+                const newSubtotal = updatedReels.reduce((sum: number, r: any) => sum + (r.quantity * r.rate), 0);
+                const discount = invoice.discountAmount || 0;
+                const newTotal = Math.max(0, newSubtotal - discount);
 
-              await updateInvoice({
-                ...invoice,
-                reels: updatedReels,
-                totalAmount: newTotal
-              });
+                await updateInvoice({
+                  ...invoice,
+                  reels: updatedReels,
+                  totalAmount: newTotal
+                });
+              }
             }
           }
 

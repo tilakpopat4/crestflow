@@ -94,7 +94,8 @@ export default function GoogleDriveUploadModal({
       // If client selected and callback provided, create work item directly
       if (onWorkItemCreated && clientId) {
         const clientObj = clients.find(c => c.id === clientId);
-        const itemRate = Number(rate) || (clientObj ? clientObj.defaultRate : 0);
+        const isMonthly = clientObj?.paymentBasis === 'monthly_retainer' || Boolean(clientObj?.monthlyRetainerAmount && clientObj.monthlyRetainerAmount > 0);
+        const itemRate = isMonthly ? 0 : (Number(rate) || (clientObj ? clientObj.defaultRate : 0));
         const newWork: WorkItem = {
           id: generateUUID(),
           clientId: clientId,
@@ -452,7 +453,10 @@ export default function GoogleDriveUploadModal({
                       onChange={(e) => {
                         setClientId(e.target.value);
                         const cl = clients.find(c => c.id === e.target.value);
-                        if (cl && !rate) setRate(String(cl.defaultRate));
+                        if (cl && !rate) {
+                          const isMonthly = cl.paymentBasis === 'monthly_retainer' || Boolean(cl.monthlyRetainerAmount && cl.monthlyRetainerAmount > 0);
+                          setRate(isMonthly ? '0' : String(cl.defaultRate));
+                        }
                       }}
                       className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:border-indigo-500"
                     >

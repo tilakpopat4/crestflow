@@ -110,38 +110,61 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
           // If item is invoiced, update the corresponding invoice reel details as well
           if (existing.status === 'Invoiced' && existing.invoiceId) {
             const invoice = invoices.find(inv => inv.id === existing.invoiceId);
-            if (invoice && invoice.reels) {
-              let replaced = false;
-              const updatedReels = invoice.reels.map((reel: any) => {
-                const isMatch =
-                  (reel.workItemId && reel.workItemId === existing.id) ||
-                  (!replaced && reel.title === existing.description && reel.quantity === existing.quantity && reel.rate === existing.rate);
-                if (isMatch && !replaced) {
-                  replaced = true;
-                  return {
-                    ...reel,
-                    workItemId: existing.id,
-                    title: formData.description,
-                    quantity: selectedQty,
-                    rate: selectedRate,
-                    subClientId: selectedSub ? selectedSub.id : undefined,
-                    subClientName: selectedSub ? selectedSub.name : undefined,
-                    videoUrl: trimmedVideoUrl
-                  };
+            if (invoice) {
+              if (invoice.invoiceType === 'monthly_retainer') {
+                if (invoice.deliverables && invoice.deliverables.length > 0) {
+                  const updatedDeliverables = invoice.deliverables.map((deliv: any) => {
+                    const isMatch = deliv.id === existing.id || deliv.workItemId === existing.id;
+                    if (isMatch) {
+                      return {
+                        ...deliv,
+                        title: formData.description,
+                        quantity: selectedQty,
+                        subClientId: selectedSub ? selectedSub.id : undefined,
+                        subClientName: selectedSub ? selectedSub.name : undefined,
+                        videoUrl: trimmedVideoUrl
+                      };
+                    }
+                    return deliv;
+                  });
+                  await addOrUpdateInvoice({
+                    ...invoice,
+                    deliverables: updatedDeliverables
+                  });
                 }
-                return reel;
-              });
+              } else if (invoice.reels) {
+                let replaced = false;
+                const updatedReels = invoice.reels.map((reel: any) => {
+                  const isMatch =
+                    (reel.workItemId && reel.workItemId === existing.id) ||
+                    (!replaced && reel.title === existing.description && reel.quantity === existing.quantity && reel.rate === existing.rate);
+                  if (isMatch && !replaced) {
+                    replaced = true;
+                    return {
+                      ...reel,
+                      workItemId: existing.id,
+                      title: formData.description,
+                      quantity: selectedQty,
+                      rate: selectedRate,
+                      subClientId: selectedSub ? selectedSub.id : undefined,
+                      subClientName: selectedSub ? selectedSub.name : undefined,
+                      videoUrl: trimmedVideoUrl
+                    };
+                  }
+                  return reel;
+                });
 
-              const newSubtotal = updatedReels.reduce((sum: number, r: any) => sum + (r.quantity * r.rate), 0);
-              const discount = invoice.discountAmount || 0;
-              const extraCost = invoice.extraCostAmount || 0;
-              const newTotal = Math.max(0, newSubtotal - discount + extraCost);
+                const newSubtotal = updatedReels.reduce((sum: number, r: any) => sum + (r.quantity * r.rate), 0);
+                const discount = invoice.discountAmount || 0;
+                const extraCost = invoice.extraCostAmount || 0;
+                const newTotal = Math.max(0, newSubtotal - discount + extraCost);
 
-              await addOrUpdateInvoice({
-                ...invoice,
-                reels: updatedReels,
-                totalAmount: newTotal
-              });
+                await addOrUpdateInvoice({
+                  ...invoice,
+                  reels: updatedReels,
+                  totalAmount: newTotal
+                });
+              }
             }
           }
 

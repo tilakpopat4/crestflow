@@ -115,13 +115,18 @@ export default function BulkEditWorkModal({
           currentSubClientName = chosenSub ? chosenSub.name : undefined;
         }
 
+        const isMonthlyClient = clientObj?.paymentBasis === 'monthly_retainer' || Boolean(clientObj?.monthlyRetainerAmount && clientObj.monthlyRetainerAmount > 0);
+
         let rate = item.rate;
         if (updateRate) {
           if (rateMode === 'clientDefault') {
-            rate = clientObj?.defaultRate ?? item.rate;
+            rate = isMonthlyClient ? 0 : (clientObj?.defaultRate ?? item.rate);
           } else {
             rate = Number(rateValue);
           }
+        } else if (updateClient && isMonthlyClient) {
+          // If reassigned to a monthly retainer client without explicit rate update, default reel rate to 0
+          rate = 0;
         }
 
         let date = item.date;
@@ -168,7 +173,7 @@ export default function BulkEditWorkModal({
         };
         updatedWorkItems.push(updatedWorkItem);
 
-        // If this work item is already invoiced, update the corresponding invoice reel & totals!
+        // If this work item is already invoiced, update the corresponding invoice reel/deliverable & totals!
         if (item.status === 'Invoiced' && item.invoiceId && invoiceMap.has(item.invoiceId)) {
           const inv = invoiceMap.get(item.invoiceId)!;
 
@@ -177,37 +182,59 @@ export default function BulkEditWorkModal({
             inv.clientName = clientObj.name;
           }
 
-          let matched = false;
-          inv.reels = (inv.reels || []).map((reel: Reel) => {
-            const isMatch =
-              (reel.workItemId && reel.workItemId === item.id) ||
-              reel.id === item.id ||
-              (!matched &&
-                reel.title === item.description &&
-                reel.quantity === item.quantity &&
-                reel.rate === item.rate);
+          const isMonthlyInvoice = inv.invoiceType === 'monthly_retainer';
 
-            if (isMatch && !matched) {
-              matched = true;
-              return {
-                ...reel,
-                workItemId: item.id,
-                title: description,
-                quantity,
-                rate,
-                videoUrl,
-                subClientId: currentSubClientId,
-                subClientName: currentSubClientName
-              };
+          if (isMonthlyInvoice) {
+            // For monthly retainer invoices, update the deliverables snapshot without changing the retainer package fee
+            if (inv.deliverables && inv.deliverables.length > 0) {
+              inv.deliverables = inv.deliverables.map((deliv: any) => {
+                const isMatch = deliv.id === item.id || deliv.workItemId === item.id;
+                if (isMatch) {
+                  return {
+                    ...deliv,
+                    title: description,
+                    quantity,
+                    videoUrl,
+                    subClientId: currentSubClientId,
+                    subClientName: currentSubClientName
+                  };
+                }
+                return deliv;
+              });
             }
-            return reel;
-          });
+          } else {
+            let matched = false;
+            inv.reels = (inv.reels || []).map((reel: Reel) => {
+              const isMatch =
+                (reel.workItemId && reel.workItemId === item.id) ||
+                reel.id === item.id ||
+                (!matched &&
+                  reel.title === item.description &&
+                  reel.quantity === item.quantity &&
+                  reel.rate === item.rate);
 
-          // Recalculate invoice totals
-          const subtotal = inv.reels.reduce((sum, r) => sum + (r.quantity * r.rate), 0);
-          const discount = inv.discountAmount || 0;
-          const extraCost = inv.extraCostAmount || 0;
-          inv.totalAmount = Math.max(0, subtotal - discount + extraCost);
+              if (isMatch && !matched) {
+                matched = true;
+                return {
+                  ...reel,
+                  workItemId: item.id,
+                  title: description,
+                  quantity,
+                  rate,
+                  videoUrl,
+                  subClientId: currentSubClientId,
+                  subClientName: currentSubClientName
+                };
+              }
+              return reel;
+            });
+
+            // Recalculate invoice totals
+            const subtotal = inv.reels.reduce((sum, r) => sum + (r.quantity * r.rate), 0);
+            const discount = inv.discountAmount || 0;
+            const extraCost = inv.extraCostAmount || 0;
+            inv.totalAmount = Math.max(0, subtotal - discount + extraCost);
+          }
         }
       }
 
@@ -310,6 +337,12 @@ export default function BulkEditWorkModal({
                     <span>Reset to each client's default rate</span>
                   </label>
                 </div>
+
+                {rateMode === 'clientDefault' && (
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Applies each client's standard per-reel rate. For monthly basis clients, reel rate is set to ₹0 because deliverables are covered by the monthly retainer.
+                  </p>
+                )}
 
                 {rateMode === 'fixed' && (
                   <div className="relative max-w-xs">
