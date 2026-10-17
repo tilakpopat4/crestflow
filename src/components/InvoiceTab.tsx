@@ -491,77 +491,90 @@ export function renderDocumentHtml(params: {
     // Header HTML
     const pageHeaderHtml = isFirstPage
       ? `
-        <div style="border-bottom: 2px solid #0f172a; padding-bottom: 10px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-start; width: 100%; box-sizing: border-box;">
-          <div style="width: 60%;">
-            <div style="font-size: 20px; font-weight: 800; text-transform: uppercase; color: #0f172a; letter-spacing: -0.3px; line-height: 1.2;">
-              ${senderName}
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 14px; border-bottom: 1.5px solid #0f172a; width: 100%; box-sizing: border-box;">
+          <div style="display: flex; align-items: center; gap: 12px; max-width: 62%;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0;">
+              <rect width="512" height="512" rx="112" fill="#4f46e5" />
+              <g>
+                <rect x="116" y="186" width="280" height="190" rx="28" fill="#ffffff" />
+                <path d="M126 146 L186 106 H386 L326 146 Z" fill="#e0e7ff" />
+                <path d="M146 146 h220 v20 H146 z" fill="#ffffff" />
+                <path d="M190 106 L170 146" stroke="#4338ca" stroke-width="8" stroke-linecap="round" />
+                <path d="M250 106 L230 146" stroke="#4338ca" stroke-width="8" stroke-linecap="round" />
+                <path d="M310 106 L290 146" stroke="#4338ca" stroke-width="8" stroke-linecap="round" />
+                <circle cx="256" cy="281" r="44" fill="#4f46e5" />
+                <polygon points="246,261 278,281 246,301" fill="#ffffff" />
+              </g>
+            </svg>
+            <div>
+              <div style="font-size: 18px; font-weight: 700; color: #0f172a; letter-spacing: -0.2px; line-height: 1.2;">
+                ${senderName}
+              </div>
+              <div style="font-size: 10px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.6px; margin-top: 2px;">
+                ${senderTitle}
+              </div>
+              ${senderPhone ? `<div style="font-size: 10.5px; color: #64748b; margin-top: 2px; font-weight: 500;">Direct: <span style="color: #334155; font-weight: 600;">${senderPhone}</span></div>` : ''}
             </div>
-            <div style="font-size: 10.5px; font-weight: 700; color: #4f46e5; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 3px;">
-              ${senderTitle}
-            </div>
-            ${senderPhone ? `<div style="font-size: 11.5px; font-weight: 500; color: #475569; margin-top: 4px;">PHONE: ${senderPhone}</div>` : ''}
           </div>
-          <div style="width: 38%; text-align: right;">
-            <div style="font-size: 24px; font-weight: 900; color: #0f172a; text-transform: uppercase; letter-spacing: -0.5px; line-height: 1;">
+          <div style="text-align: right;">
+            <div style="font-size: 20px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.8px; line-height: 1;">
               ${isWorkSummary ? 'WORK SUMMARY' : 'INVOICE'}
             </div>
-            <div style="font-size: 12px; font-family: monospace; font-weight: 700; color: #475569; margin-top: 5px;">
-              #${isWorkSummary ? `WRK-${params.invoice.id.substring(0, 8).toUpperCase()}` : invoiceNo}
+            <div style="display: inline-block; background: #f1f5f9; border-radius: 4px; padding: 2.5px 7px; margin-top: 5px;">
+              <span style="font-size: 11px; font-family: monospace; font-weight: 700; color: #334155;">#${isWorkSummary ? `WRK-${params.invoice.id.substring(0, 8).toUpperCase()}` : invoiceNo}</span>
+            </div>
+            <div style="font-size: 10.5px; color: #64748b; margin-top: 4px;">
+              Issue Date: <span style="font-weight: 600; color: #0f172a;">${issueDateStr}</span>
             </div>
           </div>
         </div>
       `
       : `
-        <div style="border-bottom: 2px solid #0f172a; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box;">
+        <div style="border-bottom: 1.5px solid #0f172a; padding-bottom: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box;">
           <div>
-            <span style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase;">${senderName}</span>
-            <span style="font-size: 11px; color: #64748b; margin-left: 10px; font-family: monospace; font-weight: 600;">#${isWorkSummary ? `WRK-${params.invoice.id.substring(0, 8).toUpperCase()}` : invoiceNo} (Continued)</span>
+            <span style="font-size: 13px; font-weight: 700; color: #0f172a;">${senderName}</span>
+            <span style="font-size: 10.5px; color: #64748b; margin-left: 8px; font-family: monospace; font-weight: 600;">#${isWorkSummary ? `WRK-${params.invoice.id.substring(0, 8).toUpperCase()}` : invoiceNo} (Cont.)</span>
           </div>
-          <div style="font-size: 11px; font-weight: 700; color: #64748b;">
+          <div style="font-size: 10px; font-weight: 600; color: #64748b;">
             Page ${pageIdx + 1} of ${totalPages}
           </div>
         </div>
       `;
 
-    // Overview Card (Page 1 only)
+    // Overview Section (Page 1 only) - Structured, clean metadata card
     const pageOverviewHtml = isFirstPage
       ? `
-        <div style="display: flex; gap: 12px; margin-bottom: 12px; width: 100%; box-sizing: border-box;">
-          <!-- Prepared / Billed To Card -->
-          <div style="flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; box-sizing: border-box;">
-            <span style="font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: #94a3b8; display: block; margin-bottom: 3px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-top: 12px; margin-bottom: 12px; width: 100%; box-sizing: border-box; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px;">
+          <div style="width: 50%;">
+            <div style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #64748b; margin-bottom: 3px;">
               ${isWorkSummary ? 'PREPARED FOR' : 'BILLED TO'}
-            </span>
-            <div style="font-size: 15px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">
+            </div>
+            <div style="font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 2px;">
               ${clientName}
             </div>
-            ${clientPhone ? `<div style="font-size: 11.5px; color: #475569; line-height: 1.35;">Ph: ${clientPhone}</div>` : ''}
-            ${clientEmail ? `<div style="font-size: 11.5px; color: #475569; line-height: 1.35;">Email: ${clientEmail}</div>` : ''}
+            ${clientPhone ? `<div style="font-size: 10.5px; color: #475569; line-height: 1.35;">Ph: ${clientPhone}</div>` : ''}
+            ${clientEmail ? `<div style="font-size: 10.5px; color: #475569; line-height: 1.35;">Email: ${clientEmail}</div>` : ''}
           </div>
 
-          <!-- Overview Card -->
-          <div style="flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; box-sizing: border-box;">
-            <span style="font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: #94a3b8; display: block; margin-bottom: 3px;">
-              ${isWorkSummary ? 'PERIOD OVERVIEW' : 'INVOICE OVERVIEW'}
-            </span>
-            <table style="width: 100%; font-size: 11.5px; color: #334155; border-collapse: collapse;">
+          <div style="width: 48%; text-align: right;">
+            <table style="margin-left: auto; font-size: 10.5px; color: #334155; border-collapse: collapse;">
               <tr>
-                <td style="color: #64748b; padding: 1.5px 0; font-weight: 500;">Issue Date:</td>
-                <td style="text-align: right; font-weight: 700; color: #0f172a; padding: 1.5px 0;">${issueDateStr}</td>
-              </tr>
-              <tr>
-                <td style="color: #64748b; padding: 1.5px 0; font-weight: 500;">${isWorkSummary ? 'Work Period:' : 'Billing Period:'}</td>
-                <td style="text-align: right; font-weight: 600; color: #1e293b; padding: 1.5px 0;">${billingPeriodStr}</td>
+                <td style="color: #64748b; padding: 1.5px 8px 1.5px 0; font-weight: 500; text-align: right;">${isWorkSummary ? 'Work Period:' : 'Billing Period:'}</td>
+                <td style="font-weight: 600; color: #0f172a; padding: 1.5px 0; text-align: right;">${billingPeriodStr}</td>
               </tr>
               ${isWorkSummary ? `
               <tr>
-                <td style="color: #64748b; padding: 1.5px 0; font-weight: 500;">Total Deliverables:</td>
-                <td style="text-align: right; font-weight: 700; color: #4f46e5; padding: 1.5px 0;">${totalDeliverablesCount} Item(s)</td>
+                <td style="color: #64748b; padding: 1.5px 8px 1.5px 0; font-weight: 500; text-align: right;">Total Deliverables:</td>
+                <td style="font-weight: 700; color: #0f172a; padding: 1.5px 0; text-align: right;">${totalDeliverablesCount} Items</td>
               </tr>
               ` : `
               <tr>
-                <td style="color: #64748b; padding: 1.5px 0; font-weight: 500;">Last Payment Date:</td>
-                <td style="text-align: right; font-weight: 600; color: #1e293b; padding: 1.5px 0;">${lastPaymentStr}</td>
+                <td style="color: #64748b; padding: 1.5px 8px 1.5px 0; font-weight: 500; text-align: right;">Payment Terms:</td>
+                <td style="font-weight: 600; color: #0f172a; padding: 1.5px 0; text-align: right;">Due on Receipt</td>
+              </tr>
+              <tr>
+                <td style="color: #64748b; padding: 1.5px 8px 1.5px 0; font-weight: 500; text-align: right;">Settlement:</td>
+                <td style="font-weight: 500; color: #475569; padding: 1.5px 0; text-align: right;">UPI / Bank Transfer</td>
               </tr>
               `}
             </table>
@@ -576,19 +589,19 @@ export function renderDocumentHtml(params: {
       tableRowsHtml = pageItems.map((item, idx) => {
         const itemIdx = itemOffset + idx;
         const subClientTag = item.subClientName
-          ? `<span style="display: inline-block; font-size: 9.5px; font-weight: 600; color: #475569; background-color: #f1f5f9; padding: 1px 5px; border-radius: 3px; margin-left: 6px; vertical-align: middle;">${item.subClientName}</span>`
+          ? `<span style="font-size: 9.5px; color: #64748b; font-weight: 500; margin-left: 6px;">(${item.subClientName})</span>`
           : '';
         const videoLink = item.videoUrl
-          ? `<div style="margin-top: 2px;"><a href="${item.videoUrl}" target="_blank" rel="noopener noreferrer" style="color: #4f46e5; text-decoration: none; font-size: 10.5px; font-weight: 600;">View Deliverable &nearr;</a></div>`
+          ? `<div style="margin-top: 1.5px;"><a href="${item.videoUrl}" target="_blank" rel="noopener noreferrer" style="color: #4f46e5; text-decoration: underline; text-underline-offset: 2px; font-size: 10px; font-weight: 500; display: inline-flex; align-items: center; gap: 2px;">View Asset &nearr;</a></div>`
           : '';
         return `
-          <tr style="border-bottom: 1px solid #e2e8f0;">
-            <td style="padding: 6.5px 10px; font-size: 11.5px; color: #64748b; text-align: center; font-weight: 600;">${String(itemIdx + 1).padStart(2, '0')}</td>
-            <td style="padding: 6.5px 12px; font-size: 11.5px; color: #0f172a; font-weight: 600; line-height: 1.35;">
-              <span>${item.title || 'Video Editing Work Item'}</span>${subClientTag}
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 6px 8px; font-size: 10px; color: #94a3b8; text-align: center; font-weight: 600; font-family: monospace;">${String(itemIdx + 1).padStart(2, '0')}</td>
+            <td style="padding: 6px 10px; font-size: 11px; color: #0f172a; line-height: 1.35;">
+              <span style="font-weight: 600;">${item.title || 'Creative Deliverable'}</span>${subClientTag}
               ${videoLink}
             </td>
-            <td style="padding: 6.5px 10px; font-size: 11.5px; color: #334155; text-align: center; font-weight: 700;">${item.quantity || 1}</td>
+            <td style="padding: 6px 8px; font-size: 10.5px; color: #334155; text-align: center; font-weight: 600;">${item.quantity || 1}</td>
           </tr>
         `;
       }).join('');
@@ -597,20 +610,20 @@ export function renderDocumentHtml(params: {
         const itemIdx = itemOffset + idx;
         const dateStr = d.date ? new Date(d.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '—';
         const subClientTag = d.subClientName
-          ? `<span style="display: inline-block; font-size: 9.5px; font-weight: 600; color: #475569; background-color: #f1f5f9; padding: 1px 5px; border-radius: 3px; margin-left: 6px; vertical-align: middle;">${d.subClientName}</span>`
+          ? `<span style="font-size: 9.5px; color: #64748b; font-weight: 500; margin-left: 6px;">(${d.subClientName})</span>`
           : '';
         const videoLink = d.videoUrl
-          ? `<div style="margin-top: 2px;"><a href="${d.videoUrl}" target="_blank" rel="noopener noreferrer" style="color: #4f46e5; text-decoration: none; font-size: 10.5px; font-weight: 600;">View Deliverable &nearr;</a></div>`
+          ? `<div style="margin-top: 1.5px;"><a href="${d.videoUrl}" target="_blank" rel="noopener noreferrer" style="color: #4f46e5; text-decoration: underline; text-underline-offset: 2px; font-size: 10px; font-weight: 500; display: inline-flex; align-items: center; gap: 2px;">View Asset &nearr;</a></div>`
           : '';
         return `
-          <tr style="border-bottom: 1px solid #e2e8f0;">
-            <td style="padding: 6.5px 10px; font-size: 11.5px; color: #64748b; text-align: center; font-weight: 600;">${String(itemIdx + 1).padStart(2, '0')}</td>
-            <td style="padding: 6.5px 10px; font-size: 11px; color: #64748b; text-align: center; white-space: nowrap;">${dateStr}</td>
-            <td style="padding: 6.5px 12px; font-size: 11.5px; color: #0f172a; font-weight: 600; line-height: 1.35;">
-              <span>${d.title || 'Video Editing Deliverable'}</span>${subClientTag}
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 6px 8px; font-size: 10px; color: #94a3b8; text-align: center; font-weight: 600; font-family: monospace;">${String(itemIdx + 1).padStart(2, '0')}</td>
+            <td style="padding: 6px 8px; font-size: 10px; color: #64748b; text-align: left; white-space: nowrap;">${dateStr}</td>
+            <td style="padding: 6px 10px; font-size: 11px; color: #0f172a; line-height: 1.35;">
+              <span style="font-weight: 600;">${d.title || 'Creative Deliverable'}</span>${subClientTag}
               ${videoLink}
             </td>
-            <td style="padding: 6.5px 10px; font-size: 11.5px; color: #334155; text-align: center; font-weight: 700;">${d.quantity || 1}</td>
+            <td style="padding: 6px 8px; font-size: 10.5px; color: #334155; text-align: center; font-weight: 600;">${d.quantity || 1}</td>
           </tr>
         `;
       }).join('');
@@ -618,35 +631,35 @@ export function renderDocumentHtml(params: {
       tableRowsHtml = pageItems.map((r, idx) => {
         const itemIdx = itemOffset + idx;
         const subClientTag = r.subClientName
-          ? `<span style="display: inline-block; font-size: 9.5px; font-weight: 600; color: #475569; background-color: #f1f5f9; padding: 1px 5px; border-radius: 3px; margin-left: 6px; vertical-align: middle;">${r.subClientName}</span>`
+          ? `<span style="font-size: 9.5px; color: #64748b; font-weight: 500; margin-left: 6px;">(${r.subClientName})</span>`
           : '';
         const videoLink = r.videoUrl
-          ? `<div style="margin-top: 2px;"><a href="${r.videoUrl}" target="_blank" rel="noopener noreferrer" style="color: #4f46e5; text-decoration: none; font-size: 10.5px; font-weight: 600;">View Deliverable &nearr;</a></div>`
+          ? `<div style="margin-top: 1.5px;"><a href="${r.videoUrl}" target="_blank" rel="noopener noreferrer" style="color: #4f46e5; text-decoration: underline; text-underline-offset: 2px; font-size: 10px; font-weight: 500; display: inline-flex; align-items: center; gap: 2px;">View Asset &nearr;</a></div>`
           : '';
         return `
-          <tr style="border-bottom: 1px solid #e2e8f0;">
-            <td style="padding: 6.5px 10px; font-size: 11.5px; color: #64748b; text-align: center; font-weight: 600;">${String(itemIdx + 1).padStart(2, '0')}</td>
-            <td style="padding: 6.5px 12px; font-size: 11.5px; color: #0f172a; font-weight: 600; line-height: 1.35;">
-              <span>${r.title || 'Video Editing Work Item'}</span>${subClientTag}
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 6px 8px; font-size: 10px; color: #94a3b8; text-align: center; font-weight: 600; font-family: monospace;">${String(itemIdx + 1).padStart(2, '0')}</td>
+            <td style="padding: 6px 10px; font-size: 11px; color: #0f172a; line-height: 1.35;">
+              <span style="font-weight: 600;">${r.title || 'Creative Service'}</span>${subClientTag}
               ${videoLink}
             </td>
-            <td style="padding: 6.5px 10px; font-size: 11.5px; color: #334155; text-align: center;">${r.quantity}</td>
-            <td style="padding: 6.5px 10px; font-size: 11.5px; color: #334155; text-align: right;">₹${(r.rate || 0).toLocaleString('en-IN')}</td>
-            <td style="padding: 6.5px 10px; font-size: 11.5px; color: #0f172a; font-weight: 700; text-align: right;">₹${((r.quantity || 1) * (r.rate || 0)).toLocaleString('en-IN')}</td>
+            <td style="padding: 6px 8px; font-size: 10.5px; color: #334155; text-align: center; font-weight: 600;">${r.quantity}</td>
+            <td style="padding: 6px 8px; font-size: 10.5px; color: #475569; text-align: right; font-variant-numeric: tabular-nums;">₹${(r.rate || 0).toLocaleString('en-IN')}</td>
+            <td style="padding: 6px 8px; font-size: 11px; color: #0f172a; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums;">₹${((r.quantity || 1) * (r.rate || 0)).toLocaleString('en-IN')}</td>
           </tr>
         `;
       }).join('');
     }
 
-    // Table Header HTML
+    // Table Header HTML - Professional hairline typography
     const tableHeaderHtml = isWorkSummary
       ? `
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 8px; box-sizing: border-box;">
+        <table style="width: 100%; border-collapse: collapse; margin-top: 6px; margin-bottom: 8px; box-sizing: border-box;">
           <thead>
-            <tr style="background-color: #0f172a; color: #ffffff;">
-              <th style="padding: 7px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; width: 36px; border-top-left-radius: 6px;">#</th>
-              <th style="padding: 7px 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: left;">Work Done / Deliverable Description</th>
-              <th style="padding: 7px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; width: 60px; border-top-right-radius: 6px;">Qty</th>
+            <tr style="border-top: 1.5px solid #0f172a; border-bottom: 1px solid #cbd5e1; background: #f8fafc;">
+              <th style="padding: 6px 8px; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #475569; text-align: center; width: 32px;">#</th>
+              <th style="padding: 6px 10px; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #475569; text-align: left;">Deliverable Description</th>
+              <th style="padding: 6px 8px; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #475569; text-align: center; width: 44px;">Qty</th>
             </tr>
           </thead>
           <tbody>
@@ -656,13 +669,13 @@ export function renderDocumentHtml(params: {
       `
       : isMonthlyRetainer
       ? `
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 8px; box-sizing: border-box;">
+        <table style="width: 100%; border-collapse: collapse; margin-top: 6px; margin-bottom: 8px; box-sizing: border-box;">
           <thead>
-            <tr style="background-color: #0f172a; color: #ffffff;">
-              <th style="padding: 7px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; width: 36px; border-top-left-radius: 6px;">#</th>
-              <th style="padding: 7px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; width: 75px;">Date</th>
-              <th style="padding: 7px 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: left;">Work Done / Deliverable Description</th>
-              <th style="padding: 7px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; width: 50px; border-top-right-radius: 6px;">Qty</th>
+            <tr style="border-top: 1.5px solid #0f172a; border-bottom: 1px solid #cbd5e1; background: #f8fafc;">
+              <th style="padding: 6px 8px; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #475569; text-align: center; width: 32px;">#</th>
+              <th style="padding: 6px 8px; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #475569; text-align: left; width: 72px;">Date</th>
+              <th style="padding: 6px 10px; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #475569; text-align: left;">Deliverable Description</th>
+              <th style="padding: 6px 8px; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #475569; text-align: center; width: 44px;">Qty</th>
             </tr>
           </thead>
           <tbody>
@@ -671,14 +684,14 @@ export function renderDocumentHtml(params: {
         </table>
       `
       : `
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 8px; box-sizing: border-box;">
+        <table style="width: 100%; border-collapse: collapse; margin-top: 6px; margin-bottom: 8px; box-sizing: border-box;">
           <thead>
-            <tr style="background-color: #0f172a; color: #ffffff;">
-              <th style="padding: 7px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; width: 36px; border-top-left-radius: 6px;">#</th>
-              <th style="padding: 7px 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: left;">Item Description / Work Log</th>
-              <th style="padding: 7px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; width: 45px;">Qty</th>
-              <th style="padding: 7px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: right; width: 85px;">Rate</th>
-              <th style="padding: 7px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; text-align: right; width: 100px; border-top-right-radius: 6px;">Total</th>
+            <tr style="border-top: 1.5px solid #0f172a; border-bottom: 1px solid #cbd5e1; background: #f8fafc;">
+              <th style="padding: 6px 8px; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #475569; text-align: center; width: 32px;">#</th>
+              <th style="padding: 6px 10px; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #475569; text-align: left;">Item Description / Service</th>
+              <th style="padding: 6px 8px; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #475569; text-align: center; width: 44px;">Qty</th>
+              <th style="padding: 6px 8px; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #475569; text-align: right; width: 80px;">Rate</th>
+              <th style="padding: 6px 8px; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #475569; text-align: right; width: 90px;">Total</th>
             </tr>
           </thead>
           <tbody>
@@ -692,36 +705,20 @@ export function renderDocumentHtml(params: {
     if (isLastPage) {
       if (isWorkSummary) {
         bottomSectionHtml = `
-          <!-- Work Summary Banner -->
-          <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
-            <div>
-              <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: #4f46e5;">DELIVERABLES SUMMARY</div>
-              <div style="font-size: 11.5px; color: #475569; margin-top: 2px;">
-                Completed for <strong>${clientName}</strong> across cycle (${billingPeriodStr})
-              </div>
-            </div>
-            <div style="text-align: right;">
-              <span style="display: inline-block; background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; font-size: 10.5px; font-weight: 600; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;">
-                Completed (${totalDeliverablesCount} items)
-              </span>
-            </div>
-          </div>
-
-          <!-- Note & Verification Section -->
-          <div style="border-top: 2px solid #0f172a; padding-top: 12px; display: flex; justify-content: space-between; align-items: flex-start; width: 100%; box-sizing: border-box;">
+          <div style="border-top: 1.5px solid #0f172a; padding-top: 12px; display: flex; justify-content: space-between; align-items: flex-start; width: 100%; box-sizing: border-box;">
             <div style="width: 65%;">
-              <div style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.8px; color: #0f172a; margin-bottom: 3px;">
-                VERIFICATION & CONFIRMATION
+              <div style="font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #64748b; margin-bottom: 3px;">
+                CONFIRMATION & DELIVERY VERIFICATION
               </div>
-              <p style="font-size: 10.5px; color: #64748b; line-height: 1.45; margin: 0;">
-                This statement confirms completion and delivery of the listed creative deliverables for the specified date period.
+              <p style="font-size: 10px; color: #64748b; line-height: 1.45; margin: 0;">
+                This statement documents completion and official handoff of the creative deliverables listed above for the billing period (${billingPeriodStr}).
               </p>
             </div>
             <div style="width: 30%; text-align: right;">
-              <div style="font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: #94a3b8;">
-                PREPARED BY
+              <div style="font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #64748b;">
+                ISSUED BY
               </div>
-              <div style="font-size: 12.5px; font-weight: 800; color: #0f172a; margin-top: 2px;">
+              <div style="font-size: 13px; font-weight: 700; color: #0f172a; margin-top: 2px;">
                 ${senderName}
               </div>
             </div>
@@ -729,133 +726,126 @@ export function renderDocumentHtml(params: {
         `;
       } else {
         bottomSectionHtml = `
-          ${isMonthlyRetainer ? `
-          <!-- Monthly Package Deliverables Banner -->
-          <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
-            <div>
-              <div style="font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: #4f46e5;">MONTHLY RETAINER PACKAGE</div>
-              <div style="font-size: 11px; color: #475569; margin-top: 1px;">
-                Fixed retainer fee covering all listed creative deliverables across billing cycle (${billingPeriodStr})
+          <div style="border-top: 1.5px solid #0f172a; padding-top: 12px; display: flex; justify-content: space-between; align-items: flex-start; width: 100%; box-sizing: border-box;">
+            <!-- Left: Payment Instructions & QR -->
+            <div style="width: 58%;">
+              <div style="font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #64748b; margin-bottom: 6px;">
+                PAYMENT SETTLEMENT DETAILS
+              </div>
+              <div style="display: flex; gap: 10px; align-items: flex-start; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px;">
+                <!-- Table of payment credentials -->
+                <div style="flex: 1;">
+                  <table style="width: 100%; border-collapse: collapse; font-size: 10px; line-height: 1.4;">
+                    <tr>
+                      <td style="color: #64748b; font-weight: 500; width: 75px; padding: 1px 0;">Method:</td>
+                      <td style="font-weight: 600; color: #0f172a; padding: 1px 0;">UPI / Instant Transfer</td>
+                    </tr>
+                    <tr>
+                      <td style="color: #64748b; font-weight: 500; padding: 1px 0;">UPI ID:</td>
+                      <td style="font-family: monospace; font-weight: 700; color: #0f172a; padding: 1px 0;">${upiId}</td>
+                    </tr>
+                    <tr>
+                      <td style="color: #64748b; font-weight: 500; padding: 1px 0;">Beneficiary:</td>
+                      <td style="font-weight: 600; color: #0f172a; padding: 1px 0;">${senderName}</td>
+                    </tr>
+                    ${params.profile?.accountNumber ? `
+                    <tr>
+                      <td style="color: #64748b; font-weight: 500; padding: 1px 0;">Bank Account:</td>
+                      <td style="font-family: monospace; font-weight: 600; color: #0f172a; padding: 1px 0;">${params.profile.accountNumber}</td>
+                    </tr>
+                    <tr>
+                      <td style="color: #64748b; font-weight: 500; padding: 1px 0;">IFSC Code:</td>
+                      <td style="font-weight: 600; color: #0f172a; padding: 1px 0;">${params.profile.ifscCode || ''} ${params.profile.bankName ? `(${params.profile.bankName})` : ''}</td>
+                    </tr>
+                    ` : ''}
+                  </table>
+                  <div style="font-size: 9px; color: #64748b; font-style: italic; margin-top: 5px; border-top: 1px solid #e2e8f0; padding-top: 4px;">
+                    Please remit payment within 7 days. Thank you for your partnership.
+                  </div>
+                </div>
+
+                <!-- QR code box -->
+                <div style="width: 80px; text-align: center; flex-shrink: 0;">
+                  <div style="border: 1px solid #cbd5e1; border-radius: 4px; padding: 3px; background: #ffffff; display: inline-block;">
+                    <div id="pdf-qr-wrapper" style="width: 72px; height: 72px; margin: 0 auto; background: #ffffff;">
+                      ${params.qrDataUrl ? `<img src="${params.qrDataUrl}" style="width: 72px; height: 72px; border-radius: 2px; display: block; margin: 0;" alt="Scan to Pay" />` : '<div style="width: 72px; height: 72px; line-height: 72px; font-size: 8px; color: #94a3b8; text-align: center;">Scan to Pay</div>'}
+                    </div>
+                    <div style="font-size: 7px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #64748b; margin-top: 2px; text-align: center;">
+                      Scan via UPI
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-            <div style="text-align: right;">
-              <span style="display: inline-block; background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; font-size: 9.5px; font-weight: 600; padding: 2px 7px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;">
-                ${deliverablesList.length} Deliverable(s) Included
-              </span>
-            </div>
-          </div>
-          ` : ''}
 
-          <!-- Subtotal & Total Due -->
-          <div style="display: flex; justify-content: flex-end; margin-bottom: 10px; width: 100%; box-sizing: border-box;">
-            <div style="width: 270px;">
-              <table style="width: 100%; font-size: 11px; color: #475569; margin-bottom: 4px;">
+            <!-- Right: Totals statement -->
+            <div style="width: 38%;">
+              <table style="width: 100%; border-collapse: collapse; font-size: 10.5px;">
                 <tr>
-                  <td style="padding: 2px 0; font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: #64748b;">
-                    ${isMonthlyRetainer ? 'Monthly Retainer' : 'Subtotal'}
+                  <td style="padding: 2.5px 0; color: #64748b; font-weight: 500;">
+                    ${isMonthlyRetainer ? 'Monthly Retainer Fee' : 'Subtotal'}
                   </td>
-                  <td style="padding: 2px 0; text-align: right; font-weight: 700; color: #0f172a;">₹${baseRetainerAmount.toLocaleString('en-IN')}</td>
+                  <td style="padding: 2.5px 0; text-align: right; font-weight: 600; color: #0f172a; font-variant-numeric: tabular-nums;">
+                    ₹${baseRetainerAmount.toLocaleString('en-IN')}
+                  </td>
                 </tr>
+                ${isMonthlyRetainer ? `
+                <tr>
+                  <td colspan="2" style="padding-bottom: 4px; font-size: 9px; color: #64748b; line-height: 1.25;">
+                    Covers all ${deliverablesList.length} deliverable(s) listed in this billing period
+                  </td>
+                </tr>
+                ` : ''}
                 ${extraCost > 0 ? `
                 <tr>
-                  <td style="padding: 2px 0; font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: #0f172a;">
-                    Extra Cost (${params.invoice.extraCostDescription || 'Additional Expenses'})
+                  <td style="padding: 2.5px 0; color: #0f172a; font-weight: 500;">
+                    Extra Expenses (${params.invoice.extraCostDescription || 'Additional'})
                   </td>
-                  <td style="padding: 2px 0; text-align: right; font-weight: 700; color: #0f172a;">
+                  <td style="padding: 2.5px 0; text-align: right; font-weight: 600; color: #0f172a; font-variant-numeric: tabular-nums;">
                     +₹${extraCost.toLocaleString('en-IN')}
                   </td>
                 </tr>
                 ` : ''}
                 ${discount > 0 ? `
                 <tr>
-                  <td style="padding: 2px 0; font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: #e11d48;">
+                  <td style="padding: 2.5px 0; color: #dc2626; font-weight: 500;">
                     Deduction (${params.invoice.discountDescription || 'Discount'})
                   </td>
-                  <td style="padding: 2px 0; text-align: right; font-weight: 700; color: #e11d48;">
+                  <td style="padding: 2.5px 0; text-align: right; font-weight: 600; color: #dc2626; font-variant-numeric: tabular-nums;">
                     -₹${discount.toLocaleString('en-IN')}
                   </td>
                 </tr>
                 ` : ''}
+                <tr style="border-top: 1.5px solid #0f172a;">
+                  <td style="padding-top: 6px; font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #0f172a;">
+                    TOTAL AMOUNT DUE
+                  </td>
+                  <td style="padding-top: 6px; text-align: right; font-size: 18px; font-weight: 800; color: #0f172a; letter-spacing: -0.3px; font-variant-numeric: tabular-nums;">
+                    ₹${grandTotal.toLocaleString('en-IN')}
+                  </td>
+                </tr>
               </table>
-
-              <div style="background-color: #0f172a; color: #ffffff; padding: 8px 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                  <div style="font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: #cbd5e1;">TOTAL DUE</div>
-                  <div style="font-size: 9px; color: #94a3b8; margin-top: 1px;">Payable via UPI / Bank</div>
-                </div>
-                <div style="font-size: 19px; font-weight: 900; color: #ffffff; letter-spacing: -0.5px;">₹${grandTotal.toLocaleString('en-IN')}</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Payment Info & QR Code Section -->
-          <div style="border-top: 2px solid #0f172a; padding-top: 10px; display: flex; gap: 12px; align-items: flex-start; width: 100%; box-sizing: border-box;">
-            <div style="flex: 1;">
-              <div style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.8px; color: #0f172a; margin-bottom: 4px;">
-                PAYMENT INFORMATION
-              </div>
-              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; font-size: 11px; color: #1e293b;">
-                <table style="width: 100%; border-collapse: collapse;">
-                  <tr>
-                    <td style="padding: 2px 0; color: #64748b; font-size: 9.5px; font-weight: 700; text-transform: uppercase; width: 36%;">Payment Method:</td>
-                    <td style="padding: 2px 0; font-weight: 600; color: #0f172a;">UPI Transfer</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 2px 0; color: #64748b; font-size: 9.5px; font-weight: 700; text-transform: uppercase;">UPI ID:</td>
-                    <td style="padding: 2px 0; font-family: monospace; font-weight: 700; color: #4f46e5;">${upiId}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 2px 0; color: #64748b; font-size: 9.5px; font-weight: 700; text-transform: uppercase;">Payee Name:</td>
-                    <td style="padding: 2px 0; font-weight: 600; color: #0f172a;">${senderName}</td>
-                  </tr>
-                  ${params.profile?.accountNumber ? `
-                  <tr>
-                    <td style="padding: 2px 0; color: #64748b; font-size: 9.5px; font-weight: 700; text-transform: uppercase;">Bank Account:</td>
-                    <td style="padding: 2px 0; font-family: monospace; font-weight: 600;">${params.profile.accountNumber}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 2px 0; color: #64748b; font-size: 9.5px; font-weight: 700; text-transform: uppercase;">IFSC / Bank:</td>
-                    <td style="padding: 2px 0; font-weight: 600;">${params.profile.ifscCode || ''} ${params.profile.bankName ? `(${params.profile.bankName})` : ''}</td>
-                  </tr>
-                  ` : ''}
-                </table>
-              </div>
-              <p style="font-size: 10px; color: #64748b; font-style: italic; margin-top: 4px; margin-bottom: 0;">
-                Thank you for your business! Please process payment within 7 days of receiving this invoice statement.
-              </p>
-            </div>
-
-            <!-- QR Code Card -->
-            <div style="width: 120px; text-align: center; flex-shrink: 0;">
-              <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 6px; margin: 0 auto;">
-                <div id="pdf-qr-wrapper" style="width: 86px; height: 86px; margin: 0 auto; background: #ffffff;">
-                  ${params.qrDataUrl ? `<img src="${params.qrDataUrl}" style="width: 86px; height: 86px; border-radius: 4px; display: block; margin: 0;" alt="Scan to Pay" />` : '<div style="width: 86px; height: 86px; line-height: 86px; font-size: 10px; color: #94a3b8; text-align: center;">Scan to Pay</div>'}
-                </div>
-                <div style="font-size: 8.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-top: 3px; text-align: center;">
-                  Scan to Pay ₹${grandTotal.toLocaleString('en-IN')}
-                </div>
-              </div>
             </div>
           </div>
         `;
       }
     } else {
       bottomSectionHtml = `
-        <div style="padding: 8px 12px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; text-align: center; font-size: 10.5px; font-weight: 600; color: #64748b; margin-bottom: 8px;">
-          Continued on next page &rarr;
+        <div style="padding: 6px 12px; border-top: 1px dashed #cbd5e1; text-align: right; font-size: 10px; font-weight: 600; color: #64748b; margin-bottom: 6px;">
+          Continued on Page ${pageIdx + 2} of ${totalPages} &rarr;
         </div>
       `;
     }
 
     const pageFooterBar = `
-      <div style="margin-top: 10px; padding-top: 6px; border-top: 1px solid #e2e8f0; font-size: 8.5px; color: #94a3b8; display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box;">
-        <span>${isWorkSummary ? 'This is a computer-generated work delivery summary statement.' : 'This is a computer-generated invoice statement.'}</span>
-        <span>Generated on ${issueDateStr}${totalPages > 1 ? ` • Page ${pageIdx + 1} of ${totalPages}` : ''}</span>
+      <div style="margin-top: 10px; padding-top: 6px; border-top: 1px solid #f1f5f9; font-size: 8.5px; color: #94a3b8; display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box;">
+        <span>${isWorkSummary ? 'Official Creative Delivery Statement' : 'Official Electronic Invoice Statement'} • CrestFlow</span>
+        <span>Issued on ${issueDateStr}${totalPages > 1 ? ` • Page ${pageIdx + 1} of ${totalPages}` : ''}</span>
       </div>
     `;
 
     return `
-      <div class="pdf-page" style="width: 794px; min-height: 1123px; max-height: 1123px; padding: 24px 30px; background: #ffffff; color: #0f172a; font-family: Inter, system-ui, -apple-system, sans-serif; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; position: relative;">
+      <div class="pdf-page" style="width: 794px; min-height: 1123px; max-height: 1123px; padding: 28px 34px; background: #ffffff; color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; position: relative;">
         <!-- Top Section -->
         <div style="width: 100%;">
           ${pageHeaderHtml}
@@ -1169,6 +1159,30 @@ export async function generateOffscreenPdfBlob(params: {
 
       const imgData = canvas.toDataURL('image/jpeg', 0.98);
       pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+
+      // Add interactive clickable hyperlinks for all <a> tags on this page
+      try {
+        const elRect = el.getBoundingClientRect();
+        const scaleX = pdfWidth / (el.offsetWidth || 794);
+        const scaleY = pdfHeight / (el.offsetHeight || 1123);
+        const linkElements = Array.from(el.querySelectorAll<HTMLAnchorElement>('a[href]'));
+
+        for (const a of linkElements) {
+          const href = a.getAttribute('href');
+          if (!href || href === '#' || href.startsWith('javascript:')) continue;
+          const rect = a.getBoundingClientRect();
+          const x = (rect.left - elRect.left) * scaleX;
+          const y = (rect.top - elRect.top) * scaleY;
+          const w = rect.width * scaleX;
+          const h = rect.height * scaleY;
+
+          if (w > 0 && h > 0 && typeof (pdf as any).link === 'function') {
+            (pdf as any).link(x, y, w, h, { url: href });
+          }
+        }
+      } catch (linkErr) {
+        console.warn("Could not attach PDF hyperlinks:", linkErr);
+      }
     }
 
     const pdfBlob = pdf.output('blob');
@@ -2452,6 +2466,24 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
               </div>
             </div>
 
+            {/* Payment Details (Optional) */}
+            <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700/60 space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">Payment & Settlement (UPI)</h4>
+                <span className="text-[11px] text-slate-400">Included on Invoice</span>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">UPI ID for Payment QR</label>
+                <input
+                  type="text"
+                  placeholder="e.g. username@bank"
+                  value={customUpiId}
+                  onChange={(e) => setCustomUpiId(e.target.value)}
+                  className="w-full border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-xs font-mono bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 outline-none transition-colors focus:border-indigo-500"
+                />
+              </div>
+            </div>
+
             <div className="mt-6 pt-6 border-t border-slate-100 space-y-2">
               <div className="flex justify-between items-center text-sm text-slate-500">
                 <span>{invoiceBillingMode === 'monthly_retainer' ? 'Monthly Retainer' : 'Subtotal'}</span>
@@ -2648,145 +2680,135 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
               >
               <div>
                 {/* Top Accent Strip & Header */}
-                <div className="flex justify-between items-start border-b-2 border-slate-900 pb-6 mb-8">
+                <div className="flex justify-between items-start border-b-1.5 border-slate-900 pb-5 mb-6">
                   {/* Left Branding */}
                   <div className="w-2/3 pr-4">
                     <div className="flex items-center gap-3 mb-2">
-                      <Logo className="w-10 h-10 rounded-xl shadow-xs" />
+                      <Logo className="w-9 h-9 rounded-lg shrink-0 shadow-2xs" />
                       <div>
-                        <h1 className="text-2xl font-black tracking-tight text-slate-900 uppercase">
+                        <h1 className="text-xl font-bold tracking-tight text-slate-900">
                           {profile?.name || user?.displayName || 'Video Production Studio'}
                         </h1>
-                        <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest mt-0.5">
+                        <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mt-0.5">
                           {profile?.professionalTitle || profile?.servicesDescription || 'Professional Video Editing & Content Creation'}
                         </p>
                       </div>
                     </div>
                     {profile?.phone && (
-                      <p className="text-sm font-medium text-slate-600 mt-2 flex items-center gap-1.5">
-                        <span className="font-bold text-slate-400 uppercase text-xs tracking-wider">Phone:</span> {profile.phone}
+                      <p className="text-xs font-medium text-slate-500 mt-2 flex items-center gap-1.5">
+                        <span className="font-semibold text-slate-400 uppercase text-[10px] tracking-wider">Direct:</span>
+                        <span className="text-slate-700 font-medium">{profile.phone}</span>
                       </p>
                     )}
                   </div>
 
                   {/* Right Invoice / Work Summary Title */}
                   <div className="w-1/3 text-right flex flex-col items-end">
-                    <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight uppercase">
+                    <h2 className="text-2xl font-bold text-slate-900 tracking-wider uppercase">
                       {previewMode === 'work-only' ? 'WORK SUMMARY' : 'INVOICE'}
                     </h2>
-                    {previewMode === 'work-only' ? (
-                      <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-0.5">
-                        Work Done Statement
-                      </p>
-                    ) : null}
-                    <p className="text-sm font-mono font-bold text-slate-600 mt-1">
-                      #{previewMode === 'work-only' ? 'WRK' : 'INV'}-{String(invoices.length + 1).padStart(4, '0')}
-                    </p>
+                    <div className="inline-block bg-slate-100 rounded px-2.5 py-0.5 mt-1.5">
+                      <span className="text-xs font-mono font-semibold text-slate-700">
+                        #{previewMode === 'work-only' ? 'WRK' : 'INV'}-{String(invoices.length + 1).padStart(4, '0')}
+                      </span>
+                    </div>
+                    <div className="text-xs text-slate-500 mt-1.5">
+                      Issue Date: <span className="font-semibold text-slate-800">{new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                    </div>
                   </div>
                 </div>
 
-                {/* Billed To / Prepared For & Summary Overview Cards */}
-                <div className="grid grid-cols-2 gap-6 mb-8">
-                  {/* Client Card */}
-                  <div className="bg-slate-50/80 border border-slate-200/80 rounded-xl p-5 shadow-2xs">
-                    <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400 block mb-2">
+                {/* Billed To / Prepared For & Summary Overview */}
+                <div className="grid grid-cols-2 gap-6 p-3.5 bg-slate-50 border border-slate-200 rounded-lg mb-6">
+                  {/* Client Info */}
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 block mb-1">
                       {previewMode === 'work-only' ? 'Prepared For' : 'Billed To'}
                     </span>
                     {selectedClient ? (
                       <div>
-                        <p className="font-black text-xl text-slate-900 mb-1">{selectedClient.name}</p>
+                        <p className="font-bold text-sm text-slate-900">{selectedClient.name}</p>
                         {selectedClient.phone && (
-                          <p className="text-sm text-slate-600 font-medium">Ph: {selectedClient.phone}</p>
+                          <p className="text-xs text-slate-600 font-medium mt-0.5">Ph: {selectedClient.phone}</p>
                         )}
                         {selectedClient.email && (
-                          <p className="text-sm text-slate-600 font-medium truncate">Email: {selectedClient.email}</p>
+                          <p className="text-xs text-slate-600 font-medium truncate mt-0.5">Email: {selectedClient.email}</p>
                         )}
                       </div>
                     ) : (
-                      <div className="text-sm text-slate-400 italic">
+                      <div className="text-xs text-slate-400 italic">
                         Select a client to preview {previewMode === 'work-only' ? 'work details' : 'invoice details'}
                       </div>
                     )}
                   </div>
 
-                  {/* Overview Card */}
-                  <div className="bg-slate-50/80 border border-slate-200/80 rounded-xl p-5 shadow-2xs flex flex-col justify-between">
-                    <div>
-                      <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400 block mb-2">
-                        {previewMode === 'work-only' ? 'Period Overview' : 'Invoice Overview'}
-                      </span>
-                      <div className="space-y-1.5 text-sm">
-                        <div className="flex justify-between items-center">
-                          <span className="text-slate-500 font-medium">Issue Date:</span>
+                  {/* Overview */}
+                  <div className="text-right flex flex-col justify-center">
+                    <div className="space-y-1 text-xs">
+                      <div className="flex justify-end gap-3 items-center">
+                        <span className="text-slate-500 font-medium">{previewMode === 'work-only' ? 'Work Period:' : 'Billing Period:'}</span>
+                        <span className="font-semibold text-slate-900">
+                          {dateFrom && dateTo ? `${new Date(dateFrom).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })} – ${new Date(dateTo).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}` : new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        </span>
+                      </div>
+                      {previewMode === 'work-only' ? (
+                        <div className="flex justify-end gap-3 items-center">
+                          <span className="text-slate-500 font-medium">Total Deliverables:</span>
                           <span className="font-bold text-slate-900">
-                            {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                            {effectiveReels.reduce((s, r) => s + (r.quantity || 1), 0)} Item(s)
                           </span>
                         </div>
-                        {dateFrom && dateTo && (
-                          <div className="flex justify-between items-center">
-                            <span className="text-slate-500 font-medium">{previewMode === 'work-only' ? 'Work Period:' : 'Billing Period:'}</span>
-                            <span className="font-semibold text-slate-800 text-xs">
-                              {new Date(dateFrom).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })} – {new Date(dateTo).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
-                            </span>
+                      ) : (
+                        <>
+                          <div className="flex justify-end gap-3 items-center">
+                            <span className="text-slate-500 font-medium">Payment Terms:</span>
+                            <span className="font-semibold text-slate-900">Due on Receipt</span>
                           </div>
-                        )}
-                        {previewMode === 'work-only' ? (
-                          <div className="flex justify-between items-center">
-                            <span className="text-slate-500 font-medium">Total Deliverables:</span>
-                            <span className="font-bold text-indigo-600">
-                              {effectiveReels.reduce((s, r) => s + (r.quantity || 1), 0)} Item(s)
-                            </span>
+                          <div className="flex justify-end gap-3 items-center">
+                            <span className="text-slate-500 font-medium">Settlement:</span>
+                            <span className="font-medium text-slate-700">UPI / Bank Transfer</span>
                           </div>
-                        ) : (
-                          <div className="flex justify-between items-center">
-                            <span className="text-slate-500 font-medium">Last Payment Date:</span>
-                            <span className="font-semibold text-slate-800">
-                              {selectedClient?.lastPaymentDate
-                                ? new Date(selectedClient.lastPaymentDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
-                                : 'N/A (First Cycle)'}
-                            </span>
-                          </div>
-                        )}
-                      </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
 
                 {/* Line Items Table */}
-                <div className="mb-8">
+                <div className="mb-6">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="bg-slate-900 text-white rounded-lg">
-                        <th className="py-3 px-3 font-bold text-xs uppercase tracking-wider text-slate-200 rounded-l-lg w-12 text-center">#</th>
+                      <tr className="border-t-1.5 border-b border-slate-900 bg-slate-50/70 text-slate-700">
+                        <th className="py-2 px-3 font-bold text-[10px] uppercase tracking-wider text-slate-500 w-10 text-center">#</th>
                         {invoiceBillingMode === 'monthly_retainer' && (
-                          <th className="py-3 px-3 font-bold text-xs uppercase tracking-wider text-slate-200 w-28 text-center">Date</th>
+                          <th className="py-2 px-3 font-bold text-[10px] uppercase tracking-wider text-slate-500 w-20 text-left">Date</th>
                         )}
-                        <th className="py-3 px-3 font-bold text-xs uppercase tracking-wider text-slate-200">
-                          {previewMode === 'work-only' || invoiceBillingMode === 'monthly_retainer' ? 'Work Done / Deliverable Description' : 'Item Description'}
+                        <th className="py-2 px-3 font-bold text-[10px] uppercase tracking-wider text-slate-500">
+                          {previewMode === 'work-only' || invoiceBillingMode === 'monthly_retainer' ? 'Deliverable Description' : 'Item Description / Service'}
                         </th>
-                        <th className={`py-3 px-3 font-bold text-xs uppercase tracking-wider text-slate-200 text-center ${previewMode === 'work-only' || invoiceBillingMode === 'monthly_retainer' ? 'w-24 rounded-r-lg' : 'w-20'}`}>
+                        <th className={`py-2 px-3 font-bold text-[10px] uppercase tracking-wider text-slate-500 text-center ${previewMode === 'work-only' || invoiceBillingMode === 'monthly_retainer' ? 'w-16' : 'w-14'}`}>
                           Qty
                         </th>
                         {previewMode !== 'work-only' && invoiceBillingMode !== 'monthly_retainer' && (
                           <>
-                            <th className="py-3 px-3 font-bold text-xs uppercase tracking-wider text-slate-200 text-right w-32">Rate</th>
-                            <th className="py-3 px-3 font-bold text-xs uppercase tracking-wider text-slate-200 text-right rounded-r-lg w-36">Total Amount</th>
+                            <th className="py-2 px-3 font-bold text-[10px] uppercase tracking-wider text-slate-500 text-right w-24">Rate</th>
+                            <th className="py-2 px-3 font-bold text-[10px] uppercase tracking-wider text-slate-500 text-right w-28">Total</th>
                           </>
                         )}
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-200">
+                    <tbody className="divide-y divide-slate-100">
                       {invoiceBillingMode === 'monthly_retainer' ? (
                         currentBillingDeliverables.length > 0 ? (
                           currentBillingDeliverables.map((d, idx) => (
                             <tr key={d.id || idx} className="hover:bg-slate-50/50 transition-colors">
-                              <td className="py-3.5 px-3 text-sm font-semibold text-slate-400 text-center">
+                              <td className="py-2.5 px-3 text-xs font-mono font-medium text-slate-400 text-center">
                                 {String(idx + 1).padStart(2, '0')}
                               </td>
-                              <td className="py-3.5 px-3 text-xs text-slate-500 text-center whitespace-nowrap">
+                              <td className="py-2.5 px-3 text-xs text-slate-500 whitespace-nowrap">
                                 {d.date ? new Date(d.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '—'}
                               </td>
-                              <td className="py-3.5 px-3 text-base font-semibold text-slate-900">
+                              <td className="py-2.5 px-3 text-xs font-semibold text-slate-900">
                                 <div>{d.title || <span className="text-slate-400 italic font-normal">Deliverable...</span>}</div>
                                 {d.videoUrl && (
                                   <div className="mt-0.5">
@@ -2794,7 +2816,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
                                       href={d.videoUrl}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="text-xs text-indigo-600 dark:text-indigo-400 font-medium hover:underline inline-flex items-center gap-1"
+                                      className="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium hover:underline inline-flex items-center gap-1"
                                       title={d.videoUrl}
                                     >
                                       <span>View Deliverable</span>
@@ -2803,21 +2825,21 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
                                   </div>
                                 )}
                               </td>
-                              <td className="py-3.5 px-3 text-base text-center font-bold text-slate-700">
+                              <td className="py-2.5 px-3 text-xs text-center font-medium text-slate-700">
                                 {d.quantity || 1}
                               </td>
                             </tr>
                           ))
                         ) : (
                           <tr className="hover:bg-slate-50/50 transition-colors">
-                            <td className="py-4 px-3 text-sm font-semibold text-slate-400 text-center">01</td>
-                            <td className="py-4 px-3 text-xs text-slate-500 text-center whitespace-nowrap">
+                            <td className="py-2.5 px-3 text-xs font-mono font-medium text-slate-400 text-center">01</td>
+                            <td className="py-2.5 px-3 text-xs text-slate-500 whitespace-nowrap">
                               {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
                             </td>
-                            <td className="py-4 px-3 text-base font-semibold text-slate-900">
+                            <td className="py-2.5 px-3 text-xs font-semibold text-slate-900">
                               <div>{monthlyServiceDescription || 'Monthly Video Editing & Creative Retainer'}</div>
                             </td>
-                            <td className="py-4 px-3 text-base text-center font-bold text-slate-700">
+                            <td className="py-2.5 px-3 text-xs text-center font-medium text-slate-700">
                               1 Month
                             </td>
                           </tr>
@@ -2825,18 +2847,23 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
                       ) : (
                         effectiveReels.map((reel, idx) => (
                           <tr key={reel.id} className="hover:bg-slate-50/50 transition-colors">
-                            <td className="py-4 px-3 text-sm font-semibold text-slate-400 text-center">
+                            <td className="py-2.5 px-3 text-xs font-mono font-medium text-slate-400 text-center">
                               {String(idx + 1).padStart(2, '0')}
                             </td>
-                            <td className="py-4 px-3 text-base font-semibold text-slate-900">
-                              <div>{reel.title || <span className="text-slate-400 italic font-normal">Item description...</span>}</div>
+                            <td className="py-2.5 px-3 text-xs font-semibold text-slate-900">
+                              <div>
+                                {reel.title || <span className="text-slate-400 italic font-normal">Item description...</span>}
+                                {reel.subClientName && (
+                                  <span className="text-[11px] font-normal text-slate-500 ml-1.5">({reel.subClientName})</span>
+                                )}
+                              </div>
                               {reel.videoUrl && (
                                 <div className="mt-0.5">
                                   <a
                                     href={reel.videoUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-xs text-indigo-600 dark:text-indigo-400 font-medium hover:underline inline-flex items-center gap-1"
+                                    className="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium hover:underline inline-flex items-center gap-1"
                                     title={reel.videoUrl}
                                   >
                                     <span>View Deliverable</span>
@@ -2845,15 +2872,15 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
                                 </div>
                               )}
                             </td>
-                            <td className="py-4 px-3 text-base text-center font-bold text-slate-700">
+                            <td className="py-2.5 px-3 text-xs text-center font-medium text-slate-700">
                               {reel.quantity}
                             </td>
                             {previewMode !== 'work-only' && (
                               <>
-                                <td className="py-4 px-3 text-base text-right font-medium text-slate-700">
+                                <td className="py-2.5 px-3 text-xs text-right font-normal text-slate-600 tabular-nums">
                                   ₹{reel.rate.toLocaleString('en-IN')}
                                 </td>
-                                <td className="py-4 px-3 text-base text-right font-bold text-slate-900">
+                                <td className="py-2.5 px-3 text-xs text-right font-semibold text-slate-900 tabular-nums">
                                   ₹{(reel.quantity * reel.rate).toLocaleString('en-IN')}
                                 </td>
                               </>
@@ -2866,14 +2893,14 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
                 </div>
 
                 {invoiceBillingMode === 'monthly_retainer' && previewMode !== 'work-only' && (
-                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 mb-6 flex justify-between items-center avoid-break">
+                  <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 mb-6 flex justify-between items-center text-xs avoid-break">
                     <div>
-                      <span className="text-xs font-bold uppercase tracking-wider text-slate-800 block">Monthly Retainer Package</span>
-                      <p className="text-xs text-slate-600 mt-0.5">
-                        Fixed monthly fee covering all creative deliverables across billing period.
+                      <span className="font-semibold text-slate-900 block">Monthly Retainer Package</span>
+                      <p className="text-[11px] text-slate-500 mt-0.5">
+                        Fixed monthly fee covering all creative deliverables across this billing cycle.
                       </p>
                     </div>
-                    <span className="px-2.5 py-1 bg-slate-100 text-slate-700 rounded text-xs font-medium">
+                    <span className="text-slate-600 font-medium">
                       {currentBillingDeliverables.length} Deliverable(s) Included
                     </span>
                   </div>
@@ -2881,50 +2908,50 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
 
                 {/* Totals Section (For Full Invoice) OR Deliverables Summary (For Work Summary) */}
                 {previewMode === 'work-only' ? (
-                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-8 flex justify-between items-center avoid-break">
+                  <div className="bg-slate-50 border border-slate-200 rounded-lg p-3.5 mb-6 flex justify-between items-center text-xs avoid-break">
                     <div>
-                      <span className="text-xs font-bold uppercase tracking-wider text-indigo-700 block">Deliverables Summary</span>
-                      <p className="text-xs text-slate-600 mt-0.5">
+                      <span className="font-semibold text-slate-900 block">Deliverables Summary</span>
+                      <p className="text-[11px] text-slate-500 mt-0.5">
                         Completed for <strong className="text-slate-800">{selectedClient?.name || 'Client'}</strong> ({dateFrom && dateTo ? `${new Date(dateFrom).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })} – ${new Date(dateTo).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}` : 'Current Cycle'})
                       </p>
                     </div>
-                    <span className="px-2.5 py-1 bg-slate-100 text-slate-700 rounded text-xs font-medium">
+                    <span className="text-slate-700 font-semibold">
                       Completed ({invoiceBillingMode === 'monthly_retainer' ? currentBillingDeliverables.length : effectiveReels.reduce((s, r) => s + (r.quantity || 1), 0)} items)
                     </span>
                   </div>
                 ) : (
-                  <div className="flex justify-end mb-10 avoid-break" style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
-                    <div className="w-72 sm:w-80 space-y-2">
-                      <div className="flex justify-between items-center py-1.5 px-3 text-sm text-slate-600">
-                        <span className="font-semibold uppercase tracking-wider text-xs text-slate-500">
-                          {invoiceBillingMode === 'monthly_retainer' ? 'Monthly Retainer' : 'Subtotal'}
+                  <div className="flex justify-end mb-6 avoid-break" style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
+                    <div className="w-72 space-y-1.5 text-xs">
+                      <div className="flex justify-between items-center py-1 text-slate-600">
+                        <span className="font-medium text-slate-500">
+                          {invoiceBillingMode === 'monthly_retainer' ? 'Monthly Retainer Fee' : 'Subtotal'}
                         </span>
-                        <span className="font-bold text-slate-900">₹{total.toLocaleString('en-IN')}</span>
+                        <span className="font-semibold text-slate-900 tabular-nums">₹{total.toLocaleString('en-IN')}</span>
                       </div>
 
                       {extraCost > 0 && (
-                        <div className="flex justify-between items-center py-1.5 px-3 text-sm text-slate-700 font-medium bg-slate-50 rounded-lg border border-slate-200 mb-1">
-                          <span className="font-semibold uppercase tracking-wider text-xs text-slate-600">
+                        <div className="flex justify-between items-center py-1 text-slate-700">
+                          <span className="font-medium text-slate-600">
                             Extra Cost {extraCostDescription ? `(${extraCostDescription})` : ''}
                           </span>
-                          <span className="font-bold">+₹{extraCost.toLocaleString('en-IN')}</span>
+                          <span className="font-semibold tabular-nums">+₹{extraCost.toLocaleString('en-IN')}</span>
                         </div>
                       )}
                       {discount > 0 && (
-                        <div className="flex justify-between items-center py-1.5 px-3 text-sm text-rose-600 font-medium bg-rose-50/60 rounded-lg border border-rose-100">
-                          <span className="font-semibold uppercase tracking-wider text-xs text-rose-600">
+                        <div className="flex justify-between items-center py-1 text-red-600">
+                          <span className="font-medium">
                             Deduction {discountDescription ? `(${discountDescription})` : ''}
                           </span>
-                          <span className="font-bold">-₹{discount.toLocaleString('en-IN')}</span>
+                          <span className="font-semibold tabular-nums">-₹{discount.toLocaleString('en-IN')}</span>
                         </div>
                       )}
 
-                      <div className="bg-slate-900 text-white p-4 rounded-xl shadow-md flex justify-between items-center mt-2">
+                      <div className="flex justify-between items-baseline pt-2.5 border-t-1.5 border-slate-900 mt-2">
                         <div>
-                          <span className="text-xs font-bold uppercase tracking-widest text-indigo-300 block">Total Due</span>
-                          <span className="text-[10px] text-slate-400 font-medium">Payable via UPI / Bank</span>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">Total Due</span>
+                          <span className="text-[10px] text-slate-500 font-normal">Due on Receipt</span>
                         </div>
-                        <span className="text-2xl font-black text-white tracking-tight">₹{grandTotal.toLocaleString('en-IN')}</span>
+                        <span className="text-2xl font-bold text-slate-900 tracking-tight tabular-nums">₹{grandTotal.toLocaleString('en-IN')}</span>
                       </div>
                     </div>
                   </div>
@@ -2932,15 +2959,15 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
               </div>
 
               {/* Payment Details & QR Code (Full Invoice) OR Verification Statement (Work Summary) */}
-              <div className="border-t-2 border-slate-900 pt-6 mt-6 avoid-break" style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
+              <div className="border-t-1.5 border-slate-900 pt-5 mt-6 avoid-break" style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
                 {previewMode === 'work-only' ? (
                   <div className="flex justify-between items-start gap-6">
                     <div className="w-2/3 space-y-1">
-                      <span className="text-xs font-black uppercase tracking-widest text-slate-900 block">
-                        Verification & Confirmation
+                      <span className="text-xs font-bold uppercase tracking-wider text-slate-900 block">
+                        Verification & Delivery Confirmation
                       </span>
                       <p className="text-xs text-slate-600 leading-relaxed">
-                        This statement confirms completion and delivery of the listed creative deliverables for the specified date period.
+                        This statement confirms completion and official delivery of the listed creative deliverables for the specified date period.
                       </p>
                     </div>
                     <div className="w-1/3 text-right">
@@ -2949,81 +2976,70 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
                     </div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-12 gap-6 items-start">
-                    {/* Left Column: Bank & UPI Info */}
-                    <div className="col-span-8 space-y-3">
-                      <span className="text-xs font-black uppercase tracking-widest text-slate-900 block">
-                        Payment Information
+                  <div className="grid grid-cols-12 gap-5 items-start">
+                    <div className="col-span-8">
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 block mb-2">
+                        Payment Settlement Details
                       </span>
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-slate-800 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                        <div>
-                          <span className="text-[11px] font-bold text-slate-400 uppercase block">Payment Method</span>
-                          <span className="font-semibold text-slate-900">UPI Transfer</span>
+                      <div className="bg-slate-50/70 border border-slate-200 rounded-lg p-3.5 space-y-2 text-xs text-slate-800">
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                          <div>
+                            <span className="text-[10px] font-semibold text-slate-500 uppercase block">Method</span>
+                            <span className="font-medium text-slate-900">UPI / Instant Bank Transfer</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] font-semibold text-slate-500 uppercase block">UPI ID</span>
+                            <span className="font-mono font-semibold text-slate-900">{activeUpi}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] font-semibold text-slate-500 uppercase block">Payee Beneficiary</span>
+                            <span className="font-medium text-slate-900">{profile?.name || user?.displayName || 'Video Editor'}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] font-semibold text-slate-500 uppercase block">Terms</span>
+                            <span className="font-medium text-slate-800">Due Upon Receipt (Net 7)</span>
+                          </div>
+                          {profile?.accountNumber && (
+                            <>
+                              <div>
+                                <span className="text-[10px] font-semibold text-slate-500 uppercase block">Bank Account No</span>
+                                <span className="font-mono font-semibold text-slate-900">{profile.accountNumber}</span>
+                              </div>
+                              <div>
+                                <span className="text-[10px] font-semibold text-slate-500 uppercase block">IFSC / Bank</span>
+                                <span className="font-semibold text-slate-900">{profile.ifscCode || ''} {profile.bankName ? `(${profile.bankName})` : ''}</span>
+                              </div>
+                            </>
+                          )}
                         </div>
-                        <div>
-                          <span className="text-[11px] font-bold text-slate-400 uppercase block mb-0.5">UPI ID</span>
-                          <input
-                            type="text"
-                            value={customUpiId}
-                            onChange={(e) => setCustomUpiId(e.target.value)}
-                            placeholder="e.g. username@bank"
-                            className="font-mono font-bold text-indigo-600 bg-indigo-50/80 border border-indigo-200 px-2 py-0.5 rounded text-xs w-full focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
-                            title="Click to change UPI ID for instant QR code generation"
-                          />
-                        </div>
-                        <div>
-                          <span className="text-[11px] font-bold text-slate-400 uppercase block">Payee Name</span>
-                          <span className="font-semibold text-slate-900">{profile?.name || user?.displayName || 'Video Editor'}</span>
-                        </div>
-                        <div>
-                          <span className="text-[11px] font-bold text-slate-400 uppercase block">Payment Cycle</span>
-                          <span className="font-semibold text-slate-800">
-                            {selectedClient?.lastPaymentDate
-                              ? new Date(selectedClient.lastPaymentDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
-                              : 'N/A (First Cycle)'}
-                          </span>
-                        </div>
-                        {profile?.accountNumber && (
-                          <>
-                            <div>
-                              <span className="text-[11px] font-bold text-slate-400 uppercase block">Bank Account No</span>
-                              <span className="font-mono font-semibold text-slate-900">{profile.accountNumber}</span>
-                            </div>
-                            <div>
-                              <span className="text-[11px] font-bold text-slate-400 uppercase block">IFSC / Bank</span>
-                              <span className="font-semibold text-slate-900">{profile.ifscCode || ''} {profile.bankName ? `(${profile.bankName})` : ''}</span>
-                            </div>
-                          </>
-                        )}
+                        <p className="text-[10px] text-slate-500 italic pt-1 border-t border-slate-200/60 mt-2">
+                          Please process payment within 7 days of receiving this invoice.
+                        </p>
                       </div>
-                      <p className="text-xs text-slate-500 italic mt-2">
-                        Thank you for your business! Please process payment within 7 days of receiving this invoice.
-                      </p>
                     </div>
 
                     {/* Right Column: QR Code */}
                     <div className="col-span-4 flex flex-col items-center justify-center">
-                      <div className="bg-white p-3 border-2 border-slate-200 rounded-2xl shadow-sm flex flex-col items-center min-w-[150px]">
+                      <div className="bg-white p-2.5 border border-slate-200 rounded-lg flex flex-col items-center shadow-2xs">
                         {activeUpiUri ? (
-                          <div className="p-1 bg-white rounded-lg flex items-center justify-center">
+                          <div className="p-0.5 bg-white rounded flex items-center justify-center">
                             <QRCodeSVG
                               value={activeUpiUri}
-                              size={128}
+                              size={88}
                               level="M"
-                              includeMargin={true}
+                              includeMargin={false}
                               bgColor="#ffffff"
-                              fgColor="#000000"
-                              className="w-32 h-32 block"
+                              fgColor="#0f172a"
+                              className="w-[88px] h-[88px] block"
                             />
                           </div>
                         ) : (
-                          <div className="w-32 h-32 flex flex-col items-center justify-center text-slate-400 text-xs italic bg-slate-50 rounded-lg">
-                            <AlertCircle className="w-5 h-5 mb-1 text-slate-400" />
-                            <span>Enter UPI ID</span>
+                          <div className="w-[88px] h-[88px] bg-slate-100 rounded flex items-center justify-center text-[10px] text-slate-400 font-medium">
+                            Scan to Pay
                           </div>
                         )}
-                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 mt-2 text-center">
-                          Scan with GPay / PhonePe / Paytm
+                        <span className="text-[8px] font-bold uppercase tracking-wider text-slate-500 mt-1.5">
+                          Scan via UPI
                         </span>
                       </div>
                     </div>
@@ -3031,8 +3047,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
                 )}
 
                 {/* Bottom Signature & Verification Note */}
-                <div className="mt-6 pt-3 border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-400 font-medium">
-                  <span>{previewMode === 'work-only' ? 'This is a computer-generated work delivery summary statement.' : 'This is a computer-generated invoice statement.'}</span>
+                <div className="mt-5 pt-3 border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-400 font-medium">
+                  <span>{previewMode === 'work-only' ? 'Official Work Delivery Summary • CrestFlow' : 'Official Electronic Invoice Statement • CrestFlow'}</span>
                   <span>Generated on {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                 </div>
               </div>
