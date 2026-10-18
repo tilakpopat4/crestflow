@@ -9,6 +9,7 @@ import Logo from './Logo';
 import { useTheme } from '../context/ThemeContext';
 import { calculateWorkJourney } from '../lib/anniversary';
 import StatusBadge from './StatusBadge';
+import { SubscriptionState } from '../hooks/useSubscription';
 
 interface GlobalHeaderProps {
   user: User | null;
@@ -21,6 +22,8 @@ interface GlobalHeaderProps {
   onEditProfile?: () => void;
   onOpenAnniversaryModal?: () => void;
   onLogout?: () => void;
+  subscriptionState?: SubscriptionState;
+  onOpenSubscriptionModal?: () => void;
 }
 
 export default function GlobalHeader({
@@ -33,7 +36,9 @@ export default function GlobalHeader({
   profile,
   onEditProfile,
   onOpenAnniversaryModal,
-  onLogout
+  onLogout,
+  subscriptionState,
+  onOpenSubscriptionModal
 }: GlobalHeaderProps) {
   const { theme, resolvedTheme, setTheme, toggleTheme } = useTheme();
   const [showThemeMenu, setShowThemeMenu] = useState(false);
@@ -503,6 +508,39 @@ export default function GlobalHeader({
             </button>
           ) : null}
         </div>
+
+        {/* Subscription Status Indicator */}
+        {subscriptionState && onOpenSubscriptionModal && (
+          <button
+            type="button"
+            onClick={onOpenSubscriptionModal}
+            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+            title={
+              subscriptionState.isPaidActive
+                ? `CrestFlow Pro Active (${subscriptionState.daysRemaining} days remaining)`
+                : 'Subscription required (₹49/month). Click to activate.'
+            }
+          >
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${
+                subscriptionState.isPaidActive
+                  ? 'bg-indigo-600 dark:bg-indigo-400'
+                  : 'bg-red-600 dark:bg-red-400'
+              }`}
+            />
+            <span
+              className={
+                subscriptionState.isPaidActive
+                  ? 'text-indigo-600 dark:text-indigo-400 font-medium text-[13px]'
+                  : 'text-red-600 dark:text-red-400 font-medium text-[13px]'
+              }
+            >
+              {subscriptionState.isPaidActive
+                ? `Pro • ${subscriptionState.daysRemaining}d`
+                : 'Subscribe • ₹49/mo'}
+            </span>
+          </button>
+        )}
 
         {/* Theme Switcher Button & Dropdown */}
         <div className="relative shrink-0" ref={themeMenuRef}>

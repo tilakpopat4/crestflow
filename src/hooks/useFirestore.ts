@@ -112,80 +112,9 @@ export function sanitizePayload(val: any): any {
   return clean;
 }
 
+import { useSupabase } from './useSupabase';
+
 export function useFirestore<T extends { id: string }>(collectionName: string, userId?: string) {
-  const [data, setData] = useState<T[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!userId) {
-      setData([]);
-      setLoading(false);
-      setError(null);
-      return;
-    }
-    
-    setLoading(true);
-    setError(null);
-    const q = query(collection(db, collectionName), where("userId", "==", userId));
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const items: T[] = [];
-        snapshot.forEach((docSnapshot) => {
-          items.push({ id: docSnapshot.id, ...docSnapshot.data() } as T);
-        });
-        setData(items);
-        setLoading(false);
-      },
-      (err) => {
-        const formattedErr = handleFirestoreError(err, OperationType.GET, collectionName);
-        setError(formattedErr.message);
-        setLoading(false);
-      }
-    );
-
-    return () => unsubscribe();
-  }, [collectionName, userId]);
-
-  const addOrUpdateItem = async (item: T) => {
-    if (!userId) return;
-    try {
-      const sanitized = sanitizePayload({ ...item, userId });
-      await setDoc(doc(db, collectionName, item.id), sanitized);
-    } catch (err) {
-      throw handleFirestoreError(err, OperationType.WRITE, `${collectionName}/${item.id}`);
-    }
-  };
-
-  const removeItem = async (id: string) => {
-    if (!userId) return;
-    try {
-      await deleteDoc(doc(db, collectionName, id));
-    } catch (err) {
-      throw handleFirestoreError(err, OperationType.DELETE, `${collectionName}/${id}`);
-    }
-  };
-  
-  // Scalable chunking for batch operations (max 400 writes per batch to respect 500 limit)
-  const batchReplaceAll = async (items: T[]) => {
-    if (!userId || items.length === 0) return;
-    try {
-      const CHUNK_SIZE = 400;
-      for (let i = 0; i < items.length; i += CHUNK_SIZE) {
-        const chunk = items.slice(i, i + CHUNK_SIZE);
-        const batch = writeBatch(db);
-        chunk.forEach((item) => {
-          const docRef = doc(db, collectionName, item.id);
-          const sanitized = sanitizePayload({ ...item, userId });
-          batch.set(docRef, sanitized);
-        });
-        await batch.commit();
-      }
-    } catch (err) {
-      throw handleFirestoreError(err, OperationType.WRITE, collectionName);
-    }
-  };
-
-  return { data, loading, error, addOrUpdateItem, removeItem, batchReplaceAll };
+  const supabaseHook = useSupabase<T>(collectionName, userId);
+  return supabaseHook;
 }

@@ -23,6 +23,10 @@ import { calculateWorkJourney } from '../lib/anniversary';
 import { executeAutoInvoiceCheck } from '../lib/autoInvoiceService';
 import StatusBadge from './StatusBadge';
 import GettingStartedCard from './GettingStartedCard';
+import { migrateFirestoreToSupabase } from '../lib/migrationService';
+import { exportWorkspaceCSV } from '../lib/csvExport';
+import { supabase } from '../lib/supabase';
+import { toSnakeCase } from '../hooks/useSupabase';
 
 interface DashboardTabProps {
   user: User | null;
@@ -57,6 +61,7 @@ export default function DashboardTab({
   const [activeWorkspaceTool, setActiveWorkspaceTool] = useState<'none' | 'notes' | 'ai'>('none');
   const journey = calculateWorkJourney(profile?.freelanceStartDate);
   const [paymentModalState, setPaymentModalState] = useState<{ invoiceId: string | null, isOpen: boolean }>({ invoiceId: null, isOpen: false });
+  const [isMigratingCloud, setIsMigratingCloud] = useState(false);
 
 
 
@@ -314,37 +319,75 @@ export default function DashboardTab({
   };
 
   const handleExport = () => {
-    const data = {
-      clients: localStorage.getItem('clients') || '[]',
-      monthlyWork: safeStringify(invoices),
+    const backupData = {
+      version: '2.0',
+      exportedAt: new Date().toISOString(),
+      user: user?.email || user?.uid,
+      clients: clients || [],
+      workItems: workItems || [],
+      invoices: invoices || [],
+      profile: profile || null,
     };
-    const blob = new Blob([safeStringify(data)], { type: 'application/json' });
+    const blob = new Blob([safeStringify(backupData)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `CrestFlow_Full_Backup_${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
+  const handleExportCSV = () => {
+    exportWorkspaceCSV(clients || [], workItems || [], invoices || []);
+  };
+
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || !user?.uid) return;
     const reader = new FileReader();
-    reader.onload = async (e) => {
+    reader.onload = async (ev) => {
       try {
-        const data = JSON.parse(e.target?.result as string);
-        if (data.clients) {
-          const parsedClients = typeof data.clients === 'string' ? JSON.parse(data.clients) : data.clients;
-          await batchReplaceClients(parsedClients);
+        const raw = ev.target?.result as string;
+        const parsed = JSON.parse(raw);
+        let clientsCount = 0;
+        let invoicesCount = 0;
+        let workItemsCount = 0;
+
+        // 1. Clients
+        const rawClients = parsed.clients || (Array.isArray(parsed) && parsed[0]?.name ? parsed : null);
+        if (rawClients) {
+          const list = typeof rawClients === 'string' ? JSON.parse(rawClients) : rawClients;
+          if (Array.isArray(list) && list.length > 0) {
+            await batchReplaceClients(list);
+            clientsCount = list.length;
+          }
         }
-        if (data.monthlyWork) {
-           const parsedWork = typeof data.monthlyWork === 'string' ? JSON.parse(data.monthlyWork) : data.monthlyWork;
-           await batchReplaceAll(parsedWork);
+
+        // 2. Invoices / Monthly Work
+        const rawInvoices = parsed.invoices || parsed.monthlyWork;
+        if (rawInvoices) {
+          const list = typeof rawInvoices === 'string' ? JSON.parse(rawInvoices) : rawInvoices;
+          if (Array.isArray(list) && list.length > 0) {
+            await batchReplaceAll(list);
+            invoicesCount = list.length;
+          }
         }
-        alert("Data imported successfully!");
-      } catch (err) {
-        alert("Invalid backup file.");
+
+        // 3. Work Items
+        if (parsed.workItems) {
+          const list = typeof parsed.workItems === 'string' ? JSON.parse(parsed.workItems) : parsed.workItems;
+          if (Array.isArray(list) && list.length > 0) {
+            const snakeItems = list.map((w: any) => toSnakeCase({ ...w, userId: user.uid }));
+            const { error: workErr } = await supabase.from('work_items').upsert(snakeItems, { onConflict: 'id' });
+            if (!workErr) workItemsCount = list.length;
+          }
+        }
+
+        alert(`Backup imported successfully!\n\nRestored ${clientsCount} clients, ${invoicesCount} invoices, and ${workItemsCount} work logs.`);
+        window.location.reload();
+      } catch (err: any) {
+        console.error("Backup import failed:", err);
+        alert("Failed to import backup file: " + (err?.message || "Invalid file format"));
       }
     };
     reader.readAsText(file);
@@ -406,17 +449,27 @@ export default function DashboardTab({
             </button>
           ) : null}
           <button 
+            onClick={handleExportCSV}
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
+            title="Download full database as CSV spreadsheet"
+          >
+            <DownloadCloud size={14} /> Export CSV
+          </button>
+
+          <button 
             onClick={handleExport}
             className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
+            title="Download full database as JSON backup"
           >
-            <DownloadCloud size={14} /> Export
+            <DownloadCloud size={14} /> Export JSON
           </button>
           
           <button 
             onClick={() => fileInputRef.current?.click()}
             className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
+            title="Restore from JSON backup file"
           >
-            <UploadCloud size={14} /> Import
+            <UploadCloud size={14} /> Import Backup
           </button>
           <input 
             type="file" 
@@ -474,6 +527,42 @@ export default function DashboardTab({
             title="Dismiss banner"
           >
             <X size={16} />
+          </button>
+        </div>
+      )}
+
+      {/* Database Migration Banner */}
+      {clients.length === 0 && user?.uid && (
+        <div className="bg-indigo-50 dark:bg-slate-900 border border-indigo-200 dark:border-indigo-900/50 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <span className="text-[10px] font-bold text-indigo-700 dark:text-indigo-400 uppercase tracking-wider bg-indigo-100 dark:bg-indigo-950/80 px-2 py-0.5 rounded">
+              Database Migration
+            </span>
+            <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-1">
+              Transfer your existing data from Firestore to Supabase
+            </h4>
+            <p className="text-xs text-slate-600 dark:text-slate-400 max-w-xl">
+              All your previous clients, work items, and invoices in Firestore can be copied directly into your new Supabase PostgreSQL database with one click.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={async () => {
+              setIsMigratingCloud(true);
+              try {
+                const res = await migrateFirestoreToSupabase(user.uid);
+                alert(`Migration Complete!\n\nMigrated ${res.clients} clients, ${res.workItems} work logs, and ${res.invoices} invoices to Supabase.`);
+                window.location.reload();
+              } catch (err: any) {
+                alert(`Migration Error: ${err?.message || 'Failed'}`);
+              } finally {
+                setIsMigratingCloud(false);
+              }
+            }}
+            disabled={isMigratingCloud}
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer border-none disabled:opacity-50 shrink-0"
+          >
+            {isMigratingCloud ? 'Migrating Data...' : 'Import from Firestore Now'}
           </button>
         </div>
       )}

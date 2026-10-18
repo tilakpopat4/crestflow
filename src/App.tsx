@@ -8,6 +8,7 @@ import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import Sidebar from './components/Sidebar';
 import GlobalHeader from './components/GlobalHeader';
 import { auth, googleProvider, db } from './firebase';
+import { supabase } from './lib/supabase';
 import { signInWithPopup, onAuthStateChanged, User, signOut, GoogleAuthProvider } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { useFirestore, safeStringify } from './hooks/useFirestore';
@@ -32,9 +33,11 @@ const PublicFreelancerProfile = lazy(() => import('./components/PublicFreelancer
 const ClientFeedbackForm = lazy(() => import('./components/ClientFeedbackForm'));
 const ProfileModal = lazy(() => import('./components/ProfileModal'));
 const AnniversaryModal = lazy(() => import('./components/AnniversaryModal'));
+const SubscriptionModal = lazy(() => import('./components/SubscriptionModal'));
 const PrivacyPolicyPage = lazy(() => import('./components/PrivacyPolicyPage'));
 const TermsOfServicePage = lazy(() => import('./components/TermsOfServicePage'));
 const ContactPage = lazy(() => import('./components/ContactPage'));
+import { useSubscription } from './hooks/useSubscription';
 
 const ViewLoadingFallback = () => (
   <div className="flex-1 flex flex-col items-center justify-center p-12 min-h-[360px] animate-in fade-in duration-150 select-none">
@@ -65,6 +68,8 @@ export default function App() {
   const [globalSearchQuery, setGlobalSearchQuery] = useState('');
   const [selectedClientIdFromSearch, setSelectedClientIdFromSearch] = useState<string | null>(null);
   const [isAnniversaryModalOpen, setIsAnniversaryModalOpen] = useState(false);
+  const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
+  const [isExpiredPrompt, setIsExpiredPrompt] = useState(false);
   const checkSupportingRoute = (): 'privacy' | 'terms' | 'contact' | null => {
     const path = window.location.pathname;
     const hash = window.location.hash;
@@ -162,6 +167,14 @@ export default function App() {
   }, [user, profiles]);
 
   const profile = profiles[0] || cachedProfile;
+  const subscriptionState = useSubscription(user?.uid, profile, user?.email || undefined);
+
+  // Auto-prompt ₹49/month subscription for users without active access
+  useEffect(() => {
+    if (user && !profilesLoading && !subscriptionState.hasAccess) {
+      setIsSubscriptionModalOpen(true);
+    }
+  }, [user, profilesLoading, subscriptionState.hasAccess]);
 
   const handleSaveProfile = async (updatedProfile: UserProfile) => {
     if (!user) return;
@@ -208,11 +221,35 @@ export default function App() {
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
+    // 1. Check existing Supabase session and listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        const mappedUser = {
+          uid: session.user.id,
+          id: session.user.id,
+          email: session.user.email || null,
+          displayName: session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email || 'User',
+          photoURL: session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture || null
+        };
+        setUser(mappedUser as any);
+        if (session.provider_token) {
+          setGmailAccessToken(session.provider_token);
+          setDriveAccessToken(session.provider_token);
+        }
+        setLoading(false);
+      } else {
+        // Fallback to Firebase auth if no Supabase session
+        const fbUnsub = onAuthStateChanged(auth, (currentUser) => {
+          setUser(currentUser);
+          setLoading(false);
+        });
+        return () => fbUnsub();
+      }
     });
-    return () => unsubscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Listen to blocked status in real-time
@@ -251,21 +288,33 @@ export default function App() {
     if (isSigningIn) return;
     setIsSigningIn(true);
     try {
-      googleProvider.addScope('https://www.googleapis.com/auth/gmail.send');
-      googleProvider.addScope('https://www.googleapis.com/auth/gmail.compose');
-      googleProvider.addScope('https://www.googleapis.com/auth/drive.file');
-      const res = await signInWithPopup(auth, googleProvider);
-      const credential = GoogleAuthProvider.credentialFromResult(res);
-      if (credential?.accessToken) {
-        setGmailAccessToken(credential.accessToken);
-        setDriveAccessToken(credential.accessToken);
-      }
+      // Primary: Authenticate via Supabase Google OAuth
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          scopes: 'https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/gmail.compose https://www.googleapis.com/auth/drive.file',
+          redirectTo: window.location.origin
+        }
+      });
+      if (error) throw error;
     } catch (error: any) {
-      console.error(error);
-      if (error?.code === 'auth/popup-closed-by-user' || error?.code === 'auth/cancelled-popup-request') {
-        return;
+      console.warn("Supabase Google Sign-In failed or fallback needed, trying Firebase popup:", error);
+      try {
+        googleProvider.addScope('https://www.googleapis.com/auth/gmail.send');
+        googleProvider.addScope('https://www.googleapis.com/auth/gmail.compose');
+        googleProvider.addScope('https://www.googleapis.com/auth/drive.file');
+        const res = await signInWithPopup(auth, googleProvider);
+        const credential = GoogleAuthProvider.credentialFromResult(res);
+        if (credential?.accessToken) {
+          setGmailAccessToken(credential.accessToken);
+          setDriveAccessToken(credential.accessToken);
+        }
+      } catch (fbErr: any) {
+        if (fbErr?.code === 'auth/popup-closed-by-user' || fbErr?.code === 'auth/cancelled-popup-request') {
+          return;
+        }
+        alert(`Sign in failed: ${error?.message || fbErr?.message}`);
       }
-      alert(`Sign in failed. This is often because the app is running in a preview window (iframe). Please open the app in a new tab using the arrow icon in the top right, and try again.\n\nError: ${error.message}`);
     } finally {
       setIsSigningIn(false);
     }
@@ -273,7 +322,9 @@ export default function App() {
 
   const handleLogout = async () => {
     try {
+      await supabase.auth.signOut();
       await signOut(auth);
+      setUser(null);
     } catch (error) {
       console.error(error);
     }
@@ -611,7 +662,29 @@ export default function App() {
           onEditProfile={() => setIsProfileModalOpen(true)}
           onOpenAnniversaryModal={() => setIsAnniversaryModalOpen(true)}
           onLogout={handleLogout}
+          subscriptionState={subscriptionState}
+          onOpenSubscriptionModal={() => {
+            setIsExpiredPrompt(false);
+            setIsSubscriptionModalOpen(true);
+          }}
         />
+        {!subscriptionState.hasAccess && (
+          <div className="bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-4 py-2.5 flex items-center justify-between text-xs text-slate-700 dark:text-slate-300 shrink-0">
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-600 dark:bg-red-400" />
+              <span>Subscription required: ₹49/month to manage clients, log work, and generate invoices.</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setIsSubscriptionModalOpen(true);
+              }}
+              className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs font-medium transition-colors cursor-pointer"
+            >
+              Subscribe ₹49/mo
+            </button>
+          </div>
+        )}
         <div className="flex-1 overflow-y-auto overflow-x-hidden relative flex flex-col">
           <div className="flex-1 flex flex-col">
             <ErrorBoundary fallbackTitle="Unable to display this tab">
@@ -677,6 +750,27 @@ export default function App() {
             initialProfile={profile}
             onSave={handleSaveProfile}
             isMandatory={!profile && !localStorage.getItem(`crestflow_profile_completed_${user.uid}`)}
+            subscriptionState={subscriptionState}
+            onOpenSubscriptionModal={() => {
+              setIsExpiredPrompt(false);
+              setIsSubscriptionModalOpen(true);
+            }}
+          />
+        </Suspense>
+      )}
+
+      {user && isSubscriptionModalOpen && (
+        <Suspense fallback={null}>
+          <SubscriptionModal
+            isOpen={isSubscriptionModalOpen}
+            onClose={() => setIsSubscriptionModalOpen(false)}
+            user={user}
+            profile={profile}
+            onSubscriptionUpdated={async () => {
+              await subscriptionState.refreshSubscription();
+            }}
+            isMandatory={!subscriptionState.hasAccess}
+            onLogout={handleLogout}
           />
         </Suspense>
       )}

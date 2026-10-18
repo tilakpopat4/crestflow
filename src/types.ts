@@ -98,6 +98,60 @@ export interface Invoice {
   deliverables?: InvoiceDeliverable[]; // Snapshot of completed deliverables without rates for monthly retainer invoices
 }
 
+export type SubscriptionStatus = 'inactive' | 'active' | 'expired' | 'canceled';
+export type SubscriptionPlan = 'monthly' | 'quarterly' | 'annual' | string;
+
+export interface SubscriptionPlanItem {
+  id: string;
+  planCode: string;
+  name: string;
+  price: number;
+  currency: string;
+  durationDays: number;
+  periodLabel: string;
+  description?: string;
+  badge?: string;
+  features: string[];
+  isActive: boolean;
+  sortOrder?: number;
+  createdAt?: number | string;
+}
+
+export interface UserSubscription {
+  status: SubscriptionStatus;
+  plan: SubscriptionPlan;
+  currentPeriodStart?: number;
+  currentPeriodEnd?: number;
+  lastPaymentId?: string;
+  lastPaymentAmount?: number;
+  updatedAt?: number;
+}
+
+
+export interface SubscriptionWhitelistItem {
+  id: string;
+  email: string;
+  reason?: string;
+  createdAt: number;
+}
+
+export interface SubscriptionPayment {
+  id: string;
+  userId: string;
+  orderId: string;
+  paymentId?: string;
+  plan: SubscriptionPlan;
+  amount: number;
+  currency: string;
+  status: 'INITIATED' | 'PENDING_VERIFICATION' | 'ACTIVE' | 'QUEUED' | 'PROCESSING' | 'SUCCESS' | 'FAILED' | 'REJECTED' | 'EXPIRED' | 'CANCELLED';
+  utr?: string;
+  method?: string;
+  payerEmail?: string;
+  adminNotes?: string;
+  createdAt: number;
+  updatedAt?: number;
+}
+
 export interface UserProfile {
   id: string;
   name: string;
@@ -112,6 +166,13 @@ export interface UserProfile {
   freelanceStartDate?: string; // Freelancer's career start date in YYYY-MM-DD format
   workExperienceBio?: string; // Optional career overview / work experience bio
   createdAt: number;
+  // SaaS Subscription fields (49/- per month)
+  subscriptionStatus?: SubscriptionStatus;
+  subscriptionPlan?: SubscriptionPlan;
+  currentPeriodStart?: number;
+  currentPeriodEnd?: number;
+  lastPaymentId?: string;
+  lastPaymentAmount?: number;
 }
 
 export interface StickyNote {

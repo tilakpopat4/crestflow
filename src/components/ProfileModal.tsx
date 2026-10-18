@@ -3,6 +3,9 @@ import { User } from 'firebase/auth';
 import { UserProfile } from '../types';
 import { Settings, X, Save, Sun, Moon, Monitor, Calendar } from 'lucide-react';
 import { useTheme, Theme } from '../context/ThemeContext';
+import { migrateFirestoreToSupabase } from '../lib/migrationService';
+
+import { SubscriptionState } from '../hooks/useSubscription';
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -11,6 +14,8 @@ interface ProfileModalProps {
   initialProfile: UserProfile | null;
   onSave: (profile: UserProfile) => Promise<void>;
   isMandatory?: boolean;
+  subscriptionState?: SubscriptionState;
+  onOpenSubscriptionModal?: () => void;
 }
 
 export default function ProfileModal({
@@ -19,7 +24,9 @@ export default function ProfileModal({
   user,
   initialProfile,
   onSave,
-  isMandatory = false
+  isMandatory = false,
+  subscriptionState,
+  onOpenSubscriptionModal
 }: ProfileModalProps) {
   const { theme, setTheme } = useTheme();
   const [name, setName] = useState('');
@@ -32,6 +39,8 @@ export default function ProfileModal({
   const [workExperienceBio, setWorkExperienceBio] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
+  const [isMigrating, setIsMigrating] = useState(false);
+  const [migrationStatus, setMigrationStatus] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -315,6 +324,83 @@ export default function ProfileModal({
               </button>
             </div>
             <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">Share this onboarding link with clients. They can view your services and submit onboarding details directly.</p>
+          </div>
+
+          {/* Subscription & SaaS Access */}
+          {subscriptionState && onOpenSubscriptionModal && (
+            <div className="pt-2">
+              <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider font-sans">
+                Subscription & Access
+              </label>
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`w-2 h-2 rounded-full ${
+                        subscriptionState.isPaidActive
+                          ? 'bg-indigo-600 dark:bg-indigo-400'
+                          : 'bg-red-600 dark:bg-red-400'
+                      }`}
+                    />
+                    <span className="text-xs font-semibold text-slate-900 dark:text-white">
+                      {subscriptionState.isPaidActive
+                        ? `CrestFlow Pro (₹49/month • ${subscriptionState.daysRemaining} days remaining)`
+                        : 'Subscription Required (₹49/month)'}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                    {subscriptionState.isPaidActive && subscriptionState.currentPeriodEnd
+                      ? `Active until ${new Date(subscriptionState.currentPeriodEnd).toLocaleDateString()}`
+                      : 'Subscribe via UPI to unlock client management, reel logs, and automated invoices.'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={onOpenSubscriptionModal}
+                  className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium transition-colors cursor-pointer shrink-0"
+                >
+                  {subscriptionState.isPaidActive ? 'Extend Plan' : 'Subscribe ₹49/mo'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Database Sync to Supabase */}
+          <div className="pt-2">
+            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+              Database Sync (Firestore &rarr; Supabase)
+            </label>
+            <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col gap-2">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                Copy all your existing clients, work items, invoices, and settings from Firestore into your Supabase PostgreSQL database.
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setIsMigrating(true);
+                    setMigrationStatus(null);
+                    try {
+                      const res = await migrateFirestoreToSupabase(user.uid);
+                      setMigrationStatus(`Successfully migrated ${res.clients} clients, ${res.workItems} work logs, and ${res.invoices} invoices!`);
+                    } catch (err: any) {
+                      setMigrationStatus(`Migration error: ${err?.message || 'Failed'}`);
+                    } finally {
+                      setIsMigrating(false);
+                    }
+                  }}
+                  disabled={isMigrating}
+                  className="px-3 py-1.5 bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 text-white rounded text-xs font-medium transition-colors cursor-pointer border-none disabled:opacity-50"
+                >
+                  {isMigrating ? 'Migrating Data...' : 'Migrate to Supabase Now'}
+                </button>
+              </div>
+              {migrationStatus && (
+                <p className="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium">
+                  {migrationStatus}
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
