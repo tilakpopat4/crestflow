@@ -12,7 +12,7 @@ import ReactDOMServer from 'react-dom/server';
 import { sendEmailWithPdfAttachment, acquireGmailAccessToken } from '../lib/gmailService';
 import PaymentDateModal from './PaymentDateModal';
 import ScheduleInvoiceModal from './ScheduleInvoiceModal';
-import { executeAutoInvoiceCheck } from '../lib/autoInvoiceService';
+import { executeAutoInvoiceCheck, findDuplicateAutoInvoices } from '../lib/autoInvoiceService';
 import { formatLocalDateToYMD } from '../lib/dateUtils';
 import StatusBadge from './StatusBadge';
 
@@ -1204,7 +1204,7 @@ interface InvoiceTabProps {
 
 export default function InvoiceTab({ user, profile, initialSearchQuery = '', onNavigateToClients }: InvoiceTabProps) {
   const { data: clients, loading: clientsLoading, addOrUpdateItem: updateClient } = useFirestore<Client>('clients', user?.uid);
-  const { data: invoices, addOrUpdateItem: addInvoice } = useFirestore<Invoice>('invoices', user?.uid);
+  const { data: invoices, addOrUpdateItem: addInvoice, removeItem: deleteInvoice } = useFirestore<Invoice>('invoices', user?.uid);
   const { data: workItems, addOrUpdateItem: updateWorkItem } = useFirestore<WorkItem>('workItems', user?.uid);
 
   const [showClosed, setShowClosed] = useState(false);
@@ -1333,26 +1333,102 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
   }, [clients]);
 
   // Automated 6:00 AM Auto-Invoice Engine (runs background check during session)
+  const autoInvoiceRef = useRef({
+    clients,
+    workItems,
+    invoices,
+    addInvoice,
+    updateWorkItem,
+    updateClient
+  });
+  autoInvoiceRef.current = {
+    clients,
+    workItems,
+    invoices,
+    addInvoice,
+    updateWorkItem,
+    updateClient
+  };
+
   useEffect(() => {
-    if (clientsLoading || !clients || clients.length === 0) return;
+    if (!user?.uid) return;
 
     const checkAndRunAutoInvoices = () => {
-      executeAutoInvoiceCheck({
-        clients,
-        workItems,
-        invoices,
-        addInvoice,
-        updateWorkItem,
-        updateClient
-      }).catch(err => {
+      const data = autoInvoiceRef.current;
+      if (!data.clients || data.clients.length === 0) return;
+      executeAutoInvoiceCheck(data).catch(err => {
         console.warn("[Auto-Invoice Engine] Background check error:", err);
       });
     };
 
-    checkAndRunAutoInvoices();
-    const intervalId = setInterval(checkAndRunAutoInvoices, 30000);
-    return () => clearInterval(intervalId);
-  }, [clients, workItems, invoices, clientsLoading, addInvoice, updateWorkItem, updateClient]);
+    const initialTimer = setTimeout(checkAndRunAutoInvoices, 2000);
+    const intervalId = setInterval(checkAndRunAutoInvoices, 60000);
+    return () => {
+      clearTimeout(initialTimer);
+      clearInterval(intervalId);
+    };
+  }, [user?.uid]);
+
+  // Duplicate auto-generated invoice detection and clean-up
+  const duplicateGroups = useMemo(() => findDuplicateAutoInvoices(invoices), [invoices]);
+  const totalDuplicateCount = useMemo(() => {
+    return duplicateGroups.reduce((sum, g) => sum + g.duplicates.length, 0);
+  }, [duplicateGroups]);
+  const [isCleaningDuplicates, setIsCleaningDuplicates] = useState(false);
+
+  const handleCleanUpDuplicates = async () => {
+    if (totalDuplicateCount === 0 || isCleaningDuplicates) return;
+    const clientNames = Array.from(new Set(duplicateGroups.map(g => g.clientName))).join(', ');
+    if (!window.confirm(`Clean up ${totalDuplicateCount} duplicate scheduled invoice(s) for ${clientNames}?\n\nThe first original invoice will be kept, and all redundant duplicates created will be safely deleted.`)) {
+      return;
+    }
+
+    setIsCleaningDuplicates(true);
+    try {
+      let deleted = 0;
+      for (const group of duplicateGroups) {
+        for (const dup of group.duplicates) {
+          await deleteInvoice(dup.id);
+          deleted++;
+        }
+      }
+      alert(`Cleaned up ${deleted} duplicate invoice(s) successfully.`);
+    } catch (err) {
+      console.error("Failed to clean up duplicates:", err);
+      alert("An error occurred while cleaning up duplicates.");
+    } finally {
+      setIsCleaningDuplicates(false);
+    }
+  };
+
+  const handleDeleteInvoice = async (invoiceId: string) => {
+    const inv = invoices.find(i => i.id === invoiceId);
+    if (!inv) return;
+
+    if (!window.confirm(`Delete Invoice #${inv.id.substring(0, 8).toUpperCase()} for ${inv.clientName}?`)) {
+      return;
+    }
+
+    try {
+      await deleteInvoice(invoiceId);
+      // If work items were linked to this invoice, revert them to 'Uninvoiced'
+      if (inv.linkedWorkItemIds && inv.linkedWorkItemIds.length > 0) {
+        for (const wId of inv.linkedWorkItemIds) {
+          const w = workItems.find(item => item.id === wId);
+          if (w && w.invoiceId === invoiceId) {
+            await updateWorkItem({
+              ...w,
+              status: 'Uninvoiced',
+              invoiceId: undefined
+            });
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Failed to delete invoice:", err);
+      alert("Failed to delete invoice. Please try again.");
+    }
+  };
 
   // Dynamic preview scaling to fit any screen perfectly with zero overlapping & no content truncation
   const previewContainerRef = useRef<HTMLDivElement>(null);
@@ -3136,7 +3212,26 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
             )}
           </div>
         ) : (
-          <div className="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-xl">
+          <>
+            {totalDuplicateCount > 0 && (
+              <div className="mb-4 p-3.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200">
+                  <span className="font-semibold">{totalDuplicateCount} duplicate scheduled invoice(s)</span>
+                  <span className="text-slate-500 dark:text-slate-400">
+                    detected for {Array.from(new Set(duplicateGroups.map(g => g.clientName))).join(', ')}
+                  </span>
+                </div>
+                <button
+                  onClick={handleCleanUpDuplicates}
+                  disabled={isCleaningDuplicates}
+                  className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors cursor-pointer border-none disabled:opacity-50 self-start sm:self-auto shrink-0"
+                  title="Keep the original first invoice and safely remove duplicates"
+                >
+                  {isCleaningDuplicates ? 'Cleaning up...' : `Clean Up ${totalDuplicateCount} Duplicate(s)`}
+                </button>
+              </div>
+            )}
+            <div className="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-xl">
             <table className="w-full text-left border-collapse min-w-[780px]">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
@@ -3312,6 +3407,14 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
                             >
                               <Copy size={13} />
                             </button>
+
+                            <button
+                              onClick={() => handleDeleteInvoice(inv.id)}
+                              className="p-1.5 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-xs transition-colors cursor-pointer border-none bg-transparent"
+                              title="Delete Invoice"
+                            >
+                              <Trash2 size={13} />
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -3335,7 +3438,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
               )}
             </table>
           </div>
-        )}
+        </>
+      )}
 
         {/* Last Bar: Total Earned Till Today */}
         <div className="mt-6 bg-slate-900 text-white rounded-xl p-5 md:p-6 border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-5 relative overflow-hidden">

@@ -134,26 +134,41 @@ export default function DashboardTab({
   }, [activeNotifications, user?.uid]);
 
   // Automated 6:00 AM Auto-Invoice Engine (runs background check during session)
+  const autoInvoiceRef = React.useRef({
+    clients,
+    workItems,
+    invoices,
+    addInvoice: addOrUpdateItem,
+    updateWorkItem,
+    updateClient
+  });
+  autoInvoiceRef.current = {
+    clients,
+    workItems,
+    invoices,
+    addInvoice: addOrUpdateItem,
+    updateWorkItem,
+    updateClient
+  };
+
   React.useEffect(() => {
-    if (!clients || clients.length === 0) return;
+    if (!user?.uid) return;
 
     const runAutoInvoiceCheck = () => {
-      executeAutoInvoiceCheck({
-        clients,
-        workItems,
-        invoices,
-        addInvoice: addOrUpdateItem,
-        updateWorkItem,
-        updateClient
-      }).catch(err => {
+      const data = autoInvoiceRef.current;
+      if (!data.clients || data.clients.length === 0) return;
+      executeAutoInvoiceCheck(data).catch(err => {
         console.warn("[Dashboard Auto-Invoice Engine] Check failed:", err);
       });
     };
 
-    runAutoInvoiceCheck();
-    const intervalId = setInterval(runAutoInvoiceCheck, 30000);
-    return () => clearInterval(intervalId);
-  }, [clients, workItems, invoices, addOrUpdateItem, updateWorkItem, updateClient]);
+    const initialTimer = setTimeout(runAutoInvoiceCheck, 2000);
+    const intervalId = setInterval(runAutoInvoiceCheck, 60000);
+    return () => {
+      clearTimeout(initialTimer);
+      clearInterval(intervalId);
+    };
+  }, [user?.uid]);
 
   // Calculate metrics for current month & overall pending amounts
   const metrics = useMemo(() => {
