@@ -1,21 +1,21 @@
-# Comprehensive Implementation Plan: YouPI PG Subscription Billing Engine (Revised)
+# Comprehensive Implementation Plan: YouPI PG Subscription Billing Engine (Revised v2)
 
 **Branch:** `feat/youpi-subscription-billing`  
 **Status:** REVISED / AWAITING USER APPROVAL  
-**Feature Flag:** `BILLING_ENABLED` (Default: `false`)
+**Feature Flag Storage:** Database Settings Table (`public.platform_settings -> billing_config`)
 
 ---
 
 ## 1. Executive Summary & Architecture Overview
 
-This project introduces server-verified subscription billing for the CrestFlow freelancing platform using the self-hosted **YouPI PG (UPI gateway)**. Because UPI collection via YouPI cannot perform recurring auto-debit, subscriptions operate on **prepaid fixed duration periods** (e.g., Monthly ₹49 = 4,900 paise, Annual ₹499 = 49,900 paise).
+This project introduces server-verified subscription billing for the CrestFlow freelancing platform using the self-hosted **YouPI PG (UPI gateway)**. Because UPI collection via YouPI cannot perform recurring auto-debit, subscriptions operate on **prepaid fixed duration periods** (Monthly ₹49 = 4,900 paise, Annual ₹499 = 49,900 paise).
 
 ### Core Architectural Invariants
-1. **Supabase-Only Billing State**: All billing tables (`plans`, `subscriptions`, `payments`, `subscription_audit_logs`, `subscription_whitelist`) live **exclusively** in Supabase PostgreSQL. Firestore stores **zero** billing data.
+1. **Supabase-Only Billing State**: All billing tables (`plans`, `subscriptions`, `payments`, `subscription_audit_logs`, `subscription_whitelist`, `platform_settings`) live **exclusively** in Supabase PostgreSQL. Firestore stores **zero** billing records.
 2. **Strict RLS & Service-Role Isolation**: Authenticated client browsers receive `SELECT`-only privileges on their own rows (`auth.uid() = user_id`). **All database writes** (`INSERT`, `UPDATE`, `DELETE`) are performed exclusively by the backend Express server using `SUPABASE_SERVICE_ROLE_KEY`. The service-role key is never prefixed with `VITE_` and never bundled into client assets.
-3. **UUID Foreign Keys**: User references across all subscription tables strictly use `user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE`.
-4. **Server-Side Paywall Enforcement**: Protected write actions (`clients`, `invoices`, `work_items`) are blocked at both PostgreSQL RLS level (`has_active_access(user_id)`) and Express middleware (`requireActiveSubscription`), rendering client-side bypass impossible.
-5. **Anti-DoS Single-Slot Queue Protection**: The YouPI single-slot FIFO queue is protected from denial-of-service via email verification checks, a max of 1 open payment session per user, per-IP rate limiting, 5-minute session timeouts, and automatic slot release.
+3. **UUID Foreign Keys Everywhere**: User references across all subscription tables strictly use `user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE`.
+4. **Server-Side Paywall & Dynamic DB Feature Flag**: Access is enforced at both PostgreSQL RLS level (`has_active_access(user_id)`) and Express middleware (`requireActiveSubscription`). The feature flag lives in `public.platform_settings`: when disabled or outside the rollout cohort, `has_active_access()` returns `TRUE`.
+5. **Anti-DoS Single-Slot Queue Protection**: The YouPI single-slot FIFO queue is protected from denial-of-service via email verification checks, a global queue-depth cap, account-age/CAPTCHA gates, a max of 1 open payment session per user, per-IP rate limiting, live status reconciliation, and automatic slot release.
 
 ```
 +-----------------------------------------------------------------------------------------+
@@ -30,11 +30,13 @@ This project introduces server-verified subscription billing for the CrestFlow f
 +-----------------------------------------------------------------------------------------+
 |                             CRESTFLOW BACKEND (Node/Express)                            |
 |  - Hosted on Node.js Runtime (Local port 5000 / Production VPS or PaaS)                 |
+|  - trust proxy configured for accurate IP rate limiting                                 |
 |  - Service-Role Supabase Client (Exclusive Write Authority)                             |
-|  - Abuse Controls: Verified-email required, Max 1 open order, IP & User Rate Limits     |
+|  - Abuse Controls: email_confirmed_at check, Account-age/CAPTCHA, Max 1 open order,     |
+|    Global queue-depth cap (max 5 open orders), Live status reconciliation               |
 |  - PaymentProvider Interface -> YouPiPaymentProvider Adapter                            |
-|  - Authoritative HMAC-SHA256 Webhook Receiver (/api/youpi-webhook)                      |
-|  - In-Process node-cron Engine + Protected /api/cron HTTP Fallback                      |
+|  - Authoritative HMAC-SHA256 Webhook Receiver + Out-of-Band GET Verification            |
+|  - Postgres Advisory Lock Cron Engine + Protected /api/cron HTTP Fallback              |
 +-----------------------------------------------------------------------------------------+
             |                                           ^
             | POST /api/v1/payments                     | POST Webhook (Public HTTPS via Reverse Proxy)
@@ -49,11 +51,12 @@ This project introduces server-verified subscription billing for the CrestFlow f
                                       v
 +-----------------------------------------------------------------------------------------+
 |                               SUPABASE POSTGRESQL DATABASE                              |
+|  - platform_settings (billing_config: enabled, rollout_percentage, beta_cohorts)        |
 |  - plans (code, price_paise, period_days, entitlement_limits)                           |
 |  - subscriptions (user_id UUID, plan_id, status: active|grace|expired, period_end)      |
 |  - payments (provider_order_id UNIQUE, amount_paise, status, raw_payload)               |
 |  - subscription_audit_logs (append-only ledger of all state transitions)                |
-|  - RLS Guard: has_active_access(UUID) enforced on clients, work_items, invoices writes  |
+|  - RLS Guard: has_active_access(UUID) computes dynamically from period_end + grace      |
 +-----------------------------------------------------------------------------------------+
 ```
 
@@ -61,50 +64,120 @@ This project introduces server-verified subscription billing for the CrestFlow f
 
 ## 2. Source-Code Verification Matrix (YouPI PG Source Cross-Check)
 
-Every endpoint, header, payload field, and state name has been cross-checked against the active YouPI PG codebase in this repository:
+Every endpoint, header, payload field, and state name has been verified against the active YouPI PG codebase in this repository with exact file citations and quoted code:
 
-| Integration Element | Verified Value / Contract | YouPI PG Source Code Reference |
-| :--- | :--- | :--- |
-| **Order Creation Endpoint** | `POST /api/v1/payments` | [`youpi-pg/apps/payment-api/src/server.js`](file:///d:/crestflow/youpi-pg/apps/payment-api/src/server.js), [`youpi-pg/openapi.yaml:18`](file:///d:/crestflow/youpi-pg/openapi.yaml#L18) |
-| **Order Creation Payload** | `{ orderId, amount, currency, customer, description, returnUrl, metadata }` | [`youpi-pg/packages/merchant-sdk/src/client.js:39`](file:///d:/crestflow/youpi-pg/packages/merchant-sdk/src/client.js#L39), [`youpi-pg/openapi.yaml:142`](file:///d:/crestflow/youpi-pg/openapi.yaml#L142) |
-| **Payment Status Endpoint** | `GET /api/v1/payments/{id}` | [`youpi-pg/packages/merchant-sdk/src/client.js:94`](file:///d:/crestflow/youpi-pg/packages/merchant-sdk/src/client.js#L94), [`youpi-pg/openapi.yaml:78`](file:///d:/crestflow/youpi-pg/openapi.yaml#L78) |
-| **Slot Release / Cancel** | `POST /api/v1/checkout/{id}/cancel` | [`youpi-pg/openapi.yaml:106`](file:///d:/crestflow/youpi-pg/openapi.yaml#L106), [`youpi-pg/apps/checkout-portal/src/views/checkout.html:4103`](file:///d:/crestflow/youpi-pg/apps/checkout-portal/src/views/checkout.html#L4103) |
-| **Webhook Signature Header** | `X-Gateway-Signature: sha256=<64_hex_hash>` | [`youpi-pg/packages/core/src/webhook-engine.js:53`](file:///d:/crestflow/youpi-pg/packages/core/src/webhook-engine.js#L53) |
-| **Webhook Event Header** | `X-Gateway-Event: SUCCESS` | [`youpi-pg/packages/core/src/webhook-engine.js:52`](file:///d:/crestflow/youpi-pg/packages/core/src/webhook-engine.js#L52) |
-| **Webhook Delivery ID** | `X-Gateway-Delivery-Id: <uuid>` | [`youpi-pg/packages/core/src/webhook-engine.js:54`](file:///d:/crestflow/youpi-pg/packages/core/src/webhook-engine.js#L54) |
-| **Webhook Timestamp Header** | `X-Gateway-Timestamp: <timestamp_ms>` | [`youpi-pg/packages/core/src/webhook-engine.js:55`](file:///d:/crestflow/youpi-pg/packages/core/src/webhook-engine.js#L55) |
-| **Webhook Payload Fields** | `{ event, paymentId, orderId, amount, amountPaise, currency, method, completedAt, metadata }` | [`youpi-pg/packages/core/src/webhook-engine.js:33-43`](file:///d:/crestflow/youpi-pg/packages/core/src/webhook-engine.js#L33-L43) |
-| **Order States Enum** | `INITIATED`, `ACTIVE`, `QUEUED`, `PROCESSING`, `SUCCESS`, `FAILED`, `EXPIRED`, `CANCELLED` | [`youpi-pg/packages/core/src/state-machine.js:8-31`](file:///d:/crestflow/youpi-pg/packages/core/src/state-machine.js#L8-L31) |
+| Integration Element | Verified Value / Contract | YouPI PG Source Code Citation | Quoted Source Code Snippet |
+| :--- | :--- | :--- | :--- |
+| **Order Creation Endpoint** | `POST /api/v1/payments` | [`youpi-pg/packages/merchant-sdk/src/client.js:38-40`](file:///d:/crestflow/youpi-pg/packages/merchant-sdk/src/client.js#L38-L40), [`youpi-pg/openapi.yaml:18`](file:///d:/crestflow/youpi-pg/openapi.yaml#L18) | `async createPayment(params) { const url = \`${this.apiUrl}/api/v1/payments\`;` |
+| **Order Creation Payload** | `{ orderId, amount, currency, customer, description, returnUrl, metadata }` | [`youpi-pg/packages/merchant-sdk/src/client.js:51-58`](file:///d:/crestflow/youpi-pg/packages/merchant-sdk/src/client.js#L51-L58) | `const payload = { orderId: params.orderId, amount: params.amount, currency: params.currency \|\| 'INR', returnUrl: params.returnUrl, customer: params.customer, metadata: params.metadata };` |
+| **Payment Status Endpoint** | `GET /api/v1/payments/{id}` | [`youpi-pg/packages/merchant-sdk/src/client.js:93-95`](file:///d:/crestflow/youpi-pg/packages/merchant-sdk/src/client.js#L93-L95), [`youpi-pg/openapi.yaml:78`](file:///d:/crestflow/youpi-pg/openapi.yaml#L78) | `async getPayment(paymentId) { const url = \`${this.apiUrl}/api/v1/payments/${paymentId}\`; const res = await fetch(url);` |
+| **Slot Release / Cancel** | `POST /api/v1/checkout/{id}/cancel` | [`youpi-pg/openapi.yaml:106-111`](file:///d:/crestflow/youpi-pg/openapi.yaml#L106-L111) | `/api/v1/checkout/{id}/cancel: post: summary: Cancel Payment Session description: Explicitly cancels an active or queued payment session, immediately releasing the UPI concurrency slot.` |
+| **Webhook Signature Header** | `X-Gateway-Signature: sha256=<64_hex_hash>` | [`youpi-pg/packages/core/src/webhook-engine.js:53`](file:///d:/crestflow/youpi-pg/packages/core/src/webhook-engine.js#L53) | `'X-Gateway-Signature': \`sha256=${signature}\`,` |
+| **Webhook Event Header** | `X-Gateway-Event: SUCCESS` | [`youpi-pg/packages/core/src/webhook-engine.js:52`](file:///d:/crestflow/youpi-pg/packages/core/src/webhook-engine.js#L52) | `'X-Gateway-Event': publicOutcome,` |
+| **Webhook Delivery ID** | `X-Gateway-Delivery-Id: <uuid>` | [`youpi-pg/packages/core/src/webhook-engine.js:54`](file:///d:/crestflow/youpi-pg/packages/core/src/webhook-engine.js#L54) | `'X-Gateway-Delivery-Id': deliveryId,` |
+| **Webhook Timestamp Header** | `X-Gateway-Timestamp: <timestamp_ms>` | [`youpi-pg/packages/core/src/webhook-engine.js:55`](file:///d:/crestflow/youpi-pg/packages/core/src/webhook-engine.js#L55) | `'X-Gateway-Timestamp': timestamp` |
+| **Webhook Payload Fields** | `{ event, paymentId, orderId, amount, amountPaise, currency, method, completedAt, metadata }` | [`youpi-pg/packages/core/src/webhook-engine.js:33-43`](file:///d:/crestflow/youpi-pg/packages/core/src/webhook-engine.js#L33-L43) | `const payloadObj = { event: publicOutcome, paymentId: session.id, orderId: session.orderId, amount: toRupeesString(session.amountPaise), amountPaise: Number(session.amountPaise), currency: session.currency \|\| 'INR', method: session.method \|\| 'UPI', completedAt: session.completedAt ? session.completedAt.toISOString() : new Date().toISOString(), metadata: session.metadata \|\| {} };` |
+| **Order States Enum** | `INITIATED`, `ACTIVE`, `QUEUED`, `PROCESSING`, `SUCCESS`, `FAILED`, `EXPIRED`, `CANCELLED` | [`youpi-pg/packages/core/src/state-machine.js:8-31`](file:///d:/crestflow/youpi-pg/packages/core/src/state-machine.js#L8-L31) | `export const VALID_TRANSITIONS = Object.freeze({ [PaymentStatus.INITIATED]: [PaymentStatus.ACTIVE, PaymentStatus.QUEUED, PaymentStatus.CANCELLED], [PaymentStatus.QUEUED]: [PaymentStatus.ACTIVE, PaymentStatus.CANCELLED], [PaymentStatus.ACTIVE]: [PaymentStatus.PROCESSING, PaymentStatus.EXPIRED, PaymentStatus.CANCELLED], [PaymentStatus.PROCESSING]: [PaymentStatus.SUCCESS, PaymentStatus.FAILED], ... });` |
 
 ---
 
-## 3. Hosting & Network Architecture
+## 3. Data Store Audit & Firestore Paywall Rules
+
+### Data Store Entity Distribution
+- **Supabase PostgreSQL (Authoritative Core & Billing)**:
+  - `public.profiles`: Core user profile data.
+  - `public.clients` & `public.sub_clients`: Client accounts and sub-clients.
+  - `public.invoices`: Invoices and line items.
+  - `public.work_items`: Work logs and deliverables.
+  - `public.reviews`: Client ratings and reviews.
+  - `public.platform_settings`: System configuration and billing rollout flags.
+  - `public.plans`: Subscription tiers, pricing in paise, entitlement limits.
+  - `public.subscriptions`: Subscription status, period timestamps.
+  - `public.payments`: Payment transaction records, UTRs, raw gateway payloads.
+  - `public.subscription_audit_logs`: Immutable audit trail of subscription events.
+  - `public.subscription_whitelist`: VIP email whitelist.
+  - `public.admin_users`: Explicit administrator UUID registry.
+- **Firebase Firestore (Legacy / Real-Time Client Mirror)**:
+  - `profiles`, `clients`, `invoices`, `workItems`, `notes`, `reviews`.
+  - **Zero billing entities**: No subscriptions, payments, or plan tables exist in Firestore.
+
+### Enforcing Paywall in Firestore Rules (`firestore.rules`)
+To prevent paywall bypass on entities stored in Firestore:
+1. **Expiry-Timestamp Custom Claim**: When a subscription is confirmed or extended, the Express server updates the user's Firebase Auth Custom Claims via the Firebase Admin SDK:
+   ```typescript
+   await admin.auth().setCustomUserClaims(firebaseUid, {
+     supabase_uuid: supabaseUserUuid,
+     pro_expiry_timestamp: Math.floor(currentPeriodEnd.getTime() / 1000), // integer seconds
+     is_whitelisted: isWhitelisted ? 1 : 0
+   });
+   ```
+2. **Forced Token Refresh**: Immediately following payment success confirmation, the client calls `await user.getIdToken(true)` to refresh its JWT and receive the updated timestamp claim.
+3. **Firestore Security Rule**:
+   ```javascript
+   function hasActiveProAccess() {
+     return request.auth != null && (
+       request.auth.token.is_whitelisted == 1 ||
+       (request.auth.token.pro_expiry_timestamp is int &&
+        request.time < timestamp.date(request.auth.token.pro_expiry_timestamp * 1000))
+     );
+   }
+
+   match /clients/{clientId} {
+     allow read: if true;
+     allow create: if isOwner(incoming().userId) && hasActiveProAccess() && isValidClient(incoming());
+     allow update, delete: if isOwner(existing().userId);
+   }
+
+   match /invoices/{invoiceId} {
+     allow read: if isSignedIn();
+     allow create: if isOwner(incoming().userId) && hasActiveProAccess() && isValidInvoice(incoming());
+     allow update, delete: if isOwner(existing().userId);
+   }
+
+   match /workItems/{workItemId} {
+     allow read: if isSignedIn();
+     allow create: if isOwner(incoming().userId) && hasActiveProAccess() && isValidWorkItem(incoming());
+     allow update, delete: if isOwner(existing().userId);
+   }
+   ```
+   **Data Preservation Guarantee**: `allow read`, `allow update`, and `allow delete` on existing records remain intact so expired users can always access, export, or manage existing data.
+
+---
+
+## 4. Hosting & Network Architecture
 
 ### Backend & Webhook Routing
-- **Express Server Hosting**: Hosted on a Node.js process (e.g. Render / Railway / VPS / Docker container alongside Vite during development at `http://localhost:5000`).
+- **Express Server Hosting**: Hosted on Node.js (port 5000 in local development; production VPS / containerized service).
+- **Reverse Proxy & Trust Proxy**:
+  - Express configured with `app.set('trust proxy', 1)` (or specified trusted CIDR subnet) to ensure `req.ip` reflects the genuine client IP rather than proxy headers.
 - **Webhook Network Path**:
-  - **Local Development**: Exposed via reverse proxy / tunnel (e.g. `ngrok http 5000` or Docker network bridge `http://host.docker.internal:5000/api/youpi-webhook`) configured in YouPI PG's merchant settings `webhook_url`.
   - **Production**: Public HTTPS URL `https://api.crestflow.com/api/youpi-webhook` terminated by Nginx / Cloudflare and reverse-proxied to Express port 5000.
-- **Cron Jobs Engine**:
-  - Primary: In-process `node-cron` daemon in the Express service executing hourly reconciliation and daily 6:00 AM renewal alerts.
-  - Secondary / Redundant: Webhook fallback endpoint `POST /api/cron/reconcile` protected by `Authorization: Bearer CRON_SECRET` for external uptime pingers (cron-job.org / GitHub Actions).
-
-### Entitlements Sync for Firestore Features
-- Billing tables live **exclusively** in Supabase Postgres.
-- The client-side entitlement hook (`useSubscription` / `useEntitlements`) queries Supabase `subscriptions` (or calls `/api/billing/status`).
-- When a user logs in, the Express server confirms active subscription in Supabase and can write an `isSubscribed: true` claim to Firebase Auth tokens via Firebase Admin SDK. All React components check the authoritative Supabase entitlement hook before initiating Firestore work logs or clients.
+  - **Local Development**: Exposed via reverse proxy / tunnel (e.g. `ngrok http 5000`) configured in YouPI PG merchant settings.
+- **Cron Jobs Engine & Advisory Locks**:
+  - Primary: In-process `node-cron` daemon in the Express service. Every cron execution wraps its logic in a PostgreSQL advisory lock:
+    ```sql
+    SELECT pg_try_advisory_lock(88992211); -- Returns false if another instance is running
+    ```
+    If false, the instance cleanly exits without duplicate execution.
+  - Secondary HTTP Fallback: Endpoint `POST /api/cron/reconcile` protected by constant-time comparison against `CRON_SECRET` using `crypto.timingSafeEqual`.
 
 ---
 
-## 4. Phased Implementation Roadmap
+## 5. Phased Implementation Roadmap
 
-### Phase 1: Database Schema, RLS Policies & Reversible Migrations
-**Goal:** Create normalized Supabase Postgres tables with UUID foreign keys, strict RLS, and zero-bypass functions.
+### Phase 1: Database Schema, Dynamic Feature Flags & Reversible Migrations
+**Goal:** Create normalized Supabase Postgres tables with UUID foreign keys, strict RLS, dynamic settings, and grandfathering migration.
 
 - **Artifacts:**
   - `supabase/migrations/20261018_subscription_billing.sql`
 - **Tables to Create:**
-  1. `public.plans`:
+  1. `public.platform_settings`:
+     - `key` TEXT PRIMARY KEY
+     - `value` JSONB NOT NULL
+     - `updated_at` TIMESTAMPTZ NOT NULL DEFAULT now()
+     - `updated_by` UUID REFERENCES auth.users(id)
+     - *Seed value:* `key = 'billing_config'`, `value = {"enabled": false, "rollout_percentage": 0, "whitelisted_user_ids": [], "beta_cohort_emails": []}`
+  2. `public.plans`:
      - `id` UUID PRIMARY KEY DEFAULT gen_random_uuid()
      - `code` TEXT NOT NULL UNIQUE ('pro_monthly', 'pro_annual')
      - `name` TEXT NOT NULL
@@ -113,16 +186,16 @@ Every endpoint, header, payload field, and state name has been cross-checked aga
      - `entitlement_limits` JSONB NOT NULL DEFAULT '{}'::jsonb
      - `is_active` BOOLEAN NOT NULL DEFAULT true
      - `created_at` TIMESTAMPTZ NOT NULL DEFAULT now()
-  2. `public.subscriptions`:
+  3. `public.subscriptions`:
      - `id` UUID PRIMARY KEY DEFAULT gen_random_uuid()
      - `user_id` UUID NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE
      - `plan_id` UUID NOT NULL REFERENCES public.plans(id)
      - `status` TEXT NOT NULL DEFAULT 'inactive' CHECK (status IN ('inactive', 'active', 'grace', 'expired', 'canceled'))
      - `current_period_start` TIMESTAMPTZ
      - `current_period_end` TIMESTAMPTZ
-     - `grace_period_end` TIMESTAMPTZ
+     - `grace_period_days` INT NOT NULL DEFAULT 3
      - `created_at` TIMESTAMPTZ NOT NULL DEFAULT now(), `updated_at` TIMESTAMPTZ NOT NULL DEFAULT now()
-  3. `public.payments`:
+  4. `public.payments`:
      - `id` UUID PRIMARY KEY DEFAULT gen_random_uuid()
      - `user_id` UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE
      - `plan_id` UUID NOT NULL REFERENCES public.plans(id)
@@ -130,12 +203,12 @@ Every endpoint, header, payload field, and state name has been cross-checked aga
      - `provider_payment_id` TEXT
      - `internal_reference` TEXT NOT NULL UNIQUE
      - `amount_paise` BIGINT NOT NULL
-     - `status` TEXT NOT NULL CHECK (status IN ('INITIATED', 'ACTIVE', 'QUEUED', 'PROCESSING', 'SUCCESS', 'FAILED', 'SUSPICIOUS', 'EXPIRED', 'CANCELLED'))
+     - `status` TEXT NOT NULL CHECK (status IN ('INITIATED', 'ACTIVE', 'QUEUED', 'PROCESSING', 'SUCCESS', 'FAILED', 'SUSPICIOUS', 'SUSPICIOUS_LATE_SUCCESS', 'EXPIRED', 'CANCELLED'))
      - `utr` TEXT
      - `raw_provider_payload` JSONB
      - `paid_at` TIMESTAMPTZ
      - `created_at` TIMESTAMPTZ NOT NULL DEFAULT now()
-  4. `public.subscription_audit_logs`:
+  5. `public.subscription_audit_logs`:
      - `id` BIGSERIAL PRIMARY KEY
      - `user_id` UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE
      - `previous_status` TEXT
@@ -144,38 +217,87 @@ Every endpoint, header, payload field, and state name has been cross-checked aga
      - `actor` TEXT NOT NULL -- 'webhook', 'cron', 'admin:uuid', 'user'
      - `metadata` JSONB DEFAULT '{}'::jsonb
      - `created_at` TIMESTAMPTZ NOT NULL DEFAULT now()
-  5. `public.subscription_whitelist`:
+  6. `public.subscription_whitelist`:
      - `id` UUID PRIMARY KEY DEFAULT gen_random_uuid()
      - `email` TEXT NOT NULL UNIQUE
      - `reason` TEXT NOT NULL DEFAULT 'Approved by Admin'
      - `added_by` UUID REFERENCES auth.users(id)
      - `created_at` TIMESTAMPTZ NOT NULL DEFAULT now()
-- **RLS Configuration:**
+  7. `public.admin_users`:
+     - `user_id` UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE
+     - `created_at` TIMESTAMPTZ NOT NULL DEFAULT now()
+  8. `public.webhook_deliveries`:
+     - `delivery_id` UUID PRIMARY KEY
+     - `order_id` TEXT NOT NULL
+     - `received_at` TIMESTAMPTZ NOT NULL DEFAULT now()
+- **Grandfathering Migration Step for Existing Users**:
+  ```sql
+  -- Grant all existing registered users a 30-day complimentary subscription period
+  INSERT INTO public.subscriptions (user_id, plan_id, status, current_period_start, current_period_end)
+  SELECT 
+    u.id,
+    (SELECT id FROM public.plans WHERE code = 'pro_monthly' LIMIT 1),
+    'active',
+    now(),
+    now() + INTERVAL '30 days'
+  FROM auth.users u
+  ON CONFLICT (user_id) DO NOTHING;
+  ```
+- **RLS Configuration**:
   - `ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;`
   - `CREATE POLICY "Users can read own subscription" ON public.subscriptions FOR SELECT USING (auth.uid() = user_id);`
   - **Zero client writes**: No `INSERT`, `UPDATE`, or `DELETE` policy is granted to `anon` or `authenticated` roles. All writes occur via Supabase `service_role` on the Express backend.
   - Same pattern applied to `payments`, `subscription_audit_logs`, and `subscription_whitelist`.
-- **Server-Side Paywall Guard Function:**
+- **Hardened Server-Side Paywall Guard Function (`has_active_access`)**:
   ```sql
   CREATE OR REPLACE FUNCTION public.has_active_access(user_uuid UUID)
-  RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER AS $$
+  RETURNS BOOLEAN
+  LANGUAGE plpgsql
+  SECURITY DEFINER
+  SET search_path = public, pg_temp
+  AS $$
   DECLARE
+    config_val JSONB;
     user_email_val TEXT;
+    confirmed_at_val TIMESTAMPTZ;
+    is_globally_enabled BOOLEAN;
+    rollout_pct INT;
+    is_whitelisted_cohort BOOLEAN;
   BEGIN
-    -- Check 1: Whitelist bypass
-    SELECT email INTO user_email_val FROM auth.users WHERE id = user_uuid;
-    IF user_email_val IS NOT NULL AND EXISTS (
+    -- 1. Read dynamic settings
+    SELECT value INTO config_val FROM public.platform_settings WHERE key = 'billing_config';
+    is_globally_enabled := COALESCE((config_val->>'enabled')::boolean, false);
+    
+    -- If billing is globally OFF, grant full access
+    IF NOT is_globally_enabled THEN
+      RETURN TRUE;
+    END IF;
+
+    -- 2. Check cohort rollout
+    rollout_pct := COALESCE((config_val->>'rollout_percentage')::int, 0);
+    SELECT email, email_confirmed_at INTO user_email_val, confirmed_at_val FROM auth.users WHERE id = user_uuid;
+    
+    -- Check specific beta cohorts
+    is_whitelisted_cohort := (config_val->'whitelisted_user_ids') ? user_uuid::text
+      OR (user_email_val IS NOT NULL AND (config_val->'beta_cohort_emails') ? user_email_val);
+      
+    IF NOT is_whitelisted_cohort AND (abs(hashtext(user_uuid::text)) % 100) >= rollout_pct THEN
+      -- User is not in active billing cohort; grant access
+      RETURN TRUE;
+    END IF;
+
+    -- 3. Whitelist check: matches lowercase email against confirmed emails ONLY
+    IF user_email_val IS NOT NULL AND confirmed_at_val IS NOT NULL AND EXISTS (
       SELECT 1 FROM public.subscription_whitelist WHERE LOWER(email) = LOWER(user_email_val)
     ) THEN
       RETURN TRUE;
     END IF;
 
-    -- Check 2: Active or Grace subscription period
+    -- 4. Dynamic period calculation (computed from current_period_end + grace, NOT stored status string)
     RETURN EXISTS (
       SELECT 1 FROM public.subscriptions
       WHERE user_id = user_uuid
-        AND status IN ('active', 'grace')
-        AND (current_period_end > now() OR grace_period_end > now())
+        AND (current_period_end + (grace_period_days || ' days')::INTERVAL) > now()
     );
   END;
   $$;
@@ -185,47 +307,66 @@ Every endpoint, header, payload field, and state name has been cross-checked aga
 ---
 
 ### Phase 2: Express Backend Server & Anti-DoS Order Creation
-**Goal:** Setup secure Express backend with verified-email gating, single open order lock, and rate limiting.
+**Goal:** Setup secure Express backend with verified-email gating, single open order lock, global queue depth cap, and rate limiting.
 
 - **Files:**
-  - `server/index.ts`: Express application running on port 5000 with CORS, JSON and raw body parsing.
-  - `server/middleware/auth.ts`: Validates Supabase JWT, asserts `email_verified === true`.
+  - `server/index.ts`: Express application running on port 5000 with `app.set('trust proxy', 1)`.
+  - `server/middleware/auth.ts`: Validates Supabase JWT using server-side `supabase.auth.getUser()`, asserts `user.email_confirmed_at IS NOT NULL`.
+  - `server/middleware/adminAuth.ts`: Asserts user is in `public.admin_users` table or `app_metadata.role === 'admin'`.
   - `server/providers/PaymentProvider.ts`: Provider-agnostic interface (`createOrder`, `verifyWebhook`, `queryStatus`, `cancelOrder`).
   - `server/providers/YouPiPaymentProvider.ts`: YouPI PG adapter interacting with `POST /api/v1/payments`, `GET /api/v1/payments/{id}`, and `POST /api/v1/checkout/{id}/cancel`.
   - `server/routes/billing.ts`:
     - `POST /api/billing/create-order`:
-      - Requires verified email authentication.
-      - **Anti-DoS Single-Slot Queue Lock**: Rejects if user already has an active order in `['INITIATED', 'ACTIVE', 'QUEUED', 'PROCESSING']` created within the last 15 minutes (returns existing session or error).
-      - Per-user and per-IP rate limiting: Max 3 order attempts per 10 minutes.
+      - **Account-Age & Verification Gate**: Asserts `email_confirmed_at IS NOT NULL` and account is at least 1 hour old (`Date.now() - new Date(user.created_at).getTime() > 3600000`) or verifies CAPTCHA token.
+      - **Global Queue-Depth Cap**: Queries `payments` count in `['ACTIVE', 'QUEUED', 'PROCESSING']`. If platform-wide open orders $\ge 5$, returns HTTP 429 (`SYSTEM_QUEUE_FULL`, "Payment gateway is processing high volume, please retry in 2 minutes").
+      - **User Order Lock with Real-Time Reconciliation**: Queries user's latest open order. If found, queries YouPI PG via `GET /api/v1/payments/{paymentId}`. If YouPI reports it as terminal (`CANCELLED`, `EXPIRED`, `FAILED`), updates DB to terminal state immediately and allows user to proceed. If still active, returns existing checkout URL instead of duplicating orders.
+      - **Per-User & Per-IP Rate Limiting**: Max 3 order attempts per 10 minutes.
       - Resolves price in paise strictly from `public.plans` DB table (ignores client amount).
       - Calls `YouPiPaymentProvider.createOrder()` and inserts `INITIATED` record via `service_role`.
     - `POST /api/billing/cancel-order`: Explicitly cancels active session via `POST /api/v1/checkout/{id}/cancel` to immediately free the YouPI single-slot queue.
-- **Verification Criteria:**
-  - Automated test confirms a user cannot create a second order while one is open.
-  - Client cannot manipulate price.
+- **Residual Risk Documentation**:
+  - *Multi-Account DoS*: A coordinated attacker with multiple confirmed email accounts could cycle orders into the queue. Mitigated by global queue-depth cap (max 5 open orders platform-wide), IP velocity limits, account-age/CAPTCHA barriers, and YouPI's aggressive 5-minute session timeout with automatic slot cancellation.
 
 ---
 
-### Phase 3: Authoritative Webhook Receiver & Confirmation Engine
-**Goal:** Implement zero-trust server-to-server webhook handler verifying HMAC-SHA256 signatures, timestamps, idempotency, and extending subscriptions atomically.
+### Phase 3: Authoritative Webhook Receiver & Dual-Verification Engine
+**Goal:** Implement zero-trust server-to-server webhook handler verifying HMAC-SHA256 signatures, replay window, out-of-band GET confirmation, idempotency, and atomic period math.
 
 - **Files:**
   - `server/routes/webhook.ts`: Mounted at `/api/youpi-webhook`.
   - `server/services/confirmationService.ts`: Core atomic transaction handler.
-- **Security Checkpoints:**
-  1. **Raw Body Buffer:** Verifies HMAC-SHA256 signature against unparsed payload bytes using `crypto.timingSafeEqual` with `YOUPI_WEBHOOK_SECRET`.
-  2. **Timestamp Replay Check:** Reject any webhook where `X-Gateway-Timestamp` is older than 5 minutes (300,000ms).
-  3. **Idempotency Guard:** If `provider_order_id` is already in state `SUCCESS`, return HTTP 200 without re-extending the subscription.
-  4. **Amount & Plan Validation:** Validate `amountPaise == plan.price_paise`. If mismatched, flag payment as `SUSPICIOUS`, record in audit log, notify admin, and do NOT activate access.
-  5. **Atomic Period Math in PostgreSQL Transaction:**
+- **Security Checkpoints**:
+  1. **Raw Body Buffer Verification**: Computes HMAC-SHA256 over raw unparsed payload bytes using `YOUPI_WEBHOOK_SECRET` and performs constant-time comparison (`crypto.timingSafeEqual`) against `X-Gateway-Signature`.
+  2. **Timestamp Signature Coverage & Replay Window**:
+     - *Cryptographic Fact*: In YouPI PG (`packages/core/src/webhook-engine.js:46-56`), the HMAC signature covers **only** the JSON body string, **not** the `X-Gateway-Timestamp` header.
+     - *Defense*: Server strictly verifies that `|Date.now() - Number(timestamp)| < 300000` (5-minute window) **and** inserts `X-Gateway-Delivery-Id` into `public.webhook_deliveries(delivery_id)`. If delivery ID already exists, drops duplicate without re-processing.
+  3. **Mandatory Out-of-Band GET Verification**:
+     - Upon receiving webhook, the server issues `GET /api/v1/payments/{paymentId}` to the YouPI Gateway.
+     - Asserts gateway status is strictly `SUCCESS`.
+     - Asserts `amountPaise` (integers only) matches expected plan price in DB.
+     - Asserts `orderId` matches DB record.
+     - Asserts `metadata.userId` matches DB user.
+  4. **Late-`SUCCESS` after `EXPIRED` Handling**:
+     - If the order was already marked `EXPIRED` in CrestFlow (e.g., bank observer received SMS after customer timeout):
+       - Do **NOT** auto-activate the subscription.
+       - Transition status to `SUSPICIOUS_LATE_SUCCESS`.
+       - Record in `subscription_audit_logs`.
+       - Push to Admin Review Queue with visual banner so admin can verify bank credit and approve manually.
+  5. **Idempotency Guard**: If `provider_order_id` is already in state `SUCCESS`, returns HTTP 200 without second period extension.
+  6. **Atomic Period Math in PostgreSQL Transaction**:
      ```sql
-     current_period_end = GREATEST(now(), COALESCE(current_period_end, now())) + (plan.period_days || ' days')::INTERVAL
+     UPDATE public.subscriptions
+     SET current_period_end = GREATEST(now(), COALESCE(current_period_end, now())) + (plan_period_days || ' days')::INTERVAL,
+         status = 'active',
+         updated_at = now()
+     WHERE user_id = target_user_id;
      ```
-  6. **Audit Trail Logging:** Insert record into `subscription_audit_logs`.
+  7. **Firebase Custom Claim Sync**: Express backend updates Firebase Auth custom claims (`pro_expiry_timestamp: Math.floor(newPeriodEnd.getTime()/1000)`).
 - **Verification Criteria:**
   - Valid webhook extends period by exactly 30 or 365 days.
   - Duplicate webhook returns 200 without second extension.
   - Forged signature returns HTTP 401.
+  - Late success after expiry flags `SUSPICIOUS_LATE_SUCCESS` without auto-activation.
 
 ---
 
@@ -238,7 +379,7 @@ Every endpoint, header, payload field, and state name has been cross-checked aga
   - `src/components/SubscriptionModal.tsx`:
     - Shows YouPI checkout modal with real-time `queuePosition` display (e.g., "Queue position #1 - Estimated wait: 45 seconds").
     - 5-minute visual countdown timer.
-    - Explicit "Cancel Order" button invoking `/api/billing/cancel-order` to prevent queue deadlock.
+    - Explicit "Cancel Order" button invoking `/api/billing/cancel-order` to immediately release YouPI queue slot.
   - `src/components/PaywallGate.tsx` / `src/App.tsx`:
     - Enforces mandatory subscription: Unsubscribed users without VIP whitelist cannot access tool features; prompted with ₹49 checkout modal.
 - **Data Preservation Guarantee:**
@@ -254,9 +395,10 @@ Every endpoint, header, payload field, and state name has been cross-checked aga
 
 - **Files:**
   - `server/cron/subscriptionCron.ts`:
-    - **Renewal Reminder Job (Daily 6:00 AM):** Identifies subscriptions expiring in 7, 3, and 1 days; schedules email/WhatsApp notifications.
-    - **Grace Period Handler:** When `current_period_end < now()`, moves status to `grace` for 3 days; after grace period, sets status to `expired`.
-    - **Reconciliation Job (Hourly):** Queries YouPI PG (`GET /api/v1/payments/{paymentId}`) for pending orders older than 15 minutes to reconcile missed webhooks or flag unresolved items.
+    - **Single-Execution Advisory Lock**: Every run requests `pg_try_advisory_lock(88992211)`. If locked, cleanly skips.
+    - **Renewal Reminder Job (Daily 6:00 AM)**: Identifies subscriptions expiring in 7, 3, and 1 days; schedules email/WhatsApp notifications.
+    - **Grace Period Handler**: Evaluates `current_period_end < now()` and `current_period_end + (grace_period_days || ' days')::INTERVAL > now()`.
+    - **Reconciliation Job (Hourly)**: Queries YouPI PG (`GET /api/v1/payments/{paymentId}`) for pending orders older than 15 minutes to reconcile missed webhooks or flag unresolved items.
 - **Verification Criteria:**
   - Automated grace period transition occurs without data disruption.
   - Reconciliation recovers pending payments that succeeded at the gateway.
@@ -272,7 +414,7 @@ Every endpoint, header, payload field, and state name has been cross-checked aga
   - `SAC_CODE_DEFAULT`: string constant `"998313"` (Information Technology Software Services).
   - **Open Question for CA**: *"Confirm exact 6-digit SAC code (e.g. 998313 vs 998314) and whether MSME / composite exemption applies for under ₹20L/₹40L annual turnover."*
 - **Files:**
-  - `server/routes/admin.ts`: Admin-only endpoints for whitelist CRUD and manual payment approve/reject, protected by server authentication and writing to `subscription_audit_logs`.
+  - `server/routes/admin.ts`: Admin-only endpoints for whitelist CRUD and manual payment approve/reject, protected by `adminAuth` middleware and writing to `subscription_audit_logs`.
   - `src/components/admin/AdminPaymentApprovals.tsx`: Verification queue showing bank UTR, observer confidence level, and one-click manual approve/reject.
   - `server/services/subscriptionInvoiceService.ts`: Automatically generates a PDF tax invoice/receipt (reusing CrestFlow's invoice engine).
 
@@ -283,16 +425,16 @@ Every endpoint, header, payload field, and state name has been cross-checked aga
 
 - **Test Files:**
   - `tests/unit/entitlements.test.ts`: Entitlement rules, VIP bypass, grace period limits.
-  - `tests/unit/periodMath.test.ts`: Atomic period extension logic (`GREATEST(now(), current_period_end) + days`).
+  - `tests/unit/periodMath.test.ts`: Dynamic period calculation and atomic extension logic.
   - `tests/integration/rlsBypass.test.ts`: **Proves that a direct client-side Supabase attempt to insert or update subscription status fails with `42501` (insufficient_privilege).**
   - `tests/integration/webhook.test.ts`:
-    - Valid signature -> 200 OK + period extended.
+    - Valid signature + out-of-band GET success -> 200 OK + period extended.
     - Invalid signature -> 401 Unauthorized.
     - Replayed webhook (stale timestamp) -> 400 Bad Request.
     - Duplicate delivery ID -> 200 OK, no duplicate extension.
     - Amount mismatch -> 422 Unprocessable + marked SUSPICIOUS.
-    - Order expired/failed -> marked FAILED, no access granted.
-  - `tests/integration/abuseControls.test.ts`: Unverified email rejected, second concurrent order blocked, rate limits enforced.
+    - Late success after expiry -> marked SUSPICIOUS_LATE_SUCCESS, no auto-activate.
+  - `tests/integration/abuseControls.test.ts`: Unconfirmed email rejected, second concurrent order blocked, global queue cap enforced, rate limits enforced.
 - **Verification Criteria:**
   - 100% of test suite passes.
   - Zero PII in logs (masked phone numbers, emails, and transaction IDs).
@@ -300,19 +442,19 @@ Every endpoint, header, payload field, and state name has been cross-checked aga
 ---
 
 ### Phase 8: Rollout Runbook & Feature Flag Control
-**Goal:** Controlled dark launch behind `BILLING_ENABLED`.
+**Goal:** Controlled dark launch managed via database settings.
 
 - **Configuration:**
-  - Default: `BILLING_ENABLED=false` (App operates identically to current behavior; paywall disabled).
+  - Default: `billing_config.enabled = false` in `platform_settings` (App operates identically to current behavior; paywall disabled).
   - Step 1: Enable for platform admin account via email whitelist.
-  - Step 2: Enable for beta cohort (10% users).
-  - Step 3: Full production rollout.
-  - Instant rollback procedure: set `BILLING_ENABLED=false` in environment variables.
+  - Step 2: Enable for beta cohort via `whitelisted_user_ids` or `rollout_percentage`.
+  - Step 3: Full production rollout (`enabled = true`, `rollout_percentage = 100`).
+  - Instant rollback procedure: update `platform_settings` setting `enabled = false`.
 
 ---
 
-## 5. Definition of Done
+## 6. Definition of Done
 1. All unit and integration tests pass, including client RLS bypass test.
-2. The threat-model checklist confirms all 15 non-negotiable security requirements are verified.
-3. Subscriptions activate **only** via server-verified HMAC webhooks or admin manual override.
-4. Setting `BILLING_ENABLED=false` restores existing behavior with zero regressions.
+2. The threat-model checklist confirms all 18 security invariants are verified.
+3. Subscriptions activate **only** via server-verified HMAC webhooks with out-of-band GET confirmation or admin manual override.
+4. Setting `billing_config.enabled = false` in `platform_settings` restores existing behavior with zero regressions.
