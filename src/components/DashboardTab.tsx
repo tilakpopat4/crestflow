@@ -62,6 +62,8 @@ export default function DashboardTab({
   const journey = calculateWorkJourney(profile?.freelanceStartDate);
   const [paymentModalState, setPaymentModalState] = useState<{ invoiceId: string | null, isOpen: boolean }>({ invoiceId: null, isOpen: false });
   const [isMigratingCloud, setIsMigratingCloud] = useState(false);
+  const [isDataMenuOpen, setIsDataMenuOpen] = useState(false);
+  const [isMigrationDismissed, setIsMigrationDismissed] = useState(false);
 
 
 
@@ -439,38 +441,54 @@ export default function DashboardTab({
           <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">Financial overview & payment cycles.</p>
         </div>
         
-        <div className="flex flex-wrap items-center gap-2">
-          {localStorage.getItem('clients') || localStorage.getItem('monthlyWork') ? (
-            <button 
-              onClick={migrateLocalData}
-              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
-            >
-              <UploadCloud size={14} /> Migrate Data
-            </button>
-          ) : null}
+        <div className="relative">
           <button 
-            onClick={handleExportCSV}
-            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
-            title="Download full database as CSV spreadsheet"
+            type="button"
+            onClick={() => setIsDataMenuOpen(!isDataMenuOpen)}
+            className="flex items-center gap-1.5 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-medium transition-colors shadow-2xs cursor-pointer"
+            aria-expanded={isDataMenuOpen}
           >
-            <DownloadCloud size={14} /> Export CSV
+            <DownloadCloud size={14} />
+            <span>Workspace Data</span>
           </button>
 
-          <button 
-            onClick={handleExport}
-            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
-            title="Download full database as JSON backup"
-          >
-            <DownloadCloud size={14} /> Export JSON
-          </button>
-          
-          <button 
-            onClick={() => fileInputRef.current?.click()}
-            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
-            title="Restore from JSON backup file"
-          >
-            <UploadCloud size={14} /> Import Backup
-          </button>
+          {isDataMenuOpen && (
+            <>
+              <div className="fixed inset-0 z-20" onClick={() => setIsDataMenuOpen(false)} />
+              <div className="absolute right-0 mt-1.5 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg py-1 z-30 text-xs">
+                {Boolean(localStorage.getItem('clients') || localStorage.getItem('monthlyWork')) && (
+                  <button
+                    type="button"
+                    onClick={() => { setIsDataMenuOpen(false); migrateLocalData(); }}
+                    className="w-full text-left px-3 py-2 text-indigo-600 dark:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-700 font-medium flex items-center gap-2 cursor-pointer border-none"
+                  >
+                    <UploadCloud size={13} /> Migrate Local Data
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => { setIsDataMenuOpen(false); handleExportCSV(); }}
+                  className="w-full text-left px-3 py-2 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2 cursor-pointer border-none"
+                >
+                  <DownloadCloud size={13} /> Export CSV Spreadsheet
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setIsDataMenuOpen(false); handleExport(); }}
+                  className="w-full text-left px-3 py-2 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2 cursor-pointer border-none"
+                >
+                  <DownloadCloud size={13} /> Export JSON Backup
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setIsDataMenuOpen(false); fileInputRef.current?.click(); }}
+                  className="w-full text-left px-3 py-2 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2 cursor-pointer border-none"
+                >
+                  <UploadCloud size={13} /> Import JSON Backup
+                </button>
+              </div>
+            </>
+          )}
           <input 
             type="file" 
             accept=".json" 
@@ -532,10 +550,10 @@ export default function DashboardTab({
       )}
 
       {/* Database Migration Banner */}
-      {clients.length === 0 && user?.uid && (
-        <div className="bg-indigo-50 dark:bg-slate-900 border border-indigo-200 dark:border-indigo-900/50 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <span className="text-[10px] font-bold text-indigo-700 dark:text-indigo-400 uppercase tracking-wider bg-indigo-100 dark:bg-indigo-950/80 px-2 py-0.5 rounded">
+      {clients.length === 0 && user?.uid && !isMigrationDismissed && (
+        <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative">
+          <div className="space-y-1 pr-6">
+            <span className="text-[10px] font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
               Database Migration
             </span>
             <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-1">
@@ -545,25 +563,36 @@ export default function DashboardTab({
               All your previous clients, work items, and invoices in Firestore can be copied directly into your new Supabase PostgreSQL database with one click.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={async () => {
-              setIsMigratingCloud(true);
-              try {
-                const res = await migrateFirestoreToSupabase(user.uid);
-                alert(`Migration Complete!\n\nMigrated ${res.clients} clients, ${res.workItems} work logs, and ${res.invoices} invoices to Supabase.`);
-                window.location.reload();
-              } catch (err: any) {
-                alert(`Migration Error: ${err?.message || 'Failed'}`);
-              } finally {
-                setIsMigratingCloud(false);
-              }
-            }}
-            disabled={isMigratingCloud}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer border-none disabled:opacity-50 shrink-0"
-          >
-            {isMigratingCloud ? 'Migrating Data...' : 'Import from Firestore Now'}
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={async () => {
+                setIsMigratingCloud(true);
+                try {
+                  const res = await migrateFirestoreToSupabase(user.uid);
+                  alert(`Migration Complete!\n\nMigrated ${res.clients} clients, ${res.workItems} work logs, and ${res.invoices} invoices to Supabase.`);
+                  window.location.reload();
+                } catch (err: any) {
+                  alert(`Migration Error: ${err?.message || 'Failed'}`);
+                } finally {
+                  setIsMigratingCloud(false);
+                }
+              }}
+              disabled={isMigratingCloud}
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer border-none disabled:opacity-50"
+            >
+              {isMigratingCloud ? 'Migrating Data...' : 'Import from Firestore Now'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsMigrationDismissed(true)}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              title="Dismiss banner"
+              aria-label="Dismiss migration banner"
+            >
+              <X size={16} />
+            </button>
+          </div>
         </div>
       )}
 

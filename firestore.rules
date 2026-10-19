@@ -21,7 +21,7 @@ service cloud.firestore {
       return isSignedIn() && (
         request.auth.token.is_whitelisted == 1 ||
         (request.auth.token.pro_expiry_timestamp is int &&
-         request.time < timestamp.date(request.auth.token.pro_expiry_timestamp * 1000))
+         request.time.toMillis() < request.auth.token.pro_expiry_timestamp * 1000)
       );
     }
 
@@ -77,28 +77,28 @@ service cloud.firestore {
 
     // Path Rules
     match /clients/{clientId} {
-      allow read: if true;
+      allow read: if isOwner(resource.data.userId);
       allow delete: if isOwner(resource.data.userId);
       allow create: if isOwner(incoming().userId) && hasActiveProAccess() && isValidId(clientId) && isValidClient(incoming());
-      allow update: if isOwner(existing().userId) && isOwner(incoming().userId) && isValidClient(incoming());
+      allow update: if isOwner(existing().userId) && isOwner(incoming().userId) && hasActiveProAccess() && isValidClient(incoming());
     }
 
     match /invoices/{invoiceId} {
-      allow read: if isSignedIn();
+      allow read: if isOwner(resource.data.userId);
       allow delete: if isOwner(resource.data.userId);
       allow create: if isOwner(incoming().userId) && hasActiveProAccess() && isValidId(invoiceId) && isValidInvoice(incoming());
-      allow update: if isOwner(existing().userId) && isOwner(incoming().userId) && isValidInvoice(incoming());
+      allow update: if isOwner(existing().userId) && isOwner(incoming().userId) && hasActiveProAccess() && isValidInvoice(incoming());
     }
 
     match /workItems/{workItemId} {
-      allow read: if isSignedIn();
+      allow read: if isOwner(resource.data.userId);
       allow delete: if isOwner(resource.data.userId);
       allow create: if isOwner(incoming().userId) && hasActiveProAccess() && isValidId(workItemId) && isValidWorkItem(incoming());
-      allow update: if isOwner(existing().userId) && isOwner(incoming().userId) && isValidWorkItem(incoming());
+      allow update: if isOwner(existing().userId) && isOwner(incoming().userId) && hasActiveProAccess() && isValidWorkItem(incoming());
     }
 
     match /profiles/{profileId} {
-      allow read: if true;
+      allow read: if isSignedIn() && (isOwner(resource.data.userId) || resource.data.isPublic == true);
       allow create: if isOwner(incoming().userId) && isValidId(profileId) && (profileId == request.auth.uid || incoming().userId == request.auth.uid) && isValidProfile(incoming());
       allow update, delete: if isOwner(existing().userId) && isOwner(incoming().userId) && isValidProfile(incoming());
     }

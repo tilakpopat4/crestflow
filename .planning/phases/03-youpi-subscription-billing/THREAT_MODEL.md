@@ -1,6 +1,6 @@
 # Threat-Model Checklist & Security Invariants Verification (Revised)
 
-This document cross-references each of the **15 Non-Negotiable Security Requirements** and additional DoS protections against its exact implementation safeguard, defense mechanism, and automated test location.
+This document cross-references each of the **18 Non-Negotiable Security Invariants** and additional DoS protections against its exact implementation safeguard, defense mechanism, and automated test location.
 
 ---
 
