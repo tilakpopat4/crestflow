@@ -8,9 +8,9 @@ import Logo from './Logo';
 import { 
   getPaymentStatusInfo, 
   calculateClientFinancials,
-  generateUPIQrUrl,
   generateUPILink
 } from '../lib/paymentUtils';
+import { QRCodeSVG } from 'qrcode.react';
 import { 
   LogOut, 
   Briefcase, 
@@ -965,11 +965,12 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
             {/* UPI Payment Option if Pending */}
             {viewInvoice.status === 'Pending' && freelancerProfile?.upiId && (
               <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 rounded-2xl p-4 flex flex-col sm:flex-row items-center gap-4">
-                <div className="w-24 h-24 bg-white p-1 rounded-xl border border-slate-200 dark:border-slate-700 shrink-0 flex items-center justify-center">
-                  <img
-                    src={generateUPIQrUrl(freelancerProfile.upiId, freelancerProfile.name, viewInvoice.totalAmount)}
-                    alt="UPI Payment QR"
-                    className="w-full h-full object-contain"
+                <div className="w-24 h-24 bg-white p-2 rounded-xl border border-slate-200 dark:border-slate-700 shrink-0 flex items-center justify-center">
+                  <QRCodeSVG
+                    value={generateUPILink(freelancerProfile.upiId, freelancerProfile.name, viewInvoice.totalAmount)}
+                    size={80}
+                    level="M"
+                    className="w-full h-full"
                   />
                 </div>
                 <div className="space-y-2 text-center sm:text-left flex-1">

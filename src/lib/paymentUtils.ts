@@ -340,14 +340,3 @@ export function generateUPILink(
   }
   return `upi://pay?pa=${cleanUpiId}&pn=${encodeURIComponent(cleanName)}&tn=${encodeURIComponent(cleanNote)}${amountQuery}&cu=INR`;
 }
-
-export function generateUPIQrUrl(
-  upiId: string,
-  payeeName: string = '',
-  amount?: number,
-  transactionNote: string = 'Freelance Video Editing Payment'
-): string {
-  const upiUri = generateUPILink(upiId, payeeName, amount, transactionNote);
-  if (!upiUri) return '';
-  return `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiUri)}`;
-}
