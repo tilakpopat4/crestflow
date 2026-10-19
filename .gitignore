@@ -8,3 +8,4 @@ coverage/
 !.env.example
 client_secret*.json
 .agent/
+youpi-pg/

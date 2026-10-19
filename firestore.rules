@@ -2,13 +2,13 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
+
     // Default-deny catch-all rule
     match /{document=**} {
       allow read, write: if false;
     }
 
-    // Common Security Helper Functions
+    // Helper Functions
     function isSignedIn() {
       return request.auth != null;
     }
@@ -17,24 +17,33 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.admin == true;
+    }
+
+    // Plain-equality client check: stored lowercase, enforced on write, requires verified email
+    function isClient(clientEmail) {
+      return isSignedIn()
+        && request.auth.token.email_verified == true
+        && request.auth.token.email != null
+        && request.auth.token.email == clientEmail;
+    }
+
+    // Paywall: Allowed during stages when subscriptions are disabled or bypassed
+    function hasActiveProAccess() {
+      return true;
+    }
+
     function isValidId(id) {
       return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_-]+$');
     }
 
-    function incoming() {
-      return request.resource.data;
-    }
-
-    function existing() {
-      return resource.data;
-    }
-
-    // Entity Schema Validators
+    // Original Entity Validators Restored with Lowercase Email & String/Size Checks
     function isValidClient(data) {
       return data.userId is string && data.userId == request.auth.uid
         && (data.name is string && data.name.size() > 0 && data.name.size() <= 200)
         && (!('company' in data) || (data.company is string && data.company.size() <= 200))
-        && (!('email' in data) || (data.email is string && data.email.size() <= 200))
+        && (!('email' in data) || (data.email is string && data.email.size() <= 200 && data.email == data.email.lower()))
         && (!('phone' in data) || (data.phone is string && data.phone.size() <= 50))
         && (!('currency' in data) || (data.currency is string && data.currency.size() <= 10))
         && (!('rate' in data) || (data.rate is number || data.rate is int))
@@ -46,19 +55,26 @@ service cloud.firestore {
         && (!('invoiceNumber' in data) || (data.invoiceNumber is string && data.invoiceNumber.size() <= 100))
         && (!('clientName' in data) || (data.clientName is string && data.clientName.size() <= 200))
         && (!('totalAmount' in data) || (data.totalAmount is number || data.totalAmount is int))
-        && (!('status' in data) || (data.status is string && data.status.size() <= 50));
+        && (!('status' in data) || (data.status is string && data.status.size() <= 50))
+        && (!('clientEmail' in data) || (data.clientEmail is string && data.clientEmail.size() <= 200 && data.clientEmail == data.clientEmail.lower()));
     }
 
     function isValidWorkItem(data) {
       return data.userId is string && data.userId == request.auth.uid
         && (!('title' in data) || (data.title is string && data.title.size() <= 300))
-        && (!('status' in data) || (data.status is string && data.status.size() <= 50));
+        && (!('status' in data) || (data.status is string && data.status.size() <= 50))
+        && (!('clientEmail' in data) || (data.clientEmail is string && data.clientEmail.size() <= 200 && data.clientEmail == data.clientEmail.lower()));
     }
 
     function isValidProfile(data) {
       return data.userId is string && data.userId == request.auth.uid
         && (!('name' in data) || (data.name is string && data.name.size() <= 200))
-        && (!('email' in data) || (data.email is string && data.email.size() <= 200));
+        && (!('email' in data) || (data.email is string && data.email.size() <= 200))
+        && (!('phone' in data) || (data.phone is string && data.phone.size() <= 50))
+        && (!('professionalTitle' in data) || (data.professionalTitle is string && data.professionalTitle.size() <= 200))
+        && (!('servicesDescription' in data) || (data.servicesDescription is string && data.servicesDescription.size() <= 2000))
+        && (!('workExperienceBio' in data) || (data.workExperienceBio is string && data.workExperienceBio.size() <= 5000))
+        && (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 2000));
     }
 
     function isValidNote(data) {
@@ -67,61 +83,107 @@ service cloud.firestore {
         && (!('content' in data) || (data.content is string && data.content.size() <= 5000));
     }
 
-    // Path Rules
+    // 1. Clients
     match /clients/{clientId} {
-      allow read: if true;
+      allow read: if isOwner(resource.data.userId) || (('email' in resource.data) && isClient(resource.data.email));
       allow delete: if isOwner(resource.data.userId);
-      allow create: if isOwner(incoming().userId) && isValidId(clientId) && isValidClient(incoming());
-      allow update: if isOwner(existing().userId) && isOwner(incoming().userId) && isValidClient(incoming());
+      allow create: if isOwner(request.resource.data.userId) && hasActiveProAccess() && isValidId(clientId) && isValidClient(request.resource.data);
+      allow update: if isOwner(resource.data.userId) && isOwner(request.resource.data.userId) && hasActiveProAccess() && isValidClient(request.resource.data);
     }
 
+    // 2. Invoices
     match /invoices/{invoiceId} {
-      allow read: if isSignedIn();
+      allow read: if isOwner(resource.data.userId) || (('clientEmail' in resource.data) && isClient(resource.data.clientEmail));
       allow delete: if isOwner(resource.data.userId);
-      allow create: if isOwner(incoming().userId) && isValidId(invoiceId) && isValidInvoice(incoming());
-      allow update: if isOwner(existing().userId) && isOwner(incoming().userId) && isValidInvoice(incoming());
+      allow create: if isOwner(request.resource.data.userId) && hasActiveProAccess() && isValidId(invoiceId) && isValidInvoice(request.resource.data);
+      allow update: if isOwner(resource.data.userId) && isOwner(request.resource.data.userId) && hasActiveProAccess() && isValidInvoice(request.resource.data);
     }
 
+    // 3. Work Items
     match /workItems/{workItemId} {
-      allow read: if isSignedIn();
+      allow read: if isOwner(resource.data.userId) || (('clientEmail' in resource.data) && isClient(resource.data.clientEmail));
       allow delete: if isOwner(resource.data.userId);
-      allow create: if isOwner(incoming().userId) && isValidId(workItemId) && isValidWorkItem(incoming());
-      allow update: if isOwner(existing().userId) && isOwner(incoming().userId) && isValidWorkItem(incoming());
+      allow create: if isOwner(request.resource.data.userId) && hasActiveProAccess() && isValidId(workItemId) && isValidWorkItem(request.resource.data);
+      allow update: if isOwner(resource.data.userId) && isOwner(request.resource.data.userId) && hasActiveProAccess() && isValidWorkItem(request.resource.data);
     }
 
+    // 4. Profiles (Public Info on Root Document)
     match /profiles/{profileId} {
-      allow read: if true;
-      allow create: if isOwner(incoming().userId) && isValidId(profileId) && (profileId == request.auth.uid || incoming().userId == request.auth.uid) && isValidProfile(incoming());
-      allow update, delete: if isOwner(existing().userId) && isOwner(incoming().userId) && isValidProfile(incoming());
+      allow list: if isAdmin();
+      allow get: if isOwner(profileId) || resource.data.isPublicProfile == true || isAdmin();
+      allow create: if isOwner(profileId) && isValidId(profileId) && isValidProfile(request.resource.data);
+      allow update: if isOwner(profileId) && isValidProfile(request.resource.data);
+      allow delete: if isOwner(profileId);
+
+      // Private Settings Subcollection (geminiApiKey, bank accounts)
+      match /private/{docId} {
+        allow read, write: if isOwner(profileId);
+      }
     }
 
-    match /serviceRequests/{requestId} {
-      allow create: if isValidId(requestId);
-      allow read, update, delete: if isSignedIn() && (isOwner(resource.data.userId) || isOwner(incoming().userId));
-    }
-
+    // 5. Notes
     match /notes/{noteId} {
       allow read, delete: if isOwner(resource.data.userId);
-      allow create: if isOwner(incoming().userId) && isValidId(noteId) && isValidNote(incoming());
-      allow update: if isOwner(existing().userId) && isOwner(incoming().userId) && isValidNote(incoming());
+      allow create: if isOwner(request.resource.data.userId) && isValidId(noteId) && isValidNote(request.resource.data);
+      allow update: if isOwner(resource.data.userId) && isOwner(request.resource.data.userId) && isValidNote(request.resource.data);
     }
 
+    // 6. Reviews
     match /reviews/{reviewId} {
-      allow read: if isSignedIn();
+      allow read: if (('isApproved' in resource.data) && resource.data.isApproved == true) || isOwner(resource.data.userId);
       allow delete: if isOwner(resource.data.userId);
-      allow create: if isValidId(reviewId) 
-        && incoming().userId is string 
-        && incoming().clientName is string 
-        && incoming().rating is number 
-        && incoming().rating >= 1 
-        && incoming().rating <= 5 
-        && incoming().feedbackText is string;
-      allow update: if isOwner(existing().userId) && isOwner(incoming().userId);
+      allow create: if isValidId(reviewId)
+        && request.resource.data.keys().hasOnly(['id', 'userId', 'clientId', 'clientName', 'projectName', 'rating', 'feedbackText', 'createdAt', 'isApproved'])
+        && request.resource.data.isApproved == false
+        && request.resource.data.userId is string
+        && request.resource.data.clientName is string
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 1 && request.resource.data.rating <= 5
+        && request.resource.data.feedbackText is string && request.resource.data.feedbackText.size() <= 2000;
+      // Update strictly limited to owner approving/unapproving the review
+      allow update: if isOwner(resource.data.userId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isApproved'])
+        && request.resource.data.isApproved is bool;
     }
 
+    // 7. Service Requests
+    match /serviceRequests/{requestId} {
+      allow create: if isValidId(requestId)
+        && request.resource.data.keys().hasOnly(['id', 'userId', 'clientName', 'contactName', 'contactPhone', 'contactEmail', 'projectDetails', 'instagram', 'proposedRate', 'status', 'createdAt'])
+        && request.resource.data.userId is string
+        && request.resource.data.clientName is string
+        && request.resource.data.projectDetails is string && request.resource.data.projectDetails.size() <= 2000;
+      allow read, update, delete: if isOwner(resource.data.userId);
+    }
+
+    // 8. Blocked Users (get vs list distinction)
     match /blocked_users/{userId} {
+      allow get: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow list: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // 9. FCM Services & Diagnostics
+    match /fcm_devices/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+    match /fcm_notifications/{notificationId} {
+      allow create: if isSignedIn();
+      allow read, write: if isOwner(resource.data.userId);
+    }
+    match /_connection_test/{docId} {
       allow read: if true;
-      allow create, update, delete: if isSignedIn();
+    }
+
+    // 10. Platform Settings (Client read and write completely disabled)
+    match /platform_settings/{settingId} {
+      allow read, write: if false;
+    }
+
+    // 11. System Settings (Global features like subscription master toggle)
+    match /system_settings/{settingId} {
+      allow read: if true;
+      allow write: if isSignedIn();
     }
   }
 }

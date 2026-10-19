@@ -58,6 +58,7 @@ export interface Reel {
 export interface WorkItem {
   id: string;
   clientId: string;
+  clientEmail?: string;
   subClientId?: string;
   subClientName?: string;
   description: string;
@@ -76,12 +77,15 @@ export interface InvoiceDeliverable {
   quantity: number;
   videoUrl?: string;
   date?: number;
+  subClientName?: string;
 }
 
 export interface Invoice {
   id: string;
+  invoiceNumber?: string;
   date: number;
   clientId: string;
+  clientEmail?: string;
   clientName: string;
   reels: Reel[];
   totalAmount: number;
@@ -96,15 +100,73 @@ export interface Invoice {
   billingMonth?: string; // e.g. "October 2026"
   linkedWorkItemIds?: string[];
   deliverables?: InvoiceDeliverable[]; // Snapshot of completed deliverables without rates for monthly retainer invoices
+  payeeName?: string;
+  payeeUpiId?: string;
+}
+
+export type SubscriptionStatus = 'inactive' | 'active' | 'expired' | 'canceled';
+export type SubscriptionPlan = 'monthly' | 'quarterly' | 'annual' | string;
+
+export interface SubscriptionPlanItem {
+  id: string;
+  planCode: string;
+  name: string;
+  price: number;
+  currency: string;
+  durationDays: number;
+  periodLabel: string;
+  description?: string;
+  badge?: string;
+  features: string[];
+  isActive: boolean;
+  sortOrder?: number;
+  createdAt?: number | string;
+}
+
+export interface UserSubscription {
+  status: SubscriptionStatus;
+  plan: SubscriptionPlan;
+  currentPeriodStart?: number;
+  currentPeriodEnd?: number;
+  lastPaymentId?: string;
+  lastPaymentAmount?: number;
+  updatedAt?: number;
+}
+
+export interface SubscriptionWhitelistItem {
+  id: string;
+  email: string;
+  reason?: string;
+  createdAt: number;
+}
+
+export interface SubscriptionPayment {
+  id: string;
+  userId: string;
+  orderId: string;
+  paymentId?: string;
+  plan: SubscriptionPlan;
+  amount: number;
+  currency: string;
+  status: 'INITIATED' | 'PENDING_VERIFICATION' | 'ACTIVE' | 'QUEUED' | 'PROCESSING' | 'SUCCESS' | 'FAILED' | 'REJECTED' | 'EXPIRED' | 'CANCELLED';
+  utr?: string;
+  method?: string;
+  payerEmail?: string;
+  adminNotes?: string;
+  createdAt: number;
+  updatedAt?: number;
 }
 
 export interface UserProfile {
   id: string;
   name: string;
+  email?: string;
   phone: string;
   upiId: string;
   professionalTitle: string;
   servicesDescription: string;
+  defaultRate?: number;
+  photoURL?: string;
   accountNumber?: string;
   ifscCode?: string;
   bankName?: string;
@@ -112,6 +174,21 @@ export interface UserProfile {
   freelanceStartDate?: string; // Freelancer's career start date in YYYY-MM-DD format
   workExperienceBio?: string; // Optional career overview / work experience bio
   createdAt: number;
+  // SaaS Subscription fields (49/- per month)
+  subscriptionStatus?: SubscriptionStatus;
+  subscriptionPlan?: SubscriptionPlan;
+  currentPeriodStart?: number;
+  currentPeriodEnd?: number;
+  lastPaymentId?: string;
+  lastPaymentAmount?: number;
+}
+
+export interface UserProfilePrivate {
+  accountNumber?: string;
+  ifscCode?: string;
+  bankName?: string;
+  geminiApiKey?: string;
+  updatedAt?: number;
 }
 
 export interface StickyNote {
@@ -132,6 +209,8 @@ export interface ClientReview {
   feedbackText: string;
   projectName?: string; // Optional project title
   userId: string; // Freelancer's user ID (owner)
+  isApproved?: boolean;
+  isPublic?: boolean;
   createdAt: number;
 }
 

@@ -72,12 +72,12 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
   const selectedClient = clients.find(c => c.id === selectedClientId);
 
   return (
-    <div className="p-6 space-y-6 max-w-6xl mx-auto pb-24 md:pb-6">
+    <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto w-full pb-24 md:pb-8">
       
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Client Reviews</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Client Reviews</h1>
           <p className="text-slate-500 dark:text-slate-400 text-sm">Gather testimonials, view ratings, and build client trust.</p>
         </div>
       </div>
@@ -199,26 +199,26 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xs border border-slate-200 dark:border-slate-700 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
         
         {/* Search Input */}
-        <div className="relative flex-1 max-w-md">
+        <div className="relative flex-1 max-w-lg">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by client, project, or review content..."
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-xl pl-10 pr-4 py-2 text-sm bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none transition-all focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900"
+            className="w-full border border-slate-200 dark:border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none transition-all focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900"
           />
         </div>
 
         {/* Star Rating Filter */}
         <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto pb-1 sm:pb-0 scrollbar-none w-full md:w-auto shrink-0">
-          <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-xs font-semibold shrink-0">
+          <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-sm font-semibold shrink-0">
             <Filter className="w-3.5 h-3.5 shrink-0" /> Filter:
           </div>
           <div className="flex items-center gap-1 shrink-0 min-w-max">
             <button
               onClick={() => setRatingFilter('all')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                 ratingFilter === 'all'
                   ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
                   : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
@@ -230,7 +230,7 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
               <button
                 key={r}
                 onClick={() => setRatingFilter(r)}
-                className={`flex items-center gap-0.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                className={`flex items-center gap-0.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                   ratingFilter === r
                     ? 'bg-indigo-600 text-white'
                     : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
@@ -277,7 +277,7 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
                       />
                     ))}
                   </div>
-                  <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold font-mono">
+                  <span className="text-xs text-slate-400 dark:text-slate-500 font-medium font-mono">
                     {new Date(review.createdAt).toLocaleDateString('en-IN', {
                       day: '2-digit',
                       month: 'short',
@@ -288,12 +288,12 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
 
                 {/* Review Text */}
                 <div className="space-y-2">
-                  <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed italic font-medium">
+                  <p className="text-slate-700 dark:text-slate-300 text-sm sm:text-base leading-relaxed italic font-medium">
                     "{review.feedbackText}"
                   </p>
                   
                   {review.projectName && (
-                    <span className="inline-block bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-100 dark:border-indigo-800/60 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold px-2 py-0.5 rounded">
+                    <span className="inline-block bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-100 dark:border-indigo-800/60 text-indigo-700 dark:text-indigo-300 text-xs font-semibold px-2 py-0.5 rounded-md">
                       Project: {review.projectName}
                     </span>
                   )}
@@ -303,8 +303,8 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
               {/* Client Info Footer */}
               <div className="pt-4 border-t border-slate-100 dark:border-slate-700 mt-4 flex items-center justify-between">
                 <div className="flex flex-col">
-                  <span className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-snug">{review.clientName}</span>
-                  <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">Verified Testimonial</span>
+                  <span className="text-base font-bold text-slate-800 dark:text-slate-100 leading-snug">{review.clientName}</span>
+                  <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">Verified Testimonial</span>
                 </div>
                 <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-500 dark:text-slate-300">
                   {review.clientName.charAt(0)}

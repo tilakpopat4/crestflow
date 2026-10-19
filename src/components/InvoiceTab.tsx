@@ -15,1185 +15,9 @@ import ScheduleInvoiceModal from './ScheduleInvoiceModal';
 import { executeAutoInvoiceCheck, findDuplicateAutoInvoices } from '../lib/autoInvoiceService';
 import { formatLocalDateToYMD } from '../lib/dateUtils';
 import StatusBadge from './StatusBadge';
-
-// Helper functions to parse and convert oklab/oklch/color() colors to standard rgb/rgba,
-// which prevents crashes in html2canvas (used by html2pdf.js) under Tailwind CSS v4.
-let colorCanvas: HTMLCanvasElement | null = null;
-let colorCtx: CanvasRenderingContext2D | null = null;
-
-function cssColorToRgb(colorStr: string): string {
-  if (typeof window === 'undefined') return colorStr;
-  try {
-    if (!colorCanvas) {
-      colorCanvas = document.createElement('canvas');
-      colorCanvas.width = 1;
-      colorCanvas.height = 1;
-      colorCtx = colorCanvas.getContext('2d', { willReadFrequently: true });
-    }
-    if (colorCtx) {
-      colorCtx.clearRect(0, 0, 1, 1);
-      colorCtx.fillStyle = '#000000';
-      colorCtx.fillStyle = colorStr;
-      colorCtx.fillRect(0, 0, 1, 1);
-      const data = colorCtx.getImageData(0, 0, 1, 1).data;
-      const alpha = +(data[3] / 255).toFixed(2);
-      if (alpha === 1) {
-        return `rgb(${data[0]}, ${data[1]}, ${data[2]})`;
-      } else {
-        return `rgba(${data[0]}, ${data[1]}, ${data[2]}, ${alpha})`;
-      }
-    }
-  } catch (e) {
-    // fallback
-  }
-  return colorStr;
-}
-
-function oklabToRgb(l_val: number, a_val: number, b_val: number): { r: number, g: number, b: number } {
-  const l = l_val + 0.3963377774 * a_val + 0.2158037573 * b_val;
-  const m = l_val - 0.1055613458 * a_val - 0.0638541728 * b_val;
-  const s = l_val - 0.0894841775 * a_val - 1.2914855480 * b_val;
-
-  const l_3 = l * l * l;
-  const m_3 = m * m * m;
-  const s_3 = s * s * s;
-
-  let r_lin = +4.0767416621 * l_3 - 3.3077115913 * m_3 + 0.2309699292 * s_3;
-  let g_lin = -1.2684380046 * l_3 + 2.6097574011 * m_3 - 0.3413193965 * s_3;
-  let b_lin = -0.0041960863 * l_3 - 0.7034186147 * m_3 + 1.7076147010 * s_3;
-
-  const gamma = (c: number) => {
-    return c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055;
-  };
-
-  const r_res = Math.round(Math.max(0, Math.min(1, gamma(r_lin))) * 255);
-  const g_res = Math.round(Math.max(0, Math.min(1, gamma(g_lin))) * 255);
-  const b_res = Math.round(Math.max(0, Math.min(1, gamma(b_lin))) * 255);
-
-  return { r: r_res, g: g_res, b: b_res };
-}
-
-function convertOklabStringToRgb(oklabStr: string): string {
-  const match = oklabStr.match(/oklab\(([^)]+)\)/);
-  if (!match) return oklabStr;
-
-  const partsStr = match[1].trim();
-  const parts = partsStr.split(/[\s,/]+/);
-  if (parts.length < 3) return oklabStr;
-
-  const parseVal = (str: string, base: number = 1) => {
-    if (str.endsWith('%')) {
-      return (parseFloat(str) / 100) * base;
-    }
-    return parseFloat(str);
-  };
-
-  let l_val = parseVal(parts[0], 1);
-  if (l_val > 1 && !parts[0].endsWith('%')) {
-    l_val = l_val / 100;
-  }
-
-  const a_val = parseVal(parts[1], 1);
-  const b_val = parseVal(parts[2], 1);
-
-  const alphaStr = parts[3];
-  const alpha = alphaStr !== undefined ? parseVal(alphaStr, 1) : 1;
-
-  const { r, g, b } = oklabToRgb(l_val, a_val, b_val);
-
-  if (alpha === 1) {
-    return `rgb(${r}, ${g}, ${b})`;
-  } else {
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-  }
-}
-
-function oklchToRgb(l_val: number, c_val: number, h_val: number): { r: number, g: number, b: number } {
-  // h_val is in degrees, convert to radians
-  const h_rad = (h_val * Math.PI) / 180;
-  const a = c_val * Math.cos(h_rad);
-  const b = c_val * Math.sin(h_rad);
-
-  const l = l_val + 0.3963377774 * a + 0.2158037573 * b;
-  const m = l_val - 0.1055613458 * a - 0.0638541728 * b;
-  const s = l_val - 0.0894841775 * a - 1.2914855480 * b;
-
-  const l_3 = l * l * l;
-  const m_3 = m * m * m;
-  const s_3 = s * s * s;
-
-  let r_lin = +4.0767416621 * l_3 - 3.3077115913 * m_3 + 0.2309699292 * s_3;
-  let g_lin = -1.2684380046 * l_3 + 2.6097574011 * m_3 - 0.3413193965 * s_3;
-  let b_lin = -0.0041960863 * l_3 - 0.7034186147 * m_3 + 1.7076147010 * s_3;
-
-  const gamma = (c: number) => {
-    return c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055;
-  };
-
-  const r_val = Math.round(Math.max(0, Math.min(1, gamma(r_lin))) * 255);
-  const g_val = Math.round(Math.max(0, Math.min(1, gamma(g_lin))) * 255);
-  const b_val = Math.round(Math.max(0, Math.min(1, gamma(b_lin))) * 255);
-
-  return { r: r_val, g: g_val, b: b_val };
-}
-
-function convertOklchStringToRgb(oklchStr: string): string {
-  const match = oklchStr.match(/oklch\(([^)]+)\)/);
-  if (!match) return oklchStr;
-
-  const partsStr = match[1].trim();
-  const parts = partsStr.split(/[\s,/]+/);
-  if (parts.length < 3) return oklchStr;
-
-  const parseVal = (str: string, base: number = 1) => {
-    if (str.endsWith('%')) {
-      return (parseFloat(str) / 100) * base;
-    }
-    return parseFloat(str);
-  };
-
-  let l_val = parseVal(parts[0], 1);
-  if (l_val > 1 && !parts[0].endsWith('%')) {
-    l_val = l_val / 100;
-  }
-
-  const c_val = parseVal(parts[1], 1);
-  const h_val = parseVal(parts[2], 1);
-
-  const alphaStr = parts[3];
-  const alpha = alphaStr !== undefined ? parseVal(alphaStr, 1) : 1;
-
-  const { r, g, b } = oklchToRgb(l_val, c_val, h_val);
-
-  if (alpha === 1) {
-    return `rgb(${r}, ${g}, ${b})`;
-  } else {
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-  }
-}
-
-function replaceUnsupportedColorsWithRgb(str: string): string {
-  if (typeof str !== 'string') return str;
-  if (!str.includes('oklch') && !str.includes('oklab') && !str.includes('color(')) return str;
-
-  return str.replace(/(oklab|oklch|color)\([^)]+\)/g, (match) => {
-    try {
-      const converted = cssColorToRgb(match);
-      if (converted && converted.startsWith('rgb')) {
-        return converted;
-      }
-      if (match.startsWith('oklab')) {
-        return convertOklabStringToRgb(match);
-      }
-      if (match.startsWith('oklch')) {
-        return convertOklchStringToRgb(match);
-      }
-    } catch (e) {
-      console.warn("Failed to parse/convert color:", match, e);
-    }
-    return match;
-  });
-}
-
-function preprocessElementStylesForPdf(element: HTMLElement): () => void {
-  const originalStyles = new Map<HTMLElement, string>();
-  const colorProperties = [
-    'color',
-    'backgroundColor',
-    'borderColor',
-    'borderTopColor',
-    'borderRightColor',
-    'borderBottomColor',
-    'borderLeftColor',
-    'outlineColor',
-    'textDecorationColor',
-    'boxShadow',
-    'fill',
-    'stroke'
-  ];
-
-  try {
-    const elements = [element, ...Array.from(element.querySelectorAll('*'))] as HTMLElement[];
-    for (const el of elements) {
-      if (!el.style) continue;
-      const computed = window.getComputedStyle(el);
-      let changed = false;
-      for (const prop of colorProperties) {
-        try {
-          const val = computed[prop as any];
-          if (typeof val === 'string' && (val.includes('oklch') || val.includes('oklab') || val.includes('color('))) {
-            const converted = replaceUnsupportedColorsWithRgb(val);
-            if (converted && converted !== val) {
-              if (!changed) {
-                originalStyles.set(el, el.getAttribute('style') || '');
-                changed = true;
-              }
-              el.style[prop as any] = converted;
-            }
-          }
-        } catch (e) {
-          // ignore individual property errors
-        }
-      }
-    }
-  } catch (err) {
-    console.warn("Failed to preprocess oklab/oklch styles on elements:", err);
-  }
-
-  return () => {
-    for (const [el, style] of originalStyles.entries()) {
-      try {
-        if (style) {
-          el.setAttribute('style', style);
-        } else {
-          el.removeAttribute('style');
-        }
-      } catch (e) {
-        // ignore restore errors
-      }
-    }
-  };
-}
-
-export function buildUpiPaymentUri(
-  upiId: string,
-  payeeName: string,
-  amount: number,
-  transactionNote: string = 'Invoice Payment'
-): string {
-  const cleanUpiId = upiId.trim().replace(/\s+/g, '');
-  if (!cleanUpiId) return '';
-
-  // Clean payee name and note (sanitize characters for clean URL encoding)
-  const cleanName = payeeName.replace(/[^\w\s.-]/g, '').trim() || 'Payee';
-  const cleanNote = transactionNote.replace(/#/g, 'INV-').replace(/[^\w\s.-]/g, '').trim() || 'Invoice Payment';
-
-  // Format amount: include &am= if amount > 0
-  let amountQuery = '';
-  if (typeof amount === 'number' && !isNaN(amount) && amount > 0) {
-    const formattedAmount = Number.isInteger(amount) ? amount.toString() : amount.toFixed(2);
-    amountQuery = `&am=${formattedAmount}`;
-  }
-
-  // NPCI canonical UPI URI string format: upi://pay?pa=<UPI_ID>&pn=<NAME>&tn=<NOTE>&am=<AMOUNT>&cu=INR
-  return `upi://pay?pa=${cleanUpiId}&pn=${encodeURIComponent(cleanName)}&tn=${encodeURIComponent(cleanNote)}${amountQuery}&cu=INR`;
-}
-
-export function generateUpiQrCodeSvg(
-  upiId: string,
-  payeeName: string,
-  amount: number,
-  transactionNote: string = 'Invoice Payment',
-  size: number = 110
-): string {
-  const upiUri = buildUpiPaymentUri(upiId, payeeName, amount, transactionNote);
-  if (!upiUri) return '';
-
-  try {
-    return ReactDOMServer.renderToString(
-      React.createElement(QRCodeSVG, {
-        value: upiUri,
-        size: size,
-        level: 'M',
-        includeMargin: true,
-        bgColor: '#ffffff',
-        fgColor: '#000000'
-      })
-    );
-  } catch (err) {
-    console.warn("Failed to generate QRCodeSVG string:", err);
-    return '';
-  }
-}
-
-export async function generateUpiQrCodeDataUrl(
-  upiId: string,
-  payeeName: string,
-  amount: number,
-  transactionNote: string = 'Invoice Payment'
-): Promise<{ pngDataUrl: string; canvas: HTMLCanvasElement | null }> {
-  const upiUri = buildUpiPaymentUri(upiId, payeeName, amount, transactionNote);
-  if (!upiUri) return { pngDataUrl: '', canvas: null };
-
-  return new Promise((resolve) => {
-    try {
-      const canvas = document.createElement('canvas');
-      canvas.width = 300;
-      canvas.height = 300;
-      canvas.style.width = '110px';
-      canvas.style.height = '110px';
-      canvas.style.display = 'block';
-
-      const qrLib = (QRCode as any).toCanvas ? QRCode : (QRCode as any).default;
-      if (qrLib && typeof qrLib.toCanvas === 'function') {
-        qrLib.toCanvas(
-          canvas,
-          upiUri,
-          {
-            width: 300,
-            margin: 1,
-            errorCorrectionLevel: 'M',
-            color: { dark: '#000000', light: '#ffffff' }
-          },
-          (err: any) => {
-            if (!err) {
-              const pngDataUrl = canvas.toDataURL('image/png');
-              if (pngDataUrl && pngDataUrl.length > 100) {
-                return resolve({ pngDataUrl, canvas });
-              }
-            }
-            tryToDataUrlFallback();
-          }
-        );
-        return;
-      }
-    } catch (e) {
-      console.warn("toCanvas attempt failed:", e);
-    }
-
-    tryToDataUrlFallback();
-
-    function tryToDataUrlFallback() {
-      try {
-        const qrLib = (QRCode as any).toDataURL ? QRCode : (QRCode as any).default;
-        if (qrLib && typeof qrLib.toDataURL === 'function') {
-          qrLib.toDataURL(
-            upiUri,
-            {
-              width: 300,
-              margin: 1,
-              errorCorrectionLevel: 'M',
-              color: { dark: '#000000', light: '#ffffff' }
-            },
-            (err: any, url: string) => {
-              if (!err && url && url.length > 100) {
-                resolve({ pngDataUrl: url, canvas: null });
-              } else {
-                resolve({ pngDataUrl: '', canvas: null });
-              }
-            }
-          );
-          return;
-        }
-      } catch (e) {
-        console.warn("toDataURL fallback failed:", e);
-      }
-      resolve({ pngDataUrl: '', canvas: null });
-    }
-  });
-}
-
-export function renderDocumentHtml(params: {
-  invoice: Invoice;
-  client?: Client;
-  profile: UserProfile | null;
-  dateFrom?: string;
-  dateTo?: string;
-  qrDataUrl?: string;
-  customUpiId?: string;
-  hideFinance?: boolean;
-  deliverables?: InvoiceDeliverable[];
-}): string {
-  const invoiceNo = params.invoice.id.length > 8
-    ? `INV-${params.invoice.id.substring(0, 8).toUpperCase()}`
-    : params.invoice.id.toUpperCase();
-
-  const issueDateStr = new Date(params.invoice.date).toLocaleDateString('en-IN', {
-    day: '2-digit', month: 'short', year: 'numeric'
-  });
-
-  const billingPeriodStr = params.dateFrom && params.dateTo
-    ? `${new Date(params.dateFrom).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })} – ${new Date(params.dateTo).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}`
-    : issueDateStr;
-
-  const lastPaymentStr = params.invoice.lastPaymentDate
-    ? new Date(params.invoice.lastPaymentDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
-    : (params.client?.lastPaymentDate
-      ? new Date(params.client.lastPaymentDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
-      : 'N/A (First Cycle)');
-
-  const senderName = params.profile?.name || 'Tilak Popat';
-  const senderTitle = params.profile?.professionalTitle || params.profile?.servicesDescription || 'Freelance Video Editor';
-  const senderPhone = params.profile?.phone || '+91 78749 03810';
-  const upiId = (params.customUpiId && params.customUpiId.trim())
-    || (params.profile?.upiId && params.profile.upiId !== 'Not specified' ? params.profile.upiId.trim() : '')
-    || 'tilakpopat2007-1@okaxis';
-
-  const reels = params.invoice.reels || [];
-  const subtotal = reels.reduce((s, r) => s + (r.quantity * r.rate), 0);
-  const discount = params.invoice.discountAmount || 0;
-  const extraCost = params.invoice.extraCostAmount || 0;
-  const grandTotal = Math.max(0, params.invoice.totalAmount);
-
-  const isMonthlyRetainer = params.invoice.invoiceType === 'monthly_retainer';
-
-  const deliverablesList: InvoiceDeliverable[] = (params.deliverables && params.deliverables.length > 0)
-    ? params.deliverables
-    : (params.invoice.deliverables && params.invoice.deliverables.length > 0)
-    ? params.invoice.deliverables
-    : (reels.length > 0 && reels.some(r => r.workItemId))
-    ? reels.map(r => ({
-        id: r.workItemId,
-        title: r.title,
-        quantity: r.quantity,
-        videoUrl: r.videoUrl,
-        date: (r as any).date || params.invoice.date
-      }))
-    : [];
-
-  const totalDeliverablesCount = isMonthlyRetainer
-    ? (deliverablesList.reduce((s, d) => s + (d.quantity || 1), 0) || 1)
-    : reels.reduce((s, r) => s + (r.quantity || 1), 0);
-
-  const isWorkSummary = !!params.hideFinance;
-  const baseRetainerAmount = isMonthlyRetainer
-    ? (reels[0]?.rate || params.invoice.totalAmount)
-    : subtotal;
-
-  const clientName = params.client?.name || params.invoice.clientName || 'Client';
-  const clientPhone = params.client?.phone;
-  const clientEmail = params.client?.email;
-
-  // Determine items to paginate
-  const allItems: any[] = isWorkSummary
-    ? (deliverablesList.length > 0 ? deliverablesList : reels)
-    : (isMonthlyRetainer ? (deliverablesList.length > 0 ? deliverablesList : [{ id: '1', title: reels[0]?.title || 'Monthly Video Editing & Creative Retainer', quantity: 1, date: params.invoice.date }]) : (reels.length > 0 ? reels : [{ id: '1', title: 'Video Editing / Content Creation Services', quantity: 1, rate: grandTotal }]));
-
-  const singlePageLimit = isWorkSummary ? 15 : 12;
-
-  const pagesData: any[][] = [];
-  if (allItems.length <= singlePageLimit) {
-    pagesData.push(allItems);
-  } else if (allItems.length <= 24) {
-    // 2 pages: distribute evenly across both pages for balanced layout
-    const page1Count = Math.ceil(allItems.length / 2);
-    pagesData.push(allItems.slice(0, page1Count));
-    pagesData.push(allItems.slice(page1Count));
-  } else {
-    // 3+ pages:
-    const page1Limit = isWorkSummary ? 18 : 15;
-    const subsequentLimit = isWorkSummary ? 20 : 16;
-    pagesData.push(allItems.slice(0, page1Limit));
-    let remaining = allItems.slice(page1Limit);
-    while (remaining.length > 0) {
-      pagesData.push(remaining.slice(0, subsequentLimit));
-      remaining = remaining.slice(subsequentLimit);
-    }
-  }
-
-  const totalPages = pagesData.length;
-
-  const pagesHtml = pagesData.map((pageItems, pageIdx) => {
-    const isFirstPage = pageIdx === 0;
-    const isLastPage = pageIdx === totalPages - 1;
-    const itemOffset = pagesData.slice(0, pageIdx).reduce((acc, p) => acc + p.length, 0);
-
-    // Header HTML
-    const pageHeaderHtml = isFirstPage
-      ? `
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 14px; border-bottom: 1.5px solid #0f172a; width: 100%; box-sizing: border-box;">
-          <div style="display: flex; align-items: center; gap: 12px; max-width: 62%;">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0;">
-              <rect width="512" height="512" rx="112" fill="#4f46e5" />
-              <g>
-                <rect x="116" y="186" width="280" height="190" rx="28" fill="#ffffff" />
-                <path d="M126 146 L186 106 H386 L326 146 Z" fill="#e0e7ff" />
-                <path d="M146 146 h220 v20 H146 z" fill="#ffffff" />
-                <path d="M190 106 L170 146" stroke="#4338ca" stroke-width="8" stroke-linecap="round" />
-                <path d="M250 106 L230 146" stroke="#4338ca" stroke-width="8" stroke-linecap="round" />
-                <path d="M310 106 L290 146" stroke="#4338ca" stroke-width="8" stroke-linecap="round" />
-                <circle cx="256" cy="281" r="44" fill="#4f46e5" />
-                <polygon points="246,261 278,281 246,301" fill="#ffffff" />
-              </g>
-            </svg>
-            <div>
-              <div style="font-size: 18px; font-weight: 700; color: #0f172a; letter-spacing: -0.2px; line-height: 1.2;">
-                ${senderName}
-              </div>
-              <div style="font-size: 10px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.6px; margin-top: 2px;">
-                ${senderTitle}
-              </div>
-              ${senderPhone ? `<div style="font-size: 10.5px; color: #64748b; margin-top: 2px; font-weight: 500;">Direct: <span style="color: #334155; font-weight: 600;">${senderPhone}</span></div>` : ''}
-            </div>
-          </div>
-          <div style="text-align: right;">
-            <div style="font-size: 20px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.8px; line-height: 1;">
-              ${isWorkSummary ? 'WORK SUMMARY' : 'INVOICE'}
-            </div>
-            <div style="display: inline-block; background: #f1f5f9; border-radius: 4px; padding: 2.5px 7px; margin-top: 5px;">
-              <span style="font-size: 11px; font-family: monospace; font-weight: 700; color: #334155;">#${isWorkSummary ? `WRK-${params.invoice.id.substring(0, 8).toUpperCase()}` : invoiceNo}</span>
-            </div>
-            <div style="font-size: 10.5px; color: #64748b; margin-top: 4px;">
-              Issue Date: <span style="font-weight: 600; color: #0f172a;">${issueDateStr}</span>
-            </div>
-          </div>
-        </div>
-      `
-      : `
-        <div style="border-bottom: 1.5px solid #0f172a; padding-bottom: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box;">
-          <div>
-            <span style="font-size: 13px; font-weight: 700; color: #0f172a;">${senderName}</span>
-            <span style="font-size: 10.5px; color: #64748b; margin-left: 8px; font-family: monospace; font-weight: 600;">#${isWorkSummary ? `WRK-${params.invoice.id.substring(0, 8).toUpperCase()}` : invoiceNo} (Cont.)</span>
-          </div>
-          <div style="font-size: 10px; font-weight: 600; color: #64748b;">
-            Page ${pageIdx + 1} of ${totalPages}
-          </div>
-        </div>
-      `;
-
-    // Overview Section (Page 1 only) - Structured, clean metadata card
-    const pageOverviewHtml = isFirstPage
-      ? `
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-top: 12px; margin-bottom: 12px; width: 100%; box-sizing: border-box; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px;">
-          <div style="width: 50%;">
-            <div style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #64748b; margin-bottom: 3px;">
-              ${isWorkSummary ? 'PREPARED FOR' : 'BILLED TO'}
-            </div>
-            <div style="font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 2px;">
-              ${clientName}
-            </div>
-            ${clientPhone ? `<div style="font-size: 10.5px; color: #475569; line-height: 1.35;">Ph: ${clientPhone}</div>` : ''}
-            ${clientEmail ? `<div style="font-size: 10.5px; color: #475569; line-height: 1.35;">Email: ${clientEmail}</div>` : ''}
-          </div>
-
-          <div style="width: 48%; text-align: right;">
-            <table style="margin-left: auto; font-size: 10.5px; color: #334155; border-collapse: collapse;">
-              <tr>
-                <td style="color: #64748b; padding: 1.5px 8px 1.5px 0; font-weight: 500; text-align: right;">${isWorkSummary ? 'Work Period:' : 'Billing Period:'}</td>
-                <td style="font-weight: 600; color: #0f172a; padding: 1.5px 0; text-align: right;">${billingPeriodStr}</td>
-              </tr>
-              ${isWorkSummary ? `
-              <tr>
-                <td style="color: #64748b; padding: 1.5px 8px 1.5px 0; font-weight: 500; text-align: right;">Total Deliverables:</td>
-                <td style="font-weight: 700; color: #0f172a; padding: 1.5px 0; text-align: right;">${totalDeliverablesCount} Items</td>
-              </tr>
-              ` : `
-              <tr>
-                <td style="color: #64748b; padding: 1.5px 8px 1.5px 0; font-weight: 500; text-align: right;">Payment Terms:</td>
-                <td style="font-weight: 600; color: #0f172a; padding: 1.5px 0; text-align: right;">Due on Receipt</td>
-              </tr>
-              <tr>
-                <td style="color: #64748b; padding: 1.5px 8px 1.5px 0; font-weight: 500; text-align: right;">Settlement:</td>
-                <td style="font-weight: 500; color: #475569; padding: 1.5px 0; text-align: right;">UPI / Bank Transfer</td>
-              </tr>
-              `}
-            </table>
-          </div>
-        </div>
-      `
-      : '';
-
-    // Table rows
-    let tableRowsHtml = '';
-    if (isWorkSummary) {
-      tableRowsHtml = pageItems.map((item, idx) => {
-        const itemIdx = itemOffset + idx;
-        const subClientTag = item.subClientName
-          ? `<span style="font-size: 9.5px; color: #64748b; font-weight: 500; margin-left: 6px;">(${item.subClientName})</span>`
-          : '';
-        const videoLink = item.videoUrl
-          ? `<div style="margin-top: 1.5px;"><a href="${item.videoUrl}" target="_blank" rel="noopener noreferrer" style="color: #4f46e5; text-decoration: underline; text-underline-offset: 2px; font-size: 10px; font-weight: 500; display: inline-flex; align-items: center; gap: 2px;">View Asset &nearr;</a></div>`
-          : '';
-        return `
-          <tr style="border-bottom: 1px solid #f1f5f9;">
-            <td style="padding: 6px 8px; font-size: 10px; color: #94a3b8; text-align: center; font-weight: 600; font-family: monospace;">${String(itemIdx + 1).padStart(2, '0')}</td>
-            <td style="padding: 6px 10px; font-size: 11px; color: #0f172a; line-height: 1.35;">
-              <span style="font-weight: 600;">${item.title || 'Creative Deliverable'}</span>${subClientTag}
-              ${videoLink}
-            </td>
-            <td style="padding: 6px 8px; font-size: 10.5px; color: #334155; text-align: center; font-weight: 600;">${item.quantity || 1}</td>
-          </tr>
-        `;
-      }).join('');
-    } else if (isMonthlyRetainer) {
-      tableRowsHtml = pageItems.map((d, idx) => {
-        const itemIdx = itemOffset + idx;
-        const dateStr = d.date ? new Date(d.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '—';
-        const subClientTag = d.subClientName
-          ? `<span style="font-size: 9.5px; color: #64748b; font-weight: 500; margin-left: 6px;">(${d.subClientName})</span>`
-          : '';
-        const videoLink = d.videoUrl
-          ? `<div style="margin-top: 1.5px;"><a href="${d.videoUrl}" target="_blank" rel="noopener noreferrer" style="color: #4f46e5; text-decoration: underline; text-underline-offset: 2px; font-size: 10px; font-weight: 500; display: inline-flex; align-items: center; gap: 2px;">View Asset &nearr;</a></div>`
-          : '';
-        return `
-          <tr style="border-bottom: 1px solid #f1f5f9;">
-            <td style="padding: 6px 8px; font-size: 10px; color: #94a3b8; text-align: center; font-weight: 600; font-family: monospace;">${String(itemIdx + 1).padStart(2, '0')}</td>
-            <td style="padding: 6px 8px; font-size: 10px; color: #64748b; text-align: left; white-space: nowrap;">${dateStr}</td>
-            <td style="padding: 6px 10px; font-size: 11px; color: #0f172a; line-height: 1.35;">
-              <span style="font-weight: 600;">${d.title || 'Creative Deliverable'}</span>${subClientTag}
-              ${videoLink}
-            </td>
-            <td style="padding: 6px 8px; font-size: 10.5px; color: #334155; text-align: center; font-weight: 600;">${d.quantity || 1}</td>
-          </tr>
-        `;
-      }).join('');
-    } else {
-      tableRowsHtml = pageItems.map((r, idx) => {
-        const itemIdx = itemOffset + idx;
-        const subClientTag = r.subClientName
-          ? `<span style="font-size: 9.5px; color: #64748b; font-weight: 500; margin-left: 6px;">(${r.subClientName})</span>`
-          : '';
-        const videoLink = r.videoUrl
-          ? `<div style="margin-top: 1.5px;"><a href="${r.videoUrl}" target="_blank" rel="noopener noreferrer" style="color: #4f46e5; text-decoration: underline; text-underline-offset: 2px; font-size: 10px; font-weight: 500; display: inline-flex; align-items: center; gap: 2px;">View Asset &nearr;</a></div>`
-          : '';
-        return `
-          <tr style="border-bottom: 1px solid #f1f5f9;">
-            <td style="padding: 6px 8px; font-size: 10px; color: #94a3b8; text-align: center; font-weight: 600; font-family: monospace;">${String(itemIdx + 1).padStart(2, '0')}</td>
-            <td style="padding: 6px 10px; font-size: 11px; color: #0f172a; line-height: 1.35;">
-              <span style="font-weight: 600;">${r.title || 'Creative Service'}</span>${subClientTag}
-              ${videoLink}
-            </td>
-            <td style="padding: 6px 8px; font-size: 10.5px; color: #334155; text-align: center; font-weight: 600;">${r.quantity}</td>
-            <td style="padding: 6px 8px; font-size: 10.5px; color: #475569; text-align: right; font-variant-numeric: tabular-nums;">₹${(r.rate || 0).toLocaleString('en-IN')}</td>
-            <td style="padding: 6px 8px; font-size: 11px; color: #0f172a; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums;">₹${((r.quantity || 1) * (r.rate || 0)).toLocaleString('en-IN')}</td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    // Table Header HTML - Professional hairline typography
-    const tableHeaderHtml = isWorkSummary
-      ? `
-        <table style="width: 100%; border-collapse: collapse; margin-top: 6px; margin-bottom: 8px; box-sizing: border-box;">
-          <thead>
-            <tr style="border-top: 1.5px solid #0f172a; border-bottom: 1px solid #cbd5e1; background: #f8fafc;">
-              <th style="padding: 6px 8px; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #475569; text-align: center; width: 32px;">#</th>
-              <th style="padding: 6px 10px; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #475569; text-align: left;">Deliverable Description</th>
-              <th style="padding: 6px 8px; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #475569; text-align: center; width: 44px;">Qty</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${tableRowsHtml}
-          </tbody>
-        </table>
-      `
-      : isMonthlyRetainer
-      ? `
-        <table style="width: 100%; border-collapse: collapse; margin-top: 6px; margin-bottom: 8px; box-sizing: border-box;">
-          <thead>
-            <tr style="border-top: 1.5px solid #0f172a; border-bottom: 1px solid #cbd5e1; background: #f8fafc;">
-              <th style="padding: 6px 8px; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #475569; text-align: center; width: 32px;">#</th>
-              <th style="padding: 6px 8px; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #475569; text-align: left; width: 72px;">Date</th>
-              <th style="padding: 6px 10px; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #475569; text-align: left;">Deliverable Description</th>
-              <th style="padding: 6px 8px; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #475569; text-align: center; width: 44px;">Qty</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${tableRowsHtml}
-          </tbody>
-        </table>
-      `
-      : `
-        <table style="width: 100%; border-collapse: collapse; margin-top: 6px; margin-bottom: 8px; box-sizing: border-box;">
-          <thead>
-            <tr style="border-top: 1.5px solid #0f172a; border-bottom: 1px solid #cbd5e1; background: #f8fafc;">
-              <th style="padding: 6px 8px; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #475569; text-align: center; width: 32px;">#</th>
-              <th style="padding: 6px 10px; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #475569; text-align: left;">Item Description / Service</th>
-              <th style="padding: 6px 8px; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #475569; text-align: center; width: 44px;">Qty</th>
-              <th style="padding: 6px 8px; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #475569; text-align: right; width: 80px;">Rate</th>
-              <th style="padding: 6px 8px; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #475569; text-align: right; width: 90px;">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${tableRowsHtml}
-          </tbody>
-        </table>
-      `;
-
-    // Bottom section HTML
-    let bottomSectionHtml = '';
-    if (isLastPage) {
-      if (isWorkSummary) {
-        bottomSectionHtml = `
-          <div style="border-top: 1.5px solid #0f172a; padding-top: 12px; display: flex; justify-content: space-between; align-items: flex-start; width: 100%; box-sizing: border-box;">
-            <div style="width: 65%;">
-              <div style="font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #64748b; margin-bottom: 3px;">
-                CONFIRMATION & DELIVERY VERIFICATION
-              </div>
-              <p style="font-size: 10px; color: #64748b; line-height: 1.45; margin: 0;">
-                This statement documents completion and official handoff of the creative deliverables listed above for the billing period (${billingPeriodStr}).
-              </p>
-            </div>
-            <div style="width: 30%; text-align: right;">
-              <div style="font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #64748b;">
-                ISSUED BY
-              </div>
-              <div style="font-size: 13px; font-weight: 700; color: #0f172a; margin-top: 2px;">
-                ${senderName}
-              </div>
-            </div>
-          </div>
-        `;
-      } else {
-        bottomSectionHtml = `
-          <div style="border-top: 1.5px solid #0f172a; padding-top: 12px; display: flex; justify-content: space-between; align-items: flex-start; width: 100%; box-sizing: border-box;">
-            <!-- Left: Payment Instructions & QR -->
-            <div style="width: 58%;">
-              <div style="font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #64748b; margin-bottom: 6px;">
-                PAYMENT SETTLEMENT DETAILS
-              </div>
-              <div style="display: flex; gap: 10px; align-items: flex-start; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px;">
-                <!-- Table of payment credentials -->
-                <div style="flex: 1;">
-                  <table style="width: 100%; border-collapse: collapse; font-size: 10px; line-height: 1.4;">
-                    <tr>
-                      <td style="color: #64748b; font-weight: 500; width: 75px; padding: 1px 0;">Method:</td>
-                      <td style="font-weight: 600; color: #0f172a; padding: 1px 0;">UPI / Instant Transfer</td>
-                    </tr>
-                    <tr>
-                      <td style="color: #64748b; font-weight: 500; padding: 1px 0;">UPI ID:</td>
-                      <td style="font-family: monospace; font-weight: 700; color: #0f172a; padding: 1px 0;">${upiId}</td>
-                    </tr>
-                    <tr>
-                      <td style="color: #64748b; font-weight: 500; padding: 1px 0;">Beneficiary:</td>
-                      <td style="font-weight: 600; color: #0f172a; padding: 1px 0;">${senderName}</td>
-                    </tr>
-                    ${params.profile?.accountNumber ? `
-                    <tr>
-                      <td style="color: #64748b; font-weight: 500; padding: 1px 0;">Bank Account:</td>
-                      <td style="font-family: monospace; font-weight: 600; color: #0f172a; padding: 1px 0;">${params.profile.accountNumber}</td>
-                    </tr>
-                    <tr>
-                      <td style="color: #64748b; font-weight: 500; padding: 1px 0;">IFSC Code:</td>
-                      <td style="font-weight: 600; color: #0f172a; padding: 1px 0;">${params.profile.ifscCode || ''} ${params.profile.bankName ? `(${params.profile.bankName})` : ''}</td>
-                    </tr>
-                    ` : ''}
-                  </table>
-                  <div style="font-size: 9px; color: #64748b; font-style: italic; margin-top: 5px; border-top: 1px solid #e2e8f0; padding-top: 4px;">
-                    Please remit payment within 7 days. Thank you for your partnership.
-                  </div>
-                </div>
-
-                <!-- QR code box -->
-                <div style="width: 80px; text-align: center; flex-shrink: 0;">
-                  <div style="border: 1px solid #cbd5e1; border-radius: 4px; padding: 3px; background: #ffffff; display: inline-block;">
-                    <div id="pdf-qr-wrapper" style="width: 72px; height: 72px; margin: 0 auto; background: #ffffff;">
-                      ${params.qrDataUrl ? `<img src="${params.qrDataUrl}" style="width: 72px; height: 72px; border-radius: 2px; display: block; margin: 0;" alt="Scan to Pay" />` : '<div style="width: 72px; height: 72px; line-height: 72px; font-size: 8px; color: #94a3b8; text-align: center;">Scan to Pay</div>'}
-                    </div>
-                    <div style="font-size: 7px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #64748b; margin-top: 2px; text-align: center;">
-                      Scan via UPI
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Right: Totals statement -->
-            <div style="width: 38%;">
-              <table style="width: 100%; border-collapse: collapse; font-size: 10.5px;">
-                <tr>
-                  <td style="padding: 2.5px 0; color: #64748b; font-weight: 500;">
-                    ${isMonthlyRetainer ? 'Monthly Retainer Fee' : 'Subtotal'}
-                  </td>
-                  <td style="padding: 2.5px 0; text-align: right; font-weight: 600; color: #0f172a; font-variant-numeric: tabular-nums;">
-                    ₹${baseRetainerAmount.toLocaleString('en-IN')}
-                  </td>
-                </tr>
-                ${isMonthlyRetainer ? `
-                <tr>
-                  <td colspan="2" style="padding-bottom: 4px; font-size: 9px; color: #64748b; line-height: 1.25;">
-                    Covers all ${deliverablesList.length} deliverable(s) listed in this billing period
-                  </td>
-                </tr>
-                ` : ''}
-                ${extraCost > 0 ? `
-                <tr>
-                  <td style="padding: 2.5px 0; color: #0f172a; font-weight: 500;">
-                    Extra Expenses (${params.invoice.extraCostDescription || 'Additional'})
-                  </td>
-                  <td style="padding: 2.5px 0; text-align: right; font-weight: 600; color: #0f172a; font-variant-numeric: tabular-nums;">
-                    +₹${extraCost.toLocaleString('en-IN')}
-                  </td>
-                </tr>
-                ` : ''}
-                ${discount > 0 ? `
-                <tr>
-                  <td style="padding: 2.5px 0; color: #dc2626; font-weight: 500;">
-                    Deduction (${params.invoice.discountDescription || 'Discount'})
-                  </td>
-                  <td style="padding: 2.5px 0; text-align: right; font-weight: 600; color: #dc2626; font-variant-numeric: tabular-nums;">
-                    -₹${discount.toLocaleString('en-IN')}
-                  </td>
-                </tr>
-                ` : ''}
-                <tr style="border-top: 1.5px solid #0f172a;">
-                  <td style="padding-top: 6px; font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #0f172a;">
-                    TOTAL AMOUNT DUE
-                  </td>
-                  <td style="padding-top: 6px; text-align: right; font-size: 18px; font-weight: 800; color: #0f172a; letter-spacing: -0.3px; font-variant-numeric: tabular-nums;">
-                    ₹${grandTotal.toLocaleString('en-IN')}
-                  </td>
-                </tr>
-              </table>
-            </div>
-          </div>
-        `;
-      }
-    } else {
-      bottomSectionHtml = `
-        <div style="padding: 6px 12px; border-top: 1px dashed #cbd5e1; text-align: right; font-size: 10px; font-weight: 600; color: #64748b; margin-bottom: 6px;">
-          Continued on Page ${pageIdx + 2} of ${totalPages} &rarr;
-        </div>
-      `;
-    }
-
-    const pageFooterBar = `
-      <div style="margin-top: 10px; padding-top: 6px; border-top: 1px solid #f1f5f9; font-size: 8.5px; color: #94a3b8; display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box;">
-        <span>${isWorkSummary ? 'Official Creative Delivery Statement' : 'Official Electronic Invoice Statement'} • CrestFlow</span>
-        <span>Issued on ${issueDateStr}${totalPages > 1 ? ` • Page ${pageIdx + 1} of ${totalPages}` : ''}</span>
-      </div>
-    `;
-
-    return `
-      <div class="pdf-page" style="width: 794px; min-height: 1123px; max-height: 1123px; padding: 28px 34px; background: #ffffff; color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; position: relative;">
-        <!-- Top Section -->
-        <div style="width: 100%;">
-          ${pageHeaderHtml}
-          ${pageOverviewHtml}
-          ${tableHeaderHtml}
-        </div>
-
-        <!-- Bottom Section -->
-        <div style="width: 100%; margin-top: auto;">
-          ${bottomSectionHtml}
-          ${pageFooterBar}
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  return pagesHtml;
-}
-
-export function printDocumentHtml(htmlContent: string, documentTitle: string = 'Invoice') {
-  const printIframe = document.createElement('iframe');
-  printIframe.style.position = 'fixed';
-  printIframe.style.right = '0';
-  printIframe.style.bottom = '0';
-  printIframe.style.width = '0';
-  printIframe.style.height = '0';
-  printIframe.style.border = '0';
-  document.body.appendChild(printIframe);
-
-  const doc = printIframe.contentWindow?.document;
-  if (!doc) {
-    window.print();
-    return;
-  }
-
-  doc.open();
-  doc.write(`
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <title>${documentTitle}</title>
-        <meta charset="utf-8" />
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-        <style>
-          @page {
-            size: A4 portrait;
-            margin: 0mm;
-          }
-          * {
-            box-sizing: border-box;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
-          body {
-            margin: 0;
-            padding: 0;
-            background: #ffffff;
-            font-family: Inter, system-ui, -apple-system, sans-serif;
-            color: #0f172a;
-          }
-          .pdf-page {
-            width: 210mm !important;
-            height: 296.5mm !important;
-            min-height: 296.5mm !important;
-            max-height: 296.5mm !important;
-            padding: 24px 30px !important;
-            box-sizing: border-box !important;
-            page-break-after: always;
-            break-after: page;
-            background: #ffffff;
-            display: flex !important;
-            flex-direction: column !important;
-            justify-content: space-between !important;
-            overflow: hidden !important;
-          }
-          .pdf-page:last-child {
-            page-break-after: avoid !important;
-            break-after: avoid !important;
-          }
-        </style>
-      </head>
-      <body>
-        ${htmlContent}
-      </body>
-    </html>
-  `);
-  doc.close();
-
-  const triggerPrint = () => {
-    try {
-      printIframe.contentWindow?.focus();
-      printIframe.contentWindow?.print();
-    } catch (err) {
-      console.warn("Print iframe trigger error:", err);
-    } finally {
-      setTimeout(() => {
-        if (document.body.contains(printIframe)) {
-          document.body.removeChild(printIframe);
-        }
-      }, 2000);
-    }
-  };
-
-  const images = Array.from(doc.images || []);
-  if (images.length === 0) {
-    setTimeout(triggerPrint, 350);
-  } else {
-    let loaded = 0;
-    const checkAllLoaded = () => {
-      loaded++;
-      if (loaded >= images.length) {
-        setTimeout(triggerPrint, 200);
-      }
-    };
-    images.forEach(img => {
-      if (img.complete) {
-        checkAllLoaded();
-      } else {
-        img.onload = checkAllLoaded;
-        img.onerror = checkAllLoaded;
-      }
-    });
-    setTimeout(triggerPrint, 1500);
-  }
-}
-
-export async function generateOffscreenPdfBlob(params: {
-  invoice: Invoice;
-  client?: Client;
-  profile: UserProfile | null;
-  dateFrom?: string;
-  dateTo?: string;
-  qrCodeUrl?: string;
-  customUpiId?: string;
-  hideFinance?: boolean;
-  deliverables?: InvoiceDeliverable[];
-}): Promise<Blob> {
-  const container = document.createElement('div');
-  container.style.position = 'fixed';
-  container.style.left = '0px';
-  container.style.top = '0px';
-  container.style.zIndex = '999999';
-  container.style.width = '794px';
-  container.style.backgroundColor = '#ffffff';
-  container.style.color = '#0f172a';
-  container.style.boxSizing = 'border-box';
-  container.style.padding = '0px';
-  container.style.fontFamily = 'Inter, system-ui, -apple-system, sans-serif';
-  container.style.opacity = '1';
-  container.style.visibility = 'visible';
-  container.style.pointerEvents = 'none';
-
-  const senderName = params.profile?.name || 'Tilak Popat';
-  const upiId = (params.customUpiId && params.customUpiId.trim())
-    || (params.profile?.upiId && params.profile.upiId !== 'Not specified' ? params.profile.upiId.trim() : '')
-    || 'tilakpopat2007-1@okaxis';
-
-  const grandTotal = Math.max(0, params.invoice.totalAmount);
-  const invShortId = params.invoice.id ? params.invoice.id.substring(0, 8) : 'INV';
-  const transactionNote = `Payment for Invoice #${invShortId}`;
-
-  let qrDataUrl = '';
-  if (upiId && !params.hideFinance) {
-    try {
-      const res = await generateUpiQrCodeDataUrl(upiId, senderName, grandTotal, transactionNote);
-      if (res && res.pngDataUrl) {
-        qrDataUrl = res.pngDataUrl;
-      }
-    } catch (e) {
-      console.warn("QR DataURL generation for offscreen PDF failed:", e);
-    }
-  }
-
-  container.innerHTML = renderDocumentHtml({
-    ...params,
-    qrDataUrl
-  });
-
-  document.body.appendChild(container);
-
-  // Ensure all images (if any) and fonts are fully decoded and rendered
-  const images = Array.from(container.querySelectorAll('img'));
-  await Promise.all(
-    images.map(async (img) => {
-      try {
-        if (typeof img.decode === 'function') {
-          await img.decode();
-        } else if (!img.complete) {
-          await new Promise((resolve) => {
-            img.onload = resolve;
-            img.onerror = resolve;
-          });
-        }
-      } catch (err) {
-        if (!img.complete) {
-          await new Promise((resolve) => {
-            img.onload = resolve;
-            img.onerror = resolve;
-          });
-        }
-      }
-    })
-  );
-
-  if (typeof document !== 'undefined' && document.fonts && document.fonts.ready) {
-    try {
-      await document.fonts.ready;
-    } catch (e) {
-      // ignore
-    }
-  }
-
-  // Pause to allow DOM repaint
-  await new Promise(r => setTimeout(r, 200));
-
-  const restoreStyles = preprocessElementStylesForPdf(container);
-
-  // Helper: patch all stylesheets in the cloned document to remove oklch/oklab/color() functions
-  function patchClonedDocumentStylesheets(clonedDoc: Document) {
-    try {
-      const sheets = Array.from(clonedDoc.styleSheets);
-      for (const sheet of sheets) {
-        let rules: CSSRuleList | null = null;
-        try { rules = sheet.cssRules; } catch (e) { continue; }
-        if (!rules) continue;
-        for (let i = 0; i < rules.length; i++) {
-          const rule = rules[i];
-          try {
-            if (rule instanceof CSSStyleRule || rule instanceof CSSKeyframeRule) {
-              const style = (rule as any).style as CSSStyleDeclaration;
-              if (!style) continue;
-              for (let j = 0; j < style.length; j++) {
-                const prop = style[j];
-                const val = style.getPropertyValue(prop);
-                if (val && (val.includes('oklch') || val.includes('oklab') || val.includes('color('))) {
-                  const converted = replaceUnsupportedColorsWithRgb(val);
-                  if (converted !== val) {
-                    style.setProperty(prop, converted, style.getPropertyPriority(prop));
-                  }
-                }
-              }
-            } else if (rule instanceof CSSMediaRule || rule instanceof CSSSupportsRule || (rule as any).cssRules) {
-              const innerRules = (rule as any).cssRules as CSSRuleList;
-              if (innerRules) {
-                for (let k = 0; k < innerRules.length; k++) {
-                  const inner = innerRules[k];
-                  const style = (inner as any).style as CSSStyleDeclaration;
-                  if (!style) continue;
-                  for (let j = 0; j < style.length; j++) {
-                    const prop = style[j];
-                    const val = style.getPropertyValue(prop);
-                    if (val && (val.includes('oklch') || val.includes('oklab') || val.includes('color('))) {
-                      const converted = replaceUnsupportedColorsWithRgb(val);
-                      if (converted !== val) {
-                        style.setProperty(prop, converted, style.getPropertyPriority(prop));
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          } catch (e) {
-            // Some rules may throw (e.g. cross-origin), skip
-          }
-        }
-      }
-    } catch (err) {
-      console.warn('patchClonedDocumentStylesheets failed:', err);
-    }
-  }
-
-  try {
-    const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
-      import('html2canvas'),
-      import('jspdf'),
-    ]);
-
-    const pageElements = Array.from(container.querySelectorAll<HTMLElement>('.pdf-page'));
-    const elementsToRender = pageElements.length > 0 ? pageElements : [container];
-
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4',
-      compress: true
-    });
-
-    const pdfWidth = pdf.internal.pageSize.getWidth(); // 210 mm
-    const pdfHeight = pdf.internal.pageSize.getHeight(); // 297 mm
-
-    for (let i = 0; i < elementsToRender.length; i++) {
-      if (i > 0) {
-        pdf.addPage();
-      }
-      const el = elementsToRender[i];
-      const canvas = await html2canvas(el, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        width: 794,
-        height: 1123,
-        logging: false,
-        onclone: (clonedDoc: Document, clonedElement: HTMLElement) => {
-          patchClonedDocumentStylesheets(clonedDoc);
-          preprocessElementStylesForPdf(clonedElement);
-        }
-      });
-
-      const imgData = canvas.toDataURL('image/jpeg', 0.98);
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-
-      // Add interactive clickable hyperlinks for all <a> tags on this page
-      try {
-        const elRect = el.getBoundingClientRect();
-        const scaleX = pdfWidth / (el.offsetWidth || 794);
-        const scaleY = pdfHeight / (el.offsetHeight || 1123);
-        const linkElements = Array.from(el.querySelectorAll<HTMLAnchorElement>('a[href]'));
-
-        for (const a of linkElements) {
-          const href = a.getAttribute('href');
-          if (!href || href === '#' || href.startsWith('javascript:')) continue;
-          const rect = a.getBoundingClientRect();
-          const x = (rect.left - elRect.left) * scaleX;
-          const y = (rect.top - elRect.top) * scaleY;
-          const w = rect.width * scaleX;
-          const h = rect.height * scaleY;
-
-          if (w > 0 && h > 0 && typeof (pdf as any).link === 'function') {
-            (pdf as any).link(x, y, w, h, { url: href });
-          }
-        }
-      } catch (linkErr) {
-        console.warn("Could not attach PDF hyperlinks:", linkErr);
-      }
-    }
-
-    const pdfBlob = pdf.output('blob');
-    return pdfBlob;
-  } finally {
-    restoreStyles();
-    if (document.body.contains(container)) {
-      document.body.removeChild(container);
-    }
-  }
-}
+import { renderDocumentHtml, printDocumentHtml, generateOffscreenPdfBlob } from '../lib/invoiceRenderer';
+import { generateUpiQrCodeDataUrl, buildUpiPaymentUri } from '../lib/upiQr';
+import { formatInvoiceNumber, getNextInvoiceNumber } from '../lib/invoiceUtils';
 
 interface InvoiceTabProps {
   user: User | null;
@@ -1245,16 +69,11 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
       setInvoiceSearchQuery(initialSearchQuery);
     }
   }, [initialSearchQuery]);
+  const [dateTo, setDateTo] = useState<string>(() => formatLocalDateToYMD(new Date()));
   const [dateFrom, setDateFrom] = useState<string>(() => {
     const d = new Date();
     const month = String(d.getMonth() + 1).padStart(2, '0');
     return `${d.getFullYear()}-${month}-01`;
-  });
-  const [dateTo, setDateTo] = useState<string>(() => {
-    const d = new Date();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${d.getFullYear()}-${month}-${day}`;
   });
   const [reels, setReels] = useState<Reel[]>([]);
   const [linkedWorkItemIds, setLinkedWorkItemIds] = useState<string[]>([]);
@@ -1297,6 +116,10 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
       const fixedRate = Number(monthlyRetainerInput) || 0;
       const monthStr = dateFrom ? new Date(dateFrom).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) : new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
       const desc = monthlyServiceDescription.trim() || `Monthly Video Editing & Content Creation Retainer (${monthStr})`;
+      const validReels = reels.filter(r => r.title.trim());
+      if (validReels.length > 0) {
+        return validReels;
+      }
       return [{
         id: reels[0]?.id || 'monthly-retainer-item',
         title: desc,
@@ -1324,7 +147,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
       title: w.description,
       quantity: w.quantity || 1,
       videoUrl: w.videoUrl,
-      date: w.date
+      date: w.date,
+      subClientName: w.subClientName
     }));
   }, [selectedClientId, workItems, linkedWorkItemIds, dateFrom, dateTo]);
 
@@ -1339,7 +163,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
     invoices,
     addInvoice,
     updateWorkItem,
-    updateClient
+    updateClient,
+    profile
   });
   autoInvoiceRef.current = {
     clients,
@@ -1347,7 +172,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
     invoices,
     addInvoice,
     updateWorkItem,
-    updateClient
+    updateClient,
+    profile
   };
 
   useEffect(() => {
@@ -1405,7 +231,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
     const inv = invoices.find(i => i.id === invoiceId);
     if (!inv) return;
 
-    if (!window.confirm(`Delete Invoice #${inv.id.substring(0, 8).toUpperCase()} for ${inv.clientName}?`)) {
+    if (!window.confirm(`Delete Invoice ${formatInvoiceNumber(inv, invoices)} for ${inv.clientName}?`)) {
       return;
     }
 
@@ -1429,44 +255,6 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
       alert("Failed to delete invoice. Please try again.");
     }
   };
-
-  // Dynamic preview scaling to fit any screen perfectly with zero overlapping & no content truncation
-  const previewContainerRef = useRef<HTMLDivElement>(null);
-  const invoiceCaptureRef = useRef<HTMLDivElement>(null);
-  const [previewScale, setPreviewScale] = useState<number>(0.75);
-  const [actualCaptureHeight, setActualCaptureHeight] = useState<number>(1123);
-  const [isZoomMode, setIsZoomMode] = useState<boolean>(false);
-
-  useEffect(() => {
-    const updateScale = () => {
-      if (!previewContainerRef.current) return;
-      const containerWidth = previewContainerRef.current.clientWidth;
-      // Responsive padding: 24px on mobile phones, 48px on tablets and desktop
-      const padding = window.innerWidth < 640 ? 24 : 48;
-      const availableWidth = Math.max(160, containerWidth - padding);
-      const a4Width = 794; // 210mm in px at 96 DPI
-      const computedScale = Math.min(1, Math.max(0.2, availableWidth / a4Width));
-      setPreviewScale(computedScale);
-
-      if (invoiceCaptureRef.current) {
-        setActualCaptureHeight(Math.max(1123, invoiceCaptureRef.current.offsetHeight));
-      }
-    };
-
-    updateScale();
-    const ro = new ResizeObserver(updateScale);
-    if (previewContainerRef.current) {
-      ro.observe(previewContainerRef.current);
-    }
-    if (invoiceCaptureRef.current) {
-      ro.observe(invoiceCaptureRef.current);
-    }
-    window.addEventListener('resize', updateScale);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener('resize', updateScale);
-    };
-  }, []);
 
   const selectedClient = clients.find(c => c.id === selectedClientId);
 
@@ -1538,15 +326,86 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
     }
   }, [selectedClientId, dateFrom, dateTo, workItems]);
 
+
+  // Helper to resolve a client's previous payment date in YYYY-MM-DD format
+  const getClientPreviousPaymentDateYMD = (clientObj?: Client): string | null => {
+    if (!clientObj) return null;
+    let prevMs: number | undefined = clientObj.lastPaymentDate
+      ? (typeof clientObj.lastPaymentDate === 'number' ? clientObj.lastPaymentDate : new Date(clientObj.lastPaymentDate).getTime())
+      : undefined;
+
+    if (!prevMs) {
+      const clientPaidInvoices = invoices
+        .filter(i => (i.clientId === clientObj.id || i.clientName.toLowerCase() === clientObj.name.toLowerCase()) && i.status === 'Paid')
+        .sort((a, b) => {
+          const bTime = (b.lastPaymentDate ? (typeof b.lastPaymentDate === 'number' ? b.lastPaymentDate : new Date(b.lastPaymentDate).getTime()) : b.date);
+          const aTime = (a.lastPaymentDate ? (typeof a.lastPaymentDate === 'number' ? a.lastPaymentDate : new Date(a.lastPaymentDate).getTime()) : a.date);
+          return bTime - aTime;
+        });
+
+      if (clientPaidInvoices.length > 0) {
+        const topPaid = clientPaidInvoices[0];
+        prevMs = topPaid.lastPaymentDate ? (typeof topPaid.lastPaymentDate === 'number' ? topPaid.lastPaymentDate : new Date(topPaid.lastPaymentDate).getTime()) : topPaid.date;
+      }
+    }
+
+    if (prevMs && !isNaN(prevMs)) {
+      return formatLocalDateToYMD(prevMs);
+    }
+    return null;
+  };
+
+  // Rule for Invoice: From date defaults to previous payment date, and To date defaults to present date
+  useEffect(() => {
+    if (!selectedClientId) return;
+    const clientObj = clients.find(c => c.id === selectedClientId);
+    if (clientObj) {
+      // 1. Present date by default for To Date
+      const presentDateYMD = formatLocalDateToYMD(new Date());
+      setDateTo(presentDateYMD);
+
+      // 2. Previous payment date by default for From Date
+      const prevPaymentYMD = getClientPreviousPaymentDateYMD(clientObj);
+      if (prevPaymentYMD) {
+        setDateFrom(prevPaymentYMD);
+      } else if (clientObj.createdAt) {
+        setDateFrom(formatLocalDateToYMD(clientObj.createdAt));
+      }
+
+      // Auto-detect retainer vs per-reel
+      const isRetainer = clientObj.paymentBasis === 'monthly_retainer' || (!!clientObj.monthlyRetainerAmount && clientObj.monthlyRetainerAmount > 0);
+      setInvoiceBillingMode(isRetainer ? 'monthly_retainer' : 'per_reel');
+      if (isRetainer) {
+        setMonthlyRetainerInput(String(clientObj.monthlyRetainerAmount || clientObj.defaultRate || ''));
+        const monthBase = prevPaymentYMD ? new Date(prevPaymentYMD) : new Date();
+        const monthStr = monthBase.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+        setMonthlyServiceDescription(`Monthly Video Editing & Content Creation Retainer (${monthStr})`);
+      }
+    }
+  }, [selectedClientId, clients, invoices]);
+
   const handleClientChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newId = e.target.value;
     setSelectedClientId(newId);
     const clientObj = clients.find(c => c.id === newId);
     if (clientObj) {
+      // 1. Present date by default for To Date
+      const presentDateYMD = formatLocalDateToYMD(new Date());
+      setDateTo(presentDateYMD);
+
+      // 2. Previous payment date by default for From Date
+      const prevPaymentYMD = getClientPreviousPaymentDateYMD(clientObj);
+      if (prevPaymentYMD) {
+        setDateFrom(prevPaymentYMD);
+      } else if (clientObj.createdAt) {
+        setDateFrom(formatLocalDateToYMD(clientObj.createdAt));
+      }
+
       if (clientObj.paymentBasis === 'monthly_retainer' || (clientObj.monthlyRetainerAmount && clientObj.monthlyRetainerAmount > 0)) {
         setInvoiceBillingMode('monthly_retainer');
         setMonthlyRetainerInput(String(clientObj.monthlyRetainerAmount || clientObj.defaultRate || ''));
-        const monthStr = dateFrom ? new Date(dateFrom).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) : new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+        const monthBase = prevPaymentYMD ? new Date(prevPaymentYMD) : new Date();
+        const monthStr = monthBase.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
         setMonthlyServiceDescription(`Monthly Video Editing & Content Creation Retainer (${monthStr})`);
       } else {
         setInvoiceBillingMode('per_reel');
@@ -1713,7 +572,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
       const url = URL.createObjectURL(pdfBlob);
       const a = document.createElement('a');
       a.href = url;
-      const invNo = inv.id.length > 8 ? `INV-${inv.id.substring(0, 8).toUpperCase()}` : inv.id;
+      const invNo = formatInvoiceNumber(inv, invoices);
       a.download = `${invNo}_${inv.clientName.replace(/\s+/g, '_')}.pdf`;
       document.body.appendChild(a);
       a.click();
@@ -1728,7 +587,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
   };
 
   const handlePrintDocument = async (inv?: Invoice, clientObj?: Client, hideFinanceOverride?: boolean) => {
-    const isWorkSummary = hideFinanceOverride !== undefined ? hideFinanceOverride : previewMode === 'work-only';
+    const isWorkSummary = !!hideFinanceOverride;
     const targetClient = clientObj || selectedClient;
     const targetInvoice: Invoice = inv || {
       id: generateUUID(),
@@ -1771,8 +630,8 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
 
     if (!isWorkSummary && upiId) {
       try {
-        const invShortId = targetInvoice.id ? targetInvoice.id.substring(0, 8) : 'INV';
-        const res = await generateUpiQrCodeDataUrl(upiId, senderName, targetInvoice.totalAmount, `Payment for Invoice #${invShortId}`);
+        const invShortId = formatInvoiceNumber(targetInvoice, invoices);
+        const res = await generateUpiQrCodeDataUrl(upiId, senderName, targetInvoice.totalAmount, `Payment for Invoice ${invShortId}`);
         if (res && res.pngDataUrl) {
           qrDataUrl = res.pngDataUrl;
         }
@@ -1888,14 +747,20 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
         title: d.title,
         quantity: d.quantity,
         videoUrl: d.videoUrl,
-        date: d.date
+        date: d.date,
+        subClientName: d.subClientName
       }));
 
+      const nextInvoiceNo = getNextInvoiceNumber(invoices);
       const newInvoice: Invoice = {
         id: generateUUID(),
+        invoiceNumber: nextInvoiceNo,
         date: Date.now(),
         clientId: selectedClient.id,
+        clientEmail: selectedClient.email ? selectedClient.email.toLowerCase().trim() : undefined,
         clientName: selectedClient.name,
+        payeeName: payeeName || profile?.name || undefined,
+        payeeUpiId: activeUpi || profile?.upiId || undefined,
         reels: [...targetReels],
         totalAmount: grandTotal,
         status: 'Pending',
@@ -2068,13 +933,11 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
   };
 
   if (clientsLoading) {
-    return <div className="p-8 max-w-[1600px] mx-auto text-center py-20"><div className="animate-pulse flex items-center justify-center space-x-2"><div className="w-2 h-2 bg-indigo-600 rounded-full"></div><div className="w-2 h-2 bg-indigo-600 rounded-full"></div><div className="w-2 h-2 bg-indigo-600 rounded-full"></div></div></div>;
+    return <div className="p-8 max-w-7xl mx-auto text-center py-20"><div className="animate-pulse flex items-center justify-center space-x-2"><div className="w-2 h-2 bg-indigo-600 rounded-full"></div><div className="w-2 h-2 bg-indigo-600 rounded-full"></div><div className="w-2 h-2 bg-indigo-600 rounded-full"></div></div></div>;
   }
 
-  const effectiveScale = isZoomMode ? (typeof window !== 'undefined' && window.innerWidth < 768 ? 0.9 : 1) : previewScale;
-
-  return (
-    <div className="p-4 md:p-8 max-w-[1600px] mx-auto">
+    return (
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 w-full">
       <div className="mb-6 md:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Invoice Generator</h2>
@@ -2098,9 +961,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 md:gap-8 items-start">
-        {/* Left Column - Form */}
-        <div className="xl:col-span-5 space-y-6">
+      <div className="max-w-4xl mx-auto space-y-6">
           <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-2">
@@ -2191,57 +1052,32 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
           </div>
 
           <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-            {/* Billing Mode Switcher */}
-            {selectedClient?.paymentBasis === 'monthly_retainer' ? (
-              <div className="mb-6 p-3.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5">
-                  <span className="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-500 shrink-0"></span>
-                  <div>
-                    <span className="text-xs font-bold text-slate-900 dark:text-slate-100 block">
-                      Monthly Retainer Client
-                    </span>
-                    <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                      Single flat retainer fee per billing cycle.
-                    </span>
-                  </div>
-                </div>
-                {selectedClient?.monthlyRetainerAmount && (
-                  <span className="text-xs font-medium text-slate-600 dark:text-slate-400 shrink-0">
-                    ₹{selectedClient.monthlyRetainerAmount.toLocaleString('en-IN')}/mo
+            {/* Automatic Billing Format Indicator (Auto-selected from client) */}
+            <div className="mb-6 p-3.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <span className="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-500 shrink-0"></span>
+                <div>
+                  <span className="text-xs font-bold text-slate-900 dark:text-slate-100 block">
+                    {invoiceBillingMode === 'monthly_retainer' ? 'Monthly Retainer Format' : 'Per Reel / Item Format'}
                   </span>
-                )}
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                    {invoiceBillingMode === 'monthly_retainer'
+                      ? 'Direct monthly flat retainer amount. Itemized work log is automatically included.'
+                      : 'Calculated dynamically based on individual deliverable rates.'}
+                  </span>
+                </div>
               </div>
-            ) : (
-              <div className="mb-6 p-1.5 bg-slate-100 dark:bg-slate-900/60 rounded-xl flex items-center gap-1.5 border border-slate-200 dark:border-slate-700">
-                <button
-                  type="button"
-                  onClick={() => setInvoiceBillingMode('per_reel')}
-                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                    invoiceBillingMode === 'per_reel'
-                      ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-xs'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                  }`}
-                >
-                  <span>Per Reel / Item</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setInvoiceBillingMode('monthly_retainer');
-                    if (!monthlyRetainerInput && selectedClient?.monthlyRetainerAmount) {
-                      setMonthlyRetainerInput(String(selectedClient.monthlyRetainerAmount));
-                    }
-                  }}
-                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer ${
-                    invoiceBillingMode === 'monthly_retainer'
-                      ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-xs'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                  }`}
-                >
-                  <span>Monthly Retainer</span>
-                </button>
+              <div className="text-right">
+                <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 shrink-0">
+                  {invoiceBillingMode === 'monthly_retainer' && selectedClient?.monthlyRetainerAmount
+                    ? `₹${selectedClient.monthlyRetainerAmount.toLocaleString('en-IN')}/mo`
+                    : selectedClient
+                    ? `₹${selectedClient.defaultRate.toLocaleString('en-IN')}/reel`
+                    : ''}
+                </span>
+                <span className="text-[10px] text-slate-400 block">Auto-selected from client</span>
               </div>
-            )}
+            </div>
 
             {invoiceBillingMode === 'monthly_retainer' ? (
               /* Monthly Retainer Section */
@@ -2642,498 +1478,6 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
 
         </div>
 
-        {/* Right Column - A4 Preview Wrapper */}
-        <div 
-          ref={previewContainerRef}
-          className="xl:col-span-7 bg-slate-200 dark:bg-slate-900/80 p-3 sm:p-5 md:p-6 rounded-xl flex flex-col items-center shadow-inner min-h-[400px] border border-slate-300 dark:border-slate-800 relative w-full overflow-x-auto touch-pan-x touch-pan-y scrollbar-thin"
-        >
-          
-          {/* Preview Mode Switcher & Quick Print Header */}
-          <div className="w-full max-w-[210mm] flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6 bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-300 dark:border-slate-700 shadow-sm z-10">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Preview:</span>
-              <div className="inline-flex bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
-                <button
-                  type="button"
-                  onClick={() => setPreviewMode('standard')}
-                  className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
-                    previewMode === 'standard'
-                      ? 'bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-400 shadow-xs'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                  }`}
-                >
-                  <Receipt size={13} /> Full Invoice
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPreviewMode('work-only')}
-                  className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
-                    previewMode === 'work-only'
-                      ? 'bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-400 shadow-xs'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                  }`}
-                >
-                  <ListChecks size={13} /> Deliverables
-                </button>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 flex-wrap justify-between sm:justify-end">
-              <div className="inline-flex bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
-                <button
-                  type="button"
-                  onClick={() => setIsZoomMode(false)}
-                  className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${
-                    !isZoomMode
-                      ? 'bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-400 shadow-xs'
-                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                  }`}
-                  title="Fit to screen width"
-                >
-                  Fit ({Math.round(previewScale * 100)}%)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsZoomMode(true)}
-                  className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${
-                    isZoomMode
-                      ? 'bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-400 shadow-xs'
-                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                  }`}
-                  title="Actual size with horizontal and vertical scroll"
-                >
-                  100% Zoom
-                </button>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => handlePrintDocument()}
-                disabled={!selectedClient || effectiveReels.length === 0}
-                className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer shrink-0"
-                title={previewMode === 'work-only' ? 'Print Work Summary' : 'Print Invoice'}
-              >
-                <Printer size={13} className="text-slate-400" /> {previewMode === 'work-only' ? 'Print Summary' : 'Print Invoice'}
-              </button>
-            </div>
-          </div>
-
-          {/* Scaled A4 Preview Box that takes dynamic measured dimensions and prevents truncation */}
-          <div 
-            className="w-full flex justify-center items-start transition-all duration-200 ease-out py-1"
-            style={{
-              height: `${Math.round(actualCaptureHeight * effectiveScale)}px`,
-              minHeight: `${Math.round(actualCaptureHeight * effectiveScale)}px`
-            }}
-          >
-            <div
-              style={{
-                width: `${Math.round(794 * effectiveScale)}px`,
-                height: `${Math.round(actualCaptureHeight * effectiveScale)}px`,
-                position: 'relative',
-                overflow: 'visible'
-              }}
-              className="shadow-2xl rounded-sm shrink-0"
-            >
-              {/* The actual A4 element captured for live preview */}
-              <div
-                ref={invoiceCaptureRef}
-                id="invoice-preview-capture"
-                className="bg-white relative flex flex-col justify-between"
-                style={{
-                  width: '210mm',
-                  minHeight: '297mm',
-                  padding: '16mm 18mm',
-                  fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-                  color: '#0f172a',
-                  boxSizing: 'border-box',
-                  transform: `scale(${effectiveScale})`,
-                  transformOrigin: 'top left',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0
-                }}
-              >
-              <div>
-                {/* Top Accent Strip & Header */}
-                <div className="flex justify-between items-start border-b-1.5 border-slate-900 pb-5 mb-6">
-                  {/* Left Branding */}
-                  <div className="w-2/3 pr-4">
-                    <div className="flex items-center gap-3 mb-2">
-                      <Logo className="w-9 h-9 rounded-lg shrink-0 shadow-2xs" />
-                      <div>
-                        <h1 className="text-xl font-bold tracking-tight text-slate-900">
-                          {profile?.name || user?.displayName || 'Video Production Studio'}
-                        </h1>
-                        <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mt-0.5">
-                          {profile?.professionalTitle || profile?.servicesDescription || 'Professional Video Editing & Content Creation'}
-                        </p>
-                      </div>
-                    </div>
-                    {profile?.phone && (
-                      <p className="text-xs font-medium text-slate-500 mt-2 flex items-center gap-1.5">
-                        <span className="font-semibold text-slate-400 uppercase text-[10px] tracking-wider">Direct:</span>
-                        <span className="text-slate-700 font-medium">{profile.phone}</span>
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Right Invoice / Work Summary Title */}
-                  <div className="w-1/3 text-right flex flex-col items-end">
-                    <h2 className="text-2xl font-bold text-slate-900 tracking-wider uppercase">
-                      {previewMode === 'work-only' ? 'WORK SUMMARY' : 'INVOICE'}
-                    </h2>
-                    <div className="inline-block bg-slate-100 rounded px-2.5 py-0.5 mt-1.5">
-                      <span className="text-xs font-mono font-semibold text-slate-700">
-                        #{previewMode === 'work-only' ? 'WRK' : 'INV'}-{String(invoices.length + 1).padStart(4, '0')}
-                      </span>
-                    </div>
-                    <div className="text-xs text-slate-500 mt-1.5">
-                      Issue Date: <span className="font-semibold text-slate-800">{new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Billed To / Prepared For & Summary Overview */}
-                <div className="grid grid-cols-2 gap-6 p-3.5 bg-slate-50 border border-slate-200 rounded-lg mb-6">
-                  {/* Client Info */}
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 block mb-1">
-                      {previewMode === 'work-only' ? 'Prepared For' : 'Billed To'}
-                    </span>
-                    {selectedClient ? (
-                      <div>
-                        <p className="font-bold text-sm text-slate-900">{selectedClient.name}</p>
-                        {selectedClient.phone && (
-                          <p className="text-xs text-slate-600 font-medium mt-0.5">Ph: {selectedClient.phone}</p>
-                        )}
-                        {selectedClient.email && (
-                          <p className="text-xs text-slate-600 font-medium truncate mt-0.5">Email: {selectedClient.email}</p>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="text-xs text-slate-400 italic">
-                        Select a client to preview {previewMode === 'work-only' ? 'work details' : 'invoice details'}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Overview */}
-                  <div className="text-right flex flex-col justify-center">
-                    <div className="space-y-1 text-xs">
-                      <div className="flex justify-end gap-3 items-center">
-                        <span className="text-slate-500 font-medium">{previewMode === 'work-only' ? 'Work Period:' : 'Billing Period:'}</span>
-                        <span className="font-semibold text-slate-900">
-                          {dateFrom && dateTo ? `${new Date(dateFrom).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })} – ${new Date(dateTo).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}` : new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
-                        </span>
-                      </div>
-                      {previewMode === 'work-only' ? (
-                        <div className="flex justify-end gap-3 items-center">
-                          <span className="text-slate-500 font-medium">Total Deliverables:</span>
-                          <span className="font-bold text-slate-900">
-                            {effectiveReels.reduce((s, r) => s + (r.quantity || 1), 0)} Item(s)
-                          </span>
-                        </div>
-                      ) : (
-                        <>
-                          <div className="flex justify-end gap-3 items-center">
-                            <span className="text-slate-500 font-medium">Payment Terms:</span>
-                            <span className="font-semibold text-slate-900">Due on Receipt</span>
-                          </div>
-                          <div className="flex justify-end gap-3 items-center">
-                            <span className="text-slate-500 font-medium">Settlement:</span>
-                            <span className="font-medium text-slate-700">UPI / Bank Transfer</span>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Line Items Table */}
-                <div className="mb-6">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="border-t-1.5 border-b border-slate-900 bg-slate-50/70 text-slate-700">
-                        <th className="py-2 px-3 font-bold text-[10px] uppercase tracking-wider text-slate-500 w-10 text-center">#</th>
-                        {invoiceBillingMode === 'monthly_retainer' && (
-                          <th className="py-2 px-3 font-bold text-[10px] uppercase tracking-wider text-slate-500 w-20 text-left">Date</th>
-                        )}
-                        <th className="py-2 px-3 font-bold text-[10px] uppercase tracking-wider text-slate-500">
-                          {previewMode === 'work-only' || invoiceBillingMode === 'monthly_retainer' ? 'Deliverable Description' : 'Item Description / Service'}
-                        </th>
-                        <th className={`py-2 px-3 font-bold text-[10px] uppercase tracking-wider text-slate-500 text-center ${previewMode === 'work-only' || invoiceBillingMode === 'monthly_retainer' ? 'w-16' : 'w-14'}`}>
-                          Qty
-                        </th>
-                        {previewMode !== 'work-only' && invoiceBillingMode !== 'monthly_retainer' && (
-                          <>
-                            <th className="py-2 px-3 font-bold text-[10px] uppercase tracking-wider text-slate-500 text-right w-24">Rate</th>
-                            <th className="py-2 px-3 font-bold text-[10px] uppercase tracking-wider text-slate-500 text-right w-28">Total</th>
-                          </>
-                        )}
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {invoiceBillingMode === 'monthly_retainer' ? (
-                        currentBillingDeliverables.length > 0 ? (
-                          currentBillingDeliverables.map((d, idx) => (
-                            <tr key={d.id || idx} className="hover:bg-slate-50/50 transition-colors">
-                              <td className="py-2.5 px-3 text-xs font-mono font-medium text-slate-400 text-center">
-                                {String(idx + 1).padStart(2, '0')}
-                              </td>
-                              <td className="py-2.5 px-3 text-xs text-slate-500 whitespace-nowrap">
-                                {d.date ? new Date(d.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '—'}
-                              </td>
-                              <td className="py-2.5 px-3 text-xs font-semibold text-slate-900">
-                                <div>{d.title || <span className="text-slate-400 italic font-normal">Deliverable...</span>}</div>
-                                {d.videoUrl && (
-                                  <div className="mt-0.5">
-                                    <a
-                                      href={d.videoUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium hover:underline inline-flex items-center gap-1"
-                                      title={d.videoUrl}
-                                    >
-                                      <span>View Deliverable</span>
-                                      <span className="text-[10px]">↗</span>
-                                    </a>
-                                  </div>
-                                )}
-                              </td>
-                              <td className="py-2.5 px-3 text-xs text-center font-medium text-slate-700">
-                                {d.quantity || 1}
-                              </td>
-                            </tr>
-                          ))
-                        ) : (
-                          <tr className="hover:bg-slate-50/50 transition-colors">
-                            <td className="py-2.5 px-3 text-xs font-mono font-medium text-slate-400 text-center">01</td>
-                            <td className="py-2.5 px-3 text-xs text-slate-500 whitespace-nowrap">
-                              {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
-                            </td>
-                            <td className="py-2.5 px-3 text-xs font-semibold text-slate-900">
-                              <div>{monthlyServiceDescription || 'Monthly Video Editing & Creative Retainer'}</div>
-                            </td>
-                            <td className="py-2.5 px-3 text-xs text-center font-medium text-slate-700">
-                              1 Month
-                            </td>
-                          </tr>
-                        )
-                      ) : (
-                        effectiveReels.map((reel, idx) => (
-                          <tr key={reel.id} className="hover:bg-slate-50/50 transition-colors">
-                            <td className="py-2.5 px-3 text-xs font-mono font-medium text-slate-400 text-center">
-                              {String(idx + 1).padStart(2, '0')}
-                            </td>
-                            <td className="py-2.5 px-3 text-xs font-semibold text-slate-900">
-                              <div>
-                                {reel.title || <span className="text-slate-400 italic font-normal">Item description...</span>}
-                                {reel.subClientName && (
-                                  <span className="text-[11px] font-normal text-slate-500 ml-1.5">({reel.subClientName})</span>
-                                )}
-                              </div>
-                              {reel.videoUrl && (
-                                <div className="mt-0.5">
-                                  <a
-                                    href={reel.videoUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium hover:underline inline-flex items-center gap-1"
-                                    title={reel.videoUrl}
-                                  >
-                                    <span>View Deliverable</span>
-                                    <span className="text-[10px]">↗</span>
-                                  </a>
-                                </div>
-                              )}
-                            </td>
-                            <td className="py-2.5 px-3 text-xs text-center font-medium text-slate-700">
-                              {reel.quantity}
-                            </td>
-                            {previewMode !== 'work-only' && (
-                              <>
-                                <td className="py-2.5 px-3 text-xs text-right font-normal text-slate-600 tabular-nums">
-                                  ₹{reel.rate.toLocaleString('en-IN')}
-                                </td>
-                                <td className="py-2.5 px-3 text-xs text-right font-semibold text-slate-900 tabular-nums">
-                                  ₹{(reel.quantity * reel.rate).toLocaleString('en-IN')}
-                                </td>
-                              </>
-                            )}
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-
-                {invoiceBillingMode === 'monthly_retainer' && previewMode !== 'work-only' && (
-                  <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 mb-6 flex justify-between items-center text-xs avoid-break">
-                    <div>
-                      <span className="font-semibold text-slate-900 block">Monthly Retainer Package</span>
-                      <p className="text-[11px] text-slate-500 mt-0.5">
-                        Fixed monthly fee covering all creative deliverables across this billing cycle.
-                      </p>
-                    </div>
-                    <span className="text-slate-600 font-medium">
-                      {currentBillingDeliverables.length} Deliverable(s) Included
-                    </span>
-                  </div>
-                )}
-
-                {/* Totals Section (For Full Invoice) OR Deliverables Summary (For Work Summary) */}
-                {previewMode === 'work-only' ? (
-                  <div className="bg-slate-50 border border-slate-200 rounded-lg p-3.5 mb-6 flex justify-between items-center text-xs avoid-break">
-                    <div>
-                      <span className="font-semibold text-slate-900 block">Deliverables Summary</span>
-                      <p className="text-[11px] text-slate-500 mt-0.5">
-                        Completed for <strong className="text-slate-800">{selectedClient?.name || 'Client'}</strong> ({dateFrom && dateTo ? `${new Date(dateFrom).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })} – ${new Date(dateTo).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}` : 'Current Cycle'})
-                      </p>
-                    </div>
-                    <span className="text-slate-700 font-semibold">
-                      Completed ({invoiceBillingMode === 'monthly_retainer' ? currentBillingDeliverables.length : effectiveReels.reduce((s, r) => s + (r.quantity || 1), 0)} items)
-                    </span>
-                  </div>
-                ) : (
-                  <div className="flex justify-end mb-6 avoid-break" style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
-                    <div className="w-72 space-y-1.5 text-xs">
-                      <div className="flex justify-between items-center py-1 text-slate-600">
-                        <span className="font-medium text-slate-500">
-                          {invoiceBillingMode === 'monthly_retainer' ? 'Monthly Retainer Fee' : 'Subtotal'}
-                        </span>
-                        <span className="font-semibold text-slate-900 tabular-nums">₹{total.toLocaleString('en-IN')}</span>
-                      </div>
-
-                      {extraCost > 0 && (
-                        <div className="flex justify-between items-center py-1 text-slate-700">
-                          <span className="font-medium text-slate-600">
-                            Extra Cost {extraCostDescription ? `(${extraCostDescription})` : ''}
-                          </span>
-                          <span className="font-semibold tabular-nums">+₹{extraCost.toLocaleString('en-IN')}</span>
-                        </div>
-                      )}
-                      {discount > 0 && (
-                        <div className="flex justify-between items-center py-1 text-red-600">
-                          <span className="font-medium">
-                            Deduction {discountDescription ? `(${discountDescription})` : ''}
-                          </span>
-                          <span className="font-semibold tabular-nums">-₹{discount.toLocaleString('en-IN')}</span>
-                        </div>
-                      )}
-
-                      <div className="flex justify-between items-baseline pt-2.5 border-t-1.5 border-slate-900 mt-2">
-                        <div>
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">Total Due</span>
-                          <span className="text-[10px] text-slate-500 font-normal">Due on Receipt</span>
-                        </div>
-                        <span className="text-2xl font-bold text-slate-900 tracking-tight tabular-nums">₹{grandTotal.toLocaleString('en-IN')}</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Payment Details & QR Code (Full Invoice) OR Verification Statement (Work Summary) */}
-              <div className="border-t-1.5 border-slate-900 pt-5 mt-6 avoid-break" style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
-                {previewMode === 'work-only' ? (
-                  <div className="flex justify-between items-start gap-6">
-                    <div className="w-2/3 space-y-1">
-                      <span className="text-xs font-bold uppercase tracking-wider text-slate-900 block">
-                        Verification & Delivery Confirmation
-                      </span>
-                      <p className="text-xs text-slate-600 leading-relaxed">
-                        This statement confirms completion and official delivery of the listed creative deliverables for the specified date period.
-                      </p>
-                    </div>
-                    <div className="w-1/3 text-right">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Prepared By</span>
-                      <span className="font-bold text-slate-900 text-sm">{profile?.name || user?.displayName || 'Video Editor'}</span>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-12 gap-5 items-start">
-                    <div className="col-span-8">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 block mb-2">
-                        Payment Settlement Details
-                      </span>
-                      <div className="bg-slate-50/70 border border-slate-200 rounded-lg p-3.5 space-y-2 text-xs text-slate-800">
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-                          <div>
-                            <span className="text-[10px] font-semibold text-slate-500 uppercase block">Method</span>
-                            <span className="font-medium text-slate-900">UPI / Instant Bank Transfer</span>
-                          </div>
-                          <div>
-                            <span className="text-[10px] font-semibold text-slate-500 uppercase block">UPI ID</span>
-                            <span className="font-mono font-semibold text-slate-900">{activeUpi}</span>
-                          </div>
-                          <div>
-                            <span className="text-[10px] font-semibold text-slate-500 uppercase block">Payee Beneficiary</span>
-                            <span className="font-medium text-slate-900">{profile?.name || user?.displayName || 'Video Editor'}</span>
-                          </div>
-                          <div>
-                            <span className="text-[10px] font-semibold text-slate-500 uppercase block">Terms</span>
-                            <span className="font-medium text-slate-800">Due Upon Receipt (Net 7)</span>
-                          </div>
-                          {profile?.accountNumber && (
-                            <>
-                              <div>
-                                <span className="text-[10px] font-semibold text-slate-500 uppercase block">Bank Account No</span>
-                                <span className="font-mono font-semibold text-slate-900">{profile.accountNumber}</span>
-                              </div>
-                              <div>
-                                <span className="text-[10px] font-semibold text-slate-500 uppercase block">IFSC / Bank</span>
-                                <span className="font-semibold text-slate-900">{profile.ifscCode || ''} {profile.bankName ? `(${profile.bankName})` : ''}</span>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                        <p className="text-[10px] text-slate-500 italic pt-1 border-t border-slate-200/60 mt-2">
-                          Please process payment within 7 days of receiving this invoice.
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Right Column: QR Code */}
-                    <div className="col-span-4 flex flex-col items-center justify-center">
-                      <div className="bg-white p-2.5 border border-slate-200 rounded-lg flex flex-col items-center shadow-2xs">
-                        {activeUpiUri ? (
-                          <div className="p-0.5 bg-white rounded flex items-center justify-center">
-                            <QRCodeSVG
-                              value={activeUpiUri}
-                              size={88}
-                              level="M"
-                              includeMargin={false}
-                              bgColor="#ffffff"
-                              fgColor="#0f172a"
-                              className="w-[88px] h-[88px] block"
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-[88px] h-[88px] bg-slate-100 rounded flex items-center justify-center text-[10px] text-slate-400 font-medium">
-                            Scan to Pay
-                          </div>
-                        )}
-                        <span className="text-[8px] font-bold uppercase tracking-wider text-slate-500 mt-1.5">
-                          Scan via UPI
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Bottom Signature & Verification Note */}
-                <div className="mt-5 pt-3 border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-400 font-medium">
-                  <span>{previewMode === 'work-only' ? 'Official Work Delivery Summary • CrestFlow' : 'Official Electronic Invoice Statement • CrestFlow'}</span>
-                  <span>Generated on {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
       {/* Invoice History & Email Actions Section */}
       <div className="mt-12 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6 space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-700 pb-4">
@@ -3156,7 +1500,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
                 value={invoiceSearchQuery}
                 onChange={(e) => setInvoiceSearchQuery(e.target.value)}
                 placeholder="Filter invoices or client..."
-                className="w-full bg-slate-50 dark:bg-slate-900 text-xs pl-8 pr-7 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500 outline-none text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                className="w-full bg-slate-50 dark:bg-slate-900 text-sm pl-9 pr-7 py-2 rounded-xl border border-slate-200 dark:border-slate-700 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500 outline-none text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
               {invoiceSearchQuery && (
                 <button
@@ -3172,7 +1516,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
               <button
                 type="button"
                 onClick={() => setShowClosed(prev => !prev)}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer shrink-0 ${
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-colors cursor-pointer shrink-0 ${
                   showClosed
                     ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -3184,7 +1528,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
               </button>
             )}
 
-            <span className="text-xs font-medium px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded shrink-0">
+            <span className="text-sm font-medium px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg shrink-0">
               {displayedInvoices.length} Invoices
             </span>
           </div>
@@ -3235,12 +1579,12 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
             <table className="w-full text-left border-collapse min-w-[780px]">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                  <th className="p-3.5">Invoice No / Date</th>
-                  <th className="p-3.5">Client</th>
-                  <th className="p-3.5">Items / Summary</th>
-                  <th className="p-3.5 text-right">Total Amount</th>
-                  <th className="p-3.5 text-center">Status</th>
-                  <th className="p-3.5 text-right">Email Actions</th>
+                  <th className="p-4">Invoice No / Date</th>
+                  <th className="p-4">Client</th>
+                  <th className="p-4">Items / Summary</th>
+                  <th className="p-4 text-right">Total Amount</th>
+                  <th className="p-4 text-center">Status</th>
+                  <th className="p-4 text-right">Email Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm">
@@ -3248,7 +1592,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
                   .filter(inv => {
                     if (!invoiceSearchQuery.trim()) return true;
                     const q = invoiceSearchQuery.toLowerCase().trim();
-                    const invNo = inv.id.substring(0, 8).toLowerCase();
+                    const invNo = formatInvoiceNumber(inv, invoices).toLowerCase();
                     const itemsText = inv.reels ? inv.reels.map(r => r.title).join(' ').toLowerCase() : '';
                     return inv.clientName.toLowerCase().includes(q) ||
                       invNo.includes(q) ||
@@ -3270,9 +1614,9 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
 
                     return (
                       <tr key={inv.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
-                        <td className="p-3.5 font-mono text-xs text-slate-700 dark:text-slate-300">
+                        <td className="p-4 font-mono text-sm text-slate-700 dark:text-slate-300">
                           <div className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5 flex-wrap">
-                            <span>#{inv.id.substring(0, 8).toUpperCase()}</span>
+                            <span>{formatInvoiceNumber(inv, invoices)}</span>
                             {inv.isAutoGenerated && (
                               <span
                                 className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400"
@@ -3283,17 +1627,17 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
                               </span>
                             )}
                           </div>
-                          <div className="text-[11px] text-slate-400 dark:text-slate-500">
+                          <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                             {new Date(inv.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                           </div>
                         </td>
-                        <td className="p-3.5 font-medium text-slate-900 dark:text-slate-100">
+                        <td className="p-4 font-medium text-slate-900 dark:text-slate-100 text-sm">
                           <div>{inv.clientName}</div>
                           {clientObj.email && (
-                            <div className="text-[11px] text-slate-400 dark:text-slate-500 font-normal">{clientObj.email}</div>
+                            <div className="text-xs text-slate-500 dark:text-slate-400 font-normal mt-0.5">{clientObj.email}</div>
                           )}
                         </td>
-                        <td className="p-3.5 text-slate-600 dark:text-slate-300">
+                        <td className="p-4 text-slate-600 dark:text-slate-300 text-sm">
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <span className="font-semibold text-xs text-slate-800 dark:text-slate-200">
                               {inv.invoiceType === 'monthly_retainer' ? '1 Retainer' : `${inv.reels.length} item(s)`}
@@ -3304,21 +1648,21 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
                               </span>
                             )}
                           </div>
-                          <div className="text-[11px] text-slate-400 dark:text-slate-500 truncate max-w-xs">
+                          <div className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-xs mt-0.5">
                             {inv.reels.map(r => r.title).join(', ')}
                           </div>
                         </td>
-                        <td className="p-3.5 text-right font-bold text-slate-900 dark:text-slate-100">
+                        <td className="p-4 text-right font-bold text-slate-900 dark:text-slate-100 text-base">
                           ₹{inv.totalAmount.toLocaleString('en-IN')}
                         </td>
-                        <td className="p-3.5 text-center">
+                        <td className="p-4 text-center">
                           <StatusBadge
                             status={inv.status}
                             onClick={() => toggleInvoiceStatus(inv.id)}
                             title={`Click to mark as ${inv.status === 'Paid' ? 'Pending' : 'Paid & update last payment date'}`}
                           />
                         </td>
-                        <td className="p-3.5 text-right">
+                        <td className="p-4 text-right">
                           <div className="flex items-center justify-end gap-1.5">
                             <button
                               onClick={() => handleEditInvoice(inv)}
@@ -3697,7 +2041,7 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
             onUnmark={() => handleConfirmPaymentDate(paymentModalState.invoiceId!, null)}
             defaultDate={modalInv?.lastPaymentDate}
             isAlreadyPaid={modalInv?.status === 'Paid'}
-            invoiceNumber={paymentModalState.invoiceId?.substring(0, 8).toUpperCase()}
+            invoiceNumber={formatInvoiceNumber(invoices.find(i => i.id === paymentModalState.invoiceId) || { id: paymentModalState.invoiceId || "" }, invoices)}
           />
         );
       })()}

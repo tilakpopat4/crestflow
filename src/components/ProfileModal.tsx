@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { User } from 'firebase/auth';
 import { UserProfile } from '../types';
-import { Settings, X, Save, Sun, Moon, Monitor, Calendar } from 'lucide-react';
-import { useTheme, Theme } from '../context/ThemeContext';
+import { Settings, X, Save, Calendar } from 'lucide-react';
+
+import { SubscriptionState } from '../hooks/useSubscription';
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -11,6 +12,8 @@ interface ProfileModalProps {
   initialProfile: UserProfile | null;
   onSave: (profile: UserProfile) => Promise<void>;
   isMandatory?: boolean;
+  subscriptionState?: SubscriptionState;
+  onOpenSubscriptionModal?: () => void;
 }
 
 export default function ProfileModal({
@@ -19,9 +22,10 @@ export default function ProfileModal({
   user,
   initialProfile,
   onSave,
-  isMandatory = false
+  isMandatory = false,
+  subscriptionState,
+  onOpenSubscriptionModal
 }: ProfileModalProps) {
-  const { theme, setTheme } = useTheme();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [upiId, setUpiId] = useState('');
@@ -133,52 +137,6 @@ export default function ProfileModal({
             </div>
           )}
 
-          {/* Theme Preference Option */}
-          <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 p-3.5 rounded-xl space-y-2">
-            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              App Appearance / Theme Mode
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => setTheme('light')}
-                className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
-                  theme === 'light'
-                    ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 border-indigo-500 shadow-xs'
-                    : 'bg-white/60 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-700'
-                }`}
-              >
-                <Sun size={14} className="text-amber-500" />
-                <span>Light</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setTheme('dark')}
-                className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
-                  theme === 'dark'
-                    ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 border-indigo-500 shadow-xs'
-                    : 'bg-white/60 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-700'
-                }`}
-              >
-                <Moon size={14} className="text-indigo-400" />
-                <span>Dark</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setTheme('system')}
-                className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
-                  theme === 'system'
-                    ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 border-indigo-500 shadow-xs'
-                    : 'bg-white/60 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-700'
-                }`}
-              >
-                <Monitor size={14} className="text-slate-400" />
-                <span>Auto</span>
-              </button>
-            </div>
-          </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Your Full Name *</label>
@@ -316,6 +274,45 @@ export default function ProfileModal({
             </div>
             <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">Share this onboarding link with clients. They can view your services and submit onboarding details directly.</p>
           </div>
+
+          {/* Subscription & SaaS Access */}
+          {subscriptionState && subscriptionState.isSubscriptionFeatureEnabled && onOpenSubscriptionModal && (
+            <div className="pt-2">
+              <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider font-sans">
+                Subscription & Access
+              </label>
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`w-2 h-2 rounded-full ${
+                        subscriptionState.isPaidActive
+                          ? 'bg-indigo-600 dark:bg-indigo-400'
+                          : 'bg-red-600 dark:bg-red-400'
+                      }`}
+                    />
+                    <span className="text-xs font-semibold text-slate-900 dark:text-white">
+                      {subscriptionState.isPaidActive
+                        ? `CrestFlow Pro (₹49/month • ${subscriptionState.daysRemaining} days remaining)`
+                        : 'Subscription Required (₹49/month)'}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                    {subscriptionState.isPaidActive && subscriptionState.currentPeriodEnd
+                      ? `Active until ${new Date(subscriptionState.currentPeriodEnd).toLocaleDateString()}`
+                      : 'Subscribe via UPI to unlock client management, reel logs, and automated invoices.'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={onOpenSubscriptionModal}
+                  className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium transition-colors cursor-pointer shrink-0"
+                >
+                  {subscriptionState.isPaidActive ? 'Extend Plan' : 'Subscribe ₹49/mo'}
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
             <button

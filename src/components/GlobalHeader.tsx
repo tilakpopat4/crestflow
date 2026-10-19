@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
-import { Search, X, Users, ClipboardList, FileText, ExternalLink, Play, ArrowRight, CheckCircle2, Clock, Sun, Moon, Monitor, Award, Calendar, LogOut } from 'lucide-react';
+import { Search, X, Users, ClipboardList, FileText, ExternalLink, Play, ArrowRight, CheckCircle2, Clock, Award, Calendar, LogOut, PanelLeft } from 'lucide-react';
 import { User } from 'firebase/auth';
 import { useFirestore } from '../hooks/useFirestore';
+import { formatInvoiceNumber } from '../lib/invoiceUtils';
 import { Client, WorkItem, Invoice, UserProfile } from '../types';
 import { Tab } from '../App';
 import Logo from './Logo';
-import { useTheme } from '../context/ThemeContext';
 import { calculateWorkJourney } from '../lib/anniversary';
 import StatusBadge from './StatusBadge';
+import { SubscriptionState } from '../hooks/useSubscription';
 
 interface GlobalHeaderProps {
   user: User | null;
@@ -21,6 +22,10 @@ interface GlobalHeaderProps {
   onEditProfile?: () => void;
   onOpenAnniversaryModal?: () => void;
   onLogout?: () => void;
+  subscriptionState?: SubscriptionState;
+  onOpenSubscriptionModal?: () => void;
+  isSidebarCollapsed?: boolean;
+  onToggleSidebar?: () => void;
 }
 
 export default function GlobalHeader({
@@ -33,12 +38,12 @@ export default function GlobalHeader({
   profile,
   onEditProfile,
   onOpenAnniversaryModal,
-  onLogout
+  onLogout,
+  subscriptionState,
+  onOpenSubscriptionModal,
+  isSidebarCollapsed = false,
+  onToggleSidebar
 }: GlobalHeaderProps) {
-  const { theme, resolvedTheme, setTheme, toggleTheme } = useTheme();
-  const [showThemeMenu, setShowThemeMenu] = useState(false);
-  const themeMenuRef = useRef<HTMLDivElement>(null);
-
   const journey = calculateWorkJourney(profile?.freelanceStartDate);
   const [showJourneyMenu, setShowJourneyMenu] = useState(false);
   const journeyMenuRef = useRef<HTMLDivElement>(null);
@@ -66,7 +71,6 @@ export default function GlobalHeader({
         setIsOpen(true);
       } else if (e.key === 'Escape') {
         setIsOpen(false);
-        setShowThemeMenu(false);
         setShowJourneyMenu(false);
       }
     };
@@ -80,9 +84,6 @@ export default function GlobalHeader({
     const handleClickOutside = (e: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
         setIsOpen(false);
-      }
-      if (themeMenuRef.current && !themeMenuRef.current.contains(e.target as Node)) {
-        setShowThemeMenu(false);
       }
       if (journeyMenuRef.current && !journeyMenuRef.current.contains(e.target as Node)) {
         setShowJourneyMenu(false);
@@ -115,7 +116,7 @@ export default function GlobalHeader({
   const filteredInvoices = cleanQuery ? invoices.filter(inv => {
     const client = clients.find(c => c.id === inv.clientId || c.name === inv.clientName);
     if (client?.isClosed) return false;
-    const invoiceNo = inv.id.substring(0, 8).toLowerCase();
+    const invoiceNo = formatInvoiceNumber(inv, invoices).toLowerCase();
     const itemsText = inv.reels ? inv.reels.map(r => r.title).join(' ').toLowerCase() : '';
     return inv.clientName.toLowerCase().includes(cleanQuery) ||
       invoiceNo.includes(cleanQuery) ||
@@ -159,6 +160,19 @@ export default function GlobalHeader({
           <Logo className="w-6 h-6 min-[380px]:w-7 min-[380px]:h-7" />
           <span className="font-extrabold text-slate-900 dark:text-white tracking-tight text-sm">CrestFlow</span>
         </div>
+
+        {/* Desktop Sidebar Toggle Button */}
+        {onToggleSidebar && (
+          <button
+            type="button"
+            onClick={onToggleSidebar}
+            className="hidden md:flex items-center justify-center p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer border-none bg-transparent"
+            title={isSidebarCollapsed ? "Expand sidebar (or swipe right)" : "Collapse sidebar (or swipe left)"}
+            aria-label="Toggle sidebar"
+          >
+            <PanelLeft size={18} />
+          </button>
+        )}
 
         {/* Real-time Global Search Input (Full width on mobile, max-w-2xl on desktop) */}
         <div ref={searchRef} className="relative w-full md:w-auto md:flex-1 md:max-w-2xl mx-auto md:mx-0 order-last md:order-none min-w-0">
@@ -358,7 +372,7 @@ export default function GlobalHeader({
                                 </div>
                                 <div>
                                   <div className="font-semibold text-xs md:text-sm text-slate-900 dark:text-slate-100 group-hover:text-indigo-700 dark:group-hover:text-indigo-400 flex items-center gap-2">
-                                    <span>#{inv.id.substring(0, 8).toUpperCase()}</span>
+                                    <span>{formatInvoiceNumber(inv, invoices)}</span>
                                     <span className="text-slate-400 dark:text-slate-600 font-normal">•</span>
                                     <span>{inv.clientName}</span>
                                   </div>
@@ -504,69 +518,40 @@ export default function GlobalHeader({
           ) : null}
         </div>
 
-        {/* Theme Switcher Button & Dropdown */}
-        <div className="relative shrink-0" ref={themeMenuRef}>
+        {/* Subscription Status Indicator */}
+        {subscriptionState && subscriptionState.isSubscriptionFeatureEnabled && onOpenSubscriptionModal && (
           <button
-            onClick={() => setShowThemeMenu(!showThemeMenu)}
-            className="p-2 md:px-3 md:py-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200/80 dark:border-slate-700/70 transition-all flex items-center gap-2 cursor-pointer shadow-2xs group"
-            title={`Current theme: ${theme === 'system' ? `Auto (${resolvedTheme})` : theme}. Click to change theme.`}
-            aria-label="Toggle Theme"
+            type="button"
+            onClick={onOpenSubscriptionModal}
+            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+            title={
+              subscriptionState.isPaidActive
+                ? `CrestFlow Pro Active (${subscriptionState.daysRemaining} days remaining)`
+                : 'Subscription required (₹49/month). Click to activate.'
+            }
           >
-            {resolvedTheme === 'dark' ? (
-              <Sun size={17} className="text-amber-400 group-hover:rotate-45 transition-transform duration-300" />
-            ) : (
-              <Moon size={17} className="text-indigo-600 group-hover:-rotate-12 transition-transform duration-300" />
-            )}
-            <span className="hidden lg:inline-block text-xs font-semibold capitalize">
-              {theme === 'system' ? `Auto (${resolvedTheme})` : theme}
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${
+                subscriptionState.isPaidActive
+                  ? 'bg-indigo-600 dark:bg-indigo-400'
+                  : 'bg-red-600 dark:bg-red-400'
+              }`}
+            />
+            <span
+              className={
+                subscriptionState.isPaidActive
+                  ? 'text-indigo-600 dark:text-indigo-400 font-medium text-[13px]'
+                  : 'text-red-600 dark:text-red-400 font-medium text-[13px]'
+              }
+            >
+              {subscriptionState.isPaidActive
+                ? `Pro • ${subscriptionState.daysRemaining}d`
+                : 'Subscribe • ₹49/mo'}
             </span>
           </button>
+        )}
 
-          {/* Theme Dropdown Menu */}
-          {showThemeMenu && (
-            <div className="absolute right-0 top-full mt-2 w-44 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-800 p-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-              <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                Theme Options
-              </div>
 
-              <button
-                onClick={() => { setTheme('light'); setShowThemeMenu(false); }}
-                className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
-                  theme === 'light'
-                    ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-semibold'
-                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
-              >
-                <Sun size={15} className="text-amber-500" />
-                <span>Light Theme</span>
-              </button>
-
-              <button
-                onClick={() => { setTheme('dark'); setShowThemeMenu(false); }}
-                className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
-                  theme === 'dark'
-                    ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-semibold'
-                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
-              >
-                <Moon size={15} className="text-indigo-400" />
-                <span>Dark Theme</span>
-              </button>
-
-              <button
-                onClick={() => { setTheme('system'); setShowThemeMenu(false); }}
-                className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
-                  theme === 'system'
-                    ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-semibold'
-                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
-              >
-                <Monitor size={15} className="text-slate-400" />
-                <span>System Auto</span>
-              </button>
-            </div>
-          )}
-        </div>
 
         {/* Mobile Profile & Logout Controls */}
         <div className="flex md:hidden items-center gap-1.5 shrink-0">

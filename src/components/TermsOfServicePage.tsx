@@ -20,7 +20,7 @@ export default function TermsOfServicePage({ onNavigate }: TermsOfServicePagePro
 
   return (
     <div className="w-full py-8 md:py-12 px-4 md:px-6">
-      <div className="max-w-[720px] mx-auto">
+      <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
           Terms of Service
         </h1>
@@ -28,9 +28,9 @@ export default function TermsOfServicePage({ onNavigate }: TermsOfServicePagePro
           Last updated: October 12, 2026
         </p>
 
-        <div className="space-y-6 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+        <div className="space-y-6 text-base text-slate-600 dark:text-slate-300 leading-relaxed">
           <section>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
               1. Acceptance of Terms
             </h2>
             <p>
@@ -39,7 +39,7 @@ export default function TermsOfServicePage({ onNavigate }: TermsOfServicePagePro
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
               2. Account Responsibilities
             </h2>
             <p className="mb-2">
@@ -54,7 +54,7 @@ export default function TermsOfServicePage({ onNavigate }: TermsOfServicePagePro
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
               3. Acceptable Use
             </h2>
             <p className="mb-2">
@@ -69,7 +69,7 @@ export default function TermsOfServicePage({ onNavigate }: TermsOfServicePagePro
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
               4. User Content and Ownership
             </h2>
             <p>
@@ -78,7 +78,7 @@ export default function TermsOfServicePage({ onNavigate }: TermsOfServicePagePro
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
               5. Third-Party Integrations
             </h2>
             <p className="mb-2">
@@ -98,7 +98,7 @@ export default function TermsOfServicePage({ onNavigate }: TermsOfServicePagePro
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
               6. Availability and Changes to the Service
             </h2>
             <p>
@@ -107,7 +107,7 @@ export default function TermsOfServicePage({ onNavigate }: TermsOfServicePagePro
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
               7. Limitation of Liability
             </h2>
             <p>
@@ -116,7 +116,7 @@ export default function TermsOfServicePage({ onNavigate }: TermsOfServicePagePro
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
               8. Termination
             </h2>
             <p>
@@ -125,7 +125,7 @@ export default function TermsOfServicePage({ onNavigate }: TermsOfServicePagePro
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
               9. Governing Law
             </h2>
             <p>
@@ -134,7 +134,7 @@ export default function TermsOfServicePage({ onNavigate }: TermsOfServicePagePro
           </section>
 
           <section className="pt-4 border-t border-slate-200 dark:border-slate-800">
-            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
               10. Contact
             </h2>
             <p>

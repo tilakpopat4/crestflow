@@ -900,7 +900,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                         </div>
                       )}
                       <div className="min-w-0 flex-1">
-                        <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors leading-snug truncate" title={client.name}>
+                        <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors leading-snug truncate" title={client.name}>
                           {client.name}
                         </h3>
                         <p className="text-[11px] text-slate-400 dark:text-slate-500 font-mono truncate">ID: {client.id.split('-')[0]}</p>
@@ -979,31 +979,31 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                   {/* 30-Day Cycle Dates Row */}
                   <div className="bg-slate-50 dark:bg-slate-900/60 p-3 sm:p-3.5 rounded-xl border border-slate-100 dark:border-slate-700/60 grid grid-cols-2 gap-2 text-xs">
                     <div className="min-w-0">
-                      <span className="text-slate-400 dark:text-slate-500 block text-[10px] font-semibold uppercase tracking-wider truncate">Prev Payment</span>
-                      <span className="font-bold text-slate-800 dark:text-slate-200 truncate block">{formattedPrevDate}</span>
+                      <span className="text-slate-400 dark:text-slate-500 block text-xs font-semibold uppercase tracking-wider truncate">Prev Payment</span>
+                      <span className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate block mt-0.5">{formattedPrevDate}</span>
                     </div>
 
                     <div className="border-l border-slate-200 dark:border-slate-700 pl-2.5 min-w-0">
-                      <span className="text-slate-400 dark:text-slate-500 block text-[10px] font-semibold uppercase tracking-wider truncate">Next Due</span>
-                      <span className="font-bold text-slate-900 dark:text-slate-100 truncate block">{formattedNextDate}</span>
+                      <span className="text-slate-400 dark:text-slate-500 block text-xs font-semibold uppercase tracking-wider truncate">Next Due</span>
+                      <span className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate block mt-0.5">{formattedNextDate}</span>
                     </div>
                   </div>
 
                   {/* Financials & Rates */}
                   <div className="flex items-center justify-between text-xs pt-1 gap-2">
                     <div className="min-w-0">
-                      <span className="text-slate-400 dark:text-slate-500 block text-[11px] truncate">
+                      <span className="text-slate-400 dark:text-slate-500 block text-xs truncate">
                         {client.paymentBasis === 'monthly_retainer' ? 'Monthly Retainer' : 'Default Rate'}
                       </span>
-                      <span className="font-semibold text-slate-700 dark:text-slate-300 truncate block">
+                      <span className="font-bold text-slate-800 dark:text-slate-200 text-sm truncate block mt-0.5">
                         ₹{(client.paymentBasis === 'monthly_retainer' ? (client.monthlyRetainerAmount || client.defaultRate) : client.defaultRate).toLocaleString('en-IN')}
                         {client.paymentBasis === 'monthly_retainer' ? ' / mo' : ' / reel'}
                       </span>
                     </div>
 
                     <div className="text-right min-w-0">
-                      <span className="text-slate-400 dark:text-slate-500 block text-[11px] truncate">Pending Balance</span>
-                      <span className={`font-bold truncate block ${financials.totalPendingAmount > 0 ? 'text-rose-600' : 'text-slate-700 dark:text-slate-300'}`}>
+                      <span className="text-slate-400 dark:text-slate-500 block text-xs truncate">Pending Balance</span>
+                      <span className={`font-bold text-sm truncate block mt-0.5 ${financials.totalPendingAmount > 0 ? 'text-rose-600' : 'text-slate-700 dark:text-slate-300'}`}>
                         ₹{financials.totalPendingAmount.toLocaleString('en-IN')}
                       </span>
                     </div>

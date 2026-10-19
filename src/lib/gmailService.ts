@@ -21,11 +21,12 @@ export async function acquireGmailAccessToken(forcePrompt = false): Promise<stri
   }
 
   try {
-    // Add Gmail scopes
-    googleProvider.addScope('https://www.googleapis.com/auth/gmail.send');
-    googleProvider.addScope('https://www.googleapis.com/auth/gmail.compose');
+    // Create dedicated provider for Gmail action only
+    const gmailProvider = new GoogleAuthProvider();
+    gmailProvider.addScope('https://www.googleapis.com/auth/gmail.send');
+    gmailProvider.addScope('https://www.googleapis.com/auth/gmail.compose');
 
-    const result = await signInWithPopup(auth, googleProvider);
+    const result = await signInWithPopup(auth, gmailProvider);
     const credential = GoogleAuthProvider.credentialFromResult(result);
     const token = credential?.accessToken;
 

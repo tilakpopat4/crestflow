@@ -23,6 +23,7 @@ import { calculateWorkJourney } from '../lib/anniversary';
 import { executeAutoInvoiceCheck } from '../lib/autoInvoiceService';
 import StatusBadge from './StatusBadge';
 import GettingStartedCard from './GettingStartedCard';
+import { formatInvoiceNumber } from '../lib/invoiceUtils';
 
 interface DashboardTabProps {
   user: User | null;
@@ -916,7 +917,7 @@ export default function DashboardTab({
             onUnmark={() => handleConfirmPaymentDate(paymentModalState.invoiceId!, null)}
             defaultDate={modalInv?.lastPaymentDate}
             isAlreadyPaid={modalInv?.status === 'Paid'}
-            invoiceNumber={paymentModalState.invoiceId?.substring(0, 8).toUpperCase()}
+            invoiceNumber={formatInvoiceNumber(invoices.find(i => i.id === paymentModalState.invoiceId) || { id: paymentModalState.invoiceId || "" }, invoices)}
           />
         );
       })()}

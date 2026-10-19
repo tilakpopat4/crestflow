@@ -1,4 +1,5 @@
 import { Client, Invoice, WorkItem, UserProfile } from '../types';
+import { formatInvoiceNumber } from './invoiceUtils';
 import { triggerFcmPaymentReminder } from './fcmService';
 
 export interface PaymentStatusInfo {
@@ -274,7 +275,7 @@ export function generateInvoiceEmailDetails(
   const senderName = profile?.name || 'Video Editor';
   const upiId = profile?.upiId || '';
 
-  const invoiceNo = `INV-${invoice.id.substring(0, 8).toUpperCase()}`;
+  const invoiceNo = formatInvoiceNumber(invoice);
   const subject = `Invoice ${invoiceNo} - ${client.name} (${monthCycleStr})`;
 
   let body = `Dear ${client.name},\n\n`;

@@ -1,7 +1,8 @@
-import { Client, Invoice, WorkItem, Reel } from '../types';
+import { Client, Invoice, WorkItem, Reel, UserProfile } from '../types';
 import { generateUUID } from './utils';
 import { formatLocalDateToYMD } from './dateUtils';
 import { getNextPaymentDueDate } from './paymentUtils';
+import { formatInvoiceNumber, getNextInvoiceNumber } from './invoiceUtils';
 
 export interface AutoInvoiceScheduleInfo {
   isEnabled: boolean;
@@ -150,10 +151,11 @@ export async function executeAutoInvoiceCheck(params: {
   addInvoice: (inv: Invoice) => Promise<any>;
   updateWorkItem: (item: WorkItem) => Promise<any>;
   updateClient: (client: Client) => Promise<any>;
+  profile?: UserProfile | null;
   now?: Date;
   forceRunClientId?: string; // allow manual execution for testing
 }): Promise<{ generatedCount: number; invoices: Invoice[]; summaryMessages: string[] }> {
-  const { clients, workItems, invoices, addInvoice, updateWorkItem, updateClient, forceRunClientId } = params;
+  const { clients, workItems, invoices, addInvoice, updateWorkItem, updateClient, profile, forceRunClientId } = params;
   const now = params.now || new Date();
   const currentHour = now.getHours();
   const todayYMD = formatLocalDateToYMD(now);
@@ -267,11 +269,16 @@ export async function executeAutoInvoiceCheck(params: {
           }))
         : undefined;
 
+      const nextInvNo = getNextInvoiceNumber(invoices || []);
       const newInvoice: Invoice = {
         id: generateUUID(),
+        invoiceNumber: nextInvNo,
         date: Date.now(),
         clientId: client.id,
+        clientEmail: client.email ? client.email.toLowerCase().trim() : undefined,
         clientName: client.name,
+        payeeName: profile?.name,
+        payeeUpiId: profile?.upiId,
         reels,
         totalAmount,
         status: 'Pending',
@@ -302,7 +309,7 @@ export async function executeAutoInvoiceCheck(params: {
       });
 
       generatedInvoices.push(newInvoice);
-      summaryMessages.push(`Invoice #${newInvoice.id.substring(0, 8).toUpperCase()} (₹${totalAmount.toLocaleString('en-IN')}) auto-generated for ${client.name}`);
+      summaryMessages.push(`Invoice ${newInvoice.invoiceNumber || formatInvoiceNumber(newInvoice)} (₹${totalAmount.toLocaleString('en-IN')}) auto-generated for ${client.name}`);
     } catch (err) {
       // If saving failed, remove storage key so it can retry later
       try {

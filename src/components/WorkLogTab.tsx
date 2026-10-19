@@ -94,10 +94,12 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
     try {
       if (editingWorkId) {
         const existing = workItems.find(w => w.id === editingWorkId);
+        const clientObj = clients.find(c => c.id === formData.clientId);
         if (existing) {
           const updatedWork: WorkItem = {
             ...existing,
             clientId: formData.clientId,
+            clientEmail: clientObj?.email ? clientObj.email.toLowerCase().trim() : existing.clientEmail,
             subClientId: selectedSub ? selectedSub.id : (formData.subClientId ? formData.subClientId : undefined),
             subClientName: selectedSub ? selectedSub.name : undefined,
             description: formData.description,
@@ -171,9 +173,11 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
           await addOrUpdateItem(updatedWork);
         }
       } else {
+        const clientObj = clients.find(c => c.id === formData.clientId);
         const newWork: WorkItem = {
           id: generateUUID(),
           clientId: formData.clientId,
+          clientEmail: clientObj?.email ? clientObj.email.toLowerCase().trim() : undefined,
           subClientId: selectedSub ? selectedSub.id : (formData.subClientId ? formData.subClientId : undefined),
           subClientName: selectedSub ? selectedSub.name : undefined,
           description: formData.description,
@@ -376,7 +380,7 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search work or client..."
-              className="w-full bg-white dark:bg-slate-800 text-xs pl-9 pr-7 py-2.5 sm:py-2 rounded-lg border border-slate-200 dark:border-slate-700 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500 outline-none text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+              className="w-full bg-white dark:bg-slate-800 text-sm pl-9 pr-7 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500 outline-none text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
             />
             {searchQuery && (
               <button
@@ -391,7 +395,7 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
           <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
             <button
               onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
-              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-transparent dark:border-slate-700 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-transparent dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
               title="Toggle sort order"
             >
               <ArrowUpDown size={14} className="shrink-0" />
@@ -402,7 +406,7 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
               <button
                 type="button"
                 onClick={() => setShowClosed(prev => !prev)}
-                className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-colors cursor-pointer ${
                   showClosed
                     ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -419,7 +423,7 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
                 <button 
                   type="button"
                   onClick={() => setIsDriveModalOpen(true)}
-                  className="w-full sm:w-auto flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs font-semibold transition-colors shadow-xs cursor-pointer truncate"
+                  className="w-full sm:w-auto flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-colors shadow-xs cursor-pointer truncate"
                   title="Directly upload video/file to Google Drive and log as work deliverable"
                 >
                   <UploadCloud size={14} className="shrink-0" />
@@ -428,7 +432,7 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
 
                 <button 
                   onClick={() => setIsFormOpen(true)}
-                  className="w-full sm:w-auto flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors shadow-xs cursor-pointer truncate"
+                  className="w-full sm:w-auto flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-colors shadow-xs cursor-pointer truncate"
                 >
                   <Plus size={15} className="shrink-0" />
                   <span className="truncate">Log Work</span>
@@ -898,14 +902,14 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
                       </td>
                       <td className="py-4 px-4 text-sm font-medium text-slate-900 dark:text-slate-100">
                         {client?.paymentBasis === 'monthly_retainer' ? (
-                          <span className="text-[13px] font-normal text-slate-600 dark:text-slate-400">
+                          <span className="text-sm font-normal text-slate-600 dark:text-slate-400">
                             Monthly Retainer
                           </span>
                         ) : (
                           `₹${(work.quantity * work.rate).toLocaleString('en-IN')}`
                         )}
                       </td>
-                      <td className="py-4 px-4 text-[13px] font-medium">
+                      <td className="py-4 px-4 text-sm font-medium">
                         <StatusBadge status={work.status === 'Invoiced' ? 'Invoiced' : 'Pending'} />
                       </td>
                       <td className="py-4 px-4 text-sm text-right flex justify-end items-center gap-1">

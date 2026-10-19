@@ -1,0 +1,19 @@
+# CrestFlow Development Roadmap
+
+## Completed Milestones & Phases
+- [x] **Phase 1: Zero-Loss Client Deletion & Invoicing Integrity**
+- [x] **Phase 2: Automated 6:00 AM Billing & Delivery Pipeline**
+- [x] **Phase 3: Subscription & Billing Architecture (Path A)**
+  - Dual-database model: Firebase Firestore (business entities) + Supabase PostgreSQL (billing records).
+- [x] **Phase 4: Automated Zero-Touch YouPI Payment Gateway Integration**
+  - Zero-touch payment flow with real-time observer attribution.
+  - Hardened backend status checks and segregated API (port 6100) vs Portal (port 7000).
+
+## Active Roadmap
+- [x] **Phase 5: Multi-Page Routing Architecture & Profile Settings Page**
+  - **Plan**: `.planning/phases/05-multi-page-routing-and-profile-page/PLAN.md`
+  - **Delivered**:
+    - Promoted Profile Settings to a dedicated full-page experience (`/profile`).
+    - Divided all workspace tabs into canonical URL routes (`/dashboard`, `/clients`, `/work`, `/invoices`, `/reviews`, `/profile`, `/admin`, `/privacy`, `/terms`, `/contact`).
+    - Type-safe, zero-dependency browser history router with Back/Forward button and deep-link support.
+    - Decomposed `App.tsx` from 771 lines down to 272 lines.

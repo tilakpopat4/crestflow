@@ -33,11 +33,8 @@ import {
   ShieldCheck,
   UserCheck,
   Sparkles,
-  QrCode,
-  Sun,
-  Moon
+  QrCode
 } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
 import StatusBadge from './StatusBadge';
 import MediaEmbedModal from './MediaEmbedModal';
 import Footer from './Footer';
@@ -49,7 +46,6 @@ interface ClientPortalProps {
 }
 
 export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: ClientPortalProps) {
-  const { resolvedTheme, toggleTheme } = useTheme();
   const [clients, setClients] = useState<Client[]>([]);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [freelancerProfile, setFreelancerProfile] = useState<UserProfile | null>(null);
@@ -88,14 +84,12 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
 
     const userEmail = user.email.toLowerCase().trim();
     
-    // Listen to clients collection and match user email
-    const unsubscribe = onSnapshot(collection(db, 'clients'), (snapshot) => {
+    // Listen to clients collection matching user email
+    const clientQuery = query(collection(db, 'clients'), where('email', '==', userEmail));
+    const unsubscribe = onSnapshot(clientQuery, (snapshot) => {
       const fetchedClients: Client[] = [];
       snapshot.forEach((docSnap) => {
-        const data = docSnap.data() as Client;
-        if (data.email && data.email.toLowerCase().trim() === userEmail) {
-          fetchedClients.push({ id: docSnap.id, ...data });
-        }
+        fetchedClients.push({ id: docSnap.id, ...docSnap.data() as Client });
       });
       setClients(fetchedClients);
       if (fetchedClients.length > 0) {
@@ -133,28 +127,39 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
     fetchFreelancer();
   }, [currentClient]);
 
-  // 3. Fetch Invoices and Work Items for the selected client
+  // 3. Fetch Invoices and Work Items for the client by clientEmail
   useEffect(() => {
-    if (!currentClient) {
+    if (!user.email || !currentClient) {
       setInvoices([]);
       setWorkItems([]);
       return;
     }
 
-    const invQuery = query(collection(db, 'invoices'), where('clientId', '==', currentClient.id));
+    const userEmail = user.email.toLowerCase().trim();
+    const invQuery = query(collection(db, 'invoices'), where('clientEmail', '==', userEmail));
     const unsubInvoices = onSnapshot(invQuery, (snap) => {
       const list: Invoice[] = [];
-      snap.forEach(d => list.push({ id: d.id, ...d.data() } as Invoice));
+      snap.forEach(d => {
+        const data = { id: d.id, ...d.data() } as Invoice;
+        if (!currentClient || data.clientId === currentClient.id) {
+          list.push(data);
+        }
+      });
       list.sort((a, b) => b.date - a.date);
       setInvoices(list);
     }, (err) => {
       console.error("Error fetching invoices:", err);
     });
 
-    const workQuery = query(collection(db, 'workItems'), where('clientId', '==', currentClient.id));
+    const workQuery = query(collection(db, 'workItems'), where('clientEmail', '==', userEmail));
     const unsubWork = onSnapshot(workQuery, (snap) => {
       const list: WorkItem[] = [];
-      snap.forEach(d => list.push({ id: d.id, ...d.data() } as WorkItem));
+      snap.forEach(d => {
+        const data = { id: d.id, ...d.data() } as WorkItem;
+        if (!currentClient || data.clientId === currentClient.id) {
+          list.push(data);
+        }
+      });
       list.sort((a, b) => b.date - a.date);
       setWorkItems(list);
     }, (err) => {
@@ -165,7 +170,7 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
       unsubInvoices();
       unsubWork();
     };
-  }, [currentClient?.id]);
+  }, [user.email, currentClient]);
 
   // Financial calculations
   const financials = currentClient ? calculateClientFinancials(currentClient.id, invoices, workItems) : null;
@@ -321,19 +326,7 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
               </select>
             )}
 
-            {/* Theme Toggle Button */}
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer flex items-center justify-center"
-              title={`Switch Theme (Current: ${resolvedTheme})`}
-              aria-label="Toggle Theme"
-            >
-              {resolvedTheme === 'dark' ? (
-                <Sun size={15} className="text-amber-400" />
-              ) : (
-                <Moon size={15} className="text-indigo-600" />
-              )}
-            </button>
+
 
             <button
               onClick={onLogout}
@@ -963,11 +956,15 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
             </div>
 
             {/* UPI Payment Option if Pending */}
-            {viewInvoice.status === 'Pending' && freelancerProfile?.upiId && (
+            {viewInvoice.status === 'Pending' && (viewInvoice.payeeUpiId || freelancerProfile?.upiId) && (
               <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 rounded-2xl p-4 flex flex-col sm:flex-row items-center gap-4">
                 <div className="w-24 h-24 bg-white p-2 rounded-xl border border-slate-200 dark:border-slate-700 shrink-0 flex items-center justify-center">
                   <QRCodeSVG
-                    value={generateUPILink(freelancerProfile.upiId, freelancerProfile.name, viewInvoice.totalAmount)}
+                    value={generateUPILink(
+                      viewInvoice.payeeUpiId || freelancerProfile?.upiId || '',
+                      viewInvoice.payeeName || freelancerProfile?.name || 'Freelancer',
+                      viewInvoice.totalAmount
+                    )}
                     size={80}
                     level="M"
                     className="w-full h-full"
@@ -975,9 +972,15 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
                 </div>
                 <div className="space-y-2 text-center sm:text-left flex-1">
                   <div className="text-xs font-bold text-slate-900 dark:text-slate-100">Scan & Pay via any UPI App</div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">UPI ID: {freelancerProfile.upiId}</div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+                    UPI ID: {viewInvoice.payeeUpiId || freelancerProfile?.upiId}
+                  </div>
                   <a
-                    href={generateUPILink(freelancerProfile.upiId, freelancerProfile.name, viewInvoice.totalAmount)}
+                    href={generateUPILink(
+                      viewInvoice.payeeUpiId || freelancerProfile?.upiId || '',
+                      viewInvoice.payeeName || freelancerProfile?.name || 'Freelancer',
+                      viewInvoice.totalAmount
+                    )}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors"
                   >
                     <QrCode size={13} /> Pay with UPI App

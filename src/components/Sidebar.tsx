@@ -1,11 +1,12 @@
-import { LayoutDashboard, Users, FileText, LogOut, ClipboardList, ShieldCheck, MessageSquare, Sun, Moon } from 'lucide-react';
+import React, { useRef } from 'react';
+import { LayoutDashboard, Users, FileText, LogOut, ClipboardList, ShieldCheck, MessageSquare, UserPlus, ChevronLeft } from 'lucide-react';
 import { clsx } from 'clsx';
 import { motion, useReducedMotion } from 'motion/react';
 import { Tab } from '../App';
 import { User } from 'firebase/auth';
 import Logo from './Logo';
 import { UserProfile } from '../types';
-import { useTheme } from '../context/ThemeContext';
+import { SubscriptionState } from '../hooks/useSubscription';
 
 interface SidebarProps {
   activeTab: Tab;
@@ -15,11 +16,67 @@ interface SidebarProps {
   profile?: UserProfile | null;
   onEditProfile?: () => void;
   onSwitchToClient?: () => void;
+  subscriptionState?: SubscriptionState;
+  onOpenSubscriptionModal?: () => void;
+  isCollapsed?: boolean;
+  onCollapse?: () => void;
 }
 
-export default function Sidebar({ activeTab, setActiveTab, user, onLogout, profile, onEditProfile, onSwitchToClient }: SidebarProps) {
-  const { resolvedTheme, toggleTheme } = useTheme();
+export default function Sidebar({
+  activeTab,
+  setActiveTab,
+  user,
+  onLogout,
+  profile,
+  onEditProfile,
+  onSwitchToClient,
+  subscriptionState,
+  onOpenSubscriptionModal,
+  isCollapsed = false,
+  onCollapse,
+}: SidebarProps) {
   const shouldReduceMotion = useReducedMotion();
+  const touchStartXRef = useRef<number | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartXRef.current = e.touches[0].clientX;
+    touchStartYRef.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartXRef.current === null) return;
+    const clientX = e.changedTouches[0].clientX;
+    const clientY = e.changedTouches[0].clientY;
+    const deltaX = clientX - touchStartXRef.current;
+    const deltaY = clientY - (touchStartYRef.current || 0);
+
+    // Swiped left by 40px+
+    if (deltaX < -40 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      onCollapse?.();
+    }
+    touchStartXRef.current = null;
+    touchStartYRef.current = null;
+  };
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if (e.button === 0) {
+      touchStartXRef.current = e.clientX;
+      touchStartYRef.current = e.clientY;
+    }
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (touchStartXRef.current === null) return;
+    const deltaX = e.clientX - touchStartXRef.current;
+    const deltaY = e.clientY - (touchStartYRef.current || 0);
+
+    if (deltaX < -40 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      onCollapse?.();
+    }
+    touchStartXRef.current = null;
+    touchStartYRef.current = null;
+  };
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -27,16 +84,31 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout, profi
     { id: 'work', label: 'Work Log', icon: ClipboardList },
     { id: 'invoice', label: 'Invoices', icon: FileText },
     { id: 'reviews', label: 'Reviews', icon: MessageSquare },
+    { id: 'onboarding', label: 'Onboarding', icon: UserPlus },
   ] as const;
 
   return (
-    <nav className="fixed md:relative bottom-0 left-0 w-full md:w-64 bg-slate-900 text-white flex md:flex-col md:h-full z-20 border-r border-slate-800/80 border-t border-slate-800 pb-[max(env(safe-area-inset-bottom),4px)] md:pb-0">
+    <nav
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      className={clsx(
+        "fixed md:relative bottom-0 left-0 w-full bg-slate-900 text-white flex md:flex-col md:h-full z-20 border-r border-slate-800/80 border-t border-slate-800 pb-[max(env(safe-area-inset-bottom),4px)] md:pb-0 transition-all duration-200 ease-in-out",
+        isCollapsed
+          ? "md:w-0 md:-translate-x-full md:opacity-0 md:pointer-events-none md:border-r-0 overflow-hidden"
+          : "md:w-64 md:translate-x-0 md:opacity-100"
+      )}
+    >
       <div className="hidden md:block p-6 border-b border-slate-800/80 mb-2">
-        <div className="flex items-center gap-3 mb-3">
-          <Logo className="w-8 h-8 rounded-xl shadow-xs" />
-          <span className="text-xl font-bold tracking-tight text-white">
-            CrestFlow
-          </span>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <Logo className="w-8 h-8 rounded-xl shadow-xs" />
+            <span className="text-xl font-bold tracking-tight text-white">
+              CrestFlow
+            </span>
+          </div>
+          
         </div>
         <p className="text-xs text-slate-400">Freelancing Client Manager</p>
       </div>
@@ -77,11 +149,32 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout, profi
         })}
       </div>
 
+      {subscriptionState?.isSubscriptionFeatureEnabled && onOpenSubscriptionModal && (
+        <div className="hidden md:block px-4 py-2 border-t border-slate-800/60">
+          <button
+            type="button"
+            onClick={onOpenSubscriptionModal}
+            className="w-full flex items-center justify-between p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 text-xs text-white transition-colors cursor-pointer border border-slate-700/60 group"
+          >
+            <div className="flex items-center gap-2">
+              <span className={`w-2 h-2 rounded-full ${subscriptionState?.isPaidActive ? 'bg-indigo-400' : 'bg-red-400'}`} />
+              <span className="font-semibold">{subscriptionState?.isPaidActive ? 'Pro Active' : 'Subscribe'}</span>
+            </div>
+            <span className="text-[11px] text-indigo-400 font-medium group-hover:underline">₹49/mo</span>
+          </button>
+        </div>
+      )}
+
       <div className="hidden md:flex p-4 border-t border-slate-800 items-center justify-between gap-2">
         <button
           type="button"
           onClick={onEditProfile}
-          className="flex items-center space-x-3 overflow-hidden flex-1 min-w-0 p-1 -m-1 rounded-lg hover:bg-slate-800/60 transition-colors text-left cursor-pointer border-none bg-transparent outline-none focus-visible:ring-1 focus-visible:ring-slate-400 group"
+          className={clsx(
+            "flex items-center space-x-3 overflow-hidden flex-1 min-w-0 p-1.5 rounded-lg transition-colors text-left cursor-pointer border-none outline-none focus-visible:ring-1 focus-visible:ring-slate-400 group",
+            activeTab === 'profile'
+              ? "bg-slate-800 text-white"
+              : "hover:bg-slate-800/60 text-slate-300"
+          )}
           title="Open Profile Settings"
         >
           {user?.photoURL ? (
@@ -101,26 +194,18 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout, profi
           </div>
         </button>
 
-        <div className="flex items-center gap-1 shrink-0">
-          <button
-            onClick={toggleTheme}
-            className="text-slate-400 hover:text-amber-400 p-2 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
-            title={`Toggle Theme (Current: ${resolvedTheme})`}
-            aria-label="Toggle Theme"
-          >
-            {resolvedTheme === 'dark' ? (
-              <Sun size={16} className="text-amber-400" />
-            ) : (
-              <Moon size={16} className="text-slate-400 hover:text-indigo-300" />
-            )}
-          </button>
-
-          {onLogout && (
-            <button onClick={onLogout} className="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition-colors" title="Sign out">
+        {onLogout && (
+          <div className="flex items-center shrink-0">
+            <button
+              onClick={onLogout}
+              className="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition-colors"
+              title="Sign out"
+              aria-label="Sign out"
+            >
               <LogOut size={16} />
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </nav>
   );

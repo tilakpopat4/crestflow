@@ -44,7 +44,7 @@ export default function ContactPage() {
 
   return (
     <div className="w-full py-8 md:py-12 px-4 md:px-6">
-      <div className="max-w-[720px] mx-auto">
+      <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
           Contact Us
         </h1>
@@ -58,7 +58,7 @@ export default function ContactPage() {
             <div>
               <label
                 htmlFor="contact-name"
-                className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5"
               >
                 Name
               </label>
@@ -71,7 +71,7 @@ export default function ContactPage() {
                   if (errors.name) setErrors((prev) => ({ ...prev, name: '' }));
                 }}
                 placeholder="Your full name"
-                className="w-full p-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                className="w-full p-3 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
               {errors.name && (
                 <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.name}</p>
@@ -81,7 +81,7 @@ export default function ContactPage() {
             <div>
               <label
                 htmlFor="contact-email"
-                className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5"
               >
                 Email
               </label>
@@ -94,7 +94,7 @@ export default function ContactPage() {
                   if (errors.email) setErrors((prev) => ({ ...prev, email: '' }));
                 }}
                 placeholder="name@example.com"
-                className="w-full p-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                className="w-full p-3 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
               {errors.email && (
                 <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.email}</p>
@@ -104,7 +104,7 @@ export default function ContactPage() {
             <div>
               <label
                 htmlFor="contact-subject"
-                className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5"
               >
                 Subject
               </label>
@@ -117,7 +117,7 @@ export default function ContactPage() {
                   if (errors.subject) setErrors((prev) => ({ ...prev, subject: '' }));
                 }}
                 placeholder="How can we help?"
-                className="w-full p-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                className="w-full p-3 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
               {errors.subject && (
                 <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.subject}</p>
@@ -127,7 +127,7 @@ export default function ContactPage() {
             <div>
               <label
                 htmlFor="contact-message"
-                className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5"
               >
                 Message
               </label>
@@ -140,7 +140,7 @@ export default function ContactPage() {
                   if (errors.message) setErrors((prev) => ({ ...prev, message: '' }));
                 }}
                 placeholder="Describe your question or issue in detail..."
-                className="w-full p-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                className="w-full p-3 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
               {errors.message && (
                 <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.message}</p>

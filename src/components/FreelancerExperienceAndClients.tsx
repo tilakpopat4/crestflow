@@ -35,7 +35,7 @@ export default function FreelancerExperienceAndClients({
           <div className="flex items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
             <div className="flex items-center gap-2">
               <Briefcase className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-              <h2 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
+              <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
                 Work Experience & Journey
               </h2>
             </div>
@@ -49,11 +49,11 @@ export default function FreelancerExperienceAndClients({
 
           {/* Experience Overview / Bio */}
           {profile.workExperienceBio ? (
-            <p className="text-slate-600 dark:text-slate-300 text-xs leading-relaxed whitespace-pre-line bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 p-3.5 rounded-lg">
+            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed whitespace-pre-line bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 p-4 rounded-xl">
               {profile.workExperienceBio}
             </p>
           ) : (
-            <p className="text-slate-600 dark:text-slate-300 text-xs leading-relaxed bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 p-3.5 rounded-lg">
+            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 p-4 rounded-xl">
               Providing high-quality {profile.servicesDescription.toLowerCase()} with a focus on fast turnarounds, consistent brand aesthetics, and clear client communication.
             </p>
           )}
@@ -81,7 +81,7 @@ export default function FreelancerExperienceAndClients({
         </div>
 
         {profile.freelanceStartDate && (
-          <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
+          <div className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
             <Calendar className="w-3.5 h-3.5 text-slate-400" />
             <span>Freelancing actively since {workJourney?.startDateFormatted || profile.freelanceStartDate}</span>
           </div>

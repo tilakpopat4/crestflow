@@ -20,7 +20,7 @@ export default function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps
 
   return (
     <div className="w-full py-8 md:py-12 px-4 md:px-6">
-      <div className="max-w-[720px] mx-auto">
+      <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
           Privacy Policy
         </h1>
@@ -28,9 +28,9 @@ export default function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps
           Last updated: October 12, 2026
         </p>
 
-        <div className="space-y-6 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+        <div className="space-y-6 text-base text-slate-600 dark:text-slate-300 leading-relaxed">
           <section>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
               1. Information We Collect
             </h2>
             <p className="mb-2">
@@ -62,7 +62,7 @@ export default function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
               2. How We Use Information
             </h2>
             <p className="mb-2">
@@ -80,7 +80,7 @@ export default function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
               3. Data Storage and Third-Party Services
             </h2>
             <p className="mb-2">
@@ -109,7 +109,7 @@ export default function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
               4. Data Sharing
             </h2>
             <p>
@@ -118,7 +118,7 @@ export default function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
               5. Cookies and Local Storage
             </h2>
             <p className="mb-2">
@@ -142,7 +142,7 @@ export default function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
               6. Data Retention and Deletion
             </h2>
             <p>
@@ -151,7 +151,7 @@ export default function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
               7. Security
             </h2>
             <p>
@@ -160,7 +160,7 @@ export default function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
               8. Your Rights and Choices
             </h2>
             <p className="mb-2">
@@ -174,7 +174,7 @@ export default function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
               9. Changes to This Policy
             </h2>
             <p>
@@ -183,7 +183,7 @@ export default function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps
           </section>
 
           <section className="pt-4 border-t border-slate-200 dark:border-slate-800">
-            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
               10. Contact Us
             </h2>
             <p>
