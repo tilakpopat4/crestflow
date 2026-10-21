@@ -366,21 +366,21 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
     : '—';
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 text-slate-900 dark:text-slate-100">
+    <div className="p-3.5 sm:p-4 md:p-8 max-w-7xl mx-auto space-y-4 sm:space-y-6 text-slate-900 dark:text-slate-100 w-full min-w-0 max-w-full overflow-hidden">
       {/* Top Action Bar with Back button and Quick Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 w-full min-w-0">
         <button
           onClick={onBack}
-          className="inline-flex items-center gap-1.5 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition-all hover:bg-slate-50 dark:hover:bg-slate-700 w-fit cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition-all hover:bg-slate-50 dark:hover:bg-slate-700 w-fit cursor-pointer shrink-0"
         >
           <ArrowLeft size={14} />
-          Back
+          <span>Back</span>
         </button>
 
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap w-full sm:w-auto">
           <button
             onClick={handleCopyReviewLink}
-            className={`flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-xs font-semibold transition-all shadow-2xs cursor-pointer ${
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 border rounded-lg text-xs font-semibold transition-all shadow-2xs cursor-pointer ${
               copiedReviewLink 
                 ? 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-indigo-600 dark:text-indigo-400' 
                 : 'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-200 dark:border-indigo-900/60 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100/50 dark:hover:bg-indigo-900/50'
@@ -400,7 +400,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
 
           <button
             onClick={() => setIsSubClientsModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold transition-all shadow-2xs cursor-pointer"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold transition-all shadow-2xs cursor-pointer"
             title="Add or edit sub-clients for this client"
           >
             <Users size={13} /> Sub-Clients {client.subClients && client.subClients.length > 0 ? `(${client.subClients.length})` : ''}
@@ -408,14 +408,14 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
 
           <button
             onClick={() => onEditClient(client)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-all shadow-2xs cursor-pointer"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-all shadow-2xs cursor-pointer"
           >
-            <Edit3 size={13} /> Edit Client
+            <Edit3 size={13} /> Edit
           </button>
           
           <button
             onClick={openPaymentModal}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-all shadow-2xs cursor-pointer"
+            className="flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-all shadow-2xs cursor-pointer"
           >
             <Calendar size={13} /> Record Payment
           </button>
@@ -424,10 +424,10 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
 
       {/* Closed Client Banner */}
       {client.isClosed && (
-        <div className="flex items-center gap-3 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-600 rounded-2xl px-5 py-3.5">
+        <div className="flex items-center gap-3 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-600 rounded-2xl px-4 sm:px-5 py-3 sm:py-3.5 w-full min-w-0">
           <Archive size={18} className="text-slate-500 dark:text-slate-400 shrink-0" />
-          <div className="flex-1">
-            <p className="text-sm font-bold text-slate-700 dark:text-slate-200">This client is closed</p>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-slate-700 dark:text-slate-200 truncate">This client is closed</p>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               Work is no longer active. All history, invoices, and data are preserved in read-only view.
               {client.closedAt && ` Closed on ${new Date(client.closedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}.`}
@@ -437,45 +437,45 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
       )}
 
       {/* Main Client Profile Header Card */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm relative overflow-hidden">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="flex items-start gap-4">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 sm:p-6 shadow-xs relative overflow-hidden w-full min-w-0">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6 w-full min-w-0">
+          <div className="flex items-start gap-3 sm:gap-4 min-w-0">
             {client.logoUrl ? (
               <img 
                 src={getDriveDirectImageUrl(client.logoUrl)} 
                 alt={client.name} 
-                className="w-16 h-16 rounded-2xl object-cover shadow-md shrink-0 bg-indigo-50 dark:bg-indigo-950" 
+                className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl object-cover shadow-xs shrink-0 bg-indigo-50 dark:bg-indigo-950" 
                 onError={(e) => {
                   e.currentTarget.onerror = null;
                   e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(client.name)}&background=6366f1&color=ffffff&size=128&rounded=true&bold=true`;
                 }}
               />
             ) : (
-              <div className="w-16 h-16 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-2xl shadow-xs shrink-0">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-xl sm:text-2xl shadow-xs shrink-0">
                 {client.name.charAt(0).toUpperCase()}
               </div>
             )}
 
-            <div>
-              <div className="flex items-center gap-3 flex-wrap">
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">{client.name}</h1>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 sm:gap-3 flex-wrap min-w-0">
+                <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight truncate">{client.name}</h1>
                 <StatusBadge 
                   status={client.isClosed ? 'Closed' : statusInfo.code} 
                   label={client.isClosed ? 'Closed' : statusInfo.label} 
                 />
               </div>
 
-              <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-slate-500 dark:text-slate-400">
-                <span className="flex items-center gap-1.5">
-                  <Phone size={14} className="text-slate-400 dark:text-slate-500" /> {client.phone}
+              <div className="mt-1.5 sm:mt-2 flex flex-wrap items-center gap-x-4 sm:gap-x-6 gap-y-1 sm:gap-y-2 text-xs text-slate-500 dark:text-slate-400 min-w-0">
+                <span className="flex items-center gap-1.5 truncate">
+                  <Phone size={13} className="text-slate-400 dark:text-slate-500 shrink-0" /> <span>{client.phone}</span>
                 </span>
                 {client.email && (
-                  <span className="flex items-center gap-1.5">
-                    <Mail size={14} className="text-slate-400 dark:text-slate-500" /> {client.email}
+                  <span className="flex items-center gap-1.5 truncate">
+                    <Mail size={13} className="text-slate-400 dark:text-slate-500 shrink-0" /> <span>{client.email}</span>
                   </span>
                 )}
-                <span className="text-slate-400 dark:text-slate-500">
-                  Client since: {client.clientFrom ? new Date(client.clientFrom + '-01').toLocaleDateString('en-IN', { month: 'short', year: 'numeric' }) : new Date(client.createdAt).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}
+                <span className="text-slate-400 dark:text-slate-500 truncate">
+                  Since: {client.clientFrom ? new Date(client.clientFrom + '-01').toLocaleDateString('en-IN', { month: 'short', year: 'numeric' }) : new Date(client.createdAt).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}
                 </span>
                 {client.instagram && (
                   <a href={client.instagram.startsWith('http') ? client.instagram : `https://instagram.com/${client.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-pink-600 dark:text-pink-400 hover:underline">
@@ -491,11 +491,11 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100 dark:border-slate-700/60">
             {!client.isClosed && (
               <button
                 onClick={() => setIsScheduleModalOpen(true)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${
                   client.autoInvoiceEnabled
                     ? 'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300'
                     : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
@@ -516,7 +516,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                   console.error(err);
                 }
               }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${
                 client.emailRemindersEnabled !== false 
                   ? 'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-200 dark:border-indigo-900/60 text-indigo-800 dark:text-indigo-300' 
                   : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
@@ -529,19 +529,19 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
 
             <button
               onClick={() => exportClientCSV(client, clientWorkItems, clientInvoices)}
-              className="flex items-center gap-1.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-2xs cursor-pointer"
+              className="flex items-center gap-1.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-2xs cursor-pointer"
               title="Export client history as CSV"
             >
-              <Download size={13} className="text-slate-500" /> Export CSV
+              <Download size={13} className="text-slate-500" /> <span>CSV</span>
             </button>
 
             <a
               href={generateWhatsAppReminder(client, statusInfo)}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-2xs"
+              className="flex items-center gap-1.5 bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-2xs"
             >
-              <Send size={13} /> WhatsApp
+              <Send size={13} /> <span>WhatsApp</span>
             </a>
           </div>
         </div>
@@ -610,40 +610,40 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
       )}
 
       {/* Dashboard Metrics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 w-full min-w-0">
         {/* Previous Payment Date */}
-        <div className="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-1">
-          <div className="flex justify-between items-center text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-            <span>Previous Payment Date</span>
-            <Calendar size={16} className="text-indigo-500 dark:text-indigo-400" />
+        <div className="bg-white dark:bg-slate-800 p-3 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-1 min-w-0">
+          <div className="flex justify-between items-center text-[10px] sm:text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+            <span className="truncate">Prev Paid</span>
+            <Calendar size={14} className="text-indigo-500 dark:text-indigo-400 shrink-0" />
           </div>
-          <div className="text-xl font-bold text-slate-900 dark:text-slate-100">{formattedLastPaymentDate}</div>
+          <div className="text-base sm:text-xl font-bold text-slate-900 dark:text-slate-100 truncate">{formattedLastPaymentDate}</div>
           <button 
             onClick={openPaymentModal}
-            className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline cursor-pointer"
+            className="text-[11px] sm:text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline cursor-pointer block truncate"
           >
             Change date
           </button>
         </div>
 
         {/* Next Payment Due Date */}
-        <div className="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-1">
-          <div className="flex justify-between items-center text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-            <span>Next Payment Due</span>
-            <Clock size={16} className="text-slate-400 dark:text-slate-500" />
+        <div className="bg-white dark:bg-slate-800 p-3 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-1 min-w-0">
+          <div className="flex justify-between items-center text-[10px] sm:text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+            <span className="truncate">Next Due</span>
+            <Clock size={14} className="text-slate-400 dark:text-slate-500 shrink-0" />
           </div>
-          <div className="text-xl font-bold text-slate-900 dark:text-slate-100">{formattedNextDueDate}</div>
-          <div className="text-xs font-medium text-slate-500 dark:text-slate-400">
-            {statusInfo.daysRemaining === 0 ? 'Due Today!' : statusInfo.daysRemaining > 0 ? `In ${statusInfo.daysRemaining} days` : `${Math.abs(statusInfo.daysRemaining)} days overdue`}
+          <div className="text-base sm:text-xl font-bold text-slate-900 dark:text-slate-100 truncate">{formattedNextDueDate}</div>
+          <div className="text-[11px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 truncate">
+            {statusInfo.daysRemaining === 0 ? 'Due Today!' : statusInfo.daysRemaining > 0 ? `In ${statusInfo.daysRemaining}d` : `${Math.abs(statusInfo.daysRemaining)}d overdue`}
           </div>
           {client.autoInvoiceEnabled && (
-            <div className="pt-1 mt-1 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between text-[11px] text-indigo-600 dark:text-indigo-400">
-              <span className="flex items-center gap-1 font-medium">
-                <Calendar size={11} /> Auto-invoice: 6 AM
+            <div className="pt-1 mt-1 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between text-[10px] sm:text-[11px] text-indigo-600 dark:text-indigo-400">
+              <span className="flex items-center gap-1 font-medium truncate">
+                <Calendar size={10} /> Auto 6 AM
               </span>
               <button
                 onClick={() => setIsScheduleModalOpen(true)}
-                className="font-bold underline cursor-pointer"
+                className="font-bold underline cursor-pointer truncate ml-1"
               >
                 {scheduleInfo.nextRunDateFormatted}
               </button>
@@ -652,25 +652,25 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
         </div>
 
         {/* Pending Due Balance */}
-        <div className="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-1">
-          <div className="flex justify-between items-center text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-            <span>Pending Balance</span>
-            <IndianRupee size={16} className="text-rose-500 dark:text-rose-400" />
+        <div className="bg-white dark:bg-slate-800 p-3 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-1 min-w-0">
+          <div className="flex justify-between items-center text-[10px] sm:text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+            <span className="truncate">Pending</span>
+            <IndianRupee size={14} className="text-rose-500 dark:text-rose-400 shrink-0" />
           </div>
-          <div className="text-xl font-bold text-rose-600 dark:text-rose-400">₹{financials.totalPendingAmount.toLocaleString('en-IN')}</div>
-          <div className="text-xs text-slate-500 dark:text-slate-400">
-            {financials.pendingInvoices.length} pending inv, {financials.uninvoicedWork.length} un-invoiced
+          <div className="text-base sm:text-xl font-bold text-rose-600 dark:text-rose-400 truncate">₹{financials.totalPendingAmount.toLocaleString('en-IN')}</div>
+          <div className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">
+            {financials.pendingInvoices.length} inv, {financials.uninvoicedWork.length} un-invoiced
           </div>
         </div>
 
         {/* Lifetime Paid Billed */}
-        <div className="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-1">
-          <div className="flex justify-between items-center text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-            <span>Total Lifetime Billed</span>
-            <CheckCircle2 size={16} className="text-indigo-500 dark:text-indigo-400" />
+        <div className="bg-white dark:bg-slate-800 p-3 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-1 min-w-0">
+          <div className="flex justify-between items-center text-[10px] sm:text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+            <span className="truncate">Total Billed</span>
+            <CheckCircle2 size={14} className="text-indigo-500 dark:text-indigo-400 shrink-0" />
           </div>
-          <div className="text-xl font-bold text-indigo-600 dark:text-indigo-400">₹{financials.paidTotal.toLocaleString('en-IN')}</div>
-          <div className="text-xs text-slate-500 dark:text-slate-400">From paid invoices</div>
+          <div className="text-base sm:text-xl font-bold text-indigo-600 dark:text-indigo-400 truncate">₹{financials.paidTotal.toLocaleString('en-IN')}</div>
+          <div className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">From paid invoices</div>
         </div>
       </div>
 
@@ -761,21 +761,21 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
           >
             {/* Tab 1: Work Logs */}
             {activeTab === 'work' && (
-          <div className="p-6 space-y-6">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Work Logs</h3>
+          <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-6 w-full min-w-0">
+            <div className="flex justify-between items-center gap-2">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">Work Logs</h3>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2">
                 <button
                   onClick={() => setIsDriveModalOpen(true)}
-                  className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
+                  className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
                   title="Directly upload video to Google Drive with embeddable link"
                 >
-                  <UploadCloud size={13} /> Upload Drive
+                  <UploadCloud size={13} /> <span className="hidden min-[380px]:inline">Upload</span> Drive
                 </button>
                 <button
                   onClick={() => setIsWorkFormOpen(true)}
-                  className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-2xs cursor-pointer"
+                  className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-2xs cursor-pointer"
                 >
                   <Plus size={13} /> Log Work
                 </button>
@@ -962,16 +962,16 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
             )}
 
             {/* Work Items Table */}
-            <div className="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-xl">
-              <table className="w-full min-w-[680px] text-left border-collapse">
+            <div className="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-xl w-full max-w-full">
+              <table className="w-full min-w-[560px] sm:min-w-[640px] text-left border-collapse">
                 <thead>
-                  <tr className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    <th className="p-3.5">Date</th>
-                    <th className="p-3.5">Description / Sub-Client / Link</th>
-                    <th className="p-3.5 text-right">{client.paymentBasis === 'monthly_retainer' ? 'Quantity' : 'Quantity & Rate'}</th>
-                    <th className="p-3.5 text-right">{client.paymentBasis === 'monthly_retainer' ? 'Billing' : 'Total'}</th>
-                    <th className="p-3.5 text-center">Status</th>
-                    <th className="p-3.5 text-right">Action</th>
+                  <tr className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 text-[11px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    <th className="p-2.5 sm:p-3.5">Date</th>
+                    <th className="p-2.5 sm:p-3.5">Description / Sub-Client / Link</th>
+                    <th className="p-2.5 sm:p-3.5 text-right">{client.paymentBasis === 'monthly_retainer' ? 'Quantity' : 'Qty & Rate'}</th>
+                    <th className="p-2.5 sm:p-3.5 text-right">{client.paymentBasis === 'monthly_retainer' ? 'Billing' : 'Total'}</th>
+                    <th className="p-2.5 sm:p-3.5 text-center">Status</th>
+                    <th className="p-2.5 sm:p-3.5 text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm">
@@ -1087,13 +1087,13 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
 
         {/* Tab 2: Invoices */}
         {activeTab === 'invoices' && (
-          <div className="p-6 space-y-6">
-            <div className="flex justify-between items-center flex-wrap gap-3">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Invoices</h3>
+          <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-6 w-full min-w-0">
+            <div className="flex justify-between items-center flex-wrap gap-2 sm:gap-3">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">Invoices</h3>
               {!client.isClosed && (
                 <button
                   onClick={() => setIsScheduleModalOpen(true)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 transition-all cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 transition-all cursor-pointer"
                 >
                   <Clock size={13} className="text-indigo-600 dark:text-indigo-400" />
                   <span>{client.autoInvoiceEnabled ? 'Schedule: Active (6:00 AM)' : 'Schedule Auto-Invoice'}</span>
@@ -1101,15 +1101,15 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
               )}
             </div>
 
-            <div className="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-xl">
-              <table className="w-full min-w-[680px] text-left border-collapse">
+            <div className="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-xl w-full max-w-full">
+              <table className="w-full min-w-[540px] sm:min-w-[620px] text-left border-collapse">
                 <thead>
-                  <tr className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    <th className="p-3.5">Invoice Date</th>
-                    <th className="p-3.5">Reels / Line Items</th>
-                    <th className="p-3.5 text-right">Total Amount</th>
-                    <th className="p-3.5 text-center">Payment Status</th>
-                    <th className="p-3.5 text-right">Email Actions</th>
+                  <tr className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 text-[11px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    <th className="p-2.5 sm:p-3.5">Invoice Date</th>
+                    <th className="p-2.5 sm:p-3.5">Reels / Line Items</th>
+                    <th className="p-2.5 sm:p-3.5 text-right">Total Amount</th>
+                    <th className="p-2.5 sm:p-3.5 text-center">Status</th>
+                    <th className="p-2.5 sm:p-3.5 text-right">Email Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm">
@@ -1203,15 +1203,15 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
 
         {/* Tab 3: Client Settings & Rates */}
         {activeTab === 'settings' && (
-          <div className="p-6 space-y-6">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Rates & Pricing</h3>
+          <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-6 w-full min-w-0">
+            <div className="flex justify-between items-center gap-2">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">Rates & Pricing</h3>
 
               <button
                 onClick={() => onEditClient(client)}
-                className="flex items-center gap-1.5 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer"
+                className="flex items-center gap-1.5 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer"
               >
-                <Edit3 size={14} /> Modify Rates
+                <Edit3 size={13} /> <span>Modify Rates</span>
               </button>
             </div>
 

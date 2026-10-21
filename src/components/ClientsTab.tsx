@@ -351,31 +351,31 @@ export default function ClientsTab({
   }
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 text-slate-900 dark:text-slate-100">
+    <div className="p-3.5 sm:p-4 md:p-8 max-w-7xl mx-auto space-y-4 sm:space-y-6 text-slate-900 dark:text-slate-100 w-full min-w-0 max-w-full overflow-hidden">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Client Directory & Profiles</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
+        <div className="min-w-0">
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Client Directory & Profiles</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mt-0.5 sm:mt-1">
             Click any client profile to view their individual dashboard, work logs, and 30-day payment cycle.
           </p>
         </div>
 
         {!isFormOpen && (
-          <div className="flex items-center gap-2 w-full md:w-auto">
+          <div className="flex items-center gap-2 w-full md:w-auto shrink-0">
             <button
               onClick={() => setIsImportModalOpen(true)}
-              className="flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-sm flex-1 md:flex-none cursor-pointer"
+              className="flex items-center justify-center gap-1.5 sm:gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-semibold transition-all shadow-xs flex-1 md:flex-none cursor-pointer"
             >
-              <UploadCloud size={16} />
-              Import CSV
+              <UploadCloud size={15} />
+              <span>Import CSV</span>
             </button>
             <button
               onClick={handleOpenAddClient}
-              className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-sm flex-1 md:flex-none cursor-pointer"
+              className="flex items-center justify-center gap-1.5 sm:gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-semibold transition-all shadow-xs flex-1 md:flex-none cursor-pointer"
             >
-              <Plus size={16} />
-              Add New Client
+              <Plus size={15} />
+              <span>Add New Client</span>
             </button>
           </div>
         )}
@@ -446,30 +446,30 @@ export default function ClientsTab({
 
       {/* Global Payment Reminders Bar across clients (if any client has payment due or delayed) */}
       {!isNotificationDismissed && notificationClients.length > 0 && (
-        <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs space-y-3 relative">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2 pr-8">
-            <div className="flex items-center gap-2 text-slate-900 dark:text-slate-100 font-bold text-sm">
-              <AlertTriangle className="text-red-600 dark:text-red-400 shrink-0" size={18} />
-              <span className="break-words">Payment Cycle Reminders ({notificationClients.length} Action Required)</span>
+        <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 sm:p-5 shadow-xs space-y-3 relative w-full min-w-0">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2 pr-7 sm:pr-8 min-w-0">
+            <div className="flex items-center gap-2 text-slate-900 dark:text-slate-100 font-bold text-xs sm:text-sm min-w-0">
+              <AlertTriangle className="text-red-600 dark:text-red-400 shrink-0" size={16} />
+              <span className="truncate">Payment Alerts ({notificationClients.length} Action Required)</span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium pl-6 sm:pl-0">30-Day Recurring Cycle Alerts</span>
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium">30-Day Cycle Alerts</span>
             </div>
           </div>
           <button
             onClick={() => setIsNotificationDismissed(true)}
-            className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 p-1.5 rounded-lg transition-colors cursor-pointer"
+            className="absolute top-3 right-3 sm:top-4 sm:right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 p-1.5 rounded-lg transition-colors cursor-pointer"
             title="Dismiss notification"
             aria-label="Close notification"
           >
-            <X size={16} />
+            <X size={15} />
           </button>
 
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 pt-1">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-2.5 sm:gap-3 pt-1 w-full min-w-0">
             {notificationClients.map(({ client, statusInfo, financials }) => (
               <div
                 key={client.id}
-                className="bg-white dark:bg-slate-800 p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs min-w-0 overflow-hidden"
+                className="bg-white dark:bg-slate-800 p-3 sm:p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 shadow-xs min-w-0 overflow-hidden w-full"
               >
                 <div className="w-full sm:w-auto min-w-0 flex-1">
                   <div className="flex items-center gap-2 min-w-0">
@@ -486,10 +486,10 @@ export default function ClientsTab({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 shrink-0 w-full sm:w-auto justify-end sm:justify-start">
+                <div className="flex items-center gap-1.5 shrink-0 w-full sm:w-auto justify-end sm:justify-start pt-1 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-700/60">
                   <button
                     onClick={() => setSelectedClientId(client.id)}
-                    className="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 rounded text-xs font-semibold transition-colors"
+                    className="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 rounded text-xs font-semibold transition-colors cursor-pointer"
                   >
                     Dashboard
                   </button>
@@ -780,19 +780,19 @@ export default function ClientsTab({
       )}
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs">
-        <div className="relative w-full">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={16} />
+      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 sm:gap-3 bg-white dark:bg-slate-800 p-3 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs w-full min-w-0">
+        <div className="relative w-full min-w-0">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={15} />
           <input
             type="text"
             placeholder="Search clients by name, phone..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-xl outline-none focus:border-indigo-600 dark:focus:border-indigo-500"
+            className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-xl outline-none focus:border-indigo-600 dark:focus:border-indigo-500"
           />
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 scrollbar-none shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 scrollbar-none shrink-0 max-w-full">
           <button
             onClick={() => setFilterType('all')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 ${filterType === 'all'
@@ -811,7 +811,7 @@ export default function ClientsTab({
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
             }`}
           >
-            <Clock size={12} className="shrink-0" /> Due / Action ({notificationClients.length})
+            <Clock size={12} className="shrink-0" /> Due ({notificationClients.length})
           </button>
 
           <button
@@ -921,21 +921,21 @@ export default function ClientsTab({
             return (
               <div
                 key={client.id}
-                className={`rounded-2xl border p-4 sm:p-5 md:p-6 shadow-xs transition-all group flex flex-col justify-between space-y-4 md:space-y-5 overflow-hidden ${
+                className={`rounded-2xl border p-3.5 sm:p-5 md:p-6 shadow-xs transition-all group flex flex-col justify-between space-y-3.5 sm:space-y-4 md:space-y-5 overflow-hidden w-full min-w-0 ${
                   client.isClosed
                     ? 'bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-700/50 opacity-75 hover:opacity-100'
                     : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:shadow-md'
                 }`}
               >
-                <div className="space-y-4 min-w-0">
-                  {/* Top row: Avatar & Status Badge */}
-                  <div className="flex items-start justify-between gap-2 min-w-0">
+                <div className="space-y-3 sm:space-y-4 min-w-0 w-full">
+                  {/* Top row: Avatar & Client Name & Action Buttons */}
+                  <div className="flex items-start justify-between gap-2 min-w-0 w-full">
                     <div className="flex items-center gap-2.5 min-w-0 flex-1">
                       {client.logoUrl ? (
                         <img
                           src={getDriveDirectImageUrl(client.logoUrl)}
                           alt={client.name}
-                          className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl object-cover shadow-sm shrink-0 bg-indigo-50 dark:bg-indigo-950"
+                          className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl object-cover shadow-xs shrink-0 bg-indigo-50 dark:bg-indigo-950"
                           onError={(e) => {
                             e.currentTarget.onerror = null;
                             e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(client.name)}&background=e0e7ff&color=4338ca&size=128&rounded=true&bold=true`;
@@ -947,14 +947,14 @@ export default function ClientsTab({
                         </div>
                       )}
                       <div className="min-w-0 flex-1">
-                        <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors leading-snug truncate" title={client.name}>
+                        <h3 className="text-sm sm:text-base md:text-lg font-bold text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors leading-snug truncate" title={client.name}>
                           {client.name}
                         </h3>
-                        <p className="text-[11px] text-slate-400 dark:text-slate-500 font-mono truncate">ID: {client.id.split('-')[0]}</p>
+                        <p className="text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500 font-mono truncate">ID: {client.id.split('-')[0]}</p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
+                    <div className="flex items-center gap-0.5 shrink-0">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -1002,18 +1002,18 @@ export default function ClientsTab({
                   </div>
 
                   {/* Payment Status Pill & Sub-Clients Badge */}
-                  <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0">
                     {client.isClosed ? (
                       <StatusBadge 
                         status="Closed" 
-                        label={`Closed${client.closedAt ? ` · ${new Date(client.closedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}` : ''}`} 
+                        label={`Closed${client.closedAt ? ` · ${new Date(client.closedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}` : ''}`} 
                       />
                     ) : (
                       <StatusBadge status={statusInfo.code} label={statusInfo.label} />
                     )}
                     {client.subClients && client.subClients.length > 0 && (
                       <span className="text-xs text-slate-500 dark:text-slate-400 font-normal inline-flex items-center gap-1">
-                        <Users size={12} className="shrink-0 text-slate-400" /> {client.subClients.length} Sub-Clients
+                        <Users size={12} className="shrink-0 text-slate-400" /> {client.subClients.length} Subs
                       </span>
                     )}
                     {client.paymentBasis === 'monthly_retainer' && (
@@ -1024,33 +1024,33 @@ export default function ClientsTab({
                   </div>
 
                   {/* 30-Day Cycle Dates Row */}
-                  <div className="bg-slate-50 dark:bg-slate-900/60 p-3 sm:p-3.5 rounded-xl border border-slate-100 dark:border-slate-700/60 grid grid-cols-2 gap-2 text-xs">
+                  <div className="bg-slate-50 dark:bg-slate-900/60 p-2.5 sm:p-3.5 rounded-xl border border-slate-100 dark:border-slate-700/60 grid grid-cols-2 gap-2 text-xs w-full min-w-0">
                     <div className="min-w-0">
-                      <span className="text-slate-400 dark:text-slate-500 block text-xs font-semibold uppercase tracking-wider truncate">Prev Payment</span>
-                      <span className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate block mt-0.5">{formattedPrevDate}</span>
+                      <span className="text-slate-400 dark:text-slate-500 block text-[10px] sm:text-xs font-semibold uppercase tracking-wider truncate">Prev Payment</span>
+                      <span className="font-bold text-slate-900 dark:text-slate-100 text-xs sm:text-sm truncate block mt-0.5">{formattedPrevDate}</span>
                     </div>
 
-                    <div className="border-l border-slate-200 dark:border-slate-700 pl-2.5 min-w-0">
-                      <span className="text-slate-400 dark:text-slate-500 block text-xs font-semibold uppercase tracking-wider truncate">Next Due</span>
-                      <span className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate block mt-0.5">{formattedNextDate}</span>
+                    <div className="border-l border-slate-200 dark:border-slate-700 pl-2 sm:pl-2.5 min-w-0">
+                      <span className="text-slate-400 dark:text-slate-500 block text-[10px] sm:text-xs font-semibold uppercase tracking-wider truncate">Next Due</span>
+                      <span className="font-bold text-slate-900 dark:text-slate-100 text-xs sm:text-sm truncate block mt-0.5">{formattedNextDate}</span>
                     </div>
                   </div>
 
                   {/* Financials & Rates */}
-                  <div className="flex items-center justify-between text-xs pt-1 gap-2">
+                  <div className="flex items-center justify-between text-xs pt-0.5 sm:pt-1 gap-2 w-full min-w-0">
                     <div className="min-w-0">
-                      <span className="text-slate-400 dark:text-slate-500 block text-xs truncate">
-                        {client.paymentBasis === 'monthly_retainer' ? 'Monthly Retainer' : 'Default Rate'}
+                      <span className="text-slate-400 dark:text-slate-500 block text-[11px] sm:text-xs truncate">
+                        {client.paymentBasis === 'monthly_retainer' ? 'Retainer' : 'Default Rate'}
                       </span>
-                      <span className="font-bold text-slate-800 dark:text-slate-200 text-sm truncate block mt-0.5">
+                      <span className="font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm truncate block mt-0.5">
                         ₹{(client.paymentBasis === 'monthly_retainer' ? (client.monthlyRetainerAmount || client.defaultRate) : client.defaultRate).toLocaleString('en-IN')}
                         {client.paymentBasis === 'monthly_retainer' ? ' / mo' : ' / reel'}
                       </span>
                     </div>
 
                     <div className="text-right min-w-0">
-                      <span className="text-slate-400 dark:text-slate-500 block text-xs truncate">Pending Balance</span>
-                      <span className={`font-bold text-sm truncate block mt-0.5 ${financials.totalPendingAmount > 0 ? 'text-rose-600' : 'text-slate-700 dark:text-slate-300'}`}>
+                      <span className="text-slate-400 dark:text-slate-500 block text-[11px] sm:text-xs truncate">Pending</span>
+                      <span className={`font-bold text-xs sm:text-sm truncate block mt-0.5 ${financials.totalPendingAmount > 0 ? 'text-rose-600' : 'text-slate-700 dark:text-slate-300'}`}>
                         ₹{financials.totalPendingAmount.toLocaleString('en-IN')}
                       </span>
                     </div>
@@ -1058,7 +1058,7 @@ export default function ClientsTab({
                 </div>
 
                 {/* Bottom Action Buttons */}
-                <div className="flex items-center gap-2 pt-1">
+                <div className="flex items-center gap-2 pt-1 w-full min-w-0">
                   <button
                     onClick={() => setSelectedClientId(client.id)}
                     className={`flex-1 min-w-0 flex items-center justify-center gap-1.5 sm:gap-2 py-2 sm:py-2.5 px-3 rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer ${
@@ -1073,7 +1073,7 @@ export default function ClientsTab({
                   {client.isClosed ? (
                     <button
                       onClick={(e) => { e.stopPropagation(); handleReopenClient(client); }}
-                      className="px-3 sm:px-3.5 py-2 sm:py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+                      className="px-2.5 sm:px-3.5 py-2 sm:py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1 cursor-pointer shrink-0"
                       title="Reopen Client"
                     >
                       <ArchiveRestore size={14} /> <span className="hidden min-[380px]:inline">Reopen</span>
@@ -1086,7 +1086,7 @@ export default function ClientsTab({
                         const cInvoices = invoices.filter(inv => inv.clientId === client.id);
                         exportClientCSV(client, cWorkItems, cInvoices);
                       }}
-                      className="px-3 sm:px-3.5 py-2 sm:py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+                      className="px-2.5 sm:px-3.5 py-2 sm:py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1 cursor-pointer shrink-0"
                       title="Export Work History & Invoice Summary to CSV"
                     >
                       <Download size={14} className="text-slate-500 dark:text-slate-400 shrink-0" /> <span>CSV</span>
