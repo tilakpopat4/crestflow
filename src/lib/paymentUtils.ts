@@ -1,6 +1,5 @@
 import { Client, Invoice, WorkItem, UserProfile } from '../types';
 import { formatInvoiceNumber } from './invoiceUtils';
-import { triggerFcmPaymentReminder } from './fcmService';
 
 export interface PaymentStatusInfo {
   nextDueDate: number; // timestamp in ms
@@ -209,22 +208,11 @@ export function generateEmailReminder(client: Client, statusInfo: PaymentStatusI
   return { subject, body, mailtoLink };
 }
 
-export async function triggerBrowserOverdueAlert(clientName: string, statusLabel: string, message: string, userId?: string) {
-  // First attempt device push via Firebase Cloud Messaging (FCM)
-  try {
-    const fcmRes = await triggerFcmPaymentReminder(clientName, statusLabel, message, userId);
-    if (fcmRes.success) {
-      console.log(`FCM Device Push dispatched successfully [${fcmRes.mode}]`);
-      return true;
-    }
-  } catch (fcmErr) {
-    console.warn('FCM dispatch attempt notice:', fcmErr);
-  }
-
-  // Fallback to standard Notification API
+export async function triggerBrowserOverdueAlert(clientName: string, statusLabel: string, message: string, _userId?: string) {
+  // Browser Notification API
   if ('Notification' in window) {
     if (Notification.permission === 'granted') {
-      new Notification(`FCM Device Alert: ${clientName}`, {
+      new Notification(`Payment Alert: ${clientName}`, {
         body: `${statusLabel} - ${message}`,
         icon: '/app_logo_icon.png',
         badge: '/icon.svg'
@@ -233,7 +221,7 @@ export async function triggerBrowserOverdueAlert(clientName: string, statusLabel
     } else if (Notification.permission !== 'denied') {
       const permission = await Notification.requestPermission();
       if (permission === 'granted') {
-        new Notification(`FCM Device Alert: ${clientName}`, {
+        new Notification(`Payment Alert: ${clientName}`, {
           body: `${statusLabel} - ${message}`,
           icon: '/app_logo_icon.png',
           badge: '/icon.svg'
@@ -244,7 +232,7 @@ export async function triggerBrowserOverdueAlert(clientName: string, statusLabel
   }
 
   // Fallback to standard alert modal
-  alert(`OVERDUE PAYMENT DEVICE ALERT (FCM)\n\nClient: ${clientName}\nStatus: ${statusLabel}\n\nDetails: ${message}`);
+  alert(`PAYMENT ALERT\n\nClient: ${clientName}\nStatus: ${statusLabel}\n\nDetails: ${message}`);
   return false;
 }
 

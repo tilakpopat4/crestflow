@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Copy, Check, ExternalLink, QrCode, Sparkles } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { UserProfile } from '../../types';
 
 interface OnboardingLinkCardProps {
@@ -16,6 +17,7 @@ export const OnboardingLinkCard: React.FC<OnboardingLinkCardProps> = ({
   onboardingUrl,
   profile,
 }) => {
+  const shouldReduceMotion = useReducedMotion();
   const [copied, setCopied] = useState(false);
   const [showQr, setShowQr] = useState(false);
 
@@ -72,29 +74,32 @@ export const OnboardingLinkCard: React.FC<OnboardingLinkCardProps> = ({
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          <button
+          <motion.button
             type="button"
             onClick={handleCopy}
+            whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
             className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-colors cursor-pointer border-0"
           >
             {copied ? <Check size={15} /> : <Copy size={15} />}
             <span>{copied ? 'Copied' : 'Copy Link'}</span>
-          </button>
+          </motion.button>
 
-          <a
+          <motion.a
             href={onboardingUrl}
             target="_blank"
             rel="noopener noreferrer"
+            whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
             className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-xl text-sm font-semibold transition-colors cursor-pointer border-0"
             title="Open client onboarding page in new tab"
           >
             <ExternalLink size={15} />
             <span className="hidden sm:inline">Preview</span>
-          </a>
+          </motion.a>
 
-          <button
+          <motion.button
             type="button"
             onClick={() => setShowQr(!showQr)}
+            whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
             className={`inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer border-0 ${
               showQr ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400' : 'bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200'
             }`}
@@ -102,23 +107,33 @@ export const OnboardingLinkCard: React.FC<OnboardingLinkCardProps> = ({
           >
             <QrCode size={15} />
             <span className="hidden sm:inline">QR</span>
-          </button>
+          </motion.button>
         </div>
       </div>
 
-      {showQr && (
-        <div className="pt-3 border-t border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row items-center gap-4 bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
-          <div className="p-3 bg-white rounded-xl shrink-0 shadow-2xs">
-            <QRCodeSVG value={onboardingUrl} size={120} level="M" />
-          </div>
-          <div className="space-y-1 text-center sm:text-left text-sm">
-            <p className="font-bold text-slate-900 dark:text-slate-100">Scan to Open Onboarding Page</p>
-            <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed max-w-sm">
-              Clients can scan this QR code with their mobile device camera to open your branded onboarding form instantly.
-            </p>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {showQr && (
+          <motion.div
+            initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0.01 : 0.2, ease: [0.22, 1, 0.36, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row items-center gap-4 bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
+              <div className="p-3 bg-white rounded-xl shrink-0 shadow-2xs">
+                <QRCodeSVG value={onboardingUrl} size={120} level="M" />
+              </div>
+              <div className="space-y-1 text-center sm:text-left text-sm">
+                <p className="font-bold text-slate-900 dark:text-slate-100">Scan to Open Onboarding Page</p>
+                <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed max-w-sm">
+                  Clients can scan this QR code with their mobile device camera to open your branded onboarding form instantly.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

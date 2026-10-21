@@ -104,8 +104,8 @@ export interface Invoice {
   payeeUpiId?: string;
 }
 
-export type SubscriptionStatus = 'inactive' | 'active' | 'expired' | 'canceled';
-export type SubscriptionPlan = 'monthly' | 'quarterly' | 'annual' | string;
+export type SubscriptionStatus = 'free' | 'inactive' | 'active' | 'pending' | 'expired' | 'cancelled' | 'halted';
+export type SubscriptionPlan = 'free' | 'pro' | 'monthly' | 'yearly' | string;
 
 export interface SubscriptionPlanItem {
   id: string;
@@ -167,6 +167,7 @@ export interface UserProfile {
   servicesDescription: string;
   defaultRate?: number;
   photoURL?: string;
+  isPublicProfile?: boolean; // Enables public client onboarding discovery
   accountNumber?: string;
   ifscCode?: string;
   bankName?: string;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabase';
-import { addToWhitelist, removeFromWhitelist } from '../../lib/youpiService';
+import { db } from '../../firebase';
+import { collection, onSnapshot, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { UserPlus, Trash2, RefreshCw } from 'lucide-react';
 
 interface WhitelistRow {
@@ -12,7 +12,7 @@ interface WhitelistRow {
 
 /**
  * VIP Whitelist Manager.
- * Grants free VIP subscription bypass to specified email addresses.
+ * Grants free VIP subscription bypass to specified email addresses via Cloud Firestore.
  * Adheres strictly to GEMINI.md: flat, restrained SaaS aesthetic with 120ms transitions.
  */
 export default function AdminWhitelistManager() {
@@ -23,52 +23,48 @@ export default function AdminWhitelistManager() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  const fetchWhitelist = async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('subscription_whitelist')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setWhitelist(data || []);
-    } catch (err) {
-      console.error('Failed to load whitelist:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchWhitelist();
+    setLoading(true);
+    const unsub = onSnapshot(
+      collection(db, 'subscription_whitelist'),
+      (snapshot) => {
+        const items: WhitelistRow[] = [];
+        snapshot.forEach((d) => {
+          const data = d.data();
+          items.push({
+            id: d.id,
+            email: data.email || d.id,
+            reason: data.reason || '',
+            created_at: data.createdAt ? new Date(data.createdAt).toISOString() : new Date().toISOString()
+          });
+        });
+        items.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        setWhitelist(items);
+        setLoading(false);
+      },
+      (err) => {
+        console.warn('Error loading whitelist:', err);
+        setLoading(false);
+      }
+    );
 
-    const channel = supabase
-      .channel('admin_whitelist_realtime')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'subscription_whitelist' },
-        () => {
-          fetchWhitelist();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => unsub();
   }, []);
 
   const handleAddEmail = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newEmail.trim()) return;
+    const cleanEmail = newEmail.trim().toLowerCase();
+    if (!cleanEmail) return;
 
     setIsSubmitting(true);
     try {
-      await addToWhitelist(newEmail.trim(), newReason.trim() || 'Approved by Admin');
+      await setDoc(doc(db, 'subscription_whitelist', cleanEmail), {
+        email: cleanEmail,
+        reason: newReason.trim() || 'Approved by Admin',
+        createdAt: Date.now()
+      });
       setNewEmail('');
       setNewReason('');
-      await fetchWhitelist();
     } catch (err: any) {
       alert(`Error adding email: ${err.message || err}`);
     } finally {
@@ -81,8 +77,7 @@ export default function AdminWhitelistManager() {
 
     setActionLoading(id);
     try {
-      await removeFromWhitelist(id);
-      await fetchWhitelist();
+      await deleteDoc(doc(db, 'subscription_whitelist', id));
     } catch (err: any) {
       alert(`Error removing email: ${err.message || err}`);
     } finally {
@@ -100,11 +95,14 @@ export default function AdminWhitelistManager() {
               VIP Email Whitelist
             </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-              Whitelisted emails bypass the ₹49 subscription and receive full lifetime VIP access without entering payments.
+              Whitelisted emails bypass subscriptions and receive full lifetime VIP access.
             </p>
           </div>
           <button
-            onClick={fetchWhitelist}
+            onClick={() => {
+              setLoading(true);
+              setTimeout(() => setLoading(false), 300);
+            }}
             className="p-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-120 self-start sm:self-auto border-0 cursor-pointer"
             title="Refresh whitelist"
           >

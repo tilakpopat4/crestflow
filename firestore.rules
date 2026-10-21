@@ -74,7 +74,8 @@ service cloud.firestore {
         && (!('professionalTitle' in data) || (data.professionalTitle is string && data.professionalTitle.size() <= 200))
         && (!('servicesDescription' in data) || (data.servicesDescription is string && data.servicesDescription.size() <= 2000))
         && (!('workExperienceBio' in data) || (data.workExperienceBio is string && data.workExperienceBio.size() <= 5000))
-        && (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 2000));
+        && (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 2000))
+        && (!('isPublicProfile' in data) || (data.isPublicProfile is bool));
     }
 
     function isValidNote(data) {
@@ -110,9 +111,10 @@ service cloud.firestore {
     // 4. Profiles (Public Info on Root Document)
     match /profiles/{profileId} {
       allow list: if isAdmin();
-      allow get: if isOwner(profileId) || resource.data.isPublicProfile == true || isAdmin();
+      allow get: if isOwner(profileId) || resource.data.isPublicProfile == true || !('isPublicProfile' in resource.data) || isAdmin();
       allow create: if isOwner(profileId) && isValidId(profileId) && isValidProfile(request.resource.data);
-      allow update: if isOwner(profileId) && isValidProfile(request.resource.data);
+      allow update: if isOwner(profileId) && isValidProfile(request.resource.data)
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['subscriptionStatus', 'subscriptionPlan', 'currentPeriodEnd', 'currentPeriodStart', 'razorpaySubscriptionId', 'cancelAtPeriodEnd']));
       allow delete: if isOwner(profileId);
 
       // Private Settings Subcollection (geminiApiKey, bank accounts)
@@ -163,14 +165,7 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // 9. FCM Services & Diagnostics
-    match /fcm_devices/{userId} {
-      allow read, write: if isOwner(userId);
-    }
-    match /fcm_notifications/{notificationId} {
-      allow create: if isSignedIn();
-      allow read, write: if isOwner(resource.data.userId);
-    }
+    // 9. Connection Diagnostics
     match /_connection_test/{docId} {
       allow read: if true;
     }
@@ -184,6 +179,23 @@ service cloud.firestore {
     match /system_settings/{settingId} {
       allow read: if true;
       allow write: if isSignedIn();
+    }
+
+    // 12. Subscriptions (Client read-only; writes restricted strictly to Cloudflare Worker via Service Account)
+    match /subscriptions/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if false;
+    }
+
+    // 13. Webhook Deduplication Ledger (Client access denied)
+    match /processed_events/{eventId} {
+      allow read, write: if false;
+    }
+
+    // 14. Subscription Whitelist (Read for authenticated users; write restricted to Admin)
+    match /subscription_whitelist/{email} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
     }
   }
 }

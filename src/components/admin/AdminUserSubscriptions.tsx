@@ -1,8 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { supabase } from '../../lib/supabase';
+import React, { useState, useEffect } from 'react';
 import { db } from '../../firebase';
 import { collection, onSnapshot, doc, setDoc, deleteDoc } from 'firebase/firestore';
-import { grantManualSubscriptionDays, revokeSubscription } from '../../lib/youpiService';
 import { Search, RefreshCw } from 'lucide-react';
 import UserSubscriptionRow, { ProfileRowData } from './UserSubscriptionRow';
 
@@ -13,7 +11,7 @@ interface BlockedItem {
 
 /**
  * Registered Freelancers and Subscriptions console.
- * Dual-source sync from Firestore and Supabase.
+ * Backed directly by Cloud Firestore.
  * Adheres strictly to GEMINI.md: text status with 6px dot, no colored pills, 120ms transitions.
  */
 export default function AdminUserSubscriptions() {
@@ -22,57 +20,6 @@ export default function AdminUserSubscriptions() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-
-  const firestoreProfilesRef = useRef<ProfileRowData[]>([]);
-  const supabaseProfilesRef = useRef<ProfileRowData[]>([]);
-
-  const combineAndSetProfiles = (fsList: ProfileRowData[], sbList: ProfileRowData[]) => {
-    const map = new Map<string, ProfileRowData>();
-
-    // 1. Add Firestore profiles
-    fsList.forEach((p) => {
-      map.set(p.id, p);
-    });
-
-    // 2. Overlay or append Supabase profiles
-    sbList.forEach((sp) => {
-      const existing = map.get(sp.id);
-      map.set(sp.id, {
-        id: sp.id,
-        name: sp.name || existing?.name || 'Anonymous User',
-        phone: sp.phone || existing?.phone,
-        upi_id: sp.upi_id || existing?.upi_id,
-        professional_title: sp.professional_title || existing?.professional_title,
-        subscription_status: sp.subscription_status || existing?.subscription_status || 'inactive',
-        subscription_plan: sp.subscription_plan || existing?.subscription_plan || 'monthly',
-        current_period_end: sp.current_period_end || existing?.current_period_end,
-        created_at: sp.created_at || existing?.created_at || new Date().toISOString()
-      });
-    });
-
-    const combined = Array.from(map.values()).sort((a, b) => {
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-    });
-
-    setProfiles(combined);
-    setLoading(false);
-  };
-
-  const fetchSupabaseProfiles = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (!error && data) {
-        supabaseProfilesRef.current = data;
-        combineAndSetProfiles(firestoreProfilesRef.current, data);
-      }
-    } catch (err) {
-      console.warn('Error fetching Supabase profiles:', err);
-    }
-  };
 
   useEffect(() => {
     setLoading(true);
@@ -91,7 +38,7 @@ export default function AdminUserSubscriptions() {
             upi_id: data.upiId || '',
             professional_title: data.professionalTitle || '',
             subscription_status: data.subscriptionStatus || 'inactive',
-            subscription_plan: data.subscriptionPlan || 'monthly',
+            subscription_plan: data.subscriptionPlan || 'free',
             current_period_end: data.currentPeriodEnd
               ? (typeof data.currentPeriodEnd === 'number'
                   ? new Date(data.currentPeriodEnd).toISOString()
@@ -103,8 +50,9 @@ export default function AdminUserSubscriptions() {
           });
         });
 
-        firestoreProfilesRef.current = items;
-        combineAndSetProfiles(items, supabaseProfilesRef.current);
+        items.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        setProfiles(items);
+        setLoading(false);
       },
       (err) => {
         console.warn('Error listening to Firestore profiles:', err);
@@ -112,10 +60,7 @@ export default function AdminUserSubscriptions() {
       }
     );
 
-    // 2. Fetch Supabase profiles
-    fetchSupabaseProfiles();
-
-    // 3. Listen to blocked users from Firestore
+    // 2. Listen to blocked users from Firestore
     const unsubBlocked = onSnapshot(
       collection(db, 'blocked_users'),
       (snapshot) => {
@@ -138,8 +83,20 @@ export default function AdminUserSubscriptions() {
     if (!window.confirm(`Grant 30 extra days of Pro access to ${userName || 'this user'}?`)) return;
     setActionLoading(userId);
     try {
-      await grantManualSubscriptionDays(userId, 30);
-      await fetchSupabaseProfiles();
+      const now = Date.now();
+      const currentEnd = profiles.find((p) => p.id === userId)?.current_period_end;
+      const base = currentEnd && new Date(currentEnd).getTime() > now ? new Date(currentEnd).getTime() : now;
+      const newEnd = base + 30 * 24 * 60 * 60 * 1000;
+      await setDoc(
+        doc(db, 'profiles', userId),
+        {
+          subscriptionStatus: 'active',
+          subscriptionPlan: 'pro',
+          currentPeriodEnd: newEnd,
+          updatedAt: now
+        },
+        { merge: true }
+      );
     } catch (err: any) {
       alert(`Error granting subscription: ${err.message || err}`);
     } finally {
@@ -151,8 +108,16 @@ export default function AdminUserSubscriptions() {
     if (!window.confirm(`Revoke subscription access for ${userName || 'this user'}?`)) return;
     setActionLoading(userId);
     try {
-      await revokeSubscription(userId);
-      await fetchSupabaseProfiles();
+      const now = Date.now();
+      await setDoc(
+        doc(db, 'profiles', userId),
+        {
+          subscriptionStatus: 'expired',
+          currentPeriodEnd: now,
+          updatedAt: now
+        },
+        { merge: true }
+      );
     } catch (err: any) {
       alert(`Error revoking access: ${err.message || err}`);
     } finally {
@@ -214,7 +179,7 @@ export default function AdminUserSubscriptions() {
           <button
             onClick={() => {
               setLoading(true);
-              fetchSupabaseProfiles();
+              setTimeout(() => setLoading(false), 300);
             }}
             className="p-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-120 border-0 cursor-pointer"
             title="Refresh list"

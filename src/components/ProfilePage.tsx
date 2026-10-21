@@ -73,6 +73,7 @@ export default function ProfilePage({
         geminiApiKey: geminiApiKey.trim() || undefined,
         freelanceStartDate: freelanceStartDate.trim() || undefined,
         workExperienceBio: workExperienceBio.trim() || undefined,
+        isPublicProfile: true,
         createdAt: profile?.createdAt || Date.now()
       };
 

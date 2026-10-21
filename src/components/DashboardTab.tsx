@@ -3,7 +3,7 @@ import { Invoice, WorkItem, Client } from '../types';
 import { 
   BarChart, Bar, LineChart, Line, Legend, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell 
 } from 'recharts';
-import { IndianRupee, Clock, TrendingUp, CheckCircle2, DownloadCloud, UploadCloud, AlertTriangle, Send, Users, ArrowRight, Mail, Bell, Copy, Smartphone, X, FileText, StickyNote as StickyNoteIcon, Award } from 'lucide-react';
+import { IndianRupee, Clock, TrendingUp, CheckCircle2, DownloadCloud, UploadCloud, AlertTriangle, Send, Users, ArrowRight, Mail, Bell, Copy, X, FileText, StickyNote as StickyNoteIcon, Award } from 'lucide-react';
 import { User } from 'firebase/auth';
 import { useFirestore, safeStringify } from '../hooks/useFirestore';
 import { 
@@ -13,7 +13,6 @@ import {
   generateEmailReminder,
   triggerBrowserOverdueAlert
 } from '../lib/paymentUtils';
-import { registerFcmDeviceToken, triggerFcmPaymentReminder } from '../lib/fcmService';
 import StickyNotesWidget from './StickyNotesWidget';
 import PaymentDateModal from './PaymentDateModal';
 import AISummarizer from './AISummarizer';
@@ -48,39 +47,11 @@ export default function DashboardTab({
   const { batchReplaceAll: batchReplaceClients } = useFirestore<any>('clients', user?.uid);
   const { data: workItems, addOrUpdateItem: updateWorkItem } = useFirestore<WorkItem>('workItems', user?.uid);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [toastAlert, setToastAlert] = useState<{ title: string; body: string; type: 'success' | 'warning' } | null>(null);
-  const [isFcmRegistering, setIsFcmRegistering] = useState(false);
-  const [isFcmRegistered, setIsFcmRegistered] = useState<boolean>(() => {
-    return Boolean(localStorage.getItem('fcm_device_token'));
-  });
   const [isNotificationDismissed, setIsNotificationDismissed] = useState(false);
   const [isAnnivBannerDismissed, setIsAnnivBannerDismissed] = useState(false);
   const [activeWorkspaceTool, setActiveWorkspaceTool] = useState<'none' | 'notes' | 'ai'>('none');
   const journey = calculateWorkJourney(profile?.freelanceStartDate);
   const [paymentModalState, setPaymentModalState] = useState<{ invoiceId: string | null, isOpen: boolean }>({ invoiceId: null, isOpen: false });
-
-
-
-  const handleRegisterFcmDevice = async () => {
-    setIsFcmRegistering(true);
-    try {
-      const res = await registerFcmDeviceToken(user?.uid);
-      if (res.token) {
-        setIsFcmRegistered(true);
-        setToastAlert({
-          title: 'FCM Device Registered!',
-          body: 'Firebase Cloud Messaging device token saved. Overdue payment reminders will push directly to this device.',
-          type: 'success'
-        });
-      } else {
-        alert(res.error || 'Failed to register FCM device token.');
-      }
-    } catch (err: any) {
-      alert('Error registering FCM device: ' + (err?.message || String(err)));
-    } finally {
-      setIsFcmRegistering(false);
-    }
-  };
 
   // Client statuses & notifications
   const clientStatuses = useMemo(() => {
@@ -95,7 +66,7 @@ export default function DashboardTab({
     return clientStatuses.filter(cs => !cs.client.isClosed && cs.statusInfo.isNotificationRequired);
   }, [clientStatuses]);
 
-  // Automated 6:00 PM FCM Payment Due Push Notification Engine
+  // Automated 6:00 PM Payment Due Notification Check
   React.useEffect(() => {
     const checkAndTrigger6PmReminders = () => {
       const now = new Date();
@@ -107,22 +78,22 @@ export default function DashboardTab({
         activeNotifications.forEach(({ client, statusInfo }) => {
           if (client.isClosed || client.emailRemindersEnabled === false) return;
 
-          const sentKey = `fcm_6pm_sent_${client.id}_${dateKey}`;
+          const sentKey = `reminder_6pm_sent_${client.id}_${dateKey}`;
           const alreadySent = localStorage.getItem(sentKey);
 
           if (!alreadySent) {
-            triggerFcmPaymentReminder(
+            triggerBrowserOverdueAlert(
               client.name,
               statusInfo.label,
               statusInfo.notificationMessage,
               user?.uid
-            ).then(res => {
-              if (res.success || res.tokenUsed) {
+            ).then(sent => {
+              if (sent) {
                 localStorage.setItem(sentKey, 'true');
-                console.log(`[Auto 6:00 PM FCM Alert] Triggered notification for ${client.name} on ${dateKey}`);
+                console.log(`[Auto 6:00 PM Alert] Triggered notification for ${client.name} on ${dateKey}`);
               }
             }).catch(err => {
-              console.warn(`[Auto 6:00 PM FCM Alert] Error sending notification for ${client.name}:`, err);
+              console.warn(`[Auto 6:00 PM Alert] Error sending notification for ${client.name}:`, err);
             });
           }
         });
@@ -429,24 +400,6 @@ export default function DashboardTab({
         </div>
       </div>
 
-      {/* Toast Notification Floating Banner */}
-      {toastAlert && (
-        <div className="fixed top-5 right-5 z-50 max-w-sm w-full bg-slate-900 text-white rounded-xl p-4 shadow-xl border border-slate-800 animate-in fade-in slide-in-from-top-4 flex items-start gap-3">
-          <div className="p-2 bg-indigo-500/20 text-indigo-400 rounded-lg shrink-0 mt-0.5">
-            <Bell size={18} />
-          </div>
-          <div className="flex-1 space-y-0.5">
-            <h5 className="text-xs font-bold text-indigo-300 uppercase tracking-wider">{toastAlert.title}</h5>
-            <p className="text-xs text-slate-200 leading-relaxed">{toastAlert.body}</p>
-          </div>
-          <button
-            onClick={() => setToastAlert(null)}
-            className="text-slate-400 hover:text-white p-1 rounded-lg transition-colors cursor-pointer"
-          >
-            <X size={16} />
-          </button>
-        </div>
-      )}
 
       {/* Career Anniversary Milestone Banner if currently active */}
       {journey?.currentAnniversary && !isAnnivBannerDismissed && (
@@ -509,20 +462,6 @@ export default function DashboardTab({
             </div>
             
             <div className="flex items-center gap-2">
-              {!isFcmRegistered ? (
-                <button
-                  onClick={handleRegisterFcmDevice}
-                  disabled={isFcmRegistering}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg transition-colors shadow-2xs disabled:opacity-50 cursor-pointer"
-                >
-                  <Smartphone size={12} /> {isFcmRegistering ? 'Registering...' : 'Enable Push'}
-                </button>
-              ) : (
-                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 dark:text-slate-400">
-                  <Bell size={11} className="text-slate-400" /> Push Active
-                </span>
-              )}
-
               {onNavigateToClients && (
                 <button 
                   onClick={onNavigateToClients}

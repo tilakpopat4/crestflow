@@ -13,7 +13,8 @@ export type AppRoute =
   | 'admin'
   | 'privacy'
   | 'terms'
-  | 'contact';
+  | 'contact'
+  | 'refund';
 
 export interface RouteMatch {
   route: AppRoute;
@@ -34,13 +35,15 @@ export const ROUTE_PATHS: Record<AppRoute, string> = {
   privacy: '/privacy',
   terms: '/terms',
   contact: '/contact',
+  refund: '/refund',
 };
 
 /**
  * Resolves the canonical AppRoute from the current pathname and search parameters.
  */
 export function resolveRoute(pathname: string, search: string = ''): RouteMatch {
-  const cleanPath = pathname.toLowerCase().replace(/\/+$/, '') || '/';
+  const rawPath = pathname.replace(/\/+$/, '') || '/';
+  const cleanPath = rawPath.toLowerCase();
   const searchParams = new URLSearchParams(search);
   const params: Record<string, string> = {};
   searchParams.forEach((val, key) => {
@@ -52,20 +55,22 @@ export function resolveRoute(pathname: string, search: string = ''): RouteMatch 
     return { route: 'dashboard', path: cleanPath, params, isSpecialMode: 'feedback' };
   }
   if (searchParams.get('freelancerId')) {
-    return { route: 'dashboard', path: cleanPath, params, isSpecialMode: 'freelancer_profile' };
+    const fid = searchParams.get('freelancerId')!;
+    return { route: 'dashboard', path: cleanPath, params: { ...params, freelancerId: fid }, isSpecialMode: 'freelancer_profile' };
   }
   const isClientPortalHash = typeof window !== 'undefined' && window.location?.hash ? window.location.hash.includes('portal') : false;
   if (searchParams.get('portal') === 'client' || isClientPortalHash) {
     return { route: 'dashboard', path: cleanPath, params, isSpecialMode: 'client_portal' };
   }
 
-  // Public Onboarding route with dynamic freelancer UID: /onboarding/:freelancerId
-  const publicOnboardingMatch = cleanPath.match(/^\/onboarding\/([a-zA-Z0-9_-]+)$/);
+  // Public Onboarding route with dynamic freelancer UID: /onboarding/:freelancerId or /client-onboarding/:freelancerId
+  // Matched against rawPath to preserve Firebase UID case-sensitivity
+  const publicOnboardingMatch = rawPath.match(/^\/(?:onboarding|client-onboarding)\/([a-zA-Z0-9_-]+)$/i);
   if (publicOnboardingMatch) {
     const targetFreelancerId = publicOnboardingMatch[1];
     return {
       route: 'dashboard',
-      path: cleanPath,
+      path: `/onboarding/${targetFreelancerId}`,
       params: { ...params, freelancerId: targetFreelancerId },
       isSpecialMode: 'freelancer_profile'
     };
@@ -114,6 +119,11 @@ export function resolveRoute(pathname: string, search: string = ''): RouteMatch 
     case '/contact':
       return { route: 'contact', path: '/contact', params };
 
+    case '/refund':
+    case '/refund-policy':
+    case '/cancellation':
+      return { route: 'refund', path: '/refund', params };
+
     default:
       // Fallback: check hash routes for backwards compatibility
       const hash = (typeof window !== 'undefined' ? window.location.hash : '').toLowerCase();
@@ -121,6 +131,7 @@ export function resolveRoute(pathname: string, search: string = ''): RouteMatch 
       if (hash.includes('privacy')) return { route: 'privacy', path: '/privacy', params };
       if (hash.includes('terms')) return { route: 'terms', path: '/terms', params };
       if (hash.includes('contact')) return { route: 'contact', path: '/contact', params };
+      if (hash.includes('refund')) return { route: 'refund', path: '/refund', params };
       if (hash.includes('profile') || hash.includes('settings')) return { route: 'profile', path: '/profile', params };
 
       return { route: 'dashboard', path: '/dashboard', params };

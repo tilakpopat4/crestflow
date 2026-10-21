@@ -63,7 +63,6 @@
 - **Visual Earnings & KPIs:** Real-time stats on Total Revenue, Pending Collections, Invoiced Totals, and Active Clients.
 - **Interactive Revenue Charts:** Monthly performance breakdowns powered by Recharts.
 - **Contribution Activity Heatmap:** GitHub-style daily calendar tracking deliveries and payment activity throughout the year.
-- **FCM Web Push Notifications:** Device registration for Firebase Cloud Messaging overdue follow-up alerts.
 
 ### 🛠️ Productivity & Workspace Utilities
 - **Google Gemini AI Work Summarizer:** Summarize raw deliverable lists into polished, executive client update emails and handover notes.
@@ -100,7 +99,6 @@ d:\crestflow\
 │   │   └── useFirestore.ts        # Real-time Firestore sync hook
 │   ├── lib/
 │   │   ├── anniversary.ts         # Career milestones & duration math
-│   │   ├── fcmService.ts          # Firebase Cloud Messaging web push
 │   │   ├── geminiService.ts       # Google Gemini AI integration
 │   │   ├── gmailService.ts        # Gmail REST API integration
 │   │   ├── paymentUtils.ts        # UPI generation, cycle reminders, email templates
@@ -119,7 +117,6 @@ d:\crestflow\
 | **Language** | [TypeScript](https://www.typescriptlang.org/) | Type-safe data structures and models |
 | **Styling** | [Tailwind CSS v4](https://tailwindcss.com/) | Modern CSS utility architecture |
 | **Database & Auth** | [Firebase Firestore](https://firebase.google.com/docs/firestore) + Auth | Cloud persistence & Google OAuth authentication |
-| **Push Notifications** | [Firebase Cloud Messaging (FCM)](https://firebase.google.com/docs/cloud-messaging) | Real-time browser overdue reminders |
 | **AI Intelligence** | [Google Gemini 2.0](https://ai.google.dev/) (`@google/genai`) | Client work summarization |
 | **Document Generation** | [html2canvas](https://html2canvas.hertzen.com/) + [jsPDF](https://github.com/parallax/jsPDF) | High-resolution PDF invoice compilation |
 | **QR & Payments** | [qrcode.react](https://github.com/zpao/qrcode.react) + NPCI UPI Spec | Dynamic UPI QR codes and deep links |
@@ -173,7 +170,6 @@ VITE_FIREBASE_API_KEY=your_firebase_api_key
 VITE_FIREBASE_AUTH_DOMAIN=your_project_id.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=your_project_id
 VITE_FIREBASE_STORAGE_BUCKET=your_project_id.appspot.com
-VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 VITE_FIREBASE_APP_ID=your_app_id
 
 # Google Gemini AI (Optional - can also be configured per-user in Profile Settings)

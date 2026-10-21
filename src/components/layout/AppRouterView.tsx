@@ -18,6 +18,7 @@ const ProfilePage = lazy(() => import('../ProfilePage'));
 const PrivacyPolicyPage = lazy(() => import('../PrivacyPolicyPage'));
 const TermsOfServicePage = lazy(() => import('../TermsOfServicePage'));
 const ContactPage = lazy(() => import('../ContactPage'));
+const RefundPolicyPage = lazy(() => import('../RefundPolicyPage'));
 
 const ViewLoadingFallback = () => (
   <div className="flex-1 flex flex-col items-center justify-center p-12 min-h-[360px] animate-in fade-in duration-150 select-none">
@@ -71,6 +72,7 @@ export const AppRouterView: React.FC<AppRouterViewProps> = ({
                 {currentRoute === 'privacy' && <PrivacyPolicyPage onNavigate={(r) => onNavigate(r)} />}
                 {currentRoute === 'terms' && <TermsOfServicePage onNavigate={(r) => onNavigate(r)} />}
                 {currentRoute === 'contact' && <ContactPage />}
+                {currentRoute === 'refund' && <RefundPolicyPage onNavigate={(r) => onNavigate(r)} />}
 
                 {currentRoute === 'dashboard' && (
                   <DashboardTab
@@ -88,6 +90,8 @@ export const AppRouterView: React.FC<AppRouterViewProps> = ({
                     user={user}
                     initialSearchQuery={globalSearchQuery}
                     initialSelectedClientId={selectedClientId}
+                    subscriptionState={subscriptionState}
+                    onOpenSubscriptionModal={onOpenSubscriptionModal}
                   />
                 )}
 
@@ -105,6 +109,8 @@ export const AppRouterView: React.FC<AppRouterViewProps> = ({
                     profile={profile}
                     initialSearchQuery={globalSearchQuery}
                     onNavigateToClients={() => onNavigate('clients')}
+                    subscriptionState={subscriptionState}
+                    onOpenSubscriptionModal={onOpenSubscriptionModal}
                   />
                 )}
 

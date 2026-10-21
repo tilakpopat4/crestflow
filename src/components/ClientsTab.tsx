@@ -19,14 +19,23 @@ import {
 import ClientDashboard from './ClientDashboard';
 import CsvImportModal from './CsvImportModal';
 import StatusBadge from './StatusBadge';
+import { SubscriptionState } from '../hooks/useSubscription';
 
 interface ClientsTabProps {
   user: User | null;
   initialSearchQuery?: string;
   initialSelectedClientId?: string | null;
+  subscriptionState?: SubscriptionState;
+  onOpenSubscriptionModal?: () => void;
 }
 
-export default function ClientsTab({ user, initialSearchQuery = '', initialSelectedClientId = null }: ClientsTabProps) {
+export default function ClientsTab({
+  user,
+  initialSearchQuery = '',
+  initialSelectedClientId = null,
+  subscriptionState,
+  onOpenSubscriptionModal
+}: ClientsTabProps) {
   const { data: clients, loading: clientsLoading, addOrUpdateItem: saveClient, removeItem: deleteClientFromDb } = useFirestore<Client>('clients', user?.uid);
   const { data: invoices } = useFirestore<Invoice>('invoices', user?.uid);
   const { data: workItems } = useFirestore<WorkItem>('workItems', user?.uid);
@@ -36,6 +45,19 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
   const [isEditing, setIsEditing] = useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+
+  const handleOpenAddClient = () => {
+    if (subscriptionState && !subscriptionState.canCreateClient(clients.length)) {
+      if (onOpenSubscriptionModal) {
+        onOpenSubscriptionModal();
+      } else {
+        alert(`Free plan limit reached (${subscriptionState.limits.maxClients} clients). Upgrade to Pro for unlimited clients.`);
+      }
+      return;
+    }
+    setIsEditing(null);
+    setIsFormOpen(true);
+  };
 
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
   const [filterType, setFilterType] = useState<'all' | 'due' | 'uptodate' | 'closed'>('all');
@@ -125,6 +147,15 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
         }
         setIsEditing(null);
       } else {
+        if (subscriptionState && !subscriptionState.canCreateClient(clients.length)) {
+          if (onOpenSubscriptionModal) {
+            onOpenSubscriptionModal();
+          } else {
+            alert(`Free plan limit reached (${subscriptionState.limits.maxClients} clients). Upgrade to Pro for unlimited clients.`);
+          }
+          return;
+        }
+
         const newClient: Client = {
           id: generateUUID(),
           name: formData.name,
@@ -340,7 +371,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
               Import CSV
             </button>
             <button
-              onClick={() => setIsFormOpen(true)}
+              onClick={handleOpenAddClient}
               className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-sm flex-1 md:flex-none cursor-pointer"
             >
               <Plus size={16} />
@@ -483,7 +514,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
                   <button
                     onClick={() => triggerBrowserOverdueAlert(client.name, statusInfo.label, statusInfo.notificationMessage, user?.uid)}
                     className="p-1.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 rounded text-xs font-semibold transition-colors cursor-pointer"
-                    title="Trigger FCM Device Push Notification"
+                    title="Trigger Payment Notification"
                   >
                     <AlertTriangle size={12} />
                   </button>
@@ -808,6 +839,22 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
         </div>
       </div>
 
+      {/* Free Tier Usage Notice */}
+      {subscriptionState && !subscriptionState.isPro && subscriptionState.isSubscriptionFeatureEnabled && (
+        <div className="flex items-center justify-between px-3.5 py-2.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs text-slate-700 dark:text-slate-300">
+          <span>Free Plan: <strong className="font-semibold text-slate-900 dark:text-slate-100">{clients.length} / {subscriptionState.limits.maxClients}</strong> clients used.</span>
+          {onOpenSubscriptionModal && (
+            <button
+              type="button"
+              onClick={onOpenSubscriptionModal}
+              className="font-medium text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+            >
+              Upgrade to Pro &rarr;
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Client Profiles Grid */}
       <div className="grid grid-cols-1 min-[960px]:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
         {clients.length === 0 ? (
@@ -824,7 +871,7 @@ export default function ClientsTab({ user, initialSearchQuery = '', initialSelec
             <div className="flex items-center justify-center gap-2 pt-1 flex-wrap">
               <button
                 type="button"
-                onClick={() => setIsFormOpen(true)}
+                onClick={handleOpenAddClient}
                 className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
               >
                 <Plus size={14} /> Add First Client

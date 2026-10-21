@@ -18,15 +18,25 @@ import StatusBadge from './StatusBadge';
 import { renderDocumentHtml, printDocumentHtml, generateOffscreenPdfBlob } from '../lib/invoiceRenderer';
 import { generateUpiQrCodeDataUrl, buildUpiPaymentUri } from '../lib/upiQr';
 import { formatInvoiceNumber, getNextInvoiceNumber } from '../lib/invoiceUtils';
+import { SubscriptionState } from '../hooks/useSubscription';
 
 interface InvoiceTabProps {
   user: User | null;
   profile: UserProfile | null;
   initialSearchQuery?: string;
   onNavigateToClients?: () => void;
+  subscriptionState?: SubscriptionState;
+  onOpenSubscriptionModal?: () => void;
 }
 
-export default function InvoiceTab({ user, profile, initialSearchQuery = '', onNavigateToClients }: InvoiceTabProps) {
+export default function InvoiceTab({
+  user,
+  profile,
+  initialSearchQuery = '',
+  onNavigateToClients,
+  subscriptionState,
+  onOpenSubscriptionModal
+}: InvoiceTabProps) {
   const { data: clients, loading: clientsLoading, addOrUpdateItem: updateClient } = useFirestore<Client>('clients', user?.uid);
   const { data: invoices, addOrUpdateItem: addInvoice, removeItem: deleteInvoice } = useFirestore<Invoice>('invoices', user?.uid);
   const { data: workItems, addOrUpdateItem: updateWorkItem } = useFirestore<WorkItem>('workItems', user?.uid);
@@ -60,6 +70,17 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
 
   const totalInvoicedAmount = activeInvoices.reduce((acc, inv) => acc + (inv.totalAmount || 0), 0);
   const paidInvoicesCount = activeInvoices.filter(inv => inv.status === 'Paid').length;
+
+  const currentMonthInvoicesCount = useMemo(() => {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+    return invoices.filter(inv => {
+      if (!inv.date) return false;
+      const d = new Date(inv.date);
+      return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
+    }).length;
+  }, [invoices]);
 
   const [selectedClientId, setSelectedClientId] = useState<string>('');
   const [invoiceSearchQuery, setInvoiceSearchQuery] = useState<string>(initialSearchQuery);
@@ -722,6 +743,15 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
   };
 
   const handleDownload = async () => {
+    if (subscriptionState && !subscriptionState.canCreateInvoice(currentMonthInvoicesCount)) {
+      if (onOpenSubscriptionModal) {
+        onOpenSubscriptionModal();
+      } else {
+        alert(`Free plan limit reached (${subscriptionState.limits.maxInvoicesPerMonth} invoices this month). Upgrade to Pro for unlimited invoices.`);
+      }
+      return;
+    }
+
     if (!selectedClient) {
       alert("Please select a client first.");
       return;
@@ -960,6 +990,22 @@ export default function InvoiceTab({ user, profile, initialSearchQuery = '', onN
           </button>
         </div>
       </div>
+
+      {/* Free Tier Usage Notice */}
+      {subscriptionState && !subscriptionState.isPro && subscriptionState.isSubscriptionFeatureEnabled && (
+        <div className="max-w-4xl mx-auto flex items-center justify-between px-3.5 py-2.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs text-slate-700 dark:text-slate-300">
+          <span>Free Plan: <strong className="font-semibold text-slate-900 dark:text-slate-100">{currentMonthInvoicesCount} / {subscriptionState.limits.maxInvoicesPerMonth}</strong> invoices generated this month.</span>
+          {onOpenSubscriptionModal && (
+            <button
+              type="button"
+              onClick={onOpenSubscriptionModal}
+              className="font-medium text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+            >
+              Upgrade to Pro &rarr;
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="max-w-4xl mx-auto space-y-6">
           <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">

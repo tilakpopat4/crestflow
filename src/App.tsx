@@ -182,7 +182,7 @@ export default function App() {
     );
   }
 
-  const isSupportingRoute = currentRoute === 'privacy' || currentRoute === 'terms' || currentRoute === 'contact';
+  const isSupportingRoute = currentRoute === 'privacy' || currentRoute === 'terms' || currentRoute === 'contact' || currentRoute === 'refund';
   const sidebarTab = currentRoute === 'invoices' ? 'invoice' : currentRoute;
 
   return (

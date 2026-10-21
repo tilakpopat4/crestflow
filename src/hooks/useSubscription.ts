@@ -1,29 +1,60 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { UserProfile, SubscriptionStatus, SubscriptionPlan } from '../types';
-import { supabase } from '../lib/supabase';
-import { checkIsWhitelisted } from '../lib/youpiService';
-import { db } from '../firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { db, auth } from '../firebase';
+import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { useSubscriptionConfig } from '../lib/subscriptionConfig';
+import { FREE_TIER_LIMITS } from '../lib/subscriptionPlans';
+
+export interface SubscriptionDoc {
+  userId: string;
+  plan: 'free' | 'pro';
+  billingCycle?: 'monthly' | 'yearly';
+  status: 'active' | 'pending' | 'cancelled' | 'halted' | 'expired';
+  currentPeriodStart?: number;
+  currentPeriodEnd?: number;
+  razorpaySubscriptionId?: string;
+  cancelAtPeriodEnd?: boolean;
+  updatedAt?: number;
+}
 
 export interface SubscriptionState {
   status: SubscriptionStatus;
   plan: SubscriptionPlan;
+  isPro: boolean;
   hasAccess: boolean;
   isPaidActive: boolean;
   isExpired: boolean;
   isInactive: boolean;
   isWhitelisted: boolean;
+  cancelAtPeriodEnd: boolean;
+  billingCycle?: 'monthly' | 'yearly';
   daysRemaining: number;
   currentPeriodEnd?: number;
   isSubscriptionFeatureEnabled: boolean;
+  limits: {
+    maxClients: number;
+    maxInvoicesPerMonth: number;
+  };
+  canCreateClient: (currentClientCount: number) => boolean;
+  canCreateInvoice: (currentMonthInvoiceCount: number) => boolean;
   refreshSubscription: () => Promise<void>;
+  cancelSubscription: () => Promise<void>;
   checkAccess: () => boolean;
 }
 
+async function checkIsWhitelisted(email?: string): Promise<boolean> {
+  if (!email || !email.trim()) return false;
+  try {
+    const snap = await getDoc(doc(db, 'subscription_whitelist', email.trim().toLowerCase()));
+    return snap.exists();
+  } catch {
+    return false;
+  }
+}
+
 /**
- * Hook to manage user subscription lifecycle.
- * All users require an active subscription (₹49/month) unless whitelisted by Admin.
+ * Hook to manage user subscription lifecycle backed by Cloud Firestore.
+ * Realtime updates from webhook via Firestore `subscriptions/{userId}` document.
  */
 export function useSubscription(
   userId?: string,
@@ -32,21 +63,9 @@ export function useSubscription(
 ): SubscriptionState {
   const { isEnabled: isSubscriptionFeatureEnabled } = useSubscriptionConfig();
   const [isWhitelisted, setIsWhitelisted] = useState(false);
-  const [localOverride, setLocalOverride] = useState<{
-    status?: SubscriptionStatus;
-    plan?: SubscriptionPlan;
-    currentPeriodEnd?: number;
-  } | null>(() => {
-    if (!userId) return null;
-    try {
-      const saved = localStorage.getItem(`crestflow_sub_${userId}`);
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
-  });
+  const [subscriptionDoc, setSubscriptionDoc] = useState<SubscriptionDoc | null>(null);
 
-  // Check email whitelist on load & changes
+  // 1. Check email whitelist
   useEffect(() => {
     if (!userEmail) {
       setIsWhitelisted(false);
@@ -61,207 +80,212 @@ export function useSubscription(
     };
   }, [userEmail]);
 
+  // 2. Realtime listener on Firestore `subscriptions/{userId}`
+  useEffect(() => {
+    if (!userId) {
+      setSubscriptionDoc(null);
+      return;
+    }
+
+    const unsub = onSnapshot(
+      doc(db, 'subscriptions', userId),
+      (snap) => {
+        if (snap.exists()) {
+          setSubscriptionDoc(snap.data() as SubscriptionDoc);
+        } else {
+          setSubscriptionDoc(null);
+        }
+      },
+      (err) => {
+        console.warn('[useSubscription] Subscriptions onSnapshot warning:', err);
+      }
+    );
+
+    return () => unsub();
+  }, [userId]);
+
   const now = Date.now();
 
   // Determine current active status
-  const { status, plan, isPaidActive, isExpired, isInactive, hasAccess, daysRemaining, currentPeriodEnd } = useMemo(() => {
-    // When master subscription toggle is turned OFF, grant full unrestricted access
+  const {
+    status,
+    plan,
+    isPro,
+    isPaidActive,
+    isExpired,
+    isInactive,
+    hasAccess,
+    cancelAtPeriodEnd,
+    billingCycle,
+    daysRemaining,
+    currentPeriodEnd,
+  } = useMemo(() => {
+    // When master subscription toggle is turned OFF, grant full unrestricted Pro access
     if (!isSubscriptionFeatureEnabled) {
       return {
         status: 'active' as SubscriptionStatus,
-        plan: 'monthly' as SubscriptionPlan,
+        plan: 'pro' as SubscriptionPlan,
+        isPro: true,
         isPaidActive: true,
         isExpired: false,
         isInactive: false,
         hasAccess: true,
+        cancelAtPeriodEnd: false,
+        billingCycle: 'monthly' as const,
         daysRemaining: 999,
-        currentPeriodEnd: undefined
+        currentPeriodEnd: undefined,
       };
     }
 
-    // 0. Whitelisted User (VIP Free Access)
+    // 0. Whitelisted VIP access
     if (isWhitelisted) {
       return {
         status: 'active' as SubscriptionStatus,
-        plan: 'monthly' as SubscriptionPlan,
+        plan: 'pro' as SubscriptionPlan,
+        isPro: true,
         isPaidActive: true,
         isExpired: false,
         isInactive: false,
         hasAccess: true,
+        cancelAtPeriodEnd: false,
+        billingCycle: 'yearly' as const,
         daysRemaining: 999,
-        currentPeriodEnd: undefined
+        currentPeriodEnd: undefined,
       };
     }
 
-    const rawStatus = localOverride?.status || profile?.subscriptionStatus || 'inactive';
-    const activePlan: SubscriptionPlan = 'monthly';
-    const periodEnd = localOverride?.currentPeriodEnd || profile?.currentPeriodEnd;
+    // 1. Read from realtime subscription doc or legacy profile fallback
+    const rawStatus = subscriptionDoc?.status || profile?.subscriptionStatus || 'free';
+    const rawPlan = subscriptionDoc?.plan || (profile?.subscriptionPlan === 'monthly' ? 'pro' : profile?.subscriptionPlan) || 'free';
+    const periodEnd = subscriptionDoc?.currentPeriodEnd || profile?.currentPeriodEnd;
+    const isCancelled = Boolean(subscriptionDoc?.cancelAtPeriodEnd);
+    const cycle = subscriptionDoc?.billingCycle || 'monthly';
 
-    // 1. Paid Active Subscription
-    if (rawStatus === 'active' && periodEnd && now < periodEnd) {
+    // Active Pro Subscription (periodEnd in future)
+    if (rawPlan === 'pro' && periodEnd && now < periodEnd) {
       const daysLeft = Math.max(0, Math.ceil((periodEnd - now) / (24 * 60 * 60 * 1000)));
       return {
-        status: 'active' as SubscriptionStatus,
-        plan: activePlan,
+        status: isCancelled ? ('cancelled' as SubscriptionStatus) : ('active' as SubscriptionStatus),
+        plan: 'pro' as SubscriptionPlan,
+        isPro: true,
         isPaidActive: true,
         isExpired: false,
         isInactive: false,
         hasAccess: true,
+        cancelAtPeriodEnd: isCancelled,
+        billingCycle: cycle,
         daysRemaining: daysLeft,
-        currentPeriodEnd: periodEnd
+        currentPeriodEnd: periodEnd,
       };
     }
 
-    // 2. Expired subscription (was active previously, but period ended)
+    // Expired Pro subscription
     if (periodEnd && now >= periodEnd) {
       return {
         status: 'expired' as SubscriptionStatus,
-        plan: activePlan,
+        plan: 'free' as SubscriptionPlan,
+        isPro: false,
         isPaidActive: false,
         isExpired: true,
         isInactive: false,
-        hasAccess: false,
+        hasAccess: true, // Free tier access
+        cancelAtPeriodEnd: false,
+        billingCycle: cycle,
         daysRemaining: 0,
-        currentPeriodEnd: periodEnd
+        currentPeriodEnd: periodEnd,
       };
     }
 
-    // 3. Inactive (New signup who hasn't subscribed yet)
+    // Free Tier user
     return {
-      status: 'inactive' as SubscriptionStatus,
-      plan: activePlan,
+      status: (rawStatus as SubscriptionStatus) || 'free',
+      plan: 'free' as SubscriptionPlan,
+      isPro: false,
       isPaidActive: false,
       isExpired: false,
-      isInactive: true,
-      hasAccess: false,
+      isInactive: rawStatus === 'free' || rawStatus === 'inactive',
+      hasAccess: true, // Free tier is active with limits
+      cancelAtPeriodEnd: false,
+      billingCycle: undefined,
       daysRemaining: 0,
-      currentPeriodEnd: undefined
+      currentPeriodEnd: undefined,
     };
-  }, [profile?.subscriptionStatus, profile?.currentPeriodEnd, localOverride, now, isWhitelisted, isSubscriptionFeatureEnabled]);
+  }, [subscriptionDoc, profile, now, isWhitelisted, isSubscriptionFeatureEnabled]);
 
-  // Refresh subscription state from Firestore, local cache, and Supabase ledger
+  // Refresh manually if needed
   const refreshSubscription = useCallback(async () => {
     if (!userId) return;
     try {
-      // 1. Whitelist check
       if (userEmail) {
         const whitelisted = await checkIsWhitelisted(userEmail);
         setIsWhitelisted(whitelisted);
-        if (whitelisted) return;
       }
-
-      // 2. Read local cache
-      const cached = localStorage.getItem(`crestflow_sub_${userId}`);
-      if (cached) {
-        try {
-          const parsed = JSON.parse(cached);
-          if (parsed.status === 'active' && parsed.currentPeriodEnd && Number(parsed.currentPeriodEnd) > Date.now()) {
-            setLocalOverride({
-              status: 'active',
-              plan: parsed.plan || 'monthly',
-              currentPeriodEnd: Number(parsed.currentPeriodEnd)
-            });
-          }
-        } catch {}
-      }
-
-      // 3. Read Firestore profile (native to Firebase Auth UID)
-      try {
-        const snap = await getDoc(doc(db, 'profiles', userId));
-        if (snap.exists()) {
-          const data = snap.data();
-          if (data?.subscriptionStatus === 'active' && data?.currentPeriodEnd) {
-            setLocalOverride({
-              status: 'active',
-              plan: data.subscriptionPlan || 'monthly',
-              currentPeriodEnd: Number(data.currentPeriodEnd)
-            });
-            return;
-          }
-        }
-      } catch (fErr) {
-        console.warn('[useSubscription] Firestore profile check:', fErr);
-      }
-
-      // 4. Read Supabase subscription_payments table (where user_id is text)
-      try {
-        const { data: payments } = await supabase
-          .from('subscription_payments')
-          .select('status, plan, created_at')
-          .eq('user_id', userId)
-          .eq('status', 'SUCCESS')
-          .order('created_at', { ascending: false })
-          .limit(1);
-
-        if (payments && payments.length > 0) {
-          const p = payments[0];
-          const startMs = new Date(p.created_at).getTime();
-          const endMs = startMs + (30 * 24 * 60 * 60 * 1000);
-          if (endMs > Date.now()) {
-            setLocalOverride({
-              status: 'active',
-              plan: (p.plan as SubscriptionPlan) || 'monthly',
-              currentPeriodEnd: endMs
-            });
-            return;
-          }
-        }
-      } catch {}
-
-      // 5. Supabase profiles table (only if userId is a standard UUID)
-      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId);
-      if (isUuid) {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('subscription_status, subscription_plan, current_period_start, current_period_end')
-          .eq('id', userId)
-          .single();
-
-        if (!error && data) {
-          const periodEndMs = data.current_period_end ? new Date(data.current_period_end).getTime() : undefined;
-          setLocalOverride({
-            status: data.subscription_status,
-            plan: 'monthly',
-            currentPeriodEnd: periodEndMs
-          });
-        }
+      const snap = await getDoc(doc(db, 'subscriptions', userId));
+      if (snap.exists()) {
+        setSubscriptionDoc(snap.data() as SubscriptionDoc);
       }
     } catch (err) {
       console.warn('[useSubscription] Refresh failed:', err);
     }
   }, [userId, userEmail]);
 
-  // Listen to cross-tab storage changes
-  useEffect(() => {
-    if (!userId) return;
-    const handleStorage = (e: StorageEvent) => {
-      if (e.key === `crestflow_sub_${userId}` && e.newValue) {
-        try {
-          const parsed = JSON.parse(e.newValue);
-          setLocalOverride(parsed);
-        } catch {}
-      }
-    };
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
-  }, [userId]);
+  // Cancel subscription at period end via Worker API
+  const cancelSubscription = useCallback(async () => {
+    if (!auth.currentUser) throw new Error('Not authenticated');
+    const token = await auth.currentUser.getIdToken();
+    const res = await fetch('/api/cancel-subscription', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-  const checkAccess = useCallback(() => {
-    return hasAccess;
-  }, [hasAccess]);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Failed to cancel subscription');
+    }
+
+    await refreshSubscription();
+  }, [refreshSubscription]);
+
+  // Free Tier Limit Guards
+  const canCreateClient = useCallback(
+    (currentClientCount: number) => {
+      if (isPro || !isSubscriptionFeatureEnabled) return true;
+      return currentClientCount < FREE_TIER_LIMITS.maxClients;
+    },
+    [isPro, isSubscriptionFeatureEnabled]
+  );
+
+  const canCreateInvoice = useCallback(
+    (currentMonthInvoiceCount: number) => {
+      if (isPro || !isSubscriptionFeatureEnabled) return true;
+      return currentMonthInvoiceCount < FREE_TIER_LIMITS.maxInvoicesPerMonth;
+    },
+    [isPro, isSubscriptionFeatureEnabled]
+  );
+
+  const checkAccess = useCallback(() => hasAccess, [hasAccess]);
 
   return {
     status,
     plan,
+    isPro,
     hasAccess,
     isPaidActive,
     isExpired,
     isInactive,
     isWhitelisted,
+    cancelAtPeriodEnd,
+    billingCycle,
     daysRemaining,
     currentPeriodEnd,
     isSubscriptionFeatureEnabled,
+    limits: FREE_TIER_LIMITS,
+    canCreateClient,
+    canCreateInvoice,
     refreshSubscription,
-    checkAccess
+    cancelSubscription,
+    checkAccess,
   };
 }

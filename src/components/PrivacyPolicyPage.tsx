@@ -100,9 +100,6 @@ export default function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps
                 <strong className="text-slate-800 dark:text-slate-200">AI Summarization:</strong> Google Gemini API (<code className="text-xs bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">@google/genai</code>) used strictly for processing work log text when you click "Summarize Work".
               </li>
               <li>
-                <strong className="text-slate-800 dark:text-slate-200">Push Notifications:</strong> Firebase Cloud Messaging (FCM) to deliver payment reminders to registered browser sessions.
-              </li>
-              <li>
                 <strong className="text-slate-800 dark:text-slate-200">Hosting:</strong> Vercel and cloud web hosting infrastructure delivering application assets over HTTPS.
               </li>
             </ul>
@@ -135,7 +132,6 @@ export default function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps
                   <li><code className="text-xs bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">crestflow_profile_*</code>: Local cache of your user profile to prevent layout shift on load.</li>
                   <li><code className="text-xs bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">crestflow_profile_completed_*</code>: Records completion of initial onboarding.</li>
                   <li><code className="text-xs bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">crestflow_anniversary_dismissed_*</code>: Records dismissed milestone alerts.</li>
-                  <li><code className="text-xs bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">fcm_token</code>: Caches your browser push notification token.</li>
                 </ul>
               </li>
             </ul>

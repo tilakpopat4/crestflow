@@ -1,22 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
 import { db } from '../firebase';
 import { collection, getDocs } from 'firebase/firestore';
-import { Users, ShieldAlert, CreditCard, UserCheck, RefreshCw, Tag, ArrowLeft } from 'lucide-react';
+import { Users, UserCheck, RefreshCw, ArrowLeft } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
-import AdminPaymentApprovals from './admin/AdminPaymentApprovals';
 import AdminWhitelistManager from './admin/AdminWhitelistManager';
 import AdminUserSubscriptions from './admin/AdminUserSubscriptions';
-import AdminMerchantUpiCard from './admin/AdminMerchantUpiCard';
-import AdminPlansManager from './admin/AdminPlansManager';
 import AdminAuthCard from './admin/AdminAuthCard';
 import { useSubscriptionConfig } from '../lib/subscriptionConfig';
 
-type AdminSection = 'payments' | 'whitelist' | 'subscriptions' | 'plans' | 'settings';
+type AdminSection = 'subscriptions' | 'whitelist';
 
 /**
- * Admin Tab Command Center.
- * Normalizes all subscription management, payment verification, and VIP access.
+ * Admin Command Center.
+ * Manages user accounts, subscriptions, and VIP email whitelist via Cloud Firestore.
  * Adheres strictly to GEMINI.md design standards: flat, restrained SaaS aesthetic, 120ms transitions.
  */
 interface AdminTabProps {
@@ -39,12 +35,11 @@ export default function AdminTab({ onNavigateBack }: AdminTabProps = {}) {
       setTogglingSubscription(false);
     }
   };
-  const [activeSection, setActiveSection] = useState<AdminSection>('payments');
+  const [activeSection, setActiveSection] = useState<AdminSection>('subscriptions');
   const shouldReduceMotion = useReducedMotion();
 
   // Aggregated platform stats
   const [stats, setStats] = useState({
-    pendingPayments: 0,
     whitelistedVips: 0,
     activeSubscribers: 0,
     totalUsers: 0
@@ -61,39 +56,22 @@ export default function AdminTab({ onNavigateBack }: AdminTabProps = {}) {
     if (!isAuthenticated) return;
     setLoadingStats(true);
     try {
-      // 1. Pending Payments (Firestore + Supabase)
-      const pendingOrderIds = new Set<string>();
+      // 1. Whitelist VIPs from Firestore
+      let whitelistCount = 0;
       try {
-        const firePayments = await getDocs(collection(db, 'subscription_payments'));
-        firePayments.forEach((d) => {
-          if (d.data()?.status === 'PENDING_VERIFICATION') {
-            pendingOrderIds.add(d.id);
-          }
-        });
-      } catch {}
+        const wlSnap = await getDocs(collection(db, 'subscription_whitelist'));
+        whitelistCount = wlSnap.size;
+      } catch (err) {
+        console.warn('Error fetching Firestore whitelist stats:', err);
+      }
 
-      try {
-        const { data: supaPending } = await supabase
-          .from('subscription_payments')
-          .select('order_id')
-          .eq('status', 'PENDING_VERIFICATION');
-
-        (supaPending || []).forEach((p) => pendingOrderIds.add(p.order_id));
-      } catch {}
-
-      // 2. Whitelist VIPs
-      const { count: whitelistCount } = await supabase
-        .from('subscription_whitelist')
-        .select('*', { count: 'exact', head: true });
-
-      // 3 & 4. Total Users & Active Subscribers (Firestore + Supabase)
-      const userIds = new Set<string>();
+      // 2. Total Users & Active Subscribers from Firestore
+      let totalUsersCount = 0;
       let activeCount = 0;
-
       try {
         const fireSnap = await getDocs(collection(db, 'profiles'));
+        totalUsersCount = fireSnap.size;
         fireSnap.forEach((d) => {
-          userIds.add(d.id);
           const data = d.data();
           if (data?.subscriptionStatus === 'active') {
             activeCount++;
@@ -103,26 +81,10 @@ export default function AdminTab({ onNavigateBack }: AdminTabProps = {}) {
         console.warn('Error fetching Firestore user stats:', err);
       }
 
-      try {
-        const { data: supaProfiles } = await supabase
-          .from('profiles')
-          .select('id, subscription_status');
-
-        (supaProfiles || []).forEach((sp) => {
-          if (!userIds.has(sp.id) && sp.subscription_status === 'active') {
-            activeCount++;
-          }
-          userIds.add(sp.id);
-        });
-      } catch (err) {
-        console.warn('Error fetching Supabase user stats:', err);
-      }
-
       setStats({
-        pendingPayments: pendingOrderIds.size,
-        whitelistedVips: whitelistCount || 0,
+        whitelistedVips: whitelistCount,
         activeSubscribers: activeCount,
-        totalUsers: userIds.size
+        totalUsers: totalUsersCount
       });
     } catch (err) {
       console.warn('Error fetching admin stats:', err);
@@ -224,26 +186,10 @@ export default function AdminTab({ onNavigateBack }: AdminTabProps = {}) {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs">
           <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            Pending Approvals
-          </div>
-          <div className="flex items-baseline justify-between">
-            <span className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
-              {stats.pendingPayments}
-            </span>
-            {stats.pendingPayments > 0 && (
-              <span className="text-xs font-semibold text-red-600 dark:text-red-400">
-                Needs Review
-              </span>
-            )}
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs">
-          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            VIP Whitelist
+            Total Freelancers
           </div>
           <div className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
-            {stats.whitelistedVips}
+            {stats.totalUsers}
           </div>
         </div>
 
@@ -258,10 +204,10 @@ export default function AdminTab({ onNavigateBack }: AdminTabProps = {}) {
 
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs">
           <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            Total Freelancers
+            VIP Whitelist
           </div>
           <div className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
-            {stats.totalUsers}
+            {stats.whitelistedVips}
           </div>
         </div>
       </div>
@@ -269,11 +215,8 @@ export default function AdminTab({ onNavigateBack }: AdminTabProps = {}) {
       {/* Navigation Tabs */}
       <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2.5 overflow-x-auto text-sm relative">
         {[
-          { id: 'payments' as const, label: 'Payment Approvals', icon: CreditCard, count: stats.pendingPayments },
-          { id: 'whitelist' as const, label: 'VIP Whitelist', icon: UserCheck },
           { id: 'subscriptions' as const, label: 'User Subscriptions', icon: Users },
-          { id: 'plans' as const, label: 'Plans & Offers', icon: Tag },
-          { id: 'settings' as const, label: 'Gateway & UPI', icon: ShieldAlert }
+          { id: 'whitelist' as const, label: 'VIP Whitelist', icon: UserCheck }
         ].map((sec) => {
           const Icon = sec.icon;
           const isActive = activeSection === sec.id;
@@ -302,17 +245,6 @@ export default function AdminTab({ onNavigateBack }: AdminTabProps = {}) {
               <span className="relative z-10 inline-flex items-center gap-2">
                 <Icon className="w-4 h-4 shrink-0" />
                 <span className="font-semibold text-sm">{sec.label}</span>
-                {Boolean(sec.count && sec.count > 0) && (
-                  <span
-                    className={`text-xs px-2 py-0.5 rounded-full font-semibold transition-colors duration-150 ${
-                      isActive
-                        ? 'bg-indigo-700/90 text-white'
-                        : 'bg-slate-100 dark:bg-slate-800 text-red-600 dark:text-red-400'
-                    }`}
-                  >
-                    {sec.count}
-                  </span>
-                )}
               </span>
             </motion.button>
           );
@@ -329,11 +261,8 @@ export default function AdminTab({ onNavigateBack }: AdminTabProps = {}) {
             exit={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: -4 }}
             transition={{ duration: 0.16, ease: [0.25, 1, 0.5, 1] }}
           >
-            {activeSection === 'payments' && <AdminPaymentApprovals />}
-            {activeSection === 'whitelist' && <AdminWhitelistManager />}
             {activeSection === 'subscriptions' && <AdminUserSubscriptions />}
-            {activeSection === 'plans' && <AdminPlansManager />}
-            {activeSection === 'settings' && <AdminMerchantUpiCard />}
+            {activeSection === 'whitelist' && <AdminWhitelistManager />}
           </motion.div>
         </AnimatePresence>
       </div>

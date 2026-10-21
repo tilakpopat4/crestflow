@@ -17,7 +17,7 @@ export const ProfileInvoicingCard: React.FC<ProfileInvoicingCardProps> = ({
   userId
 }) => {
   const [copiedLink, setCopiedLink] = useState(false);
-  const onboardingLink = `${typeof window !== 'undefined' ? window.location.origin : ''}/?freelancerId=${userId}`;
+  const onboardingLink = `${typeof window !== 'undefined' ? window.location.origin : ''}/onboarding/${userId}`;
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(onboardingLink);

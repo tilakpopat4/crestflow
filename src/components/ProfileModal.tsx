@@ -79,6 +79,7 @@ export default function ProfileModal({
         geminiApiKey: geminiApiKey.trim() || undefined,
         freelanceStartDate: freelanceStartDate.trim() || undefined,
         workExperienceBio: workExperienceBio.trim() || undefined,
+        isPublicProfile: true,
         createdAt: initialProfile?.createdAt || Date.now()
       };
       await onSave(updatedProfile);
@@ -259,12 +260,12 @@ export default function ProfileModal({
                 type="text"
                 readOnly
                 className="w-full border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-xs bg-slate-100 dark:bg-slate-800 outline-none font-mono text-slate-600 dark:text-slate-300"
-                value={`${window.location.origin}/?freelancerId=${user.uid}`}
+                value={`${window.location.origin}/onboarding/${user.uid}`}
               />
               <button
                 type="button"
                 onClick={() => {
-                  navigator.clipboard.writeText(`${window.location.origin}/?freelancerId=${user.uid}`);
+                  navigator.clipboard.writeText(`${window.location.origin}/onboarding/${user.uid}`);
                   alert("Onboarding link copied to clipboard!");
                 }}
                 className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer"

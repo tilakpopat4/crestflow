@@ -1,0 +1,14 @@
+# CrestFlow robots.txt
+User-agent: *
+Allow: /
+Allow: /privacy
+Allow: /terms
+Allow: /refund
+Allow: /contact
+Allow: /onboarding/
+
+# Disallow authenticated/admin areas from public crawl
+Disallow: /admin
+Disallow: /api/
+
+Sitemap: https://crestflow.tilakpopat2007.workers.dev/sitemap.xml

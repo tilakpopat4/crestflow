@@ -56,9 +56,10 @@ export function useUserProfile(user: User | null) {
         localStorage.setItem(`crestflow_profile_completed_${user.uid}`, 'true');
       } catch {}
 
-      if ((user.photoURL && !firestoreProf.photoURL) || (user.email && !firestoreProf.email)) {
+      if ((user.photoURL && !firestoreProf.photoURL) || (user.email && !firestoreProf.email) || firestoreProf.isPublicProfile !== true) {
         const enriched: UserProfile = {
           ...firestoreProf,
+          isPublicProfile: true,
           ...(user.photoURL && !firestoreProf.photoURL ? { photoURL: user.photoURL } : {}),
           ...(user.email && !firestoreProf.email ? { email: user.email } : {}),
         };
@@ -92,7 +93,10 @@ export function useUserProfile(user: User | null) {
     } catch {}
 
     const { geminiApiKey, accountNumber, ifscCode, bankName, ...publicFields } = profileWithMeta;
-    await firestoreSaveProfile(publicFields as UserProfile);
+    await firestoreSaveProfile({
+      ...publicFields,
+      isPublicProfile: true
+    } as UserProfile);
 
     const privateSettingsRef = doc(db, 'profiles', user.uid, 'private', 'settings');
     await setDoc(privateSettingsRef, {

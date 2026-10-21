@@ -2,7 +2,7 @@ import React from 'react';
 
 interface FooterProps {
   variant?: 'default' | 'minimal';
-  onNavigate?: (route: 'privacy' | 'terms' | 'contact') => void;
+  onNavigate?: (route: 'privacy' | 'terms' | 'contact' | 'refund') => void;
   className?: string;
   transparent?: boolean;
 }
@@ -19,7 +19,7 @@ export default function Footer({
   const handleLinkClick = (
     e: React.MouseEvent<HTMLAnchorElement>,
     path: string,
-    route: 'privacy' | 'terms' | 'contact'
+    route: 'privacy' | 'terms' | 'contact' | 'refund'
   ) => {
     // Allow opening in new tab via Ctrl/Cmd/middle click
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
@@ -99,6 +99,13 @@ export default function Footer({
               className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:underline transition-colors focus:outline-none"
             >
               Terms of Service
+            </a>
+            <a
+              href="/refund"
+              onClick={(e) => handleLinkClick(e, '/refund', 'refund')}
+              className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:underline transition-colors focus:outline-none"
+            >
+              Cancellation &amp; Refund
             </a>
             <a
               href="/contact"

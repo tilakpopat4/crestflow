@@ -9,7 +9,6 @@ const firebaseConfig = {
   authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || "crestflow-14f4b.firebaseapp.com",
   projectId: env.VITE_FIREBASE_PROJECT_ID || "crestflow-14f4b",
   storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || "crestflow-14f4b.firebasestorage.app",
-  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || "960977935987",
   appId: env.VITE_FIREBASE_APP_ID || "1:960977935987:web:9c55663e25a9d8c30a1406",
   measurementId: env.VITE_FIREBASE_MEASUREMENT_ID || "G-5M69302VHW"
 };
