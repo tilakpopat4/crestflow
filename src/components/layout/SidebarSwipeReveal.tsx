@@ -40,11 +40,11 @@ export const SidebarSwipeReveal: React.FC<SidebarSwipeRevealProps> = ({
 
   return (
     <>
-      {/* Edge swipe detector when sidebar is collapsed */}
+      {/* Edge swipe detector when sidebar is collapsed (desktop only) */}
       <div
         onTouchStart={handleEdgeTouchStart}
         onTouchEnd={handleEdgeTouchEnd}
-        className="fixed top-0 left-0 w-8 h-full z-25 pointer-events-auto"
+        className="hidden md:block fixed top-0 left-0 w-8 h-full z-25 pointer-events-auto"
         aria-hidden="true"
       />
 

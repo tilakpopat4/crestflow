@@ -368,34 +368,34 @@ export default function DashboardTab({
   }
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 md:space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="p-3 sm:p-4 md:p-8 max-w-7xl mx-auto space-y-4 sm:space-y-6 md:space-y-8 w-full min-w-0 overflow-hidden">
+      <div className="flex flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Dashboard</h2>
-          <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">Financial overview & payment cycles.</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Dashboard</h2>
+          <p className="text-slate-500 dark:text-slate-400 mt-0.5 sm:mt-1 text-xs sm:text-sm">Financial overview & payment cycles.</p>
         </div>
         
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {localStorage.getItem('clients') || localStorage.getItem('monthlyWork') ? (
             <button 
               onClick={migrateLocalData}
-              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
+              className="flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
             >
-              <UploadCloud size={14} /> Migrate Data
+              <UploadCloud size={13} /> <span className="hidden min-[380px]:inline">Migrate</span>
             </button>
           ) : null}
           <button 
             onClick={handleExport}
-            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
+            className="flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
           >
-            <DownloadCloud size={14} /> Export
+            <DownloadCloud size={13} /> Export
           </button>
           
           <button 
             onClick={() => fileInputRef.current?.click()}
-            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
+            className="flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
           >
-            <UploadCloud size={14} /> Import
+            <UploadCloud size={13} /> Import
           </button>
           <input 
             type="file" 
@@ -462,7 +462,7 @@ export default function DashboardTab({
           >
             <X size={16} />
           </button>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pr-8">
+          <div className="flex items-center justify-between gap-2 pr-8">
             <div className="flex items-center gap-2 text-slate-900 dark:text-slate-100 font-bold text-sm">
               <AlertTriangle className="text-red-600 dark:text-red-400 shrink-0" size={16} />
               <span>Payment Reminders ({activeNotifications.length})</span>
@@ -552,34 +552,49 @@ export default function DashboardTab({
       )}
 
       {/* Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
-        <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-start gap-4 min-w-0">
-          <div className="p-3 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-lg shrink-0">
-            <IndianRupee size={24} />
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6">
+        <div className="bg-white dark:bg-slate-800 p-2.5 sm:p-4 md:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs flex flex-col sm:flex-row items-start gap-1.5 sm:gap-3 md:gap-4 min-w-0">
+          <div className="p-1.5 sm:p-2.5 md:p-3 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-lg shrink-0">
+            <IndianRupee size={16} className="sm:hidden" />
+            <IndianRupee size={22} className="hidden sm:block" />
           </div>
-          <div className="min-w-0">
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider truncate">Total Earned This Month</p>
-            <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 truncate">₹{metrics.totalEarned.toLocaleString('en-IN')}</h3>
+          <div className="min-w-0 flex-1 w-full">
+            <p className="text-[8px] min-[360px]:text-[9px] min-[400px]:text-[10px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-tight sm:tracking-wider leading-tight line-clamp-2 sm:line-clamp-1 mb-0.5 sm:mb-1">
+              Total Earned This Month
+            </p>
+            <h3 className="text-sm min-[360px]:text-base sm:text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 truncate">
+              ₹{metrics.totalEarned.toLocaleString('en-IN')}
+            </h3>
           </div>
         </div>
         
-        <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-start gap-4 min-w-0">
-          <div className="p-3 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg shrink-0">
-            <Clock size={24} />
+        <div className="bg-white dark:bg-slate-800 p-2.5 sm:p-4 md:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs flex flex-col sm:flex-row items-start gap-1.5 sm:gap-3 md:gap-4 min-w-0">
+          <div className="p-1.5 sm:p-2.5 md:p-3 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg shrink-0">
+            <Clock size={16} className="sm:hidden" />
+            <Clock size={22} className="hidden sm:block" />
           </div>
-          <div className="min-w-0">
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider truncate">Total Pending Invoices Amount</p>
-            <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 truncate">₹{metrics.totalDue.toLocaleString('en-IN')}</h3>
+          <div className="min-w-0 flex-1 w-full">
+            <p className="text-[8px] min-[360px]:text-[9px] min-[400px]:text-[10px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-tight sm:tracking-wider leading-tight line-clamp-2 sm:line-clamp-1 mb-0.5 sm:mb-1">
+              Total Pending Invoices Amount
+            </p>
+            <h3 className="text-sm min-[360px]:text-base sm:text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 truncate">
+              ₹{metrics.totalDue.toLocaleString('en-IN')}
+            </h3>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-start gap-4 min-w-0 sm:col-span-2 xl:col-span-1">
-          <div className="p-3 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-lg shrink-0">
-            <TrendingUp size={24} />
+        <div className="bg-white dark:bg-slate-800 p-2.5 sm:p-4 md:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs flex flex-col sm:flex-row items-start gap-1.5 sm:gap-3 md:gap-4 min-w-0">
+          <div className="p-1.5 sm:p-2.5 md:p-3 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-lg shrink-0">
+            <TrendingUp size={16} className="sm:hidden" />
+            <TrendingUp size={22} className="hidden sm:block" />
           </div>
-          <div className="min-w-0">
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider truncate">Invoices This Month</p>
-            <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 truncate">{metrics.totalInvoicesThisMonth}</h3>
+          <div className="min-w-0 flex-1 w-full">
+            <p className="text-[8px] min-[360px]:text-[9px] min-[400px]:text-[10px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-tight sm:tracking-wider leading-tight line-clamp-2 sm:line-clamp-1 mb-0.5 sm:mb-1">
+              Invoices This Month
+            </p>
+            <h3 className="text-sm min-[360px]:text-base sm:text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 truncate">
+              {metrics.totalInvoicesThisMonth}
+            </h3>
           </div>
         </div>
       </div>
@@ -587,15 +602,15 @@ export default function DashboardTab({
 
 
       {/* Analytics & Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
         {/* Recharts Monthly Earnings Line Chart */}
-        <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+        <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-3.5 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs flex flex-col min-w-0">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 sm:mb-6">
             <div>
-              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Monthly Earnings Trend</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Track paid earnings vs total invoiced revenue over time</p>
+              <h3 className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Monthly Earnings Trend</h3>
+              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">Track paid earnings vs total invoiced revenue over time</p>
             </div>
-            <div className="flex items-center gap-4 text-xs">
+            <div className="flex items-center gap-3 sm:gap-4 text-[11px] sm:text-xs">
               <span className="flex items-center gap-1.5 font-medium text-indigo-600 dark:text-indigo-400">
                 <span className="w-2.5 h-2.5 rounded-full bg-indigo-600"></span> Paid Earnings
               </span>
@@ -604,21 +619,22 @@ export default function DashboardTab({
               </span>
             </div>
           </div>
-          <div className="flex-1 min-h-[280px]">
+          <div className="flex-1 min-h-[240px] sm:min-h-[280px]">
             {monthlyTrendData.some(m => m.totalInvoiced > 0 || m.paidEarnings > 0) ? (
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={monthlyTrendData} margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
+                <LineChart data={monthlyTrendData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? "#334155" : "#e2e8f0"} />
                   <XAxis 
                     dataKey="monthLabel" 
                     axisLine={false} 
                     tickLine={false} 
-                    tick={{ fontSize: 12, fill: isDark ? '#94a3b8' : '#64748b' }} 
+                    tick={{ fontSize: 11, fill: isDark ? '#94a3b8' : '#64748b' }} 
                   />
                   <YAxis 
                     axisLine={false} 
                     tickLine={false} 
-                    tick={{ fontSize: 12, fill: isDark ? '#94a3b8' : '#64748b' }}
+                    width={38}
+                    tick={{ fontSize: 11, fill: isDark ? '#94a3b8' : '#64748b' }}
                     tickFormatter={(val) => `₹${val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val}`}
                   />
                   <Tooltip 
@@ -680,15 +696,15 @@ export default function DashboardTab({
         </div>
 
         {/* Client Distribution Bar Chart */}
-        <div className="lg:col-span-1 bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col">
-          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-6">Client Revenue</h3>
-          <div className="flex-1 min-h-[280px]">
+        <div className="lg:col-span-1 bg-white dark:bg-slate-800 p-3.5 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs flex flex-col min-w-0">
+          <h3 className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-4 sm:mb-6">Client Revenue</h3>
+          <div className="flex-1 min-h-[240px] sm:min-h-[280px]">
             {metrics.chartData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={metrics.chartData} layout="vertical" margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={isDark ? "#334155" : "#e2e8f0"} />
                   <XAxis type="number" hide />
-                  <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: isDark ? '#94a3b8' : '#64748b' }} width={80} />
+                  <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: isDark ? '#94a3b8' : '#64748b' }} width={80} />
                   <Tooltip 
                     cursor={{ fill: isDark ? 'rgba(51, 65, 85, 0.4)' : 'rgba(226, 232, 240, 0.6)' }}
                     formatter={(value: number) => [`₹${value.toLocaleString('en-IN')}`, 'Revenue']}
@@ -729,96 +745,96 @@ export default function DashboardTab({
       </div>
 
       {/* Recent Invoices Table */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col">
-          <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-white dark:bg-slate-800">
-            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Recent Invoices</h3>
-          </div>
-          
-          <div className="overflow-x-auto flex-1">
-            <table className="w-full text-left border-collapse min-w-[600px]">
-              <thead>
-                <tr className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700 text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-semibold">
-                  <th className="px-6 py-3">Date</th>
-                  <th className="px-6 py-3">Client</th>
-                  <th className="px-6 py-3 text-right">Amount</th>
-                  <th className="px-6 py-3 text-center">Status</th>
-                  <th className="px-6 py-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-                {recentInvoices.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
-                      <div className="flex flex-col items-center justify-center space-y-2">
-                        <p>No invoices generated yet.</p>
-                        {onNavigateToInvoices && (
-                          <button
-                            type="button"
-                            onClick={onNavigateToInvoices}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors cursor-pointer"
-                          >
-                            Create Your First Invoice
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ) : recentInvoices.map((inv) => (
-                  <tr key={inv.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-400">
-                      {new Date(inv.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
-                    </td>
-                    <td className="px-6 py-4 font-medium text-slate-900 dark:text-slate-100">
-                      <div>{inv.clientName}</div>
-                      {inv.discountAmount && (
-                        <div className="text-xs text-rose-500 font-normal mt-0.5">
-                          Deduction: -₹{inv.discountAmount.toLocaleString('en-IN')}{inv.discountDescription ? ` (${inv.discountDescription})` : ''}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-right font-medium text-slate-900 dark:text-slate-100">
-                      ₹{inv.totalAmount.toLocaleString('en-IN')}
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <StatusBadge
-                        status={inv.status}
-                        onClick={() => toggleInvoiceStatus(inv.id)}
-                        title="Click to toggle payment status"
-                      />
-                    </td>
-                    <td className="px-6 py-4 text-right space-x-3">
-                      <button
-                        onClick={() => toggleInvoiceStatus(inv.id)}
-                        className="text-xs font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 hover:underline cursor-pointer"
-                      >
-                        {inv.status === 'Paid' ? 'Mark Pending' : 'Approve Payment'}
-                      </button>
-                      <button
-                        onClick={() => deleteInvoice(inv.id)}
-                        className="text-xs text-red-600 hover:text-red-700 font-medium hover:underline cursor-pointer"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs overflow-hidden flex flex-col">
+        <div className="p-3.5 sm:p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-white dark:bg-slate-800">
+          <h3 className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Recent Invoices</h3>
         </div>
+        
+        <div className="overflow-x-auto w-full">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700 text-[10px] sm:text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-semibold">
+                <th className="px-2.5 sm:px-6 py-2.5 sm:py-3 whitespace-nowrap">Date</th>
+                <th className="px-2.5 sm:px-6 py-2.5 sm:py-3">Client</th>
+                <th className="px-2.5 sm:px-6 py-2.5 sm:py-3 text-right whitespace-nowrap">Amount</th>
+                <th className="px-2 sm:px-6 py-2.5 sm:py-3 text-center whitespace-nowrap">Status</th>
+                <th className="px-2.5 sm:px-6 py-2.5 sm:py-3 text-right whitespace-nowrap">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+              {recentInvoices.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-4 sm:px-6 py-12 text-center text-slate-500 dark:text-slate-400">
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <p>No invoices generated yet.</p>
+                      {onNavigateToInvoices && (
+                        <button
+                          type="button"
+                          onClick={onNavigateToInvoices}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors cursor-pointer"
+                        >
+                          Create Your First Invoice
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ) : recentInvoices.map((inv) => (
+                <tr key={inv.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
+                  <td className="px-2.5 sm:px-6 py-2.5 sm:py-4 whitespace-nowrap text-[11px] sm:text-sm text-slate-600 dark:text-slate-400">
+                    {new Date(inv.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                  </td>
+                  <td className="px-2.5 sm:px-6 py-2.5 sm:py-4 font-medium text-slate-900 dark:text-slate-100 text-xs sm:text-sm">
+                    <div className="truncate max-w-[100px] sm:max-w-none">{inv.clientName}</div>
+                    {inv.discountAmount && (
+                      <div className="text-[10px] sm:text-xs text-rose-500 font-normal mt-0.5 truncate">
+                        -₹{inv.discountAmount.toLocaleString('en-IN')}{inv.discountDescription ? ` (${inv.discountDescription})` : ''}
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-2.5 sm:px-6 py-2.5 sm:py-4 text-right font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap text-xs sm:text-sm">
+                    ₹{inv.totalAmount.toLocaleString('en-IN')}
+                  </td>
+                  <td className="px-2 sm:px-6 py-2.5 sm:py-4 text-center whitespace-nowrap">
+                    <StatusBadge
+                      status={inv.status}
+                      onClick={() => toggleInvoiceStatus(inv.id)}
+                      title="Click to toggle payment status"
+                    />
+                  </td>
+                  <td className="px-2.5 sm:px-6 py-2.5 sm:py-4 text-right whitespace-nowrap space-x-1.5 sm:space-x-3 text-[11px] sm:text-xs">
+                    <button
+                      onClick={() => toggleInvoiceStatus(inv.id)}
+                      className="font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 hover:underline cursor-pointer"
+                    >
+                      {inv.status === 'Paid' ? 'Mark Pending' : 'Approve Payment'}
+                    </button>
+                    <button
+                      onClick={() => deleteInvoice(inv.id)}
+                      className="text-red-600 hover:text-red-700 font-medium hover:underline cursor-pointer"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       {/* Workspace Utilities: Progressive Disclosure */}
       <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 mb-4">
           <div>
-            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Workspace Tools</h3>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Quick access to scratchpad notes and Gemini AI summaries</p>
+            <h3 className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Workspace Tools</h3>
+            <p className="text-[11px] sm:text-xs text-slate-400 dark:text-slate-500 mt-0.5">Quick access to scratchpad notes and Gemini AI summaries</p>
           </div>
-          <div className="inline-flex p-0.5 bg-slate-100 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
+          <div className="inline-flex p-0.5 bg-slate-100 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shrink-0 self-start sm:self-auto">
             <button
               type="button"
               onClick={() => setActiveWorkspaceTool(prev => prev === 'notes' ? 'none' : 'notes')}
-              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeWorkspaceTool === 'notes'
                   ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-2xs'
                   : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
@@ -829,7 +845,7 @@ export default function DashboardTab({
             <button
               type="button"
               onClick={() => setActiveWorkspaceTool(prev => prev === 'ai' ? 'none' : 'ai')}
-              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeWorkspaceTool === 'ai'
                   ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-2xs'
                   : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'

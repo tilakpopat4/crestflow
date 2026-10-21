@@ -74,50 +74,50 @@ export default function Footer({
     <footer
       className={`w-full border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 transition-colors ${className}`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
         {/* Row 1 */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4">
           <div>
-            <div className="font-bold text-slate-900 dark:text-slate-100 text-base">
+            <div className="font-bold text-slate-900 dark:text-slate-100 text-sm sm:text-base">
               CrestFlow
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Freelancing client manager
             </p>
           </div>
-          <nav aria-label="Footer" className="flex flex-wrap items-center gap-x-6 gap-y-2">
+          <nav aria-label="Footer" className="flex flex-wrap items-center gap-x-3.5 sm:gap-x-6 gap-y-1.5 sm:gap-y-2">
             <a
               href="/privacy"
               onClick={(e) => handleLinkClick(e, '/privacy', 'privacy')}
-              className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:underline transition-colors focus:outline-none"
+              className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:underline transition-colors focus:outline-none"
             >
               Privacy Policy
             </a>
             <a
               href="/terms"
               onClick={(e) => handleLinkClick(e, '/terms', 'terms')}
-              className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:underline transition-colors focus:outline-none"
+              className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:underline transition-colors focus:outline-none"
             >
               Terms of Service
             </a>
             <a
               href="/refund"
               onClick={(e) => handleLinkClick(e, '/refund', 'refund')}
-              className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:underline transition-colors focus:outline-none"
+              className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:underline transition-colors focus:outline-none"
             >
               Cancellation &amp; Refund
             </a>
             <a
               href="/contact"
               onClick={(e) => handleLinkClick(e, '/contact', 'contact')}
-              className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:underline transition-colors focus:outline-none"
+              className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:underline transition-colors focus:outline-none"
             >
               Contact Us
             </a>
             <a
               href="/contact"
               onClick={(e) => handleLinkClick(e, '/contact', 'contact')}
-              className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:underline transition-colors focus:outline-none"
+              className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:underline transition-colors focus:outline-none"
             >
               Support
             </a>
@@ -125,7 +125,7 @@ export default function Footer({
         </div>
 
         {/* Row 2 */}
-        <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+        <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-row items-center justify-between gap-2 text-[11px] sm:text-xs font-medium text-slate-500 dark:text-slate-400">
           <span>&copy; {currentYear} CrestFlow. All rights reserved.</span>
           <span>Version {appVersion}</span>
         </div>

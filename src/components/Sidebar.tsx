@@ -175,7 +175,7 @@ export default function Sidebar({
               whileTap={shouldReduceMotion ? undefined : { scale: 0.96 }}
               title={item.label}
               className={clsx(
-                "relative flex flex-col md:flex-row items-center px-1 min-[380px]:px-1.5 md:px-3 py-1.5 min-[380px]:py-2 md:py-2.5 rounded-xl text-[9px] min-[380px]:text-[10px] md:text-sm font-medium flex-1 md:flex-initial md:w-full md:max-w-none flex-shrink md:flex-shrink-0 min-w-0 min-h-[44px] justify-center transition-colors duration-150 outline-none select-none cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900",
+                "relative flex items-center justify-center px-1 min-[380px]:px-2 md:px-3 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-medium flex-1 md:flex-initial md:w-full md:max-w-none flex-shrink md:flex-shrink-0 min-w-0 min-h-[44px] md:min-h-0 transition-colors duration-150 outline-none select-none cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900",
                 isIconOnly ? "md:justify-center" : "md:justify-start md:space-x-3",
                 isActive
                   ? "text-white"
@@ -185,7 +185,7 @@ export default function Sidebar({
               {isActive && (
                 <motion.div
                   layoutId="sidebarActiveTabIndicator"
-                  className="absolute inset-0 bg-indigo-600 rounded-xl shadow-sm -z-0"
+                  className="absolute inset-0 bg-indigo-600 rounded-xl shadow-xs -z-0"
                   transition={
                     shouldReduceMotion
                       ? { duration: 0 }
@@ -195,20 +195,17 @@ export default function Sidebar({
               )}
               <span
                 className={clsx(
-                  "relative z-10 flex flex-col md:flex-row items-center w-full justify-center transition-all duration-200",
+                  "relative z-10 flex items-center justify-center w-full transition-all duration-200",
                   isIconOnly ? "md:justify-center" : "md:justify-start md:space-x-3"
                 )}
               >
                 <Icon
-                  size={16}
+                  size={20}
                   className={clsx(
                     isActive ? "text-white" : "text-slate-400",
-                    "mb-0.5 md:mb-0 shrink-0 transition-colors"
+                    "shrink-0 transition-colors md:w-[18px] md:h-[18px]"
                   )}
                 />
-                <span className="md:hidden truncate w-full text-center leading-tight">
-                  {item.label}
-                </span>
                 <AnimatePresence initial={false}>
                   {!isIconOnly && (
                     <motion.span

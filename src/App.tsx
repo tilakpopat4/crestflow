@@ -187,7 +187,7 @@ export default function App() {
   const sidebarTab = currentRoute === 'invoices' ? 'invoice' : currentRoute;
 
   return (
-    <div className="flex flex-col md:flex-row h-screen w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-hidden font-sans transition-colors duration-150 relative">
+    <div className="flex flex-col md:flex-row h-[100dvh] max-h-[100dvh] w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-hidden font-sans transition-colors duration-150 relative">
       <SidebarSwipeReveal
         isCollapsed={isSidebarCollapsed}
         onExpand={expandSidebar}
@@ -210,7 +210,7 @@ export default function App() {
         onCollapse={collapseSidebar}
       />
 
-      <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative pb-20 md:pb-0 transition-all duration-200">
+      <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative pb-16 md:pb-0 transition-all duration-200">
         <GlobalHeader
           user={user}
           activeTab={isSupportingRoute ? ('' as any) : sidebarTab}
