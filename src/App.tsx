@@ -21,13 +21,14 @@ import { SignInScreen } from './components/auth/SignInScreen';
 import { AppRouterView } from './components/layout/AppRouterView';
 import { SidebarSwipeReveal } from './components/layout/SidebarSwipeReveal';
 import Footer from './components/Footer';
+import { lazyWithRetry } from './lib/lazyWithRetry';
 
-const ClientPortal = lazy(() => import('./components/ClientPortal'));
-const AdminTab = lazy(() => import('./components/AdminTab'));
-const PublicFreelancerProfile = lazy(() => import('./components/PublicFreelancerProfile'));
-const ClientFeedbackForm = lazy(() => import('./components/ClientFeedbackForm'));
-const SubscriptionModal = lazy(() => import('./components/SubscriptionModal'));
-const AnniversaryModal = lazy(() => import('./components/AnniversaryModal'));
+const ClientPortal = lazyWithRetry(() => import('./components/ClientPortal'));
+const AdminTab = lazyWithRetry(() => import('./components/AdminTab'));
+const PublicFreelancerProfile = lazyWithRetry(() => import('./components/PublicFreelancerProfile'));
+const ClientFeedbackForm = lazyWithRetry(() => import('./components/ClientFeedbackForm'));
+const SubscriptionModal = lazyWithRetry(() => import('./components/SubscriptionModal'));
+const AnniversaryModal = lazyWithRetry(() => import('./components/AnniversaryModal'));
 
 const ViewLoadingFallback = () => (
   <div className="flex-1 flex flex-col items-center justify-center p-12 min-h-[360px] animate-in fade-in duration-150 select-none">

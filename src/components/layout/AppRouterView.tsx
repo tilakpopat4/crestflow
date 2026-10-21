@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from 'react';
+import React, { Suspense } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { User } from 'firebase/auth';
 import { UserProfile } from '../../types';
@@ -6,19 +6,20 @@ import { SubscriptionState } from '../../hooks/useSubscription';
 import { AppRoute } from '../../lib/router';
 import ErrorBoundary from '../ErrorBoundary';
 import Footer from '../Footer';
+import { lazyWithRetry } from '../../lib/lazyWithRetry';
 
-const DashboardTab = lazy(() => import('../DashboardTab'));
-const ClientsTab = lazy(() => import('../ClientsTab'));
-const InvoiceTab = lazy(() => import('../InvoiceTab'));
-const WorkLogTab = lazy(() => import('../WorkLogTab').then(m => ({ default: m.WorkLogTab })));
-const ReviewsTab = lazy(() => import('../ReviewsTab'));
-const ClientOnboardingTab = lazy(() => import('../ClientOnboardingTab'));
-const AdminTab = lazy(() => import('../AdminTab'));
-const ProfilePage = lazy(() => import('../ProfilePage'));
-const PrivacyPolicyPage = lazy(() => import('../PrivacyPolicyPage'));
-const TermsOfServicePage = lazy(() => import('../TermsOfServicePage'));
-const ContactPage = lazy(() => import('../ContactPage'));
-const RefundPolicyPage = lazy(() => import('../RefundPolicyPage'));
+const DashboardTab = lazyWithRetry(() => import('../DashboardTab'));
+const ClientsTab = lazyWithRetry(() => import('../ClientsTab'));
+const InvoiceTab = lazyWithRetry(() => import('../InvoiceTab'));
+const WorkLogTab = lazyWithRetry(() => import('../WorkLogTab'), m => ({ default: m.WorkLogTab }));
+const ReviewsTab = lazyWithRetry(() => import('../ReviewsTab'));
+const ClientOnboardingTab = lazyWithRetry(() => import('../ClientOnboardingTab'));
+const AdminTab = lazyWithRetry(() => import('../AdminTab'));
+const ProfilePage = lazyWithRetry(() => import('../ProfilePage'));
+const PrivacyPolicyPage = lazyWithRetry(() => import('../PrivacyPolicyPage'));
+const TermsOfServicePage = lazyWithRetry(() => import('../TermsOfServicePage'));
+const ContactPage = lazyWithRetry(() => import('../ContactPage'));
+const RefundPolicyPage = lazyWithRetry(() => import('../RefundPolicyPage'));
 
 const ViewLoadingFallback = () => (
   <div className="flex-1 flex flex-col items-center justify-center p-12 min-h-[360px] animate-in fade-in duration-150 select-none">
