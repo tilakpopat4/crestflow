@@ -222,7 +222,10 @@ export default function StickyNotesWidget({ user, clients }: StickyNotesWidgetPr
 
       {/* Sticky Notes Grid */}
       {loading ? (
-        <div className="py-12 text-center text-xs text-slate-400 dark:text-slate-500 animate-pulse">Loading sticky notes...</div>
+        <div className="py-12 flex flex-col items-center justify-center gap-2 select-none">
+          <div className="w-5 h-5 rounded-full border-2 border-indigo-600 dark:border-indigo-400 border-t-transparent animate-spin" />
+          <span className="text-xs text-slate-400 dark:text-slate-500">Loading sticky notes...</span>
+        </div>
       ) : filteredNotes.length === 0 ? (
         <div className="py-12 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl text-center space-y-2">
           <div className="w-10 h-10 mx-auto rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500">

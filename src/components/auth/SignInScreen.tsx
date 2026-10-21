@@ -27,7 +27,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
           {/* Left Column: Context for Creators */}
           <div className="lg:col-span-7 space-y-6">
             <div>
-              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-white/15 text-white border border-white/20 text-xs font-mono uppercase tracking-wider mb-3 backdrop-blur-xs">
+              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-slate-900/80 text-white border border-slate-700/80 text-xs font-mono uppercase tracking-wider mb-3">
                 <Film size={12} className="text-white" />
                 Built for Video Editors &amp; Creators
               </div>
@@ -106,7 +106,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
               {['Premiere Pro', 'DaVinci Resolve', 'After Effects', 'Final Cut Pro'].map((app) => (
                 <span
                   key={app}
-                  className="px-2 py-0.5 rounded bg-white/20 text-white text-[11px] font-medium backdrop-blur-xs"
+                  className="px-2 py-0.5 rounded bg-slate-900/80 text-white text-[11px] font-medium border border-slate-700/60"
                 >
                   {app}
                 </span>

@@ -49,7 +49,7 @@ export const OnboardingRequestCard: React.FC<OnboardingRequestCardProps> = ({
       default:
         return (
           <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-800 dark:text-slate-200">
-            <span className="w-2 h-2 rounded-full bg-indigo-600 dark:bg-indigo-400 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-indigo-600 dark:bg-indigo-400" />
             Pending Review
           </span>
         );
