@@ -168,6 +168,7 @@ export interface UserProfile {
   defaultRate?: number;
   photoURL?: string;
   isPublicProfile?: boolean; // Enables public client onboarding discovery
+  gettingStartedDismissed?: boolean; // Permanently dismisses Getting Started checklist
   accountNumber?: string;
   ifscCode?: string;
   bankName?: string;

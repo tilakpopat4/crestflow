@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Circle, X, UserCheck, Users, Check } from 'lucide-react';
 import { Client, Invoice, WorkItem, UserProfile } from '../types';
+import { db } from '../firebase';
+import { doc, setDoc } from 'firebase/firestore';
 
 interface GettingStartedCardProps {
   userId?: string;
@@ -16,7 +18,8 @@ interface GettingStartedCardProps {
 
 /**
  * GettingStartedCard renders a lightweight, professional checklist for first-time onboarding.
- * Helps users configure their profile, add clients, and generate their first invoice without trapping them.
+ * Helps users configure their profile, add clients, and generate their first invoice.
+ * Once dismissed, it is permanently dismissed across all devices (Firestore) and never shown again.
  */
 export default function GettingStartedCard({
   userId,
@@ -31,9 +34,43 @@ export default function GettingStartedCard({
 }: GettingStartedCardProps) {
   const storageKey = userId ? `crestflow_onboarding_dismissed_${userId}` : 'crestflow_onboarding_dismissed';
 
-  const [isDismissed, setIsDismissed] = useState<boolean>(() => {
-    return Boolean(localStorage.getItem(storageKey));
-  });
+  const checkIsDismissed = (): boolean => {
+    if (typeof window === 'undefined') return false;
+    // 1. Account profile in Cloud Firestore (permanent across all devices for this account)
+    if (profile?.gettingStartedDismissed === true) return true;
+    // 2. Global device storage (if closed once from any account on this device)
+    if (localStorage.getItem('crestflow_onboarding_dismissed_global') === 'true') return true;
+    if (localStorage.getItem('crestflow_onboarding_dismissed') === 'true') return true;
+    // 3. User-specific local storage
+    if (storageKey && localStorage.getItem(storageKey) === 'true') return true;
+    return false;
+  };
+
+  const [isDismissed, setIsDismissed] = useState<boolean>(checkIsDismissed);
+
+  // Sync state when profile loads from Firestore
+  useEffect(() => {
+    if (profile?.gettingStartedDismissed === true) {
+      setIsDismissed(true);
+    }
+  }, [profile?.gettingStartedDismissed]);
+
+  // If dismissed locally, guarantee it is synced to the user's Firestore profile for life
+  useEffect(() => {
+    if (userId && !profile?.gettingStartedDismissed) {
+      const isLocallyDismissed = (
+        localStorage.getItem('crestflow_onboarding_dismissed_global') === 'true' ||
+        localStorage.getItem('crestflow_onboarding_dismissed') === 'true' ||
+        (storageKey && localStorage.getItem(storageKey) === 'true')
+      );
+      if (isLocallyDismissed) {
+        setIsDismissed(true);
+        setDoc(doc(db, 'profiles', userId), { gettingStartedDismissed: true }, { merge: true }).catch((err) => {
+          console.warn('Could not sync gettingStartedDismissed to Firestore:', err);
+        });
+      }
+    }
+  }, [userId, profile?.gettingStartedDismissed, storageKey]);
 
   const isProfileComplete = Boolean(
     profile?.name &&
@@ -47,14 +84,27 @@ export default function GettingStartedCard({
 
   const stepsCompleted = (isProfileComplete ? 1 : 0) + (isClientAdded ? 1 : 0) + (isWorkOrInvoiceDone ? 1 : 0);
 
-  // If user has dismissed the guide or completed all steps and navigated away, do not render
+  // If user has dismissed the guide or completed it, do not render
   if (isDismissed) {
     return null;
   }
 
-  const handleDismiss = () => {
-    localStorage.setItem(storageKey, 'true');
+  const handleDismiss = async () => {
     setIsDismissed(true);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('crestflow_onboarding_dismissed_global', 'true');
+      localStorage.setItem('crestflow_onboarding_dismissed', 'true');
+      if (storageKey) {
+        localStorage.setItem(storageKey, 'true');
+      }
+    }
+    if (userId) {
+      try {
+        await setDoc(doc(db, 'profiles', userId), { gettingStartedDismissed: true }, { merge: true });
+      } catch (err) {
+        console.warn('Failed to persist gettingStartedDismissed to Firestore:', err);
+      }
+    }
   };
 
   return (
