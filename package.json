@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
-    "test": "tsx --test tests/routing-navigation.test.ts tests/phase3-verification.test.ts tests/sidebar-resize.test.ts",
+    "test": "tsx --test tests/routing-navigation.test.ts tests/phase3-verification.test.ts tests/sidebar-resize.test.ts tests/admin-auth.test.ts",
     "deploy": "npm run build && npx wrangler deploy"
   },
   "dependencies": {

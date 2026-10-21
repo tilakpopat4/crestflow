@@ -1,28 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../firebase';
+import { db, auth, googleProvider } from '../firebase';
 import { collection, getDocs } from 'firebase/firestore';
-import { Users, UserCheck, RefreshCw, ArrowLeft } from 'lucide-react';
+import { signInWithPopup, signOut, User } from 'firebase/auth';
+import { Users, UserCheck, ShieldCheck, RefreshCw, ArrowLeft, LogOut } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import AdminWhitelistManager from './admin/AdminWhitelistManager';
 import AdminUserSubscriptions from './admin/AdminUserSubscriptions';
-import AdminAuthCard from './admin/AdminAuthCard';
+import AdminUsersManager from './admin/AdminUsersManager';
+import AdminAccessDeniedCard from './admin/AdminAccessDeniedCard';
 import { useSubscriptionConfig } from '../lib/subscriptionConfig';
+import { useAdminAuth } from '../hooks/useAdminAuth';
 
-type AdminSection = 'subscriptions' | 'whitelist';
+type AdminSection = 'subscriptions' | 'whitelist' | 'admins';
 
-/**
- * Admin Command Center.
- * Manages user accounts, subscriptions, and VIP email whitelist via Cloud Firestore.
- * Adheres strictly to GEMINI.md design standards: flat, restrained SaaS aesthetic, 120ms transitions.
- */
 interface AdminTabProps {
+  user?: User | null;
   onNavigateBack?: () => void;
 }
 
-export default function AdminTab({ onNavigateBack }: AdminTabProps = {}) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+/**
+ * Admin Command Center.
+ * Authenticated via Google Login; restricted to tilakpopat2007@gmail.com and admin_users in Firestore.
+ * Adheres strictly to GEMINI.md design standards: flat, restrained SaaS aesthetic, 120ms transitions.
+ */
+export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabProps = {}) {
+  const currentUser = propUser ?? auth.currentUser;
+  const { isAdmin, isSuperAdmin, loading: authLoading, adminEmails } = useAdminAuth(currentUser);
+
   const { isEnabled: isSubscriptionEnabled, setEnabled: setSubscriptionEnabled } = useSubscriptionConfig();
   const [togglingSubscription, setTogglingSubscription] = useState(false);
+  const [activeSection, setActiveSection] = useState<AdminSection>('subscriptions');
+  const shouldReduceMotion = useReducedMotion();
+
+  const [stats, setStats] = useState({
+    whitelistedVips: 0,
+    activeSubscribers: 0,
+    totalUsers: 0,
+  });
+  const [loadingStats, setLoadingStats] = useState(false);
 
   const handleToggleSubscription = async (newVal: boolean) => {
     setTogglingSubscription(true);
@@ -35,28 +50,11 @@ export default function AdminTab({ onNavigateBack }: AdminTabProps = {}) {
       setTogglingSubscription(false);
     }
   };
-  const [activeSection, setActiveSection] = useState<AdminSection>('subscriptions');
-  const shouldReduceMotion = useReducedMotion();
-
-  // Aggregated platform stats
-  const [stats, setStats] = useState({
-    whitelistedVips: 0,
-    activeSubscribers: 0,
-    totalUsers: 0
-  });
-  const [loadingStats, setLoadingStats] = useState(false);
-
-  useEffect(() => {
-    if (sessionStorage.getItem('isAdminAuthenticated') === 'true') {
-      setIsAuthenticated(true);
-    }
-  }, []);
 
   const fetchStats = async () => {
-    if (!isAuthenticated) return;
+    if (!isAdmin) return;
     setLoadingStats(true);
     try {
-      // 1. Whitelist VIPs from Firestore
       let whitelistCount = 0;
       try {
         const wlSnap = await getDocs(collection(db, 'subscription_whitelist'));
@@ -65,7 +63,6 @@ export default function AdminTab({ onNavigateBack }: AdminTabProps = {}) {
         console.warn('Error fetching Firestore whitelist stats:', err);
       }
 
-      // 2. Total Users & Active Subscribers from Firestore
       let totalUsersCount = 0;
       let activeCount = 0;
       try {
@@ -84,7 +81,7 @@ export default function AdminTab({ onNavigateBack }: AdminTabProps = {}) {
       setStats({
         whitelistedVips: whitelistCount,
         activeSubscribers: activeCount,
-        totalUsers: totalUsersCount
+        totalUsers: totalUsersCount,
       });
     } catch (err) {
       console.warn('Error fetching admin stats:', err);
@@ -94,20 +91,57 @@ export default function AdminTab({ onNavigateBack }: AdminTabProps = {}) {
   };
 
   useEffect(() => {
-    fetchStats();
-  }, [isAuthenticated, activeSection]);
+    if (isAdmin) {
+      fetchStats();
+    }
+  }, [isAdmin, activeSection]);
 
-  const handleLogoutAdmin = () => {
-    setIsAuthenticated(false);
-    sessionStorage.removeItem('isAdminAuthenticated');
+  const handleSwitchAccount = async () => {
+    try {
+      await signOut(auth);
+      await signInWithPopup(auth, googleProvider);
+    } catch (err: any) {
+      if (err?.code !== 'auth/popup-closed-by-user') {
+        alert(`Sign in error: ${err.message}`);
+      }
+    }
   };
 
-  // Password Protection Gate
-  if (!isAuthenticated) {
-    return <AdminAuthCard onSuccess={() => setIsAuthenticated(true)} onBack={onNavigateBack} />;
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      if (onNavigateBack) {
+        onNavigateBack();
+      }
+    } catch (err) {
+      console.error('Error signing out:', err);
+    }
+  };
+
+  // 1. Loading verification gate
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-900 p-4">
+        <div className="flex flex-col items-center gap-3">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500" />
+          <span className="text-xs text-slate-400">Verifying administrator authorization...</span>
+        </div>
+      </div>
+    );
   }
 
-  // Authenticated Admin Dashboard
+  // 2. Access Denied barrier for unauthorized Google accounts
+  if (!isAdmin) {
+    return (
+      <AdminAccessDeniedCard
+        user={currentUser}
+        onSwitchAccount={handleSwitchAccount}
+        onBack={onNavigateBack}
+      />
+    );
+  }
+
+  // 3. Authorized Admin Command Center
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 text-slate-900 dark:text-slate-100 w-full">
       {/* Top Header */}
@@ -116,9 +150,17 @@ export default function AdminTab({ onNavigateBack }: AdminTabProps = {}) {
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
             Admin Command Center
           </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Manage ₹49 subscriptions, approve submitted bank UTRs, and configure VIP email whitelists.
-          </p>
+          <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mt-1 flex-wrap">
+            <span>Signed in as:</span>
+            <span className="font-semibold text-slate-700 dark:text-slate-200 font-mono">
+              {currentUser?.email}
+            </span>
+            {isSuperAdmin && (
+              <span className="text-indigo-600 dark:text-indigo-400 font-medium">
+                (Super Admin)
+              </span>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-2.5 flex-wrap">
           {onNavigateBack && (
@@ -138,10 +180,12 @@ export default function AdminTab({ onNavigateBack }: AdminTabProps = {}) {
             <RefreshCw className={`w-4 h-4 ${loadingStats ? 'animate-spin' : ''}`} />
           </button>
           <button
-            onClick={handleLogoutAdmin}
-            className="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white px-3.5 py-2 rounded-lg text-sm font-medium transition-colors duration-120 cursor-pointer border-0"
+            onClick={handleSignOut}
+            className="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white px-3.5 py-2 rounded-lg text-sm font-medium transition-colors duration-120 cursor-pointer border-0 inline-flex items-center gap-1.5"
+            title="Sign out of admin account"
           >
-            Lock Console
+            <LogOut className="w-4 h-4" />
+            <span>Sign Out</span>
           </button>
         </div>
       </div>
@@ -210,13 +254,23 @@ export default function AdminTab({ onNavigateBack }: AdminTabProps = {}) {
             {stats.whitelistedVips}
           </div>
         </div>
+
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs">
+          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            Admin Accounts
+          </div>
+          <div className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
+            {adminEmails.length}
+          </div>
+        </div>
       </div>
 
       {/* Navigation Tabs */}
       <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2.5 overflow-x-auto text-sm relative">
         {[
           { id: 'subscriptions' as const, label: 'User Subscriptions', icon: Users },
-          { id: 'whitelist' as const, label: 'VIP Whitelist', icon: UserCheck }
+          { id: 'whitelist' as const, label: 'VIP Whitelist', icon: UserCheck },
+          { id: 'admins' as const, label: 'Admin Accounts', icon: ShieldCheck },
         ].map((sec) => {
           const Icon = sec.icon;
           const isActive = activeSection === sec.id;
@@ -263,6 +317,7 @@ export default function AdminTab({ onNavigateBack }: AdminTabProps = {}) {
           >
             {activeSection === 'subscriptions' && <AdminUserSubscriptions />}
             {activeSection === 'whitelist' && <AdminWhitelistManager />}
+            {activeSection === 'admins' && <AdminUsersManager currentUserEmail={currentUser?.email} />}
           </motion.div>
         </AnimatePresence>
       </div>

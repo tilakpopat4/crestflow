@@ -134,7 +134,7 @@ export const AppRouterView: React.FC<AppRouterViewProps> = ({
                   />
                 )}
 
-                {currentRoute === 'admin' && <AdminTab />}
+                {currentRoute === 'admin' && <AdminTab user={user} />}
               </motion.div>
             </AnimatePresence>
           </Suspense>

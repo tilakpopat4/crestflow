@@ -18,8 +18,13 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return isSignedIn() && request.auth.token.admin == true;
+      return isSignedIn() && (
+        (request.auth.token.email != null && request.auth.token.email == 'tilakpopat2007@gmail.com') ||
+        (request.auth.token.email != null && exists(/databases/$(database)/documents/admin_users/$(request.auth.token.email.lower()))) ||
+        request.auth.token.admin == true
+      );
     }
+
 
     // Plain-equality client check: stored lowercase, enforced on write, requires verified email
     function isClient(clientEmail) {
@@ -194,6 +199,12 @@ service cloud.firestore {
 
     // 14. Subscription Whitelist (Read for authenticated users; write restricted to Admin)
     match /subscription_whitelist/{email} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // 15. Admin Google Accounts (Read for authenticated users; write restricted to Admin)
+    match /admin_users/{email} {
       allow read: if isSignedIn();
       allow write: if isAdmin();
     }

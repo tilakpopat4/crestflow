@@ -174,7 +174,7 @@ export default function App() {
       <div className="h-screen w-full bg-slate-50 dark:bg-slate-950 overflow-y-auto flex flex-col">
         <div className="flex-1">
           <Suspense fallback={<ViewLoadingFallback />}>
-            <AdminTab onNavigateBack={() => navigate('dashboard')} />
+            <AdminTab user={user} onNavigateBack={() => navigate('dashboard')} />
           </Suspense>
         </div>
         <Footer onNavigate={(r) => navigate(r)} />
