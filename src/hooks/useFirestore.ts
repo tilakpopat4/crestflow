@@ -152,7 +152,7 @@ export function useFirestore<T extends { id: string }>(collectionName: string, u
     if (!userId) return;
     try {
       const sanitized = sanitizePayload({ ...item, userId });
-      await setDoc(doc(db, collectionName, item.id), sanitized);
+      await setDoc(doc(db, collectionName, item.id), sanitized, { merge: true });
     } catch (err) {
       throw handleFirestoreError(err, OperationType.WRITE, `${collectionName}/${item.id}`);
     }
