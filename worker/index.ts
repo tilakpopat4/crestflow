@@ -4,8 +4,10 @@ import {
   handleCreateSubscription,
   handleGetMe,
   handleCancelSubscription,
+  handleChangePlan,
 } from './routes/subscription';
 import { handleRazorpayWebhook } from './routes/webhook';
+import { handleCronReconciliation } from './reconcile';
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -158,15 +160,37 @@ Sitemap: ${url.origin}/sitemap.xml
         return await handleCancelSubscription(request, env);
       }
 
-      // 4. POST /api/razorpay-webhook
+      // 4. POST /api/change-plan
+      if (url.pathname === '/api/change-plan' && request.method === 'POST') {
+        return await handleChangePlan(request, env);
+      }
+
+      // 5. POST /api/razorpay-webhook
       if (url.pathname === '/api/razorpay-webhook' && request.method === 'POST') {
         return await handleRazorpayWebhook(request, env);
+      }
+
+      // 6. POST /api/admin/reconcile (Manual trigger for subscription reconciliation)
+      if (url.pathname === '/api/admin/reconcile' && request.method === 'POST') {
+        const stats = await handleCronReconciliation(env);
+        return jsonResponse({ success: true, stats });
       }
 
       return jsonResponse({ error: 'Endpoint not found' }, 404);
     } catch (err: any) {
       console.error('[Worker API Error]', err);
       return jsonResponse({ error: err.message || 'Internal Server Error' }, 500);
+    }
+  },
+
+  /**
+   * Daily Cron Trigger execution
+   */
+  async scheduled(controller: any, env: Env, ctx: any): Promise<void> {
+    if (ctx && typeof ctx.waitUntil === 'function') {
+      ctx.waitUntil(handleCronReconciliation(env));
+    } else {
+      await handleCronReconciliation(env);
     }
   },
 };

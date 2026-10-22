@@ -55,7 +55,8 @@ export async function createRazorpaySubscription(
   userId: string,
   isFirstTime: boolean,
   userEmail?: string,
-  userName?: string
+  userName?: string,
+  startAt?: number
 ): Promise<{ id: string; status: string; shortUrl?: string }> {
   const authHeader = `Basic ${btoa(`${env.RAZORPAY_KEY_ID}:${env.RAZORPAY_KEY_SECRET}`)}`;
   const nowSeconds = Math.floor(Date.now() / 1000);
@@ -75,7 +76,9 @@ export async function createRazorpaySubscription(
     },
   };
 
-  if (isFirstTime) {
+  if (startAt && startAt > nowSeconds) {
+    bodyPayload.start_at = startAt;
+  } else if (isFirstTime) {
     // First-time users get start_at = now+7d plus a ₹1 (100 paise) addon
     bodyPayload.start_at = nowSeconds + 7 * 24 * 60 * 60;
     bodyPayload.addons = [
@@ -112,11 +115,13 @@ export async function createRazorpaySubscription(
 }
 
 /**
- * Cancels an active Razorpay subscription at the end of the current billing cycle.
+ * Cancels an active or trialing Razorpay subscription.
+ * @param cancelAtCycleEnd When true, subscription runs until current cycle end. When false, terminates immediately (used for trials).
  */
 export async function cancelRazorpaySubscription(
   env: Env,
-  subscriptionId: string
+  subscriptionId: string,
+  cancelAtCycleEnd = true
 ): Promise<{ id: string; status: string }> {
   const authHeader = `Basic ${btoa(`${env.RAZORPAY_KEY_ID}:${env.RAZORPAY_KEY_SECRET}`)}`;
 
@@ -129,7 +134,7 @@ export async function cancelRazorpaySubscription(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        cancel_at_cycle_end: 1,
+        cancel_at_cycle_end: cancelAtCycleEnd ? 1 : 0,
       }),
     }
   );

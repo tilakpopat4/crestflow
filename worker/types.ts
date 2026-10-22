@@ -27,6 +27,10 @@ export interface Env {
 
   // Secret pepper for salting trial ledger SHA-256 hashes
   TRIAL_LEDGER_PEPPER?: string;
+
+  // Resend API Configuration
+  RESEND_API_KEY?: string;
+  RESEND_FROM_EMAIL?: string;
 }
 
 export interface TrialLedgerEntry {
@@ -57,8 +61,18 @@ export interface VerifiedUser {
   name?: string;
 }
 
+export interface PendingPlanChange {
+  newPlan: PlanKey;
+  newPlanId: string;
+  newSubscriptionId: string;
+  effectiveDate: number;
+  requestedAt: number;
+}
+
 export interface SubscriptionRecord {
   userId: string;
+  userEmail?: string;
+  userName?: string;
   plan: 'free' | 'pro' | PlanKey;
   billingCycle?: PlanKey;
   status: 'active' | 'trialing' | 'pending' | 'past_due' | 'cancelled' | 'halted' | 'expired';
@@ -72,5 +86,10 @@ export interface SubscriptionRecord {
   cancelAtPeriodEnd?: boolean;
   lockTimestamp?: number;
   lastEventTimestamp?: number;
+  notifiedTrialDay5?: boolean;
+  notifiedCharge24h?: boolean;
+  notifiedChargeFailed?: boolean;
+  notifiedExpired?: boolean;
+  pendingPlanChange?: PendingPlanChange;
   updatedAt: number;
 }

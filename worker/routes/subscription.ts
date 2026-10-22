@@ -166,6 +166,8 @@ export async function handleCreateSubscription(request: Request, env: Env): Prom
   // 4. Update Firestore Subscription Record
   await updateSubscriptionInFirestore(creds, verifiedUser.uid, {
     userId: verifiedUser.uid,
+    userEmail: verifiedUser.email,
+    userName: verifiedUser.name,
     plan: requestedPlanKey as any,
     billingCycle: requestedPlanKey as any,
     status: 'pending',
@@ -208,34 +210,4 @@ export async function handleGetMe(request: Request, env: Env): Promise<Response>
   });
 }
 
-/**
- * Handles POST /api/cancel-subscription
- */
-export async function handleCancelSubscription(request: Request, env: Env): Promise<Response> {
-  const idToken = getBearerToken(request);
-  if (!idToken) {
-    return jsonResponse({ error: 'Missing Authorization header' }, 401);
-  }
-
-  const creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
-  const projectId = env.FIREBASE_PROJECT_ID || creds.project_id;
-  const verifiedUser = await verifyFirebaseIdToken(idToken, projectId);
-
-  const currentSub = await getSubscriptionFromFirestore(creds, verifiedUser.uid);
-  if (!currentSub || !currentSub.razorpaySubscriptionId) {
-    return jsonResponse({ error: 'No active recurring subscription found to cancel' }, 404);
-  }
-
-  await cancelRazorpaySubscription(env, currentSub.razorpaySubscriptionId);
-
-  await updateSubscriptionInFirestore(creds, verifiedUser.uid, {
-    cancelAtPeriodEnd: true,
-    status: 'cancelled',
-    updatedAt: Date.now(),
-  });
-
-  return jsonResponse({
-    success: true,
-    message: 'Subscription will cancel automatically at the end of the current billing cycle',
-  });
-}
+export { handleCancelSubscription, handleChangePlan } from './planManagement';

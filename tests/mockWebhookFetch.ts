@@ -7,11 +7,24 @@ export interface MockWebhookState {
   razorpaySubscriptions: Map<string, any>;
   refundedPayments: Array<{ paymentId: string; amount: number }>;
   cancelledSubscriptions: string[];
+  cancellationsDetailed: Array<{ subId: string; cancelAtCycleEnd: number }>;
+  sentEmails: Array<{ to: string[]; subject: string; html: string; text: string }>;
+  publicKeyJwk?: any;
 }
 
 export function createMockFetch(state: MockWebhookState, originalFetch: typeof globalThis.fetch) {
   return async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
     const urlStr = input.toString();
+
+    // 0. Google JWKS public keys for Firebase token verification
+    if (urlStr.includes('securetoken@system.gserviceaccount.com') && state.publicKeyJwk) {
+      return new Response(
+        JSON.stringify({
+          keys: [state.publicKeyJwk],
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
 
     // 1. Google OAuth2 token exchange
     if (urlStr.includes('oauth2.googleapis.com/token')) {
@@ -21,14 +34,42 @@ export function createMockFetch(state: MockWebhookState, originalFetch: typeof g
       });
     }
 
-    // 2. Razorpay Subscriptions API: Cancel / Fetch
-    if (urlStr.includes('api.razorpay.com/v1/subscriptions/')) {
+    // 2. Resend Email API
+    if (urlStr.includes('api.resend.com/emails')) {
+      const body = JSON.parse((init?.body as string) || '{}');
+      state.sentEmails.push({
+        to: body.to || [],
+        subject: body.subject || '',
+        html: body.html || '',
+        text: body.text || '',
+      });
+      return new Response(JSON.stringify({ id: `re_mock_${Date.now()}` }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // 3. Razorpay Subscriptions API: Create / Cancel / Fetch
+    if (urlStr.includes('api.razorpay.com/v1/subscriptions')) {
+      if (urlStr.endsWith('/subscriptions') && init?.method === 'POST') {
+        const body = JSON.parse((init?.body as string) || '{}');
+        const id = `sub_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+        state.razorpaySubscriptions.set(id, { id, status: 'created', ...body });
+        return new Response(JSON.stringify({ id, status: 'created', short_url: `https://rzp.io/i/${id}` }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
       const parts = urlStr.split('/');
       const isCancel = urlStr.endsWith('/cancel');
       const subId = isCancel ? parts[parts.length - 2] : parts[parts.length - 1].split('?')[0];
 
       if (isCancel) {
+        const body = JSON.parse((init?.body as string) || '{}');
         state.cancelledSubscriptions.push(subId);
+        if (!state.cancellationsDetailed) state.cancellationsDetailed = [];
+        state.cancellationsDetailed.push({ subId, cancelAtCycleEnd: body.cancel_at_cycle_end ?? 1 });
         return new Response(JSON.stringify({ id: subId, status: 'cancelled' }), {
           status: 200,
           headers: { 'Content-Type': 'application/json' },
@@ -47,7 +88,7 @@ export function createMockFetch(state: MockWebhookState, originalFetch: typeof g
       });
     }
 
-    // 3. Razorpay Payments Refund API
+    // 4. Razorpay Payments Refund API
     if (urlStr.includes('api.razorpay.com/v1/payments/') && urlStr.endsWith('/refund')) {
       const parts = urlStr.split('/');
       const paymentId = parts[parts.length - 2];
@@ -59,7 +100,7 @@ export function createMockFetch(state: MockWebhookState, originalFetch: typeof g
       });
     }
 
-    // 4. Firestore processed_events (Deduplication)
+    // 5. Firestore processed_events (Deduplication)
     if (urlStr.includes('/documents/processed_events/')) {
       const eventId = urlStr.split('/').pop()?.split('?')[0] || '';
       if (init?.method === 'PATCH') {
@@ -72,7 +113,7 @@ export function createMockFetch(state: MockWebhookState, originalFetch: typeof g
       return new Response('Not found', { status: 404 });
     }
 
-    // 5. Firestore trial_ledger/{hash}
+    // 6. Firestore trial_ledger/{hash}
     if (urlStr.includes('/documents/trial_ledger/')) {
       const hash = urlStr.split('/').pop()?.split('?')[0] || '';
       if (init?.method === 'PATCH') {
@@ -81,8 +122,7 @@ export function createMockFetch(state: MockWebhookState, originalFetch: typeof g
         const incomingFields: Record<string, any> = {};
 
         for (const [k, v] of Object.entries(body.fields || {})) {
-          const val = v as any;
-          incomingFields[k] = val.stringValue ?? val.integerValue ?? val.timestampValue ?? val.booleanValue;
+          incomingFields[k] = parseMockFirestoreValue(v);
         }
 
         state.trialLedger.set(hash, { ...existing, ...incomingFields });
@@ -94,14 +134,31 @@ export function createMockFetch(state: MockWebhookState, originalFetch: typeof g
 
       const fields: Record<string, any> = {};
       for (const [k, v] of Object.entries(entry)) {
-        if (typeof v === 'number') fields[k] = { integerValue: String(v) };
-        else if (typeof v === 'boolean') fields[k] = { booleanValue: v };
-        else fields[k] = { stringValue: String(v) };
+        fields[k] = toMockFirestoreValue(v);
       }
       return new Response(JSON.stringify({ fields }), { status: 200 });
     }
 
-    // 6. Firestore subscriptions/{userId}
+    // 7. Firestore list subscriptions: /documents/subscriptions?pageSize=...
+    if (urlStr.includes('/documents/subscriptions') && !urlStr.includes('/documents/subscriptions/')) {
+      const documents: any[] = [];
+      for (const [userId, sub] of state.firestoreSubscriptions.entries()) {
+        const fields: Record<string, any> = {};
+        for (const [k, v] of Object.entries(sub)) {
+          fields[k] = toMockFirestoreValue(v);
+        }
+        documents.push({
+          name: `projects/demo/databases/(default)/documents/subscriptions/${userId}`,
+          fields,
+        });
+      }
+      return new Response(JSON.stringify({ documents }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // 8. Firestore single subscription: /documents/subscriptions/{userId}
     if (urlStr.includes('/documents/subscriptions/')) {
       const userId = urlStr.split('/').pop()?.split('?')[0] || '';
       if (init?.method === 'PATCH') {
@@ -110,8 +167,7 @@ export function createMockFetch(state: MockWebhookState, originalFetch: typeof g
         const incomingFields: Record<string, any> = {};
 
         for (const [k, v] of Object.entries(body.fields || {})) {
-          const val = v as any;
-          incomingFields[k] = val.stringValue ?? val.integerValue ?? val.timestampValue ?? val.booleanValue;
+          incomingFields[k] = parseMockFirestoreValue(v);
         }
 
         state.firestoreSubscriptions.set(userId, { ...existing, ...incomingFields });
@@ -123,15 +179,47 @@ export function createMockFetch(state: MockWebhookState, originalFetch: typeof g
 
       const fields: Record<string, any> = {};
       for (const [k, v] of Object.entries(sub)) {
-        if (typeof v === 'number') fields[k] = { integerValue: String(v) };
-        else if (typeof v === 'boolean') fields[k] = { booleanValue: v };
-        else fields[k] = { stringValue: String(v) };
+        fields[k] = toMockFirestoreValue(v);
       }
       return new Response(JSON.stringify({ fields }), { status: 200 });
     }
 
     return originalFetch(input, init);
   };
+}
+
+function parseMockFirestoreValue(val: any): any {
+  if (!val) return null;
+  if ('stringValue' in val) return val.stringValue;
+  if ('integerValue' in val) return parseInt(val.integerValue, 10);
+  if ('doubleValue' in val) return val.doubleValue;
+  if ('booleanValue' in val) return val.booleanValue;
+  if ('timestampValue' in val) return val.timestampValue;
+  if ('arrayValue' in val) return (val.arrayValue.values || []).map(parseMockFirestoreValue);
+  if ('mapValue' in val) {
+    const res: Record<string, any> = {};
+    for (const [k, v] of Object.entries(val.mapValue.fields || {})) {
+      res[k] = parseMockFirestoreValue(v);
+    }
+    return res;
+  }
+  return null;
+}
+
+function toMockFirestoreValue(v: any): any {
+  if (v === null || v === undefined) return { nullValue: null };
+  if (typeof v === 'number') return { integerValue: String(v) };
+  if (typeof v === 'boolean') return { booleanValue: v };
+  if (typeof v === 'string') return { stringValue: v };
+  if (Array.isArray(v)) return { arrayValue: { values: v.map(toMockFirestoreValue) } };
+  if (typeof v === 'object') {
+    const fields: Record<string, any> = {};
+    for (const [k, val] of Object.entries(v)) {
+      fields[k] = toMockFirestoreValue(val);
+    }
+    return { mapValue: { fields } };
+  }
+  return { stringValue: String(v) };
 }
 
 export function createMockIdToken(uid: string, email: string, privateKeyPem: string): string {

@@ -41,7 +41,7 @@ export function parseServiceAccount(rawJson: string): ServiceAccountCredentials 
 /**
  * Generates an OAuth2 access token for Google Cloud Firestore REST API using Web Crypto.
  */
-async function getGoogleAccessToken(creds: ServiceAccountCredentials): Promise<string> {
+export async function getGoogleAccessToken(creds: ServiceAccountCredentials): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   if (cachedAccessToken && cachedAccessToken.expiresAt > now + 300) {
     return cachedAccessToken.token;
@@ -104,7 +104,7 @@ async function getGoogleAccessToken(creds: ServiceAccountCredentials): Promise<s
 }
 
 // Helpers to serialize JS values to Firestore Value objects
-function toFirestoreValue(val: any): any {
+export function toFirestoreValue(val: any): any {
   if (val === null || val === undefined) return { nullValue: null };
   if (val instanceof Date) return { timestampValue: val.toISOString() };
   if (typeof val === 'boolean') return { booleanValue: val };
@@ -130,7 +130,7 @@ function toFirestoreValue(val: any): any {
   return { stringValue: String(val) };
 }
 
-function fromFirestoreValue(val: any): any {
+export function fromFirestoreValue(val: any): any {
   if (!val) return null;
   if ('nullValue' in val) return null;
   if ('booleanValue' in val) return val.booleanValue;
