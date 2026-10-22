@@ -1,6 +1,7 @@
 import { Env } from './types';
 import {
   jsonResponse,
+  getBearerToken,
   handleCreateSubscription,
   handleGetMe,
   handleCancelSubscription,
@@ -8,6 +9,7 @@ import {
 } from './routes/subscription';
 import { handleRazorpayWebhook } from './routes/webhook';
 import { handleCronReconciliation } from './reconcile';
+import { constantTimeCompare } from './razorpay';
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -36,6 +38,7 @@ export default {
     }
 
     // Serve SEO crawler files directly with correct Content-Type headers
+    const baseUrl = env.BASE_URL || url.origin;
     if (url.pathname === '/robots.txt') {
       const robots = `# CrestFlow robots.txt
 User-agent: *
@@ -49,7 +52,7 @@ Allow: /onboarding/
 Disallow: /admin
 Disallow: /api/
 
-Sitemap: ${url.origin}/sitemap.xml
+Sitemap: ${baseUrl}/sitemap.xml
 `;
       return new Response(robots, {
         headers: {
@@ -63,31 +66,31 @@ Sitemap: ${url.origin}/sitemap.xml
       const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>${url.origin}/</loc>
+    <loc>${baseUrl}/</loc>
     <lastmod>2026-10-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>${url.origin}/contact</loc>
+    <loc>${baseUrl}/contact</loc>
     <lastmod>2026-10-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>${url.origin}/refund</loc>
+    <loc>${baseUrl}/refund</loc>
     <lastmod>2026-10-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>${url.origin}/terms</loc>
+    <loc>${baseUrl}/terms</loc>
     <lastmod>2026-10-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>${url.origin}/privacy</loc>
+    <loc>${baseUrl}/privacy</loc>
     <lastmod>2026-10-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -170,8 +173,20 @@ Sitemap: ${url.origin}/sitemap.xml
         return await handleRazorpayWebhook(request, env);
       }
 
-      // 6. POST /api/admin/reconcile (Manual trigger for subscription reconciliation)
-      if (url.pathname === '/api/admin/reconcile' && request.method === 'POST') {
+      // 6. POST /api/reconcile-cron (Cron reconciliation trigger, protected by CRON_SECRET)
+      if (
+        (url.pathname === '/api/reconcile-cron' || url.pathname === '/api/admin/reconcile') &&
+        request.method === 'POST'
+      ) {
+        const authHeaderToken = getBearerToken(request);
+        const customHeaderSecret = request.headers.get('x-cron-secret');
+        const providedSecret = customHeaderSecret || authHeaderToken || '';
+        const expectedSecret = env.CRON_SECRET || '';
+
+        if (!expectedSecret || !providedSecret || !constantTimeCompare(providedSecret, expectedSecret)) {
+          return jsonResponse({ error: 'Unauthorized: Invalid or missing CRON_SECRET' }, 401);
+        }
+
         const stats = await handleCronReconciliation(env);
         return jsonResponse({ success: true, stats });
       }

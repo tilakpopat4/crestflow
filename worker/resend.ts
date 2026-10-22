@@ -90,9 +90,10 @@ export async function sendTrialDay5Email(
   toEmail: string,
   name?: string
 ): Promise<{ success: boolean; id?: string; error?: string }> {
+  const baseUrl = env.BASE_URL || 'https://crestflow.app';
   const greeting = name ? `Hi ${name},` : 'Hello,';
   const subject = 'Your CrestFlow Pro trial ends in 2 days';
-  const text = `${greeting}\n\nYou have 2 days remaining on your 7-day CrestFlow Pro trial.\n\nAll your client portals, automated 6 AM delivery schedules, and direct UPI payment links will continue uninterrupted. When your trial ends, your selected recurring subscription will seamlessly activate.\n\nIf you need to make any adjustments or cancel before your billing cycle starts, you can manage your subscription directly in your account settings.\n\nManage Subscription: https://crestflow.com/settings\n\n— The CrestFlow Team`;
+  const text = `${greeting}\n\nYou have 2 days remaining on your 7-day CrestFlow Pro trial.\n\nAll your client portals, automated 6 AM delivery schedules, and direct UPI payment links will continue uninterrupted. When your trial ends, your selected recurring subscription will seamlessly activate.\n\nIf you need to make any adjustments or cancel before your billing cycle starts, you can manage your subscription directly in your account settings.\n\nManage Subscription: ${baseUrl}/billing\n\n— The CrestFlow Team`;
 
   const html = wrapEmailHtml(
     subject,
@@ -101,7 +102,7 @@ export async function sendTrialDay5Email(
      <p>You have <strong>2 days remaining</strong> on your 7-day CrestFlow Pro trial.</p>
      <p>All your client portals, automated 6 AM delivery schedules, and direct UPI payment links will continue uninterrupted. When your trial ends, your selected recurring subscription will seamlessly activate.</p>
      <p>If you need to make adjustments or cancel before your primary billing begins, you can do so anytime in your dashboard:</p>
-     <p><a href="https://crestflow.com/settings" class="btn">Manage Subscription</a></p>`
+     <p><a href="${baseUrl}/billing" class="btn">Manage Subscription</a></p>`
   );
 
   return sendResendEmail(env, { to: toEmail, subject, text, html });
@@ -116,9 +117,10 @@ export async function sendCharge24hEmail(
   name?: string,
   planName = 'Pro'
 ): Promise<{ success: boolean; id?: string; error?: string }> {
+  const baseUrl = env.BASE_URL || 'https://crestflow.app';
   const greeting = name ? `Hi ${name},` : 'Hello,';
   const subject = 'Reminder: Your CrestFlow subscription begins tomorrow';
-  const text = `${greeting}\n\nThis is a reminder that your 7-day ₹1 trial is ending tomorrow. Your ${planName} subscription will be charged to your payment method automatically in 24 hours.\n\nYou will continue having full access to unlimited clients, unlimited invoices, and automated delivery features.\n\nView or update your subscription at: https://crestflow.com/settings\n\n— The CrestFlow Team`;
+  const text = `${greeting}\n\nThis is a reminder that your 7-day ₹1 trial is ending tomorrow. Your ${planName} subscription will be charged to your payment method automatically in 24 hours.\n\nYou will continue having full access to unlimited clients, unlimited invoices, and automated delivery features.\n\nView or update your subscription at: ${baseUrl}/billing\n\n— The CrestFlow Team`;
 
   const html = wrapEmailHtml(
     subject,
@@ -126,7 +128,7 @@ export async function sendCharge24hEmail(
      <p>${greeting}</p>
      <p>This is a reminder that your 7-day &#8377;1 trial is ending tomorrow. Your <strong>${planName}</strong> subscription will be charged to your payment method automatically in 24 hours.</p>
      <p>You will continue to have full access to unlimited clients, unlimited invoices, direct UPI payments, and automated deliveries.</p>
-     <p><a href="https://crestflow.com/settings" class="btn">View Subscription</a></p>`
+     <p><a href="${baseUrl}/billing" class="btn">View Subscription</a></p>`
   );
 
   return sendResendEmail(env, { to: toEmail, subject, text, html });
@@ -140,9 +142,10 @@ export async function sendChargeFailedEmail(
   toEmail: string,
   name?: string
 ): Promise<{ success: boolean; id?: string; error?: string }> {
+  const baseUrl = env.BASE_URL || 'https://crestflow.app';
   const greeting = name ? `Hi ${name},` : 'Hello,';
   const subject = 'Action Required: Payment failed for your CrestFlow subscription';
-  const text = `${greeting}\n\nWe were unable to process the recurring payment for your CrestFlow subscription.\n\nA 3-day grace period has been applied to your account. Your write access (creating invoices, updating client delivery dates) remains active for the next 3 days while payment is retried.\n\nPlease update your payment details promptly to avoid your account switching to read-only mode.\n\nUpdate Payment Method: https://crestflow.com/settings\n\n— The CrestFlow Team`;
+  const text = `${greeting}\n\nWe were unable to process the recurring payment for your CrestFlow subscription.\n\nA 3-day grace period has been applied to your account. Your write access (creating invoices, updating client delivery dates) remains active for the next 3 days while payment is retried.\n\nPlease update your payment details promptly to avoid your account switching to read-only mode.\n\nUpdate Payment Method: ${baseUrl}/billing\n\n— The CrestFlow Team`;
 
   const html = wrapEmailHtml(
     subject,
@@ -151,7 +154,7 @@ export async function sendChargeFailedEmail(
      <p>We were unable to process the recurring payment for your CrestFlow subscription.</p>
      <p>A <strong>3-day grace period</strong> has been applied to your account. Your workspace remains fully active while payment is retried.</p>
      <p>Please review and update your payment method to avoid your account switching to read-only mode:</p>
-     <p><a href="https://crestflow.com/settings" class="btn">Update Payment Method</a></p>`
+     <p><a href="${baseUrl}/billing" class="btn">Update Payment Method</a></p>`
   );
 
   return sendResendEmail(env, { to: toEmail, subject, text, html });
@@ -165,9 +168,10 @@ export async function sendExpiredEmail(
   toEmail: string,
   name?: string
 ): Promise<{ success: boolean; id?: string; error?: string }> {
+  const baseUrl = env.BASE_URL || 'https://crestflow.app';
   const greeting = name ? `Hi ${name},` : 'Hello,';
   const subject = 'Your CrestFlow subscription has expired';
-  const text = `${greeting}\n\nYour CrestFlow subscription access period has expired, and your account has transitioned into read-only mode.\n\nYou can still log in, review past work, and download or export all existing client and invoice records anytime.\n\nTo restore write access and resume creating new invoices or managing active projects, you can renew your subscription at: https://crestflow.com/settings\n\n— The CrestFlow Team`;
+  const text = `${greeting}\n\nYour CrestFlow subscription access period has expired, and your account has transitioned into read-only mode.\n\nYou can still log in, review past work, and download or export all existing client and invoice records anytime.\n\nTo restore write access and resume creating new invoices or managing active projects, you can renew your subscription at: ${baseUrl}/billing\n\n— The CrestFlow Team`;
 
   const html = wrapEmailHtml(
     subject,
@@ -176,7 +180,7 @@ export async function sendExpiredEmail(
      <p>Your CrestFlow subscription access period has expired. Your workspace has been placed in <strong>read-only mode</strong>.</p>
      <p>You can still log in, review your dashboard, and download or export all existing client records and invoices at any time.</p>
      <p>To restore write access and resume creating invoices, reactivate your subscription below:</p>
-     <p><a href="https://crestflow.com/settings" class="btn">Reactivate Subscription</a></p>`
+     <p><a href="${baseUrl}/billing" class="btn">Reactivate Subscription</a></p>`
   );
 
   return sendResendEmail(env, { to: toEmail, subject, text, html });

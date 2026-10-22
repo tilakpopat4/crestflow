@@ -110,7 +110,7 @@ describe('Firestore Billing Anti-Bypass Security Suite', () => {
       webhookRef.set({
         eventId: 'evt_fake_payment_123',
         status: 'processed',
-        amount: 49900,
+        amount: 7900,
       })
     );
   });

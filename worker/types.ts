@@ -10,6 +10,12 @@ export interface Env {
     fetch: (request: Request) => Promise<Response>;
   };
 
+  // Application Base URL (configurable origin)
+  BASE_URL?: string;
+
+  // Cron Secret for authenticating /api/reconcile-cron
+  CRON_SECRET?: string;
+
   // Razorpay Secrets (Stored via wrangler secret put)
   RAZORPAY_KEY_ID: string;
   RAZORPAY_KEY_SECRET: string;
@@ -80,6 +86,7 @@ export interface SubscriptionRecord {
   currentPeriodEnd?: number;
   accessUntil?: string | Date;
   trialEndsAt?: string | Date | null;
+  graceUntil?: string | null;
   hasHadSubscription?: boolean;
   razorpaySubscriptionId?: string;
   razorpayPlanId?: string;

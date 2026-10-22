@@ -36,7 +36,10 @@ export default function ClientOnboardingTab({
     useFirestore<Client>('clients', user.uid);
 
   const onboardingUrl = useMemo(() => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://crestflow.app';
+    const origin =
+      typeof window !== 'undefined'
+        ? window.location.origin
+        : (import.meta.env.VITE_BASE_URL || 'https://crestflow.app');
     return `${origin}/onboarding/${user.uid}`;
   }, [user.uid]);
 

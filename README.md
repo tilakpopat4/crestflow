@@ -177,7 +177,26 @@ VITE_GEMINI_API_KEY=your_gemini_api_key
 
 # Google OAuth Client ID for Gmail API Invoice Delivery
 VITE_GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
+
+# Canonical Application Origin (Optional, defaults to window.location.origin)
+VITE_BASE_URL=https://crestflow.app
 ```
+
+### Cloudflare Worker Production Secrets
+Backend environment variables must be provisioned via `npx wrangler secret put <NAME>`:
+- `RAZORPAY_KEY_ID`: Live Razorpay Key ID (`rzp_live_...`)
+- `RAZORPAY_KEY_SECRET`: Live Razorpay Secret
+- `RAZORPAY_WEBHOOK_SECRET`: Secret used to compute HMAC-SHA256 signature
+- `FIREBASE_SERVICE_ACCOUNT`: Full Firebase Admin Service Account JSON string
+- `CRON_SECRET`: High-entropy bearer secret required for `/api/reconcile-cron`
+- `TRIAL_LEDGER_PEPPER`: Secret salt used when computing SHA-256 digests of emails and VPAs
+- `PLAN_ID_MONTHLY`: Razorpay Plan ID for ₹79/month
+- `PLAN_ID_QUARTERLY`: Razorpay Plan ID for ₹199/3 months
+- `PLAN_ID_HALF`: Razorpay Plan ID for ₹449/6 months
+- `PLAN_ID_YEARLY`: Razorpay Plan ID for ₹899/year
+- `RESEND_API_KEY`: API key for lifecycle emails
+- `BASE_URL`: Application origin (default: `https://crestflow.app`)
+
 
 ---
 

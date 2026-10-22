@@ -8,6 +8,9 @@
     "not_found_handling": "single-page-application",
     "binding": "ASSETS"
   },
+  "vars": {
+    "BASE_URL": "https://crestflow.app"
+  },
   "triggers": {
     "crons": ["0 0 * * *"]
   }

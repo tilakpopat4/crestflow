@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
-    "test": "tsx --test tests/routing-navigation.test.ts tests/phase3-verification.test.ts tests/sidebar-resize.test.ts tests/admin-auth.test.ts tests/chunk-recovery.test.ts tests/client-portal-adaptation.test.ts tests/profile-gemini-key.test.ts tests/webhook-security.test.ts tests/trial-ledger-security.test.ts tests/reconcile-and-lifecycle.test.ts tests/pricing-and-billing-flow.test.ts",
+    "test": "tsx --test tests/routing-navigation.test.ts tests/phase3-verification.test.ts tests/sidebar-resize.test.ts tests/admin-auth.test.ts tests/chunk-recovery.test.ts tests/client-portal-adaptation.test.ts tests/profile-gemini-key.test.ts tests/webhook-security.test.ts tests/trial-ledger-security.test.ts tests/reconcile-and-lifecycle.test.ts tests/pricing-and-billing-flow.test.ts tests/billing-review-fixes.test.ts tests/billing-refund-and-cron.test.ts",
     "test:security": "npx firebase-tools emulators:exec --only firestore \"npx tsx --test tests/billing-anti-bypass.test.ts\"",
     "deploy": "npm run build && npx wrangler deploy"
   },

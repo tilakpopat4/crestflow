@@ -49,7 +49,9 @@ export default function RefundPolicyPage({ onNavigate }: RefundPolicyPageProps) 
             </p>
             <ul className="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-300">
               <li><strong className="text-slate-900 dark:text-slate-100">CrestFlow Pro Monthly:</strong> &#8377;79 per month (billed monthly).</li>
-              <li><strong className="text-slate-900 dark:text-slate-100">CrestFlow Pro Yearly:</strong> &#8377;799 per year (billed annually).</li>
+              <li><strong className="text-slate-900 dark:text-slate-100">CrestFlow Pro Quarterly:</strong> &#8377;199 per quarter (billed every 3 months).</li>
+              <li><strong className="text-slate-900 dark:text-slate-100">CrestFlow Pro 6-Month:</strong> &#8377;449 per 6 months (billed every 6 months).</li>
+              <li><strong className="text-slate-900 dark:text-slate-100">CrestFlow Pro Yearly:</strong> &#8377;899 per year (billed annually).</li>
             </ul>
             <p className="mt-2">
               Subscriptions automatically renew at the end of each billing cycle unless cancelled prior to the renewal date.
