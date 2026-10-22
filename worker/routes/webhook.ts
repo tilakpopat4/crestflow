@@ -6,7 +6,18 @@ import {
   isEventProcessed,
   markEventProcessed,
 } from '../firestore';
-import { verifyRazorpayWebhookSignature, fetchRazorpaySubscription } from '../razorpay';
+import {
+  verifyRazorpayWebhookSignature,
+  fetchRazorpaySubscription,
+  cancelRazorpaySubscription,
+  refundRazorpayPayment,
+} from '../razorpay';
+import {
+  normalizeGoogleEmail,
+  normalizeUpiVpa,
+  hashIdentifier,
+  markTrialLedgerUsed,
+} from '../trialLedger';
 import { jsonResponse } from './subscription';
 
 /**
@@ -80,9 +91,10 @@ export async function handleRazorpayWebhook(request: Request, env: Env): Promise
   }
 
   // 5. Guard against out-of-order events
+  const nowMs = Date.now();
   const eventCreatedAtMs = eventPayload.created_at
     ? eventPayload.created_at * 1000
-    : Date.now();
+    : nowMs;
 
   const existing = await getSubscriptionFromFirestore(creds, userId);
   if (existing?.lastEventTimestamp && eventCreatedAtMs < existing.lastEventTimestamp) {
@@ -92,9 +104,65 @@ export async function handleRazorpayWebhook(request: Request, env: Env): Promise
     return jsonResponse({ status: 'ok', ignored: 'out-of-order event' }, 200);
   }
 
-  // 6. State Machine & accessUntil Calculation per docs/BILLING_SPEC.md
+  // 6. Trial Ledger Confirmation & Anti-Abuse Checks (VPA & Email)
+  const isPaymentConfirmation =
+    eventType === 'subscription.authenticated' ||
+    eventType === 'subscription.activated' ||
+    eventType === 'subscription.charged' ||
+    eventType === 'payment.captured';
+
+  if (isPaymentConfirmation) {
+    // 6a. Confirm Email Hash in trial_ledger
+    const userEmail = rzpSub.notes?.userEmail || payloadData.payment?.entity?.email;
+    if (userEmail) {
+      const emailHash = await hashIdentifier(normalizeGoogleEmail(userEmail), env.TRIAL_LEDGER_PEPPER);
+      await markTrialLedgerUsed(creds, emailHash, 'email', userId, subId);
+    }
+
+    // 6b. Check & Confirm UPI VPA in trial_ledger
+    const upiVpa = payloadData.payment?.entity?.vpa;
+    if (upiVpa) {
+      const vpaHash = await hashIdentifier(normalizeUpiVpa(upiVpa), env.TRIAL_LEDGER_PEPPER);
+      const vpaCheck = await markTrialLedgerUsed(creds, vpaHash, 'vpa', userId, subId);
+
+      // If UPI VPA was already used by another account, abort, cancel, and refund
+      if (vpaCheck.alreadyUsedByOther) {
+        console.warn(`[Trial Abuse] VPA '${upiVpa}' already claimed by another user. Cancelling & refunding.`);
+
+        // Cancel subscription immediately
+        await cancelRazorpaySubscription(env, subId).catch(console.error);
+
+        // Refund the ₹1 verification charge
+        const paymentId = payloadData.payment?.entity?.id;
+        if (paymentId) {
+          await refundRazorpayPayment(env, paymentId, 100).catch(console.error);
+        }
+
+        // Expire access immediately in Firestore
+        await updateSubscriptionInFirestore(creds, userId, {
+          userId,
+          status: 'expired',
+          plan: 'free',
+          accessUntil: new Date(nowMs - 1000).toISOString(),
+          cancelAtPeriodEnd: true,
+          lastEventTimestamp: eventCreatedAtMs,
+          updatedAt: nowMs,
+        });
+
+        return jsonResponse(
+          {
+            status: 'abused',
+            action: 'cancelled_and_refunded',
+            reason: 'UPI VPA already used for another free trial.',
+          },
+          200
+        );
+      }
+    }
+  }
+
+  // 7. State Machine & accessUntil Calculation per docs/BILLING_SPEC.md
   const rzpStatus: string = rzpSub.status || '';
-  const nowMs = Date.now();
 
   let newStatus: 'trialing' | 'active' | 'past_due' | 'cancelled' | 'halted' | 'expired' = 'active';
   let accessUntilIso: string = new Date(nowMs + 30 * 86400 * 1000).toISOString();

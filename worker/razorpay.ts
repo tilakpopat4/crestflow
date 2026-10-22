@@ -166,3 +166,35 @@ export async function fetchRazorpaySubscription(
 
   return await res.json();
 }
+
+/**
+ * Refunds a payment via Razorpay REST API (e.g. ₹1 trial fee on abuse detection).
+ */
+export async function refundRazorpayPayment(
+  env: Env,
+  paymentId: string,
+  amountPaise = 100
+): Promise<any> {
+  const authHeader = `Basic ${btoa(`${env.RAZORPAY_KEY_ID}:${env.RAZORPAY_KEY_SECRET}`)}`;
+
+  const res = await fetch(`https://api.razorpay.com/v1/payments/${paymentId}/refund`, {
+    method: 'POST',
+    headers: {
+      Authorization: authHeader,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      amount: amountPaise,
+      notes: {
+        reason: 'Trial abuse policy enforcement refund',
+      },
+    }),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Razorpay refund failed: ${res.status} ${errorText}`);
+  }
+
+  return await res.json();
+}

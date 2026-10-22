@@ -24,6 +24,20 @@ export interface Env {
 
   // Optional project ID override
   FIREBASE_PROJECT_ID?: string;
+
+  // Secret pepper for salting trial ledger SHA-256 hashes
+  TRIAL_LEDGER_PEPPER?: string;
+}
+
+export interface TrialLedgerEntry {
+  hash: string;
+  type: 'email' | 'vpa';
+  status: 'reserved' | 'used';
+  claimedByUid: string;
+  reservedAt: number;
+  expiresAt?: number;
+  usedAt?: number;
+  subscriptionId?: string;
 }
 
 export interface ServiceAccountCredentials {

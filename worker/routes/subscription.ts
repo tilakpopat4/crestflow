@@ -9,6 +9,11 @@ import {
   createRazorpaySubscription,
   cancelRazorpaySubscription,
 } from '../razorpay';
+import {
+  normalizeGoogleEmail,
+  hashIdentifier,
+  reserveTrialLedgerEntry,
+} from '../trialLedger';
 
 export function jsonResponse(data: any, status = 200): Response {
   return new Response(JSON.stringify(data), {
@@ -120,14 +125,35 @@ export async function handleCreateSubscription(request: Request, env: Env): Prom
   });
 
   // 2. First-time user vs Returning user detection
-  const isFirstTime =
-    !existing ||
-    (!existing.hasHadSubscription &&
-      existing.status !== 'active' &&
-      existing.status !== 'cancelled' &&
-      existing.status !== 'expired');
+  const isReturningUser =
+    existing &&
+    (existing.hasHadSubscription ||
+      existing.status === 'active' ||
+      existing.status === 'cancelled' ||
+      existing.status === 'expired');
 
-  // 3. Create Subscription in Razorpay (sets notes.uid, expire_by 30m, start_at + 7d & 100 paise addon if first time)
+  let isFirstTime = !isReturningUser;
+
+  // 3. Anti-abuse Trial Ledger: Reserve Google email hash
+  let emailHash = '';
+  if (verifiedUser.email) {
+    const normalizedEmail = normalizeGoogleEmail(verifiedUser.email);
+    emailHash = await hashIdentifier(normalizedEmail, env.TRIAL_LEDGER_PEPPER);
+
+    if (isFirstTime) {
+      const reservation = await reserveTrialLedgerEntry(creds, emailHash, 'email', verifiedUser.uid);
+      if (!reservation.success) {
+        return jsonResponse(
+          {
+            error: reservation.reason || 'Free trial already claimed for this Google account. Please choose a paid plan.',
+          },
+          403
+        );
+      }
+    }
+  }
+
+  // 4. Create Subscription in Razorpay (sets notes.uid, expire_by 30m, start_at + 7d & 100 paise addon if first time)
   const rzpSub = await createRazorpaySubscription(
     env,
     planId,
