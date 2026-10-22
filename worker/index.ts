@@ -1,36 +1,11 @@
 import { Env } from './types';
-import { verifyFirebaseIdToken } from './auth';
 import {
-  parseServiceAccount,
-  getSubscriptionFromFirestore,
-  updateSubscriptionInFirestore,
-  isEventProcessed,
-  markEventProcessed,
-} from './firestore';
-import {
-  createRazorpaySubscription,
-  cancelRazorpaySubscription,
-  verifyRazorpayWebhookSignature,
-} from './razorpay';
-
-function jsonResponse(data: any, status = 200): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    },
-  });
-}
-
-function getBearerToken(request: Request): string | null {
-  const authHeader = request.headers.get('Authorization') || request.headers.get('authorization');
-  if (!authHeader) return null;
-  const match = authHeader.match(/^Bearer\s+(.+)$/i);
-  return match ? match[1].trim() : null;
-}
+  jsonResponse,
+  handleCreateSubscription,
+  handleGetMe,
+  handleCancelSubscription,
+} from './routes/subscription';
+import { handleRazorpayWebhook } from './routes/webhook';
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -124,7 +99,7 @@ Sitemap: ${url.origin}/sitemap.xml
       });
     }
 
-    // Only intercept /api/* routes; everything else serves static assets
+    // Only intercept /api/* routes; everything else serves static SPA assets
     if (!url.pathname.startsWith('/api/')) {
       const response = await env.ASSETS.fetch(request);
 
@@ -168,199 +143,29 @@ Sitemap: ${url.origin}/sitemap.xml
     }
 
     try {
-      // -----------------------------------------------------------------------
       // 1. POST /api/create-subscription
-      // -----------------------------------------------------------------------
       if (url.pathname === '/api/create-subscription' && request.method === 'POST') {
-        const idToken = getBearerToken(request);
-        if (!idToken) {
-          return jsonResponse({ error: 'Missing Authorization header' }, 401);
-        }
-
-        const creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
-        const projectId = env.FIREBASE_PROJECT_ID || creds.project_id;
-        const verifiedUser = await verifyFirebaseIdToken(idToken, projectId);
-
-        const body = (await request.json().catch(() => ({}))) as {
-          plan?: 'monthly' | 'yearly';
-        };
-        const requestedCycle = body.plan === 'yearly' ? 'yearly' : 'monthly';
-
-        const planId =
-          requestedCycle === 'yearly'
-            ? env.RAZORPAY_PLAN_YEARLY
-            : env.RAZORPAY_PLAN_MONTHLY;
-
-        if (!planId) {
-          return jsonResponse(
-            { error: `Razorpay plan ID for ${requestedCycle} is not configured on the Worker` },
-            500
-          );
-        }
-
-        // Create subscription in Razorpay
-        const rzpSub = await createRazorpaySubscription(
-          env,
-          planId,
-          verifiedUser.uid,
-          verifiedUser.email,
-          verifiedUser.name
-        );
-
-        // Record pending subscription in Firestore
-        await updateSubscriptionInFirestore(creds, verifiedUser.uid, {
-          userId: verifiedUser.uid,
-          plan: 'free', // stays free until webhook confirms activation/charge
-          billingCycle: requestedCycle,
-          status: 'pending',
-          razorpaySubscriptionId: rzpSub.id,
-          razorpayPlanId: planId,
-          cancelAtPeriodEnd: false,
-          updatedAt: Date.now(),
-        });
-
-        return jsonResponse({
-          subscriptionId: rzpSub.id,
-          keyId: env.RAZORPAY_KEY_ID,
-          shortUrl: rzpSub.shortUrl,
-        });
+        return await handleCreateSubscription(request, env);
       }
 
-      // -----------------------------------------------------------------------
-      // 2. POST /api/razorpay-webhook
-      // -----------------------------------------------------------------------
-      if (url.pathname === '/api/razorpay-webhook' && request.method === 'POST') {
-        const rawBody = await request.text();
-        const signature = request.headers.get('x-razorpay-signature');
-
-        // Verify cryptographic HMAC-SHA256 signature
-        const isValid = await verifyRazorpayWebhookSignature(
-          rawBody,
-          signature,
-          env.RAZORPAY_WEBHOOK_SECRET
-        );
-
-        if (!isValid) {
-          return jsonResponse({ error: 'Invalid webhook signature' }, 400);
-        }
-
-        let eventPayload: any;
-        try {
-          eventPayload = JSON.parse(rawBody);
-        } catch {
-          return jsonResponse({ error: 'Invalid JSON payload' }, 400);
-        }
-
-        const creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
-
-        // Event Deduplication
-        const eventId = eventPayload.event_id || `${eventPayload.event}_${Date.now()}`;
-        if (await isEventProcessed(creds, eventId)) {
-          return jsonResponse({ status: 'ok', duplicate: true }, 200);
-        }
-        await markEventProcessed(creds, eventId);
-
-        const eventType = eventPayload.event;
-        const subEntity =
-          eventPayload.payload?.subscription?.entity ||
-          eventPayload.payload?.payment?.entity?.subscription;
-
-        const userId = subEntity?.notes?.userId;
-        const subId = subEntity?.id;
-
-        if (userId) {
-          if (
-            eventType === 'subscription.activated' ||
-            eventType === 'subscription.charged' ||
-            eventType === 'payment.captured'
-          ) {
-            // Determine period end timestamp from Razorpay entity
-            const periodEnd = subEntity?.current_end
-              ? subEntity.current_end * 1000
-              : Date.now() + 30 * 24 * 60 * 60 * 1000;
-
-            const periodStart = subEntity?.current_start
-              ? subEntity.current_start * 1000
-              : Date.now();
-
-            await updateSubscriptionInFirestore(creds, userId, {
-              userId,
-              plan: 'pro',
-              status: 'active',
-              currentPeriodStart: periodStart,
-              currentPeriodEnd: periodEnd,
-              razorpaySubscriptionId: subId || subEntity?.id,
-              cancelAtPeriodEnd: false,
-              updatedAt: Date.now(),
-            });
-          } else if (
-            eventType === 'subscription.pending' ||
-            eventType === 'subscription.halted'
-          ) {
-            // Grace period: keep access until current_period_end
-            await updateSubscriptionInFirestore(creds, userId, {
-              status: 'halted',
-              updatedAt: Date.now(),
-            });
-          } else if (
-            eventType === 'subscription.cancelled' ||
-            eventType === 'subscription.completed'
-          ) {
-            // Cancelled: Access remains valid only until current period end
-            const existing = await getSubscriptionFromFirestore(creds, userId);
-            const isExpired = existing?.currentPeriodEnd
-              ? existing.currentPeriodEnd <= Date.now()
-              : true;
-
-            await updateSubscriptionInFirestore(creds, userId, {
-              status: 'cancelled',
-              cancelAtPeriodEnd: true,
-              plan: isExpired ? 'free' : (existing?.plan || 'pro'),
-              updatedAt: Date.now(),
-            });
-          }
-        }
-
-        return jsonResponse({ status: 'ok' }, 200);
+      // 2. GET /api/me
+      if (url.pathname === '/api/me' && request.method === 'GET') {
+        return await handleGetMe(request, env);
       }
 
-      // -----------------------------------------------------------------------
       // 3. POST /api/cancel-subscription
-      // -----------------------------------------------------------------------
       if (url.pathname === '/api/cancel-subscription' && request.method === 'POST') {
-        const idToken = getBearerToken(request);
-        if (!idToken) {
-          return jsonResponse({ error: 'Missing Authorization header' }, 401);
-        }
+        return await handleCancelSubscription(request, env);
+      }
 
-        const creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
-        const projectId = env.FIREBASE_PROJECT_ID || creds.project_id;
-        const verifiedUser = await verifyFirebaseIdToken(idToken, projectId);
-
-        const currentSub = await getSubscriptionFromFirestore(creds, verifiedUser.uid);
-        if (!currentSub || !currentSub.razorpaySubscriptionId) {
-          return jsonResponse({ error: 'No active recurring subscription found to cancel' }, 404);
-        }
-
-        // Cancel in Razorpay at end of cycle
-        await cancelRazorpaySubscription(env, currentSub.razorpaySubscriptionId);
-
-        // Update Firestore subscription record
-        await updateSubscriptionInFirestore(creds, verifiedUser.uid, {
-          cancelAtPeriodEnd: true,
-          status: 'cancelled',
-          updatedAt: Date.now(),
-        });
-
-        return jsonResponse({
-          success: true,
-          message: 'Subscription will cancel automatically at the end of the current billing cycle',
-        });
+      // 4. POST /api/razorpay-webhook
+      if (url.pathname === '/api/razorpay-webhook' && request.method === 'POST') {
+        return await handleRazorpayWebhook(request, env);
       }
 
       return jsonResponse({ error: 'Endpoint not found' }, 404);
     } catch (err: any) {
-      console.error('[Worker Error]', err);
+      console.error('[Worker API Error]', err);
       return jsonResponse({ error: err.message || 'Internal Server Error' }, 500);
     }
   },

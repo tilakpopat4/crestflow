@@ -34,9 +34,13 @@ service cloud.firestore {
         && request.auth.token.email == clientEmail;
     }
 
-    // Paywall: Allowed during stages when subscriptions are disabled or bypassed
-    function hasActiveProAccess() {
-      return true;
+    // Access entitlement: user must have an active subscription with accessUntil > request.time
+    function hasActiveSubscription() {
+      return isAdmin() || (
+        isSignedIn() &&
+        exists(/databases/$(database)/documents/subscriptions/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/subscriptions/$(request.auth.uid)).data.accessUntil > request.time
+      );
     }
 
     function isValidId(id) {
@@ -93,25 +97,25 @@ service cloud.firestore {
     // 1. Clients
     match /clients/{clientId} {
       allow read: if isOwner(resource.data.userId) || (('email' in resource.data) && isClient(resource.data.email));
-      allow delete: if isOwner(resource.data.userId);
-      allow create: if isOwner(request.resource.data.userId) && hasActiveProAccess() && isValidId(clientId) && isValidClient(request.resource.data);
-      allow update: if isOwner(resource.data.userId) && isOwner(request.resource.data.userId) && hasActiveProAccess() && isValidClient(request.resource.data);
+      allow delete: if isOwner(resource.data.userId) && hasActiveSubscription();
+      allow create: if isOwner(request.resource.data.userId) && hasActiveSubscription() && isValidId(clientId) && isValidClient(request.resource.data);
+      allow update: if isOwner(resource.data.userId) && isOwner(request.resource.data.userId) && hasActiveSubscription() && isValidClient(request.resource.data);
     }
 
     // 2. Invoices
     match /invoices/{invoiceId} {
       allow read: if isOwner(resource.data.userId) || (('clientEmail' in resource.data) && isClient(resource.data.clientEmail));
-      allow delete: if isOwner(resource.data.userId);
-      allow create: if isOwner(request.resource.data.userId) && hasActiveProAccess() && isValidId(invoiceId) && isValidInvoice(request.resource.data);
-      allow update: if isOwner(resource.data.userId) && isOwner(request.resource.data.userId) && hasActiveProAccess() && isValidInvoice(request.resource.data);
+      allow delete: if isOwner(resource.data.userId) && hasActiveSubscription();
+      allow create: if isOwner(request.resource.data.userId) && hasActiveSubscription() && isValidId(invoiceId) && isValidInvoice(request.resource.data);
+      allow update: if isOwner(resource.data.userId) && isOwner(request.resource.data.userId) && hasActiveSubscription() && isValidInvoice(request.resource.data);
     }
 
     // 3. Work Items
     match /workItems/{workItemId} {
       allow read: if isOwner(resource.data.userId) || (('clientEmail' in resource.data) && isClient(resource.data.clientEmail));
-      allow delete: if isOwner(resource.data.userId);
-      allow create: if isOwner(request.resource.data.userId) && hasActiveProAccess() && isValidId(workItemId) && isValidWorkItem(request.resource.data);
-      allow update: if isOwner(resource.data.userId) && isOwner(request.resource.data.userId) && hasActiveProAccess() && isValidWorkItem(request.resource.data);
+      allow delete: if isOwner(resource.data.userId) && hasActiveSubscription();
+      allow create: if isOwner(request.resource.data.userId) && hasActiveSubscription() && isValidId(workItemId) && isValidWorkItem(request.resource.data);
+      allow update: if isOwner(resource.data.userId) && isOwner(request.resource.data.userId) && hasActiveSubscription() && isValidWorkItem(request.resource.data);
     }
 
     // 4. Profiles (Public Info on Root Document)
@@ -187,13 +191,23 @@ service cloud.firestore {
       allow write: if isSignedIn();
     }
 
-    // 12. Subscriptions (Client read-only; writes restricted strictly to Cloudflare Worker via Service Account)
+    // 12. Subscriptions (Client read-only for own doc; never write)
     match /subscriptions/{userId} {
       allow read: if isOwner(userId) || isAdmin();
       allow write: if false;
     }
 
-    // 13. Webhook Deduplication Ledger (Client access denied)
+    // 13. Trial Ledger (Anti-abuse phone/email hash; client access denied)
+    match /trial_ledger/{hash} {
+      allow read, write: if false;
+    }
+
+    // 14. Webhook Events (Idempotency and audit ledger; client access denied)
+    match /webhook_events/{eventId} {
+      allow read, write: if false;
+    }
+
+    // 15. Legacy Webhook Deduplication Ledger (Client access denied)
     match /processed_events/{eventId} {
       allow read, write: if false;
     }

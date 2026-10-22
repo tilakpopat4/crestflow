@@ -53,22 +53,41 @@ export async function createRazorpaySubscription(
   env: Env,
   planId: string,
   userId: string,
+  isFirstTime: boolean,
   userEmail?: string,
   userName?: string
 ): Promise<{ id: string; status: string; shortUrl?: string }> {
   const authHeader = `Basic ${btoa(`${env.RAZORPAY_KEY_ID}:${env.RAZORPAY_KEY_SECRET}`)}`;
+  const nowSeconds = Math.floor(Date.now() / 1000);
+  const expireBy = nowSeconds + 30 * 60; // Expire in 30 minutes
 
   const bodyPayload: Record<string, any> = {
     plan_id: planId,
     total_count: 120, // 10 years max recurring cycles
     quantity: 1,
     customer_notify: 1,
+    expire_by: expireBy,
     notes: {
+      uid: userId,
       userId,
       userEmail: userEmail || '',
       userName: userName || '',
     },
   };
+
+  if (isFirstTime) {
+    // First-time users get start_at = now+7d plus a ₹1 (100 paise) addon
+    bodyPayload.start_at = nowSeconds + 7 * 24 * 60 * 60;
+    bodyPayload.addons = [
+      {
+        item: {
+          name: '7-Day Trial Verification Fee',
+          amount: 100, // 100 paise = ₹1
+          currency: 'INR',
+        },
+      },
+    ];
+  }
 
   const res = await fetch('https://api.razorpay.com/v1/subscriptions', {
     method: 'POST',
@@ -121,4 +140,29 @@ export async function cancelRazorpaySubscription(
   }
 
   return (await res.json()) as { id: string; status: string };
+}
+
+/**
+ * Re-fetches the authoritative subscription entity directly from Razorpay.
+ */
+export async function fetchRazorpaySubscription(
+  env: Env,
+  subscriptionId: string
+): Promise<any> {
+  const authHeader = `Basic ${btoa(`${env.RAZORPAY_KEY_ID}:${env.RAZORPAY_KEY_SECRET}`)}`;
+
+  const res = await fetch(`https://api.razorpay.com/v1/subscriptions/${subscriptionId}`, {
+    method: 'GET',
+    headers: {
+      Authorization: authHeader,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Razorpay fetch subscription failed: ${res.status} ${errorText}`);
+  }
+
+  return await res.json();
 }

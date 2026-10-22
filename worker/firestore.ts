@@ -106,11 +106,17 @@ async function getGoogleAccessToken(creds: ServiceAccountCredentials): Promise<s
 // Helpers to serialize JS values to Firestore Value objects
 function toFirestoreValue(val: any): any {
   if (val === null || val === undefined) return { nullValue: null };
+  if (val instanceof Date) return { timestampValue: val.toISOString() };
   if (typeof val === 'boolean') return { booleanValue: val };
   if (typeof val === 'number') {
     return Number.isInteger(val) ? { integerValue: String(val) } : { doubleValue: val };
   }
-  if (typeof val === 'string') return { stringValue: val };
+  if (typeof val === 'string') {
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(val)) {
+      return { timestampValue: val };
+    }
+    return { stringValue: val };
+  }
   if (Array.isArray(val)) {
     return { arrayValue: { values: val.map(toFirestoreValue) } };
   }
