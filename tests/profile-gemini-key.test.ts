@@ -53,6 +53,18 @@ describe('Gemini API Key Persistence & Profile State Management', () => {
     );
   });
 
+  it('ProfilePage allows saving partial details without requiring UPI ID or blocking on empty optional fields', () => {
+    const content = fs.readFileSync(profilePageFile, 'utf-8');
+    assert.ok(
+      !content.includes('!upiId.trim()'),
+      'ProfilePage must not block saving when upiId is empty'
+    );
+    assert.ok(
+      content.includes('trimmedUpi && !trimmedUpi.includes(\'@\')'),
+      'ProfilePage should only validate UPI format if a UPI ID is actually provided'
+    );
+  });
+
   it('ProfilePreferencesCard includes show/hide toggle and key configured indicator', () => {
     const content = fs.readFileSync(preferencesCardFile, 'utf-8');
     assert.ok(
@@ -62,6 +74,22 @@ describe('Gemini API Key Persistence & Profile State Management', () => {
     assert.ok(
       content.includes('Key configured'),
       'ProfilePreferencesCard should indicate when a key is saved and configured'
+    );
+  });
+
+  it('firestore.rules permits profile creation and updates with optional userId and valid profile fields', () => {
+    const rulesContent = fs.readFileSync(path.resolve('firestore.rules'), 'utf-8');
+    assert.ok(
+      rulesContent.includes("!('userId' in data) || (data.userId is string && data.userId == request.auth.uid)"),
+      'firestore.rules must allow partial updates where userId is omitted or matches auth user'
+    );
+    assert.ok(
+      rulesContent.includes("!('upiId' in data)"),
+      'firestore.rules must explicitly allow upiId field in profile'
+    );
+    assert.ok(
+      rulesContent.includes('allow create: if isOwner(profileId) && isValidProfile(request.resource.data);'),
+      'firestore.rules must allow create for owners without restricting auth UID formats'
     );
   });
 });

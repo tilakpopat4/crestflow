@@ -196,13 +196,35 @@ export function useUserProfile(user: User | null) {
 
     // 4. Save private settings document with deleteField support for removals
     const privateSettingsRef = doc(db, 'profiles', user.uid, 'private', 'settings');
-    await setDoc(privateSettingsRef, {
-      geminiApiKey: geminiApiKey && geminiApiKey.trim() ? geminiApiKey.trim() : deleteField(),
-      accountNumber: accountNumber && accountNumber.trim() ? accountNumber.trim() : deleteField(),
-      ifscCode: ifscCode && ifscCode.trim() ? ifscCode.trim() : deleteField(),
-      bankName: bankName && bankName.trim() ? bankName.trim() : deleteField(),
+    const privateDocData: Record<string, any> = {
       updatedAt: Date.now(),
-    }, { merge: true });
+    };
+
+    if (geminiApiKey && geminiApiKey.trim()) {
+      privateDocData.geminiApiKey = geminiApiKey.trim();
+    } else if (privateSettings?.geminiApiKey) {
+      privateDocData.geminiApiKey = deleteField();
+    }
+
+    if (accountNumber && accountNumber.trim()) {
+      privateDocData.accountNumber = accountNumber.trim();
+    } else if (privateSettings?.accountNumber) {
+      privateDocData.accountNumber = deleteField();
+    }
+
+    if (ifscCode && ifscCode.trim()) {
+      privateDocData.ifscCode = ifscCode.trim();
+    } else if (privateSettings?.ifscCode) {
+      privateDocData.ifscCode = deleteField();
+    }
+
+    if (bankName && bankName.trim()) {
+      privateDocData.bankName = bankName.trim();
+    } else if (privateSettings?.bankName) {
+      privateDocData.bankName = deleteField();
+    }
+
+    await setDoc(privateSettingsRef, privateDocData, { merge: true });
   };
 
   return {

@@ -40,7 +40,7 @@ export const ProfileInvoicingCard: React.FC<ProfileInvoicingCardProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-            Receiving UPI ID *
+            Receiving UPI ID
           </label>
           <input
             type="text"
@@ -48,7 +48,6 @@ export const ProfileInvoicingCard: React.FC<ProfileInvoicingCardProps> = ({
             value={upiId}
             onChange={(e) => setUpiId(e.target.value)}
             className="w-full px-3.5 py-2.5 text-sm font-mono rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white outline-none focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 transition-colors"
-            required
           />
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5">
             Used to render high-contrast vector QR codes directly on invoices.
@@ -57,7 +56,7 @@ export const ProfileInvoicingCard: React.FC<ProfileInvoicingCardProps> = ({
 
         <div>
           <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-            Contact Phone Number *
+            Contact Phone Number
           </label>
           <input
             type="text"
@@ -65,7 +64,6 @@ export const ProfileInvoicingCard: React.FC<ProfileInvoicingCardProps> = ({
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white outline-none focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 transition-colors"
-            required
           />
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5">
             Appears on invoice contact headers and client WhatsApp notifications.

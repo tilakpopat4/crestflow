@@ -104,7 +104,7 @@ export const ProfileGeneralCard: React.FC<ProfileGeneralCardProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-            Professional Title *
+            Professional Title
           </label>
           <input
             type="text"
@@ -112,7 +112,6 @@ export const ProfileGeneralCard: React.FC<ProfileGeneralCardProps> = ({
             value={professionalTitle}
             onChange={(e) => setProfessionalTitle(e.target.value)}
             className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white outline-none focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 transition-colors"
-            required
           />
         </div>
 
@@ -140,7 +139,7 @@ export const ProfileGeneralCard: React.FC<ProfileGeneralCardProps> = ({
 
       <div>
         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-          Services Description *
+          Services Description
         </label>
         <input
           type="text"
@@ -148,7 +147,6 @@ export const ProfileGeneralCard: React.FC<ProfileGeneralCardProps> = ({
           value={servicesDescription}
           onChange={(e) => setServicesDescription(e.target.value)}
           className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white outline-none focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 transition-colors"
-          required
         />
       </div>
 

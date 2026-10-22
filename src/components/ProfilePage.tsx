@@ -26,7 +26,7 @@ export default function ProfilePage({
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [upiId, setUpiId] = useState('');
-  const [professionalTitle, setProfessionalTitle] = useState('Video Editor Pro');
+  const [professionalTitle, setProfessionalTitle] = useState('Video Editor');
   const [servicesDescription, setServicesDescription] = useState('Video Editing Services');
   const [geminiApiKey, setGeminiApiKey] = useState('');
   const [freelanceStartDate, setFreelanceStartDate] = useState('');
@@ -36,6 +36,8 @@ export default function ProfilePage({
   const [error, setError] = useState('');
 
   const isInitializedRef = useRef(false);
+  const hasUserEditedRef = useRef(false);
+  const hasLoadedInitialKeyRef = useRef(false);
 
   useEffect(() => {
     if (!isInitializedRef.current) {
@@ -49,22 +51,30 @@ export default function ProfilePage({
         setFreelanceStartDate(profile.freelanceStartDate || '');
         setWorkExperienceBio(profile.workExperienceBio || '');
         isInitializedRef.current = true;
+        if (profile.geminiApiKey) {
+          hasLoadedInitialKeyRef.current = true;
+        }
       } else if (user) {
         setName(user.displayName || '');
       }
-    } else if (profile?.geminiApiKey && !geminiApiKey) {
-      // If private credentials resolve after initial render, populate key
+    } else if (!hasLoadedInitialKeyRef.current && profile?.geminiApiKey) {
+      // If private credentials resolve after initial render, populate key once
       setGeminiApiKey(profile.geminiApiKey);
+      hasLoadedInitialKeyRef.current = true;
     }
-  }, [profile, user, geminiApiKey]);
+  }, [profile, user]);
+
+  const wrapInput = (setter: (val: string) => void) => (val: string) => {
+    hasUserEditedRef.current = true;
+    if (error) setError('');
+    setter(val);
+  };
 
   const handleSave = async () => {
-    if (!name.trim() || !phone.trim() || !upiId.trim() || !professionalTitle.trim() || !servicesDescription.trim()) {
-      setError('Full name, phone, UPI ID, title, and services description are required.');
-      return;
-    }
+    const trimmedName = name.trim() || user.displayName || 'Creator';
+    const trimmedUpi = upiId.trim();
 
-    if (!upiId.includes('@')) {
+    if (trimmedUpi && !trimmedUpi.includes('@')) {
       setError('Please enter a valid UPI ID (e.g. username@bank).');
       return;
     }
@@ -76,11 +86,11 @@ export default function ProfilePage({
     try {
       const updatedProfile: UserProfile = {
         id: user.uid,
-        name: name.trim(),
+        name: trimmedName,
         phone: phone.trim(),
-        upiId: upiId.trim(),
-        professionalTitle: professionalTitle.trim(),
-        servicesDescription: servicesDescription.trim(),
+        upiId: trimmedUpi,
+        professionalTitle: professionalTitle.trim() || 'Video Editor',
+        servicesDescription: servicesDescription.trim() || 'Video Editing Services',
         geminiApiKey: geminiApiKey.trim() || undefined,
         freelanceStartDate: freelanceStartDate.trim() || undefined,
         workExperienceBio: workExperienceBio.trim() || undefined,
@@ -92,7 +102,7 @@ export default function ProfilePage({
       setIsSaved(true);
       setTimeout(() => setIsSaved(false), 3000);
     } catch (err: any) {
-      console.error(err);
+      console.error('Failed to save profile changes:', err);
       setError('Failed to save profile changes. Please try again.');
     } finally {
       setIsSaving(false);
@@ -115,22 +125,22 @@ export default function ProfilePage({
           <ProfileGeneralCard
             user={user}
             name={name}
-            setName={setName}
+            setName={wrapInput(setName)}
             professionalTitle={professionalTitle}
-            setProfessionalTitle={setProfessionalTitle}
+            setProfessionalTitle={wrapInput(setProfessionalTitle)}
             servicesDescription={servicesDescription}
-            setServicesDescription={setServicesDescription}
+            setServicesDescription={wrapInput(setServicesDescription)}
             freelanceStartDate={freelanceStartDate}
-            setFreelanceStartDate={setFreelanceStartDate}
+            setFreelanceStartDate={wrapInput(setFreelanceStartDate)}
             workExperienceBio={workExperienceBio}
-            setWorkExperienceBio={setWorkExperienceBio}
+            setWorkExperienceBio={wrapInput(setWorkExperienceBio)}
           />
 
           <ProfileInvoicingCard
             upiId={upiId}
-            setUpiId={setUpiId}
+            setUpiId={wrapInput(setUpiId)}
             phone={phone}
-            setPhone={setPhone}
+            setPhone={wrapInput(setPhone)}
             userId={user.uid}
           />
         </div>
@@ -139,7 +149,7 @@ export default function ProfilePage({
         <div className="lg:col-span-5 space-y-6">
           <ProfilePreferencesCard
             geminiApiKey={geminiApiKey}
-            setGeminiApiKey={setGeminiApiKey}
+            setGeminiApiKey={wrapInput(setGeminiApiKey)}
           />
 
           <ProfileSubscriptionCard
