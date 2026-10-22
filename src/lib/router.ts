@@ -10,6 +10,8 @@ export type AppRoute =
   | 'reviews'
   | 'onboarding'
   | 'profile'
+  | 'pricing'
+  | 'billing'
   | 'admin'
   | 'privacy'
   | 'terms'
@@ -31,6 +33,8 @@ export const ROUTE_PATHS: Record<AppRoute, string> = {
   reviews: '/reviews',
   onboarding: '/onboarding',
   profile: '/profile',
+  pricing: '/pricing',
+  billing: '/billing',
   admin: '/admin',
   privacy: '/privacy',
   terms: '/terms',
@@ -107,6 +111,14 @@ export function resolveRoute(pathname: string, search: string = ''): RouteMatch 
     case '/settings':
       return { route: 'profile', path: '/profile', params };
 
+    case '/pricing':
+    case '/plans':
+      return { route: 'pricing', path: '/pricing', params };
+
+    case '/billing':
+    case '/subscription':
+      return { route: 'billing', path: '/billing', params };
+
     case '/admin':
       return { route: 'admin', path: '/admin', params };
 
@@ -128,6 +140,8 @@ export function resolveRoute(pathname: string, search: string = ''): RouteMatch 
       // Fallback: check hash routes for backwards compatibility
       const hash = (typeof window !== 'undefined' ? window.location.hash : '').toLowerCase();
       if (hash.includes('admin')) return { route: 'admin', path: '/admin', params };
+      if (hash.includes('pricing') || hash.includes('plans')) return { route: 'pricing', path: '/pricing', params };
+      if (hash.includes('billing') || hash.includes('subscription')) return { route: 'billing', path: '/billing', params };
       if (hash.includes('privacy')) return { route: 'privacy', path: '/privacy', params };
       if (hash.includes('terms')) return { route: 'terms', path: '/terms', params };
       if (hash.includes('contact')) return { route: 'contact', path: '/contact', params };

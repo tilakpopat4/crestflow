@@ -35,11 +35,11 @@ describe('PHASE 3 Verification: Core Subscriptions, Security & Direct UPI', () =
     const yearly = PRO_PLANS.find(p => p.id === 'yearly');
 
     assert.ok(monthly, 'Monthly plan must exist');
-    assert.strictEqual(monthly.price, 79, 'Monthly price must be ₹79');
+    assert.strictEqual(monthly.price, 499, 'Monthly price must be ₹499');
     assert.strictEqual(monthly.currency, 'INR');
 
     assert.ok(yearly, 'Yearly plan must exist');
-    assert.strictEqual(yearly.price, 799, 'Yearly price must be ₹799');
+    assert.strictEqual(yearly.price, 4499, 'Yearly price must be ₹4499');
     assert.strictEqual(yearly.currency, 'INR');
   });
 

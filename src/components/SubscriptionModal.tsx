@@ -7,6 +7,8 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import { PlanSelectionStep } from './subscription/PlanSelectionStep';
 import { SubscriptionSuccessStep } from './subscription/SubscriptionSuccessStep';
 
+import { PlanIntervalKey } from '../lib/subscriptionPlans';
+
 interface SubscriptionModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -45,7 +47,7 @@ export default function SubscriptionModal({
   onLogout,
 }: SubscriptionModalProps) {
   const [step, setStep] = useState<'select' | 'activating' | 'success'>('select');
-  const [selectedCycle, setSelectedCycle] = useState<'monthly' | 'yearly'>('monthly');
+  const [selectedCycle, setSelectedCycle] = useState<PlanIntervalKey>('monthly');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -67,7 +69,7 @@ export default function SubscriptionModal({
       (snap) => {
         if (snap.exists()) {
           const data = snap.data();
-          if (data?.status === 'active' && data?.plan === 'pro') {
+          if ((data?.status === 'active' || data?.status === 'trialing') && data?.accessUntil) {
             setStep('success');
             if (onSubscriptionUpdated) {
               onSubscriptionUpdated();
@@ -102,7 +104,7 @@ export default function SubscriptionModal({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${idToken}`,
         },
-        body: JSON.stringify({ plan: selectedCycle }),
+        body: JSON.stringify({ planKey: selectedCycle }),
       });
 
       if (!res.ok) {

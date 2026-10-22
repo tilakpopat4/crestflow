@@ -1,17 +1,21 @@
 /**
- * CrestFlow Subscription Plans & Limits configuration.
+ * CrestFlow 4 Subscription Plans (Monthly, Quarterly, 6-Month, Yearly) & Limits.
  */
 
+export type PlanIntervalKey = 'monthly' | 'quarterly' | 'half' | 'yearly';
+
 export interface PlanPricing {
-  id: 'free' | 'monthly' | 'yearly';
-  planCode: 'free' | 'pro_monthly' | 'pro_yearly';
+  id: PlanIntervalKey;
+  planCode: string;
   name: string;
   price: number;
   currency: string;
+  interval: string;
   durationDays: number;
   periodLabel: string;
+  monthlyEquivalent: number;
+  savingsBadge?: string;
   description: string;
-  badge?: string;
   features: string[];
 }
 
@@ -24,34 +28,88 @@ export const PRO_PLANS: PlanPricing[] = [
   {
     id: 'monthly',
     planCode: 'pro_monthly',
-    name: 'CrestFlow Pro Monthly',
-    price: 79,
+    name: 'Pro Monthly',
+    price: 499,
     currency: 'INR',
+    interval: 'month',
     durationDays: 30,
     periodLabel: '/ month',
-    description: 'Billed monthly. Cancel anytime.',
+    monthlyEquivalent: 499,
+    description: 'Billed monthly. Complete flexibility.',
     features: [
-      'Unlimited client accounts & sub-clients',
-      'Unlimited invoice generation with personal UPI QR codes',
-      'Automated 6:00 AM invoice scheduling',
-      'Google Drive & Gmail automated delivery',
+      'Unlimited clients & sub-clients',
+      'Unlimited invoices with personal UPI QR codes',
+      'Automated 6:00 AM delivery scheduling',
       'Client review portal & public freelancer portfolio',
+      'Direct UPI payment tracking without gateway commission',
+    ],
+  },
+  {
+    id: 'quarterly',
+    planCode: 'pro_quarterly',
+    name: 'Pro Quarterly',
+    price: 1299,
+    currency: 'INR',
+    interval: '3 months',
+    durationDays: 90,
+    periodLabel: '/ quarter',
+    monthlyEquivalent: 433,
+    savingsBadge: 'Save 13%',
+    description: 'Billed every 3 months (~₹433/mo).',
+    features: [
+      'All Pro Monthly features included',
+      'Quarterly uninterrupted workflow',
+      'Priority delivery & support',
+    ],
+  },
+  {
+    id: 'half',
+    planCode: 'pro_half',
+    name: 'Pro 6-Month',
+    price: 2399,
+    currency: 'INR',
+    interval: '6 months',
+    durationDays: 180,
+    periodLabel: '/ 6 months',
+    monthlyEquivalent: 400,
+    savingsBadge: 'Save 20%',
+    description: 'Billed every 6 months (~₹400/mo).',
+    features: [
+      'All Pro features included',
+      'Half-year locked pricing',
+      'Client review portal & priority roadmap',
     ],
   },
   {
     id: 'yearly',
     planCode: 'pro_yearly',
-    name: 'CrestFlow Pro Yearly',
-    price: 799,
+    name: 'Pro Yearly',
+    price: 4499,
     currency: 'INR',
+    interval: 'year',
     durationDays: 365,
     periodLabel: '/ year',
-    description: 'Billed annually (~₹66/month, save 15%).',
-    badge: 'Best Value',
+    monthlyEquivalent: 375,
+    savingsBadge: 'Save 25%',
+    description: 'Billed annually (~₹375/mo, 3 months free).',
     features: [
-      'All Pro Monthly features included',
-      '12 months of uninterrupted access',
-      'Priority delivery & upcoming feature beta access',
+      'All Pro features included',
+      'Full year uninterrupted access',
+      'Custom domain & priority beta features',
     ],
   },
 ];
+
+/**
+ * Returns the exact mandatory disclosure string required by billing regulations:
+ * "₹1 today for a 7-day trial, then ₹X on [date]; the ₹1 is non-refundable"
+ */
+export function getTrialDisclosureText(plan: PlanPricing, baseDate = new Date()): string {
+  const chargeDate = new Date(baseDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const formattedDate = chargeDate.toLocaleDateString('en-IN', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+  return `₹1 today for a 7-day trial, then ₹${plan.price.toLocaleString('en-IN')} on ${formattedDate}; the ₹1 is non-refundable`;
+}

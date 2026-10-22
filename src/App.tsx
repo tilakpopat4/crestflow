@@ -3,23 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useRef, lazy, Suspense } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { useState, useEffect, Suspense } from 'react';
 import Sidebar from './components/Sidebar';
 import GlobalHeader from './components/GlobalHeader';
-import { auth, googleProvider, db } from './firebase';
-import { signInWithPopup, onAuthStateChanged, User, signOut } from 'firebase/auth';
-import { doc, onSnapshot } from 'firebase/firestore';
-import { calculateWorkJourney, isAnniversaryDismissed, dismissAnniversary } from './lib/anniversary';
+import { useAuthSession } from './hooks/useAuthSession';
 import { useSubscription } from './hooks/useSubscription';
 import { useUserProfile } from './hooks/useUserProfile';
 import { useAppRouter } from './hooks/useAppRouter';
 import { useSidebarCollapse } from './hooks/useSidebarCollapse';
+import { useAnniversaryCheck } from './hooks/useAnniversaryCheck';
 import { AppRoute } from './lib/router';
 import { BlockedUserScreen } from './components/auth/BlockedUserScreen';
 import { SignInScreen } from './components/auth/SignInScreen';
 import { AppRouterView } from './components/layout/AppRouterView';
 import { SidebarSwipeReveal } from './components/layout/SidebarSwipeReveal';
+import { MembershipBanner } from './components/subscription/MembershipBanner';
 import Footer from './components/Footer';
 import { lazyWithRetry } from './lib/lazyWithRetry';
 
@@ -29,6 +27,10 @@ const PublicFreelancerProfile = lazyWithRetry(() => import('./components/PublicF
 const ClientFeedbackForm = lazyWithRetry(() => import('./components/ClientFeedbackForm'));
 const SubscriptionModal = lazyWithRetry(() => import('./components/SubscriptionModal'));
 const AnniversaryModal = lazyWithRetry(() => import('./components/AnniversaryModal'));
+const UserOnboardingModal = lazyWithRetry(
+  () => import('./components/onboarding/UserOnboardingModal'),
+  (m) => ({ default: m.UserOnboardingModal })
+);
 
 const ViewLoadingFallback = () => (
   <div className="flex-1 flex flex-col items-center justify-center p-12 min-h-[360px] animate-in fade-in duration-150 select-none">
@@ -44,19 +46,14 @@ export type Tab = 'dashboard' | 'clients' | 'work' | 'invoice' | 'reviews' | 'on
 
 export default function App() {
   const { currentRoute, params, isSpecialMode, navigate } = useAppRouter();
+  const { user, loading, isSigningIn, isBlocked, handleLogin, handleLogout } = useAuthSession();
 
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [isSigningIn, setIsSigningIn] = useState(false);
-  const [isBlocked, setIsBlocked] = useState<boolean | null>(null);
   const [isClientPortalMode, setIsClientPortalMode] = useState(isSpecialMode === 'client_portal');
-
   const [globalSearchQuery, setGlobalSearchQuery] = useState('');
   const [selectedClientIdFromSearch, setSelectedClientIdFromSearch] = useState<string | null>(null);
-  const [isAnniversaryModalOpen, setIsAnniversaryModalOpen] = useState(false);
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
+  const [isOnboardingModalOpen, setIsOnboardingModalOpen] = useState(false);
 
-  // Sidebar collapse and swipe interaction state
   const {
     isCollapsed: isSidebarCollapsed,
     toggleSidebar,
@@ -64,64 +61,25 @@ export default function App() {
     expandSidebar,
   } = useSidebarCollapse();
 
-  // Profile data & Firestore persistence via hook
   const { profile, profilesLoading, handleSaveProfile } = useUserProfile(user);
   const subscriptionState = useSubscription(user?.uid, profile, user?.email || undefined);
+  const {
+    journey,
+    isAnniversaryModalOpen,
+    openAnniversaryModal,
+    closeAnniversaryModal,
+  } = useAnniversaryCheck(user, profile?.freelanceStartDate);
 
+  // Prompt onboarding if profile setup is incomplete
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  // Listen to blocked status
-  useEffect(() => {
-    if (!user) {
-      setIsBlocked(false);
-      return;
-    }
-    const unsub = onSnapshot(doc(db, 'blocked_users', user.uid), (snap) => {
-      setIsBlocked(snap.exists());
-    }, () => setIsBlocked(false));
-    return () => unsub();
-  }, [user]);
-
-  const journey = calculateWorkJourney(profile?.freelanceStartDate);
-
-  // Check career anniversary milestone
-  useEffect(() => {
-    if (!user || !profile?.freelanceStartDate) return;
-    const stats = calculateWorkJourney(profile.freelanceStartDate);
-    if (stats?.currentAnniversary && !isAnniversaryDismissed(user.uid, stats.currentAnniversary.id)) {
-      setIsAnniversaryModalOpen(true);
-    }
-  }, [user?.uid, profile?.freelanceStartDate]);
-
-  const handleLogin = async () => {
-    if (isSigningIn) return;
-    setIsSigningIn(true);
-    try {
-      await signInWithPopup(auth, googleProvider);
-    } catch (err: any) {
-      if (err?.code !== 'auth/popup-closed-by-user') {
-        alert(`Sign in error: ${err.message}`);
+    if (user && profile && !profilesLoading) {
+      const hasCompleted = localStorage.getItem(`crestflow_onboarded_${user.uid}`) || profile.upiId;
+      if (!hasCompleted) {
+        setIsOnboardingModalOpen(true);
       }
-    } finally {
-      setIsSigningIn(false);
     }
-  };
+  }, [user, profile, profilesLoading]);
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  // Special public routes
   if (isSpecialMode === 'feedback') {
     return (
       <Suspense fallback={<ViewLoadingFallback />}>
@@ -169,7 +127,6 @@ export default function App() {
     );
   }
 
-  // Admin Portal: Standalone full-page view without left panel (Sidebar) and without search bar (GlobalHeader)
   if (currentRoute === 'admin') {
     return (
       <div className="h-screen w-full bg-slate-50 dark:bg-slate-950 overflow-y-auto flex flex-col">
@@ -234,7 +191,7 @@ export default function App() {
           setGlobalQuery={setGlobalSearchQuery}
           profile={profile}
           onEditProfile={() => navigate('profile')}
-          onOpenAnniversaryModal={() => setIsAnniversaryModalOpen(true)}
+          onOpenAnniversaryModal={openAnniversaryModal}
           onLogout={handleLogout}
           subscriptionState={subscriptionState}
           onOpenSubscriptionModal={() => setIsSubscriptionModalOpen(true)}
@@ -242,21 +199,11 @@ export default function App() {
           onToggleSidebar={toggleSidebar}
         />
 
-        {!subscriptionState.hasAccess && subscriptionState.isSubscriptionFeatureEnabled && (
-          <div className="bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-4 py-2.5 flex items-center justify-between text-xs text-slate-700 dark:text-slate-300 shrink-0">
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-600 dark:bg-red-400" />
-              <span>Subscription required: ₹49/month to manage clients, log work, and generate invoices.</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setIsSubscriptionModalOpen(true)}
-              className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs font-medium transition-colors cursor-pointer border-none"
-            >
-              Subscribe ₹49/mo
-            </button>
-          </div>
-        )}
+        <MembershipBanner
+          subscriptionState={subscriptionState}
+          onOpenPricing={() => navigate('pricing')}
+          onOpenBilling={() => navigate('billing')}
+        />
 
         <AppRouterView
           currentRoute={currentRoute}
@@ -287,16 +234,25 @@ export default function App() {
         </Suspense>
       )}
 
+      {user && isOnboardingModalOpen && (
+        <Suspense fallback={null}>
+          <UserOnboardingModal
+            user={user}
+            profile={profile}
+            isOpen={isOnboardingModalOpen}
+            onComplete={() => {
+              localStorage.setItem(`crestflow_onboarded_${user.uid}`, 'true');
+              setIsOnboardingModalOpen(false);
+            }}
+          />
+        </Suspense>
+      )}
+
       {user && isAnniversaryModalOpen && (
         <Suspense fallback={null}>
           <AnniversaryModal
             isOpen={isAnniversaryModalOpen}
-            onClose={() => {
-              if (user && journey?.currentAnniversary) {
-                dismissAnniversary(user.uid, journey.currentAnniversary.id);
-              }
-              setIsAnniversaryModalOpen(false);
-            }}
+            onClose={closeAnniversaryModal}
             milestone={journey?.currentAnniversary || null}
             stats={journey}
             freelancerName={profile?.name || user.displayName || undefined}

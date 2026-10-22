@@ -18,6 +18,8 @@ describe('CrestFlow Multi-Page Routing Architecture', () => {
     assert.strictEqual(resolveRoute('/onboarding').route, 'onboarding');
     assert.strictEqual(resolveRoute('/profile').route, 'profile');
     assert.strictEqual(resolveRoute('/admin').route, 'admin');
+    assert.strictEqual(resolveRoute('/pricing').route, 'pricing');
+    assert.strictEqual(resolveRoute('/billing').route, 'billing');
     assert.strictEqual(resolveRoute('/privacy').route, 'privacy');
     assert.strictEqual(resolveRoute('/terms').route, 'terms');
     assert.strictEqual(resolveRoute('/contact').route, 'contact');
@@ -26,6 +28,8 @@ describe('CrestFlow Multi-Page Routing Architecture', () => {
 
   it('resolves legacy path aliases to canonical routes', () => {
     assert.strictEqual(resolveRoute('/settings').route, 'profile');
+    assert.strictEqual(resolveRoute('/plans').route, 'pricing');
+    assert.strictEqual(resolveRoute('/subscription').route, 'billing');
     assert.strictEqual(resolveRoute('/work-log').route, 'work');
     assert.strictEqual(resolveRoute('/invoice').route, 'invoices');
     assert.strictEqual(resolveRoute('/client-onboarding').route, 'onboarding');

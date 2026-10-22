@@ -60,8 +60,8 @@ export const ProfileSubscriptionCard: React.FC<ProfileSubscriptionCardProps> = (
       </div>
 
       {cancelMessage && (
-        <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 rounded-lg text-xs text-amber-800 dark:text-amber-300 flex items-center gap-2">
-          <AlertCircle size={14} className="shrink-0" />
+        <div className="p-3 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-200 flex items-center gap-2">
+          <AlertCircle size={14} className="shrink-0 text-slate-600 dark:text-slate-400" />
           <span>{cancelMessage}</span>
         </div>
       )}
@@ -73,7 +73,7 @@ export const ProfileSubscriptionCard: React.FC<ProfileSubscriptionCardProps> = (
               className={`w-2 h-2 rounded-full ${
                 isPro
                   ? isCancelled
-                    ? 'bg-amber-500'
+                    ? 'bg-slate-500'
                     : 'bg-indigo-600 dark:bg-indigo-400'
                   : 'bg-slate-400'
               }`}
@@ -84,7 +84,7 @@ export const ProfileSubscriptionCard: React.FC<ProfileSubscriptionCardProps> = (
                 : 'Free Tier (Basic)'}
             </span>
             {isCancelled && (
-              <span className="text-[10px] bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 px-1.5 py-0.5 rounded font-medium">
+              <span className="text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 px-1.5 py-0.5 rounded font-medium">
                 Cancels at period end
               </span>
             )}

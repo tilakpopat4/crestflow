@@ -16,6 +16,8 @@ const ReviewsTab = lazyWithRetry(() => import('../ReviewsTab'));
 const ClientOnboardingTab = lazyWithRetry(() => import('../ClientOnboardingTab'));
 const AdminTab = lazyWithRetry(() => import('../AdminTab'));
 const ProfilePage = lazyWithRetry(() => import('../ProfilePage'));
+const PricingPage = lazyWithRetry(() => import('../subscription/PricingPage'));
+const BillingPage = lazyWithRetry(() => import('../subscription/BillingPage'));
 const PrivacyPolicyPage = lazyWithRetry(() => import('../PrivacyPolicyPage'));
 const TermsOfServicePage = lazyWithRetry(() => import('../TermsOfServicePage'));
 const ContactPage = lazyWithRetry(() => import('../ContactPage'));
@@ -132,6 +134,27 @@ export const AppRouterView: React.FC<AppRouterViewProps> = ({
                     onSave={onSaveProfile}
                     subscriptionState={subscriptionState}
                     onOpenSubscriptionModal={onOpenSubscriptionModal}
+                  />
+                )}
+
+                {currentRoute === 'pricing' && (
+                  <PricingPage
+                    user={user}
+                    profile={profile}
+                    onNavigateToDashboard={() => onNavigate('dashboard')}
+                    onNavigateToBilling={() => onNavigate('billing')}
+                    onSubscriptionActivated={async () => {
+                      await subscriptionState.refreshSubscription();
+                    }}
+                  />
+                )}
+
+                {currentRoute === 'billing' && (
+                  <BillingPage
+                    user={user}
+                    subscriptionState={subscriptionState}
+                    onNavigateToPricing={() => onNavigate('pricing')}
+                    onNavigateToDashboard={() => onNavigate('dashboard')}
                   />
                 )}
 

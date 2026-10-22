@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { UserProfile, SubscriptionStatus, SubscriptionPlan } from '../types';
+import { UserProfile } from '../types';
 import { db, auth } from '../firebase';
 import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { useSubscriptionConfig } from '../lib/subscriptionConfig';
@@ -7,36 +7,40 @@ import { FREE_TIER_LIMITS } from '../lib/subscriptionPlans';
 
 export interface SubscriptionDoc {
   userId: string;
-  plan: 'free' | 'pro';
-  billingCycle?: 'monthly' | 'yearly';
-  status: 'active' | 'pending' | 'cancelled' | 'halted' | 'expired';
+  plan: string;
+  billingCycle?: string;
+  status: 'active' | 'trialing' | 'pending' | 'past_due' | 'cancelled' | 'halted' | 'expired';
   currentPeriodStart?: number;
   currentPeriodEnd?: number;
+  accessUntil?: string;
+  trialEndsAt?: string | null;
   razorpaySubscriptionId?: string;
   cancelAtPeriodEnd?: boolean;
   updatedAt?: number;
 }
 
 export interface SubscriptionState {
-  status: SubscriptionStatus;
-  plan: SubscriptionPlan;
+  status: 'active' | 'trialing' | 'pending' | 'past_due' | 'cancelled' | 'halted' | 'expired' | 'none';
+  plan: string;
   isPro: boolean;
   hasAccess: boolean;
-  isPaidActive: boolean;
+  isTrialing: boolean;
+  isPastDue: boolean;
   isExpired: boolean;
-  isInactive: boolean;
+  isCancelled: boolean;
+  isPaidActive: boolean;
   isWhitelisted: boolean;
   cancelAtPeriodEnd: boolean;
-  billingCycle?: 'monthly' | 'yearly';
+  billingCycle?: string;
+  accessUntil?: string | null;
+  trialEndsAt?: string | null;
   daysRemaining: number;
+  serverNow?: string;
   currentPeriodEnd?: number;
   isSubscriptionFeatureEnabled: boolean;
-  limits: {
-    maxClients: number;
-    maxInvoicesPerMonth: number;
-  };
-  canCreateClient: (currentClientCount: number) => boolean;
-  canCreateInvoice: (currentMonthInvoiceCount: number) => boolean;
+  limits: typeof FREE_TIER_LIMITS;
+  canCreateClient: (count: number) => boolean;
+  canCreateInvoice: (count: number) => boolean;
   refreshSubscription: () => Promise<void>;
   cancelSubscription: () => Promise<void>;
   checkAccess: () => boolean;
@@ -53,8 +57,9 @@ async function checkIsWhitelisted(email?: string): Promise<boolean> {
 }
 
 /**
- * Hook to manage user subscription lifecycle backed by Cloud Firestore.
- * Realtime updates from webhook via Firestore `subscriptions/{userId}` document.
+ * Authoritative subscription state hook.
+ * Client never decides access; it listens directly to Firestore subscriptions/{userId}
+ * and synchronizes with serverNow from GET /api/me.
  */
 export function useSubscription(
   userId?: string,
@@ -64,8 +69,14 @@ export function useSubscription(
   const { isEnabled: isSubscriptionFeatureEnabled } = useSubscriptionConfig();
   const [isWhitelisted, setIsWhitelisted] = useState(false);
   const [subscriptionDoc, setSubscriptionDoc] = useState<SubscriptionDoc | null>(null);
+  const [serverMe, setServerMe] = useState<{
+    serverNow: string;
+    status: string;
+    accessUntil: string | null;
+    trialEndsAt: string | null;
+  } | null>(null);
 
-  // 1. Check email whitelist
+  // 1. Check VIP email whitelist
   useEffect(() => {
     if (!userEmail) {
       setIsWhitelisted(false);
@@ -80,7 +91,28 @@ export function useSubscription(
     };
   }, [userEmail]);
 
-  // 2. Realtime listener on Firestore `subscriptions/{userId}`
+  // 2. Fetch authoritative state from GET /api/me
+  const fetchMe = useCallback(async () => {
+    if (!auth.currentUser) return;
+    try {
+      const token = await auth.currentUser.getIdToken();
+      const res = await fetch('/api/me', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setServerMe(data);
+      }
+    } catch (err) {
+      console.warn('[useSubscription] Failed to fetch /api/me:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (userId) fetchMe();
+  }, [userId, fetchMe]);
+
+  // 3. Realtime Firestore listener on `subscriptions/{userId}`
   useEffect(() => {
     if (!userId) {
       setSubscriptionDoc(null);
@@ -96,123 +128,80 @@ export function useSubscription(
           setSubscriptionDoc(null);
         }
       },
-      (err) => {
-        console.warn('[useSubscription] Subscriptions onSnapshot warning:', err);
-      }
+      (err) => console.warn('[useSubscription] onSnapshot warning:', err)
     );
 
     return () => unsub();
   }, [userId]);
 
-  const now = Date.now();
-
-  // Determine current active status
-  const {
-    status,
-    plan,
-    isPro,
-    isPaidActive,
-    isExpired,
-    isInactive,
-    hasAccess,
-    cancelAtPeriodEnd,
-    billingCycle,
-    daysRemaining,
-    currentPeriodEnd,
-  } = useMemo(() => {
-    // When master subscription toggle is turned OFF, grant full unrestricted Pro access
-    if (!isSubscriptionFeatureEnabled) {
+  // 4. Compute access strictly from server accessUntil
+  const computedState = useMemo(() => {
+    if (!isSubscriptionFeatureEnabled || isWhitelisted) {
       return {
-        status: 'active' as SubscriptionStatus,
-        plan: 'pro' as SubscriptionPlan,
+        status: 'active' as const,
+        plan: 'pro_yearly',
         isPro: true,
-        isPaidActive: true,
-        isExpired: false,
-        isInactive: false,
         hasAccess: true,
+        isTrialing: false,
+        isPastDue: false,
+        isExpired: false,
+        isCancelled: false,
+        isPaidActive: true,
         cancelAtPeriodEnd: false,
-        billingCycle: 'monthly' as const,
+        billingCycle: 'yearly',
+        accessUntil: undefined,
+        trialEndsAt: undefined,
         daysRemaining: 999,
+        serverNow: serverMe?.serverNow,
         currentPeriodEnd: undefined,
       };
     }
 
-    // 0. Whitelisted VIP access
-    if (isWhitelisted) {
-      return {
-        status: 'active' as SubscriptionStatus,
-        plan: 'pro' as SubscriptionPlan,
-        isPro: true,
-        isPaidActive: true,
-        isExpired: false,
-        isInactive: false,
-        hasAccess: true,
-        cancelAtPeriodEnd: false,
-        billingCycle: 'yearly' as const,
-        daysRemaining: 999,
-        currentPeriodEnd: undefined,
-      };
-    }
+    const serverNowMs = serverMe?.serverNow ? new Date(serverMe.serverNow).getTime() : Date.now();
+    const accessUntilStr = subscriptionDoc?.accessUntil || serverMe?.accessUntil;
+    const trialEndsAtStr = subscriptionDoc?.trialEndsAt || serverMe?.trialEndsAt;
+    const accessUntilMs = accessUntilStr ? new Date(accessUntilStr).getTime() : 0;
+    const trialEndsAtMs = trialEndsAtStr ? new Date(trialEndsAtStr).getTime() : 0;
 
-    // 1. Read from realtime subscription doc or legacy profile fallback
-    const rawStatus = subscriptionDoc?.status || profile?.subscriptionStatus || 'free';
-    const rawPlan = subscriptionDoc?.plan || (profile?.subscriptionPlan === 'monthly' ? 'pro' : profile?.subscriptionPlan) || 'free';
-    const periodEnd = subscriptionDoc?.currentPeriodEnd || profile?.currentPeriodEnd;
+    const rawStatus = (subscriptionDoc?.status || serverMe?.status || 'none') as SubscriptionState['status'];
     const isCancelled = Boolean(subscriptionDoc?.cancelAtPeriodEnd);
-    const cycle = subscriptionDoc?.billingCycle || 'monthly';
 
-    // Active Pro Subscription (periodEnd in future)
-    if (rawPlan === 'pro' && periodEnd && now < periodEnd) {
-      const daysLeft = Math.max(0, Math.ceil((periodEnd - now) / (24 * 60 * 60 * 1000)));
-      return {
-        status: isCancelled ? ('cancelled' as SubscriptionStatus) : ('active' as SubscriptionStatus),
-        plan: 'pro' as SubscriptionPlan,
-        isPro: true,
-        isPaidActive: true,
-        isExpired: false,
-        isInactive: false,
-        hasAccess: true,
-        cancelAtPeriodEnd: isCancelled,
-        billingCycle: cycle,
-        daysRemaining: daysLeft,
-        currentPeriodEnd: periodEnd,
-      };
+    // Access entitlement is strictly governed by whether server accessUntil > serverNow
+    const hasAccess = accessUntilMs > serverNowMs;
+    const isTrialing = rawStatus === 'trialing' && hasAccess;
+    const isPastDue = rawStatus === 'past_due' && hasAccess;
+    const isPaidActive = (rawStatus === 'active' || rawStatus === 'cancelled') && hasAccess;
+    const isExpired = !hasAccess && rawStatus !== 'none';
+
+    // Days left display counter based on serverNow
+    let targetEndMs = accessUntilMs;
+    if (isTrialing && trialEndsAtMs > 0) {
+      targetEndMs = trialEndsAtMs;
     }
+    const daysRemaining = targetEndMs > serverNowMs
+      ? Math.max(0, Math.ceil((targetEndMs - serverNowMs) / (24 * 60 * 60 * 1000)))
+      : 0;
 
-    // Expired Pro subscription
-    if (periodEnd && now >= periodEnd) {
-      return {
-        status: 'expired' as SubscriptionStatus,
-        plan: 'free' as SubscriptionPlan,
-        isPro: false,
-        isPaidActive: false,
-        isExpired: true,
-        isInactive: false,
-        hasAccess: true, // Free tier access
-        cancelAtPeriodEnd: false,
-        billingCycle: cycle,
-        daysRemaining: 0,
-        currentPeriodEnd: periodEnd,
-      };
-    }
-
-    // Free Tier user
     return {
-      status: (rawStatus as SubscriptionStatus) || 'free',
-      plan: 'free' as SubscriptionPlan,
-      isPro: false,
-      isPaidActive: false,
-      isExpired: false,
-      isInactive: rawStatus === 'free' || rawStatus === 'inactive',
-      hasAccess: true, // Free tier is active with limits
-      cancelAtPeriodEnd: false,
-      billingCycle: undefined,
-      daysRemaining: 0,
-      currentPeriodEnd: undefined,
+      status: rawStatus,
+      plan: subscriptionDoc?.plan || 'pro_monthly',
+      isPro: hasAccess,
+      hasAccess,
+      isTrialing,
+      isPastDue,
+      isExpired,
+      isCancelled,
+      isPaidActive,
+      cancelAtPeriodEnd: isCancelled,
+      billingCycle: subscriptionDoc?.billingCycle || 'monthly',
+      accessUntil: accessUntilStr,
+      trialEndsAt: trialEndsAtStr,
+      daysRemaining,
+      serverNow: serverMe?.serverNow,
+      currentPeriodEnd: subscriptionDoc?.currentPeriodEnd,
     };
-  }, [subscriptionDoc, profile, now, isWhitelisted, isSubscriptionFeatureEnabled]);
+  }, [subscriptionDoc, serverMe, isWhitelisted, isSubscriptionFeatureEnabled]);
 
-  // Refresh manually if needed
   const refreshSubscription = useCallback(async () => {
     if (!userId) return;
     try {
@@ -220,6 +209,7 @@ export function useSubscription(
         const whitelisted = await checkIsWhitelisted(userEmail);
         setIsWhitelisted(whitelisted);
       }
+      await fetchMe();
       const snap = await getDoc(doc(db, 'subscriptions', userId));
       if (snap.exists()) {
         setSubscriptionDoc(snap.data() as SubscriptionDoc);
@@ -227,17 +217,14 @@ export function useSubscription(
     } catch (err) {
       console.warn('[useSubscription] Refresh failed:', err);
     }
-  }, [userId, userEmail]);
+  }, [userId, userEmail, fetchMe]);
 
-  // Cancel subscription at period end via Worker API
   const cancelSubscription = useCallback(async () => {
     if (!auth.currentUser) throw new Error('Not authenticated');
     const token = await auth.currentUser.getIdToken();
     const res = await fetch('/api/cancel-subscription', {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     if (!res.ok) {
@@ -248,38 +235,27 @@ export function useSubscription(
     await refreshSubscription();
   }, [refreshSubscription]);
 
-  // Free Tier Limit Guards
   const canCreateClient = useCallback(
-    (currentClientCount: number) => {
-      if (isPro || !isSubscriptionFeatureEnabled) return true;
-      return currentClientCount < FREE_TIER_LIMITS.maxClients;
+    (count: number) => {
+      if (computedState.hasAccess || !isSubscriptionFeatureEnabled) return true;
+      return count < FREE_TIER_LIMITS.maxClients;
     },
-    [isPro, isSubscriptionFeatureEnabled]
+    [computedState.hasAccess, isSubscriptionFeatureEnabled]
   );
 
   const canCreateInvoice = useCallback(
-    (currentMonthInvoiceCount: number) => {
-      if (isPro || !isSubscriptionFeatureEnabled) return true;
-      return currentMonthInvoiceCount < FREE_TIER_LIMITS.maxInvoicesPerMonth;
+    (count: number) => {
+      if (computedState.hasAccess || !isSubscriptionFeatureEnabled) return true;
+      return count < FREE_TIER_LIMITS.maxInvoicesPerMonth;
     },
-    [isPro, isSubscriptionFeatureEnabled]
+    [computedState.hasAccess, isSubscriptionFeatureEnabled]
   );
 
-  const checkAccess = useCallback(() => hasAccess, [hasAccess]);
+  const checkAccess = useCallback(() => computedState.hasAccess, [computedState.hasAccess]);
 
   return {
-    status,
-    plan,
-    isPro,
-    hasAccess,
-    isPaidActive,
-    isExpired,
-    isInactive,
+    ...computedState,
     isWhitelisted,
-    cancelAtPeriodEnd,
-    billingCycle,
-    daysRemaining,
-    currentPeriodEnd,
     isSubscriptionFeatureEnabled,
     limits: FREE_TIER_LIMITS,
     canCreateClient,
