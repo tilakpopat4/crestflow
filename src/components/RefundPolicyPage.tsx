@@ -83,6 +83,7 @@ export default function RefundPolicyPage({ onNavigate }: RefundPolicyPageProps) 
             <ul className="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-300">
               <li><strong className="text-slate-900 dark:text-slate-100">7-Day Money-Back Guarantee:</strong> If you are not satisfied with CrestFlow Pro, you can request a full refund within 7 calendar days of your initial subscription purchase or subsequent renewal.</li>
               <li><strong className="text-slate-900 dark:text-slate-100">Requests after 7 days:</strong> Refund requests made after 7 calendar days from the transaction date are not eligible for a refund, but you will retain full Pro access until your current period expires.</li>
+              <li><strong className="text-slate-900 dark:text-slate-100">Trial Verification Fee:</strong> The nominal &#8377;1 mandate authentication charge for starting a 7-day free trial is non-refundable, except in cases where a subscription is terminated during automated fraud or duplicate abuse checks.</li>
               <li><strong className="text-slate-900 dark:text-slate-100">Duplicate Transactions:</strong> If you were accidentally charged twice for the same billing cycle due to a technical error, we will promptly refund the duplicate transaction in full upon notice.</li>
             </ul>
           </section>
