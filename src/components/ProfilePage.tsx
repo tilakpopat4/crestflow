@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { User } from 'firebase/auth';
 import { UserProfile } from '../types';
 import { SubscriptionState } from '../hooks/useSubscription';
@@ -35,17 +35,28 @@ export default function ProfilePage({
   const [isSaved, setIsSaved] = useState(false);
   const [error, setError] = useState('');
 
+  const isInitializedRef = useRef(false);
+
   useEffect(() => {
-    setName(profile?.name || user.displayName || '');
-    setPhone(profile?.phone || '');
-    setUpiId(profile?.upiId || '');
-    setProfessionalTitle(profile?.professionalTitle || 'Video Editor');
-    setServicesDescription(profile?.servicesDescription || 'Video Editing Services');
-    setGeminiApiKey(profile?.geminiApiKey || '');
-    setFreelanceStartDate(profile?.freelanceStartDate || '');
-    setWorkExperienceBio(profile?.workExperienceBio || '');
-    setError('');
-  }, [profile, user]);
+    if (!isInitializedRef.current) {
+      if (profile) {
+        setName(profile.name || user.displayName || '');
+        setPhone(profile.phone || '');
+        setUpiId(profile.upiId || '');
+        setProfessionalTitle(profile.professionalTitle || 'Video Editor');
+        setServicesDescription(profile.servicesDescription || 'Video Editing Services');
+        setGeminiApiKey(profile.geminiApiKey || '');
+        setFreelanceStartDate(profile.freelanceStartDate || '');
+        setWorkExperienceBio(profile.workExperienceBio || '');
+        isInitializedRef.current = true;
+      } else if (user) {
+        setName(user.displayName || '');
+      }
+    } else if (profile?.geminiApiKey && !geminiApiKey) {
+      // If private credentials resolve after initial render, populate key
+      setGeminiApiKey(profile.geminiApiKey);
+    }
+  }, [profile, user, geminiApiKey]);
 
   const handleSave = async () => {
     if (!name.trim() || !phone.trim() || !upiId.trim() || !professionalTitle.trim() || !servicesDescription.trim()) {

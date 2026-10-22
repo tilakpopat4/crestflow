@@ -1,6 +1,11 @@
-import { useState, useEffect } from 'react';
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { useState, useEffect, useMemo } from 'react';
 import { User } from 'firebase/auth';
-import { doc, onSnapshot, setDoc } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc, deleteField } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useFirestore, safeStringify } from './useFirestore';
 import { UserProfile, UserProfilePrivate } from '../types';
@@ -20,7 +25,17 @@ export function useUserProfile(user: User | null) {
     return null;
   });
 
-  const [privateSettings, setPrivateSettings] = useState<UserProfilePrivate | null>(null);
+  const [privateSettings, setPrivateSettings] = useState<UserProfilePrivate | null>(() => {
+    if (user?.uid) {
+      try {
+        const saved = localStorage.getItem(`crestflow_private_${user.uid}`);
+        return saved ? JSON.parse(saved) : null;
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
 
   // Sync private settings subcollection (API keys, bank details)
   useEffect(() => {
@@ -30,15 +45,23 @@ export function useUserProfile(user: User | null) {
       return;
     }
     try {
-      const saved = localStorage.getItem(`crestflow_profile_${user.uid}`);
-      if (saved) setCachedProfile(JSON.parse(saved));
+      const savedProfile = localStorage.getItem(`crestflow_profile_${user.uid}`);
+      if (savedProfile) setCachedProfile(JSON.parse(savedProfile));
+      const savedPrivate = localStorage.getItem(`crestflow_private_${user.uid}`);
+      if (savedPrivate) setPrivateSettings(JSON.parse(savedPrivate));
     } catch {}
 
     const privateRef = doc(db, 'profiles', user.uid, 'private', 'settings');
     const unsubPrivate = onSnapshot(
       privateRef,
       (snap) => {
-        if (snap.exists()) setPrivateSettings(snap.data() as UserProfilePrivate);
+        if (snap.exists()) {
+          const data = snap.data() as UserProfilePrivate;
+          setPrivateSettings(data);
+          try {
+            localStorage.setItem(`crestflow_private_${user.uid}`, safeStringify(data));
+          } catch {}
+        }
       },
       (err) => console.warn('Private settings read error:', err)
     );
@@ -69,15 +92,20 @@ export function useUserProfile(user: User | null) {
   }, [user, profiles, firestoreSaveProfile]);
 
   const rawProfile = profiles[0] || cachedProfile;
-  const profile: UserProfile | null = rawProfile ? {
-    ...rawProfile,
-    photoURL: rawProfile.photoURL || user?.photoURL || undefined,
-    email: rawProfile.email || user?.email || undefined,
-    ...(privateSettings?.geminiApiKey ? { geminiApiKey: privateSettings.geminiApiKey } : {}),
-    ...(privateSettings?.accountNumber ? { accountNumber: privateSettings.accountNumber } : {}),
-    ...(privateSettings?.ifscCode ? { ifscCode: privateSettings.ifscCode } : {}),
-    ...(privateSettings?.bankName ? { bankName: privateSettings.bankName } : {}),
-  } : null;
+
+  // Memoize profile to avoid generating new references on every re-render
+  const profile: UserProfile | null = useMemo(() => {
+    if (!rawProfile) return null;
+    return {
+      ...rawProfile,
+      photoURL: rawProfile.photoURL || user?.photoURL || undefined,
+      email: rawProfile.email || user?.email || undefined,
+      ...(privateSettings?.geminiApiKey ? { geminiApiKey: privateSettings.geminiApiKey } : {}),
+      ...(privateSettings?.accountNumber ? { accountNumber: privateSettings.accountNumber } : {}),
+      ...(privateSettings?.ifscCode ? { ifscCode: privateSettings.ifscCode } : {}),
+      ...(privateSettings?.bankName ? { bankName: privateSettings.bankName } : {}),
+    };
+  }, [rawProfile, user?.photoURL, user?.email, privateSettings]);
 
   const handleSaveProfile = async (updatedProfile: UserProfile) => {
     if (!user) return;
@@ -93,17 +121,38 @@ export function useUserProfile(user: User | null) {
     } catch {}
 
     const { geminiApiKey, accountNumber, ifscCode, bankName, ...publicFields } = profileWithMeta;
+
+    // Save public fields to root profiles document
     await firestoreSaveProfile({
       ...publicFields,
       isPublicProfile: true
     } as UserProfile);
 
+    // Update in-memory private settings immediately to prevent stale empty reads
+    const newPrivateSettings: UserProfilePrivate = {
+      ...(privateSettings || {}),
+      ...(geminiApiKey !== undefined && geminiApiKey.trim() !== '' ? { geminiApiKey: geminiApiKey.trim() } : {}),
+      ...(accountNumber !== undefined && accountNumber.trim() !== '' ? { accountNumber: accountNumber.trim() } : {}),
+      ...(ifscCode !== undefined && ifscCode.trim() !== '' ? { ifscCode: ifscCode.trim() } : {}),
+      ...(bankName !== undefined && bankName.trim() !== '' ? { bankName: bankName.trim() } : {}),
+    };
+
+    if (geminiApiKey === undefined || geminiApiKey.trim() === '') {
+      delete newPrivateSettings.geminiApiKey;
+    }
+
+    setPrivateSettings(newPrivateSettings);
+    try {
+      localStorage.setItem(`crestflow_private_${user.uid}`, safeStringify(newPrivateSettings));
+    } catch {}
+
+    // Save private credentials to subcollection document with deleteField support for removals
     const privateSettingsRef = doc(db, 'profiles', user.uid, 'private', 'settings');
     await setDoc(privateSettingsRef, {
-      ...(geminiApiKey !== undefined ? { geminiApiKey } : {}),
-      ...(accountNumber !== undefined ? { accountNumber } : {}),
-      ...(ifscCode !== undefined ? { ifscCode } : {}),
-      ...(bankName !== undefined ? { bankName } : {}),
+      geminiApiKey: geminiApiKey && geminiApiKey.trim() ? geminiApiKey.trim() : deleteField(),
+      accountNumber: accountNumber && accountNumber.trim() ? accountNumber.trim() : deleteField(),
+      ifscCode: ifscCode && ifscCode.trim() ? ifscCode.trim() : deleteField(),
+      bankName: bankName && bankName.trim() ? bankName.trim() : deleteField(),
       updatedAt: Date.now()
     }, { merge: true });
   };
