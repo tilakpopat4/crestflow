@@ -69,5 +69,14 @@ describe('CrestFlow Multi-Page Routing Architecture', () => {
     assert.strictEqual(getRoutePath('profile'), '/profile');
     assert.strictEqual(getRoutePath('clients', { id: 'cl_1' }), '/clients?id=cl_1');
     assert.strictEqual(getRoutePath('invoices'), '/invoices');
+    assert.strictEqual(getRoutePath('not_found'), '/404');
+  });
+
+  it('resolves unknown paths outside existing sitemaps to "not_found"', () => {
+    assert.strictEqual(resolveRoute('/unknown-route').route, 'not_found');
+    assert.strictEqual(resolveRoute('/some/nested/invalid/path').route, 'not_found');
+    assert.strictEqual(resolveRoute('/foobar').route, 'not_found');
+    assert.strictEqual(resolveRoute('/404').route, 'not_found');
+    assert.strictEqual(resolveRoute('/not-found').route, 'not_found');
   });
 });

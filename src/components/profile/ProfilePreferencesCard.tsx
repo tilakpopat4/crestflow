@@ -84,7 +84,7 @@ export const ProfilePreferencesCard: React.FC<ProfilePreferencesCardProps> = ({
         </div>
 
         <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-          Stored securely in your private Firestore settings subcollection. Enables one-click work summaries on your dashboard.
+          Stored securely in your private Firestore settings subcollection. Enables one-click work summaries on your dashboard. Get a free API key at <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-indigo-600 dark:text-indigo-400 hover:underline font-medium">Google AI Studio</a>.
         </p>
       </div>
     </div>

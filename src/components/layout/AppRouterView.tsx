@@ -22,6 +22,7 @@ const PrivacyPolicyPage = lazyWithRetry(() => import('../PrivacyPolicyPage'));
 const TermsOfServicePage = lazyWithRetry(() => import('../TermsOfServicePage'));
 const ContactPage = lazyWithRetry(() => import('../ContactPage'));
 const RefundPolicyPage = lazyWithRetry(() => import('../RefundPolicyPage'));
+const NotFoundScreen = lazyWithRetry(() => import('../NotFoundScreen'));
 
 const ViewLoadingFallback = () => (
   <div className="flex-1 flex flex-col items-center justify-center p-12 min-h-[360px] animate-in fade-in duration-150 select-none">
@@ -159,6 +160,9 @@ export const AppRouterView: React.FC<AppRouterViewProps> = ({
                 )}
 
                 {currentRoute === 'admin' && <AdminTab user={user} />}
+                {currentRoute === 'not_found' && (
+                  <NotFoundScreen onBack={() => onNavigate('dashboard')} />
+                )}
               </motion.div>
             </AnimatePresence>
           </Suspense>

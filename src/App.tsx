@@ -27,6 +27,7 @@ const PublicFreelancerProfile = lazyWithRetry(() => import('./components/PublicF
 const ClientFeedbackForm = lazyWithRetry(() => import('./components/ClientFeedbackForm'));
 const SubscriptionModal = lazyWithRetry(() => import('./components/SubscriptionModal'));
 const AnniversaryModal = lazyWithRetry(() => import('./components/AnniversaryModal'));
+const NotFoundScreen = lazyWithRetry(() => import('./components/NotFoundScreen'));
 const UserOnboardingModal = lazyWithRetry(
   () => import('./components/onboarding/UserOnboardingModal'),
   (m) => ({ default: m.UserOnboardingModal })
@@ -92,6 +93,14 @@ export default function App() {
     return (
       <Suspense fallback={<ViewLoadingFallback />}>
         <PublicFreelancerProfile freelancerId={params.freelancerId} />
+      </Suspense>
+    );
+  }
+
+  if (currentRoute === 'not_found') {
+    return (
+      <Suspense fallback={<ViewLoadingFallback />}>
+        <NotFoundScreen onBack={() => navigate('dashboard')} />
       </Suspense>
     );
   }

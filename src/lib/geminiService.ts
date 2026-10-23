@@ -7,9 +7,10 @@ export async function generateWorkSummary(
   upToDate: Date,
   profile: UserProfile | null | undefined
 ): Promise<string> {
-  const apiKey = profile?.geminiApiKey || import.meta.env.GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY;
+  const rawKey = profile?.geminiApiKey || import.meta.env.GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY;
+  const apiKey = typeof rawKey === 'string' ? rawKey.trim().replace(/^["']|["']$/g, '') : '';
   if (!apiKey) {
-    throw new Error("Gemini API key is not configured. Please add it in your Profile Settings.");
+    throw new Error("Gemini API key is not configured. Please add your API key in Profile Settings.");
   }
 
   const ai = new GoogleGenAI({ apiKey });
@@ -80,13 +81,29 @@ Do not mention specific dates or specific earnings unless provided. Focus on hig
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash',
+      model: 'gemini-2.5-flash',
       contents: prompt,
     });
     
     return response.text || "Summary could not be generated.";
   } catch (error: any) {
     console.error("Error generating summary with Gemini:", error);
-    throw new Error(error.message || "Failed to generate summary.");
+    const rawError = error?.message || (typeof error === 'string' ? error : JSON.stringify(error));
+    if (rawError.includes('API_KEY_INVALID') || rawError.includes('API key not valid')) {
+      throw new Error("Your Gemini API key is invalid or has expired. Please verify your key at Google AI Studio (aistudio.google.com) and update it in your Profile Settings.");
+    }
+    // Attempt fallback to gemini-1.5-flash if 2.5 is unavailable
+    if (rawError.includes('not found') || rawError.includes('404')) {
+      try {
+        const fallback = await ai.models.generateContent({
+          model: 'gemini-1.5-flash',
+          contents: prompt,
+        });
+        return fallback.text || "Summary could not be generated.";
+      } catch (fallbackErr: any) {
+        console.error("Fallback error:", fallbackErr);
+      }
+    }
+    throw new Error(rawError || "Failed to generate summary.");
   }
 }

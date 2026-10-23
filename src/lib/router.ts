@@ -16,7 +16,8 @@ export type AppRoute =
   | 'privacy'
   | 'terms'
   | 'contact'
-  | 'refund';
+  | 'refund'
+  | 'not_found';
 
 export interface RouteMatch {
   route: AppRoute;
@@ -40,6 +41,7 @@ export const ROUTE_PATHS: Record<AppRoute, string> = {
   terms: '/terms',
   contact: '/contact',
   refund: '/refund',
+  not_found: '/404',
 };
 
 /**
@@ -136,6 +138,10 @@ export function resolveRoute(pathname: string, search: string = ''): RouteMatch 
     case '/cancellation':
       return { route: 'refund', path: '/refund', params };
 
+    case '/404':
+    case '/not-found':
+      return { route: 'not_found', path: '/404', params };
+
     default:
       // Fallback: check hash routes for backwards compatibility
       const hash = (typeof window !== 'undefined' ? window.location.hash : '').toLowerCase();
@@ -147,8 +153,14 @@ export function resolveRoute(pathname: string, search: string = ''): RouteMatch 
       if (hash.includes('contact')) return { route: 'contact', path: '/contact', params };
       if (hash.includes('refund')) return { route: 'refund', path: '/refund', params };
       if (hash.includes('profile') || hash.includes('settings')) return { route: 'profile', path: '/profile', params };
+      if (hash.includes('reviews')) return { route: 'reviews', path: '/reviews', params };
+      if (hash.includes('work')) return { route: 'work', path: '/work', params };
+      if (hash.includes('clients')) return { route: 'clients', path: '/clients', params };
+      if (hash.includes('invoices') || hash.includes('invoice')) return { route: 'invoices', path: '/invoices', params };
+      if (hash.includes('onboarding')) return { route: 'onboarding', path: '/onboarding', params };
+      if (hash.includes('dashboard')) return { route: 'dashboard', path: '/dashboard', params };
 
-      return { route: 'dashboard', path: '/dashboard', params };
+      return { route: 'not_found', path: cleanPath, params };
   }
 }
 

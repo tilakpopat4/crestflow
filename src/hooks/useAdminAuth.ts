@@ -18,17 +18,26 @@ export interface AdminAuthState {
  * Authorizes 'tilakpopat2007@gmail.com' by default (Super Admin),
  * as well as any Google ID/email added to the 'admin_users' collection in Firestore.
  */
+const CACHED_ADMINS_KEY = 'crestflow_cached_admin_emails_v1';
+
 export function useAdminAuth(user: User | null): AdminAuthState {
-  const [adminEmails, setAdminEmails] = useState<string[]>([SUPER_ADMIN_EMAIL]);
-  const [loading, setLoading] = useState(true);
+  const [adminEmails, setAdminEmails] = useState<string[]>(() => {
+    try {
+      const cached = localStorage.getItem(CACHED_ADMINS_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return [SUPER_ADMIN_EMAIL];
+  });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!user) {
       setLoading(false);
       return;
     }
-
-    setLoading(true);
 
     const unsub = onSnapshot(
       collection(db, 'admin_users'),
@@ -41,6 +50,9 @@ export function useAdminAuth(user: User | null): AdminAuthState {
           }
         });
         setAdminEmails(emails);
+        try {
+          localStorage.setItem(CACHED_ADMINS_KEY, JSON.stringify(emails));
+        } catch {}
         setLoading(false);
       },
       (err) => {

@@ -118,17 +118,7 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
     }
   };
 
-  // 1. Loading verification gate
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900 p-4">
-        <div className="flex flex-col items-center gap-3">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500" />
-          <span className="text-xs text-slate-400">Verifying administrator authorization...</span>
-        </div>
-      </div>
-    );
-  }
+
 
   // 2. Access Denied barrier for unauthorized Google accounts
   if (!isAdmin) {
