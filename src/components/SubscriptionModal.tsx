@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, RefreshCw, ShieldCheck } from 'lucide-react';
+import { X, RefreshCw } from 'lucide-react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { User } from 'firebase/auth';
 import { UserProfile } from '../types';
 import { db } from '../firebase';
@@ -158,87 +159,99 @@ export default function SubscriptionModal({
     }
   };
 
-  if (!isOpen) return null;
+  const shouldReduceMotion = useReducedMotion();
 
   return (
-    <div
-      id="subscription-modal-overlay"
-      onClick={() => {
-        if (!isMandatory && step !== 'activating') onClose();
-      }}
-      className="fixed inset-0 bg-slate-900/70 z-50 flex items-center justify-center p-4 overflow-y-auto"
-    >
-      <div
-        id="subscription-modal-container"
-        onClick={(e) => e.stopPropagation()}
-        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-lg max-h-[92vh] overflow-y-auto flex flex-col shadow-xl"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-800">
-          <div>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-white">
-              {step === 'success' ? 'Subscription Active' : 'Upgrade to CrestFlow Pro'}
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              {step === 'select'
-                ? 'Unlock unlimited clients, automated invoices, and tracking tools'
-                : step === 'activating'
-                ? 'Authorizing subscription with Razorpay...'
-                : 'Your CrestFlow account is now active'}
-            </p>
-          </div>
-          {!isMandatory && step !== 'activating' && (
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-0 cursor-pointer"
-              aria-label="Close dialog"
-            >
-              <X size={18} />
-            </button>
-          )}
-        </div>
-
-        {/* Content */}
-        <div className="p-6">
-          {error && (
-            <div className="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-xs text-red-600 dark:text-red-400">
-              {error}
-            </div>
-          )}
-
-          {step === 'select' && (
-            <PlanSelectionStep
-              selectedCycle={selectedCycle}
-              onSelectCycle={setSelectedCycle}
-              loading={loading}
-              onStartPayment={handleStartPayment}
-              isMandatory={isMandatory}
-              onLogout={onLogout}
-            />
-          )}
-
-          {step === 'activating' && (
-            <div className="text-center py-10 space-y-4">
-              <div className="relative flex items-center justify-center w-12 h-12 mx-auto">
-                <RefreshCw className="w-8 h-8 text-indigo-600 dark:text-indigo-400 animate-spin" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  Verifying Payment...
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto leading-relaxed">
-                  Razorpay is confirming your recurring subscription. Your account will automatically activate as soon as confirmation arrives.
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          id="subscription-modal-overlay"
+          initial={shouldReduceMotion ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={shouldReduceMotion ? undefined : { opacity: 0 }}
+          transition={{ duration: 0.15 }}
+          onClick={() => {
+            if (!isMandatory && step !== 'activating') onClose();
+          }}
+          className="fixed inset-0 bg-slate-900/70 z-50 flex items-center justify-center p-4 overflow-y-auto"
+        >
+          <motion.div
+            id="subscription-modal-container"
+            initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.98, y: 6 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={shouldReduceMotion ? undefined : { opacity: 0, scale: 0.98, y: 6 }}
+            transition={{ duration: 0.18, ease: [0.25, 1, 0.5, 1] }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-lg max-h-[92vh] overflow-y-auto flex flex-col shadow-xl"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-800">
+              <div>
+                <h2 className="text-base font-semibold text-slate-900 dark:text-white">
+                  {step === 'success' ? 'Subscription Active' : 'Upgrade to CrestFlow Pro'}
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  {step === 'select'
+                    ? 'Unlock unlimited clients, automated invoices, and tracking tools'
+                    : step === 'activating'
+                    ? 'Authorizing subscription with Razorpay...'
+                    : 'Your CrestFlow account is now active'}
                 </p>
               </div>
+              {!isMandatory && step !== 'activating' && (
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-0 cursor-pointer"
+                  aria-label="Close dialog"
+                >
+                  <X size={18} />
+                </button>
+              )}
             </div>
-          )}
 
-          {step === 'success' && (
-            <SubscriptionSuccessStep onClose={onClose} billingCycle={selectedCycle} />
-          )}
-        </div>
-      </div>
-    </div>
+            {/* Content */}
+            <div className="p-6">
+              {error && (
+                <div className="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-xs text-red-600 dark:text-red-400">
+                  {error}
+                </div>
+              )}
+
+              {step === 'select' && (
+                <PlanSelectionStep
+                  selectedCycle={selectedCycle}
+                  onSelectCycle={setSelectedCycle}
+                  loading={loading}
+                  onStartPayment={handleStartPayment}
+                  isMandatory={isMandatory}
+                  onLogout={onLogout}
+                />
+              )}
+
+              {step === 'activating' && (
+                <div className="text-center py-10 space-y-4">
+                  <div className="relative flex items-center justify-center w-12 h-12 mx-auto">
+                    <RefreshCw className="w-8 h-8 text-indigo-600 dark:text-indigo-400 animate-spin" />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                      Verifying Payment...
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto leading-relaxed">
+                      Razorpay is confirming your recurring subscription. Your account will automatically activate as soon as confirmation arrives.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {step === 'success' && (
+                <SubscriptionSuccessStep onClose={onClose} billingCycle={selectedCycle} />
+              )}
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

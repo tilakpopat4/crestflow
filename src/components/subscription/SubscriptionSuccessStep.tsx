@@ -1,12 +1,16 @@
 import React from 'react';
 import { ShieldCheck } from 'lucide-react';
 
+import { PlanIntervalKey, PRO_PLANS } from '../../lib/subscriptionPlans';
+
 interface SubscriptionSuccessStepProps {
   onClose: () => void;
-  billingCycle?: 'monthly' | 'yearly';
+  billingCycle?: PlanIntervalKey;
 }
 
 export const SubscriptionSuccessStep: React.FC<SubscriptionSuccessStepProps> = ({ onClose, billingCycle = 'monthly' }) => {
+  const planName = PRO_PLANS.find((p) => p.id === billingCycle)?.name || 'Pro';
+
   return (
     <div className="text-center py-6 space-y-4">
       <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 mx-auto flex items-center justify-center">
@@ -17,7 +21,7 @@ export const SubscriptionSuccessStep: React.FC<SubscriptionSuccessStepProps> = (
           Pro Subscription Activated
         </h3>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto leading-relaxed">
-          Your CrestFlow Pro ({billingCycle === 'yearly' ? 'Yearly' : 'Monthly'}) membership is now active. All client limits, automated invoicing, and tracking tools are unlocked.
+          Your CrestFlow {planName} membership is now active. All client limits, automated invoicing, and tracking tools are unlocked.
         </p>
       </div>
       <button
