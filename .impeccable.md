@@ -60,7 +60,7 @@ Hard rules:
 - Page background: warm cream / linen (#efede4)
 - Soft accent / borders: soft slate blue (#90acd5)
 - Primary action / buttons / active nav: deep steel blue (#4870aa), white text
-- Sidebar / contrast headers: deep black (#000000), white brand name
+- Sidebar / left panel: clean white (#ffffff) with 1px slate border (#d5d6cc), slate-900 brand name
 - Primary text: black (#000000). Secondary text and table headers: slate (#5a677d)
 - Cards and tables: white / cream tint (#ffffff / #efede4), 1px #d5d6cc border
 - Delete: red (#DC2626)

@@ -108,7 +108,7 @@ export default function Sidebar({
       onPointerUp={handlePointerUp}
       style={{ '--sidebar-width': `${width}px` } as React.CSSProperties}
       className={clsx(
-        "fixed md:relative bottom-0 left-0 w-full bg-slate-900 text-white flex md:flex-col md:h-full z-20 border-r border-slate-800/80 border-t border-slate-800 pb-[max(env(safe-area-inset-bottom),4px)] md:pb-0",
+        "fixed md:relative bottom-0 left-0 w-full bg-white text-slate-900 flex md:flex-col md:h-full z-20 border-r border-slate-200 border-t md:border-t-0 pb-[max(env(safe-area-inset-bottom),4px)] md:pb-0",
         isResizing ? "transition-none" : "transition-all duration-200 ease-in-out",
         isCollapsed
           ? "md:w-0 md:-translate-x-full md:opacity-0 md:pointer-events-none md:border-r-0 overflow-hidden"
@@ -117,7 +117,7 @@ export default function Sidebar({
     >
       <div
         className={clsx(
-          "hidden md:block border-b border-slate-800/80 mb-2 transition-all duration-200",
+          "hidden md:block border-b border-slate-200 mb-2 transition-all duration-200",
           isIconOnly ? "p-3" : "p-6"
         )}
       >
@@ -136,7 +136,7 @@ export default function Sidebar({
                 animate={{ opacity: 1, width: 'auto' }}
                 exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, width: 0 }}
                 transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
-                className="text-xl font-bold tracking-tight text-white overflow-hidden whitespace-nowrap"
+                className="text-xl font-bold tracking-tight text-slate-900 overflow-hidden whitespace-nowrap"
               >
                 CrestFlow
               </motion.span>
@@ -151,7 +151,7 @@ export default function Sidebar({
               animate={{ opacity: 1, height: 'auto' }}
               exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
               transition={{ duration: 0.18, ease: [0.25, 1, 0.5, 1] }}
-              className="text-xs text-slate-400 overflow-hidden whitespace-nowrap"
+              className="text-xs text-slate-500 overflow-hidden whitespace-nowrap"
             >
               Freelancing Client Manager
             </motion.p>
@@ -175,11 +175,11 @@ export default function Sidebar({
               whileTap={shouldReduceMotion ? undefined : { scale: 0.96 }}
               title={item.label}
               className={clsx(
-                "relative flex items-center justify-center px-1 min-[380px]:px-2 md:px-3 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-medium flex-1 md:flex-initial md:w-full md:max-w-none flex-shrink md:flex-shrink-0 min-w-0 min-h-[44px] md:min-h-0 transition-colors duration-150 outline-none select-none cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900",
+                "relative flex items-center justify-center px-1 min-[380px]:px-2 md:px-3 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-medium flex-1 md:flex-initial md:w-full md:max-w-none flex-shrink md:flex-shrink-0 min-w-0 min-h-[44px] md:min-h-0 transition-colors duration-150 outline-none select-none cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
                 isIconOnly ? "md:justify-center" : "md:justify-start md:space-x-3",
                 isActive
                   ? "text-white"
-                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
               )}
             >
               {isActive && (
@@ -202,7 +202,7 @@ export default function Sidebar({
                 <Icon
                   size={20}
                   className={clsx(
-                    isActive ? "text-white" : "text-slate-400",
+                    isActive ? "text-white" : "text-slate-500",
                     "shrink-0 transition-colors md:w-[18px] md:h-[18px]"
                   )}
                 />
@@ -229,7 +229,7 @@ export default function Sidebar({
       {subscriptionState?.isSubscriptionFeatureEnabled && onOpenSubscriptionModal && (
         <div
           className={clsx(
-            "hidden md:block border-t border-slate-800/60 transition-all duration-200",
+            "hidden md:block border-t border-slate-200 transition-all duration-200",
             isIconOnly ? "px-2 py-2" : "px-4 py-2"
           )}
         >
@@ -237,14 +237,14 @@ export default function Sidebar({
             type="button"
             onClick={onOpenSubscriptionModal}
             className={clsx(
-              "w-full flex items-center p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 text-xs text-white transition-colors cursor-pointer border border-slate-700/60 group",
+              "w-full flex items-center p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-xs text-slate-800 transition-colors cursor-pointer border border-slate-200 group",
               isIconOnly ? "justify-center" : "justify-between"
             )}
             title={subscriptionState?.isPaidActive ? "Pro Active (Manage)" : "Subscribe to Pro"}
           >
             <div className="flex items-center gap-2">
               <span
-                className={`w-2 h-2 rounded-full shrink-0 ${subscriptionState?.isPaidActive ? 'bg-indigo-400' : 'bg-red-400'}`}
+                className={`w-2 h-2 rounded-full shrink-0 ${subscriptionState?.isPaidActive ? 'bg-indigo-600' : 'bg-red-500'}`}
               />
               <AnimatePresence initial={false}>
                 {!isIconOnly && (
@@ -269,7 +269,7 @@ export default function Sidebar({
                   animate={{ opacity: 1, width: 'auto' }}
                   exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, width: 0 }}
                   transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
-                  className="text-[11px] text-indigo-400 font-medium group-hover:underline whitespace-nowrap overflow-hidden"
+                  className="text-[11px] text-indigo-600 font-semibold group-hover:underline whitespace-nowrap overflow-hidden"
                 >
                   ₹49/mo
                 </motion.span>

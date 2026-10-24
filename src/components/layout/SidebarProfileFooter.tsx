@@ -31,7 +31,7 @@ export const SidebarProfileFooter: React.FC<SidebarProfileFooterProps> = ({
   return (
     <div
       className={clsx(
-        "hidden md:flex border-t border-slate-800 transition-all duration-200",
+        "hidden md:flex border-t border-slate-200 transition-all duration-200",
         isIconOnly ? "p-2 flex-col items-center gap-2" : "p-4 items-center justify-between gap-2"
       )}
     >
@@ -39,18 +39,18 @@ export const SidebarProfileFooter: React.FC<SidebarProfileFooterProps> = ({
         type="button"
         onClick={onEditProfile}
         className={clsx(
-          "flex items-center overflow-hidden rounded-lg transition-colors text-left cursor-pointer border-none outline-none focus-visible:ring-1 focus-visible:ring-slate-400 group",
+          "flex items-center overflow-hidden rounded-lg transition-colors text-left cursor-pointer border-none outline-none focus-visible:ring-1 focus-visible:ring-indigo-400 group",
           isIconOnly ? "justify-center p-1.5" : "space-x-3 flex-1 min-w-0 p-1.5",
           activeTab === 'profile'
-            ? "bg-slate-800 text-white"
-            : "hover:bg-slate-800/60 text-slate-300"
+            ? "bg-slate-100 text-slate-900"
+            : "hover:bg-slate-100 text-slate-700"
         )}
         title={isIconOnly ? (profile?.name || user?.displayName || 'Profile Settings') : "Open Profile Settings"}
       >
         {user?.photoURL ? (
           <img src={user.photoURL} alt="Profile" className="w-8 h-8 rounded-full shrink-0" />
         ) : (
-          <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-medium shrink-0">
+          <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-xs font-semibold shrink-0">
             {(profile?.name || user?.displayName)?.charAt(0) || 'U'}
           </div>
         )}
@@ -64,10 +64,10 @@ export const SidebarProfileFooter: React.FC<SidebarProfileFooterProps> = ({
               transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
               className="flex-1 min-w-0 overflow-hidden whitespace-nowrap"
             >
-              <p className="text-sm font-medium text-white truncate group-hover:text-slate-200 transition-colors">
+              <p className="text-sm font-semibold text-slate-900 truncate group-hover:text-slate-800 transition-colors">
                 {profile?.name || user?.displayName || 'User Account'}
               </p>
-              <p className="text-xs text-slate-400 truncate mt-0.5">
+              <p className="text-xs text-slate-500 truncate mt-0.5">
                 {profile?.professionalTitle || user?.email || 'View Profile'}
               </p>
             </motion.div>
@@ -79,7 +79,7 @@ export const SidebarProfileFooter: React.FC<SidebarProfileFooterProps> = ({
         <div className="flex items-center shrink-0">
           <button
             onClick={onLogout}
-            className="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer border-none bg-transparent"
+            className="text-slate-400 hover:text-slate-700 p-2 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer border-none bg-transparent"
             title="Sign out"
             aria-label="Sign out"
           >
