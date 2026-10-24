@@ -17,7 +17,7 @@ export default function Logo({ className = "w-8 h-8" }: LogoProps) {
           <stop offset="100%" stopColor="#304d77" />
         </linearGradient>
         <linearGradient id="logoAccent" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#efede4" />
+          <stop offset="0%" stopColor="#ffffff" />
           <stop offset="100%" stopColor="#90acd5" />
         </linearGradient>
       </defs>

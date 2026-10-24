@@ -51,18 +51,18 @@ no pill background.
 Hard rules:
 - NO emoji, emoji-style icons, or multicolor icons anywhere in the UI
 - NO pill/capsule shapes with tinted backgrounds. If a container is
-  unavoidable, use a flat cream/light-gray (#e4e2d7) background, slate text, 4px radius
+  unavoidable, use a flat light-gray (#f1f5f9) background, slate text, 4px radius
 - Never use color alone to distinguish rows; the table should read correctly
   in grayscale
 - Same treatment in dark mode via existing tokens (slate on black)
 
 ## Palette (4-Color System)
-- Page background: warm cream / linen (#efede4)
+- Page background: pure white (#ffffff)
 - Soft accent / borders: soft slate blue (#90acd5)
 - Primary action / buttons / active nav: deep steel blue (#4870aa), white text
-- Sidebar / left panel: clean white (#ffffff) with 1px slate border (#d5d6cc), slate-900 brand name
+- Sidebar / left panel: clean white (#ffffff) with 1px slate border (#e2e8f0), slate-900 brand name
 - Primary text: black (#000000). Secondary text and table headers: slate (#5a677d)
-- Cards and tables: white / cream tint (#ffffff / #efede4), 1px #d5d6cc border
+- Cards and tables: white (#ffffff), 1px #e2e8f0 border
 - Delete: red (#DC2626)
 Color carries meaning only: status, category, action, danger. Never decoration.
 The codebase tokens in `src/index.css` via `@theme` are authoritative.

@@ -3,9 +3,9 @@
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-slate-50: #efede4;
-  --color-slate-100: #e4e2d7;
-  --color-slate-200: #d5d6cc;
+  --color-slate-50: #ffffff;
+  --color-slate-100: #f8fafc;
+  --color-slate-200: #e2e8f0;
   --color-slate-300: #b9bcc6;
   --color-slate-400: #8792a4;
   --color-slate-500: #5a677d;
