@@ -16,8 +16,7 @@ import {
   calculateClientFinancials, 
   generateWhatsAppReminder,
   generateEmailReminder,
-  generateInvoiceEmailDetails,
-  triggerBrowserOverdueAlert
+  generateInvoiceEmailDetails
 } from '../lib/paymentUtils';
 import { generateUUID, extractVideoUrl, getDriveDirectImageUrl } from '../lib/utils';
 import GoogleDriveUploadModal from './GoogleDriveUploadModal';
@@ -598,13 +597,6 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                 <Mail size={12} /> Send Email
               </a>
             )}
-            <button
-              onClick={() => triggerBrowserOverdueAlert(client.name, statusInfo.label, statusInfo.notificationMessage, user?.uid)}
-              className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 shadow-sm flex items-center gap-1 cursor-pointer"
-              title="Trigger Payment Notification"
-            >
-              <AlertTriangle size={12} /> Browser Alert
-            </button>
           </div>
         </div>
       )}

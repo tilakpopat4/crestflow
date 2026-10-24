@@ -3,15 +3,14 @@ import { Invoice, WorkItem, Client } from '../types';
 import { 
   BarChart, Bar, LineChart, Line, Legend, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell 
 } from 'recharts';
-import { IndianRupee, Clock, TrendingUp, CheckCircle2, DownloadCloud, UploadCloud, AlertTriangle, Send, Users, ArrowRight, Mail, Bell, Copy, X, FileText, StickyNote as StickyNoteIcon, Award } from 'lucide-react';
+import { IndianRupee, Clock, TrendingUp, CheckCircle2, DownloadCloud, UploadCloud, AlertTriangle, Send, Users, ArrowRight, Mail, Copy, X, FileText, StickyNote as StickyNoteIcon, Award } from 'lucide-react';
 import { User } from 'firebase/auth';
 import { useFirestore, safeStringify } from '../hooks/useFirestore';
 import { 
   getPaymentStatusInfo, 
   calculateClientFinancials, 
   generateWhatsAppReminder,
-  generateEmailReminder,
-  triggerBrowserOverdueAlert
+  generateEmailReminder
 } from '../lib/paymentUtils';
 import StickyNotesWidget from './StickyNotesWidget';
 import PaymentDateModal from './PaymentDateModal';
@@ -65,44 +64,6 @@ export default function DashboardTab({
   const activeNotifications = useMemo(() => {
     return clientStatuses.filter(cs => !cs.client.isClosed && cs.statusInfo.isNotificationRequired);
   }, [clientStatuses]);
-
-  // Automated 6:00 PM Payment Due Notification Check
-  React.useEffect(() => {
-    const checkAndTrigger6PmReminders = () => {
-      const now = new Date();
-      const currentHour = now.getHours(); // 0 to 23
-      const dateKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-
-      // Trigger automatically once per day at or after 6:00 PM (18:00) for clients with coming/overdue payment
-      if (currentHour >= 18) {
-        activeNotifications.forEach(({ client, statusInfo }) => {
-          if (client.isClosed || client.emailRemindersEnabled === false) return;
-
-          const sentKey = `reminder_6pm_sent_${client.id}_${dateKey}`;
-          const alreadySent = localStorage.getItem(sentKey);
-
-          if (!alreadySent) {
-            triggerBrowserOverdueAlert(
-              client.name,
-              statusInfo.label,
-              statusInfo.notificationMessage,
-              user?.uid
-            ).then(sent => {
-              if (sent) {
-                localStorage.setItem(sentKey, 'true');
-              }
-            }).catch(err => {
-              console.warn(`[Auto 6:00 PM Alert] Error sending notification for ${client.name}:`, err);
-            });
-          }
-        });
-      }
-    };
-
-    checkAndTrigger6PmReminders();
-    const intervalId = setInterval(checkAndTrigger6PmReminders, 30000);
-    return () => clearInterval(intervalId);
-  }, [activeNotifications, user?.uid]);
 
   // Automated 6:00 AM Auto-Invoice Engine (runs background check during session)
   const autoInvoiceRef = React.useRef({
@@ -534,14 +495,6 @@ export default function DashboardTab({
                       title="Copy Email Text"
                     >
                       <Copy size={13} />
-                    </button>
-
-                    <button
-                      onClick={() => triggerBrowserOverdueAlert(client.name, statusInfo.label, statusInfo.notificationMessage, user?.uid)}
-                      className="p-1.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-xs transition-colors cursor-pointer"
-                      title="Trigger Device Notification"
-                    >
-                      <Bell size={13} />
                     </button>
                   </div>
                 </div>

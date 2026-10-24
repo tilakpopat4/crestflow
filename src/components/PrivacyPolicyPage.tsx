@@ -74,7 +74,6 @@ export default function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps
               <li>To generate PDF invoices and receipts directly in your web browser.</li>
               <li>To compose and send invoice emails with PDF attachments via your authorized Gmail account, strictly upon your explicit user action.</li>
               <li>To generate optional AI work summaries using the Google Gemini API when initiated by you.</li>
-              <li>To provide payment cycle reminders via browser push notifications.</li>
               <li>To serve the client portal and public booking profile configured by you.</li>
             </ul>
           </section>

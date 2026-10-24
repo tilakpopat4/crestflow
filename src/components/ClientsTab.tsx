@@ -13,8 +13,7 @@ import {
   getPaymentStatusInfo,
   calculateClientFinancials,
   generateWhatsAppReminder,
-  generateEmailReminder,
-  triggerBrowserOverdueAlert
+  generateEmailReminder
 } from '../lib/paymentUtils';
 import ClientDashboard from './ClientDashboard';
 import CsvImportModal from './CsvImportModal';
@@ -511,13 +510,6 @@ export default function ClientsTab({
                       <Mail size={12} />
                     </a>
                   )}
-                  <button
-                    onClick={() => triggerBrowserOverdueAlert(client.name, statusInfo.label, statusInfo.notificationMessage, user?.uid)}
-                    className="p-1.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 rounded text-xs font-semibold transition-colors cursor-pointer"
-                    title="Trigger Payment Notification"
-                  >
-                    <AlertTriangle size={12} />
-                  </button>
                 </div>
               </div>
             ))}

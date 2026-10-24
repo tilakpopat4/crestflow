@@ -208,34 +208,6 @@ export function generateEmailReminder(client: Client, statusInfo: PaymentStatusI
   return { subject, body, mailtoLink };
 }
 
-export async function triggerBrowserOverdueAlert(clientName: string, statusLabel: string, message: string, _userId?: string) {
-  // Browser Notification API
-  if ('Notification' in window) {
-    if (Notification.permission === 'granted') {
-      new Notification(`Payment Alert: ${clientName}`, {
-        body: `${statusLabel} - ${message}`,
-        icon: '/app_logo_icon.png',
-        badge: '/icon.svg'
-      });
-      return true;
-    } else if (Notification.permission !== 'denied') {
-      const permission = await Notification.requestPermission();
-      if (permission === 'granted') {
-        new Notification(`Payment Alert: ${clientName}`, {
-          body: `${statusLabel} - ${message}`,
-          icon: '/app_logo_icon.png',
-          badge: '/icon.svg'
-        });
-        return true;
-      }
-    }
-  }
-
-  // Fallback to standard alert modal
-  alert(`PAYMENT ALERT\n\nClient: ${clientName}\nStatus: ${statusLabel}\n\nDetails: ${message}`);
-  return false;
-}
-
 export function generateInvoiceEmailDetails(
   client: Client,
   invoice: {
