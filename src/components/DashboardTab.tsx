@@ -615,9 +615,9 @@ export default function DashboardTab({
                     type="monotone" 
                     dataKey="paidEarnings" 
                     name="paidEarnings"
-                    stroke="#4F46E5" 
+                    stroke="#4870aa" 
                     strokeWidth={3} 
-                    dot={{ r: 4, fill: '#4F46E5', strokeWidth: 2, stroke: isDark ? '#1e293b' : '#ffffff' }}
+                    dot={{ r: 4, fill: '#4870aa', strokeWidth: 2, stroke: isDark ? '#1e293b' : '#ffffff' }}
                     activeDot={{ r: 7, strokeWidth: 0 }} 
                   />
                   <Line 
@@ -676,7 +676,7 @@ export default function DashboardTab({
                       fontWeight: 600
                     }}
                   />
-                  <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24} fill="#4F46E5" />
+                  <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24} fill="#4870aa" />
                 </BarChart>
               </ResponsiveContainer>
             ) : (

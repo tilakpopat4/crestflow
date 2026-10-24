@@ -25,13 +25,13 @@ Principle: status is shown with TEXT, not colored pills. Color is reserved for
 things that need attention. A finished or normal state must look calm.
 
 Allowed colors for badges/status: neutral grays (slate family) and, only
-where meaning demands it, the existing indigo (#4F46E5) or red (#DC2626).
+where meaning demands it, the primary steel blue (#4870aa) or red (#DC2626).
 NO green. NO purple. NO amber/orange badges. NO tinted pastel backgrounds.
 
 Status column (plain text, 13px, weight 500, no background, no border, no pill):
 - Draft: slate-500 text
 - Invoiced: slate-700 text (slate-300 in dark mode)
-- Paid: indigo text (indigo-600, indigo-400 in dark mode)
+- Paid: steel blue text (indigo-600, indigo-400 in dark mode)
 - Overdue: red text (red-600, red-400 in dark mode)
 Optional: a 6px solid dot before the label in the same color as the text.
 No icons, no checkmarks, no circles with ticks.
@@ -45,29 +45,27 @@ Amount column / "Monthly Retainer" / "Sub: Career Launcher" tags:
 
 Streak chip ("240 days worked"): plain slate text with a small line icon,
 no amber background, no border, no flame emoji.
-"Watch Preview": a plain text link in indigo with a 14px line play icon,
+"Watch Preview": a plain text link in steel blue with a 14px line play icon,
 no pill background.
 
 Hard rules:
 - NO emoji, emoji-style icons, or multicolor icons anywhere in the UI
 - NO pill/capsule shapes with tinted backgrounds. If a container is
-  unavoidable, use a flat light-gray (#F1F5F9) background, slate text, 4px radius
+  unavoidable, use a flat cream/light-gray (#e4e2d7) background, slate text, 4px radius
 - Never use color alone to distinguish rows; the table should read correctly
   in grayscale
-- Same treatment in dark mode via existing tokens (slate on navy)
+- Same treatment in dark mode via existing tokens (slate on black)
 
-## Palette (only these)
-- Sidebar: deep navy (~#0F172A), muted slate text (~#CBD5E1), white brand name
-- Active nav item: indigo (~#4F46E5), white text
-- Page: white / #F8FAFC. Cards and tables: white, 1px #E5E7EB border
-- Primary text: near-black navy (~#0F172A). Secondary text and table headers:
-  slate (~#64748B)
-- Primary button: indigo (~#4F46E5). Secondary button: blue (~#2563EB)
-- Delete: red (~#DC2626)
+## Palette (4-Color System)
+- Page background: warm cream / linen (#efede4)
+- Soft accent / borders: soft slate blue (#90acd5)
+- Primary action / buttons / active nav: deep steel blue (#4870aa), white text
+- Sidebar / contrast headers: deep black (#000000), white brand name
+- Primary text: black (#000000). Secondary text and table headers: slate (#5a677d)
+- Cards and tables: white / cream tint (#ffffff / #efede4), 1px #d5d6cc border
+- Delete: red (#DC2626)
 Color carries meaning only: status, category, action, danger. Never decoration.
-Dark mode uses the same navy/slate family via the existing theme tokens.
-Never hardcode colors in components. Hex values above are approximate; the
-codebase tokens are authoritative.
+The codebase tokens in `src/index.css` via `@theme` are authoritative.
 
 ## Buttons
 - Primary: solid indigo, white text. Secondary: solid blue, white text

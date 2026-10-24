@@ -2,6 +2,43 @@
 
 @variant dark (&:where(.dark, .dark *));
 
+@theme {
+  --color-slate-50: #efede4;
+  --color-slate-100: #e4e2d7;
+  --color-slate-200: #d5d6cc;
+  --color-slate-300: #b9bcc6;
+  --color-slate-400: #8792a4;
+  --color-slate-500: #5a677d;
+  --color-slate-600: #414e64;
+  --color-slate-700: #253246;
+  --color-slate-800: #12161f;
+  --color-slate-900: #000000;
+  --color-slate-950: #000000;
+
+  --color-indigo-50: #f0f4fa;
+  --color-indigo-100: #dce6f4;
+  --color-indigo-200: #b8cde8;
+  --color-indigo-300: #90acd5;
+  --color-indigo-400: #6f92c2;
+  --color-indigo-500: #557eb6;
+  --color-indigo-600: #4870aa;
+  --color-indigo-700: #3b5e90;
+  --color-indigo-800: #2f4c75;
+  --color-indigo-900: #243b5c;
+  --color-indigo-950: #16253c;
+
+  --color-blue-50: #f0f4fa;
+  --color-blue-100: #dce6f4;
+  --color-blue-200: #b8cde8;
+  --color-blue-300: #90acd5;
+  --color-blue-400: #6f92c2;
+  --color-blue-500: #557eb6;
+  --color-blue-600: #4870aa;
+  --color-blue-700: #3b5e90;
+  --color-blue-800: #2f4c75;
+  --color-blue-900: #243b5c;
+}
+
 @layer base {
   :root {
     color-scheme: light dark;
@@ -33,7 +70,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid #6366f1;
+    outline: 2px solid #4870aa;
     outline-offset: 2px;
   }
 }

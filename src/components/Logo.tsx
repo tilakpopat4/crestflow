@@ -13,12 +13,12 @@ export default function Logo({ className = "w-8 h-8" }: LogoProps) {
     >
       <defs>
         <linearGradient id="logoBg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#6366f1" />
-          <stop offset="100%" stopColor="#4338ca" />
+          <stop offset="0%" stopColor="#4870aa" />
+          <stop offset="100%" stopColor="#304d77" />
         </linearGradient>
         <linearGradient id="logoAccent" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#e0e7ff" />
-          <stop offset="100%" stopColor="#c7d2fe" />
+          <stop offset="0%" stopColor="#efede4" />
+          <stop offset="100%" stopColor="#90acd5" />
         </linearGradient>
       </defs>
 
@@ -29,11 +29,11 @@ export default function Logo({ className = "w-8 h-8" }: LogoProps) {
         <path d="M126 146 L186 106 H386 L326 146 Z" fill="url(#logoAccent)" />
         <path d="M146 146 h220 v20 H146 z" fill="#ffffff" />
         
-        <path d="M190 106 L170 146" stroke="#4338ca" strokeWidth="8" strokeLinecap="round" />
-        <path d="M250 106 L230 146" stroke="#4338ca" strokeWidth="8" strokeLinecap="round" />
-        <path d="M310 106 L290 146" stroke="#4338ca" strokeWidth="8" strokeLinecap="round" />
+        <path d="M190 106 L170 146" stroke="#304d77" strokeWidth="8" strokeLinecap="round" />
+        <path d="M250 106 L230 146" stroke="#304d77" strokeWidth="8" strokeLinecap="round" />
+        <path d="M310 106 L290 146" stroke="#304d77" strokeWidth="8" strokeLinecap="round" />
 
-        <circle cx="256" cy="281" r="44" fill="#4f46e5" />
+        <circle cx="256" cy="281" r="44" fill="#4870aa" />
         <polygon points="246,261 278,281 246,301" fill="#ffffff" />
       </g>
     </svg>

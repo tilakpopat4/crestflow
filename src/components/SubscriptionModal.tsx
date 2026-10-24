@@ -133,7 +133,7 @@ export default function SubscriptionModal({
           contact: profile?.phone || '',
         },
         theme: {
-          color: '#4f46e5',
+          color: '#4870aa',
         },
         handler: function () {
           // Payment submitted by user; transition to waiting state for webhook confirmation
