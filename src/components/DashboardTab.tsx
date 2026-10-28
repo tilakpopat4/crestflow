@@ -51,6 +51,7 @@ export default function DashboardTab({
   const [activeWorkspaceTool, setActiveWorkspaceTool] = useState<'none' | 'notes' | 'ai'>('none');
   const journey = calculateWorkJourney(profile?.freelanceStartDate);
   const [paymentModalState, setPaymentModalState] = useState<{ invoiceId: string | null, isOpen: boolean }>({ invoiceId: null, isOpen: false });
+  const [clientRevenueTimeframe, setClientRevenueTimeframe] = useState<'all' | 'month'>('all');
 
   // Client statuses & notifications
   const clientStatuses = useMemo(() => {
@@ -111,7 +112,8 @@ export default function DashboardTab({
     let totalEarned = 0;
     let totalInvoicesThisMonth = 0;
     
-    const clientRevenueMap = new Map<string, number>();
+    const allTimeClientRevenueMap = new Map<string, number>();
+    const monthClientRevenueMap = new Map<string, number>();
 
     // 1. Calculate current month's earned revenue & invoices count
     invoices.forEach(inv => {
@@ -122,13 +124,22 @@ export default function DashboardTab({
         totalInvoicesThisMonth++;
       }
 
-      // For paid earnings, use lastPaymentDate if available to attribute to the month it was ACTUALLY paid
+      // For paid earnings, attribute to all-time and current month
       if (inv.status === 'Paid') {
+        const clientObj = clients.find(c => c.id === inv.clientId);
+        const resolvedName = clientObj?.name || inv.clientName || 'Client';
+        const amount = Number(inv.totalAmount) || 0;
+
+        // All-Time paid revenue
+        const currentAllTime = allTimeClientRevenueMap.get(resolvedName) || 0;
+        allTimeClientRevenueMap.set(resolvedName, currentAllTime + amount);
+
+        // Current month paid revenue
         const paymentDate = inv.lastPaymentDate ? new Date(inv.lastPaymentDate) : invDate;
         if (paymentDate.getMonth() === currentMonth && paymentDate.getFullYear() === currentYear) {
-          totalEarned += inv.totalAmount;
-          const current = clientRevenueMap.get(inv.clientName) || 0;
-          clientRevenueMap.set(inv.clientName, current + inv.totalAmount);
+          totalEarned += amount;
+          const currentMonthRev = monthClientRevenueMap.get(resolvedName) || 0;
+          monthClientRevenueMap.set(resolvedName, currentMonthRev + amount);
         }
       }
     });
@@ -142,12 +153,22 @@ export default function DashboardTab({
       })
       .reduce((sum, inv) => sum + (Number(inv.totalAmount) || 0), 0);
 
-    const chartData = Array.from(clientRevenueMap.entries())
+    const allTimeChartData = Array.from(allTimeClientRevenueMap.entries())
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
 
-    return { totalEarned, totalDue, totalInvoicesThisMonth, chartData };
+    const monthChartData = Array.from(monthClientRevenueMap.entries())
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+
+    const chartData = allTimeChartData.length > 0 ? allTimeChartData : monthChartData;
+
+    return { totalEarned, totalDue, totalInvoicesThisMonth, chartData, allTimeChartData, monthChartData };
   }, [invoices, clients]);
+
+  const activeClientRevenueData = useMemo(() => {
+    return clientRevenueTimeframe === 'month' ? metrics.monthChartData : metrics.allTimeChartData;
+  }, [clientRevenueTimeframe, metrics]);
 
   // Compute monthly earnings trend for line chart
   const monthlyTrendData = useMemo(() => {
@@ -650,14 +671,45 @@ export default function DashboardTab({
 
         {/* Client Distribution Bar Chart */}
         <div className="lg:col-span-1 bg-white dark:bg-slate-800 p-3.5 sm:p-6 rounded-xl shadow-xs flex flex-col min-w-0">
-          <h3 className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-4 sm:mb-6">Client Revenue</h3>
+          <div className="flex items-center justify-between gap-2 mb-4 sm:mb-6">
+            <div>
+              <h3 className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Client Revenue</h3>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                {clientRevenueTimeframe === 'month' ? 'Paid revenue this month' : 'Total all-time paid'}
+              </p>
+            </div>
+            <div className="inline-flex rounded-lg bg-slate-100 dark:bg-slate-700/80 p-0.5 text-[11px] font-medium shrink-0">
+              <button
+                type="button"
+                onClick={() => setClientRevenueTimeframe('all')}
+                className={`px-2.5 py-1 rounded-md transition-colors cursor-pointer border-none ${
+                  clientRevenueTimeframe === 'all'
+                    ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-2xs font-semibold'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100'
+                }`}
+              >
+                All Time
+              </button>
+              <button
+                type="button"
+                onClick={() => setClientRevenueTimeframe('month')}
+                className={`px-2.5 py-1 rounded-md transition-colors cursor-pointer border-none ${
+                  clientRevenueTimeframe === 'month'
+                    ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-2xs font-semibold'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100'
+                }`}
+              >
+                This Month
+              </button>
+            </div>
+          </div>
           <div className="flex-1 min-h-[240px] sm:min-h-[280px]">
-            {metrics.chartData.length > 0 ? (
+            {activeClientRevenueData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={metrics.chartData} layout="vertical" margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                <BarChart data={activeClientRevenueData} layout="vertical" margin={{ top: 0, right: 10, left: 10, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={isDark ? "#334155" : "#e2e8f0"} />
                   <XAxis type="number" hide />
-                  <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: isDark ? '#94a3b8' : '#64748b' }} width={80} />
+                  <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: isDark ? '#94a3b8' : '#64748b' }} width={95} />
                   <Tooltip 
                     cursor={{ fill: isDark ? 'rgba(51, 65, 85, 0.4)' : 'rgba(226, 232, 240, 0.6)' }}
                     formatter={(value: number) => [`₹${value.toLocaleString('en-IN')}`, 'Revenue']}
@@ -681,15 +733,30 @@ export default function DashboardTab({
               </ResponsiveContainer>
             ) : (
               <div className="h-full flex flex-col items-center justify-center text-sm text-slate-400 dark:text-slate-500 text-center py-12 space-y-2">
-                <p>No data available for this month.<br/>Generate invoices to see client distribution.</p>
-                {onNavigateToClients && (
-                  <button
-                    type="button"
-                    onClick={onNavigateToClients}
-                    className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
-                  >
-                    Manage Clients &rarr;
-                  </button>
+                {clientRevenueTimeframe === 'month' && metrics.allTimeChartData.length > 0 ? (
+                  <>
+                    <p>No invoices paid this month yet.</p>
+                    <button
+                      type="button"
+                      onClick={() => setClientRevenueTimeframe('all')}
+                      className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                    >
+                      View All-Time Client Revenue ({metrics.allTimeChartData.length} client{metrics.allTimeChartData.length > 1 ? 's' : ''}) &rarr;
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <p>No client revenue recorded yet.<br/>Generate invoices to see client distribution.</p>
+                    {onNavigateToClients && (
+                      <button
+                        type="button"
+                        onClick={onNavigateToClients}
+                        className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                      >
+                        Manage Clients &rarr;
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
             )}

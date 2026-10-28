@@ -159,5 +159,28 @@ describe('Tab Layout & Ratio Consistency Suite', () => {
       'Work logs table container must not have redundant outer border box'
     );
   });
+
+  it('DashboardTab computes both all-time and current-month client revenue with All-Time default', () => {
+    const dashContent = fs.readFileSync(path.resolve(process.cwd(), 'src/components/DashboardTab.tsx'), 'utf8');
+
+    // Asserts allTimeClientRevenueMap and monthClientRevenueMap exist
+    assert.ok(
+      dashContent.includes('allTimeClientRevenueMap'),
+      'DashboardTab must compute all-time client revenue map'
+    );
+    assert.ok(
+      dashContent.includes('monthClientRevenueMap'),
+      'DashboardTab must compute monthly client revenue map'
+    );
+    assert.ok(
+      dashContent.includes("useState<'all' | 'month'>('all')"),
+      'DashboardTab must default to All Time so client revenue renders even if current month has no paid invoices yet'
+    );
+    assert.ok(
+      dashContent.includes('activeClientRevenueData'),
+      'DashboardTab must bind activeClientRevenueData dynamically to the timeframe selector'
+    );
+  });
 });
+
 
