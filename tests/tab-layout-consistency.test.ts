@@ -82,5 +82,29 @@ describe('Tab Layout & Ratio Consistency Suite', () => {
       );
     }
   });
+
+  it('invoice table rows enforce 2-line structure without wrapping into a 3rd line', () => {
+    const invoiceTabContent = fs.readFileSync(path.resolve(process.cwd(), 'src/components/InvoiceTab.tsx'), 'utf8');
+
+    // 1. Table must have min-w-[960px] to provide adequate column width
+    assert.ok(
+      invoiceTabContent.includes('min-w-[960px]'),
+      'Invoice table must have min-w-[960px] to avoid compressing columns'
+    );
+
+    // 2. Invoice number and date cell must have whitespace-nowrap
+    assert.ok(
+      invoiceTabContent.includes('formatInvoiceNumber(inv, invoices)}') &&
+      invoiceTabContent.includes('whitespace-nowrap min-w-[130px]'),
+      'Invoice number column must use whitespace-nowrap to prevent hyphen breaking'
+    );
+
+    // 3. Action buttons must have whitespace-nowrap and shrink-0
+    assert.ok(
+      invoiceTabContent.includes('Send via Gmail') &&
+      invoiceTabContent.includes('whitespace-nowrap shrink-0'),
+      'Send via Gmail and actions must use whitespace-nowrap and shrink-0 to prevent button text stacking'
+    );
+  });
 });
 
