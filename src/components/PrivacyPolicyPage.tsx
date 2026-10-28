@@ -141,7 +141,7 @@ export default function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps
               6. Data Retention and Deletion
             </h2>
             <p>
-              Your data is retained for as long as your account is active. You can delete individual client profiles, work log entries, and invoice records at any time directly through the dashboard. If you wish to permanently delete your entire account, profile, and all associated Firestore records, you may submit a request to <a href="mailto:work.tilakpopatfilms@gmail.com" className="text-slate-900 dark:text-slate-100 hover:underline font-medium">work.tilakpopatfilms@gmail.com</a> or via our <a href="/contact" onClick={handleContactLink} className="text-slate-900 dark:text-slate-100 hover:underline font-medium">Contact Us</a> page. We process deletion requests within 30 business days.
+              Your data is retained for as long as your account is active. You can delete individual client profiles, work log entries, and invoice records at any time directly through the dashboard. If you wish to permanently delete your entire account, profile, and all associated Firestore records, you may submit a request to <a href="mailto:support.crestflow@gmail.com" className="text-slate-900 dark:text-slate-100 hover:underline font-medium">support.crestflow@gmail.com</a> or via our <a href="/contact" onClick={handleContactLink} className="text-slate-900 dark:text-slate-100 hover:underline font-medium">Contact Us</a> page. We process deletion requests within 30 business days.
             </p>
           </section>
 
@@ -186,7 +186,7 @@ export default function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps
             </p>
             <div className="mt-3 space-y-1 text-slate-700 dark:text-slate-300">
               <p><strong className="text-slate-900 dark:text-slate-100">Tilak Popat Films</strong></p>
-              <p>Email: <a href="mailto:work.tilakpopatfilms@gmail.com" className="text-slate-900 dark:text-slate-100 hover:underline">work.tilakpopatfilms@gmail.com</a></p>
+              <p>Email: <a href="mailto:support.crestflow@gmail.com" className="text-slate-900 dark:text-slate-100 hover:underline">support.crestflow@gmail.com</a></p>
               <p>Address: Gandhinagar, Gujarat, 382421</p>
               <p className="mt-2">
                 Or send us a message directly via our{' '}

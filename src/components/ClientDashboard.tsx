@@ -365,7 +365,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
     : '—';
 
   return (
-    <div className="p-3.5 sm:p-4 md:p-8 max-w-7xl mx-auto space-y-4 sm:space-y-6 text-slate-900 dark:text-slate-100 w-full min-w-0 max-w-full overflow-hidden">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 text-slate-900 dark:text-slate-100 w-full min-w-0">
       {/* Top Action Bar with Back button and Quick Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 w-full min-w-0">
         <button

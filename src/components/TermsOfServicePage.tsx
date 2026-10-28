@@ -142,7 +142,7 @@ export default function TermsOfServicePage({ onNavigate }: TermsOfServicePagePro
             </p>
             <div className="mt-3 space-y-1 text-slate-700 dark:text-slate-300">
               <p><strong className="text-slate-900 dark:text-slate-100">Tilak Popat Films</strong></p>
-              <p>Email: <a href="mailto:work.tilakpopatfilms@gmail.com" className="text-slate-900 dark:text-slate-100 hover:underline">work.tilakpopatfilms@gmail.com</a></p>
+              <p>Email: <a href="mailto:support.crestflow@gmail.com" className="text-slate-900 dark:text-slate-100 hover:underline">support.crestflow@gmail.com</a></p>
               <p>Address: Gandhinagar, Gujarat, 382421</p>
               <p className="mt-2">
                 You may also submit inquiries through our{' '}

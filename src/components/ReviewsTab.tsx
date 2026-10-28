@@ -72,13 +72,13 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
   const selectedClient = clients.find(c => c.id === selectedClientId);
 
   return (
-    <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto w-full pb-24 md:pb-8">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 w-full min-w-0 pb-24 md:pb-8">
       
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Client Reviews</h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm">Gather testimonials, view ratings, and build client trust.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Client Reviews</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">Gather testimonials, view ratings, and build client trust.</p>
         </div>
       </div>
 

@@ -10,6 +10,16 @@ import {
 import { handleRazorpayWebhook } from './routes/webhook';
 import { handleCronReconciliation } from './reconcile';
 import { constantTimeCompare } from './razorpay';
+import {
+  handleNotifyContact,
+  handleNotifyWelcome,
+  handleNotifyNewClientRequest,
+  handleNotifyMilestone,
+  handleScheduleEmail,
+  handleCancelEmail,
+  handleProcessEmailQueue,
+} from './routes/notifications';
+import { processDueEmailJobs } from './emailDispatcher';
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -191,6 +201,41 @@ Sitemap: ${baseUrl}/sitemap.xml
         return jsonResponse({ success: true, stats });
       }
 
+      // 7. POST /api/notify/contact
+      if (url.pathname === '/api/notify/contact' && request.method === 'POST') {
+        return await handleNotifyContact(request, env);
+      }
+
+      // 8. POST /api/notify/welcome
+      if (url.pathname === '/api/notify/welcome' && request.method === 'POST') {
+        return await handleNotifyWelcome(request, env);
+      }
+
+      // 9. POST /api/notify/new-client-request
+      if (url.pathname === '/api/notify/new-client-request' && request.method === 'POST') {
+        return await handleNotifyNewClientRequest(request, env);
+      }
+
+      // 10. POST /api/notify/milestone
+      if (url.pathname === '/api/notify/milestone' && request.method === 'POST') {
+        return await handleNotifyMilestone(request, env);
+      }
+
+      // 11. POST /api/email/schedule
+      if (url.pathname === '/api/email/schedule' && request.method === 'POST') {
+        return await handleScheduleEmail(request, env);
+      }
+
+      // 12. POST /api/email/cancel
+      if (url.pathname === '/api/email/cancel' && request.method === 'POST') {
+        return await handleCancelEmail(request, env);
+      }
+
+      // 13. POST /api/email/process-queue
+      if (url.pathname === '/api/email/process-queue' && request.method === 'POST') {
+        return await handleProcessEmailQueue(request, env);
+      }
+
       return jsonResponse({ error: 'Endpoint not found' }, 404);
     } catch (err: any) {
       console.error('[Worker API Error]', err);
@@ -202,10 +247,15 @@ Sitemap: ${baseUrl}/sitemap.xml
    * Daily Cron Trigger execution
    */
   async scheduled(controller: any, env: Env, ctx: any): Promise<void> {
-    if (ctx && typeof ctx.waitUntil === 'function') {
-      ctx.waitUntil(handleCronReconciliation(env));
-    } else {
+    const runCron = async () => {
       await handleCronReconciliation(env);
+      await processDueEmailJobs(env, 10);
+    };
+
+    if (ctx && typeof ctx.waitUntil === 'function') {
+      ctx.waitUntil(runCron());
+    } else {
+      await runCron();
     }
   },
 };

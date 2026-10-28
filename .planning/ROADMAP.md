@@ -17,3 +17,14 @@
     - Divided all workspace tabs into canonical URL routes (`/dashboard`, `/clients`, `/work`, `/invoices`, `/reviews`, `/profile`, `/admin`, `/privacy`, `/terms`, `/contact`).
     - Type-safe, zero-dependency browser history router with Back/Forward button and deep-link support.
     - Decomposed `App.tsx` from 771 lines down to 272 lines.
+
+- [x] **Phase 6: Automated Freelancer Lifecycle Email Notifications System**
+  - **Plan**: `.planning/phases/06-automated-freelancer-email-notifications/PLAN.md`
+  - **Delivered**:
+    - Server-side email template registry (`worker/emailTemplates.ts`) with strict schemas and zero emojis.
+    - Cloud Firestore email queue (`emailJobs`) with atomic leases, idempotency, and exponential backoff retry (`worker/emailQueue.ts`).
+    - Event-triggered notifications for sign-up welcome, recurring monthly billing receipt, days worked milestones, and new client requests.
+    - Public contact form connected to `/api/notify/contact` with rate limiting and mailto fallback.
+    - Scheduled email API (`/api/email/schedule` & `/api/email/cancel`) and cron queue processing (`worker/index.ts`).
+    - 74 automated unit/integration tests passing cleanly (`tests/email-system.test.ts`).
+

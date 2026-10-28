@@ -93,6 +93,23 @@ export function useUserProfile(user: User | null) {
               console.warn('Auto-sync profile photo error:', err)
             );
           }
+
+          // Trigger automated welcome greeting email once per user
+          const welcomeKey = `crestflow_welcome_sent_${user.uid}`;
+          if (!localStorage.getItem(welcomeKey)) {
+            user.getIdToken().then((token) => {
+              fetch('/api/notify/welcome', {
+                method: 'POST',
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  'Content-Type': 'application/json',
+                },
+              })
+                .then((r) => r.json())
+                .then(() => localStorage.setItem(welcomeKey, 'true'))
+                .catch((err) => console.warn('Welcome email dispatch error:', err));
+            }).catch(() => {});
+          }
         }
         setProfilesLoading(false);
       },

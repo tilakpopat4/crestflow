@@ -156,6 +156,23 @@ export default function PublicFreelancerProfile({ freelancerId }: PublicFreelanc
 
       await setDoc(reqRef, newRequest);
 
+      // Automated lead email notification to the freelancer
+      fetch('/api/notify/new-client-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          freelancerId,
+          requestId: reqRef.id,
+          clientName: clientName.trim(),
+          contactName: contactName.trim(),
+          contactEmail: contactEmail.trim(),
+          contactPhone: contactPhone.trim(),
+          instagram: instagram.trim() || undefined,
+          proposedRate: proposedRate && !isNaN(Number(proposedRate)) ? Number(proposedRate) : undefined,
+          projectDetails: projectDetails.trim(),
+        }),
+      }).catch((notifyErr) => console.warn('Automated lead email notification failed:', notifyErr));
+
       // Build WhatsApp draft URL and redirect
       if (profile.phone) {
         const cleanPhone = profile.phone.replace(/[^0-9]/g, '');

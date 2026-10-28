@@ -124,10 +124,10 @@ export default function ClientOnboardingTab({
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 w-full text-slate-900 dark:text-slate-100">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 w-full min-w-0 text-slate-900 dark:text-slate-100">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
           Client Onboarding
         </h1>
         <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">

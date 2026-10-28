@@ -1,24 +1,9 @@
 import { Env } from '../types';
-import {
-  parseServiceAccount,
-  getSubscriptionFromFirestore,
-  updateSubscriptionInFirestore,
-  isEventProcessed,
-  markEventProcessed,
-} from '../firestore';
-import {
-  verifyRazorpayWebhookSignature,
-  fetchRazorpaySubscription,
-  cancelRazorpaySubscription,
-  refundRazorpayPayment,
-} from '../razorpay';
-import {
-  normalizeGoogleEmail,
-  normalizeUpiVpa,
-  hashIdentifier,
-  markTrialLedgerUsed,
-} from '../trialLedger';
+import { parseServiceAccount, getSubscriptionFromFirestore, updateSubscriptionInFirestore, isEventProcessed, markEventProcessed } from '../firestore';
+import { verifyRazorpayWebhookSignature, fetchRazorpaySubscription, cancelRazorpaySubscription, refundRazorpayPayment } from '../razorpay';
+import { normalizeGoogleEmail, normalizeUpiVpa, hashIdentifier, markTrialLedgerUsed } from '../trialLedger';
 import { jsonResponse } from './subscription';
+import { sendPaymentChargedReceipt } from '../emailDispatcher';
 
 /**
  * Handles POST /api/razorpay-webhook
@@ -104,6 +89,8 @@ export async function handleRazorpayWebhook(request: Request, env: Env): Promise
     return jsonResponse({ status: 'ok', ignored: 'out-of-order event' }, 200);
   }
 
+  const userEmail = rzpSub.notes?.userEmail || payloadData.payment?.entity?.email || existing?.userEmail;
+
   // 6. Trial Ledger Confirmation & Anti-Abuse Checks (VPA & Email)
   const isPaymentCaptured =
     eventType === 'payment.captured' ||
@@ -117,7 +104,6 @@ export async function handleRazorpayWebhook(request: Request, env: Env): Promise
 
   if (isPaymentConfirmation) {
     // 6a. Check & Confirm Email Hash in trial_ledger
-    const userEmail = rzpSub.notes?.userEmail || payloadData.payment?.entity?.email;
     let emailAbused = false;
     if (userEmail) {
       const emailHash = await hashIdentifier(normalizeGoogleEmail(userEmail), env.TRIAL_LEDGER_PEPPER);
@@ -238,6 +224,20 @@ export async function handleRazorpayWebhook(request: Request, env: Env): Promise
   ) {
     newStatus = 'active';
     accessUntilIso = new Date(currentPeriodEndMs).toISOString();
+
+    if (eventType === 'subscription.charged' && userEmail) {
+      const planAmt = payloadData.payment?.entity?.amount ? `₹${(payloadData.payment.entity.amount / 100).toFixed(0)}` : '₹49';
+      sendPaymentChargedReceipt(env, creds, {
+        userId,
+        userEmail,
+        planName: 'Pro',
+        amountFormatted: planAmt,
+        periodStartMs: currentPeriodStartMs || nowMs,
+        periodEndMs: currentPeriodEndMs,
+        subId,
+        eventId,
+      }).catch((err) => console.warn('[Webhook] Payment receipt error:', err));
+    }
   } else if (
     eventType === 'subscription.pending' ||
     eventType === 'payment.failed' ||

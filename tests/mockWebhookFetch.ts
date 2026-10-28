@@ -9,6 +9,9 @@ export interface MockWebhookState {
   cancelledSubscriptions: string[];
   cancellationsDetailed: Array<{ subId: string; cancelAtCycleEnd: number }>;
   sentEmails: Array<{ to: string[]; subject: string; html: string; text: string }>;
+  emailJobs?: Map<string, any>;
+  emailIdempotency?: Map<string, any>;
+  profiles?: Map<string, any>;
   publicKeyJwk?: any;
 }
 
@@ -179,6 +182,79 @@ export function createMockFetch(state: MockWebhookState, originalFetch: typeof g
 
       const fields: Record<string, any> = {};
       for (const [k, v] of Object.entries(sub)) {
+        fields[k] = toMockFirestoreValue(v);
+      }
+      return new Response(JSON.stringify({ fields }), { status: 200 });
+    }
+
+    // 9. Firestore emailIdempotency/{cleanKey}
+    if (urlStr.includes('/documents/emailIdempotency/')) {
+      const key = urlStr.split('/').pop()?.split('?')[0] || '';
+      if (!state.emailIdempotency) state.emailIdempotency = new Map();
+      if (init?.method === 'PATCH') {
+        const body = JSON.parse((init.body as string) || '{}');
+        const jobId = body.fields?.jobId?.stringValue || 'job_mock';
+        state.emailIdempotency.set(key, { jobId });
+        return new Response(JSON.stringify({ name: key }), { status: 200 });
+      }
+      const existing = state.emailIdempotency.get(key);
+      if (existing) {
+        return new Response(JSON.stringify({ fields: { jobId: { stringValue: existing.jobId } } }), { status: 200 });
+      }
+      return new Response('Not found', { status: 404 });
+    }
+
+    // 10. Firestore emailJobs/{jobId}
+    if (urlStr.includes('/documents/emailJobs/')) {
+      const jobId = urlStr.split('/').pop()?.split('?')[0] || '';
+      if (!state.emailJobs) state.emailJobs = new Map();
+      if (init?.method === 'PATCH') {
+        const body = JSON.parse((init.body as string) || '{}');
+        const existing = state.emailJobs.get(jobId) || {};
+        const incomingFields: Record<string, any> = {};
+        for (const [k, v] of Object.entries(body.fields || {})) {
+          incomingFields[k] = parseMockFirestoreValue(v);
+        }
+        state.emailJobs.set(jobId, { ...existing, ...incomingFields });
+        return new Response(JSON.stringify({ name: jobId }), { status: 200 });
+      }
+      const job = state.emailJobs.get(jobId);
+      if (!job) return new Response('Not found', { status: 404 });
+      const fields: Record<string, any> = {};
+      for (const [k, v] of Object.entries(job)) {
+        fields[k] = toMockFirestoreValue(v);
+      }
+      return new Response(JSON.stringify({ fields }), { status: 200 });
+    }
+
+    // 11. Firestore runQuery
+    if (urlStr.includes('/documents:runQuery')) {
+      const results: any[] = [];
+      if (state.emailJobs) {
+        for (const [jobId, job] of state.emailJobs.entries()) {
+          const fields: Record<string, any> = {};
+          for (const [k, v] of Object.entries(job)) {
+            fields[k] = toMockFirestoreValue(v);
+          }
+          results.push({
+            document: {
+              name: `projects/demo/databases/(default)/documents/emailJobs/${jobId}`,
+              fields,
+            },
+          });
+        }
+      }
+      return new Response(JSON.stringify(results), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+
+    // 12. Firestore profiles/{userId}
+    if (urlStr.includes('/documents/profiles/')) {
+      const userId = urlStr.split('/').pop()?.split('?')[0] || '';
+      if (!state.profiles) state.profiles = new Map();
+      const prof = state.profiles.get(userId);
+      if (!prof) return new Response('Not found', { status: 404 });
+      const fields: Record<string, any> = {};
+      for (const [k, v] of Object.entries(prof)) {
         fields[k] = toMockFirestoreValue(v);
       }
       return new Response(JSON.stringify({ fields }), { status: 200 });

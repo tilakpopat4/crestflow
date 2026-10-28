@@ -350,12 +350,12 @@ export default function ClientsTab({
   }
 
   return (
-    <div className="p-3.5 sm:p-4 md:p-8 max-w-7xl mx-auto space-y-4 sm:space-y-6 text-slate-900 dark:text-slate-100 w-full min-w-0 max-w-full overflow-hidden">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 text-slate-900 dark:text-slate-100 w-full min-w-0">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
         <div className="min-w-0">
           <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Client Directory & Profiles</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mt-0.5 sm:mt-1">
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
             Click any client profile to view their individual dashboard, work logs, and 30-day payment cycle.
           </p>
         </div>

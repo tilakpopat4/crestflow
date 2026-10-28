@@ -5,6 +5,8 @@ export interface EmailParams {
   subject: string;
   html: string;
   text: string;
+  idempotencyKey?: string;
+  replyTo?: string;
 }
 
 /**
@@ -13,24 +15,30 @@ export interface EmailParams {
 export async function sendResendEmail(
   env: Env,
   params: EmailParams
-): Promise<{ success: boolean; id?: string; error?: string }> {
+): Promise<{ success: boolean; id?: string; error?: string; statusCode?: number }> {
   if (!env.RESEND_API_KEY) {
     console.warn('[Resend] RESEND_API_KEY is not configured. Skipping email.');
     return { success: false, error: 'RESEND_API_KEY not configured' };
   }
 
   const fromEmail = env.RESEND_FROM_EMAIL || 'CrestFlow <billing@crestflow.com>';
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${env.RESEND_API_KEY}`,
+    'Content-Type': 'application/json',
+  };
+
+  if (params.idempotencyKey) {
+    headers['Idempotency-Key'] = params.idempotencyKey;
+  }
 
   try {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${env.RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify({
         from: fromEmail,
         to: [params.to],
+        reply_to: params.replyTo || 'support.crestflow@gmail.com',
         subject: params.subject,
         html: params.html,
         text: params.text,
@@ -40,14 +48,14 @@ export async function sendResendEmail(
     if (!res.ok) {
       const errorText = await res.text();
       console.error(`[Resend Error] ${res.status}: ${errorText}`);
-      return { success: false, error: errorText };
+      return { success: false, error: errorText, statusCode: res.status };
     }
 
     const data = (await res.json()) as { id: string };
-    return { success: true, id: data.id };
+    return { success: true, id: data.id, statusCode: res.status };
   } catch (err: any) {
     console.error('[Resend Network Error]', err);
-    return { success: false, error: err.message };
+    return { success: false, error: err.message, statusCode: 599 };
   }
 }
 
@@ -75,7 +83,7 @@ function wrapEmailHtml(title: string, contentHtml: string): string {
     <div class="brand">CrestFlow</div>
     ${contentHtml}
     <div class="footer">
-      This is an automated operational notification from CrestFlow. You are receiving this because you maintain an active or trialing CrestFlow workspace.
+      This is an automated operational notification from CrestFlow. Need help? Contact our team at <a href="mailto:support.crestflow@gmail.com" style="color: #64748B;">support.crestflow@gmail.com</a>.
     </div>
   </div>
 </body>

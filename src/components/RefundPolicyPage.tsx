@@ -124,7 +124,7 @@ export default function RefundPolicyPage({ onNavigate }: RefundPolicyPageProps) 
               If you have any questions about this Cancellation &amp; Refund Policy, please contact our support team:
             </p>
             <div className="mt-3 p-4 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 space-y-1 text-sm">
-              <p><strong className="text-slate-900 dark:text-slate-100">Email:</strong> tilakpopatfilms@gmail.com</p>
+              <p><strong className="text-slate-900 dark:text-slate-100">Email:</strong> support.crestflow@gmail.com</p>
               <p><strong className="text-slate-900 dark:text-slate-100">Support Hours:</strong> Monday – Saturday, 10:00 AM – 7:00 PM IST</p>
               <p>
                 <a

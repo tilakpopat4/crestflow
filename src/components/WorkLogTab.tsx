@@ -365,10 +365,10 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 w-full min-w-0">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Work Log</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Work Log</h2>
           <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">Track deliverables and services.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">

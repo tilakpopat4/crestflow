@@ -110,7 +110,7 @@ export default function ProfilePage({
   };
 
   return (
-    <div className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 space-y-6">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 w-full min-w-0 flex-1">
       <ProfileHeader isSaving={isSaving} isSaved={isSaved} onSave={handleSave} />
 
       {error && (

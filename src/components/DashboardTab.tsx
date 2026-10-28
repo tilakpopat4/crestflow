@@ -329,11 +329,11 @@ export default function DashboardTab({
   }
 
   return (
-    <div className="p-3 sm:p-4 md:p-8 max-w-7xl mx-auto space-y-4 sm:space-y-6 md:space-y-8 w-full min-w-0 overflow-hidden">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 w-full min-w-0">
       <div className="flex flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Dashboard</h2>
-          <p className="text-slate-500 dark:text-slate-400 mt-0.5 sm:mt-1 text-xs sm:text-sm">Financial overview & payment cycles.</p>
+          <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">Financial overview & payment cycles.</p>
         </div>
         
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">

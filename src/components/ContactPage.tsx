@@ -6,8 +6,11 @@ export default function ContactPage() {
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: { [key: string]: string } = {};
 
@@ -32,14 +35,43 @@ export default function ContactPage() {
     }
 
     setErrors({});
+    setIsSubmitting(true);
+    setSubmitError(null);
 
-    // Since no backend contact email service exists, wire directly to mailto: link
-    const supportEmail = 'work.tilakpopatfilms@gmail.com';
-    const emailSubject = encodeURIComponent(`[CrestFlow Contact] ${subject.trim()}`);
-    const emailBody = encodeURIComponent(
-      `Name: ${name.trim()}\nEmail: ${email.trim()}\n\nMessage:\n${message.trim()}`
-    );
-    window.location.href = `mailto:${supportEmail}?subject=${emailSubject}&body=${emailBody}`;
+    try {
+      const res = await fetch('/api/notify/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          senderName: name.trim(),
+          senderEmail: email.trim(),
+          subject: subject.trim(),
+          message: message.trim(),
+        }),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server responded with ${res.status}`);
+      }
+
+      setIsSubmitted(true);
+      setName('');
+      setEmail('');
+      setSubject('');
+      setMessage('');
+    } catch (err: any) {
+      console.warn('API submission failed, falling back to mailto:', err);
+      const supportEmail = 'support.crestflow@gmail.com';
+      const emailSubject = encodeURIComponent(`[CrestFlow Contact] ${subject.trim()}`);
+      const emailBody = encodeURIComponent(
+        `Name: ${name.trim()}\nEmail: ${email.trim()}\n\nMessage:\n${message.trim()}`
+      );
+      window.location.href = `mailto:${supportEmail}?subject=${emailSubject}&body=${emailBody}`;
+      setSubmitError('Message forwarded to your mail client.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -147,12 +179,26 @@ export default function ContactPage() {
               )}
             </div>
 
+            {isSubmitted && (
+              <div className="p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm text-slate-800 dark:text-slate-200">
+                <span className="font-semibold block mb-1">Message Sent</span>
+                Thank you for contacting CrestFlow. Your inquiry has been routed to our support team and we will respond shortly.
+              </div>
+            )}
+
+            {submitError && !isSubmitted && (
+              <div className="p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-slate-600 dark:text-slate-400">
+                {submitError}
+              </div>
+            )}
+
             <div>
               <button
                 type="submit"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-5 py-2.5 rounded-lg text-sm transition-colors border-none cursor-pointer"
+                disabled={isSubmitting}
+                className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-medium px-5 py-2.5 rounded-lg text-sm transition-colors border-none cursor-pointer"
               >
-                Send Message
+                {isSubmitting ? 'Sending...' : 'Send Message'}
               </button>
             </div>
           </form>
@@ -164,10 +210,10 @@ export default function ContactPage() {
                 Support Email
               </span>
               <a
-                href="mailto:work.tilakpopatfilms@gmail.com"
+                href="mailto:support.crestflow@gmail.com"
                 className="text-slate-900 dark:text-slate-100 hover:underline"
               >
-                work.tilakpopatfilms@gmail.com
+                support.crestflow@gmail.com
               </a>
             </div>
 
