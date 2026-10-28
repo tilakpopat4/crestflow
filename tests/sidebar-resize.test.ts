@@ -74,4 +74,31 @@ describe('Sidebar Resizing & Free Size Management', () => {
     current = DEFAULT_SIDEBAR_WIDTH;
     assert.strictEqual(current, 256);
   });
+
+  it('preserves icon rail and avoids automatic collapse when reducing to minimum size', () => {
+    // When width is reduced down to the absolute minimum width, width is clamped to MIN_SIDEBAR_WIDTH
+    const minWidth = MIN_SIDEBAR_WIDTH;
+    assert.strictEqual(minWidth, 68);
+
+    // Sidebar remains visible as an icon rail, not collapsed to 0
+    const isIconOnly = minWidth < ICON_ONLY_THRESHOLD;
+    assert.strictEqual(isIconOnly, true);
+  });
+
+  it('ensures Sidebar does not attach auto-collapse pointer or touch listeners to nav container', async () => {
+    const fs = await import('node:fs/promises');
+    const path = await import('node:path');
+    const sidebarSource = await fs.readFile(
+      path.resolve(process.cwd(), 'src/components/Sidebar.tsx'),
+      'utf-8'
+    );
+
+    // Must not have accidental swipe-to-collapse pointer or touch handlers attached to <nav>
+    assert.strictEqual(sidebarSource.includes('onPointerUp={handlePointerUp}'), false);
+    assert.strictEqual(sidebarSource.includes('onTouchEnd={handleTouchEnd}'), false);
+    assert.strictEqual(sidebarSource.includes('deltaX < -40'), false);
+
+    // Explicit manual collapse control should be present
+    assert.ok(sidebarSource.includes('aria-label="Collapse sidebar"'));
+  });
 });

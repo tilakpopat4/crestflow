@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { LayoutDashboard, Users, FileText, ClipboardList, MessageSquare, UserPlus } from 'lucide-react';
+import React from 'react';
+import { LayoutDashboard, Users, FileText, ClipboardList, MessageSquare, UserPlus, ChevronLeft } from 'lucide-react';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { Tab } from '../App';
@@ -49,48 +49,6 @@ export default function Sidebar({
     minWidth,
     maxWidth,
   } = useSidebarResize();
-  const touchStartXRef = useRef<number | null>(null);
-  const touchStartYRef = useRef<number | null>(null);
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartXRef.current = e.touches[0].clientX;
-    touchStartYRef.current = e.touches[0].clientY;
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartXRef.current === null) return;
-    const clientX = e.changedTouches[0].clientX;
-    const clientY = e.changedTouches[0].clientY;
-    const deltaX = clientX - touchStartXRef.current;
-    const deltaY = clientY - (touchStartYRef.current || 0);
-
-    // Swiped left by 40px+
-    if (deltaX < -40 && Math.abs(deltaX) > Math.abs(deltaY)) {
-      onCollapse?.();
-    }
-    touchStartXRef.current = null;
-    touchStartYRef.current = null;
-  };
-
-  const handlePointerDown = (e: React.PointerEvent) => {
-    if (e.button === 0) {
-      touchStartXRef.current = e.clientX;
-      touchStartYRef.current = e.clientY;
-    }
-  };
-
-  const handlePointerUp = (e: React.PointerEvent) => {
-    if (touchStartXRef.current === null) return;
-    const deltaX = e.clientX - touchStartXRef.current;
-    const deltaY = e.clientY - (touchStartYRef.current || 0);
-
-    if (deltaX < -40 && Math.abs(deltaX) > Math.abs(deltaY)) {
-      onCollapse?.();
-    }
-    touchStartXRef.current = null;
-    touchStartYRef.current = null;
-  };
-
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'clients', label: 'Clients', icon: Users },
@@ -102,10 +60,6 @@ export default function Sidebar({
 
   return (
     <nav
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      onPointerDown={handlePointerDown}
-      onPointerUp={handlePointerUp}
       style={{ '--sidebar-width': `${width}px` } as React.CSSProperties}
       className={clsx(
         "fixed md:relative bottom-0 left-0 w-full bg-white text-slate-900 flex md:flex-col md:h-full z-20 border-r border-slate-200 border-t md:border-t-0 pb-[max(env(safe-area-inset-bottom),4px)] md:pb-0",
@@ -124,24 +78,37 @@ export default function Sidebar({
         <div
           className={clsx(
             "flex items-center transition-all duration-200",
-            isIconOnly ? "justify-center mb-0" : "gap-3 mb-3"
+            isIconOnly ? "justify-center mb-0" : "justify-between gap-2 mb-3"
           )}
         >
-          <Logo className="w-8 h-8 rounded-xl shadow-xs shrink-0" />
-          <AnimatePresence initial={false}>
-            {!isIconOnly && (
-              <motion.span
-                key="brand-name"
-                initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: 'auto' }}
-                exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, width: 0 }}
-                transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
-                className="text-xl font-bold tracking-tight text-slate-900 overflow-hidden whitespace-nowrap"
-              >
-                CrestFlow
-              </motion.span>
-            )}
-          </AnimatePresence>
+          <div className="flex items-center gap-3 min-w-0">
+            <Logo className="w-8 h-8 rounded-xl shadow-xs shrink-0" />
+            <AnimatePresence initial={false}>
+              {!isIconOnly && (
+                <motion.span
+                  key="brand-name"
+                  initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: 'auto' }}
+                  exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, width: 0 }}
+                  transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
+                  className="text-xl font-bold tracking-tight text-slate-900 overflow-hidden whitespace-nowrap"
+                >
+                  CrestFlow
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </div>
+          {!isIconOnly && onCollapse && (
+            <button
+              type="button"
+              onClick={onCollapse}
+              className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer border-none bg-transparent shrink-0"
+              title="Collapse sidebar"
+              aria-label="Collapse sidebar"
+            >
+              <ChevronLeft size={16} />
+            </button>
+          )}
         </div>
         <AnimatePresence initial={false}>
           {!isIconOnly && (
