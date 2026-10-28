@@ -46,8 +46,8 @@ export default function AISummarizer({ clients, workItems, profile }: AISummariz
   };
 
   return (
-    <div className="bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden flex flex-col mt-8">
-      <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-800/80">
+    <div className="bg-slate-50 dark:bg-slate-900 rounded-xl shadow-xs overflow-hidden flex flex-col mt-8">
+      <div className="p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-800/80">
         <div>
           <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
             <Sparkles className="text-indigo-600 dark:text-indigo-400" size={20} />
