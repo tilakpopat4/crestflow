@@ -444,7 +444,7 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
       </div>
 
       {isFormOpen && (
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 mb-8">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm mb-8">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">{editingWorkId ? 'Edit Work Log Entry' : 'Log Completed Work'}</h3>
             <button onClick={handleCancel} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">×</button>
@@ -691,7 +691,7 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
           )}
         </div>
       ) : (
-        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm contain-paint">
+        <div className="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm contain-paint">
           {/* Mobile Header Bar */}
           <div className="md:hidden flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-400">
             <label className="flex items-center gap-2 cursor-pointer select-none">

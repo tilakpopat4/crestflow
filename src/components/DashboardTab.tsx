@@ -371,14 +371,14 @@ export default function DashboardTab({
 
       {/* Career Anniversary Milestone Banner if currently active */}
       {journey?.currentAnniversary && !isAnnivBannerDismissed && (
-        <div className="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between gap-4 relative overflow-hidden animate-in fade-in duration-200">
+        <div className="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 p-4 sm:p-5 rounded-xl shadow-xs flex items-center justify-between gap-4 relative overflow-hidden animate-in fade-in duration-200">
           <div className="flex items-center gap-3.5 relative z-10">
-            <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
+            <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
               <Award size={20} />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-medium uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded">
+                <span className="text-[10px] font-medium uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded">
                   Career Anniversary Milestone
                 </span>
                 <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
@@ -414,7 +414,7 @@ export default function DashboardTab({
       />
 
       {!isNotificationDismissed && activeNotifications.length > 0 && (
-        <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-xs space-y-3 relative">
+        <div className="bg-slate-50 dark:bg-slate-900/60 rounded-xl p-4 sm:p-5 shadow-xs space-y-3 relative">
           <button
             onClick={() => setIsNotificationDismissed(true)}
             className="absolute top-3.5 right-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-md transition-colors cursor-pointer"
@@ -506,7 +506,7 @@ export default function DashboardTab({
 
       {/* Metric Cards */}
       <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6">
-        <div className="bg-white dark:bg-slate-800 p-2.5 sm:p-4 md:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs flex flex-col sm:flex-row items-start gap-1.5 sm:gap-3 md:gap-4 min-w-0">
+        <div className="bg-white dark:bg-slate-800 p-2.5 sm:p-4 md:p-6 rounded-xl shadow-xs flex flex-col sm:flex-row items-start gap-1.5 sm:gap-3 md:gap-4 min-w-0">
           <div className="p-1.5 sm:p-2.5 md:p-3 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-lg shrink-0">
             <IndianRupee size={16} className="sm:hidden" />
             <IndianRupee size={22} className="hidden sm:block" />
@@ -521,7 +521,7 @@ export default function DashboardTab({
           </div>
         </div>
         
-        <div className="bg-white dark:bg-slate-800 p-2.5 sm:p-4 md:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs flex flex-col sm:flex-row items-start gap-1.5 sm:gap-3 md:gap-4 min-w-0">
+        <div className="bg-white dark:bg-slate-800 p-2.5 sm:p-4 md:p-6 rounded-xl shadow-xs flex flex-col sm:flex-row items-start gap-1.5 sm:gap-3 md:gap-4 min-w-0">
           <div className="p-1.5 sm:p-2.5 md:p-3 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg shrink-0">
             <Clock size={16} className="sm:hidden" />
             <Clock size={22} className="hidden sm:block" />
@@ -536,7 +536,7 @@ export default function DashboardTab({
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 p-2.5 sm:p-4 md:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs flex flex-col sm:flex-row items-start gap-1.5 sm:gap-3 md:gap-4 min-w-0">
+        <div className="bg-white dark:bg-slate-800 p-2.5 sm:p-4 md:p-6 rounded-xl shadow-xs flex flex-col sm:flex-row items-start gap-1.5 sm:gap-3 md:gap-4 min-w-0">
           <div className="p-1.5 sm:p-2.5 md:p-3 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-lg shrink-0">
             <TrendingUp size={16} className="sm:hidden" />
             <TrendingUp size={22} className="hidden sm:block" />
@@ -557,7 +557,7 @@ export default function DashboardTab({
       {/* Analytics & Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
         {/* Recharts Monthly Earnings Line Chart */}
-        <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-3.5 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs flex flex-col min-w-0">
+        <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-3.5 sm:p-6 rounded-xl shadow-xs flex flex-col min-w-0">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 sm:mb-6">
             <div>
               <h3 className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Monthly Earnings Trend</h3>
@@ -649,7 +649,7 @@ export default function DashboardTab({
         </div>
 
         {/* Client Distribution Bar Chart */}
-        <div className="lg:col-span-1 bg-white dark:bg-slate-800 p-3.5 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs flex flex-col min-w-0">
+        <div className="lg:col-span-1 bg-white dark:bg-slate-800 p-3.5 sm:p-6 rounded-xl shadow-xs flex flex-col min-w-0">
           <h3 className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-4 sm:mb-6">Client Revenue</h3>
           <div className="flex-1 min-h-[240px] sm:min-h-[280px]">
             {metrics.chartData.length > 0 ? (
@@ -698,8 +698,8 @@ export default function DashboardTab({
       </div>
 
       {/* Recent Invoices Table */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs overflow-hidden flex flex-col">
-        <div className="p-3.5 sm:p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-white dark:bg-slate-800">
+      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xs overflow-hidden flex flex-col">
+        <div className="p-3.5 sm:p-6 flex justify-between items-center bg-white dark:bg-slate-800">
           <h3 className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Recent Invoices</h3>
         </div>
         

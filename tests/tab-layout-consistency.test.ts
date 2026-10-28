@@ -106,5 +106,58 @@ describe('Tab Layout & Ratio Consistency Suite', () => {
       'Send via Gmail and actions must use whitespace-nowrap and shrink-0 to prevent button text stacking'
     );
   });
+
+  it('removes box and tab outline borders from major card containers across pages', () => {
+    // 1. ClientDashboard: profile card, metrics, and tab strip must not have redundant box/tab outlines
+    const cdContent = fs.readFileSync(path.resolve(process.cwd(), 'src/components/ClientDashboard.tsx'), 'utf8');
+    assert.strictEqual(
+      cdContent.includes('Main Client Profile Header Card */}'),
+      true
+    );
+    assert.strictEqual(
+      cdContent.includes('rounded-2xl border border-slate-200 dark:border-slate-700 p-4 sm:p-6 shadow-xs relative overflow-hidden'),
+      false,
+      'Client profile header card must not have outer border outline'
+    );
+    assert.strictEqual(
+      cdContent.includes('border-b border-slate-200 dark:border-slate-700 px-4 md:px-6 pt-4 flex gap-4 md:gap-6 overflow-x-auto scrollbar-none -mb-px'),
+      false,
+      'Client tab navigation strip must not have full-width divider border'
+    );
+
+    // 2. DashboardTab: metric cards and chart card must not have outer border outlines
+    const dashContent = fs.readFileSync(path.resolve(process.cwd(), 'src/components/DashboardTab.tsx'), 'utf8');
+    assert.strictEqual(
+      dashContent.includes('p-2.5 sm:p-4 md:p-6 rounded-xl border border-slate-200'),
+      false,
+      'Dashboard metric cards must not have outer border outline'
+    );
+    assert.strictEqual(
+      dashContent.includes('lg:col-span-2 bg-white dark:bg-slate-800 p-3.5 sm:p-6 rounded-xl border border-slate-200'),
+      false,
+      'Dashboard monthly trend chart card must not have outer border outline'
+    );
+
+    // 3. InvoiceTab: invoice history card and table wrapper must not have outer border outlines
+    const invContent = fs.readFileSync(path.resolve(process.cwd(), 'src/components/InvoiceTab.tsx'), 'utf8');
+    assert.strictEqual(
+      invContent.includes('rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6 space-y-4'),
+      false,
+      'Invoice history container must not have outer card border outline'
+    );
+    assert.strictEqual(
+      invContent.includes('overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-xl'),
+      false,
+      'Invoice table container must not have redundant outer border box'
+    );
+
+    // 4. WorkLogTab: work logs card must not have outer border outline
+    const workContent = fs.readFileSync(path.resolve(process.cwd(), 'src/components/WorkLogTab.tsx'), 'utf8');
+    assert.strictEqual(
+      workContent.includes('bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm contain-paint'),
+      false,
+      'Work logs table container must not have redundant outer border box'
+    );
+  });
 });
 

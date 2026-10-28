@@ -143,39 +143,39 @@ export default function ClientOnboardingTab({
 
       {/* Summary Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
-        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5 sm:p-6 shadow-xs flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-5 sm:p-6 shadow-xs flex items-center justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Pending Inquiries</p>
             <p className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 mt-1">{counts.pending}</p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/60 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+          <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/60  flex items-center justify-center text-indigo-600 dark:text-indigo-400">
             <Inbox size={22} />
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5 sm:p-6 shadow-xs flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-5 sm:p-6 shadow-xs flex items-center justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Accepted Clients</p>
             <p className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 mt-1">{counts.accepted}</p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-300">
+          <div className="w-12 h-12 rounded-xl bg-slate-50 dark:bg-slate-900/60  flex items-center justify-center text-slate-700 dark:text-slate-300">
             <CheckCircle2 size={22} />
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5 sm:p-6 shadow-xs flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-5 sm:p-6 shadow-xs flex items-center justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Submissions</p>
             <p className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 mt-1">{counts.all}</p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400">
+          <div className="w-12 h-12 rounded-xl bg-slate-50 dark:bg-slate-900/60  flex items-center justify-center text-slate-600 dark:text-slate-400">
             <Users size={22} />
           </div>
         </div>
       </div>
 
       {/* Inquiries Header, Search & Filter Bar */}
-      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5 sm:p-6 shadow-xs space-y-4">
+      <div className="bg-white dark:bg-slate-800 rounded-xl p-5 sm:p-6 shadow-xs space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <UserPlus size={18} className="text-indigo-600 dark:text-indigo-400" />
@@ -269,7 +269,7 @@ export default function ClientOnboardingTab({
             className="w-full"
           >
             {filteredRequests.length === 0 ? (
-              <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-12 text-center space-y-3">
+              <div className="bg-white dark:bg-slate-800 rounded-xl p-12 text-center space-y-3">
                 <div className="w-12 h-12 bg-slate-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mx-auto text-slate-400 dark:text-slate-400">
                   <Inbox size={22} />
                 </div>

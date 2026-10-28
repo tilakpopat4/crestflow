@@ -108,7 +108,7 @@ export default function GettingStartedCard({
   };
 
   return (
-    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5 shadow-xs space-y-4">
+    <div className="bg-white dark:bg-slate-800 border  rounded-xl p-5 shadow-xs space-y-4">
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
@@ -139,8 +139,8 @@ export default function GettingStartedCard({
         {/* Step 1: Profile & Payment Info */}
         <div className={`p-4 rounded-lg border transition-colors flex flex-col justify-between space-y-3 ${
           isProfileComplete
-            ? 'bg-slate-50/50 dark:bg-slate-900/30 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400'
-            : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100'
+            ? 'bg-slate-50/50 dark:bg-slate-900/30  text-slate-600 dark:text-slate-400'
+            : 'bg-white dark:bg-slate-800  text-slate-900 dark:text-slate-100'
         }`}>
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
@@ -179,8 +179,8 @@ export default function GettingStartedCard({
         {/* Step 2: Add First Client */}
         <div className={`p-4 rounded-lg border transition-colors flex flex-col justify-between space-y-3 ${
           isClientAdded
-            ? 'bg-slate-50/50 dark:bg-slate-900/30 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400'
-            : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100'
+            ? 'bg-slate-50/50 dark:bg-slate-900/30  text-slate-600 dark:text-slate-400'
+            : 'bg-white dark:bg-slate-800  text-slate-900 dark:text-slate-100'
         }`}>
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
@@ -219,8 +219,8 @@ export default function GettingStartedCard({
         {/* Step 3: Log Work & Generate Invoice */}
         <div className={`p-4 rounded-lg border transition-colors flex flex-col justify-between space-y-3 ${
           isWorkOrInvoiceDone
-            ? 'bg-slate-50/50 dark:bg-slate-900/30 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400'
-            : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100'
+            ? 'bg-slate-50/50 dark:bg-slate-900/30  text-slate-600 dark:text-slate-400'
+            : 'bg-white dark:bg-slate-800  text-slate-900 dark:text-slate-100'
         }`}>
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">

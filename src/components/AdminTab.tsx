@@ -181,7 +181,7 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
       </div>
 
       {/* Master Subscription Feature Toggle */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
+      <div className="bg-white dark:bg-slate-900 rounded-xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
         <div className="space-y-1">
           <div className="flex items-center gap-2.5">
             <span className={`w-3 h-3 rounded-full ${isSubscriptionEnabled ? 'bg-indigo-600' : 'bg-slate-400'}`} />
@@ -218,7 +218,7 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
 
       {/* Metrics Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs">
+        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs">
           <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Total Freelancers
           </div>
@@ -227,7 +227,7 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs">
+        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs">
           <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Active Subscriptions
           </div>
@@ -236,7 +236,7 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs">
+        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs">
           <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             VIP Whitelist
           </div>
@@ -245,7 +245,7 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs">
+        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs">
           <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Admin Accounts
           </div>
@@ -256,7 +256,7 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2.5 overflow-x-auto text-sm relative">
+      <div className="flex items-center gap-2 pb-2.5 overflow-x-auto text-sm relative">
         {[
           { id: 'subscriptions' as const, label: 'User Subscriptions', icon: Users },
           { id: 'whitelist' as const, label: 'VIP Whitelist', icon: UserCheck },

@@ -157,7 +157,7 @@ export default function BillingPage({
         )}
 
         {/* Current Plan Overview Card */}
-        <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 mb-6">
+        <div className="bg-white dark:bg-slate-900 rounded-lg shadow-xs p-6 mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800 gap-4">
             <div>
               <div className="text-xs uppercase tracking-wider text-slate-500 mb-1">Current Tier</div>

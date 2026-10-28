@@ -86,7 +86,7 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Left/Middle: Testimonials Stats Card */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xs border border-slate-200 dark:border-slate-700 p-6 flex flex-col md:flex-row lg:col-span-2 items-stretch gap-6 md:gap-8">
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xs p-6 flex flex-col md:flex-row lg:col-span-2 items-stretch gap-6 md:gap-8">
           
           {/* Average Rating Widget */}
           <div className="flex flex-col items-center justify-center text-center p-4 md:border-r border-slate-100 dark:border-slate-700 md:pr-8 min-w-[150px]">
@@ -134,7 +134,7 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
         </div>
 
         {/* Right: Review Request Link Generator */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xs border border-slate-200 dark:border-slate-700 p-6 flex flex-col justify-between">
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xs p-6 flex flex-col justify-between">
           <div className="space-y-4">
             <h3 className="font-bold text-slate-800 dark:text-slate-100 text-sm flex items-center gap-1.5">
               <Share2 className="w-4 h-4 text-indigo-500" /> Request a Review
@@ -196,7 +196,7 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
       </div>
 
       {/* Review List Filter & Search Toolbar */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xs border border-slate-200 dark:border-slate-700 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xs p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
         
         {/* Search Input */}
         <div className="relative flex-1 max-w-lg">
@@ -250,7 +250,7 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
           {filteredReviews.map((review) => (
             <div 
               key={review.id} 
-              className="bg-white dark:bg-slate-800 rounded-xl shadow-xs border border-slate-200 dark:border-slate-700 p-6 flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-md transition-all duration-200 relative group animate-in fade-in"
+              className="bg-white dark:bg-slate-800 rounded-xl shadow-xs p-6 flex flex-col justify-between hover:shadow-md transition-all duration-200 relative group animate-in fade-in"
             >
               
               {/* Delete button (always visible on mobile touch, hover on desktop) */}
@@ -315,7 +315,7 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
           ))}
         </div>
       ) : (
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xs border border-slate-200 dark:border-slate-700 py-16 px-6 text-center space-y-4 max-w-lg mx-auto">
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xs py-16 px-6 text-center space-y-4 max-w-lg mx-auto">
           <div className="w-12 h-12 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-700 text-slate-400 dark:text-slate-500 flex items-center justify-center mx-auto shadow-xs">
             <MessageSquare className="w-6 h-6" />
           </div>

@@ -385,7 +385,7 @@ export default function ClientsTab({
         const pendingRequests = serviceRequests.filter(req => req.status === 'pending');
         if (pendingRequests.length === 0) return null;
         return (
-          <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs space-y-4">
+          <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-5 shadow-xs space-y-4">
             <div className="flex items-center gap-2.5 text-slate-900 dark:text-slate-100 font-bold text-sm">
               <Briefcase className="text-indigo-600 dark:text-indigo-400" size={20} />
               <span>Incoming Client Onboardings / Inquiries ({pendingRequests.length})</span>
@@ -393,7 +393,7 @@ export default function ClientsTab({
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {pendingRequests.map((req) => (
-                <div key={req.id} className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs flex flex-col justify-between gap-3">
+                <div key={req.id} className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-xs flex flex-col justify-between gap-3">
                   <div className="space-y-2">
                     <div className="flex items-start justify-between gap-2">
                       <div>
@@ -407,7 +407,7 @@ export default function ClientsTab({
                       )}
                     </div>
                     
-                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-900/60 p-2.5 rounded-lg border border-slate-100 dark:border-slate-800">
+                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-900/60 p-2.5 rounded-lg">
                       {req.projectDetails}
                     </p>
                     
@@ -445,7 +445,7 @@ export default function ClientsTab({
 
       {/* Global Payment Reminders Bar across clients (if any client has payment due or delayed) */}
       {!isNotificationDismissed && notificationClients.length > 0 && (
-        <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 sm:p-5 shadow-xs space-y-3 relative w-full min-w-0">
+        <div className="bg-slate-50 dark:bg-slate-900/60 rounded-xl p-3.5 sm:p-5 shadow-xs space-y-3 relative w-full min-w-0">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2 pr-7 sm:pr-8 min-w-0">
             <div className="flex items-center gap-2 text-slate-900 dark:text-slate-100 font-bold text-xs sm:text-sm min-w-0">
               <AlertTriangle className="text-red-600 dark:text-red-400 shrink-0" size={16} />
@@ -468,7 +468,7 @@ export default function ClientsTab({
             {notificationClients.map(({ client, statusInfo, financials }) => (
               <div
                 key={client.id}
-                className="bg-white dark:bg-slate-800 p-3 sm:p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 shadow-xs min-w-0 overflow-hidden w-full"
+                className="bg-white dark:bg-slate-800 p-3 sm:p-3.5 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 shadow-xs min-w-0 overflow-hidden w-full"
               >
                 <div className="w-full sm:w-auto min-w-0 flex-1">
                   <div className="flex items-center gap-2 min-w-0">
@@ -519,7 +519,7 @@ export default function ClientsTab({
 
       {/* Add / Edit Client Form Modal */}
       {isFormOpen && (
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-md animate-in fade-in slide-in-from-top-4 duration-300">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-md animate-in fade-in slide-in-from-top-4 duration-300">
           <div className="flex justify-between items-center mb-6 border-b border-slate-100 dark:border-slate-700 pb-3">
             <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">{isEditing ? 'Edit Client Profile' : 'Add New Client Profile'}</h3>
             <button onClick={cancelEdit} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
@@ -850,7 +850,7 @@ export default function ClientsTab({
       {/* Client Profiles Grid */}
       <div className="grid grid-cols-1 min-[960px]:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
         {clients.length === 0 ? (
-          <div className="col-span-full py-16 px-6 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-8 space-y-4 max-w-xl mx-auto my-4 shadow-xs">
+          <div className="col-span-full py-16 px-6 text-center bg-white dark:bg-slate-800 rounded-2xl p-8 space-y-4 max-w-xl mx-auto my-4 shadow-xs">
             <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-400 flex items-center justify-center mx-auto">
               <Users size={24} />
             </div>
@@ -878,7 +878,7 @@ export default function ClientsTab({
             </div>
           </div>
         ) : filteredClients.length === 0 ? (
-          <div className="col-span-full py-16 px-6 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-8 space-y-4 max-w-xl mx-auto my-4 shadow-xs">
+          <div className="col-span-full py-16 px-6 text-center bg-white dark:bg-slate-800 rounded-2xl p-8 space-y-4 max-w-xl mx-auto my-4 shadow-xs">
             <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-400 flex items-center justify-center mx-auto">
               <Search size={24} />
             </div>
@@ -913,10 +913,10 @@ export default function ClientsTab({
             return (
               <div
                 key={client.id}
-                className={`rounded-2xl border p-3.5 sm:p-5 md:p-6 shadow-xs transition-all group flex flex-col justify-between space-y-3.5 sm:space-y-4 md:space-y-5 overflow-hidden w-full min-w-0 ${
+                className={`rounded-2xl p-3.5 sm:p-5 md:p-6 shadow-xs transition-all group flex flex-col justify-between space-y-3.5 sm:space-y-4 md:space-y-5 overflow-hidden w-full min-w-0 ${
                   client.isClosed
-                    ? 'bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-700/50 opacity-75 hover:opacity-100'
-                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:shadow-md'
+                    ? 'bg-slate-50 dark:bg-slate-900/50 opacity-75 hover:opacity-100'
+                    : 'bg-white dark:bg-slate-800 hover:shadow-md'
                 }`}
               >
                 <div className="space-y-3 sm:space-y-4 min-w-0 w-full">
@@ -934,7 +934,7 @@ export default function ClientsTab({
                           }}
                         />
                       ) : (
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/60 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-base sm:text-lg shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-base sm:text-lg shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
                           {client.name.charAt(0).toUpperCase()}
                         </div>
                       )}

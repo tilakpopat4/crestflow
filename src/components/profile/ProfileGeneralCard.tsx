@@ -38,7 +38,7 @@ export const ProfileGeneralCard: React.FC<ProfileGeneralCardProps> = ({
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 sm:p-6 space-y-5">
+    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-xs p-5 sm:p-6 space-y-5">
       {/* Profile Picture & Connected Account Details */}
       <div className="flex items-center gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
         {user.photoURL ? (

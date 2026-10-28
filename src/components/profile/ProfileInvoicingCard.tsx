@@ -26,7 +26,7 @@ export const ProfileInvoicingCard: React.FC<ProfileInvoicingCardProps> = ({
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 sm:p-6 space-y-4">
+    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-xs p-5 sm:p-6 space-y-4">
       <div>
         <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
           <QrCode size={16} className="text-indigo-600 dark:text-indigo-400" />

@@ -57,7 +57,7 @@ export const OnboardingRequestCard: React.FC<OnboardingRequestCardProps> = ({
   };
 
   return (
-    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5 sm:p-6 shadow-xs flex flex-col justify-between gap-4">
+    <div className="bg-white dark:bg-slate-800 rounded-xl p-5 sm:p-6 shadow-xs flex flex-col justify-between gap-4">
       <div className="space-y-3">
         {/* Header: Client & Status */}
         <div className="flex items-start justify-between gap-3">

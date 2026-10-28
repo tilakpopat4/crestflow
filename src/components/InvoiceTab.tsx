@@ -1016,7 +1016,7 @@ export default function InvoiceTab({
       )}
 
       <div className="max-w-4xl mx-auto space-y-6">
-          <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-xl shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-2">
                 <Receipt size={18} className="text-indigo-500" />
@@ -1105,7 +1105,7 @@ export default function InvoiceTab({
             </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-xl shadow-sm">
             {/* Automatic Billing Format Indicator (Auto-selected from client) */}
             <div className="mb-6 p-3.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl flex items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
@@ -1135,7 +1135,7 @@ export default function InvoiceTab({
 
             {invoiceBillingMode === 'monthly_retainer' ? (
               /* Monthly Retainer Section */
-              <div className="p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60 space-y-4">
+              <div className="p-4 sm:p-5 rounded-xl bg-slate-50 dark:bg-slate-900/60 space-y-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
@@ -1533,7 +1533,7 @@ export default function InvoiceTab({
         </div>
 
       {/* Invoice History & Email Actions Section */}
-      <div className="mt-12 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6 space-y-4">
+      <div className="mt-12 bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6 space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-700 pb-4">
           <div>
             <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
@@ -1629,7 +1629,7 @@ export default function InvoiceTab({
                 </button>
               </div>
             )}
-            <div className="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-xl">
+            <div className="overflow-x-auto w-full">
             <table className="w-full text-left border-collapse min-w-[960px]">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
@@ -1845,7 +1845,7 @@ export default function InvoiceTab({
       )}
 
         {/* Last Bar: Total Earned Till Today */}
-        <div className="mt-6 bg-slate-900 text-white rounded-xl p-5 md:p-6 border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-5 relative overflow-hidden">
+        <div className="mt-6 bg-slate-900 text-white rounded-xl p-5 md:p-6 flex flex-col md:flex-row items-center justify-between gap-5 relative overflow-hidden">
           <div className="flex items-center gap-4 relative z-10 w-full md:w-auto">
             <div className="w-12 h-12 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-indigo-400 shrink-0">
               <IndianRupee size={24} className="stroke-[2.5]" />
