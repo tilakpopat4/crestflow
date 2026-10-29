@@ -95,3 +95,4 @@ export async function handleNotifyNewClientRequest(request: Request, env: Env): 
   const dispatchResult = await dispatchEmailJob(env, creds, job);
   return jsonResponse({ success: true, jobId, duplicate, dispatched: dispatchResult.success });
 }
+

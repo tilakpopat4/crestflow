@@ -83,3 +83,4 @@ export async function handleNotifyPaymentDueToday(request: Request, env: Env): P
   const dispatchResult = await dispatchEmailJob(env, creds, job);
   return jsonResponse({ success: true, jobId, dispatched: dispatchResult.success });
 }
+

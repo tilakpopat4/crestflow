@@ -67,3 +67,4 @@ export function wrapEmailHtml(title: string, contentHtml: string): string {
 </body>
 </html>`;
 }
+

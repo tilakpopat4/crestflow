@@ -55,3 +55,4 @@ export function usePaymentDueNotifier(
     });
   }, [user, clients, invoices, workItems]);
 }
+

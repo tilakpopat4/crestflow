@@ -126,3 +126,4 @@ export async function handleProcessEmailQueue(request: Request, env: Env): Promi
   const stats = await processDueEmailJobs(env, 10);
   return jsonResponse({ success: true, stats });
 }
+
