@@ -182,7 +182,7 @@ export default function ContactPage() {
             {isSubmitted && (
               <div className="p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm text-slate-800 dark:text-slate-200">
                 <span className="font-semibold block mb-1">Message Sent</span>
-                Thank you for contacting CrestFlow. Your inquiry has been routed to our support team and we will respond shortly.
+                Thank you for contacting CrestFlow. We have sent a confirmation email to your inbox — our team will contact you within 48 hours.
               </div>
             )}
 

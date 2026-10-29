@@ -197,7 +197,7 @@ describe('Production-Ready Automated Email System Suite', () => {
   });
 
   describe('2. Event-Triggered Email Workflows', () => {
-    it('dispatches contact inquiry email directly to support.crestflow@gmail.com', async () => {
+    it('dispatches contact inquiry email directly to support.crestflow@gmail.com and auto-replies within 48 hours', async () => {
       const initialCount = mockState.sentEmails.length;
 
       const res = await worker.fetch(
@@ -220,15 +220,22 @@ describe('Production-Ready Automated Email System Suite', () => {
       assert.equal(res.status, 200);
       const data = await res.json();
       assert.equal(data.success, true);
-      assert.equal(mockState.sentEmails.length, initialCount + 1);
+      assert.equal(mockState.sentEmails.length, initialCount + 2);
 
-      const sent = mockState.sentEmails[mockState.sentEmails.length - 1];
-      assert.deepEqual(sent.to, ['support.crestflow@gmail.com']);
-      assert.match(sent.subject, /Question about video logging/);
-      assert.match(sent.text, /Sarah Connor/);
+      // 1. Support team forwarding
+      const supportEmail = mockState.sentEmails[initialCount];
+      assert.deepEqual(supportEmail.to, ['support.crestflow@gmail.com']);
+      assert.match(supportEmail.subject, /Question about video logging/);
+      assert.match(supportEmail.text, /Sarah Connor/);
+
+      // 2. Instant auto-reply to sender with 48h SLA
+      const autoReply = mockState.sentEmails[initialCount + 1];
+      assert.deepEqual(autoReply.to, ['sarah@resistance.org']);
+      assert.match(autoReply.subject, /Our team will contact you within 48 hours/);
+      assert.match(autoReply.text, /48 hours/);
     });
 
-    it('dispatches welcome greeting email on first sign-up and prevents duplicates', async () => {
+    it('dispatches welcome greeting email on first sign-up with "Congrats You\'ve Started Your Journey" and prevents duplicates', async () => {
       const token = createMockIdToken('user_welcome_test', 'creator@crestflow.test', keyPair.privateKey);
       const initialCount = mockState.sentEmails.length;
 
@@ -249,6 +256,9 @@ describe('Production-Ready Automated Email System Suite', () => {
       assert.equal(data1.success, true);
       assert.equal(mockState.sentEmails.length, initialCount + 1);
 
+      const sentWelcome = mockState.sentEmails[initialCount];
+      assert.match(sentWelcome.subject, /Congrats You've Started Your Journey/);
+
       // Second call -> Idempotent check prevents sending again
       const res2 = await worker.fetch(
         new Request('https://crestflow.app/api/notify/welcome', {
@@ -264,6 +274,121 @@ describe('Production-Ready Automated Email System Suite', () => {
       assert.equal(res2.status, 200);
       const data2 = await res2.json();
       assert.equal(data2.already_sent, true);
+      assert.equal(mockState.sentEmails.length, initialCount + 1);
+    });
+
+    it('dispatches work milestone celebration email for 100 days worked and enforces deduplication', async () => {
+      const token = createMockIdToken('usr_milestone_100', 'milestone100@test.com', keyPair.privateKey);
+      const initialCount = mockState.sentEmails.length;
+
+      const res1 = await worker.fetch(
+        new Request('https://crestflow.app/api/notify/milestone', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            milestoneId: '100_days',
+            milestoneTitle: '100 Days Freelancing Milestone',
+            daysWorked: 100,
+            durationFormatted: '3 mos, 10 days',
+          }),
+        }),
+        testEnv
+      );
+
+      assert.equal(res1.status, 200);
+      const data1 = await res1.json();
+      assert.equal(data1.success, true);
+      assert.equal(mockState.sentEmails.length, initialCount + 1);
+
+      const sentMilestone = mockState.sentEmails[initialCount];
+      assert.deepEqual(sentMilestone.to, ['milestone100@test.com']);
+      assert.match(sentMilestone.subject, /100 Days Freelancing Milestone/);
+      assert.match(sentMilestone.text, /100 days worked/i);
+      assert.match(sentMilestone.html, /100 active days of freelancing/i);
+
+      // Re-trigger with same milestone -> idempotent
+      const res2 = await worker.fetch(
+        new Request('https://crestflow.app/api/notify/milestone', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            milestoneId: '100_days',
+            milestoneTitle: '100 Days Freelancing Milestone',
+            daysWorked: 100,
+            durationFormatted: '3 mos, 10 days',
+          }),
+        }),
+        testEnv
+      );
+
+      assert.equal(res2.status, 200);
+      const data2 = await res2.json();
+      assert.equal(data2.already_celebrated, true);
+      assert.equal(mockState.sentEmails.length, initialCount + 1);
+    });
+
+    it('dispatches payment due today notification to freelancer with daily deduplication', async () => {
+      const token = createMockIdToken('usr_due_freelancer', 'freelancer.due@test.com', keyPair.privateKey);
+      const initialCount = mockState.sentEmails.length;
+
+      const res1 = await worker.fetch(
+        new Request('https://crestflow.app/api/notify/payment-due-today', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            clientId: 'client_roots_media',
+            clientName: 'Roots & Stories Media',
+            amountDueFormatted: '₹15,000',
+            paymentBasis: 'Monthly Retainer',
+            dueDateFormatted: '29 Oct 2026',
+            invoiceId: 'CF-00008',
+          }),
+        }),
+        testEnv
+      );
+
+      assert.equal(res1.status, 200);
+      const data1 = await res1.json();
+      assert.equal(data1.success, true);
+      assert.equal(mockState.sentEmails.length, initialCount + 1);
+
+      const sentDue = mockState.sentEmails[initialCount];
+      assert.deepEqual(sentDue.to, ['freelancer.due@test.com']);
+      assert.match(sentDue.subject, /Payment Due Today: Roots & Stories Media/);
+      assert.match(sentDue.text, /₹15,000/);
+
+      // Re-triggering for same client today -> idempotent
+      const res2 = await worker.fetch(
+        new Request('https://crestflow.app/api/notify/payment-due-today', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            clientId: 'client_roots_media',
+            clientName: 'Roots & Stories Media',
+            amountDueFormatted: '₹15,000',
+            paymentBasis: 'Monthly Retainer',
+            dueDateFormatted: '29 Oct 2026',
+            invoiceId: 'CF-00008',
+          }),
+        }),
+        testEnv
+      );
+
+      assert.equal(res2.status, 200);
+      const data2 = await res2.json();
+      assert.equal(data2.already_notified, true);
       assert.equal(mockState.sentEmails.length, initialCount + 1);
     });
 

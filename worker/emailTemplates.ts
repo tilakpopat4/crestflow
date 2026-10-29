@@ -3,6 +3,16 @@
  * Strict schemas, zero emojis, and restrained styling conforming to GEMINI.md.
  */
 
+import {
+  escapeHtml,
+  wrapEmailHtml,
+} from './emailWrapper';
+
+export {
+  escapeHtml,
+  wrapEmailHtml,
+};
+
 export interface EmailTemplateRenderResult {
   subject: string;
   html: string;
@@ -11,63 +21,16 @@ export interface EmailTemplateRenderResult {
 
 export type SupportedEventType =
   | 'contact_submission'
+  | 'contact_auto_reply'
   | 'welcome_freelancer'
   | 'payment_charged'
   | 'work_milestone'
+  | 'payment_due_today'
   | 'new_client_request'
   | 'scheduled_reminder';
 
 /**
- * Escapes HTML characters to prevent XSS and template injection.
- */
-export function escapeHtml(str: unknown): string {
-  if (typeof str !== 'string') return '';
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
-/**
- * Common HTML wrapper adhering to CrestFlow's flat, restrained design system.
- * Zero emojis, clean typography, neutral borders, and support contact footer.
- */
-export function wrapEmailHtml(title: string, contentHtml: string): string {
-  const safeTitle = escapeHtml(title);
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>${safeTitle}</title>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F8FAFC; color: #0F172A; margin: 0; padding: 24px; line-height: 1.5; }
-    .card { max-width: 560px; margin: 0 auto; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 32px; }
-    .brand { font-size: 18px; font-weight: 700; color: #0F172A; margin-bottom: 24px; letter-spacing: -0.02em; }
-    h1 { font-size: 20px; font-weight: 600; color: #0F172A; margin-top: 0; margin-bottom: 16px; }
-    p { font-size: 14px; color: #475569; margin: 0 0 16px 0; }
-    .table-wrap { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
-    .table-wrap td { padding: 8px 12px; border-bottom: 1px solid #F1F5F9; color: #334155; }
-    .table-wrap td.label { font-weight: 500; color: #64748B; width: 35%; }
-    .btn { display: inline-block; background-color: #4F46E5; color: #FFFFFF !important; font-size: 14px; font-weight: 500; text-decoration: none; padding: 10px 18px; border-radius: 6px; margin: 12px 0 20px 0; }
-    .footer { font-size: 12px; color: #94A3B8; margin-top: 32px; border-top: 1px solid #F1F5F9; padding-top: 16px; }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <div class="brand">CrestFlow</div>
-    ${contentHtml}
-    <div class="footer">
-      This is an automated operational notification from CrestFlow. Need help? Contact our team at <a href="mailto:support.crestflow@gmail.com" style="color: #64748B;">support.crestflow@gmail.com</a>.
-    </div>
-  </div>
-</body>
-</html>`;
-}
-
-/**
- * 1. Contact Form Submission (Sent to CrestFlow Support or Freelancer)
+ * 1. Contact Form Submission (Sent to CrestFlow Support)
  */
 export function renderContactSubmissionTemplate(data: {
   senderName: string;
@@ -99,7 +62,39 @@ export function renderContactSubmissionTemplate(data: {
 }
 
 /**
- * 2. Welcome Freelancer Onboarding
+ * 2. Contact Form Auto-Reply (Guaranteed 48h Response SLA)
+ */
+export function renderContactAutoReplyTemplate(data: {
+  senderName: string;
+  subject: string;
+  originalMessage?: string;
+}): EmailTemplateRenderResult {
+  const name = escapeHtml(data.senderName);
+  const subj = escapeHtml(data.subject);
+  const msg = data.originalMessage ? escapeHtml(data.originalMessage).replace(/\n/g, '<br>') : '';
+
+  const emailSubject = `We received your message — Our team will contact you within 48 hours | CrestFlow`;
+  const text = `Hi ${data.senderName},\n\nThank you for getting in touch with CrestFlow.\n\nWe have received your message regarding "${data.subject}". Our team will contact you within 48 hours.\n\n${data.originalMessage ? `Your inquiry:\n${data.originalMessage}\n\n` : ''}If you have any urgent follow-up details, please reply directly to this email at support.crestflow@gmail.com.\n\nBest regards,\n— The CrestFlow Support Team`;
+
+  const html = wrapEmailHtml(
+    emailSubject,
+    `<h1>We Received Your Message</h1>
+     <p>Hi ${name},</p>
+     <p>Thank you for reaching out to CrestFlow. We have received your inquiry regarding <strong>${subj}</strong>.</p>
+     <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 16px; margin: 16px 0;">
+       <p style="font-size: 14px; font-weight: 600; color: #0F172A; margin: 0 0 6px 0;">Our Team Will Contact You Within 48 Hours</p>
+       <p style="font-size: 13px; color: #64748B; margin: 0;">A member of our support team is reviewing your message and will get back to you shortly.</p>
+     </div>
+     ${msg ? `<p style="font-size: 12px; color: #64748B; margin-bottom: 4px;"><strong>Summary of your message:</strong></p>
+     <p style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 6px; padding: 12px; font-size: 13px; color: #334155; white-space: pre-wrap;">${msg}</p>` : ''}
+     <p>If you have any further questions or attachments in the meantime, reply directly to this email at <a href="mailto:support.crestflow@gmail.com" style="color: #4F46E5;">support.crestflow@gmail.com</a>.</p>`
+  );
+
+  return { subject: emailSubject, html, text };
+}
+
+/**
+ * 3. Welcome Freelancer Onboarding ("Congrats You've Started Your Journey")
  */
 export function renderWelcomeFreelancerTemplate(data: {
   name?: string;
@@ -108,28 +103,28 @@ export function renderWelcomeFreelancerTemplate(data: {
   const greeting = data.name ? `Hi ${escapeHtml(data.name)},` : 'Hello,';
   const url = escapeHtml(data.workspaceUrl || 'https://crestflow.app/profile');
 
-  const emailSubject = 'Welcome to CrestFlow';
-  const text = `${data.name ? `Hi ${data.name},` : 'Hello,'}\n\nWelcome to CrestFlow — your independent client manager and invoicing workspace.\n\nHere are 3 quick steps to get fully set up:\n1. Configure your UPI ID in Profile Settings for zero-touch invoice QR generation.\n2. Share your public client intake link with prospective clients.\n3. Log your first active deliverable or client contract.\n\nOpen Workspace: ${data.workspaceUrl || 'https://crestflow.app/profile'}\n\nIf you have any questions, our support team is available at support.crestflow@gmail.com.\n\n— The CrestFlow Team`;
+  const emailSubject = "Congrats You've Started Your Journey | CrestFlow";
+  const text = `${data.name ? `Hi ${data.name},` : 'Hello,'}\n\nCongrats! You've started your journey with CrestFlow — your independent client manager and invoicing workspace.\n\nHere are 3 quick steps to get fully set up:\n1. Configure your UPI ID in Profile Settings for zero-touch invoice QR generation.\n2. Share your public client intake link with prospective clients.\n3. Log your first active deliverable or client contract.\n\nOpen Workspace: ${data.workspaceUrl || 'https://crestflow.app/profile'}\n\nIf you have any questions, our support team is available at support.crestflow@gmail.com.\n\n— The CrestFlow Team`;
 
   const html = wrapEmailHtml(
     emailSubject,
-    `<h1>Welcome to CrestFlow</h1>
+    `<h1>Congrats You've Started Your Journey</h1>
      <p>${greeting}</p>
-     <p>Welcome to CrestFlow — your focused workspace for client relationship management, video deliverables, and direct UPI invoicing.</p>
+     <p>Congratulations on taking the leap into independent freelancing. CrestFlow is built to keep your deliverables, client relationships, and direct UPI invoicing organized in one place.</p>
      <p>Here are three quick steps to get started:</p>
      <ol style="font-size: 14px; color: #475569; padding-left: 20px; line-height: 1.8;">
        <li><strong>Configure your UPI ID:</strong> Add your payment handle in Profile Settings to enable instant QR code invoices.</li>
        <li><strong>Share your intake link:</strong> Send your public onboarding link to prospective clients to capture new leads automatically.</li>
        <li><strong>Log your first project:</strong> Track your deliverables and client billing cycles with ease.</li>
      </ol>
-     <p><a href="${url}" class="btn">Complete Your Profile</a></p>`
+     <p><a href="${url}" class="btn">Open Your Workspace</a></p>`
   );
 
   return { subject: emailSubject, html, text };
 }
 
 /**
- * 3. Monthly Payment Cycle Receipt
+ * 4. Monthly Payment Cycle Receipt
  */
 export function renderPaymentChargedTemplate(data: {
   name?: string;
@@ -170,7 +165,7 @@ export function renderPaymentChargedTemplate(data: {
 }
 
 /**
- * 4. Work Days Milestone Celebration
+ * 5. Work Days Milestone Celebration
  */
 export function renderWorkMilestoneTemplate(data: {
   name?: string;
@@ -183,14 +178,14 @@ export function renderWorkMilestoneTemplate(data: {
   const days = data.daysWorked;
   const duration = escapeHtml(data.durationFormatted);
 
-  const emailSubject = `Milestone Reached: ${data.milestoneTitle}`;
-  const text = `${data.name ? `Hi ${data.name},` : 'Hello,'}\n\nCongratulations on reaching a major milestone in your freelancing career: ${data.milestoneTitle} (${data.daysWorked} days worked, ${data.durationFormatted}).\n\nYour dedication and consistent client delivery continue to build a lasting independent business.\n\nKeep building,\n— The CrestFlow Team`;
+  const emailSubject = `Milestone Reached: ${data.milestoneTitle} | CrestFlow`;
+  const text = `${data.name ? `Hi ${data.name},` : 'Hello,'}\n\nCongratulations on reaching a major career milestone: ${data.milestoneTitle} (${data.daysWorked} days worked, ${data.durationFormatted}).\n\nYour dedication and consistent client delivery continue to build a lasting independent business.\n\nKeep building,\n— The CrestFlow Team`;
 
   const html = wrapEmailHtml(
     emailSubject,
     `<h1>Milestone Reached</h1>
      <p>${greeting}</p>
-     <p>Congratulations on reaching an inspiring career milestone:</p>
+     <p>Congratulations on reaching an inspiring milestone in your freelancing journey:</p>
      <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 20px; margin: 16px 0; text-align: center;">
        <div style="font-size: 18px; font-weight: 700; color: #0F172A; margin-bottom: 6px;">${title}</div>
        <div style="font-size: 13px; color: #64748B;">${days} active days of freelancing &bull; ${duration}</div>
@@ -203,7 +198,49 @@ export function renderWorkMilestoneTemplate(data: {
 }
 
 /**
- * 5. New Client Onboarding Request
+ * 6. Client Payment Due Today Notifier
+ */
+export function renderPaymentDueTodayTemplate(data: {
+  freelancerName?: string;
+  clientName: string;
+  amountDueFormatted: string;
+  paymentBasis?: string;
+  dueDateFormatted: string;
+  invoiceId?: string;
+  workspaceUrl?: string;
+}): EmailTemplateRenderResult {
+  const greeting = data.freelancerName ? `Hi ${escapeHtml(data.freelancerName)},` : 'Hello,';
+  const client = escapeHtml(data.clientName);
+  const amount = escapeHtml(data.amountDueFormatted);
+  const basis = escapeHtml(data.paymentBasis || 'Monthly Retainer');
+  const dueDate = escapeHtml(data.dueDateFormatted);
+  const inv = data.invoiceId ? escapeHtml(data.invoiceId) : 'Scheduled Cycle';
+  const url = escapeHtml(data.workspaceUrl || 'https://crestflow.app/invoices');
+
+  const emailSubject = `Payment Due Today: ${data.clientName} (${data.amountDueFormatted})`;
+  const text = `${data.freelancerName ? `Hi ${data.freelancerName},` : 'Hello,'}\n\nThis is an automated notification that your client ${data.clientName} has a payment due today (${data.dueDateFormatted}).\n\nPayment Details:\n- Client: ${data.clientName}\n- Amount Due: ${data.amountDueFormatted}\n- Billing Basis: ${data.paymentBasis || 'Monthly Retainer'}\n- Due Date: ${data.dueDateFormatted}\n- Reference: ${data.invoiceId || 'Scheduled Cycle'}\n\nYou can review this invoice or send a friendly reminder directly from your CrestFlow workspace: ${data.workspaceUrl || 'https://crestflow.app/invoices'}\n\n— The CrestFlow Team`;
+
+  const html = wrapEmailHtml(
+    emailSubject,
+    `<h1>Payment Due Today</h1>
+     <p>${greeting}</p>
+     <p>This is a reminder that <strong>${client}</strong> has a payment due today (${dueDate}).</p>
+     <table class="table-wrap">
+       <tr><td class="label">Client</td><td><strong>${client}</strong></td></tr>
+       <tr><td class="label">Amount Due</td><td><strong>${amount}</strong></td></tr>
+       <tr><td class="label">Billing Basis</td><td>${basis}</td></tr>
+       <tr><td class="label">Due Date</td><td>${dueDate}</td></tr>
+       <tr><td class="label">Reference</td><td><code>${inv}</code></td></tr>
+     </table>
+     <p>You can follow up with your client or share their UPI invoice QR code directly from your dashboard.</p>
+     <p><a href="${url}" class="btn">View Invoice in CrestFlow</a></p>`
+  );
+
+  return { subject: emailSubject, html, text };
+}
+
+/**
+ * 7. New Client Onboarding Request
  */
 export function renderNewClientRequestTemplate(data: {
   freelancerName?: string;
@@ -251,7 +288,7 @@ export function renderNewClientRequestTemplate(data: {
 }
 
 /**
- * 6. Scheduled Reminder / Administrative Notice
+ * 8. Scheduled Reminder / Administrative Notice
  */
 export function renderScheduledReminderTemplate(data: {
   title: string;
@@ -285,12 +322,16 @@ export function renderEmailTemplate(eventType: SupportedEventType, data: any): E
   switch (eventType) {
     case 'contact_submission':
       return renderContactSubmissionTemplate(data);
+    case 'contact_auto_reply':
+      return renderContactAutoReplyTemplate(data);
     case 'welcome_freelancer':
       return renderWelcomeFreelancerTemplate(data);
     case 'payment_charged':
       return renderPaymentChargedTemplate(data);
     case 'work_milestone':
       return renderWorkMilestoneTemplate(data);
+    case 'payment_due_today':
+      return renderPaymentDueTodayTemplate(data);
     case 'new_client_request':
       return renderNewClientRequestTemplate(data);
     case 'scheduled_reminder':

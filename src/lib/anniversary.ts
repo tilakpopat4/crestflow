@@ -152,6 +152,23 @@ export function calculateWorkJourney(startDateStr?: string | null, customNow?: D
     }
   }
 
+  // Check 100-day milestone
+  const day100Target = new Date(startMidnight.getTime() + 100 * 24 * 60 * 60 * 1000);
+  const diffTo100Days = Math.round((nowMidnight.getTime() - day100Target.getTime()) / (1000 * 60 * 60 * 24));
+  if (diffTo100Days >= 0 && diffTo100Days <= 3) {
+    currentAnniversary = {
+      id: '100_days',
+      badge: '100 Days',
+      title: '100 Days Freelancing Milestone',
+      description: 'Congratulations on completing 100 days of independent freelancing!',
+      emoji: '',
+      months: 3.3,
+      targetDate: day100Target,
+      diffDays: diffTo100Days,
+      isCurrent: true,
+    };
+  }
+
   return {
     workedDays,
     startDate: start,

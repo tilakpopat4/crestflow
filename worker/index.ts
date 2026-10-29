@@ -15,6 +15,7 @@ import {
   handleNotifyWelcome,
   handleNotifyNewClientRequest,
   handleNotifyMilestone,
+  handleNotifyPaymentDueToday,
   handleScheduleEmail,
   handleCancelEmail,
   handleProcessEmailQueue,
@@ -219,6 +220,11 @@ Sitemap: ${baseUrl}/sitemap.xml
       // 10. POST /api/notify/milestone
       if (url.pathname === '/api/notify/milestone' && request.method === 'POST') {
         return await handleNotifyMilestone(request, env);
+      }
+
+      // 11. POST /api/notify/payment-due-today
+      if (url.pathname === '/api/notify/payment-due-today' && request.method === 'POST') {
+        return await handleNotifyPaymentDueToday(request, env);
       }
 
       // 11. POST /api/email/schedule

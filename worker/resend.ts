@@ -21,7 +21,7 @@ export async function sendResendEmail(
     return { success: false, error: 'RESEND_API_KEY not configured' };
   }
 
-  const fromEmail = env.RESEND_FROM_EMAIL || 'CrestFlow <billing@crestflow.com>';
+  const fromEmail = env.RESEND_FROM_EMAIL || 'CrestFlow <support.crestflow@gmail.com>';
   const headers: Record<string, string> = {
     Authorization: `Bearer ${env.RESEND_API_KEY}`,
     'Content-Type': 'application/json',

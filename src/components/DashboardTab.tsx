@@ -22,6 +22,7 @@ import { executeAutoInvoiceCheck } from '../lib/autoInvoiceService';
 import StatusBadge from './StatusBadge';
 import GettingStartedCard from './GettingStartedCard';
 import { formatInvoiceNumber } from '../lib/invoiceUtils';
+import { usePaymentDueNotifier } from '../hooks/usePaymentDueNotifier';
 
 interface DashboardTabProps {
   user: User | null;
@@ -52,6 +53,9 @@ export default function DashboardTab({
   const journey = calculateWorkJourney(profile?.freelanceStartDate);
   const [paymentModalState, setPaymentModalState] = useState<{ invoiceId: string | null, isOpen: boolean }>({ invoiceId: null, isOpen: false });
   const [clientRevenueTimeframe, setClientRevenueTimeframe] = useState<'all' | 'month'>('all');
+
+  // Automated notification mailer when any client's payment is due today
+  usePaymentDueNotifier(user, clients, invoices, workItems);
 
   // Client statuses & notifications
   const clientStatuses = useMemo(() => {

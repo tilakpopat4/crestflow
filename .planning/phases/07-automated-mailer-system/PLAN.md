@@ -147,3 +147,4 @@ Implement a production-grade, automated mailer system connecting all user notifi
 | **Contact Us Auto-Reply** | Submit `POST /api/notify/contact` with test inquiry. | Support receives inquiry email AND submitter receives instant auto-reply with 48h SLA notice. |
 | **Support Email Channel** | Verify `reply_to` and template footers across all templates. | 100% of emails use `support.crestflow@gmail.com`. |
 | **Quality & Tests** | Run `npm test` and `npm run build`. | All unit/integration tests pass (90+ tests) with zero errors. |
+
