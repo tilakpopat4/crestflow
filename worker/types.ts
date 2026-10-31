@@ -37,6 +37,12 @@ export interface Env {
   // Resend API Configuration
   RESEND_API_KEY?: string;
   RESEND_FROM_EMAIL?: string;
+
+  // EmailJS API Configuration (direct Gmail sending)
+  EMAILJS_SERVICE_ID?: string;
+  EMAILJS_TEMPLATE_ID?: string;
+  EMAILJS_PUBLIC_KEY?: string;
+  EMAILJS_PRIVATE_KEY?: string;
 }
 
 export interface TrialLedgerEntry {

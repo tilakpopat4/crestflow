@@ -9,7 +9,10 @@
     "binding": "ASSETS"
   },
   "vars": {
-    "BASE_URL": "https://crestflow.app"
+    "BASE_URL": "https://crestflow.app",
+    "EMAILJS_SERVICE_ID": "service_u6nm96l",
+    "EMAILJS_TEMPLATE_ID": "template_g3ojhpa",
+    "EMAILJS_PUBLIC_KEY": "MY75lMNsMx8rYRLa4"
   },
   "triggers": {
     "crons": ["0 0 * * *"]

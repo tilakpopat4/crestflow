@@ -37,7 +37,22 @@ export function createMockFetch(state: MockWebhookState, originalFetch: typeof g
       });
     }
 
-    // 2. Resend Email API
+    // 2. Email Delivery APIs (EmailJS & Resend)
+    if (urlStr.includes('api.emailjs.com/api/v1.0/email/send')) {
+      const body = JSON.parse((init?.body as string) || '{}');
+      const params = body.template_params || {};
+      state.sentEmails.push({
+        to: params.to_email ? [params.to_email] : [],
+        subject: params.subject || '',
+        html: params.message_html || '',
+        text: params.message_text || '',
+      });
+      return new Response('OK', {
+        status: 200,
+        headers: { 'Content-Type': 'text/plain' },
+      });
+    }
+
     if (urlStr.includes('api.resend.com/emails')) {
       const body = JSON.parse((init?.body as string) || '{}');
       state.sentEmails.push({

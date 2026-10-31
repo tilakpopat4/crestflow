@@ -10,15 +10,58 @@ export interface EmailParams {
 }
 
 /**
- * Sends a transactional email using the Resend REST API.
+ * Sends a transactional email using EmailJS (via support.crestflow@gmail.com) with Resend fallback.
  */
 export async function sendResendEmail(
   env: Env,
   params: EmailParams
 ): Promise<{ success: boolean; id?: string; error?: string; statusCode?: number }> {
+  const emailJsServiceId = env.EMAILJS_SERVICE_ID || 'service_u6nm96l';
+  const emailJsTemplateId = env.EMAILJS_TEMPLATE_ID || 'template_g3ojhpa';
+  const emailJsPublicKey = env.EMAILJS_PUBLIC_KEY || 'MY75lMNsMx8rYRLa4';
+  const emailJsPrivateKey = env.EMAILJS_PRIVATE_KEY || 'Ts55PbuNCO6ND4LDZNEfI';
+
+  // 1. Primary Dispatcher: EmailJS (Sends directly from support.crestflow@gmail.com)
+  if (emailJsServiceId && emailJsTemplateId && emailJsPublicKey) {
+    try {
+      const payload = {
+        service_id: emailJsServiceId,
+        template_id: emailJsTemplateId,
+        user_id: emailJsPublicKey,
+        accessToken: emailJsPrivateKey,
+        template_params: {
+          to_email: params.to,
+          subject: params.subject,
+          message_html: params.html,
+          message_text: params.text,
+          reply_to: params.replyTo || 'support.crestflow@gmail.com',
+        },
+      };
+
+      const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'origin': env.BASE_URL || 'https://crestflow.app',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        return { success: true, id: `emailjs_${Date.now()}`, statusCode: 200 };
+      }
+
+      const errorText = await res.text();
+      console.warn(`[EmailJS Error] ${res.status}: ${errorText}`);
+    } catch (err: any) {
+      console.warn('[EmailJS Network Error]', err);
+    }
+  }
+
+  // 2. Secondary Fallback: Resend API
   if (!env.RESEND_API_KEY) {
-    console.warn('[Resend] RESEND_API_KEY is not configured. Skipping email.');
-    return { success: false, error: 'RESEND_API_KEY not configured' };
+    console.warn('[Resend] RESEND_API_KEY is not configured and EmailJS failed. Skipping email.');
+    return { success: false, error: 'No email service configured' };
   }
 
   const fromEmail = env.RESEND_FROM_EMAIL || 'CrestFlow <onboarding@resend.dev>';
