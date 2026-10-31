@@ -73,3 +73,4 @@ export const AUTOMATED_TRIGGERS: TriggerItem[] = [
     status: 'Active',
   },
 ];
+
