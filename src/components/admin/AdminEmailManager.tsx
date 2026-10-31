@@ -26,12 +26,20 @@ export default function AdminEmailManager() {
         accessToken: 'Ts55PbuNCO6ND4LDZNEfI',
         template_params: {
           to_email: recipient,
+          email: recipient,
+          to: recipient,
+          recipient: recipient,
+          user_email: recipient,
+          to_name: recipient.split('@')[0],
+          from_name: 'CrestFlow Support',
           subject: 'Admin Test Dispatch | CrestFlow Mailer',
+          message: `Email System Operational\n\nThis is a test notification from CrestFlow Admin Command Center dispatched via support.crestflow@gmail.com to ${recipient}.`,
           message_html: `<div style="font-family: sans-serif; padding: 20px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
             <h2 style="color: #0f172a; margin-top: 0;">Email System Operational</h2>
             <p style="color: #475569; font-size: 14px;">This is a test notification dispatched from the CrestFlow Admin Command Center.</p>
             <table style="font-size: 13px; color: #334155; margin: 16px 0;">
               <tr><td style="font-weight: bold; width: 120px;">Sender:</td><td>support.crestflow@gmail.com</td></tr>
+              <tr><td style="font-weight: bold;">Recipient:</td><td>${recipient}</td></tr>
               <tr><td style="font-weight: bold;">Provider:</td><td>EmailJS (Google OAuth)</td></tr>
               <tr><td style="font-weight: bold;">Timestamp:</td><td>${new Date().toLocaleString('en-IN')}</td></tr>
             </table>
@@ -57,7 +65,7 @@ export default function AdminEmailManager() {
 
       setTestResult({
         success: true,
-        message: `Test email successfully delivered to ${recipient} from support.crestflow@gmail.com.`,
+        message: `Test email dispatched to ${recipient} via EmailJS. If not in Inbox, please check Spam/Promotions or the EmailJS History dashboard.`,
       });
     } catch (err: any) {
       setTestResult({
