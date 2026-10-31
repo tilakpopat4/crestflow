@@ -2,16 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { db, auth, googleProvider } from '../firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import { signInWithPopup, signOut, User } from 'firebase/auth';
-import { Users, UserCheck, ShieldCheck, RefreshCw, ArrowLeft, LogOut } from 'lucide-react';
+import { Users, UserCheck, ShieldCheck, RefreshCw, ArrowLeft, LogOut, Mail } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import AdminWhitelistManager from './admin/AdminWhitelistManager';
 import AdminUserSubscriptions from './admin/AdminUserSubscriptions';
 import AdminUsersManager from './admin/AdminUsersManager';
 import AdminAccessDeniedCard from './admin/AdminAccessDeniedCard';
+import AdminEmailManager from './admin/AdminEmailManager';
 import { useSubscriptionConfig } from '../lib/subscriptionConfig';
 import { useAdminAuth } from '../hooks/useAdminAuth';
 
-type AdminSection = 'subscriptions' | 'whitelist' | 'admins';
+type AdminSection = 'subscriptions' | 'whitelist' | 'admins' | 'email';
 
 interface AdminTabProps {
   user?: User | null;
@@ -261,6 +262,7 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
           { id: 'subscriptions' as const, label: 'User Subscriptions', icon: Users },
           { id: 'whitelist' as const, label: 'VIP Whitelist', icon: UserCheck },
           { id: 'admins' as const, label: 'Admin Accounts', icon: ShieldCheck },
+          { id: 'email' as const, label: 'Email & Mailer', icon: Mail },
         ].map((sec) => {
           const Icon = sec.icon;
           const isActive = activeSection === sec.id;
@@ -308,6 +310,7 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
             {activeSection === 'subscriptions' && <AdminUserSubscriptions />}
             {activeSection === 'whitelist' && <AdminWhitelistManager />}
             {activeSection === 'admins' && <AdminUsersManager currentUserEmail={currentUser?.email} />}
+            {activeSection === 'email' && <AdminEmailManager />}
           </motion.div>
         </AnimatePresence>
       </div>
