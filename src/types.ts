@@ -17,6 +17,7 @@ export interface Client {
   name: string;
   phone: string;
   email: string;
+  currency?: string; // 'INR' | 'USD' | 'EUR' | 'GBP'
   logoUrl?: string;
   instagram?: string;
   clientFrom?: string; // e.g. YYYY-MM

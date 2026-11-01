@@ -27,6 +27,7 @@ import ScheduleInvoiceModal from './ScheduleInvoiceModal';
 import { getAutoInvoiceScheduleInfo } from '../lib/autoInvoiceService';
 import StatusBadge from './StatusBadge';
 import ClientRatesModal from './ClientRatesModal';
+import { getCurrencySymbol, formatCurrencyAmount } from '../lib/currencyUtils';
 
 interface ClientDashboardProps {
   client: Client;
@@ -42,6 +43,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
   const { data: profiles } = useFirestore<UserProfile>('profiles', user?.uid);
 
   const profile = profiles[0] || null;
+  const currencySymbol = getCurrencySymbol(client.currency);
   const [copiedReviewLink, setCopiedReviewLink] = useState(false);
   const [isDriveModalOpen, setIsDriveModalOpen] = useState(false);
   const [isRatesModalOpen, setIsRatesModalOpen] = useState(false);
@@ -67,6 +69,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
   };
 
   const handleSaveRates = async (rates: {
+    currency?: string;
     paymentBasis: 'per_reel' | 'monthly_retainer';
     defaultRate: number;
     monthlyRetainerAmount?: number;
@@ -75,6 +78,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
   }) => {
     const updatedClient: Client = {
       ...client,
+      currency: rates.currency || client.currency || 'INR',
       paymentBasis: rates.paymentBasis,
       defaultRate: rates.defaultRate,
       monthlyRetainerAmount: rates.monthlyRetainerAmount,
@@ -506,6 +510,9 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                 <span className="text-slate-400 dark:text-slate-500 truncate">
                   Since: {client.clientFrom ? new Date(client.clientFrom + '-01').toLocaleDateString('en-IN', { month: 'short', year: 'numeric' }) : new Date(client.createdAt).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}
                 </span>
+                <span className="text-slate-500 dark:text-slate-400 font-medium truncate">
+                  Currency: <span className="text-slate-700 dark:text-slate-200">{client.currency || 'INR'} ({currencySymbol})</span>
+                </span>
                 {client.instagram && (
                   <a href={client.instagram.startsWith('http') ? client.instagram : `https://instagram.com/${client.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-pink-600 dark:text-pink-400 hover:underline">
                     Instagram
@@ -677,9 +684,9 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
         <div className="bg-white dark:bg-slate-800 p-3 sm:p-5 rounded-xl shadow-xs space-y-1 min-w-0">
           <div className="flex justify-between items-center text-[10px] sm:text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
             <span className="truncate">Pending</span>
-            <IndianRupee size={14} className="text-rose-500 dark:text-rose-400 shrink-0" />
+            <DollarSign size={14} className="text-rose-500 dark:text-rose-400 shrink-0" />
           </div>
-          <div className="text-base sm:text-xl font-bold text-rose-600 dark:text-rose-400 truncate">₹{financials.totalPendingAmount.toLocaleString('en-IN')}</div>
+          <div className="text-base sm:text-xl font-bold text-rose-600 dark:text-rose-400 truncate">{formatCurrencyAmount(financials.totalPendingAmount, client.currency)}</div>
           <div className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">
             {financials.pendingInvoices.length} inv, {financials.uninvoicedWork.length} un-invoiced
           </div>
@@ -691,7 +698,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
             <span className="truncate">Total Billed</span>
             <CheckCircle2 size={14} className="text-indigo-500 dark:text-indigo-400 shrink-0" />
           </div>
-          <div className="text-base sm:text-xl font-bold text-indigo-600 dark:text-indigo-400 truncate">₹{financials.paidTotal.toLocaleString('en-IN')}</div>
+          <div className="text-base sm:text-xl font-bold text-indigo-600 dark:text-indigo-400 truncate">{formatCurrencyAmount(financials.paidTotal, client.currency)}</div>
           <div className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">From paid invoices</div>
         </div>
       </div>
@@ -897,7 +904,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                     </div>
                   ) : (
                     <div className="space-y-1">
-                      <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Rate (₹) *</label>
+                      <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Rate ({currencySymbol}) *</label>
                       <input
                         type="number"
                         required
@@ -1055,7 +1062,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                           <td className="p-3.5 text-right text-slate-600 dark:text-slate-300">
                             {client.paymentBasis === 'monthly_retainer' 
                               ? `${item.quantity} item${item.quantity === 1 ? '' : 's'}`
-                              : `${item.quantity} × ₹${item.rate.toLocaleString('en-IN')}`}
+                              : `${item.quantity} × ${formatCurrencyAmount(item.rate, client.currency)}`}
                           </td>
                           <td className="py-3 px-3.5 text-right font-bold text-slate-900 dark:text-slate-100 whitespace-nowrap min-w-[100px]">
                             {client.paymentBasis === 'monthly_retainer' ? (
@@ -1063,7 +1070,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                                 Covered in Retainer
                               </span>
                             ) : (
-                              `₹${(item.quantity * item.rate).toLocaleString('en-IN')}`
+                              formatCurrencyAmount(item.quantity * item.rate, client.currency)
                             )}
                           </td>
                           <td className="py-3 px-3.5 text-center whitespace-nowrap min-w-[80px]">
@@ -1175,7 +1182,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                             </div>
                           </td>
                           <td className="py-3 px-3.5 text-right font-bold text-slate-900 dark:text-slate-100 whitespace-nowrap min-w-[100px]">
-                            ₹{inv.totalAmount.toLocaleString('en-IN')}
+                            {formatCurrencyAmount(inv.totalAmount, client.currency)}
                           </td>
                           <td className="py-3 px-3.5 text-center whitespace-nowrap min-w-[80px]">
                             <StatusBadge
@@ -1265,7 +1272,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                 </div>
                 <span className="text-xs text-slate-500 dark:text-slate-400 block">
                   {client.paymentBasis === 'monthly_retainer'
-                    ? `Fixed ₹${(client.monthlyRetainerAmount || client.defaultRate || 0).toLocaleString('en-IN')}/mo`
+                    ? `Fixed ${formatCurrencyAmount(client.monthlyRetainerAmount || client.defaultRate || 0, client.currency)}/mo`
                     : 'Billed per deliverable'}
                 </span>
               </div>
@@ -1279,7 +1286,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                   <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Default Reel Rate</span>
                   <Edit3 size={12} className="text-slate-400 group-hover:text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
-                <div className="text-xl font-bold text-indigo-600 dark:text-indigo-400">₹{client.defaultRate.toLocaleString('en-IN')}</div>
+                <div className="text-xl font-bold text-indigo-600 dark:text-indigo-400">{formatCurrencyAmount(client.defaultRate, client.currency)}</div>
                 <span className="text-xs text-slate-400 dark:text-slate-500">Per video edit</span>
               </div>
 
@@ -1293,7 +1300,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                   <Edit3 size={12} className="text-slate-400 group-hover:text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
                 <div className="text-xl font-bold text-indigo-600 dark:text-indigo-400">
-                  {client.onSiteShootRate ? `₹${client.onSiteShootRate.toLocaleString('en-IN')}` : 'Not Set'}
+                  {client.onSiteShootRate ? formatCurrencyAmount(client.onSiteShootRate, client.currency) : 'Not Set'}
                 </div>
                 <span className="text-xs text-slate-400 dark:text-slate-500">Per shoot day</span>
               </div>
@@ -1308,7 +1315,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                   <Edit3 size={12} className="text-slate-400 group-hover:text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
                 <div className="text-xl font-bold text-indigo-600 dark:text-indigo-400">
-                  {client.websiteMakingRate ? `₹${client.websiteMakingRate.toLocaleString('en-IN')}` : 'Not Set'}
+                  {client.websiteMakingRate ? formatCurrencyAmount(client.websiteMakingRate, client.currency) : 'Not Set'}
                 </div>
                 <span className="text-xs text-slate-400 dark:text-slate-500">Per website project</span>
               </div>
@@ -1364,7 +1371,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                     className="mt-0.5 rounded text-indigo-600"
                   />
                   <label htmlFor="markPaidCheckbox" className="cursor-pointer font-medium">
-                    Also mark all {financials.pendingInvoices.length} pending invoice(s) (₹{financials.pendingInvoiceTotal.toLocaleString('en-IN')}) as Paid
+                    Also mark all {financials.pendingInvoices.length} pending invoice(s) ({formatCurrencyAmount(financials.pendingInvoiceTotal, client.currency)}) as Paid
                   </label>
                 </div>
               )}
@@ -1608,10 +1615,10 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                           <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
                             <span>{scWorkLogs.length} work log(s)</span>
                             <span>•</span>
-                            <span className="font-semibold text-slate-700 dark:text-slate-300">Total: ₹{totalVal.toLocaleString('en-IN')}</span>
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">Total: {formatCurrencyAmount(totalVal, client.currency)}</span>
                             {uninvoicedVal > 0 && (
                               <span className="text-slate-600 dark:text-slate-400 text-[11px] font-medium">
-                                ₹{uninvoicedVal.toLocaleString('en-IN')} pending invoice
+                                {formatCurrencyAmount(uninvoicedVal, client.currency)} pending invoice
                               </span>
                             )}
                           </div>

@@ -20,6 +20,7 @@ import CsvImportModal from './CsvImportModal';
 import StatusBadge from './StatusBadge';
 import ClientFormModal, { ClientFormData } from './ClientFormModal';
 import { SubscriptionState } from '../hooks/useSubscription';
+import { getCurrencySymbol, formatCurrencyAmount } from '../lib/currencyUtils';
 
 interface ClientsTabProps {
   user: User | null;
@@ -56,6 +57,23 @@ export default function ClientsTab({
       return;
     }
     setIsEditing(null);
+    setFormData({
+      name: '',
+      phone: '',
+      email: '',
+      currency: 'INR',
+      logoUrl: '',
+      instagram: '',
+      clientFrom: '',
+      workExperience: '',
+      paymentBasis: 'per_reel',
+      monthlyRetainerAmount: '',
+      defaultRate: '',
+      onSiteShootRate: '',
+      websiteMakingRate: '',
+      lastPaymentDate: new Date().toISOString().split('T')[0],
+      emailRemindersEnabled: true
+    });
     setIsFormOpen(true);
   };
 
@@ -75,10 +93,11 @@ export default function ClientsTab({
     }
   }, [initialSelectedClientId]);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ClientFormData>({
     name: '',
     phone: '',
     email: '',
+    currency: 'INR',
     logoUrl: '',
     instagram: '',
     clientFrom: '',
@@ -126,6 +145,7 @@ export default function ClientsTab({
             name: formData.name,
             phone: formData.phone,
             email: formData.email,
+            currency: formData.currency || 'INR',
             logoUrl: formData.logoUrl?.trim() || undefined,
             instagram: formData.instagram,
             clientFrom: formData.clientFrom,
@@ -161,6 +181,7 @@ export default function ClientsTab({
           name: formData.name,
           phone: formData.phone,
           email: formData.email,
+          currency: formData.currency || 'INR',
           logoUrl: formData.logoUrl?.trim() || undefined,
           instagram: formData.instagram,
           clientFrom: formData.clientFrom,
@@ -208,6 +229,7 @@ export default function ClientsTab({
       name: c.name,
       phone: c.phone,
       email: c.email || '',
+      currency: c.currency || 'INR',
       logoUrl: c.logoUrl || '',
       instagram: c.instagram || '',
       clientFrom: c.clientFrom || '',
@@ -492,7 +514,7 @@ export default function ClientsTab({
                     Due: {new Date(statusInfo.nextDueDate).toLocaleDateString('en-IN')}
                     {financials.totalPendingAmount > 0 && (
                       <span className="font-semibold text-rose-600 ml-2">
-                        ₹{financials.totalPendingAmount.toLocaleString('en-IN')} due
+                        {formatCurrencyAmount(financials.totalPendingAmount, client.currency)} due
                       </span>
                     )}
                   </div>
@@ -806,7 +828,7 @@ export default function ClientsTab({
                         {client.paymentBasis === 'monthly_retainer' ? 'Retainer' : 'Default Rate'}
                       </span>
                       <span className="font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm truncate block mt-0.5">
-                        ₹{(client.paymentBasis === 'monthly_retainer' ? (client.monthlyRetainerAmount || client.defaultRate) : client.defaultRate).toLocaleString('en-IN')}
+                        {formatCurrencyAmount(client.paymentBasis === 'monthly_retainer' ? (client.monthlyRetainerAmount || client.defaultRate) : client.defaultRate, client.currency)}
                         {client.paymentBasis === 'monthly_retainer' ? ' / mo' : ' / reel'}
                       </span>
                     </div>
@@ -814,7 +836,7 @@ export default function ClientsTab({
                     <div className="text-right min-w-0">
                       <span className="text-slate-400 dark:text-slate-500 block text-[11px] sm:text-xs truncate">Pending</span>
                       <span className={`font-bold text-xs sm:text-sm truncate block mt-0.5 ${financials.totalPendingAmount > 0 ? 'text-rose-600' : 'text-slate-700 dark:text-slate-300'}`}>
-                        ₹{financials.totalPendingAmount.toLocaleString('en-IN')}
+                        {formatCurrencyAmount(financials.totalPendingAmount, client.currency)}
                       </span>
                     </div>
                   </div>

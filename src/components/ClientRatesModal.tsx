@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { X, CheckCircle2, Film, Calendar, DollarSign } from 'lucide-react';
 import { Client } from '../types';
+import { FREELANCE_CURRENCIES, getCurrencySymbol } from '../lib/currencyUtils';
 
 interface ClientRatesModalProps {
   isOpen: boolean;
   onClose: () => void;
   client: Client;
   onSaveRates: (rates: {
+    currency?: string;
     paymentBasis: 'per_reel' | 'monthly_retainer';
     defaultRate: number;
     monthlyRetainerAmount?: number;
@@ -22,6 +24,7 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
   onSaveRates,
 }) => {
   const isMonthly = client.paymentBasis === 'monthly_retainer' || Boolean(client.monthlyRetainerAmount && client.monthlyRetainerAmount > 0);
+  const [currency, setCurrency] = useState<string>(client.currency || 'INR');
   const [paymentBasis, setPaymentBasis] = useState<'per_reel' | 'monthly_retainer'>(isMonthly ? 'monthly_retainer' : 'per_reel');
   const [monthlyRetainerAmount, setMonthlyRetainerAmount] = useState<string>(
     client.monthlyRetainerAmount ? String(client.monthlyRetainerAmount) : isMonthly ? String(client.defaultRate) : ''
@@ -33,6 +36,7 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
+      setCurrency(client.currency || 'INR');
       const monthly = client.paymentBasis === 'monthly_retainer' || Boolean(client.monthlyRetainerAmount && client.monthlyRetainerAmount > 0);
       setPaymentBasis(monthly ? 'monthly_retainer' : 'per_reel');
       setMonthlyRetainerAmount(
@@ -47,6 +51,8 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
 
   if (!isOpen) return null;
 
+  const currencySymbol = getCurrencySymbol(currency);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
@@ -57,6 +63,7 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
           : Number(defaultRate) || 0;
 
       await onSaveRates({
+        currency,
         paymentBasis,
         defaultRate: rateVal,
         monthlyRetainerAmount:
@@ -105,6 +112,30 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Payment Currency */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+              Payment Currency *
+            </label>
+            <div className="grid grid-cols-4 gap-2">
+              {FREELANCE_CURRENCIES.map((c) => (
+                <button
+                  key={c.code}
+                  type="button"
+                  onClick={() => setCurrency(c.code)}
+                  className={`py-2 px-2.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-colors duration-120 ${
+                    currency === c.code
+                      ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-900 dark:text-indigo-200 font-bold shadow-2xs'
+                      : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  <span className="font-mono text-sm">{c.symbol}</span>
+                  <span>{c.code}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Payment Basis */}
           <div className="space-y-1.5">
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
@@ -120,13 +151,7 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
                     : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300 hover:border-slate-300'
                 }`}
               >
-                <div
-                  className={`p-1.5 rounded-lg shrink-0 text-sm flex items-center justify-center ${
-                    paymentBasis === 'per_reel'
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                  }`}
-                >
+                <div className={`p-1.5 rounded-lg shrink-0 text-sm flex items-center justify-center ${paymentBasis === 'per_reel' ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}`}>
                   <Film size={14} />
                 </div>
                 <div>
@@ -144,13 +169,7 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
                     : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300 hover:border-slate-300'
                 }`}
               >
-                <div
-                  className={`p-1.5 rounded-lg shrink-0 text-sm flex items-center justify-center ${
-                    paymentBasis === 'monthly_retainer'
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                  }`}
-                >
+                <div className={`p-1.5 rounded-lg shrink-0 text-sm flex items-center justify-center ${paymentBasis === 'monthly_retainer' ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}`}>
                   <Calendar size={14} />
                 </div>
                 <div>
@@ -165,11 +184,11 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
           {paymentBasis === 'monthly_retainer' ? (
             <div className="space-y-1.5 p-3.5 bg-indigo-50/40 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40 rounded-xl">
               <label className="block text-xs font-semibold text-indigo-950 dark:text-indigo-200">
-                Fixed Monthly Retainer Amount (₹) *
+                Fixed Monthly Retainer Amount ({currencySymbol}) *
               </label>
               <div className="relative">
                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">
-                  ₹
+                  {currencySymbol}
                 </span>
                 <input
                   required
@@ -177,10 +196,7 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
                   min="0"
                   step="1"
                   value={monthlyRetainerAmount || defaultRate}
-                  onChange={(e) => {
-                    setMonthlyRetainerAmount(e.target.value);
-                    setDefaultRate(e.target.value);
-                  }}
+                  onChange={(e) => { setMonthlyRetainerAmount(e.target.value); setDefaultRate(e.target.value); }}
                   className="w-full border border-indigo-200 dark:border-indigo-800 rounded-xl pl-8 pr-3.5 py-2.5 text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 outline-none transition-colors focus:border-indigo-600"
                   placeholder="e.g. 25000"
                 />
@@ -192,11 +208,11 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
           ) : (
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                Default Rate per Reel / Deliverable (₹) *
+                Default Rate per Reel / Deliverable ({currencySymbol}) *
               </label>
               <div className="relative">
                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">
-                  ₹
+                  {currencySymbol}
                 </span>
                 <input
                   required
@@ -215,11 +231,11 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
           {/* On Site Shoot Rate */}
           <div className="space-y-1.5">
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-              On Site Shoot Rate (₹) (Optional)
+              On Site Shoot Rate ({currencySymbol}) (Optional)
             </label>
             <div className="relative">
               <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">
-                ₹
+                {currencySymbol}
               </span>
               <input
                 type="number"
@@ -236,11 +252,11 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
           {/* Website Making Rate */}
           <div className="space-y-1.5">
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-              Website Making Rate (₹) (Optional)
+              Website Making Rate ({currencySymbol}) (Optional)
             </label>
             <div className="relative">
               <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">
-                ₹
+                {currencySymbol}
               </span>
               <input
                 type="number"

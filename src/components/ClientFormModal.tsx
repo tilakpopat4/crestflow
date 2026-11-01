@@ -1,10 +1,12 @@
 import React from 'react';
-import { X, CheckCircle2, Film, Calendar, Mail } from 'lucide-react';
+import { X, CheckCircle2, Film, Calendar, Mail, Coins } from 'lucide-react';
+import { FREELANCE_CURRENCIES, getCurrencySymbol } from '../lib/currencyUtils';
 
 export interface ClientFormData {
   name: string;
   phone: string;
   email: string;
+  currency?: string;
   logoUrl: string;
   instagram: string;
   clientFrom: string;
@@ -39,6 +41,8 @@ export const ClientFormModal: React.FC<ClientFormModalProps> = ({
   onClose,
 }) => {
   if (!isOpen) return null;
+
+  const currencySymbol = getCurrencySymbol(formData.currency);
 
   const update = (key: keyof ClientFormData, val: any) =>
     setFormData((prev) => ({ ...prev, [key]: val }));
@@ -106,6 +110,36 @@ export const ClientFormModal: React.FC<ClientFormModalProps> = ({
             <input required type="date" value={formData.lastPaymentDate} onChange={(e) => update('lastPaymentDate', e.target.value)} className={inputCls} />
           </div>
 
+          {/* Payment Currency */}
+          <div className="space-y-1.5 md:col-span-2">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+              Payment Currency *
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {FREELANCE_CURRENCIES.map((curr) => {
+                const isSelected = (formData.currency || 'INR') === curr.code;
+                return (
+                  <button
+                    key={curr.code}
+                    type="button"
+                    onClick={() => update('currency', curr.code)}
+                    className={`px-3 py-2 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors duration-120 cursor-pointer ${
+                      isSelected
+                        ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-900 dark:text-indigo-200 shadow-2xs font-bold'
+                        : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    }`}
+                  >
+                    <span className="font-mono text-sm">{curr.symbol}</span>
+                    <span>{curr.code}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              Selected currency applies to invoices, work items, and rate calculations for this client.
+            </p>
+          </div>
+
           {/* Payment Basis */}
           <div className="space-y-1.5 md:col-span-2">
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Payment Basis / Billing Type *</label>
@@ -150,9 +184,9 @@ export const ClientFormModal: React.FC<ClientFormModalProps> = ({
 
           {formData.paymentBasis === 'monthly_retainer' ? (
             <div className="space-y-1.5 md:col-span-2 p-3.5 bg-indigo-50/40 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40 rounded-xl">
-              <label className="block text-xs font-semibold text-indigo-950 dark:text-indigo-200">Fixed Monthly Retainer (₹) *</label>
+              <label className="block text-xs font-semibold text-indigo-950 dark:text-indigo-200">Fixed Monthly Retainer ({currencySymbol}) *</label>
               <div className="relative">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">₹</span>
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">{currencySymbol}</span>
                 <input
                   required
                   type="number"
@@ -166,19 +200,28 @@ export const ClientFormModal: React.FC<ClientFormModalProps> = ({
             </div>
           ) : (
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Default Rate per Reel (₹) *</label>
-              <input required type="number" min="0" value={formData.defaultRate} onChange={(e) => update('defaultRate', e.target.value)} className={inputCls} placeholder="1500" />
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Default Rate per Reel ({currencySymbol}) *</label>
+              <div className="relative">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">{currencySymbol}</span>
+                <input required type="number" min="0" value={formData.defaultRate} onChange={(e) => update('defaultRate', e.target.value)} className={`${inputCls} pl-8`} placeholder="1500" />
+              </div>
             </div>
           )}
 
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">On Site Shoot Rate (₹)</label>
-            <input type="number" min="0" value={formData.onSiteShootRate} onChange={(e) => update('onSiteShootRate', e.target.value)} className={inputCls} placeholder="5000" />
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">On Site Shoot Rate ({currencySymbol})</label>
+            <div className="relative">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">{currencySymbol}</span>
+              <input type="number" min="0" value={formData.onSiteShootRate} onChange={(e) => update('onSiteShootRate', e.target.value)} className={`${inputCls} pl-8`} placeholder="5000" />
+            </div>
           </div>
 
           <div className="space-y-1.5 md:col-span-2">
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Website Making Rate (₹)</label>
-            <input type="number" min="0" value={formData.websiteMakingRate} onChange={(e) => update('websiteMakingRate', e.target.value)} className={inputCls} placeholder="15000" />
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Website Making Rate ({currencySymbol})</label>
+            <div className="relative">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">{currencySymbol}</span>
+              <input type="number" min="0" value={formData.websiteMakingRate} onChange={(e) => update('websiteMakingRate', e.target.value)} className={`${inputCls} pl-8`} placeholder="15000" />
+            </div>
           </div>
 
           <div className="md:col-span-2 p-3 bg-indigo-50/60 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/40 rounded-xl flex items-center justify-between">
