@@ -244,3 +244,4 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
 };
 
 export default ProfilePublicSection;
+
