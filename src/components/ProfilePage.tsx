@@ -2,11 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { User } from 'firebase/auth';
 import { UserProfile } from '../types';
 import { SubscriptionState } from '../hooks/useSubscription';
-import { ProfileHeader } from './profile/ProfileHeader';
-import { ProfileGeneralCard } from './profile/ProfileGeneralCard';
-import { ProfileInvoicingCard } from './profile/ProfileInvoicingCard';
-import { ProfilePreferencesCard } from './profile/ProfilePreferencesCard';
-import { ProfileSubscriptionCard } from './profile/ProfileSubscriptionCard';
+import ProfileNavSidebar, { SettingsSectionId } from './profile/ProfileNavSidebar';
+import ProfilePublicSection from './profile/ProfilePublicSection';
+import ProfileInvoicingSection from './profile/ProfileInvoicingSection';
+import ProfilePreferencesCard from './profile/ProfilePreferencesCard';
+import ProfileSubscriptionSection from './profile/ProfileSubscriptionSection';
 
 interface ProfilePageProps {
   user: User;
@@ -16,13 +16,20 @@ interface ProfilePageProps {
   onOpenSubscriptionModal?: () => void;
 }
 
+/**
+ * Account & Creator Settings Page.
+ * Styled after modern high-productivity settings interfaces with responsive sidebar navigation,
+ * split section headers, live unsaved change indicators, and per-section save/discard flows.
+ * Adheres strictly to GEMINI.md design standards: slate neutrals, steel blue accents, no green.
+ */
 export default function ProfilePage({
   user,
   profile,
   onSave,
   subscriptionState,
-  onOpenSubscriptionModal
+  onOpenSubscriptionModal,
 }: ProfilePageProps) {
+  // Live form state
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [upiId, setUpiId] = useState('');
@@ -31,57 +38,118 @@ export default function ProfilePage({
   const [geminiApiKey, setGeminiApiKey] = useState('');
   const [freelanceStartDate, setFreelanceStartDate] = useState('');
   const [workExperienceBio, setWorkExperienceBio] = useState('');
+
+  // Saved snapshot for dirty checking and discarding
+  const [savedSnapshot, setSavedSnapshot] = useState({
+    name: '',
+    phone: '',
+    upiId: '',
+    professionalTitle: 'Video Editor',
+    servicesDescription: 'Video Editing Services',
+    geminiApiKey: '',
+    freelanceStartDate: '',
+    workExperienceBio: '',
+  });
+
+  const [activeSection, setActiveSection] = useState<SettingsSectionId>('profile');
   const [isSaving, setIsSaving] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
+  const [savedSection, setSavedSection] = useState<SettingsSectionId | null>(null);
   const [error, setError] = useState('');
+  const [upiError, setUpiError] = useState('');
 
   const isInitializedRef = useRef(false);
-  const hasUserEditedRef = useRef(false);
   const hasLoadedInitialKeyRef = useRef(false);
 
   useEffect(() => {
     if (!isInitializedRef.current) {
       if (profile) {
-        setName(profile.name || user.displayName || '');
-        setPhone(profile.phone || '');
-        setUpiId(profile.upiId || '');
-        setProfessionalTitle(profile.professionalTitle || 'Video Editor');
-        setServicesDescription(profile.servicesDescription || 'Video Editing Services');
-        setGeminiApiKey(profile.geminiApiKey || '');
-        setFreelanceStartDate(profile.freelanceStartDate || '');
-        setWorkExperienceBio(profile.workExperienceBio || '');
+        const initial = {
+          name: profile.name || user.displayName || '',
+          phone: profile.phone || '',
+          upiId: profile.upiId || '',
+          professionalTitle: profile.professionalTitle || 'Video Editor',
+          servicesDescription: profile.servicesDescription || 'Video Editing Services',
+          geminiApiKey: profile.geminiApiKey || '',
+          freelanceStartDate: profile.freelanceStartDate || '',
+          workExperienceBio: profile.workExperienceBio || '',
+        };
+        setName(initial.name);
+        setPhone(initial.phone);
+        setUpiId(initial.upiId);
+        setProfessionalTitle(initial.professionalTitle);
+        setServicesDescription(initial.servicesDescription);
+        setGeminiApiKey(initial.geminiApiKey);
+        setFreelanceStartDate(initial.freelanceStartDate);
+        setWorkExperienceBio(initial.workExperienceBio);
+        setSavedSnapshot(initial);
         isInitializedRef.current = true;
         if (profile.geminiApiKey) {
           hasLoadedInitialKeyRef.current = true;
         }
       } else if (user) {
-        setName(user.displayName || '');
+        const defaultName = user.displayName || '';
+        setName(defaultName);
+        setSavedSnapshot((prev) => ({ ...prev, name: defaultName }));
       }
     } else if (!hasLoadedInitialKeyRef.current && profile?.geminiApiKey) {
-      // If private credentials resolve after initial render, populate key once
       setGeminiApiKey(profile.geminiApiKey);
+      setSavedSnapshot((prev) => ({ ...prev, geminiApiKey: profile.geminiApiKey! }));
       hasLoadedInitialKeyRef.current = true;
     }
   }, [profile, user]);
 
-  const wrapInput = (setter: (val: string) => void) => (val: string) => {
-    hasUserEditedRef.current = true;
+  // Dirty state checks per section
+  const isProfileDirty =
+    name !== savedSnapshot.name ||
+    professionalTitle !== savedSnapshot.professionalTitle ||
+    freelanceStartDate !== savedSnapshot.freelanceStartDate ||
+    workExperienceBio !== savedSnapshot.workExperienceBio;
+
+  const isInvoicingDirty =
+    upiId !== savedSnapshot.upiId ||
+    phone !== savedSnapshot.phone ||
+    servicesDescription !== savedSnapshot.servicesDescription;
+
+  const isAiDirty = geminiApiKey !== savedSnapshot.geminiApiKey;
+
+  // Discard handlers
+  const handleDiscardProfile = () => {
+    setName(savedSnapshot.name);
+    setProfessionalTitle(savedSnapshot.professionalTitle);
+    setFreelanceStartDate(savedSnapshot.freelanceStartDate);
+    setWorkExperienceBio(savedSnapshot.workExperienceBio);
     if (error) setError('');
-    setter(val);
   };
 
-  const handleSave = async () => {
+  const handleDiscardInvoicing = () => {
+    setUpiId(savedSnapshot.upiId);
+    setPhone(savedSnapshot.phone);
+    setServicesDescription(savedSnapshot.servicesDescription);
+    setUpiError('');
+    if (error) setError('');
+  };
+
+  const handleDiscardAi = () => {
+    setGeminiApiKey(savedSnapshot.geminiApiKey);
+    if (error) setError('');
+  };
+
+  // Save handler
+  const handleSaveSection = async (section: SettingsSectionId) => {
     const trimmedName = name.trim() || user.displayName || 'Creator';
     const trimmedUpi = upiId.trim();
 
     if (trimmedUpi && !trimmedUpi.includes('@')) {
-      setError('Please enter a valid UPI ID (e.g. username@bank).');
+      setUpiError('Please enter a valid UPI ID (e.g. username@bank).');
+      setActiveSection('invoicing');
+      document.getElementById('section-invoicing')?.scrollIntoView({ behavior: 'smooth' });
       return;
     }
 
-    setIsSaving(true);
-    setIsSaved(false);
+    setUpiError('');
     setError('');
+    setIsSaving(true);
+    setSavedSection(null);
 
     try {
       const updatedProfile: UserProfile = {
@@ -95,23 +163,51 @@ export default function ProfilePage({
         freelanceStartDate: freelanceStartDate.trim() || undefined,
         workExperienceBio: workExperienceBio.trim() || undefined,
         isPublicProfile: true,
-        createdAt: profile?.createdAt || Date.now()
+        createdAt: profile?.createdAt || Date.now(),
       };
 
       await onSave(updatedProfile);
-      setIsSaved(true);
-      setTimeout(() => setIsSaved(false), 3000);
+
+      setSavedSnapshot({
+        name: trimmedName,
+        phone: phone.trim(),
+        upiId: trimmedUpi,
+        professionalTitle: professionalTitle.trim() || 'Video Editor',
+        servicesDescription: servicesDescription.trim() || 'Video Editing Services',
+        geminiApiKey: geminiApiKey.trim(),
+        freelanceStartDate: freelanceStartDate.trim(),
+        workExperienceBio: workExperienceBio.trim(),
+      });
+
+      setSavedSection(section);
+      setTimeout(() => setSavedSection(null), 3000);
     } catch (err: any) {
       console.error('Failed to save profile changes:', err);
-      setError('Failed to save profile changes. Please try again.');
+      setError('Failed to save changes. Please try again.');
     } finally {
       setIsSaving(false);
     }
   };
 
+  const handleSelectNav = (id: SettingsSectionId) => {
+    setActiveSection(id);
+    const target = document.getElementById(`section-${id}`);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 w-full min-w-0 flex-1">
-      <ProfileHeader isSaving={isSaving} isSaved={isSaved} onSave={handleSave} />
+      {/* Page Header */}
+      <div className="pb-4 border-b border-slate-200 dark:border-slate-800">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-3xl">
+          Settings
+        </h1>
+        <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+          Your creator identity, client invoicing rails, AI integrations, and CrestFlow membership.
+        </p>
+      </div>
 
       {error && (
         <div className="p-3.5 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-xs text-red-600 dark:text-red-400">
@@ -119,40 +215,59 @@ export default function ProfilePage({
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Creator Details & Invoicing */}
-        <div className="lg:col-span-7 space-y-6">
-          <ProfileGeneralCard
+      {/* Main Grid: Navigation Sidebar on Left, Form Sections on Right */}
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-10">
+        <ProfileNavSidebar
+          activeSection={activeSection}
+          onSelectSection={handleSelectNav}
+          hasSubscription={Boolean(subscriptionState?.isSubscriptionFeatureEnabled)}
+        />
+
+        <div className="min-w-0 divide-y divide-slate-200 dark:divide-slate-800 space-y-8">
+          <ProfilePublicSection
             user={user}
             name={name}
-            setName={wrapInput(setName)}
+            setName={setName}
             professionalTitle={professionalTitle}
-            setProfessionalTitle={wrapInput(setProfessionalTitle)}
-            servicesDescription={servicesDescription}
-            setServicesDescription={wrapInput(setServicesDescription)}
+            setProfessionalTitle={setProfessionalTitle}
+            bio={workExperienceBio}
+            setBio={setWorkExperienceBio}
             freelanceStartDate={freelanceStartDate}
-            setFreelanceStartDate={wrapInput(setFreelanceStartDate)}
-            workExperienceBio={workExperienceBio}
-            setWorkExperienceBio={wrapInput(setWorkExperienceBio)}
+            setFreelanceStartDate={setFreelanceStartDate}
+            isSaving={isSaving}
+            isSaved={savedSection === 'profile'}
+            isDirty={isProfileDirty}
+            onSave={() => handleSaveSection('profile')}
+            onDiscard={handleDiscardProfile}
           />
 
-          <ProfileInvoicingCard
+          <ProfileInvoicingSection
             upiId={upiId}
-            setUpiId={wrapInput(setUpiId)}
+            setUpiId={setUpiId}
             phone={phone}
-            setPhone={wrapInput(setPhone)}
+            setPhone={setPhone}
+            servicesDescription={servicesDescription}
+            setServicesDescription={setServicesDescription}
             userId={user.uid}
+            isSaving={isSaving}
+            isSaved={savedSection === 'invoicing'}
+            isDirty={isInvoicingDirty}
+            upiError={upiError}
+            onSave={() => handleSaveSection('invoicing')}
+            onDiscard={handleDiscardInvoicing}
           />
-        </div>
 
-        {/* Right Column: Preferences, AI & SaaS Plan */}
-        <div className="lg:col-span-5 space-y-6">
           <ProfilePreferencesCard
             geminiApiKey={geminiApiKey}
-            setGeminiApiKey={wrapInput(setGeminiApiKey)}
+            setGeminiApiKey={setGeminiApiKey}
+            isSaving={isSaving}
+            isSaved={savedSection === 'ai'}
+            isDirty={isAiDirty}
+            onSave={() => handleSaveSection('ai')}
+            onDiscard={handleDiscardAi}
           />
 
-          <ProfileSubscriptionCard
+          <ProfileSubscriptionSection
             subscriptionState={subscriptionState}
             onOpenSubscriptionModal={onOpenSubscriptionModal}
           />
