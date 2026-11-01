@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { Invoice, WorkItem, Client } from '../types';
 import { 
-  BarChart, Bar, LineChart, Line, Legend, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell 
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell 
 } from 'recharts';
 import { IndianRupee, Clock, TrendingUp, CheckCircle2, DownloadCloud, UploadCloud, AlertTriangle, Send, Users, ArrowRight, Mail, Copy, X, FileText, StickyNote as StickyNoteIcon, Award } from 'lucide-react';
 import { User } from 'firebase/auth';
@@ -21,6 +21,7 @@ import { calculateWorkJourney } from '../lib/anniversary';
 import { executeAutoInvoiceCheck } from '../lib/autoInvoiceService';
 import StatusBadge from './StatusBadge';
 import GettingStartedCard from './GettingStartedCard';
+import RevenueComparisonChart from './dashboard/RevenueComparisonChart';
 import { formatInvoiceNumber } from '../lib/invoiceUtils';
 import { usePaymentDueNotifier } from '../hooks/usePaymentDueNotifier';
 
@@ -174,54 +175,6 @@ export default function DashboardTab({
     return clientRevenueTimeframe === 'month' ? metrics.monthChartData : metrics.allTimeChartData;
   }, [clientRevenueTimeframe, metrics]);
 
-  // Compute monthly earnings trend for line chart
-  const monthlyTrendData = useMemo(() => {
-    const monthMap = new Map<string, { monthKey: string; monthLabel: string; totalInvoiced: number; paidEarnings: number; pendingAmount: number }>();
-
-    // Seed last 6 calendar months for continuous timeline
-    const now = new Date();
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      const label = d.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
-      monthMap.set(key, { monthKey: key, monthLabel: label, totalInvoiced: 0, paidEarnings: 0, pendingAmount: 0 });
-    }
-
-    invoices.forEach(inv => {
-      if (!inv.date) return;
-      
-      // Invoiced and Pending always align with creation date
-      const invDate = new Date(inv.date);
-      const invKey = `${invDate.getFullYear()}-${String(invDate.getMonth() + 1).padStart(2, '0')}`;
-      const invLabel = invDate.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
-
-      if (!monthMap.has(invKey)) {
-        monthMap.set(invKey, { monthKey: invKey, monthLabel: invLabel, totalInvoiced: 0, paidEarnings: 0, pendingAmount: 0 });
-      }
-
-      const amt = Number(inv.totalAmount) || 0;
-      const invItem = monthMap.get(invKey)!;
-      invItem.totalInvoiced += amt;
-
-      if (inv.status === 'Pending') {
-        invItem.pendingAmount += amt;
-      }
-
-      // Paid Earnings align with payment date
-      if (inv.status === 'Paid') {
-        const payDate = inv.lastPaymentDate ? new Date(inv.lastPaymentDate) : invDate;
-        const payKey = `${payDate.getFullYear()}-${String(payDate.getMonth() + 1).padStart(2, '0')}`;
-        const payLabel = payDate.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
-
-        if (!monthMap.has(payKey)) {
-          monthMap.set(payKey, { monthKey: payKey, monthLabel: payLabel, totalInvoiced: 0, paidEarnings: 0, pendingAmount: 0 });
-        }
-        monthMap.get(payKey)!.paidEarnings += amt;
-      }
-    });
-
-    return Array.from(monthMap.values()).sort((a, b) => a.monthKey.localeCompare(b.monthKey));
-  }, [invoices]);
 
   const toggleInvoiceStatus = (id: string) => {
     const inv = invoices.find(i => i.id === id);
@@ -581,96 +534,9 @@ export default function DashboardTab({
 
       {/* Analytics & Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-        {/* Recharts Monthly Earnings Line Chart */}
+        {/* Monthly Earnings Revenue Comparison Chart */}
         <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-3.5 sm:p-6 rounded-xl shadow-xs flex flex-col min-w-0">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 sm:mb-6">
-            <div>
-              <h3 className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Monthly Earnings Trend</h3>
-              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">Track paid earnings vs total invoiced revenue over time</p>
-            </div>
-            <div className="flex items-center gap-3 sm:gap-4 text-[11px] sm:text-xs">
-              <span className="flex items-center gap-1.5 font-medium text-indigo-600 dark:text-indigo-400">
-                <span className="w-2.5 h-2.5 rounded-full bg-indigo-600"></span> Paid Earnings
-              </span>
-              <span className="flex items-center gap-1.5 font-medium text-slate-600 dark:text-slate-400">
-                <span className="w-2.5 h-2.5 rounded-full bg-slate-400"></span> Total Invoiced
-              </span>
-            </div>
-          </div>
-          <div className="flex-1 min-h-[240px] sm:min-h-[280px]">
-            {monthlyTrendData.some(m => m.totalInvoiced > 0 || m.paidEarnings > 0) ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={monthlyTrendData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? "#334155" : "#e2e8f0"} />
-                  <XAxis 
-                    dataKey="monthLabel" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fontSize: 11, fill: isDark ? '#94a3b8' : '#64748b' }} 
-                  />
-                  <YAxis 
-                    axisLine={false} 
-                    tickLine={false} 
-                    width={38}
-                    tick={{ fontSize: 11, fill: isDark ? '#94a3b8' : '#64748b' }}
-                    tickFormatter={(val) => `₹${val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val}`}
-                  />
-                  <Tooltip 
-                    contentStyle={{
-                      borderRadius: '12px',
-                      border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
-                      backgroundColor: isDark ? '#1e293b' : '#ffffff',
-                      color: isDark ? '#f8fafc' : '#0f172a',
-                      boxShadow: isDark ? '0 10px 15px -3px rgb(0 0 0 / 0.4)' : '0 10px 15px -3px rgb(0 0 0 / 0.1)'
-                    }}
-                    itemStyle={{
-                      color: isDark ? '#f8fafc' : '#0f172a'
-                    }}
-                    labelStyle={{
-                      color: isDark ? '#94a3b8' : '#64748b',
-                      fontWeight: 600,
-                      marginBottom: '4px'
-                    }}
-                    formatter={(value: number, name: string) => [
-                      `₹${Number(value).toLocaleString('en-IN')}`, 
-                      name === 'paidEarnings' ? 'Paid Earnings' : 'Total Invoiced'
-                    ]}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="paidEarnings" 
-                    name="paidEarnings"
-                    stroke="#4870aa" 
-                    strokeWidth={3} 
-                    dot={{ r: 4, fill: '#4870aa', strokeWidth: 2, stroke: isDark ? '#1e293b' : '#ffffff' }}
-                    activeDot={{ r: 7, strokeWidth: 0 }} 
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="totalInvoiced" 
-                    name="totalInvoiced"
-                    stroke="#94a3b8" 
-                    strokeWidth={2} 
-                    strokeDasharray="4 4"
-                    dot={{ r: 3, fill: '#94a3b8', stroke: isDark ? '#1e293b' : '#ffffff' }} 
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center text-sm text-slate-400 dark:text-slate-500 text-center py-12 space-y-2">
-                <p>No monthly invoice data yet.<br/>Generate invoices to render the earnings line chart.</p>
-                {onNavigateToInvoices && (
-                  <button
-                    type="button"
-                    onClick={onNavigateToInvoices}
-                    className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
-                  >
-                    Go to Invoicing &rarr;
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+          <RevenueComparisonChart invoices={invoices} onNavigateToInvoices={onNavigateToInvoices} />
         </div>
 
         {/* Client Distribution Bar Chart */}
