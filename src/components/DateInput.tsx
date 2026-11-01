@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Calendar } from 'lucide-react';
 import { formatYMDToDMY, parseDMYToYMD, formatLocalDateToYMD } from '../lib/dateUtils';
+import { toDay, isoDate } from '../lib/calendarUtils';
+import { CalendarPopover } from './CalendarPopover';
 
 interface DateInputProps {
   value: string; // YYYY-MM-DD
@@ -24,13 +26,29 @@ export const DateInput: React.FC<DateInputProps> = ({
   name
 }) => {
   const [displayText, setDisplayText] = useState(() => formatYMDToDMY(value));
-  const hiddenPickerRef = useRef<HTMLInputElement>(null);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const isBackspacingRef = useRef(false);
 
   // Sync internal display text if external value changes (e.g. form reset, item loaded for edit)
   useEffect(() => {
     const formatted = formatYMDToDMY(value);
     setDisplayText(formatted);
+  }, [value]);
+
+  const selectedDayNum = useMemo(() => {
+    if (!value) return null;
+    const parts = value.split('-');
+    if (parts.length === 3) {
+      const y = parseInt(parts[0], 10);
+      const m = parseInt(parts[1], 10) - 1;
+      const d = parseInt(parts[2], 10);
+      if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+        return toDay(y, m, d);
+      }
+    }
+    return null;
   }, [value]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -140,29 +158,15 @@ export const DateInput: React.FC<DateInputProps> = ({
     }
   };
 
-  const handleNativePickerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedYmd = e.target.value;
-    if (selectedYmd) {
-      setDisplayText(formatYMDToDMY(selectedYmd));
-      onChange(selectedYmd);
-    }
-  };
-
-  const triggerPicker = () => {
-    if (disabled) return;
-    try {
-      if (hiddenPickerRef.current && typeof hiddenPickerRef.current.showPicker === 'function') {
-        hiddenPickerRef.current.showPicker();
-      } else {
-        hiddenPickerRef.current?.focus();
-      }
-    } catch {
-      hiddenPickerRef.current?.focus();
-    }
+  const handleCalendarSelect = (dayNum: number) => {
+    const ymd = isoDate(dayNum);
+    setDisplayText(formatYMDToDMY(ymd));
+    onChange(ymd);
+    setIsCalendarOpen(false);
   };
 
   return (
-    <div className="relative flex items-center w-full">
+    <div ref={containerRef} className="relative flex items-center w-full">
       <input
         type="text"
         id={id}
@@ -182,27 +186,26 @@ export const DateInput: React.FC<DateInputProps> = ({
       {/* Calendar picker trigger button */}
       <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center">
         <button
+          ref={buttonRef}
           type="button"
           disabled={disabled}
-          onClick={triggerPicker}
+          onClick={() => !disabled && setIsCalendarOpen((prev) => !prev)}
           tabIndex={-1}
           title="Open calendar picker"
+          aria-expanded={isCalendarOpen}
           className="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
         >
           <Calendar size={16} />
         </button>
-
-        {/* Hidden native date picker overlay for guaranteed mobile & desktop picker support */}
-        <input
-          ref={hiddenPickerRef}
-          type="date"
-          tabIndex={-1}
-          value={value || ''}
-          onChange={handleNativePickerChange}
-          className="sr-only"
-          aria-hidden="true"
-        />
       </div>
+
+      <CalendarPopover
+        isOpen={isCalendarOpen}
+        onClose={() => setIsCalendarOpen(false)}
+        onSelectDate={handleCalendarSelect}
+        selectedDay={selectedDayNum}
+        triggerRef={containerRef}
+      />
     </div>
   );
 };
