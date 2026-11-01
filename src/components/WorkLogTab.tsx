@@ -64,6 +64,7 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
       date: formatLocalDateToYMD(work.date)
     });
     setIsFormOpen(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleCancel = () => {

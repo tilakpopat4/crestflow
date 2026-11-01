@@ -41,3 +41,4 @@ export const RevenueChartEmptyState: React.FC<RevenueChartEmptyStateProps> = ({
 };
 
 export default RevenueChartEmptyState;
+

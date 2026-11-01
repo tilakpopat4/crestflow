@@ -26,6 +26,7 @@ import { formatLocalDateToYMD, parseYMDToTimestamp } from '../lib/dateUtils';
 import ScheduleInvoiceModal from './ScheduleInvoiceModal';
 import { getAutoInvoiceScheduleInfo } from '../lib/autoInvoiceService';
 import StatusBadge from './StatusBadge';
+import ClientRatesModal from './ClientRatesModal';
 
 interface ClientDashboardProps {
   client: Client;
@@ -43,6 +44,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
   const profile = profiles[0] || null;
   const [copiedReviewLink, setCopiedReviewLink] = useState(false);
   const [isDriveModalOpen, setIsDriveModalOpen] = useState(false);
+  const [isRatesModalOpen, setIsRatesModalOpen] = useState(false);
   const [embedModalData, setEmbedModalData] = useState<{ isOpen: boolean; url: string; title: string; clientName?: string } | null>(null);
 
   const handleCopyReviewLink = () => {
@@ -52,10 +54,38 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
     const clientNameParam = encodeURIComponent(client.name);
     const link = `${baseUrl}?feedback=true&uid=${user.uid}&name=${nameParam}&clientId=${client.id}&clientName=${clientNameParam}`;
     
-    navigator.clipboard.writeText(link).then(() => {
-      setCopiedReviewLink(true);
-      setTimeout(() => setCopiedReviewLink(false), 2000);
-    });
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(link).then(() => {
+        setCopiedReviewLink(true);
+        setTimeout(() => setCopiedReviewLink(false), 2000);
+      }).catch(() => {
+        prompt('Copy review link:', link);
+      });
+    } else {
+      prompt('Copy review link:', link);
+    }
+  };
+
+  const handleSaveRates = async (rates: {
+    paymentBasis: 'per_reel' | 'monthly_retainer';
+    defaultRate: number;
+    monthlyRetainerAmount?: number;
+    onSiteShootRate?: number;
+    websiteMakingRate?: number;
+  }) => {
+    const updatedClient: Client = {
+      ...client,
+      paymentBasis: rates.paymentBasis,
+      defaultRate: rates.defaultRate,
+      monthlyRetainerAmount: rates.monthlyRetainerAmount,
+      onSiteShootRate: rates.onSiteShootRate,
+      websiteMakingRate: rates.websiteMakingRate,
+    };
+    if (!rates.onSiteShootRate) delete updatedClient.onSiteShootRate;
+    if (!rates.websiteMakingRate) delete updatedClient.websiteMakingRate;
+    if (rates.paymentBasis !== 'monthly_retainer') delete updatedClient.monthlyRetainerAmount;
+
+    await updateClient(updatedClient);
   };
 
   const [activeTab, setActiveTab] = useState<'work' | 'invoices' | 'settings'>('work');
@@ -1197,21 +1227,39 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
         {activeTab === 'settings' && (
           <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-6 w-full min-w-0">
             <div className="flex justify-between items-center gap-2">
-              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">Rates & Pricing</h3>
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">Rates &amp; Pricing</h3>
 
-              <button
-                onClick={() => onEditClient(client)}
-                className="flex items-center gap-1.5 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer"
-              >
-                <Edit3 size={13} /> <span>Modify Rates</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsRatesModalOpen(true)}
+                  className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer shadow-xs"
+                >
+                  <Edit3 size={13} /> <span>Modify Rates</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onEditClient(client)}
+                  className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-3 py-1.5 sm:py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer"
+                  title="Edit Full Client Profile"
+                >
+                  <Edit2 size={13} /> <span>Full Profile</span>
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl space-y-1">
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">
-                  Payment Basis
-                </span>
+              <div
+                onClick={() => setIsRatesModalOpen(true)}
+                className="p-4 bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100/80 dark:hover:bg-slate-900 rounded-xl space-y-1 cursor-pointer transition-all border border-transparent hover:border-slate-300 dark:hover:border-slate-700 group"
+                title="Click to modify billing basis"
+              >
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">
+                    Payment Basis
+                  </span>
+                  <Edit3 size={12} className="text-slate-400 group-hover:text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
                 <div className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                   {client.paymentBasis === 'monthly_retainer' ? 'Monthly Retainer' : 'Per Reel'}
                 </div>
@@ -1222,22 +1270,43 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                 </span>
               </div>
 
-              <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl space-y-1">
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Default Reel Rate</span>
+              <div
+                onClick={() => setIsRatesModalOpen(true)}
+                className="p-4 bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100/80 dark:hover:bg-slate-900 rounded-xl space-y-1 cursor-pointer transition-all border border-transparent hover:border-slate-300 dark:hover:border-slate-700 group"
+                title="Click to modify default reel rate"
+              >
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Default Reel Rate</span>
+                  <Edit3 size={12} className="text-slate-400 group-hover:text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
                 <div className="text-xl font-bold text-indigo-600 dark:text-indigo-400">₹{client.defaultRate.toLocaleString('en-IN')}</div>
                 <span className="text-xs text-slate-400 dark:text-slate-500">Per video edit</span>
               </div>
 
-              <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl space-y-1">
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">On Site Shoot Rate</span>
+              <div
+                onClick={() => setIsRatesModalOpen(true)}
+                className="p-4 bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100/80 dark:hover:bg-slate-900 rounded-xl space-y-1 cursor-pointer transition-all border border-transparent hover:border-slate-300 dark:hover:border-slate-700 group"
+                title="Click to modify on-site shoot rate"
+              >
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">On Site Shoot Rate</span>
+                  <Edit3 size={12} className="text-slate-400 group-hover:text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
                 <div className="text-xl font-bold text-indigo-600 dark:text-indigo-400">
                   {client.onSiteShootRate ? `₹${client.onSiteShootRate.toLocaleString('en-IN')}` : 'Not Set'}
                 </div>
                 <span className="text-xs text-slate-400 dark:text-slate-500">Per shoot day</span>
               </div>
 
-              <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl space-y-1">
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Website Making Rate</span>
+              <div
+                onClick={() => setIsRatesModalOpen(true)}
+                className="p-4 bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100/80 dark:hover:bg-slate-900 rounded-xl space-y-1 cursor-pointer transition-all border border-transparent hover:border-slate-300 dark:hover:border-slate-700 group"
+                title="Click to modify website making rate"
+              >
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Website Making Rate</span>
+                  <Edit3 size={12} className="text-slate-400 group-hover:text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
                 <div className="text-xl font-bold text-indigo-600 dark:text-indigo-400">
                   {client.websiteMakingRate ? `₹${client.websiteMakingRate.toLocaleString('en-IN')}` : 'Not Set'}
                 </div>
@@ -1629,6 +1698,14 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
         onUpdateClient={updateClient}
         onAddInvoice={updateInvoice}
         onUpdateWorkItem={updateWorkItem}
+      />
+
+      {/* Dedicated Rates & Pricing Editor Modal */}
+      <ClientRatesModal
+        isOpen={isRatesModalOpen}
+        onClose={() => setIsRatesModalOpen(false)}
+        client={client}
+        onSaveRates={handleSaveRates}
       />
     </div>
   );

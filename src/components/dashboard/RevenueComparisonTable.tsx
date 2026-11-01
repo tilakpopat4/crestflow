@@ -62,3 +62,4 @@ export const RevenueComparisonTable: React.FC<RevenueComparisonTableProps> = ({
 };
 
 export default RevenueComparisonTable;
+

@@ -94,3 +94,4 @@ export const RevenueScrubberColumns: React.FC<RevenueScrubberColumnsProps> = ({
 };
 
 export default RevenueScrubberColumns;
+
