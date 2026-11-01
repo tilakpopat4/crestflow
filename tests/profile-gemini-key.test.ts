@@ -88,6 +88,7 @@ describe('Gemini API Key Persistence & Profile State Management', () => {
       'firestore.rules must explicitly allow upiId field in profile'
     );
     assert.ok(
+      rulesContent.includes('allow create: if (isOwner(profileId) && isValidProfile(request.resource.data)) || isAdmin();') ||
       rulesContent.includes('allow create: if isOwner(profileId) && isValidProfile(request.resource.data);'),
       'firestore.rules must allow create for owners without restricting auth UID formats'
     );

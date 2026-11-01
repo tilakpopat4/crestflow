@@ -34,6 +34,7 @@ export default function AdminUserSubscriptions() {
           items.push({
             id: d.id,
             name: data.name || '',
+            email: data.email || '',
             phone: data.phone || '',
             upi_id: data.upiId || '',
             professional_title: data.professionalTitle || '',
@@ -143,9 +144,11 @@ export default function AdminUserSubscriptions() {
   };
 
   const filtered = profiles.filter((p) => {
-    const q = searchQuery.toLowerCase();
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return true;
     return (
       (p.name && p.name.toLowerCase().includes(q)) ||
+      (p.email && p.email.toLowerCase().includes(q)) ||
       (p.professional_title && p.professional_title.toLowerCase().includes(q)) ||
       (p.upi_id && p.upi_id.toLowerCase().includes(q)) ||
       (p.phone && p.phone.includes(q)) ||
@@ -170,7 +173,7 @@ export default function AdminUserSubscriptions() {
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search name, phone, UID..."
+              placeholder="Search name, email, phone, UID..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg pl-9 pr-3.5 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 outline-none focus:border-indigo-500 transition-colors duration-120"

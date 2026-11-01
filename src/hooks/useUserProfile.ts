@@ -110,6 +110,21 @@ export function useUserProfile(user: User | null) {
                 .catch((err) => console.warn('Welcome email dispatch error:', err));
             }).catch(() => {});
           }
+        } else {
+          // snap does not exist: ensure profile document exists in Firestore so user appears in admin list
+          const initialData: Partial<UserProfile> = {
+            id: user.uid,
+            userId: user.uid,
+            name: user.displayName || (user.email ? user.email.split('@')[0] : 'Freelancer'),
+            email: user.email || '',
+            photoURL: user.photoURL || '',
+            isPublicProfile: true,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          };
+          setDoc(profileRef, sanitizePayload(initialData), { merge: true }).catch((err) =>
+            console.warn('Initial profile auto-creation error:', err)
+          );
         }
         setProfilesLoading(false);
       },

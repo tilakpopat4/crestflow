@@ -4,6 +4,7 @@ import { Plus, XCircle, Ban, CheckCircle } from 'lucide-react';
 export interface ProfileRowData {
   id: string;
   name: string;
+  email?: string;
   phone?: string;
   upi_id?: string;
   professional_title?: string;
@@ -45,6 +46,11 @@ export default function UserSubscriptionRow({
         <div className="font-bold text-slate-900 dark:text-slate-100 text-sm">
           {profile.name || 'Anonymous User'}
         </div>
+        {profile.email && (
+          <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            {profile.email}
+          </div>
+        )}
         <div
           className="font-mono text-xs text-slate-400 dark:text-slate-500 mt-0.5 select-all"
           title="User UID"

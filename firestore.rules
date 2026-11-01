@@ -127,10 +127,9 @@ service cloud.firestore {
     match /profiles/{profileId} {
       allow list: if isAdmin();
       allow get: if isOwner(profileId) || resource.data.isPublicProfile == true || !('isPublicProfile' in resource.data) || isAdmin();
-      allow create: if isOwner(profileId) && isValidProfile(request.resource.data);
-      allow update: if isOwner(profileId) && isValidProfile(request.resource.data)
-        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['subscriptionStatus', 'subscriptionPlan', 'currentPeriodEnd', 'currentPeriodStart', 'razorpaySubscriptionId', 'cancelAtPeriodEnd']));
-      allow delete: if isOwner(profileId);
+      allow create: if (isOwner(profileId) && isValidProfile(request.resource.data)) || isAdmin();
+      allow update: if (isOwner(profileId) && isValidProfile(request.resource.data) && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['subscriptionStatus', 'subscriptionPlan', 'currentPeriodEnd', 'currentPeriodStart', 'razorpaySubscriptionId', 'cancelAtPeriodEnd']))) || isAdmin();
+      allow delete: if isOwner(profileId) || isAdmin();
 
       // Private Settings Subcollection (geminiApiKey, bank accounts)
       match /private/{docId} {

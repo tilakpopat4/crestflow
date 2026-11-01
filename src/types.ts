@@ -33,6 +33,7 @@ export interface Client {
   isClosed?: boolean; // soft-archive: work is closed, data is preserved
   closedAt?: number; // timestamp when client was closed
   createdAt: number;
+  updatedAt?: number;
   subClients?: SubClient[]; // List of sub-clients belonging to this client
   // Auto-invoice scheduling fields (runs at morning 6:00 AM)
   autoInvoiceEnabled?: boolean;
@@ -69,6 +70,7 @@ export interface WorkItem {
   invoiceId?: string;
   videoUrl?: string;
   createdAt: number;
+  updatedAt?: number;
 }
 
 export interface InvoiceDeliverable {
@@ -138,6 +140,7 @@ export interface SubscriptionWhitelistItem {
   email: string;
   reason?: string;
   createdAt: number;
+  updatedAt?: number;
 }
 
 export interface SubscriptionPayment {
@@ -177,6 +180,7 @@ export interface UserProfile {
   freelanceStartDate?: string; // Freelancer's career start date in YYYY-MM-DD format
   workExperienceBio?: string; // Optional career overview / work experience bio
   createdAt: number;
+  updatedAt?: number;
   // SaaS Subscription fields (49/- per month)
   subscriptionStatus?: SubscriptionStatus;
   subscriptionPlan?: SubscriptionPlan;
@@ -215,6 +219,7 @@ export interface ClientReview {
   isApproved?: boolean;
   isPublic?: boolean;
   createdAt: number;
+  updatedAt?: number;
 }
 
 export interface ServiceRequest {
@@ -229,4 +234,5 @@ export interface ServiceRequest {
   proposedRate?: number;
   status: 'pending' | 'accepted' | 'declined';
   createdAt: number;
+  updatedAt?: number;
 }

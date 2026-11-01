@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { User, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { auth, googleProvider, db } from '../firebase';
 
 export function useAuthSession() {
@@ -36,7 +36,24 @@ export function useAuthSession() {
     if (isSigningIn) return;
     setIsSigningIn(true);
     try {
-      await signInWithPopup(auth, googleProvider);
+      const res = await signInWithPopup(auth, googleProvider);
+      if (res?.user) {
+        const u = res.user;
+        const profileRef = doc(db, 'profiles', u.uid);
+        const initialData = {
+          id: u.uid,
+          userId: u.uid,
+          name: u.displayName || (u.email ? u.email.split('@')[0] : 'Freelancer'),
+          email: u.email || '',
+          photoURL: u.photoURL || '',
+          isPublicProfile: true,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        };
+        setDoc(profileRef, initialData, { merge: true }).catch((err) => {
+          console.warn('Initial profile upsert on login error:', err);
+        });
+      }
     } catch (err: any) {
       if (err?.code !== 'auth/popup-closed-by-user') {
         alert(`Sign in error: ${err.message}`);

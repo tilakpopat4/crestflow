@@ -73,8 +73,8 @@ export default function App() {
 
   // Prompt onboarding if profile setup is incomplete
   useEffect(() => {
-    if (user && profile && !profilesLoading) {
-      const hasCompleted = localStorage.getItem(`crestflow_onboarded_${user.uid}`) || profile.upiId;
+    if (user && !profilesLoading) {
+      const hasCompleted = localStorage.getItem(`crestflow_onboarded_${user.uid}`) || profile?.upiId;
       if (!hasCompleted) {
         setIsOnboardingModalOpen(true);
       }
