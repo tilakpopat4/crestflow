@@ -11,6 +11,7 @@ import BulkEditWorkModal from './BulkEditWorkModal';
 import { DateInput } from './DateInput';
 import { formatLocalDateToYMD, parseYMDToTimestamp } from '../lib/dateUtils';
 import StatusBadge from './StatusBadge';
+import Checkbox from './ui/Checkbox';
 
 interface WorkLogTabProps {
   user: User;
@@ -694,13 +695,12 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
         <div className="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm contain-paint">
           {/* Mobile Header Bar */}
           <div className="md:hidden flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-400">
-            <label className="flex items-center gap-2 cursor-pointer select-none">
-              <input
-                type="checkbox"
+            <label className="flex items-center gap-2.5 cursor-pointer select-none">
+              <Checkbox
                 checked={allVisibleSelected}
-                ref={(el) => { if (el) el.indeterminate = someVisibleSelected; }}
+                indeterminate={someVisibleSelected}
                 onChange={handleSelectAll}
-                className="w-4 h-4 rounded text-indigo-600 border-slate-300 dark:border-slate-600 cursor-pointer focus:ring-indigo-500"
+                aria-label={`Select all visible ${sortedWork.length} deliverables`}
               />
               <span>Select All ({sortedWork.length})</span>
             </label>
@@ -729,11 +729,10 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
                 >
                   <div className="flex items-start justify-between gap-2.5">
                     <div className="flex items-start gap-2.5 min-w-0 flex-1">
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         checked={isSelected}
                         onChange={() => toggleSelectItem(work.id)}
-                        className="w-4 h-4 mt-0.5 rounded text-indigo-600 border-slate-300 dark:border-slate-600 cursor-pointer focus:ring-indigo-500 shrink-0"
+                        aria-label={`Select ${work.description || 'work log'}`}
                       />
                       <div className="min-w-0">
                         <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate">
@@ -826,13 +825,12 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700">
                   <th className="py-3 pl-4 pr-2 w-10">
-                    <input
-                      type="checkbox"
+                    <Checkbox
                       checked={allVisibleSelected}
-                      ref={(el) => { if (el) el.indeterminate = someVisibleSelected; }}
+                      indeterminate={someVisibleSelected}
                       onChange={handleSelectAll}
-                      className="w-4 h-4 rounded text-indigo-600 border-slate-300 dark:border-slate-600 cursor-pointer focus:ring-indigo-500"
                       title="Select all visible"
+                      aria-label="Select all visible deliverables"
                     />
                   </th>
                   <th className="py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Date</th>
@@ -857,11 +855,10 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
                       )}
                     >
                       <td className="py-4 pl-4 pr-2">
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           checked={isSelected}
                           onChange={() => toggleSelectItem(work.id)}
-                          className="w-4 h-4 rounded text-indigo-600 border-slate-300 dark:border-slate-600 cursor-pointer focus:ring-indigo-500"
+                          aria-label={`Select ${work.description || 'work log'}`}
                         />
                       </td>
                       <td className="py-4 px-4 text-sm text-slate-600 dark:text-slate-400">

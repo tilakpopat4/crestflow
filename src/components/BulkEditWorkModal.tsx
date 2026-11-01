@@ -303,11 +303,10 @@ export default function BulkEditWorkModal({
           {/* Rate Section */}
           <div className={`p-4 rounded-xl border transition-colors ${updateRate ? 'border-indigo-300 dark:border-indigo-700 bg-indigo-50/20 dark:bg-indigo-950/20' : 'border-slate-200 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-900/30'}`}>
             <label className="flex items-center gap-2.5 cursor-pointer font-semibold text-sm text-slate-800 dark:text-slate-200 select-none">
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={updateRate}
                 onChange={(e) => setUpdateRate(e.target.checked)}
-                className="w-4 h-4 rounded text-indigo-600 border-slate-300 focus:ring-indigo-500 cursor-pointer"
+                aria-label="Update Rate"
               />
               <IndianRupee size={15} className="text-indigo-600 dark:text-indigo-400" />
               <span>Update Rate (₹)</span>
@@ -365,11 +364,10 @@ export default function BulkEditWorkModal({
           {/* Date Section */}
           <div className={`p-4 rounded-xl border transition-colors ${updateDate ? 'border-indigo-300 dark:border-indigo-700 bg-indigo-50/20 dark:bg-indigo-950/20' : 'border-slate-200 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-900/30'}`}>
             <label className="flex items-center gap-2.5 cursor-pointer font-semibold text-sm text-slate-800 dark:text-slate-200 select-none">
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={updateDate}
                 onChange={(e) => setUpdateDate(e.target.checked)}
-                className="w-4 h-4 rounded text-indigo-600 border-slate-300 focus:ring-indigo-500 cursor-pointer"
+                aria-label="Update Date Completed"
               />
               <Calendar size={15} className="text-indigo-600 dark:text-indigo-400" />
               <span>Update Date Completed</span>
@@ -389,11 +387,10 @@ export default function BulkEditWorkModal({
           {/* Quantity Section */}
           <div className={`p-4 rounded-xl border transition-colors ${updateQuantity ? 'border-indigo-300 dark:border-indigo-700 bg-indigo-50/20 dark:bg-indigo-950/20' : 'border-slate-200 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-900/30'}`}>
             <label className="flex items-center gap-2.5 cursor-pointer font-semibold text-sm text-slate-800 dark:text-slate-200 select-none">
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={updateQuantity}
                 onChange={(e) => setUpdateQuantity(e.target.checked)}
-                className="w-4 h-4 rounded text-indigo-600 border-slate-300 focus:ring-indigo-500 cursor-pointer"
+                aria-label="Update Quantity"
               />
               <Hash size={15} className="text-indigo-600 dark:text-indigo-400" />
               <span>Update Quantity</span>
@@ -416,11 +413,10 @@ export default function BulkEditWorkModal({
           {/* Description Section */}
           <div className={`p-4 rounded-xl border transition-colors ${updateDescription ? 'border-indigo-300 dark:border-indigo-700 bg-indigo-50/20 dark:bg-indigo-950/20' : 'border-slate-200 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-900/30'}`}>
             <label className="flex items-center gap-2.5 cursor-pointer font-semibold text-sm text-slate-800 dark:text-slate-200 select-none">
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={updateDescription}
                 onChange={(e) => setUpdateDescription(e.target.checked)}
-                className="w-4 h-4 rounded text-indigo-600 border-slate-300 focus:ring-indigo-500 cursor-pointer"
+                aria-label="Update Description"
               />
               <FileText size={15} className="text-indigo-600 dark:text-indigo-400" />
               <span>Update Description</span>
@@ -475,11 +471,10 @@ export default function BulkEditWorkModal({
           {/* Client & Sub-Client Section */}
           <div className={`p-4 rounded-xl border transition-colors ${updateClient ? 'border-indigo-300 dark:border-indigo-700 bg-indigo-50/20 dark:bg-indigo-950/20' : 'border-slate-200 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-900/30'}`}>
             <label className="flex items-center gap-2.5 cursor-pointer font-semibold text-sm text-slate-800 dark:text-slate-200 select-none">
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={updateClient}
                 onChange={(e) => setUpdateClient(e.target.checked)}
-                className="w-4 h-4 rounded text-indigo-600 border-slate-300 focus:ring-indigo-500 cursor-pointer"
+                aria-label="Update Client"
               />
               <Building2 size={15} className="text-indigo-600 dark:text-indigo-400" />
               <span>Change Client / Sub-Client</span>
