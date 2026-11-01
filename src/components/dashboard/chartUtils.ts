@@ -124,3 +124,4 @@ export function buildMonthlyDataFromInvoices(invoices: Invoice[]): {
 
   return { data: months, isSampleData: false, hasPrevYearData };
 }
+

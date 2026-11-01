@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { Invoice, WorkItem, Client } from '../types';
 import { 
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell 
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid 
 } from 'recharts';
 import { IndianRupee, Clock, TrendingUp, CheckCircle2, DownloadCloud, UploadCloud, AlertTriangle, Send, Users, ArrowRight, Mail, Copy, X, FileText, StickyNote as StickyNoteIcon, Award } from 'lucide-react';
 import { User } from 'firebase/auth';
