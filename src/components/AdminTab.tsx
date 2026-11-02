@@ -2,17 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { db, auth, googleProvider } from '../firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import { signInWithPopup, signOut, User } from 'firebase/auth';
-import { Users, UserCheck, ShieldCheck, RefreshCw, ArrowLeft, LogOut, Mail } from 'lucide-react';
+import { Users, UserCheck, ShieldCheck, RefreshCw, ArrowLeft, LogOut, Mail, History } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import AdminWhitelistManager from './admin/AdminWhitelistManager';
 import AdminUserSubscriptions from './admin/AdminUserSubscriptions';
 import AdminUsersManager from './admin/AdminUsersManager';
 import AdminAccessDeniedCard from './admin/AdminAccessDeniedCard';
 import AdminEmailManager from './admin/AdminEmailManager';
+import AdminPlatformHistory from './admin/AdminPlatformHistory';
 import { useSubscriptionConfig } from '../lib/subscriptionConfig';
 import { useAdminAuth } from '../hooks/useAdminAuth';
+import { useAdminUsersAndHistory } from '../hooks/useAdminUsersAndHistory';
 
-type AdminSection = 'subscriptions' | 'whitelist' | 'admins' | 'email';
+type AdminSection = 'subscriptions' | 'history' | 'whitelist' | 'admins' | 'email';
 
 interface AdminTabProps {
   user?: User | null;
@@ -26,19 +28,33 @@ interface AdminTabProps {
  */
 export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabProps = {}) {
   const currentUser = propUser ?? auth.currentUser;
-  const { isAdmin, isSuperAdmin, loading: authLoading, adminEmails } = useAdminAuth(currentUser);
-
+  const { isAdmin, isSuperAdmin, adminEmails } = useAdminAuth(currentUser);
   const { isEnabled: isSubscriptionEnabled, setEnabled: setSubscriptionEnabled } = useSubscriptionConfig();
   const [togglingSubscription, setTogglingSubscription] = useState(false);
   const [activeSection, setActiveSection] = useState<AdminSection>('subscriptions');
   const shouldReduceMotion = useReducedMotion();
 
-  const [stats, setStats] = useState({
-    whitelistedVips: 0,
-    activeSubscribers: 0,
-    totalUsers: 0,
-  });
-  const [loadingStats, setLoadingStats] = useState(false);
+  // Unified multi-source aggregator for complete user data and platform history
+  const { users, stats: unifiedStats, loading: loadingUnified, refresh: refreshUnified } =
+    useAdminUsersAndHistory(isAdmin);
+
+  const [whitelistCount, setWhitelistCount] = useState(0);
+
+  const fetchWhitelistStats = async () => {
+    if (!isAdmin) return;
+    try {
+      const wlSnap = await getDocs(collection(db, 'subscription_whitelist'));
+      setWhitelistCount(wlSnap.size);
+    } catch (err) {
+      console.warn('Error fetching Firestore whitelist stats:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchWhitelistStats();
+    }
+  }, [isAdmin]);
 
   const handleToggleSubscription = async (newVal: boolean) => {
     setTogglingSubscription(true);
@@ -52,50 +68,10 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
     }
   };
 
-  const fetchStats = async () => {
-    if (!isAdmin) return;
-    setLoadingStats(true);
-    try {
-      let whitelistCount = 0;
-      try {
-        const wlSnap = await getDocs(collection(db, 'subscription_whitelist'));
-        whitelistCount = wlSnap.size;
-      } catch (err) {
-        console.warn('Error fetching Firestore whitelist stats:', err);
-      }
-
-      let totalUsersCount = 0;
-      let activeCount = 0;
-      try {
-        const fireSnap = await getDocs(collection(db, 'profiles'));
-        totalUsersCount = fireSnap.size;
-        fireSnap.forEach((d) => {
-          const data = d.data();
-          if (data?.subscriptionStatus === 'active') {
-            activeCount++;
-          }
-        });
-      } catch (err) {
-        console.warn('Error fetching Firestore user stats:', err);
-      }
-
-      setStats({
-        whitelistedVips: whitelistCount,
-        activeSubscribers: activeCount,
-        totalUsers: totalUsersCount,
-      });
-    } catch (err) {
-      console.warn('Error fetching admin stats:', err);
-    } finally {
-      setLoadingStats(false);
-    }
+  const handleRefreshAll = () => {
+    fetchWhitelistStats();
+    refreshUnified();
   };
-
-  useEffect(() => {
-    if (isAdmin) {
-      fetchStats();
-    }
-  }, [isAdmin, activeSection]);
 
   const handleSwitchAccount = async () => {
     try {
@@ -119,9 +95,7 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
     }
   };
 
-
-
-  // 2. Access Denied barrier for unauthorized Google accounts
+  // 1. Access Denied barrier for unauthorized Google accounts
   if (!isAdmin) {
     return (
       <AdminAccessDeniedCard
@@ -132,7 +106,7 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
     );
   }
 
-  // 3. Authorized Admin Command Center
+  // 2. Authorized Admin Command Center
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 text-slate-900 dark:text-slate-100 w-full min-w-0">
       {/* Top Header */}
@@ -164,11 +138,11 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
             </button>
           )}
           <button
-            onClick={fetchStats}
+            onClick={handleRefreshAll}
             className="p-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-120 border-0 cursor-pointer"
-            title="Refresh statistics"
+            title="Refresh platform data"
           >
-            <RefreshCw className={`w-4 h-4 ${loadingStats ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${loadingUnified ? 'animate-spin' : ''}`} />
           </button>
           <button
             onClick={handleSignOut}
@@ -182,7 +156,7 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
       </div>
 
       {/* Master Subscription Feature Toggle */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
+      <div className="bg-white dark:bg-slate-900 rounded-xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs border border-slate-200 dark:border-slate-800">
         <div className="space-y-1">
           <div className="flex items-center gap-2.5">
             <span className={`w-3 h-3 rounded-full ${isSubscriptionEnabled ? 'bg-indigo-600' : 'bg-slate-400'}`} />
@@ -219,34 +193,34 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
 
       {/* Metrics Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs">
+        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs border border-slate-200 dark:border-slate-800">
           <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Total Freelancers
           </div>
           <div className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
-            {stats.totalUsers}
+            {unifiedStats.totalUsers}
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs">
+        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs border border-slate-200 dark:border-slate-800">
           <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Active Subscriptions
           </div>
           <div className="text-2xl sm:text-3xl font-bold text-indigo-600 dark:text-indigo-400">
-            {stats.activeSubscribers}
+            {unifiedStats.activeSubscribers}
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs">
+        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs border border-slate-200 dark:border-slate-800">
           <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             VIP Whitelist
           </div>
           <div className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
-            {stats.whitelistedVips}
+            {whitelistCount}
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs">
+        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs border border-slate-200 dark:border-slate-800">
           <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Admin Accounts
           </div>
@@ -260,6 +234,7 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
       <div className="flex items-center gap-2 pb-2.5 overflow-x-auto text-sm relative">
         {[
           { id: 'subscriptions' as const, label: 'User Subscriptions', icon: Users },
+          { id: 'history' as const, label: 'Platform History', icon: History },
           { id: 'whitelist' as const, label: 'VIP Whitelist', icon: UserCheck },
           { id: 'admins' as const, label: 'Admin Accounts', icon: ShieldCheck },
           { id: 'email' as const, label: 'Email & Mailer', icon: Mail },
@@ -307,7 +282,21 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
             exit={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: -4 }}
             transition={{ duration: 0.16, ease: [0.25, 1, 0.5, 1] }}
           >
-            {activeSection === 'subscriptions' && <AdminUserSubscriptions />}
+            {activeSection === 'subscriptions' && (
+              <AdminUserSubscriptions
+                users={users}
+                loading={loadingUnified}
+                onRefresh={refreshUnified}
+              />
+            )}
+            {activeSection === 'history' && (
+              <AdminPlatformHistory
+                users={users}
+                stats={unifiedStats}
+                loading={loadingUnified}
+                onRefresh={refreshUnified}
+              />
+            )}
             {activeSection === 'whitelist' && <AdminWhitelistManager />}
             {activeSection === 'admins' && <AdminUsersManager currentUserEmail={currentUser?.email} />}
             {activeSection === 'email' && <AdminEmailManager />}
