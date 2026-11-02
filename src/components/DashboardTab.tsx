@@ -18,7 +18,6 @@ import AISummarizer from './AISummarizer';
 import { UserProfile } from '../types';
 import { useTheme } from '../context/ThemeContext';
 import { calculateWorkJourney } from '../lib/anniversary';
-import { executeAutoInvoiceCheck } from '../lib/autoInvoiceService';
 import StatusBadge from './StatusBadge';
 import GettingStartedCard from './GettingStartedCard';
 import RevenueComparisonChart from './dashboard/RevenueComparisonChart';
@@ -70,43 +69,6 @@ export default function DashboardTab({
   const activeNotifications = useMemo(() => {
     return clientStatuses.filter(cs => !cs.client.isClosed && cs.statusInfo.isNotificationRequired);
   }, [clientStatuses]);
-
-  // Automated 6:00 AM Auto-Invoice Engine (runs background check during session)
-  const autoInvoiceRef = React.useRef({
-    clients,
-    workItems,
-    invoices,
-    addInvoice: addOrUpdateItem,
-    updateWorkItem,
-    updateClient
-  });
-  autoInvoiceRef.current = {
-    clients,
-    workItems,
-    invoices,
-    addInvoice: addOrUpdateItem,
-    updateWorkItem,
-    updateClient
-  };
-
-  React.useEffect(() => {
-    if (!user?.uid) return;
-
-    const runAutoInvoiceCheck = () => {
-      const data = autoInvoiceRef.current;
-      if (!data.clients || data.clients.length === 0) return;
-      executeAutoInvoiceCheck(data).catch(err => {
-        console.warn("[Dashboard Auto-Invoice Engine] Check failed:", err);
-      });
-    };
-
-    const initialTimer = setTimeout(runAutoInvoiceCheck, 2000);
-    const intervalId = setInterval(runAutoInvoiceCheck, 60000);
-    return () => {
-      clearTimeout(initialTimer);
-      clearInterval(intervalId);
-    };
-  }, [user?.uid]);
 
   // Calculate metrics for current month & overall pending amounts
   const metrics = useMemo(() => {

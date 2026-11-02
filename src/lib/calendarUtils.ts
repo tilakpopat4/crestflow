@@ -214,3 +214,4 @@ export const getStandardPresets = (today: number): Record<string, [number, numbe
     year: [toDay(y, 0, 1), today]
   };
 };
+

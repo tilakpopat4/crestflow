@@ -11,8 +11,6 @@ import { QRCodeSVG } from 'qrcode.react';
 import ReactDOMServer from 'react-dom/server';
 import { sendEmailWithPdfAttachment, acquireGmailAccessToken } from '../lib/gmailService';
 import PaymentDateModal from './PaymentDateModal';
-import ScheduleInvoiceModal from './ScheduleInvoiceModal';
-import { executeAutoInvoiceCheck, findDuplicateAutoInvoices } from '../lib/autoInvoiceService';
 import { formatLocalDateToYMD } from '../lib/dateUtils';
 import StatusBadge from './StatusBadge';
 import { renderDocumentHtml, printDocumentHtml, generateOffscreenPdfBlob } from '../lib/invoiceRenderer';
@@ -130,7 +128,6 @@ export default function InvoiceTab({
     gmailStatus?: { sending: boolean; success?: boolean; error?: string; messageId?: string };
   } | null>(null);
   const [paymentModalState, setPaymentModalState] = useState<{ invoiceId: string | null, isOpen: boolean }>({ invoiceId: null, isOpen: false });
-  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
 
   const effectiveReels = useMemo<Reel[]>(() => {
     if (invoiceBillingMode === 'monthly_retainer') {
@@ -172,81 +169,6 @@ export default function InvoiceTab({
       subClientName: w.subClientName
     }));
   }, [selectedClientId, workItems, linkedWorkItemIds, dateFrom, dateTo]);
-
-  const activeSchedulesCount = useMemo(() => {
-    return clients.filter(c => !c.isClosed && c.autoInvoiceEnabled).length;
-  }, [clients]);
-
-  // Automated 6:00 AM Auto-Invoice Engine (runs background check during session)
-  const autoInvoiceRef = useRef({
-    clients,
-    workItems,
-    invoices,
-    addInvoice,
-    updateWorkItem,
-    updateClient,
-    profile
-  });
-  autoInvoiceRef.current = {
-    clients,
-    workItems,
-    invoices,
-    addInvoice,
-    updateWorkItem,
-    updateClient,
-    profile
-  };
-
-  useEffect(() => {
-    if (!user?.uid) return;
-
-    const checkAndRunAutoInvoices = () => {
-      const data = autoInvoiceRef.current;
-      if (!data.clients || data.clients.length === 0) return;
-      executeAutoInvoiceCheck(data).catch(err => {
-        console.warn("[Auto-Invoice Engine] Background check error:", err);
-      });
-    };
-
-    const initialTimer = setTimeout(checkAndRunAutoInvoices, 2000);
-    const intervalId = setInterval(checkAndRunAutoInvoices, 60000);
-    return () => {
-      clearTimeout(initialTimer);
-      clearInterval(intervalId);
-    };
-  }, [user?.uid]);
-
-  // Duplicate auto-generated invoice detection and clean-up
-  const duplicateGroups = useMemo(() => findDuplicateAutoInvoices(invoices), [invoices]);
-  const totalDuplicateCount = useMemo(() => {
-    return duplicateGroups.reduce((sum, g) => sum + g.duplicates.length, 0);
-  }, [duplicateGroups]);
-  const [isCleaningDuplicates, setIsCleaningDuplicates] = useState(false);
-
-  const handleCleanUpDuplicates = async () => {
-    if (totalDuplicateCount === 0 || isCleaningDuplicates) return;
-    const clientNames = Array.from(new Set(duplicateGroups.map(g => g.clientName))).join(', ');
-    if (!window.confirm(`Clean up ${totalDuplicateCount} duplicate scheduled invoice(s) for ${clientNames}?\n\nThe first original invoice will be kept, and all redundant duplicates created will be safely deleted.`)) {
-      return;
-    }
-
-    setIsCleaningDuplicates(true);
-    try {
-      let deleted = 0;
-      for (const group of duplicateGroups) {
-        for (const dup of group.duplicates) {
-          await deleteInvoice(dup.id);
-          deleted++;
-        }
-      }
-      alert(`Cleaned up ${deleted} duplicate invoice(s) successfully.`);
-    } catch (err) {
-      console.error("Failed to clean up duplicates:", err);
-      alert("An error occurred while cleaning up duplicates.");
-    } finally {
-      setIsCleaningDuplicates(false);
-    }
-  };
 
   const handleDeleteInvoice = async (invoiceId: string) => {
     const inv = invoices.find(i => i.id === invoiceId);
@@ -981,22 +903,6 @@ export default function InvoiceTab({
           <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Invoice Generator</h2>
           <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">Create and export client invoices.</p>
         </div>
-        <div className="flex items-center gap-2.5">
-          <button
-            type="button"
-            onClick={() => setIsScheduleModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs transition-colors cursor-pointer"
-            title="Schedule automatic morning 6:00 AM invoice generation for clients"
-          >
-            <Clock size={16} className="text-indigo-200" />
-            <span>Schedule Auto-Invoice</span>
-            {activeSchedulesCount > 0 && (
-              <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-white/20 text-white">
-                {activeSchedulesCount} Active
-              </span>
-            )}
-          </button>
-        </div>
       </div>
 
       {/* Free Tier Usage Notice */}
@@ -1045,25 +951,10 @@ export default function InvoiceTab({
                   <option value="" disabled>-- Choose a saved client --</option>
                   {clients.filter(c => !c.isClosed || c.id === selectedClientId).map(c => (
                     <option key={c.id} value={c.id}>
-                      {c.name}{c.isClosed ? ' (Closed)' : ''}{c.autoInvoiceEnabled ? ' (⏰ 6 AM Auto)' : ''}
+                      {c.name}{c.isClosed ? ' (Closed)' : ''}
                     </option>
                   ))}
                 </select>
-                {selectedClient?.autoInvoiceEnabled && (
-                  <div className="mt-1.5 flex items-center justify-between text-[11px] text-indigo-700 dark:text-indigo-300 bg-indigo-50/80 dark:bg-indigo-950/40 px-2.5 py-1 rounded-lg border border-indigo-200/60 dark:border-indigo-800/60">
-                    <span className="flex items-center gap-1 font-medium">
-                      <Clock size={12} className="text-indigo-600 dark:text-indigo-400" />
-                      Auto-invoicing active at 6:00 AM
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setIsScheduleModalOpen(true)}
-                      className="font-bold underline hover:text-indigo-900 dark:hover:text-indigo-200 cursor-pointer"
-                    >
-                      Edit Schedule
-                    </button>
-                  </div>
-                )}
                 {clients.length === 0 && (
                   <div className="mt-2 p-3 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-slate-600 dark:text-slate-400 flex items-center justify-between gap-3">
                     <span>No clients available. Add a client first to generate an invoice.</span>
@@ -1611,24 +1502,6 @@ export default function InvoiceTab({
           </div>
         ) : (
           <>
-            {totalDuplicateCount > 0 && (
-              <div className="mb-4 p-3.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200">
-                  <span className="font-semibold">{totalDuplicateCount} duplicate scheduled invoice(s)</span>
-                  <span className="text-slate-500 dark:text-slate-400">
-                    detected for {Array.from(new Set(duplicateGroups.map(g => g.clientName))).join(', ')}
-                  </span>
-                </div>
-                <button
-                  onClick={handleCleanUpDuplicates}
-                  disabled={isCleaningDuplicates}
-                  className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors cursor-pointer border-none disabled:opacity-50 self-start sm:self-auto shrink-0"
-                  title="Keep the original first invoice and safely remove duplicates"
-                >
-                  {isCleaningDuplicates ? 'Cleaning up...' : `Clean Up ${totalDuplicateCount} Duplicate(s)`}
-                </button>
-              </div>
-            )}
             <div className="overflow-x-auto w-full">
             <table className="w-full text-left border-collapse min-w-[960px]">
               <thead>
@@ -1671,15 +1544,6 @@ export default function InvoiceTab({
                         <td className="py-3 px-4 font-mono text-sm text-slate-700 dark:text-slate-300 whitespace-nowrap min-w-[130px]">
                           <div className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5 whitespace-nowrap">
                             <span className="whitespace-nowrap">{formatInvoiceNumber(inv, invoices)}</span>
-                            {inv.isAutoGenerated && (
-                              <span
-                                className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 whitespace-nowrap"
-                                title="Auto-generated on scheduled date at 6:00 AM"
-                              >
-                                <Sparkles size={10} className="text-indigo-500" />
-                                Auto 6 AM
-                              </span>
-                            )}
                           </div>
                           <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 whitespace-nowrap">
                             {new Date(inv.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
@@ -2104,18 +1968,6 @@ export default function InvoiceTab({
           />
         );
       })()}
-
-      <ScheduleInvoiceModal
-        isOpen={isScheduleModalOpen}
-        onClose={() => setIsScheduleModalOpen(false)}
-        clients={clients}
-        workItems={workItems}
-        invoices={invoices}
-        initialClientId={selectedClientId || undefined}
-        onUpdateClient={updateClient}
-        onAddInvoice={addInvoice}
-        onUpdateWorkItem={updateWorkItem}
-      />
     </div>
   );
 }
