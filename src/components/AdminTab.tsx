@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db, auth, googleProvider } from '../firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import { signInWithPopup, signOut, User } from 'firebase/auth';
-import { Users, UserCheck, ShieldCheck, RefreshCw, ArrowLeft, LogOut, Mail, History } from 'lucide-react';
+import { Users, UserCheck, ShieldCheck, RefreshCw, ArrowLeft, LogOut, Mail, History, Globe } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import AdminWhitelistManager from './admin/AdminWhitelistManager';
 import AdminUserSubscriptions from './admin/AdminUserSubscriptions';
@@ -10,11 +10,12 @@ import AdminUsersManager from './admin/AdminUsersManager';
 import AdminAccessDeniedCard from './admin/AdminAccessDeniedCard';
 import AdminEmailManager from './admin/AdminEmailManager';
 import AdminPlatformHistory from './admin/AdminPlatformHistory';
+import AdminFooterManager from './admin/AdminFooterManager';
 import { useSubscriptionConfig } from '../lib/subscriptionConfig';
 import { useAdminAuth } from '../hooks/useAdminAuth';
 import { useAdminUsersAndHistory } from '../hooks/useAdminUsersAndHistory';
 
-type AdminSection = 'subscriptions' | 'history' | 'whitelist' | 'admins' | 'email';
+type AdminSection = 'subscriptions' | 'history' | 'whitelist' | 'admins' | 'email' | 'footer';
 
 interface AdminTabProps {
   user?: User | null;
@@ -24,7 +25,6 @@ interface AdminTabProps {
 /**
  * Admin Command Center.
  * Authenticated via Google Login; restricted to tilakpopat2007@gmail.com and admin_users in Firestore.
- * Adheres strictly to GEMINI.md design standards: flat, restrained SaaS aesthetic, 120ms transitions.
  */
 export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabProps = {}) {
   const currentUser = propUser ?? auth.currentUser;
@@ -34,10 +34,8 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
   const [activeSection, setActiveSection] = useState<AdminSection>('subscriptions');
   const shouldReduceMotion = useReducedMotion();
 
-  // Unified multi-source aggregator for complete user data and platform history
   const { users, stats: unifiedStats, loading: loadingUnified, refresh: refreshUnified } =
     useAdminUsersAndHistory(isAdmin);
-
   const [whitelistCount, setWhitelistCount] = useState(0);
 
   const fetchWhitelistStats = async () => {
@@ -51,9 +49,7 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
   };
 
   useEffect(() => {
-    if (isAdmin) {
-      fetchWhitelistStats();
-    }
+    if (isAdmin) fetchWhitelistStats();
   }, [isAdmin]);
 
   const handleToggleSubscription = async (newVal: boolean) => {
@@ -78,53 +74,42 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
       await signOut(auth);
       await signInWithPopup(auth, googleProvider);
     } catch (err: any) {
-      if (err?.code !== 'auth/popup-closed-by-user') {
-        alert(`Sign in error: ${err.message}`);
-      }
+      if (err?.code !== 'auth/popup-closed-by-user') alert(`Sign in error: ${err.message}`);
     }
   };
 
   const handleSignOut = async () => {
     try {
       await signOut(auth);
-      if (onNavigateBack) {
-        onNavigateBack();
-      }
+      if (onNavigateBack) onNavigateBack();
     } catch (err) {
       console.error('Error signing out:', err);
     }
   };
 
-  // 1. Access Denied barrier for unauthorized Google accounts
   if (!isAdmin) {
-    return (
-      <AdminAccessDeniedCard
-        user={currentUser}
-        onSwitchAccount={handleSwitchAccount}
-        onBack={onNavigateBack}
-      />
-    );
+    return <AdminAccessDeniedCard user={currentUser} onSwitchAccount={handleSwitchAccount} onBack={onNavigateBack} />;
   }
 
-  // 2. Authorized Admin Command Center
+  const navItems = [
+    { id: 'subscriptions' as const, label: 'User Subscriptions', icon: Users },
+    { id: 'history' as const, label: 'Platform History', icon: History },
+    { id: 'whitelist' as const, label: 'VIP Whitelist', icon: UserCheck },
+    { id: 'admins' as const, label: 'Admin Accounts', icon: ShieldCheck },
+    { id: 'email' as const, label: 'Email & Mailer', icon: Mail },
+    { id: 'footer' as const, label: 'Footer Links', icon: Globe },
+  ];
+
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 text-slate-900 dark:text-slate-100 w-full min-w-0">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
-            Admin Command Center
-          </h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Admin Command Center</h1>
           <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mt-1 flex-wrap">
             <span>Signed in as:</span>
-            <span className="font-semibold text-slate-700 dark:text-slate-200 font-mono">
-              {currentUser?.email}
-            </span>
-            {isSuperAdmin && (
-              <span className="text-indigo-600 dark:text-indigo-400 font-medium">
-                (Super Admin)
-              </span>
-            )}
+            <span className="font-semibold text-slate-700 dark:text-slate-200 font-mono">{currentUser?.email}</span>
+            {isSuperAdmin && <span className="text-indigo-600 dark:text-indigo-400 font-medium">(Super Admin)</span>}
           </div>
         </div>
         <div className="flex items-center gap-2.5 flex-wrap">
@@ -160,9 +145,7 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
         <div className="space-y-1">
           <div className="flex items-center gap-2.5">
             <span className={`w-3 h-3 rounded-full ${isSubscriptionEnabled ? 'bg-indigo-600' : 'bg-slate-400'}`} />
-            <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
-              Platform Subscription System: {isSubscriptionEnabled ? 'ACTIVE (ON)' : 'DISABLED (OFF)'}
-            </h2>
+            <h2 className="text-base font-bold">Platform Subscription System: {isSubscriptionEnabled ? 'ACTIVE (ON)' : 'DISABLED (OFF)'}</h2>
           </div>
           <p className="text-sm text-slate-500 dark:text-slate-400 max-w-2xl leading-relaxed">
             {isSubscriptionEnabled
@@ -182,11 +165,9 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
               isSubscriptionEnabled ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-700'
             }`}
           >
-            <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-150 ${
-                isSubscriptionEnabled ? 'translate-x-6' : 'translate-x-1'
-              }`}
-            />
+            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-150 ${
+              isSubscriptionEnabled ? 'translate-x-6' : 'translate-x-1'
+            }`} />
           </button>
         </div>
       </div>
@@ -194,51 +175,26 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
       {/* Metrics Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs border border-slate-200 dark:border-slate-800">
-          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            Total Freelancers
-          </div>
-          <div className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
-            {unifiedStats.totalUsers}
-          </div>
+          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Freelancers</div>
+          <div className="text-2xl sm:text-3xl font-bold">{unifiedStats.totalUsers}</div>
         </div>
-
         <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs border border-slate-200 dark:border-slate-800">
-          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            Active Subscriptions
-          </div>
-          <div className="text-2xl sm:text-3xl font-bold text-indigo-600 dark:text-indigo-400">
-            {unifiedStats.activeSubscribers}
-          </div>
+          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Active Subscriptions</div>
+          <div className="text-2xl sm:text-3xl font-bold text-indigo-600 dark:text-indigo-400">{unifiedStats.activeSubscribers}</div>
         </div>
-
         <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs border border-slate-200 dark:border-slate-800">
-          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            VIP Whitelist
-          </div>
-          <div className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
-            {whitelistCount}
-          </div>
+          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">VIP Whitelist</div>
+          <div className="text-2xl sm:text-3xl font-bold">{whitelistCount}</div>
         </div>
-
         <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs border border-slate-200 dark:border-slate-800">
-          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            Admin Accounts
-          </div>
-          <div className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
-            {adminEmails.length}
-          </div>
+          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Admin Accounts</div>
+          <div className="text-2xl sm:text-3xl font-bold">{adminEmails.length}</div>
         </div>
       </div>
 
       {/* Navigation Tabs */}
       <div className="flex items-center gap-2 pb-2.5 overflow-x-auto text-sm relative">
-        {[
-          { id: 'subscriptions' as const, label: 'User Subscriptions', icon: Users },
-          { id: 'history' as const, label: 'Platform History', icon: History },
-          { id: 'whitelist' as const, label: 'VIP Whitelist', icon: UserCheck },
-          { id: 'admins' as const, label: 'Admin Accounts', icon: ShieldCheck },
-          { id: 'email' as const, label: 'Email & Mailer', icon: Mail },
-        ].map((sec) => {
+        {navItems.map((sec) => {
           const Icon = sec.icon;
           const isActive = activeSection === sec.id;
           return (
@@ -256,11 +212,7 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
                 <motion.div
                   layoutId="adminActiveTabIndicator"
                   className="absolute inset-0 bg-indigo-600 rounded-lg shadow-xs -z-0"
-                  transition={
-                    shouldReduceMotion
-                      ? { duration: 0 }
-                      : { type: 'spring', stiffness: 450, damping: 38 }
-                  }
+                  transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 450, damping: 38 }}
                 />
               )}
               <span className="relative z-10 inline-flex items-center gap-2">
@@ -282,24 +234,12 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
             exit={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: -4 }}
             transition={{ duration: 0.16, ease: [0.25, 1, 0.5, 1] }}
           >
-            {activeSection === 'subscriptions' && (
-              <AdminUserSubscriptions
-                users={users}
-                loading={loadingUnified}
-                onRefresh={refreshUnified}
-              />
-            )}
-            {activeSection === 'history' && (
-              <AdminPlatformHistory
-                users={users}
-                stats={unifiedStats}
-                loading={loadingUnified}
-                onRefresh={refreshUnified}
-              />
-            )}
+            {activeSection === 'subscriptions' && <AdminUserSubscriptions users={users} loading={loadingUnified} onRefresh={refreshUnified} />}
+            {activeSection === 'history' && <AdminPlatformHistory users={users} stats={unifiedStats} loading={loadingUnified} onRefresh={refreshUnified} />}
             {activeSection === 'whitelist' && <AdminWhitelistManager />}
             {activeSection === 'admins' && <AdminUsersManager currentUserEmail={currentUser?.email} />}
             {activeSection === 'email' && <AdminEmailManager />}
+            {activeSection === 'footer' && <AdminFooterManager />}
           </motion.div>
         </AnimatePresence>
       </div>
