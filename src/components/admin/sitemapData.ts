@@ -1,0 +1,212 @@
+export type PageCategory = 'public' | 'client' | 'workspace' | 'admin';
+
+export interface SitemapPageItem {
+  id: string;
+  name: string;
+  path: string;
+  samplePath: string;
+  category: PageCategory;
+  description: string;
+  accessLevel: 'Public' | 'Client' | 'Authenticated Freelancer' | 'Super Admin';
+  inXmlSitemap: boolean;
+}
+
+export const SITEMAP_PAGES: SitemapPageItem[] = [
+  // 1. Public Marketing & Legal Pages
+  {
+    id: 'pricing',
+    name: 'Pricing & Membership Plans',
+    path: '/pricing',
+    samplePath: '/pricing',
+    category: 'public',
+    description: 'Membership tiers, ₹49/mo freelance workspace features, and platform FAQ.',
+    accessLevel: 'Public',
+    inXmlSitemap: true,
+  },
+  {
+    id: 'billing',
+    name: 'Subscription Billing & Checkout',
+    path: '/billing',
+    samplePath: '/billing',
+    category: 'public',
+    description: 'Instant Razorpay / UPI checkout gateway and ₹1 trial onboarding.',
+    accessLevel: 'Public',
+    inXmlSitemap: true,
+  },
+  {
+    id: 'contact',
+    name: 'Contact & Support',
+    path: '/contact',
+    samplePath: '/contact',
+    category: 'public',
+    description: 'Automated inquiry intake dispatches directly to support.crestflow@gmail.com with 48h SLA auto-reply.',
+    accessLevel: 'Public',
+    inXmlSitemap: true,
+  },
+  {
+    id: 'privacy',
+    name: 'Privacy Policy',
+    path: '/privacy',
+    samplePath: '/privacy',
+    category: 'public',
+    description: 'Data security practices, Firestore isolation, and privacy disclosures.',
+    accessLevel: 'Public',
+    inXmlSitemap: true,
+  },
+  {
+    id: 'terms',
+    name: 'Terms of Service',
+    path: '/terms',
+    samplePath: '/terms',
+    category: 'public',
+    description: 'Platform service level agreements, acceptable usage, and liability terms.',
+    accessLevel: 'Public',
+    inXmlSitemap: true,
+  },
+  {
+    id: 'refund',
+    name: 'Cancellation & Refund Policy',
+    path: '/refund',
+    samplePath: '/refund',
+    category: 'public',
+    description: 'Razorpay subscription cancellation rules and payment refund policies.',
+    accessLevel: 'Public',
+    inXmlSitemap: true,
+  },
+  {
+    id: 'not_found',
+    name: '404 Error Screen',
+    path: '/404',
+    samplePath: '/404',
+    category: 'public',
+    description: 'Custom animated retro TV not found page with one-click return to app.',
+    accessLevel: 'Public',
+    inXmlSitemap: false,
+  },
+
+  // 2. Public Freelancer & Client Portals
+  {
+    id: 'user_onboarding',
+    name: 'Client Onboarding Brief Intake',
+    path: '/:username/onboarding',
+    samplePath: '/tilakpopat2007/onboarding',
+    category: 'client',
+    description: 'Clean branded intake form for prospective clients to submit briefs and WhatsApp alerts without random IDs.',
+    accessLevel: 'Public',
+    inXmlSitemap: true,
+  },
+  {
+    id: 'user_public_profile',
+    name: 'Public Freelancer Portfolio',
+    path: '/:username/publicprofile',
+    samplePath: '/tilakpopat2007/publicprofile',
+    category: 'client',
+    description: 'Public showcase displaying deliverables, past clients, work bio, and project intake form.',
+    accessLevel: 'Public',
+    inXmlSitemap: true,
+  },
+  {
+    id: 'client_portal',
+    name: 'Client Invoicing & Payment Portal',
+    path: '/portal',
+    samplePath: '/portal',
+    category: 'client',
+    description: 'Dedicated external client portal for invoice reviews, deliverables tracking, and direct UPI settlements.',
+    accessLevel: 'Client',
+    inXmlSitemap: false,
+  },
+  {
+    id: 'client_feedback',
+    name: 'Client Testimonial & Review Form',
+    path: '/?feedback=true',
+    samplePath: '/?feedback=true',
+    category: 'client',
+    description: 'Direct star rating and testimonial intake form for completed client deliverables.',
+    accessLevel: 'Client',
+    inXmlSitemap: false,
+  },
+
+  // 3. Authenticated Freelancer Workspace Tabs
+  {
+    id: 'ws_dashboard',
+    name: 'Freelancer Dashboard',
+    path: '/dashboard',
+    samplePath: '/dashboard',
+    category: 'workspace',
+    description: 'Live revenue comparisons, career streak counters, metrics, and client distribution charts.',
+    accessLevel: 'Authenticated Freelancer',
+    inXmlSitemap: false,
+  },
+  {
+    id: 'ws_clients',
+    name: 'Client & Retainer Manager',
+    path: '/clients',
+    samplePath: '/clients',
+    category: 'workspace',
+    description: 'Client roster, billing rates, sub-client assignments, and incoming onboarding briefs.',
+    accessLevel: 'Authenticated Freelancer',
+    inXmlSitemap: false,
+  },
+  {
+    id: 'ws_work',
+    name: 'Work Log & Reel Tracker',
+    path: '/work',
+    samplePath: '/work',
+    category: 'workspace',
+    description: 'Delivery log tracking videos, reels, shooting schedules, and completion dates.',
+    accessLevel: 'Authenticated Freelancer',
+    inXmlSitemap: false,
+  },
+  {
+    id: 'ws_invoices',
+    name: 'Invoice Creation & Billing',
+    path: '/invoices',
+    samplePath: '/invoices',
+    category: 'workspace',
+    description: 'Professional invoice generator with PDF exports, payment status flags, and UPI QR codes.',
+    accessLevel: 'Authenticated Freelancer',
+    inXmlSitemap: false,
+  },
+  {
+    id: 'ws_reviews',
+    name: 'Testimonials & Reviews Hub',
+    path: '/reviews',
+    samplePath: '/reviews',
+    category: 'workspace',
+    description: 'Review moderation and testimonial showcases for freelancer credibility.',
+    accessLevel: 'Authenticated Freelancer',
+    inXmlSitemap: false,
+  },
+  {
+    id: 'ws_onboarding',
+    name: 'Client Intake Hub & QR Code',
+    path: '/onboarding',
+    samplePath: '/onboarding',
+    category: 'workspace',
+    description: 'Freelancer control center for managing incoming onboarding leads and copying public links.',
+    accessLevel: 'Authenticated Freelancer',
+    inXmlSitemap: false,
+  },
+  {
+    id: 'ws_profile',
+    name: 'Account, Handle & AI Settings',
+    path: '/profile',
+    samplePath: '/profile',
+    category: 'workspace',
+    description: 'Customize public username, bio, career start date, UPI ID, and Gemini API keys.',
+    accessLevel: 'Authenticated Freelancer',
+    inXmlSitemap: false,
+  },
+
+  // 4. Admin Command Center
+  {
+    id: 'admin_center',
+    name: 'Admin Command Center',
+    path: '/admin',
+    samplePath: '/admin',
+    category: 'admin',
+    description: 'Master platform controls: user subscriptions, VIP whitelist, platform history, email mailers, and sitemaps.',
+    accessLevel: 'Super Admin',
+    inXmlSitemap: false,
+  },
+];

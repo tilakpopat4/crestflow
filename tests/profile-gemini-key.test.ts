@@ -88,6 +88,14 @@ describe('Gemini API Key Persistence & Profile State Management', () => {
       'firestore.rules must explicitly allow upiId field in profile'
     );
     assert.ok(
+      rulesContent.includes("!('username' in data) || (data.username is string && data.username.size() <= 100)"),
+      'firestore.rules must allow optional username field up to 100 characters'
+    );
+    assert.ok(
+      rulesContent.includes('allow list: if true;'),
+      'firestore.rules must allow public listing/queries of profiles collection'
+    );
+    assert.ok(
       rulesContent.includes('allow create: if (isOwner(profileId) && isValidProfile(request.resource.data)) || isAdmin();') ||
       rulesContent.includes('allow create: if isOwner(profileId) && isValidProfile(request.resource.data);'),
       'firestore.rules must allow create for owners without restricting auth UID formats'

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
+import { getOnboardingUrl } from '../../lib/userHandle';
 
 interface ProfileInvoicingSectionProps {
   upiId: string;
@@ -9,6 +10,7 @@ interface ProfileInvoicingSectionProps {
   servicesDescription: string;
   setServicesDescription: (val: string) => void;
   userId: string;
+  handle?: string;
   isSaving: boolean;
   isSaved: boolean;
   isDirty: boolean;
@@ -29,6 +31,7 @@ export const ProfileInvoicingSection: React.FC<ProfileInvoicingSectionProps> = (
   servicesDescription,
   setServicesDescription,
   userId,
+  handle,
   isSaving,
   isSaved,
   isDirty,
@@ -37,7 +40,7 @@ export const ProfileInvoicingSection: React.FC<ProfileInvoicingSectionProps> = (
   onDiscard,
 }) => {
   const [copiedLink, setCopiedLink] = useState(false);
-  const onboardingLink = `${typeof window !== 'undefined' ? window.location.origin : 'https://crestflow.app'}/onboarding/${userId}`;
+  const onboardingLink = getOnboardingUrl(handle || userId);
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(onboardingLink);
@@ -58,33 +61,34 @@ export const ProfileInvoicingSection: React.FC<ProfileInvoicingSectionProps> = (
 
       <div className="rounded-xl bg-white dark:bg-slate-900 shadow-xs ring-1 ring-slate-200 dark:ring-slate-800 overflow-hidden">
         <div className="grid grid-cols-1 gap-x-4 gap-y-5 p-5 sm:grid-cols-2 sm:p-6">
-          {/* Receiving UPI ID */}
-          <div>
-            <label htmlFor="invoicing-upi" className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
-              Receiving UPI ID
-            </label>
+          {/* UPI ID / VPA */}
+          <div className="sm:col-span-2">
+            <div className="mb-1.5 flex items-baseline justify-between gap-2">
+              <label htmlFor="invoicing-upi" className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                Direct UPI ID / VPA
+              </label>
+              <span className="text-[11px] text-slate-400 dark:text-slate-500">Optional</span>
+            </div>
             <input
               id="invoicing-upi"
               type="text"
               value={upiId}
               onChange={(e) => setUpiId(e.target.value)}
-              placeholder="e.g. yourname@okhdfcbank"
-              className={`block h-10 w-full rounded-lg bg-slate-50 dark:bg-slate-800/60 px-3 text-sm font-mono text-slate-900 dark:text-slate-100 border placeholder:text-slate-400 outline-none transition-colors ${
-                upiError
-                  ? 'border-red-500 focus:border-red-600'
-                  : 'border-slate-200 dark:border-slate-700 focus:border-indigo-600 dark:focus:border-indigo-400'
-              }`}
+              placeholder="e.g. name@okaxis or creator@okhdfcbank"
+              className={`block h-10 w-full rounded-lg bg-slate-50 dark:bg-slate-800/60 px-3 text-sm text-slate-900 dark:text-slate-100 border ${
+                upiError ? 'border-red-500 focus:border-red-600' : 'border-slate-200 dark:border-slate-700 focus:border-indigo-600 dark:focus:border-indigo-400'
+              } placeholder:text-slate-400 outline-none transition-colors`}
             />
             {upiError ? (
-              <p className="mt-1 text-[11px] text-red-600 dark:text-red-400">{upiError}</p>
+              <p className="mt-1 text-xs text-red-600 dark:text-red-400 font-medium">{upiError}</p>
             ) : (
               <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                Used to generate vector UPI QR codes on client invoices.
+                Receives direct peer-to-peer invoice settlements with instant QR code generation.
               </p>
             )}
           </div>
 
-          {/* Contact Phone Number */}
+          {/* Contact Phone */}
           <div>
             <div className="mb-1.5 flex items-baseline justify-between gap-2">
               <label htmlFor="invoicing-phone" className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
@@ -188,4 +192,3 @@ export const ProfileInvoicingSection: React.FC<ProfileInvoicingSectionProps> = (
 };
 
 export default ProfileInvoicingSection;
-

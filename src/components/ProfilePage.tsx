@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { User } from 'firebase/auth';
-import { UserProfile } from '../types';
-import { SubscriptionState } from '../hooks/useSubscription';
+import { User as FirebaseUser } from 'firebase/auth';
+import { UserProfile, SubscriptionState } from '../types';
 import ProfileNavSidebar, { SettingsSectionId } from './profile/ProfileNavSidebar';
 import ProfilePublicSection from './profile/ProfilePublicSection';
 import ProfileInvoicingSection from './profile/ProfileInvoicingSection';
 import ProfilePreferencesCard from './profile/ProfilePreferencesCard';
 import ProfileSubscriptionSection from './profile/ProfileSubscriptionSection';
+import { getUserHandle, cleanUsername } from '../lib/userHandle';
 
 interface ProfilePageProps {
-  user: User;
+  user: FirebaseUser;
   profile: UserProfile | null;
   onSave: (updatedProfile: UserProfile) => Promise<void>;
   subscriptionState?: SubscriptionState;
@@ -31,6 +31,7 @@ export default function ProfilePage({
 }: ProfilePageProps) {
   // Live form state
   const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
   const [phone, setPhone] = useState('');
   const [upiId, setUpiId] = useState('');
   const [professionalTitle, setProfessionalTitle] = useState('Video Editor');
@@ -42,6 +43,7 @@ export default function ProfilePage({
   // Saved snapshot for dirty checking and discarding
   const [savedSnapshot, setSavedSnapshot] = useState({
     name: '',
+    username: '',
     phone: '',
     upiId: '',
     professionalTitle: 'Video Editor',
@@ -63,8 +65,10 @@ export default function ProfilePage({
   useEffect(() => {
     if (!isInitializedRef.current) {
       if (profile) {
+        const initialHandle = profile.username || getUserHandle(profile, user);
         const initial = {
           name: profile.name || user.displayName || '',
+          username: initialHandle,
           phone: profile.phone || '',
           upiId: profile.upiId || '',
           professionalTitle: profile.professionalTitle || 'Video Editor',
@@ -74,6 +78,7 @@ export default function ProfilePage({
           workExperienceBio: profile.workExperienceBio || '',
         };
         setName(initial.name);
+        setUsername(initial.username);
         setPhone(initial.phone);
         setUpiId(initial.upiId);
         setProfessionalTitle(initial.professionalTitle);
@@ -88,8 +93,10 @@ export default function ProfilePage({
         }
       } else if (user) {
         const defaultName = user.displayName || '';
+        const defaultHandle = getUserHandle(null, user);
         setName(defaultName);
-        setSavedSnapshot((prev) => ({ ...prev, name: defaultName }));
+        setUsername(defaultHandle);
+        setSavedSnapshot((prev) => ({ ...prev, name: defaultName, username: defaultHandle }));
       }
     } else if (!hasLoadedInitialKeyRef.current && profile?.geminiApiKey) {
       setGeminiApiKey(profile.geminiApiKey);
@@ -101,6 +108,7 @@ export default function ProfilePage({
   // Dirty state checks per section
   const isProfileDirty =
     name !== savedSnapshot.name ||
+    username !== savedSnapshot.username ||
     professionalTitle !== savedSnapshot.professionalTitle ||
     freelanceStartDate !== savedSnapshot.freelanceStartDate ||
     workExperienceBio !== savedSnapshot.workExperienceBio;
@@ -115,6 +123,7 @@ export default function ProfilePage({
   // Discard handlers
   const handleDiscardProfile = () => {
     setName(savedSnapshot.name);
+    setUsername(savedSnapshot.username);
     setProfessionalTitle(savedSnapshot.professionalTitle);
     setFreelanceStartDate(savedSnapshot.freelanceStartDate);
     setWorkExperienceBio(savedSnapshot.workExperienceBio);
@@ -152,9 +161,11 @@ export default function ProfilePage({
     setSavedSection(null);
 
     try {
+      const cleanHandle = cleanUsername(username) || getUserHandle(profile, user);
       const updatedProfile: UserProfile = {
         id: user.uid,
         name: trimmedName,
+        username: cleanHandle,
         phone: phone.trim(),
         upiId: trimmedUpi,
         professionalTitle: professionalTitle.trim() || 'Video Editor',
@@ -170,6 +181,7 @@ export default function ProfilePage({
 
       setSavedSnapshot({
         name: trimmedName,
+        username: cleanHandle,
         phone: phone.trim(),
         upiId: trimmedUpi,
         professionalTitle: professionalTitle.trim() || 'Video Editor',
@@ -182,8 +194,8 @@ export default function ProfilePage({
       setSavedSection(section);
       setTimeout(() => setSavedSection(null), 3000);
     } catch (err: any) {
-      console.error('Failed to save profile changes:', err);
-      setError('Failed to save changes. Please try again.');
+      console.error('Failed to save profile settings:', err);
+      setError(err?.message || 'Failed to save changes. Please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -191,9 +203,9 @@ export default function ProfilePage({
 
   const handleSelectNav = (id: SettingsSectionId) => {
     setActiveSection(id);
-    const target = document.getElementById(`section-${id}`);
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const targetElement = document.getElementById(`section-${id}`);
+    if (targetElement) {
+      targetElement.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
@@ -228,6 +240,8 @@ export default function ProfilePage({
             user={user}
             name={name}
             setName={setName}
+            username={username}
+            setUsername={setUsername}
             professionalTitle={professionalTitle}
             setProfessionalTitle={setProfessionalTitle}
             bio={workExperienceBio}
@@ -242,24 +256,25 @@ export default function ProfilePage({
           />
 
           <ProfileInvoicingSection
+            userId={user.uid}
+            handle={cleanUsername(username) || getUserHandle(profile, user)}
             upiId={upiId}
             setUpiId={setUpiId}
+            upiError={upiError}
             phone={phone}
             setPhone={setPhone}
             servicesDescription={servicesDescription}
             setServicesDescription={setServicesDescription}
-            userId={user.uid}
             isSaving={isSaving}
             isSaved={savedSection === 'invoicing'}
             isDirty={isInvoicingDirty}
-            upiError={upiError}
             onSave={() => handleSaveSection('invoicing')}
             onDiscard={handleDiscardInvoicing}
           />
 
           <ProfilePreferencesCard
-            geminiApiKey={geminiApiKey}
-            setGeminiApiKey={setGeminiApiKey}
+            apiKey={geminiApiKey}
+            setApiKey={setGeminiApiKey}
             isSaving={isSaving}
             isSaved={savedSection === 'ai'}
             isDirty={isAiDirty}
@@ -267,10 +282,12 @@ export default function ProfilePage({
             onDiscard={handleDiscardAi}
           />
 
-          <ProfileSubscriptionSection
-            subscriptionState={subscriptionState}
-            onOpenSubscriptionModal={onOpenSubscriptionModal}
-          />
+          {subscriptionState && (
+            <ProfileSubscriptionSection
+              subscriptionState={subscriptionState}
+              onOpenSubscriptionModal={onOpenSubscriptionModal}
+            />
+          )}
         </div>
       </div>
     </div>

@@ -1,12 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { User } from 'firebase/auth';
-import { Search, UserPlus, Inbox, Users, CheckCircle2 } from 'lucide-react';
+import { Search, Inbox, Users, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { UserProfile, ServiceRequest, Client } from '../types';
 import { useFirestore } from '../hooks/useFirestore';
 import { generateUUID } from '../lib/utils';
 import { OnboardingLinkCard } from './onboarding/OnboardingLinkCard';
 import { OnboardingRequestCard } from './onboarding/OnboardingRequestCard';
+import { getUserHandle, getOnboardingUrl, getPublicProfileUrl } from '../lib/userHandle';
 
 interface ClientOnboardingTabProps {
   user: User;
@@ -35,13 +36,9 @@ export default function ClientOnboardingTab({
   const { addOrUpdateItem: saveClient } =
     useFirestore<Client>('clients', user.uid);
 
-  const onboardingUrl = useMemo(() => {
-    const origin =
-      typeof window !== 'undefined'
-        ? window.location.origin
-        : (import.meta.env.VITE_BASE_URL || 'https://crestflow.app');
-    return `${origin}/onboarding/${user.uid}`;
-  }, [user.uid]);
+  const handle = useMemo(() => getUserHandle(profile, user), [profile, user]);
+  const onboardingUrl = useMemo(() => getOnboardingUrl(handle), [handle]);
+  const publicProfileUrl = useMemo(() => getPublicProfileUrl(handle), [handle]);
 
   // Derived counts
   const counts = useMemo(() => {
@@ -58,9 +55,7 @@ export default function ClientOnboardingTab({
     const query = searchQuery.trim().toLowerCase();
     return serviceRequests
       .filter((req) => {
-        if (statusFilter !== 'all' && req.status !== statusFilter) {
-          return false;
-        }
+        if (statusFilter !== 'all' && req.status !== statusFilter) return false;
         if (!query) return true;
         return (
           req.clientName?.toLowerCase().includes(query) ||
@@ -77,23 +72,22 @@ export default function ClientOnboardingTab({
       const newClientId = generateUUID();
       const newClient: Client = {
         id: newClientId,
-        name: request.clientName,
-        phone: request.contactPhone,
-        email: request.contactEmail,
-        defaultRate: request.proposedRate || profile?.defaultRate || 1500,
-        createdAt: Date.now(),
+        name: request.clientName || request.contactName || 'New Client',
+        phone: request.contactPhone || '',
+        email: request.contactEmail || '',
+        defaultRate: request.proposedRate || 0,
+        instagram: request.instagram || '',
+        paymentBasis: 'per_reel',
         notes: `Client onboarding request submitted on ${new Date(request.createdAt).toLocaleDateString()}:\n${request.projectDetails}`,
+        createdAt: Date.now(),
       };
 
-      if (request.instagram) {
-        newClient.instagram = request.instagram;
-      }
-
       await saveClient(newClient);
-      await updateServiceRequest({
-        ...request,
-        status: 'accepted',
-      });
+      await updateServiceRequest({ ...request, status: 'accepted' });
+
+      if (onNavigateToClients) {
+        onNavigateToClients();
+      }
     } catch (err: any) {
       console.error(err);
       alert(`Failed to accept onboarding request: ${err.message || String(err)}`);
@@ -103,10 +97,7 @@ export default function ClientOnboardingTab({
   const handleDeclineRequest = async (request: ServiceRequest) => {
     if (!window.confirm(`Decline the onboarding request from ${request.contactName}?`)) return;
     try {
-      await updateServiceRequest({
-        ...request,
-        status: 'declined',
-      });
+      await updateServiceRequest({ ...request, status: 'declined' });
     } catch (err: any) {
       console.error(err);
     }
@@ -114,10 +105,7 @@ export default function ClientOnboardingTab({
 
   const handleRestoreRequest = async (request: ServiceRequest) => {
     try {
-      await updateServiceRequest({
-        ...request,
-        status: 'pending',
-      });
+      await updateServiceRequest({ ...request, status: 'pending' });
     } catch (err: any) {
       console.error(err);
     }
@@ -125,7 +113,6 @@ export default function ClientOnboardingTab({
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 w-full min-w-0 text-slate-900 dark:text-slate-100">
-      {/* Page Header */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
           Client Onboarding
@@ -135,9 +122,9 @@ export default function ClientOnboardingTab({
         </p>
       </div>
 
-      {/* Shareable Onboarding Link Card */}
       <OnboardingLinkCard
         onboardingUrl={onboardingUrl}
+        publicProfileUrl={publicProfileUrl}
         profile={profile}
       />
 
@@ -148,7 +135,7 @@ export default function ClientOnboardingTab({
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Pending Inquiries</p>
             <p className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 mt-1">{counts.pending}</p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/60  flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+          <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
             <Inbox size={22} />
           </div>
         </div>
@@ -158,94 +145,56 @@ export default function ClientOnboardingTab({
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Accepted Clients</p>
             <p className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 mt-1">{counts.accepted}</p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-slate-50 dark:bg-slate-900/60  flex items-center justify-center text-slate-700 dark:text-slate-300">
+          <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
             <CheckCircle2 size={22} />
           </div>
         </div>
 
         <div className="bg-white dark:bg-slate-800 rounded-xl p-5 sm:p-6 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Submissions</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Leads</p>
             <p className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 mt-1">{counts.all}</p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-slate-50 dark:bg-slate-900/60  flex items-center justify-center text-slate-600 dark:text-slate-400">
+          <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300">
             <Users size={22} />
           </div>
         </div>
       </div>
 
-      {/* Inquiries Header, Search & Filter Bar */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl p-5 sm:p-6 shadow-xs space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <UserPlus size={18} className="text-indigo-600 dark:text-indigo-400" />
-            <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
-              Incoming Onboarding Requests
-            </h2>
-            <span className="text-xs font-medium px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 rounded-lg">
-              {filteredRequests.length}
-            </span>
-          </div>
-
-          {/* Search Box */}
-          <div className="relative w-full md:w-72">
-            <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search inquiries..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl pl-10 pr-3.5 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-indigo-500 dark:focus:border-indigo-400"
-            />
-          </div>
+      {/* Filter and Search Bar */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+          <input
+            type="text"
+            placeholder="Search leads by name, email, details..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm outline-none focus:border-indigo-600 transition-colors"
+          />
         </div>
 
-        {/* Filter Pills */}
-        <div className="flex flex-wrap items-center gap-2 pt-1">
-          {(['pending', 'accepted', 'declined', 'all'] as const).map((filter) => {
-            const count = counts[filter];
-            const isActive = statusFilter === filter;
-            const labels: Record<FilterStatus, string> = {
-              pending: 'Pending Review',
-              accepted: 'Accepted',
-              declined: 'Declined',
-              all: 'All Requests',
-            };
-
+        <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl self-start sm:self-auto overflow-x-auto max-w-full">
+          {(['pending', 'accepted', 'declined', 'all'] as FilterStatus[]).map((tab) => {
+            const isActive = statusFilter === tab;
             return (
               <motion.button
-                key={filter}
-                type="button"
-                onClick={() => setStatusFilter(filter)}
+                key={tab}
+                onClick={() => setStatusFilter(tab)}
                 whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
-                className={`relative px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors cursor-pointer border-0 select-none ${
-                  isActive
-                    ? 'text-white dark:text-slate-900'
-                    : 'bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                className={`relative px-3.5 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors duration-120 cursor-pointer border-0 ${
+                  isActive ? 'text-white' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
                 }`}
               >
                 {isActive && (
                   <motion.div
                     layoutId="onboardingFilterPill"
-                    className="absolute inset-0 bg-slate-900 dark:bg-slate-100 rounded-xl -z-0"
-                    transition={
-                      shouldReduceMotion
-                        ? { duration: 0 }
-                        : { type: 'spring', stiffness: 500, damping: 38 }
-                    }
+                    className="absolute inset-0 bg-indigo-600 rounded-lg shadow-xs -z-0"
+                    transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 500, damping: 35 }}
                   />
                 )}
-                <span className="relative z-10 inline-flex items-center gap-1.5">
-                  <span>{labels[filter]}</span>
-                  <span
-                    className={`text-[11px] px-1.5 py-0.5 rounded-md font-mono ${
-                      isActive
-                        ? 'bg-white/20 dark:bg-slate-900/20 text-white dark:text-slate-900'
-                        : 'bg-slate-200/80 dark:bg-slate-600/60 text-slate-600 dark:text-slate-300'
-                    }`}
-                  >
-                    {count}
-                  </span>
+                <span className="relative z-10">
+                  {tab} ({counts[tab]})
                 </span>
               </motion.button>
             );
@@ -270,7 +219,7 @@ export default function ClientOnboardingTab({
           >
             {filteredRequests.length === 0 ? (
               <div className="bg-white dark:bg-slate-800 rounded-xl p-12 text-center space-y-3">
-                <div className="w-12 h-12 bg-slate-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mx-auto text-slate-400 dark:text-slate-400">
+                <div className="w-12 h-12 bg-slate-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mx-auto text-slate-400">
                   <Inbox size={22} />
                 </div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">

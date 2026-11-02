@@ -157,6 +157,7 @@ export interface SubscriptionPayment {
 export interface UserProfile {
   id: string;
   userId?: string;
+  username?: string; // Custom public handle (e.g. tilakpopat) for clean URLs
   name: string;
   email?: string;
   phone: string;

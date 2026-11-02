@@ -89,10 +89,12 @@ export default function App() {
     );
   }
 
-  if (isSpecialMode === 'freelancer_profile' && params.freelancerId) {
+  if (isSpecialMode === 'freelancer_profile' && (params.freelancerId || params.username)) {
+    const targetHandle = params.username || params.freelancerId;
+    const targetMode = params.mode === 'profile' ? 'profile' : 'onboarding';
     return (
       <Suspense fallback={<ViewLoadingFallback />}>
-        <PublicFreelancerProfile freelancerId={params.freelancerId} />
+        <PublicFreelancerProfile freelancerId={targetHandle} mode={targetMode} />
       </Suspense>
     );
   }

@@ -1,11 +1,15 @@
 import React from 'react';
 import { User as FirebaseUser } from 'firebase/auth';
 import { Check, Sparkles } from 'lucide-react';
+import { cleanUsername, isValidUsername, getOnboardingUrl, getPublicProfileUrl } from '../../lib/userHandle';
+import ProfilePublicLinksCard from './ProfilePublicLinksCard';
 
 interface ProfilePublicSectionProps {
   user: FirebaseUser;
   name: string;
   setName: (val: string) => void;
+  username: string;
+  setUsername: (val: string) => void;
   professionalTitle: string;
   setProfessionalTitle: (val: string) => void;
   bio: string;
@@ -27,6 +31,8 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
   user,
   name,
   setName,
+  username,
+  setUsername,
   professionalTitle,
   setProfessionalTitle,
   bio,
@@ -40,6 +46,11 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
   onDiscard,
 }) => {
   const charsLeft = 160 - (bio?.length || 0);
+
+  const cleanHandle = cleanUsername(username) || 'creator';
+  const onboardingUrl = getOnboardingUrl(cleanHandle);
+  const publicProfileUrl = getPublicProfileUrl(cleanHandle);
+  const isHandleValid = isValidUsername(cleanHandle);
 
   const getActiveDaysLabel = () => {
     if (!freelanceStartDate) return null;
@@ -58,7 +69,7 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
           Public profile
         </h2>
         <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-          How you appear to clients, invoice recipients, and on public onboarding intake links.
+          Configure your professional username handle, branded intake links, and public creator portfolio.
         </p>
       </div>
 
@@ -92,8 +103,8 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
                   </span>
                 )}
               </div>
-              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 truncate">
-                {user.email || 'Authenticated Google Account'}
+              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 truncate font-mono">
+                @{cleanHandle} • {user.email || 'Authenticated Google Account'}
               </p>
             </div>
           </div>
@@ -137,27 +148,46 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
             </p>
           </div>
 
-          {/* Public Profile Link / Username */}
+          {/* Professional Username Handle */}
           <div className="sm:col-span-2">
-            <label htmlFor="profile-link" className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
-              Public intake link
-            </label>
+            <div className="mb-1.5 flex items-baseline justify-between gap-2">
+              <label htmlFor="profile-username" className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                Professional Username / Public Handle
+              </label>
+              <span className="text-[11px] text-slate-400 dark:text-slate-500">No random numbers</span>
+            </div>
             <div className="flex h-10 w-full overflow-hidden rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 focus-within:border-indigo-600 dark:focus-within:border-indigo-400 transition-colors">
               <span className="flex shrink-0 items-center pl-3 text-xs text-slate-500 dark:text-slate-400 select-none font-mono">
-                {typeof window !== 'undefined' ? `${window.location.host}/profile/` : 'crestflow.app/profile/'}
+                {typeof window !== 'undefined' ? `${window.location.host}/` : 'crestflow.app/'}
               </span>
               <input
-                id="profile-link"
+                id="profile-username"
                 type="text"
-                readOnly
-                value={user.uid}
-                className="min-w-0 flex-1 bg-transparent pr-3 text-xs text-slate-700 dark:text-slate-300 font-mono outline-none"
+                value={username}
+                onChange={(e) => setUsername(cleanUsername(e.target.value))}
+                placeholder="username"
+                className="min-w-0 flex-1 bg-transparent px-1 text-xs text-slate-800 dark:text-slate-200 font-mono outline-none"
               />
+              <span className="flex shrink-0 items-center pr-3 text-xs text-slate-400 dark:text-slate-500 select-none font-mono">
+                /onboarding
+              </span>
             </div>
+            {!isHandleValid && cleanHandle.length > 0 && (
+              <p className="mt-1 text-[11px] text-rose-500">
+                Handle must be 3-30 letters, numbers, hyphens or underscores (no spaces or reserved words).
+              </p>
+            )}
             <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-              Clients use this address to view your deliverables showcase and submit project requests.
+              Replaces random user IDs with your clean brand handle across all public links.
             </p>
           </div>
+
+          {/* Live Link Cards */}
+          <ProfilePublicLinksCard
+            cleanHandle={cleanHandle}
+            onboardingUrl={onboardingUrl}
+            publicProfileUrl={publicProfileUrl}
+          />
 
           {/* Career Start Date */}
           <div>
@@ -244,4 +274,3 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
 };
 
 export default ProfilePublicSection;
-

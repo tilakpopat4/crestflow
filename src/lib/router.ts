@@ -62,23 +62,58 @@ export function resolveRoute(pathname: string, search: string = ''): RouteMatch 
   }
   if (searchParams.get('freelancerId')) {
     const fid = searchParams.get('freelancerId')!;
-    return { route: 'dashboard', path: cleanPath, params: { ...params, freelancerId: fid }, isSpecialMode: 'freelancer_profile' };
+    return { route: 'dashboard', path: cleanPath, params: { ...params, freelancerId: fid, username: fid }, isSpecialMode: 'freelancer_profile' };
   }
   const isClientPortalHash = typeof window !== 'undefined' && window.location?.hash ? window.location.hash.includes('portal') : false;
-  if (searchParams.get('portal') === 'client' || isClientPortalHash) {
-    return { route: 'dashboard', path: cleanPath, params, isSpecialMode: 'client_portal' };
+  if (searchParams.get('portal') === 'client' || isClientPortalHash || cleanPath === '/portal') {
+    return { route: 'dashboard', path: '/portal', params, isSpecialMode: 'client_portal' };
   }
 
-  // Public Onboarding route with dynamic freelancer UID: /onboarding/:freelancerId or /client-onboarding/:freelancerId
-  // Matched against rawPath to preserve Firebase UID case-sensitivity
-  const publicOnboardingMatch = rawPath.match(/^\/(?:onboarding|client-onboarding)\/([a-zA-Z0-9_-]+)$/i);
-  if (publicOnboardingMatch) {
-    const targetFreelancerId = publicOnboardingMatch[1];
+  // 1. Professional Onboarding URL: /:username/onboarding
+  const userOnboardingMatch = rawPath.match(/^\/([a-zA-Z0-9_-]+)\/onboarding\/?$/i);
+  if (userOnboardingMatch) {
+    const targetUsername = userOnboardingMatch[1];
+    return {
+      route: 'dashboard',
+      path: `/${targetUsername}/onboarding`,
+      params: { ...params, freelancerId: targetUsername, username: targetUsername, mode: 'onboarding' },
+      isSpecialMode: 'freelancer_profile',
+    };
+  }
+
+  // 2. Professional Public Profile URL: /:username/publicprofile or /:username/public-profile
+  const userPublicProfileMatch = rawPath.match(/^\/([a-zA-Z0-9_-]+)\/(?:publicprofile|public-profile)\/?$/i);
+  if (userPublicProfileMatch) {
+    const targetUsername = userPublicProfileMatch[1];
+    return {
+      route: 'dashboard',
+      path: `/${targetUsername}/publicprofile`,
+      params: { ...params, freelancerId: targetUsername, username: targetUsername, mode: 'profile' },
+      isSpecialMode: 'freelancer_profile',
+    };
+  }
+
+  // 3. Legacy Onboarding route: /onboarding/:freelancerId or /client-onboarding/:freelancerId
+  const legacyOnboardingMatch = rawPath.match(/^\/(?:onboarding|client-onboarding)\/([a-zA-Z0-9_-]+)\/?$/i);
+  if (legacyOnboardingMatch) {
+    const targetFreelancerId = legacyOnboardingMatch[1];
     return {
       route: 'dashboard',
       path: `/onboarding/${targetFreelancerId}`,
-      params: { ...params, freelancerId: targetFreelancerId },
-      isSpecialMode: 'freelancer_profile'
+      params: { ...params, freelancerId: targetFreelancerId, username: targetFreelancerId, mode: 'onboarding' },
+      isSpecialMode: 'freelancer_profile',
+    };
+  }
+
+  // 4. Legacy Public Profile route: /publicprofile/:freelancerId or /public-profile/:freelancerId
+  const legacyProfileMatch = rawPath.match(/^\/(?:publicprofile|public-profile)\/([a-zA-Z0-9_-]+)\/?$/i);
+  if (legacyProfileMatch) {
+    const targetFreelancerId = legacyProfileMatch[1];
+    return {
+      route: 'dashboard',
+      path: `/publicprofile/${targetFreelancerId}`,
+      params: { ...params, freelancerId: targetFreelancerId, username: targetFreelancerId, mode: 'profile' },
+      isSpecialMode: 'freelancer_profile',
     };
   }
 
@@ -122,6 +157,7 @@ export function resolveRoute(pathname: string, search: string = ''): RouteMatch 
       return { route: 'billing', path: '/billing', params };
 
     case '/admin':
+    case '/sitemap':
       return { route: 'admin', path: '/admin', params };
 
     case '/privacy':
@@ -145,7 +181,7 @@ export function resolveRoute(pathname: string, search: string = ''): RouteMatch 
     default:
       // Fallback: check hash routes for backwards compatibility
       const hash = (typeof window !== 'undefined' ? window.location.hash : '').toLowerCase();
-      if (hash.includes('admin')) return { route: 'admin', path: '/admin', params };
+      if (hash.includes('admin') || hash.includes('sitemap')) return { route: 'admin', path: '/admin', params };
       if (hash.includes('pricing') || hash.includes('plans')) return { route: 'pricing', path: '/pricing', params };
       if (hash.includes('billing') || hash.includes('subscription')) return { route: 'billing', path: '/billing', params };
       if (hash.includes('privacy')) return { route: 'privacy', path: '/privacy', params };

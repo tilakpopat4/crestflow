@@ -78,6 +78,7 @@ service cloud.firestore {
     function isValidProfile(data) {
       return (!('userId' in data) || (data.userId is string && data.userId == request.auth.uid))
         && (!('id' in data) || (data.id is string && data.id.size() <= 128))
+        && (!('username' in data) || (data.username is string && data.username.size() <= 100))
         && (!('name' in data) || (data.name is string && data.name.size() <= 200))
         && (!('email' in data) || (data.email is string && data.email.size() <= 200))
         && (!('phone' in data) || (data.phone is string && data.phone.size() <= 50))
@@ -125,7 +126,7 @@ service cloud.firestore {
 
     // 4. Profiles (Public Info on Root Document)
     match /profiles/{profileId} {
-      allow list: if isAdmin();
+      allow list: if true;
       allow get: if isOwner(profileId) || resource.data.isPublicProfile == true || !('isPublicProfile' in resource.data) || isAdmin();
       allow create: if (isOwner(profileId) && isValidProfile(request.resource.data)) || isAdmin();
       allow update: if (isOwner(profileId) && isValidProfile(request.resource.data) && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['subscriptionStatus', 'subscriptionPlan', 'currentPeriodEnd', 'currentPeriodStart', 'razorpaySubscriptionId', 'cancelAtPeriodEnd']))) || isAdmin();

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db, auth, googleProvider } from '../firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import { signInWithPopup, signOut, User } from 'firebase/auth';
-import { Users, UserCheck, ShieldCheck, RefreshCw, ArrowLeft, LogOut, Mail, History, Globe } from 'lucide-react';
+import { Users, UserCheck, ShieldCheck, RefreshCw, ArrowLeft, LogOut, Mail, History, Globe, Compass } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import AdminWhitelistManager from './admin/AdminWhitelistManager';
 import AdminUserSubscriptions from './admin/AdminUserSubscriptions';
@@ -11,11 +11,12 @@ import AdminAccessDeniedCard from './admin/AdminAccessDeniedCard';
 import AdminEmailManager from './admin/AdminEmailManager';
 import AdminPlatformHistory from './admin/AdminPlatformHistory';
 import AdminFooterManager from './admin/AdminFooterManager';
+import AdminSitemapManager from './admin/AdminSitemapManager';
 import { useSubscriptionConfig } from '../lib/subscriptionConfig';
 import { useAdminAuth } from '../hooks/useAdminAuth';
 import { useAdminUsersAndHistory } from '../hooks/useAdminUsersAndHistory';
 
-type AdminSection = 'subscriptions' | 'history' | 'whitelist' | 'admins' | 'email' | 'footer';
+type AdminSection = 'subscriptions' | 'history' | 'whitelist' | 'admins' | 'email' | 'footer' | 'sitemap';
 
 interface AdminTabProps {
   user?: User | null;
@@ -98,6 +99,7 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
     { id: 'admins' as const, label: 'Admin Accounts', icon: ShieldCheck },
     { id: 'email' as const, label: 'Email & Mailer', icon: Mail },
     { id: 'footer' as const, label: 'Footer Links', icon: Globe },
+    { id: 'sitemap' as const, label: 'Portal Sitemap & Pages', icon: Compass },
   ];
 
   return (
@@ -217,7 +219,7 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
               )}
               <span className="relative z-10 inline-flex items-center gap-2">
                 <Icon className="w-4 h-4 shrink-0" />
-                <span className="font-semibold text-sm">{sec.label}</span>
+                <span className="font-semibold text-sm whitespace-nowrap">{sec.label}</span>
               </span>
             </motion.button>
           );
@@ -240,6 +242,7 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
             {activeSection === 'admins' && <AdminUsersManager currentUserEmail={currentUser?.email} />}
             {activeSection === 'email' && <AdminEmailManager />}
             {activeSection === 'footer' && <AdminFooterManager />}
+            {activeSection === 'sitemap' && <AdminSitemapManager />}
           </motion.div>
         </AnimatePresence>
       </div>
