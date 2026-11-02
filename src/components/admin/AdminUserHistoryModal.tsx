@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { X, FileText, Users, Briefcase, User, ExternalLink } from 'lucide-react';
+import { X, FileText, Users, Briefcase, User, RefreshCw } from 'lucide-react';
 import { AdminUserUnified } from '../../hooks/useAdminUsersAndHistory';
+import { useFetchUserHistory } from '../../hooks/useFetchUserHistory';
 
 interface AdminUserHistoryModalProps {
   user: AdminUserUnified | null;
@@ -18,12 +19,38 @@ type HistoryTab = 'invoices' | 'clients' | 'work' | 'profile';
 export default function AdminUserHistoryModal({ user, isOpen, onClose }: AdminUserHistoryModalProps) {
   const [activeTab, setActiveTab] = useState<HistoryTab>('invoices');
 
+  // Actively query Firestore for this specific user's invoices, clients, work items, and profile
+  const {
+    invoices,
+    clients,
+    workItems,
+    profile,
+    invoicesCount,
+    totalBilled,
+    clientsCount,
+    workItemsCount,
+    loading,
+    error,
+  } = useFetchUserHistory(isOpen ? user?.id : null, isOpen ? user?.email : null);
+
   if (!isOpen || !user) return null;
 
   const now = Date.now();
   const expiryDate = user.current_period_end ? new Date(user.current_period_end) : null;
   const isSubActive =
     user.subscription_status === 'active' && (!expiryDate || expiryDate.getTime() > now);
+
+  const displayUser = {
+    name: profile?.name || user.name || 'Anonymous User',
+    email: profile?.email || user.email,
+    phone: profile?.phone || user.phone,
+    upiId: profile?.upiId || user.upi_id,
+    professionalTitle: profile?.professionalTitle || user.professional_title,
+    bio: profile?.workExperienceBio || profile?.servicesDescription,
+    createdAt: profile?.createdAt || user.created_at,
+    updatedAt: profile?.updatedAt || user.updated_at,
+    photoURL: profile?.photoURL || user.photo_url,
+  };
 
   return (
     <div
@@ -37,20 +64,20 @@ export default function AdminUserHistoryModal({ user, isOpen, onClose }: AdminUs
         {/* Modal Header */}
         <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex items-start justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
-            {user.photo_url ? (
+            {displayUser.photoURL ? (
               <img
-                src={user.photo_url}
-                alt={user.name}
+                src={displayUser.photoURL}
+                alt={displayUser.name}
                 className="w-11 h-11 rounded-full object-cover shrink-0 border border-slate-200 dark:border-slate-700"
               />
             ) : (
               <div className="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 font-bold shrink-0">
-                {(user.name || user.email || 'U').charAt(0).toUpperCase()}
+                {(displayUser.name || displayUser.email || 'U').charAt(0).toUpperCase()}
               </div>
             )}
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="text-lg font-bold truncate">{user.name || 'Anonymous User'}</h3>
+                <h3 className="text-lg font-bold truncate">{displayUser.name}</h3>
                 {isSubActive ? (
                   <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400">
                     <span className="w-2 h-2 rounded-full bg-indigo-600" />
@@ -63,7 +90,7 @@ export default function AdminUserHistoryModal({ user, isOpen, onClose }: AdminUs
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{user.email}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{displayUser.email}</p>
               <p className="text-[11px] font-mono text-slate-400 select-all truncate mt-0.5">
                 UID: {user.id}
               </p>
@@ -83,25 +110,25 @@ export default function AdminUserHistoryModal({ user, isOpen, onClose }: AdminUs
           <div>
             <div className="text-slate-500">Invoices</div>
             <div className="font-bold text-slate-900 dark:text-slate-100 text-sm mt-0.5">
-              {user.invoicesCount}
+              {loading ? '…' : invoicesCount}
             </div>
           </div>
           <div>
             <div className="text-slate-500">Total Billed</div>
             <div className="font-bold text-slate-900 dark:text-slate-100 text-sm mt-0.5">
-              ₹{user.totalBilled.toLocaleString()}
+              {loading ? '…' : `₹${totalBilled.toLocaleString()}`}
             </div>
           </div>
           <div>
             <div className="text-slate-500">Clients</div>
             <div className="font-bold text-slate-900 dark:text-slate-100 text-sm mt-0.5">
-              {user.clientsCount}
+              {loading ? '…' : clientsCount}
             </div>
           </div>
           <div>
             <div className="text-slate-500">Work Logs</div>
             <div className="font-bold text-slate-900 dark:text-slate-100 text-sm mt-0.5">
-              {user.workItemsCount}
+              {loading ? '…' : workItemsCount}
             </div>
           </div>
         </div>
@@ -109,9 +136,9 @@ export default function AdminUserHistoryModal({ user, isOpen, onClose }: AdminUs
         {/* Tab Selection */}
         <div className="flex border-b border-slate-200 dark:border-slate-800 px-5 gap-2 pt-2 bg-white dark:bg-slate-900">
           {[
-            { id: 'invoices' as const, label: `Invoices (${user.invoicesCount})`, icon: FileText },
-            { id: 'clients' as const, label: `Clients (${user.clientsCount})`, icon: Users },
-            { id: 'work' as const, label: `Work Items (${user.workItemsCount})`, icon: Briefcase },
+            { id: 'invoices' as const, label: `Invoices (${loading ? '…' : invoicesCount})`, icon: FileText },
+            { id: 'clients' as const, label: `Clients (${loading ? '…' : clientsCount})`, icon: Users },
+            { id: 'work' as const, label: `Work Items (${loading ? '…' : workItemsCount})`, icon: Briefcase },
             { id: 'profile' as const, label: 'Profile Metadata', icon: User },
           ].map((t) => {
             const Icon = t.icon;
@@ -135,10 +162,19 @@ export default function AdminUserHistoryModal({ user, isOpen, onClose }: AdminUs
 
         {/* Tab Body Content */}
         <div className="flex-1 overflow-y-auto p-5 text-sm">
-          {activeTab === 'invoices' && (
+          {loading ? (
+            <div className="flex items-center justify-center py-16 text-slate-400 gap-2 text-xs">
+              <RefreshCw className="w-4 h-4 animate-spin text-indigo-600" />
+              <span>Fetching history and details from Firebase...</span>
+            </div>
+          ) : error ? (
+            <div className="p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-red-600 dark:text-red-400">
+              {error}
+            </div>
+          ) : activeTab === 'invoices' ? (
             <div>
-              {user.invoices.length === 0 ? (
-                <div className="text-center py-10 text-slate-400 text-xs">No invoices created yet.</div>
+              {invoices.length === 0 ? (
+                <div className="text-center py-12 text-slate-400 text-xs">No invoices created yet.</div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
@@ -152,7 +188,7 @@ export default function AdminUserHistoryModal({ user, isOpen, onClose }: AdminUs
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
-                      {user.invoices.map((inv: any) => (
+                      {invoices.map((inv: any) => (
                         <tr key={inv.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
                           <td className="py-2.5 font-mono text-slate-700 dark:text-slate-300">
                             {inv.invoiceNumber || inv.id.slice(0, 8)}
@@ -191,12 +227,10 @@ export default function AdminUserHistoryModal({ user, isOpen, onClose }: AdminUs
                 </div>
               )}
             </div>
-          )}
-
-          {activeTab === 'clients' && (
+          ) : activeTab === 'clients' ? (
             <div>
-              {user.clients.length === 0 ? (
-                <div className="text-center py-10 text-slate-400 text-xs">No clients added yet.</div>
+              {clients.length === 0 ? (
+                <div className="text-center py-12 text-slate-400 text-xs">No clients added yet.</div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
@@ -210,7 +244,7 @@ export default function AdminUserHistoryModal({ user, isOpen, onClose }: AdminUs
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
-                      {user.clients.map((c: any) => (
+                      {clients.map((c: any) => (
                         <tr key={c.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
                           <td className="py-2.5 font-semibold text-slate-900 dark:text-slate-100">
                             {c.name}
@@ -232,15 +266,13 @@ export default function AdminUserHistoryModal({ user, isOpen, onClose }: AdminUs
                 </div>
               )}
             </div>
-          )}
-
-          {activeTab === 'work' && (
+          ) : activeTab === 'work' ? (
             <div>
-              {user.workItems.length === 0 ? (
-                <div className="text-center py-10 text-slate-400 text-xs">No work logs recorded yet.</div>
+              {workItems.length === 0 ? (
+                <div className="text-center py-12 text-slate-400 text-xs">No work logs recorded yet.</div>
               ) : (
                 <div className="space-y-2">
-                  {user.workItems.map((w: any) => (
+                  {workItems.map((w: any) => (
                     <div
                       key={w.id}
                       className="p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg flex items-center justify-between text-xs"
@@ -266,35 +298,33 @@ export default function AdminUserHistoryModal({ user, isOpen, onClose }: AdminUs
                 </div>
               )}
             </div>
-          )}
-
-          {activeTab === 'profile' && (
+          ) : (
             <div className="grid grid-cols-2 gap-4 text-xs">
               <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 space-y-1">
                 <span className="text-slate-400 font-semibold uppercase">Phone Number</span>
-                <p className="font-medium text-slate-800 dark:text-slate-200">{user.phone || '—'}</p>
+                <p className="font-medium text-slate-800 dark:text-slate-200">{displayUser.phone || '—'}</p>
               </div>
               <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 space-y-1">
                 <span className="text-slate-400 font-semibold uppercase">UPI ID</span>
-                <p className="font-mono text-slate-800 dark:text-slate-200">{user.upi_id || '—'}</p>
+                <p className="font-mono text-slate-800 dark:text-slate-200">{displayUser.upiId || '—'}</p>
               </div>
               <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 space-y-1">
                 <span className="text-slate-400 font-semibold uppercase">Professional Title</span>
                 <p className="font-medium text-slate-800 dark:text-slate-200">
-                  {user.professional_title || '—'}
+                  {displayUser.professionalTitle || '—'}
                 </p>
               </div>
               <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 space-y-1">
                 <span className="text-slate-400 font-semibold uppercase">Registered Date</span>
                 <p className="font-medium text-slate-800 dark:text-slate-200">
-                  {new Date(user.created_at).toLocaleString()}
+                  {displayUser.createdAt ? new Date(displayUser.createdAt).toLocaleString() : '—'}
                 </p>
               </div>
-              {user.updated_at && (
+              {displayUser.bio && (
                 <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 space-y-1 col-span-2">
-                  <span className="text-slate-400 font-semibold uppercase">Last Profile Update</span>
-                  <p className="font-medium text-slate-800 dark:text-slate-200">
-                    {new Date(user.updated_at).toLocaleString()}
+                  <span className="text-slate-400 font-semibold uppercase">Services & Experience Bio</span>
+                  <p className="text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
+                    {displayUser.bio}
                   </p>
                 </div>
               )}

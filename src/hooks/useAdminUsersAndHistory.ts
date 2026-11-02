@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { db, auth } from '../firebase';
-import { collection, onSnapshot, getDocs, doc, setDoc } from 'firebase/firestore';
+import { collection, onSnapshot, getDocs, query, where } from 'firebase/firestore';
 
 export interface AdminUserUnified {
   id: string; // User UID
@@ -58,14 +58,50 @@ export function useAdminUsersAndHistory(isAdmin: boolean) {
     }
 
     try {
-      // 1. Fetch raw collections in parallel
-      const [profilesSnap, subsSnap, invoicesSnap, clientsSnap, workSnap] = await Promise.all([
-        getDocs(collection(db, 'profiles')).catch(() => null),
-        getDocs(collection(db, 'subscriptions')).catch(() => null),
-        getDocs(collection(db, 'invoices')).catch(() => null),
-        getDocs(collection(db, 'clients')).catch(() => null),
-        getDocs(collection(db, 'workItems')).catch(() => null),
-      ]);
+      const curr = auth.currentUser;
+
+      // 1. Fetch raw collections in parallel with graceful fallbacks
+      let profilesSnap: any = null;
+      let subsSnap: any = null;
+      let invoicesSnap: any = null;
+      let clientsSnap: any = null;
+      let workSnap: any = null;
+
+      try {
+        profilesSnap = await getDocs(collection(db, 'profiles'));
+      } catch (e) {
+        console.warn('Error reading profiles collection:', e);
+      }
+
+      try {
+        subsSnap = await getDocs(collection(db, 'subscriptions'));
+      } catch (e) {
+        console.warn('Error reading subscriptions collection:', e);
+      }
+
+      try {
+        invoicesSnap = await getDocs(collection(db, 'invoices'));
+      } catch (e) {
+        if (curr?.uid) {
+          invoicesSnap = await getDocs(query(collection(db, 'invoices'), where('userId', '==', curr.uid))).catch(() => null);
+        }
+      }
+
+      try {
+        clientsSnap = await getDocs(collection(db, 'clients'));
+      } catch (e) {
+        if (curr?.uid) {
+          clientsSnap = await getDocs(query(collection(db, 'clients'), where('userId', '==', curr.uid))).catch(() => null);
+        }
+      }
+
+      try {
+        workSnap = await getDocs(collection(db, 'workItems'));
+      } catch (e) {
+        if (curr?.uid) {
+          workSnap = await getDocs(query(collection(db, 'workItems'), where('userId', '==', curr.uid))).catch(() => null);
+        }
+      }
 
       const userMap = new Map<string, Partial<AdminUserUnified>>();
 
@@ -92,7 +128,7 @@ export function useAdminUsersAndHistory(isAdmin: boolean) {
       };
 
       // Ingest Profiles
-      profilesSnap?.forEach((d) => {
+      profilesSnap?.forEach((d: any) => {
         const data = d.data();
         const u = getOrCreate(d.id);
         u.name = data.name || u.name || '';
@@ -118,7 +154,7 @@ export function useAdminUsersAndHistory(isAdmin: boolean) {
       });
 
       // Ingest Subscriptions
-      subsSnap?.forEach((d) => {
+      subsSnap?.forEach((d: any) => {
         const data = d.data();
         const uid = data.userId || d.id;
         const u = getOrCreate(uid);
@@ -133,7 +169,7 @@ export function useAdminUsersAndHistory(isAdmin: boolean) {
       // Ingest Invoices
       let totalBilledAll = 0;
       let totalInvoicesAll = 0;
-      invoicesSnap?.forEach((d) => {
+      invoicesSnap?.forEach((d: any) => {
         const data = d.data();
         const uid = data.userId;
         totalInvoicesAll++;
@@ -151,7 +187,7 @@ export function useAdminUsersAndHistory(isAdmin: boolean) {
 
       // Ingest Clients
       let totalClientsAll = 0;
-      clientsSnap?.forEach((d) => {
+      clientsSnap?.forEach((d: any) => {
         const data = d.data();
         const uid = data.userId;
         totalClientsAll++;
@@ -165,7 +201,7 @@ export function useAdminUsersAndHistory(isAdmin: boolean) {
 
       // Ingest Work Items
       let totalWorkAll = 0;
-      workSnap?.forEach((d) => {
+      workSnap?.forEach((d: any) => {
         const data = d.data();
         const uid = data.userId;
         totalWorkAll++;
@@ -178,7 +214,6 @@ export function useAdminUsersAndHistory(isAdmin: boolean) {
       });
 
       // Include Current Logged In Admin / User if missing
-      const curr = auth.currentUser;
       if (curr?.uid) {
         const u = getOrCreate(curr.uid);
         if (!u.email && curr.email) u.email = curr.email;
