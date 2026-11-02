@@ -58,3 +58,4 @@ export const RatesCurrencySelector: React.FC<RatesCurrencySelectorProps> = ({
 };
 
 export default RatesCurrencySelector;
+
