@@ -10,6 +10,8 @@ interface RevenueChartHeaderProps {
   shown: { now: boolean; prev: boolean };
   toggle: (key: 'now' | 'prev') => void;
   hasPrevYearData: boolean;
+  monthsCount?: number;
+  startMonthLabel?: string;
 }
 
 export const RevenueChartHeader: React.FC<RevenueChartHeaderProps> = ({
@@ -21,7 +23,19 @@ export const RevenueChartHeader: React.FC<RevenueChartHeaderProps> = ({
   shown,
   toggle,
   hasPrevYearData,
+  monthsCount = 12,
+  startMonthLabel,
 }) => {
+  const periodDescription =
+    monthsCount === 12
+      ? 'in the last 12 months'
+      : `across the last ${monthsCount} month${monthsCount === 1 ? '' : 's'}${
+          startMonthLabel ? ` (since ${startMonthLabel})` : ''
+        }`;
+
+  const seriesButtonLabel =
+    monthsCount === 12 ? 'Last 12 months' : `Last ${monthsCount} month${monthsCount === 1 ? '' : 's'}`;
+
   return (
     <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3 mb-6">
       <div className="max-w-xl min-w-0">
@@ -40,7 +54,7 @@ export const RevenueChartHeader: React.FC<RevenueChartHeaderProps> = ({
           <span className="font-semibold text-slate-900 dark:text-slate-100 tabular-nums">
             {formatCurrency(totalNow)}
           </span>{' '}
-          in the last 12 months against {formatCurrency(totalPrev)} in {comparisonLabel}.
+          {periodDescription} against {formatCurrency(totalPrev)} in {comparisonLabel}.
         </p>
       </div>
 
@@ -58,7 +72,7 @@ export const RevenueChartHeader: React.FC<RevenueChartHeaderProps> = ({
           >
             <span className="h-0.5 w-3.5 shrink-0 rounded-full bg-[#4870aa] dark:bg-indigo-400" />
           </span>
-          <span>Last 12 months</span>
+          <span>{seriesButtonLabel}</span>
         </button>
 
         <button
@@ -81,4 +95,3 @@ export const RevenueChartHeader: React.FC<RevenueChartHeaderProps> = ({
 };
 
 export default RevenueChartHeader;
-

@@ -2,6 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert';
 import fs from 'node:fs';
 import path from 'node:path';
+import { buildMonthlyDataFromInvoices } from '../src/components/dashboard/chartUtils';
 
 describe('Tab Layout & Ratio Consistency Suite', () => {
   const tabFiles = [
@@ -181,6 +182,35 @@ describe('Tab Layout & Ratio Consistency Suite', () => {
       'DashboardTab must bind activeClientRevenueData dynamically to the timeframe selector'
     );
   });
+
+  it('buildMonthlyDataFromInvoices only shows from the month the freelancer started work and not before', () => {
+    const result = buildMonthlyDataFromInvoices([
+      {
+        id: 'inv_1',
+        userId: 'u1',
+        clientId: 'c1',
+        clientName: 'Roots & Stories',
+        totalAmount: 11100,
+        status: 'Paid',
+        date: '2026-07-15',
+        lastPaymentDate: '2026-07-15'
+      } as any
+    ]);
+
+    assert.strictEqual(result.hasData, true);
+    const firstMonth = result.data[0];
+    assert.strictEqual(firstMonth.month, 'July');
+    assert.strictEqual(firstMonth.year, 2026);
+
+    const juneExists = result.data.some((m) => m.month === 'June' && m.year === 2026);
+    const decExists = result.data.some((m) => m.month === 'December' && m.year === 2025);
+    assert.strictEqual(juneExists, false, 'June 2026 before start month must not be present');
+    assert.strictEqual(decExists, false, 'December 2025 before start month must not be present');
+
+    const profileResult = buildMonthlyDataFromInvoices([
+      { id: 'inv_2', userId: 'u1', totalAmount: 5000, status: 'Invoiced', date: '2026-08-10' } as any
+    ], '2026-08-01');
+    assert.strictEqual(profileResult.data[0].month, 'August');
+    assert.strictEqual(profileResult.data[0].year, 2026);
+  });
 });
-
-

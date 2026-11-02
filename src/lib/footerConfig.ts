@@ -171,3 +171,4 @@ export function useFooterConfig() {
 
   return { config, loading, saveConfig: saveFooterConfig, resetConfig: resetFooterConfig };
 }
+

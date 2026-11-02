@@ -14,6 +14,8 @@ import { RevenueChartHeader } from './RevenueChartHeader';
 
 interface RevenueComparisonChartProps {
   invoices?: Invoice[];
+  freelanceStartDate?: string | null;
+  workItems?: { date?: string; createdAt?: number | string }[];
   onNavigateToInvoices?: () => void;
 }
 
@@ -21,18 +23,21 @@ const r = (n: number) => Math.round(n * 10) / 10;
 
 /**
  * Interactive monthly revenue comparison line chart.
- * Renders live monthly earnings and comparisons from user invoices.
+ * Renders live monthly earnings and comparisons from user invoices starting from
+ * when the freelancer started work up to the current date.
  * When an account is new with no invoice revenue, renders a clean empty state.
  * Strictly adheres to GEMINI.md design standards: steel blue (#4870aa), slate neutrals, no green.
  */
 export default function RevenueComparisonChart({
   invoices = [],
+  freelanceStartDate,
+  workItems,
   onNavigateToInvoices,
 }: RevenueComparisonChartProps) {
   const chartId = useId().replace(/:/g, '');
   const { data: months, hasData, hasPrevYearData } = React.useMemo(
-    () => buildMonthlyDataFromInvoices(invoices),
-    [invoices]
+    () => buildMonthlyDataFromInvoices(invoices, freelanceStartDate, workItems),
+    [invoices, freelanceStartDate, workItems]
   );
 
   const [shown, setShown] = useState({ now: true, prev: true });
@@ -45,7 +50,7 @@ export default function RevenueComparisonChart({
   const [tableOpen, setTableOpen] = useState(false);
 
   // If new account has no paid or invoiced records, render clean zero-state without mock numbers
-  if (!hasData) {
+  if (!hasData || months.length === 0) {
     return <RevenueChartEmptyState onNavigateToInvoices={onNavigateToInvoices} />;
   }
 
@@ -117,6 +122,8 @@ export default function RevenueComparisonChart({
         shown={shown}
         toggle={toggle}
         hasPrevYearData={hasPrevYearData}
+        monthsCount={months.length}
+        startMonthLabel={months[0] ? `${months[0].shortMonth} ${months[0].year}` : undefined}
       />
 
       {/* SVG Plot & Scrubber */}
@@ -235,16 +242,16 @@ export default function RevenueComparisonChart({
           />
         </div>
 
-        {/* X-Axis Month Abbreviations */}
+        {/* X-Axis Month Abbreviations dynamically distributed */}
         <div
           aria-hidden="true"
-          className="mt-2.5 grid grid-cols-12 text-[11px] font-medium text-slate-400 dark:text-slate-500 tabular-nums"
+          className="mt-2.5 flex text-[11px] font-medium text-slate-400 dark:text-slate-500 tabular-nums"
         >
           {months.map((p, i) => (
             <span
               key={`${p.year}-${p.month}-lbl`}
-              className={`flex min-w-0 justify-center whitespace-nowrap${
-                (months.length - 1 - i) % 2 ? ' max-sm:invisible' : ''
+              className={`flex flex-1 min-w-0 justify-center whitespace-nowrap${
+                months.length > 6 && (months.length - 1 - i) % 2 ? ' max-sm:invisible' : ''
               }`}
             >
               {p.shortMonth}

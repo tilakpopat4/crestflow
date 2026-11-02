@@ -498,7 +498,7 @@ export default function DashboardTab({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
         {/* Monthly Earnings Revenue Comparison Chart */}
         <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-3.5 sm:p-6 rounded-xl shadow-xs flex flex-col min-w-0">
-          <RevenueComparisonChart invoices={invoices} onNavigateToInvoices={onNavigateToInvoices} />
+          <RevenueComparisonChart invoices={invoices} freelanceStartDate={profile?.freelanceStartDate} workItems={workItems} onNavigateToInvoices={onNavigateToInvoices} />
         </div>
 
         {/* Client Distribution Bar Chart */}
