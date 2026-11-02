@@ -14,7 +14,7 @@ export default function Footer({
   transparent = false,
 }: FooterProps) {
   const currentYear = new Date().getFullYear();
-  const appVersion = '0.0.0';
+  const appVersion = '1.1.0';
 
   const handleLinkClick = (
     e: React.MouseEvent<HTMLAnchorElement>,
@@ -44,7 +44,11 @@ export default function Footer({
         <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm ${
           transparent ? 'text-white/80' : 'text-slate-600 dark:text-slate-400'
         }`}>
-          <span>&copy; {currentYear} CrestFlow. All rights reserved.</span>
+          <div className="flex items-center gap-2">
+            <span>&copy; {currentYear} CrestFlow. All rights reserved.</span>
+            <span>&bull;</span>
+            <span>Version {appVersion}</span>
+          </div>
           <nav aria-label="Footer" className="flex items-center gap-6">
             <a
               href="/privacy"
