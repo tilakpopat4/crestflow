@@ -13,6 +13,21 @@ export function useAuthSession() {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setLoading(false);
+      if (currentUser?.uid) {
+        const profileRef = doc(db, 'profiles', currentUser.uid);
+        const data = {
+          id: currentUser.uid,
+          userId: currentUser.uid,
+          name: currentUser.displayName || (currentUser.email ? currentUser.email.split('@')[0] : 'Freelancer'),
+          email: currentUser.email || '',
+          photoURL: currentUser.photoURL || '',
+          isPublicProfile: true,
+          updatedAt: Date.now(),
+        };
+        setDoc(profileRef, data, { merge: true }).catch((err) =>
+          console.warn('Auto profile sync on auth state change error:', err)
+        );
+      }
     });
     return () => unsubscribe();
   }, []);

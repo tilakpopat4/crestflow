@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../firebase';
 import { collection, onSnapshot, doc, setDoc, deleteDoc } from 'firebase/firestore';
-import { Search, RefreshCw } from 'lucide-react';
+import { Search, RefreshCw, Users } from 'lucide-react';
 import UserSubscriptionRow, { ProfileRowData } from './UserSubscriptionRow';
 import AdminUserHistoryModal from './AdminUserHistoryModal';
+import AdminSyncAuthModal from './AdminSyncAuthModal';
 import { AdminUserUnified } from '../../hooks/useAdminUsersAndHistory';
 
 interface BlockedItem {
@@ -31,6 +32,7 @@ export default function AdminUserSubscriptions({
   const [searchQuery, setSearchQuery] = useState('');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [selectedUserForHistory, setSelectedUserForHistory] = useState<AdminUserUnified | null>(null);
+  const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
 
   useEffect(() => {
     // Listen to blocked users from Firestore
@@ -141,8 +143,16 @@ export default function AdminUserSubscriptions({
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="relative w-full sm:w-72">
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={() => setIsSyncModalOpen(true)}
+              className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors duration-120 border-0 cursor-pointer inline-flex items-center gap-1.5 shrink-0"
+              title="Sync accounts from Firebase Authentication"
+            >
+              <Users className="w-3.5 h-3.5" />
+              <span>Sync Auth Users</span>
+            </button>
+            <div className="relative w-full sm:w-64">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
@@ -210,6 +220,15 @@ export default function AdminUserSubscriptions({
         user={selectedUserForHistory}
         isOpen={Boolean(selectedUserForHistory)}
         onClose={() => setSelectedUserForHistory(null)}
+      />
+
+      {/* Sync Firebase Auth Accounts Modal */}
+      <AdminSyncAuthModal
+        isOpen={isSyncModalOpen}
+        onClose={() => setIsSyncModalOpen(false)}
+        onSynced={() => {
+          onRefresh();
+        }}
       />
     </>
   );

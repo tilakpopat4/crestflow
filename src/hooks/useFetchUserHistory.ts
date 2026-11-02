@@ -116,3 +116,4 @@ export function useFetchUserHistory(userId?: string | null, userEmail?: string |
     error,
   };
 }
+
