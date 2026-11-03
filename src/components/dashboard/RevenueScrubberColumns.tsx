@@ -49,7 +49,7 @@ export const RevenueScrubberColumns: React.FC<RevenueScrubberColumnsProps> = ({
                 cy={yAt(p.now)}
                 r="4.5"
                 strokeWidth="2"
-                className="fill-[#4870aa] stroke-white group-data-off-now/plot:hidden dark:fill-indigo-400 dark:stroke-slate-800"
+                className="fill-[#3ea6ff] stroke-white group-data-off-now/plot:hidden dark:fill-indigo-400 dark:stroke-slate-800"
               />
             </svg>
 
@@ -63,7 +63,7 @@ export const RevenueScrubberColumns: React.FC<RevenueScrubberColumnsProps> = ({
                 {p.month} {p.year}
               </span>
               <span className="mt-1.5 flex items-center gap-1.5 whitespace-nowrap text-slate-600 group-data-off-now/plot:hidden dark:text-slate-400">
-                <span className="h-0.5 w-3 shrink-0 rounded-full bg-[#4870aa] dark:bg-indigo-400" />
+                <span className="h-0.5 w-3 shrink-0 rounded-full bg-[#3ea6ff] dark:bg-indigo-400" />
                 Paid
                 <span className="ml-auto pl-2 font-semibold text-slate-900 tabular-nums dark:text-slate-100">
                   {formatCurrency(p.now)}

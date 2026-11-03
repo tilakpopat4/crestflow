@@ -56,14 +56,13 @@ Hard rules:
   in grayscale
 - Same treatment in dark mode via existing tokens (slate on black)
 
-## Palette (4-Color System)
-- Page background: pure white (#ffffff)
-- Soft accent / borders: soft slate blue (#90acd5)
-- Primary action / buttons / active nav: deep steel blue (#4870aa), white text
-- Sidebar / left panel: clean white (#ffffff) with 1px slate border (#e2e8f0), slate-900 brand name
-- Primary text: black (#000000). Secondary text and table headers: slate (#5a677d)
-- Cards and tables: white (#ffffff), 1px #e2e8f0 border
-- Delete: red (#DC2626)
+## Palette (Creator & Studio System)
+- Page background: studio canvas light (#f1f1f1), dark (#0f0f0f)
+- Cards & modals: white (#ffffff) with 1px #e3e3e3 border in light; elevated surface (#212121 / #121212) in dark
+- Primary action / buttons / active nav: vibrant cyan-blue (#3ea6ff), white text
+- Sidebar / left panel: clean light/dark surface with 1px border (#e3e3e3 / #2a2a2a)
+- Primary text: black (#000000) / white (#ffffff). Secondary text and table headers: slate (#717171 / #aaaaaa)
+- Destructive / Delete / Overdue: red (#e1002d)
 Color carries meaning only: status, category, action, danger. Never decoration.
 The codebase tokens in `src/index.css` via `@theme` are authoritative.
 

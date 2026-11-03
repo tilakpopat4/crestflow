@@ -70,7 +70,7 @@ export const RevenueChartHeader: React.FC<RevenueChartHeaderProps> = ({
             aria-hidden="true"
             className="flex size-3.5 shrink-0 items-center justify-center group-aria-[pressed=false]/key:opacity-30"
           >
-            <span className="h-0.5 w-3.5 shrink-0 rounded-full bg-[#4870aa] dark:bg-indigo-400" />
+            <span className="h-0.5 w-3.5 shrink-0 rounded-full bg-[#3ea6ff] dark:bg-indigo-400" />
           </span>
           <span>{seriesButtonLabel}</span>
         </button>

@@ -13,12 +13,12 @@ export default function Logo({ className = "w-8 h-8" }: LogoProps) {
     >
       <defs>
         <linearGradient id="logoBg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#4870aa" />
-          <stop offset="100%" stopColor="#304d77" />
+          <stop offset="0%" stopColor="#3ea6ff" />
+          <stop offset="100%" stopColor="#1b7ec9" />
         </linearGradient>
         <linearGradient id="logoAccent" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#ffffff" />
-          <stop offset="100%" stopColor="#90acd5" />
+          <stop offset="100%" stopColor="#b1daff" />
         </linearGradient>
       </defs>
 
@@ -33,7 +33,7 @@ export default function Logo({ className = "w-8 h-8" }: LogoProps) {
         <path d="M250 106 L230 146" stroke="#304d77" strokeWidth="8" strokeLinecap="round" />
         <path d="M310 106 L290 146" stroke="#304d77" strokeWidth="8" strokeLinecap="round" />
 
-        <circle cx="256" cy="281" r="44" fill="#4870aa" />
+        <circle cx="256" cy="281" r="44" fill="#3ea6ff" />
         <polygon points="246,261 278,281 246,301" fill="#ffffff" />
       </g>
     </svg>
