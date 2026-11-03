@@ -210,3 +210,4 @@ export const SITEMAP_PAGES: SitemapPageItem[] = [
     inXmlSitemap: false,
   },
 ];
+

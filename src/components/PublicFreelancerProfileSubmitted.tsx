@@ -82,3 +82,4 @@ export const PublicFreelancerProfileSubmitted: React.FC<PublicFreelancerProfileS
 };
 
 export default PublicFreelancerProfileSubmitted;
+

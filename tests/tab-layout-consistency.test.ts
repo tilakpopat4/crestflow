@@ -212,5 +212,17 @@ describe('Tab Layout & Ratio Consistency Suite', () => {
     ], '2026-08-01');
     assert.strictEqual(profileResult.data[0].month, 'August');
     assert.strictEqual(profileResult.data[0].year, 2026);
+
+    // Multi-month activity starting in July 2026 without explicit freelanceStartDate
+    const multiMonthResult = buildMonthlyDataFromInvoices([
+      { id: 'inv_jul', totalAmount: 11100, status: 'Paid', date: '2026-07-01', lastPaymentDate: '2026-07-05' } as any,
+      { id: 'inv_aug', totalAmount: 6600, status: 'Paid', date: '2026-08-01', lastPaymentDate: '2026-08-05' } as any,
+      { id: 'inv_sep', totalAmount: 9000, status: 'Paid', date: '2026-09-01', lastPaymentDate: '2026-09-05' } as any,
+    ]);
+    assert.strictEqual(multiMonthResult.hasData, true);
+    assert.strictEqual(multiMonthResult.data[0].month, 'July');
+    assert.strictEqual(multiMonthResult.data[0].year, 2026);
+    assert.strictEqual(multiMonthResult.data.some((m) => m.month === 'June' && m.year === 2026), false);
+    assert.strictEqual(multiMonthResult.data.some((m) => m.year === 2025), false);
   });
 });

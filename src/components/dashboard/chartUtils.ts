@@ -185,5 +185,15 @@ export function buildMonthlyDataFromInvoices(
   const totalInvoiced = months.reduce((acc, m) => acc + m.invoiced, 0);
   const hasData = totalPaid > 0 || totalInvoiced > 0;
 
-  return { data: months, hasData, hasPrevYearData };
+  // If no explicit career start date was configured in profile, only show from the month
+  // the freelancer actually had their first invoice or paid activity (never show months before work started)
+  let resultMonths = months;
+  if (!freelanceStartDate) {
+    const firstActiveIndex = months.findIndex((m) => m.now > 0 || m.invoiced > 0);
+    if (firstActiveIndex > 0) {
+      resultMonths = months.slice(firstActiveIndex);
+    }
+  }
+
+  return { data: resultMonths, hasData, hasPrevYearData };
 }
