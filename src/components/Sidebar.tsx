@@ -149,17 +149,6 @@ export default function Sidebar({
                   : "text-[#aaaaaa] hover:text-white hover:bg-[#282828] active:bg-[#333333] border-transparent"
               )}
             >
-              {isActive && (
-                <motion.div
-                  layoutId="sidebarActiveTabIndicator"
-                  className="absolute inset-0 bg-[#282828] border border-[#3a3a3a] rounded-xl shadow-xs z-0"
-                  transition={
-                    shouldReduceMotion
-                      ? { duration: 0 }
-                      : { type: 'spring', stiffness: 450, damping: 35 }
-                  }
-                />
-              )}
               <span
                 className={clsx(
                   "relative z-10 flex items-center justify-center w-full transition-all duration-120",
