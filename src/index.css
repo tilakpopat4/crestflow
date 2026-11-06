@@ -91,17 +91,64 @@ header,
 }
 
 /* Sidebar navigation panel: clean dark surface per GEMINI.md */
-nav:not([aria-label="Footer"]):not(footer nav) {
+aside,
+aside nav,
+[role="navigation"].sidebar,
+nav.sidebar {
   background-color: #1e1e1e !important;
   border-color: #2a2a2a !important;
 }
 
-/* Footer: completely transparent link and list areas */
+/* Footer: completely transparent link, list, and container areas */
+footer,
+footer * {
+  box-shadow: none !important;
+}
+
 footer nav,
+footer div,
 footer ul,
 footer li,
-footer a {
+footer a,
+footer p,
+footer span {
   background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+footer {
+  background-color: #282828 !important;
+}
+
+/* Force all action/primary buttons to adhere to Creator & Studio graphite palette per GEMINI.md */
+button.bg-indigo-600,
+button.bg-blue-600,
+button.bg-indigo-700,
+button.bg-blue-700,
+a.bg-indigo-600,
+a.bg-blue-600,
+a.bg-indigo-700,
+a.bg-blue-700,
+[role="button"].bg-indigo-600,
+[role="button"].bg-blue-600 {
+  background-color: #282828 !important;
+  color: #ffffff !important;
+  border: 1px solid #3a3a3a !important;
+}
+
+button.bg-indigo-600:hover,
+button.bg-blue-600:hover,
+button.bg-indigo-700:hover,
+button.bg-blue-700:hover,
+a.bg-indigo-600:hover,
+a.bg-blue-600:hover,
+a.bg-indigo-700:hover,
+a.bg-blue-700:hover,
+[role="button"].bg-indigo-600:hover,
+[role="button"].bg-blue-600:hover {
+  background-color: #383838 !important;
+  color: #ffffff !important;
+  border-color: #4a4a4a !important;
 }
 
 /* Sub-sections, cards & modals: highlighted & separated purely by #282828 on #333333 canvas without borders */

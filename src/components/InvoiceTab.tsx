@@ -1132,19 +1132,19 @@ export default function InvoiceTab({
                   <div className="flex flex-wrap gap-3">
                     <button
                       onClick={() => addItem('', selectedClient ? selectedClient.defaultRate : 0)}
-                      className="text-indigo-600 dark:text-indigo-400 text-xs font-semibold underline hover:text-indigo-700 flex items-center gap-1 cursor-pointer"
+                      className="text-slate-300 hover:text-white text-xs font-semibold underline transition-colors duration-120 flex items-center gap-1 cursor-pointer"
                     >
                       <Plus size={14} /> Add Reel
                     </button>
                     <button
                       onClick={() => addItem('On Site Shoot', selectedClient?.onSiteShootRate || 0)}
-                      className="text-indigo-600 dark:text-indigo-400 text-xs font-semibold underline hover:text-indigo-700 flex items-center gap-1 cursor-pointer"
+                      className="text-slate-300 hover:text-white text-xs font-semibold underline transition-colors duration-120 flex items-center gap-1 cursor-pointer"
                     >
                       <Plus size={14} /> Add On Site Shoot
                     </button>
                     <button
                       onClick={() => addItem('Website Making', selectedClient?.websiteMakingRate || 0)}
-                      className="text-indigo-600 dark:text-indigo-400 text-xs font-semibold underline hover:text-indigo-700 flex items-center gap-1 cursor-pointer"
+                      className="text-slate-300 hover:text-white text-xs font-semibold underline transition-colors duration-120 flex items-center gap-1 cursor-pointer"
                     >
                       <Plus size={14} /> Add Website
                     </button>
@@ -1185,7 +1185,7 @@ export default function InvoiceTab({
                         <button
                           type="button"
                           onClick={handleApplyDirectGrandTotal}
-                          className="w-full sm:w-auto px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-lg text-xs font-semibold transition-colors shadow-xs whitespace-nowrap flex items-center justify-center gap-1.5 cursor-pointer"
+                          className="w-full sm:w-auto px-3 py-1.5 bg-[#282828] hover:bg-[#383838] active:bg-[#1f1f1f] text-white border border-[#3a3a3a] rounded-lg text-xs font-semibold transition-colors duration-120 shadow-xs whitespace-nowrap flex items-center justify-center gap-1.5 cursor-pointer"
                           title="Divide grand total into clean whole numbers equally"
                         >
                           <Divide size={13} className="shrink-0" />

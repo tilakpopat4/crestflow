@@ -140,19 +140,19 @@ export default function Sidebar({
               key={item.id}
               onClick={() => setActiveTab(item.id)}
               whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
-              title={item.label}
+              title={isIconOnly ? item.label : undefined}
               className={clsx(
-                "group relative flex items-center justify-center px-1 min-[380px]:px-2 md:px-3 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-medium flex-1 md:flex-initial md:w-full md:max-w-none flex-shrink md:flex-shrink-0 min-w-0 min-h-[44px] md:min-h-0 transition-colors duration-120 outline-none select-none cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500",
+                "group relative flex items-center justify-center px-1 min-[380px]:px-2 md:px-3 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-medium flex-1 md:flex-initial md:w-full md:max-w-none flex-shrink md:flex-shrink-0 min-w-0 min-h-[44px] md:min-h-0 transition-colors duration-120 outline-none select-none cursor-pointer border",
                 isIconOnly ? "md:justify-center" : "md:justify-start md:space-x-3",
                 isActive
-                  ? "text-white"
-                  : "text-[#aaaaaa] hover:text-white hover:bg-[#282828] active:bg-[#333333]"
+                  ? "text-white bg-[#282828] border-[#3a3a3a]"
+                  : "text-[#aaaaaa] hover:text-white hover:bg-[#282828] active:bg-[#333333] border-transparent"
               )}
             >
               {isActive && (
                 <motion.div
                   layoutId="sidebarActiveTabIndicator"
-                  className="absolute inset-0 bg-[#333333] rounded-xl shadow-xs z-0"
+                  className="absolute inset-0 bg-[#282828] border border-[#3a3a3a] rounded-xl shadow-xs z-0"
                   transition={
                     shouldReduceMotion
                       ? { duration: 0 }

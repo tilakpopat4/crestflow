@@ -56,8 +56,7 @@ export const OnboardingLinkCard: React.FC<OnboardingLinkCardProps> = ({
         </div>
 
         {profile?.professionalTitle && (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-700 rounded-lg text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 self-start sm:self-auto">
-            <Sparkles size={14} className="text-indigo-600 dark:text-indigo-400" />
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#282828] border border-[#3a3a3a] rounded-lg text-xs sm:text-sm font-semibold text-slate-300 self-start sm:self-auto">
             {profile.professionalTitle}
           </span>
         )}
@@ -84,7 +83,7 @@ export const OnboardingLinkCard: React.FC<OnboardingLinkCardProps> = ({
               type="button"
               onClick={() => handleCopy(onboardingUrl, 'onboarding')}
               whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
-              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-colors cursor-pointer border-0"
+              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[#282828] hover:bg-[#383838] text-white border border-[#3a3a3a] rounded-xl text-sm font-semibold transition-colors cursor-pointer"
             >
               {copiedType === 'onboarding' ? <Check size={15} /> : <Copy size={15} />}
               <span>{copiedType === 'onboarding' ? 'Copied' : 'Copy Onboarding'}</span>

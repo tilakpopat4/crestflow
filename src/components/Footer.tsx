@@ -125,15 +125,15 @@ export default function Footer({
   );
 
   const legalLinks = (
-    <ul className="flex flex-wrap gap-x-4 gap-y-2 bg-transparent">
+    <ul className="flex flex-wrap gap-x-4 gap-y-2 !bg-transparent border-none">
       {config.legalLinks.map((link) => (
-        <li key={link.id}>
+        <li key={link.id} className="!bg-transparent border-none">
           <a
             href={link.url}
             target={link.openInNewTab ? '_blank' : undefined}
             rel={link.openInNewTab ? 'noopener noreferrer' : undefined}
             onClick={(e) => handleLinkClick(e, link)}
-            className={bottomLinkClass}
+            className={`${bottomLinkClass} !bg-transparent`}
           >
             {link.name}
           </a>
@@ -184,16 +184,16 @@ export default function Footer({
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col items-start gap-6 py-10 md:flex-row md:items-center md:justify-between">
           {brandLogo}
-          <nav aria-label="Footer" className="bg-transparent">
-            <ul className="flex flex-wrap gap-x-6 gap-y-3 bg-transparent">
+          <nav aria-label="Footer" className="!bg-transparent border-none">
+            <ul className="flex flex-wrap gap-x-6 gap-y-3 !bg-transparent border-none">
               {config.primaryLinks.map((link) => (
-                <li key={link.id}>
+                <li key={link.id} className="!bg-transparent border-none">
                   <a
                     href={link.url}
                     target={link.openInNewTab ? '_blank' : undefined}
                     rel={link.openInNewTab ? 'noopener noreferrer' : undefined}
                     onClick={(e) => handleLinkClick(e, link)}
-                    className={navLinkClass}
+                    className={`${navLinkClass} !bg-transparent`}
                   >
                     {link.name}
                   </a>

@@ -425,7 +425,7 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
                 <button 
                   type="button"
                   onClick={() => setIsDriveModalOpen(true)}
-                  className="w-full sm:w-auto flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-colors shadow-xs cursor-pointer truncate"
+                  className="w-full sm:w-auto flex items-center justify-center gap-1.5 bg-[#282828] hover:bg-[#383838] text-white border border-[#3a3a3a] px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-colors duration-120 shadow-xs cursor-pointer truncate"
                   title="Directly upload video/file to Google Drive and log as work deliverable"
                 >
                   <UploadCloud size={14} className="shrink-0" />
@@ -434,7 +434,7 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
 
                 <button 
                   onClick={() => setIsFormOpen(true)}
-                  className="w-full sm:w-auto flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-colors shadow-xs cursor-pointer truncate"
+                  className="w-full sm:w-auto flex items-center justify-center gap-1.5 bg-[#282828] hover:bg-[#383838] text-white border border-[#3a3a3a] px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-colors duration-120 shadow-xs cursor-pointer truncate"
                 >
                   <Plus size={15} className="shrink-0" />
                   <span className="truncate">Log Work</span>
@@ -844,8 +844,8 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
                     <tr
                       key={work.id}
                       className={clsx(
-                        'hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors',
-                        isSelected && 'bg-indigo-50/60 dark:bg-indigo-950/20'
+                        'hover:bg-[#282828] transition-colors duration-120',
+                        isSelected && 'bg-[#2a2a2a]'
                       )}
                     >
                       <td className="py-4 pl-4 pr-2">
@@ -927,7 +927,7 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
                             href={videoUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors"
+                            className="p-1.5 text-slate-400 hover:text-white hover:bg-[#383838] rounded transition-colors duration-120 cursor-pointer"
                             title="Open link in Google Drive / external tab"
                           >
                             <ExternalLink size={15} />
@@ -935,14 +935,14 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
                         )}
                         <button 
                           onClick={() => handleEditWork(work)}
-                          className="text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                          className="text-slate-400 hover:text-white p-1.5 rounded hover:bg-[#383838] active:bg-[#444444] transition-colors duration-120 cursor-pointer"
                           title="Edit Work Log"
                         >
                           <Edit2 size={16} />
                         </button>
                         <button 
                           onClick={() => deleteWork(work)}
-                          className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-950/50 transition-colors cursor-pointer"
+                          className="text-[#e1002d] hover:text-[#ff3b5c] p-1.5 rounded hover:bg-[#383838] active:bg-[#444444] transition-colors duration-120 cursor-pointer"
                           title="Delete Work Log"
                         >
                           <Trash2 size={16} />

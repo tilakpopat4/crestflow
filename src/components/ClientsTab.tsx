@@ -403,7 +403,7 @@ export default function ClientsTab({
             </button>
             <button
               onClick={handleOpenAddClient}
-              className="flex items-center justify-center gap-1.5 sm:gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-semibold transition-all shadow-xs flex-1 md:flex-none cursor-pointer"
+              className="flex items-center justify-center gap-1.5 sm:gap-2 bg-[#282828] hover:bg-[#383838] text-white border border-[#3a3a3a] px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-semibold transition-all shadow-xs flex-1 md:flex-none cursor-pointer"
             >
               <Plus size={15} />
               <span>Add New Client</span>
