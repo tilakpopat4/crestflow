@@ -488,10 +488,12 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 sm:gap-3 flex-wrap min-w-0">
                 <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight truncate">{client.name}</h1>
-                <StatusBadge 
-                  status={client.isClosed ? 'Closed' : statusInfo.code} 
-                  label={client.isClosed ? 'Closed' : statusInfo.label} 
-                />
+                {client.isClosed && (
+                  <StatusBadge 
+                    status="Closed" 
+                    label="Closed" 
+                  />
+                )}
               </div>
 
               <div className="mt-1.5 sm:mt-2 flex flex-wrap items-center gap-x-4 sm:gap-x-6 gap-y-1 sm:gap-y-2 text-xs text-slate-500 dark:text-slate-400 min-w-0">
@@ -563,61 +565,6 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
           </div>
         </div>
       </div>
-
-      {/* Payment Reminder / Alert Notification Banner (when notification is required) */}
-      {!client.isClosed && statusInfo.isNotificationRequired && (
-        <div className={`p-5 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
-          statusInfo.severity === 'critical' || statusInfo.severity === 'urgent'
-            ? 'bg-red-50 dark:bg-red-950/40 text-red-900 dark:text-red-200' 
-            : 'bg-slate-50 dark:bg-slate-900/40 text-slate-900 dark:text-slate-200'
-        }`}>
-          <div className="flex items-start gap-3">
-            <div className={`p-2 rounded-lg shrink-0 ${
-              statusInfo.severity === 'critical' || statusInfo.severity === 'urgent'
-                ? 'bg-red-100 dark:bg-red-900/60 text-red-600 dark:text-red-400' 
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-            }`}>
-              <AlertTriangle size={20} />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h4 className="text-sm font-bold">{statusInfo.notificationTitle}</h4>
-                {client.emailRemindersEnabled !== false && (
-                  <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
-                    Email Reminders Active
-                  </span>
-                )}
-              </div>
-              <p className="text-xs mt-0.5 opacity-90">{statusInfo.notificationMessage}</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0 flex-wrap">
-            <button
-              onClick={openPaymentModal}
-              className="px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 shadow-sm cursor-pointer"
-            >
-              Record Payment
-            </button>
-            <a
-              href={generateWhatsAppReminder(client, statusInfo)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-3 py-1.5 bg-slate-900 dark:bg-slate-800 text-white rounded-lg text-xs font-semibold hover:bg-slate-800 dark:hover:bg-slate-700 shadow-sm flex items-center gap-1"
-            >
-              <Send size={12} /> WhatsApp
-            </a>
-            {client.emailRemindersEnabled !== false && (
-              <a
-                href={generateEmailReminder(client, statusInfo).mailtoLink}
-                className="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-semibold hover:bg-indigo-700 shadow-sm flex items-center gap-1"
-              >
-                <Mail size={12} /> Send Email
-              </a>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Dashboard Metrics Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 w-full min-w-0">

@@ -11,9 +11,7 @@ import { generateUUID, getDriveDirectImageUrl } from '../lib/utils';
 import { exportClientCSV } from '../lib/csvExport';
 import {
   getPaymentStatusInfo,
-  calculateClientFinancials,
-  generateWhatsAppReminder,
-  generateEmailReminder
+  calculateClientFinancials
 } from '../lib/paymentUtils';
 import ClientDashboard from './ClientDashboard';
 import CsvImportModal from './CsvImportModal';
@@ -79,7 +77,6 @@ export default function ClientsTab({
 
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
   const [filterType, setFilterType] = useState<'all' | 'due' | 'uptodate' | 'closed'>('all');
-  const [isNotificationDismissed, setIsNotificationDismissed] = useState(false);
 
   React.useEffect(() => {
     if (initialSearchQuery !== undefined) {
@@ -478,80 +475,6 @@ export default function ClientsTab({
         );
       })()}
 
-      {/* Global Payment Reminders Bar across clients (if any client has payment due or delayed) */}
-      {!isNotificationDismissed && notificationClients.length > 0 && (
-        <div className="bg-slate-50 dark:bg-slate-900/60 rounded-xl p-3.5 sm:p-5 shadow-xs space-y-3 relative w-full min-w-0">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2 pr-7 sm:pr-8 min-w-0">
-            <div className="flex items-center gap-2 text-slate-900 dark:text-slate-100 font-bold text-xs sm:text-sm min-w-0">
-              <AlertTriangle className="text-red-600 dark:text-red-400 shrink-0" size={16} />
-              <span className="truncate">Payment Alerts ({notificationClients.length} Action Required)</span>
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium">30-Day Cycle Alerts</span>
-            </div>
-          </div>
-          <button
-            onClick={() => setIsNotificationDismissed(true)}
-            className="absolute top-3 right-3 sm:top-4 sm:right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 p-1.5 rounded-lg transition-colors cursor-pointer"
-            title="Dismiss notification"
-            aria-label="Close notification"
-          >
-            <X size={15} />
-          </button>
-
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-2.5 sm:gap-3 pt-1 w-full min-w-0">
-            {notificationClients.map(({ client, statusInfo, financials }) => (
-              <div
-                key={client.id}
-                className="bg-white dark:bg-slate-800 p-3 sm:p-3.5 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 shadow-xs min-w-0 overflow-hidden w-full"
-              >
-                <div className="w-full sm:w-auto min-w-0 flex-1">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="font-bold text-slate-900 dark:text-slate-100 text-xs truncate">{client.name}</span>
-                    <StatusBadge status={statusInfo.code} label={statusInfo.label} />
-                  </div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 truncate">
-                    Due: {new Date(statusInfo.nextDueDate).toLocaleDateString('en-IN')}
-                    {financials.totalPendingAmount > 0 && (
-                      <span className="font-semibold text-rose-600 ml-2">
-                        {formatCurrencyAmount(financials.totalPendingAmount, client.currency)} due
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-1.5 shrink-0 w-full sm:w-auto justify-end sm:justify-start pt-1 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-700/60">
-                  <button
-                    onClick={() => setSelectedClientId(client.id)}
-                    className="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 rounded text-xs font-semibold transition-colors cursor-pointer"
-                  >
-                    Dashboard
-                  </button>
-                  <a
-                    href={generateWhatsAppReminder(client, statusInfo)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-1.5 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white rounded text-xs font-semibold transition-colors"
-                    title="Send WhatsApp Reminder"
-                  >
-                    <Send size={12} />
-                  </a>
-                  {client.emailRemindersEnabled !== false && (
-                    <a
-                      href={generateEmailReminder(client, statusInfo).mailtoLink}
-                      className="p-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs font-semibold transition-colors"
-                      title="Send Email Reminder"
-                    >
-                      <Mail size={12} />
-                    </a>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Add / Edit Client Form Modal */}
       {isFormOpen && (
         <ClientFormModal
@@ -788,13 +711,11 @@ export default function ClientsTab({
 
                   {/* Payment Status Pill & Sub-Clients Badge */}
                   <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0">
-                    {client.isClosed ? (
+                    {client.isClosed && (
                       <StatusBadge 
                         status="Closed" 
                         label={`Closed${client.closedAt ? ` · ${new Date(client.closedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}` : ''}`} 
                       />
-                    ) : (
-                      <StatusBadge status={statusInfo.code} label={statusInfo.label} />
                     )}
                     {client.subClients && client.subClients.length > 0 && (
                       <span className="text-xs text-slate-500 dark:text-slate-400 font-normal inline-flex items-center gap-1">

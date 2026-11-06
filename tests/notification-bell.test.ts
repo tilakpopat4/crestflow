@@ -47,6 +47,27 @@ describe('Notification Bell & Payment Cycle Deduplication Suite', () => {
     );
   });
 
+  it('removes inline payment alerts banner and delayed status badge from client page', () => {
+    const clientsTabPath = path.resolve(process.cwd(), 'src/components/ClientsTab.tsx');
+    const clientDashboardPath = path.resolve(process.cwd(), 'src/components/ClientDashboard.tsx');
+
+    const clientsTabContent = fs.readFileSync(clientsTabPath, 'utf8');
+    assert.ok(
+      !clientsTabContent.includes('Payment Alerts ('),
+      'ClientsTab must no longer contain the Payment Alerts banner'
+    );
+    assert.ok(
+      !clientsTabContent.includes('StatusBadge status={statusInfo.code}'),
+      'ClientsTab client card must no longer show payment delayed badge'
+    );
+
+    const clientDashboardContent = fs.readFileSync(clientDashboardPath, 'utf8');
+    assert.ok(
+      !clientDashboardContent.includes('Payment Reminder / Alert Notification Banner'),
+      'ClientDashboard must no longer contain the alert notification banner'
+    );
+  });
+
   it('correctly calculates payment due notifications and deduplicates once dismissed', () => {
     const now = Date.now();
     const mockClientDueToday: Client = {
@@ -128,3 +149,4 @@ describe('Notification Bell & Payment Cycle Deduplication Suite', () => {
     assert.strictEqual(afterDismissList.length, 0, 'After dismissing for this cycle, notification must never appear again');
   });
 });
+
