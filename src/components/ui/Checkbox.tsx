@@ -41,7 +41,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
             onChange={onChange}
             disabled={disabled}
             title={title}
-            className={`col-start-1 row-start-1 size-4 cursor-pointer appearance-none rounded-sm border border-slate-400 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-100 disabled:checked:border-slate-300 disabled:checked:bg-slate-300 aria-invalid:border-red-600 dark:border-slate-500 dark:bg-slate-900 dark:checked:border-indigo-500 dark:checked:bg-indigo-500 dark:indeterminate:border-indigo-500 dark:indeterminate:bg-indigo-500 dark:focus-visible:outline-indigo-400 dark:disabled:border-slate-700 dark:disabled:bg-slate-800 transition-colors duration-120 ${className}`}
+            className={`col-start-1 row-start-1 size-4 cursor-pointer appearance-none rounded-sm border border-[#888888] bg-[#1a1a1a] checked:border-[#4870aa] checked:bg-[#4870aa] indeterminate:border-[#4870aa] indeterminate:bg-[#4870aa] hover:border-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:cursor-not-allowed disabled:opacity-40 transition-colors duration-120 ${className}`}
             {...props}
           />
           <svg

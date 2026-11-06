@@ -92,8 +92,8 @@ nav,
 }
 
 /* Sub-sections, cards & modals: highlighted & separated purely by #282828 on #333333 canvas without borders */
-.bg-white,
-[class*="bg-white"] {
+.bg-white:not(input):not(select):not(textarea),
+[class*="bg-white"]:not(input):not(select):not(textarea) {
   background-color: #282828 !important;
   border-color: transparent !important;
 }
@@ -182,6 +182,25 @@ select option {
 input::placeholder,
 textarea::placeholder {
   color: #717171 !important;
+}
+
+/* Checkboxes: Ensure crisp, high-contrast visibility across dark tables and forms */
+input[type="checkbox"] {
+  background-color: #1a1a1a !important;
+  border: 1.5px solid #888888 !important;
+  border-radius: 3px !important;
+  min-width: 16px !important;
+  min-height: 16px !important;
+}
+
+input[type="checkbox"]:hover {
+  border-color: #ffffff !important;
+}
+
+input[type="checkbox"]:checked,
+input[type="checkbox"]:indeterminate {
+  background-color: #4870aa !important;
+  border-color: #4870aa !important;
 }
 
 /* Safe area insets for notched iPhones (bottom nav) */
