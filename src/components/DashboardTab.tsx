@@ -287,14 +287,14 @@ export default function DashboardTab({
           ) : null}
           <button 
             onClick={handleExport}
-            className="flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
+            className="flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-[#282828] border border-[#444444] hover:bg-[#1f1f1f] text-white rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
           >
             <DownloadCloud size={13} /> Export
           </button>
           
           <button 
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
+            className="flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-[#282828] border border-[#444444] hover:bg-[#1f1f1f] text-white rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
           >
             <UploadCloud size={13} /> Import
           </button>
@@ -354,18 +354,18 @@ export default function DashboardTab({
       />
 
       {!isNotificationDismissed && activeNotifications.length > 0 && (
-        <div className="bg-slate-50 dark:bg-slate-900/60 rounded-xl p-4 sm:p-5 shadow-xs space-y-3 relative">
+        <div className="bg-[#282828] border border-[#444444] rounded-xl p-4 sm:p-5 shadow-xs space-y-3 relative">
           <button
             onClick={() => setIsNotificationDismissed(true)}
-            className="absolute top-3.5 right-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-md transition-colors cursor-pointer"
+            className="absolute top-3.5 right-3.5 text-slate-400 hover:text-white p-1 rounded-md transition-colors cursor-pointer"
             title="Dismiss notification"
             aria-label="Close notification"
           >
             <X size={16} />
           </button>
           <div className="flex items-center justify-between gap-2 pr-8">
-            <div className="flex items-center gap-2 text-slate-900 dark:text-slate-100 font-bold text-sm">
-              <AlertTriangle className="text-red-600 dark:text-red-400 shrink-0" size={16} />
+            <div className="flex items-center gap-2 text-white font-bold text-sm">
+              <AlertTriangle className="text-red-500 shrink-0" size={16} />
               <span>Payment Reminders ({activeNotifications.length})</span>
             </div>
             
@@ -373,7 +373,7 @@ export default function DashboardTab({
               {onNavigateToClients && (
                 <button 
                   onClick={onNavigateToClients}
-                  className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 cursor-pointer"
+                  className="text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1 cursor-pointer"
                 >
                   Directory <ArrowRight size={11} />
                 </button>
@@ -381,7 +381,7 @@ export default function DashboardTab({
             </div>
           </div>
 
-          <div className="divide-y divide-slate-200/50 dark:divide-slate-800/30">
+          <div className="divide-y divide-[#444444]">
             {activeNotifications.map(({ client, statusInfo, financials }) => {
               const emailData = generateEmailReminder(client, statusInfo);
               const isEmailEnabled = client.emailRemindersEnabled !== false;
@@ -393,14 +393,14 @@ export default function DashboardTab({
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate">{client.name}</span>
+                      <span className="font-bold text-white text-sm truncate">{client.name}</span>
                       <StatusBadge status={statusInfo.code} label={statusInfo.label} />
                     </div>
 
-                    <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-3 flex-wrap">
-                      <span>Due: <strong className="text-slate-700 dark:text-slate-300">{new Date(statusInfo.nextDueDate).toLocaleDateString('en-IN')}</strong></span>
+                    <div className="text-xs text-slate-400 flex items-center gap-3 flex-wrap">
+                      <span>Due: <strong className="text-slate-200">{new Date(statusInfo.nextDueDate).toLocaleDateString('en-IN')}</strong></span>
                       {financials.totalPendingAmount > 0 && (
-                        <span>Pending: <strong className="text-rose-600 dark:text-rose-400">₹{financials.totalPendingAmount.toLocaleString('en-IN')}</strong></span>
+                        <span>Pending: <strong className="text-rose-400">₹{financials.totalPendingAmount.toLocaleString('en-IN')}</strong></span>
                       )}
                     </div>
                   </div>
@@ -410,7 +410,7 @@ export default function DashboardTab({
                       href={generateWhatsAppReminder(client, statusInfo)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white rounded-lg text-xs font-semibold transition-colors"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#333333] hover:bg-[#3a3a3a] border border-[#444444] text-white rounded-lg text-xs font-semibold transition-colors"
                       title="Send WhatsApp Reminder"
                     >
                       <Send size={12} /> WhatsApp
@@ -419,7 +419,7 @@ export default function DashboardTab({
                     {isEmailEnabled && (
                       <a
                         href={emailData.mailtoLink}
-                        className="p-1.5 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 rounded-lg text-xs transition-colors"
+                        className="p-1.5 bg-[#333333] hover:bg-[#3a3a3a] border border-[#444444] text-slate-200 rounded-lg text-xs transition-colors"
                         title="Draft Email Reminder"
                       >
                         <Mail size={13} />
@@ -431,7 +431,7 @@ export default function DashboardTab({
                         navigator.clipboard.writeText(`Subject: ${emailData.subject}\n\n${emailData.body}`);
                         alert(`Email reminder template for ${client.name} copied!`);
                       }}
-                      className="p-1.5 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-xs transition-colors cursor-pointer"
+                      className="p-1.5 text-slate-300 hover:text-white bg-[#333333] hover:bg-[#3a3a3a] border border-[#444444] rounded-lg text-xs transition-colors cursor-pointer"
                       title="Copy Email Text"
                     >
                       <Copy size={13} />
@@ -446,46 +446,46 @@ export default function DashboardTab({
 
       {/* Metric Cards */}
       <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6">
-        <div className="bg-white dark:bg-slate-800 p-2.5 sm:p-4 md:p-6 rounded-xl shadow-xs flex flex-col sm:flex-row items-start gap-1.5 sm:gap-3 md:gap-4 min-w-0">
-          <div className="p-1.5 sm:p-2.5 md:p-3 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-lg shrink-0">
+        <div className="bg-[#282828] border border-[#444444] p-2.5 sm:p-4 md:p-6 rounded-xl shadow-xs flex flex-col sm:flex-row items-start gap-1.5 sm:gap-3 md:gap-4 min-w-0">
+          <div className="p-1.5 sm:p-2.5 md:p-3 bg-[#333333] text-white rounded-lg shrink-0">
             <IndianRupee size={16} className="sm:hidden" />
             <IndianRupee size={22} className="hidden sm:block" />
           </div>
           <div className="min-w-0 flex-1 w-full">
-            <p className="text-[8px] min-[360px]:text-[9px] min-[400px]:text-[10px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-tight sm:tracking-wider leading-tight line-clamp-2 sm:line-clamp-1 mb-0.5 sm:mb-1">
+            <p className="text-[8px] min-[360px]:text-[9px] min-[400px]:text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-tight sm:tracking-wider leading-tight line-clamp-2 sm:line-clamp-1 mb-0.5 sm:mb-1">
               Total Earned This Month
             </p>
-            <h3 className="text-sm min-[360px]:text-base sm:text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 truncate">
+            <h3 className="text-sm min-[360px]:text-base sm:text-2xl md:text-3xl font-bold text-white truncate">
               ₹{metrics.totalEarned.toLocaleString('en-IN')}
             </h3>
           </div>
         </div>
         
-        <div className="bg-white dark:bg-slate-800 p-2.5 sm:p-4 md:p-6 rounded-xl shadow-xs flex flex-col sm:flex-row items-start gap-1.5 sm:gap-3 md:gap-4 min-w-0">
-          <div className="p-1.5 sm:p-2.5 md:p-3 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg shrink-0">
+        <div className="bg-[#282828] border border-[#444444] p-2.5 sm:p-4 md:p-6 rounded-xl shadow-xs flex flex-col sm:flex-row items-start gap-1.5 sm:gap-3 md:gap-4 min-w-0">
+          <div className="p-1.5 sm:p-2.5 md:p-3 bg-[#333333] text-white rounded-lg shrink-0">
             <Clock size={16} className="sm:hidden" />
             <Clock size={22} className="hidden sm:block" />
           </div>
           <div className="min-w-0 flex-1 w-full">
-            <p className="text-[8px] min-[360px]:text-[9px] min-[400px]:text-[10px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-tight sm:tracking-wider leading-tight line-clamp-2 sm:line-clamp-1 mb-0.5 sm:mb-1">
+            <p className="text-[8px] min-[360px]:text-[9px] min-[400px]:text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-tight sm:tracking-wider leading-tight line-clamp-2 sm:line-clamp-1 mb-0.5 sm:mb-1">
               Total Pending Invoices Amount
             </p>
-            <h3 className="text-sm min-[360px]:text-base sm:text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 truncate">
+            <h3 className="text-sm min-[360px]:text-base sm:text-2xl md:text-3xl font-bold text-white truncate">
               ₹{metrics.totalDue.toLocaleString('en-IN')}
             </h3>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 p-2.5 sm:p-4 md:p-6 rounded-xl shadow-xs flex flex-col sm:flex-row items-start gap-1.5 sm:gap-3 md:gap-4 min-w-0">
-          <div className="p-1.5 sm:p-2.5 md:p-3 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-lg shrink-0">
+        <div className="bg-[#282828] border border-[#444444] p-2.5 sm:p-4 md:p-6 rounded-xl shadow-xs flex flex-col sm:flex-row items-start gap-1.5 sm:gap-3 md:gap-4 min-w-0">
+          <div className="p-1.5 sm:p-2.5 md:p-3 bg-[#333333] text-white rounded-lg shrink-0">
             <TrendingUp size={16} className="sm:hidden" />
             <TrendingUp size={22} className="hidden sm:block" />
           </div>
           <div className="min-w-0 flex-1 w-full">
-            <p className="text-[8px] min-[360px]:text-[9px] min-[400px]:text-[10px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-tight sm:tracking-wider leading-tight line-clamp-2 sm:line-clamp-1 mb-0.5 sm:mb-1">
+            <p className="text-[8px] min-[360px]:text-[9px] min-[400px]:text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-tight sm:tracking-wider leading-tight line-clamp-2 sm:line-clamp-1 mb-0.5 sm:mb-1">
               Invoices This Month
             </p>
-            <h3 className="text-sm min-[360px]:text-base sm:text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 truncate">
+            <h3 className="text-sm min-[360px]:text-base sm:text-2xl md:text-3xl font-bold text-white truncate">
               {metrics.totalInvoicesThisMonth}
             </h3>
           </div>
@@ -510,14 +510,14 @@ export default function DashboardTab({
                 {clientRevenueTimeframe === 'month' ? 'Paid revenue this month' : 'Total all-time paid'}
               </p>
             </div>
-            <div className="inline-flex rounded-lg bg-slate-100 dark:bg-slate-700/80 p-0.5 text-[11px] font-medium shrink-0">
+            <div className="inline-flex rounded-lg bg-[#282828] border border-[#444444] p-0.5 text-[11px] font-medium shrink-0">
               <button
                 type="button"
                 onClick={() => setClientRevenueTimeframe('all')}
                 className={`px-2.5 py-1 rounded-md transition-colors cursor-pointer border-none ${
                   clientRevenueTimeframe === 'all'
-                    ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-2xs font-semibold'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100'
+                    ? 'bg-[#333333] text-white shadow-2xs font-semibold'
+                    : 'text-slate-400 hover:text-white'
                 }`}
               >
                 All Time
@@ -527,8 +527,8 @@ export default function DashboardTab({
                 onClick={() => setClientRevenueTimeframe('month')}
                 className={`px-2.5 py-1 rounded-md transition-colors cursor-pointer border-none ${
                   clientRevenueTimeframe === 'month'
-                    ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-2xs font-semibold'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100'
+                    ? 'bg-[#333333] text-white shadow-2xs font-semibold'
+                    : 'text-slate-400 hover:text-white'
                 }`}
               >
                 This Month
@@ -682,14 +682,14 @@ export default function DashboardTab({
             <h3 className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Workspace Tools</h3>
             <p className="text-[11px] sm:text-xs text-slate-400 dark:text-slate-500 mt-0.5">Quick access to scratchpad notes and Gemini AI summaries</p>
           </div>
-          <div className="inline-flex p-0.5 bg-slate-100 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shrink-0 self-start sm:self-auto">
+          <div className="inline-flex p-0.5 bg-[#282828] rounded-lg border border-[#444444] shrink-0 self-start sm:self-auto">
             <button
               type="button"
               onClick={() => setActiveWorkspaceTool(prev => prev === 'notes' ? 'none' : 'notes')}
               className={`px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeWorkspaceTool === 'notes'
-                  ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-2xs'
-                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
+                  ? 'bg-[#333333] text-white shadow-2xs'
+                  : 'text-slate-400 hover:text-white'
               }`}
             >
               <StickyNoteIcon size={13} /> Notes {activeWorkspaceTool === 'notes' ? '(Active)' : ''}
@@ -699,8 +699,8 @@ export default function DashboardTab({
               onClick={() => setActiveWorkspaceTool(prev => prev === 'ai' ? 'none' : 'ai')}
               className={`px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeWorkspaceTool === 'ai'
-                  ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-2xs'
-                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
+                  ? 'bg-[#333333] text-white shadow-2xs'
+                  : 'text-slate-400 hover:text-white'
               }`}
             >
               <FileText size={13} /> AI Summarizer {activeWorkspaceTool === 'ai' ? '(Active)' : ''}

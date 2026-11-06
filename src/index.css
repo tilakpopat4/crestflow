@@ -3,36 +3,36 @@
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-slate-50: #ffffff;
-  --color-slate-100: #f1f1f1;
-  --color-slate-200: #e3e3e3;
-  --color-slate-300: #cccccc;
+  --color-slate-50: #333333;
+  --color-slate-100: #282828;
+  --color-slate-200: #444444;
+  --color-slate-300: #666666;
   --color-slate-400: #aaaaaa;
   --color-slate-500: #717171;
-  --color-slate-600: #616161;
-  --color-slate-700: #2d2d2d;
-  --color-slate-800: #212121;
-  --color-slate-900: #121212;
-  --color-slate-950: #0f0f0f;
+  --color-slate-600: #999999;
+  --color-slate-700: #cccccc;
+  --color-slate-800: #e0e0e0;
+  --color-slate-900: #f1f1f1;
+  --color-slate-950: #ffffff;
 
-  --color-indigo-50: #f5f5f5;
-  --color-indigo-100: #ebebeb;
-  --color-indigo-200: #d4d4d4;
-  --color-indigo-300: #a3a3a3;
-  --color-indigo-400: #525252;
-  --color-indigo-500: #383838;
+  --color-indigo-50: #282828;
+  --color-indigo-100: #242424;
+  --color-indigo-200: #383838;
+  --color-indigo-300: #525252;
+  --color-indigo-400: #888888;
+  --color-indigo-500: #aaaaaa;
   --color-indigo-600: #282828;
   --color-indigo-700: #1c1c1c;
   --color-indigo-800: #141414;
   --color-indigo-900: #0f0f0f;
   --color-indigo-950: #0a0a0a;
 
-  --color-blue-50: #f5f5f5;
-  --color-blue-100: #ebebeb;
-  --color-blue-200: #d4d4d4;
-  --color-blue-300: #a3a3a3;
-  --color-blue-400: #525252;
-  --color-blue-500: #383838;
+  --color-blue-50: #282828;
+  --color-blue-100: #242424;
+  --color-blue-200: #383838;
+  --color-blue-300: #525252;
+  --color-blue-400: #888888;
+  --color-blue-500: #aaaaaa;
   --color-blue-600: #282828;
   --color-blue-700: #1c1c1c;
   --color-blue-800: #141414;
@@ -63,7 +63,8 @@
   }
 
   body {
-    @apply bg-slate-50 text-slate-900 transition-colors duration-150;
+    background-color: #333333;
+    color: #f1f1f1;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -71,7 +72,8 @@
   }
 
   html.dark body {
-    @apply bg-slate-950 text-slate-100;
+    background-color: #333333;
+    color: #f1f1f1;
   }
 
   :focus-visible {
@@ -80,40 +82,60 @@
   }
 }
 
-/* Card & surface backgrounds: replace white with #333333 while maintaining high text contrast */
-.bg-white {
-  background-color: #333333;
-  color: #f1f1f1;
+/* Eliminate white background anywhere across the application */
+body,
+main,
+header,
+nav,
+.bg-white,
+[class*="bg-white"],
+.bg-slate-50 {
+  background-color: #333333 !important;
 }
 
-.bg-white .text-slate-900,
-.bg-white .text-slate-800,
-.bg-white .text-slate-700 {
-  color: #f1f1f1;
+.bg-slate-100,
+.bg-indigo-50,
+.bg-indigo-100,
+.bg-blue-50,
+.bg-blue-100 {
+  background-color: #282828 !important;
 }
 
-.bg-white .text-slate-600,
-.bg-white .text-slate-500,
-.bg-white .text-slate-400 {
-  color: #aaaaaa;
+body,
+main,
+.bg-white,
+[class*="bg-white"],
+.bg-slate-50,
+.text-slate-900,
+.text-slate-800,
+.text-slate-700 {
+  color: #f1f1f1 !important;
 }
 
-.bg-white .border-slate-200,
-.bg-white .border-slate-100 {
-  border-color: #444444;
+.text-slate-600,
+.text-slate-500 {
+  color: #aaaaaa !important;
+}
+
+.border-slate-200,
+.border-slate-100 {
+  border-color: #444444 !important;
 }
 
 .bg-white input:not([type="checkbox"]):not([type="radio"]),
 .bg-white select,
-.bg-white textarea {
-  background-color: #242424;
-  color: #f1f1f1;
-  border-color: #444444;
+.bg-white textarea,
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+  background-color: #242424 !important;
+  color: #f1f1f1 !important;
+  border-color: #444444 !important;
 }
 
-.bg-white input::placeholder,
-.bg-white textarea::placeholder {
-  color: #717171;
+input::placeholder,
+textarea::placeholder {
+  color: #717171 !important;
 }
 
 /* Safe area insets for notched iPhones (bottom nav) */
