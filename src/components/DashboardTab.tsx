@@ -287,14 +287,14 @@ export default function DashboardTab({
           ) : null}
           <button 
             onClick={handleExport}
-            className="flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-[#282828] border border-[#444444] hover:bg-[#1f1f1f] text-white rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
+            className="flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-[#282828] hover:bg-[#1f1f1f] text-white rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer border-0"
           >
             <DownloadCloud size={13} /> Export
           </button>
           
           <button 
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-[#282828] border border-[#444444] hover:bg-[#1f1f1f] text-white rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
+            className="flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-[#282828] hover:bg-[#1f1f1f] text-white rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer border-0"
           >
             <UploadCloud size={13} /> Import
           </button>
@@ -354,7 +354,7 @@ export default function DashboardTab({
       />
 
       {!isNotificationDismissed && activeNotifications.length > 0 && (
-        <div className="bg-[#282828] border border-[#444444] rounded-xl p-4 sm:p-5 shadow-xs space-y-3 relative">
+        <div className="bg-[#282828] rounded-xl p-4 sm:p-5 shadow-xs space-y-3 relative">
           <button
             onClick={() => setIsNotificationDismissed(true)}
             className="absolute top-3.5 right-3.5 text-slate-400 hover:text-white p-1 rounded-md transition-colors cursor-pointer"
@@ -410,7 +410,7 @@ export default function DashboardTab({
                       href={generateWhatsAppReminder(client, statusInfo)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#333333] hover:bg-[#3a3a3a] border border-[#444444] text-white rounded-lg text-xs font-semibold transition-colors"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#333333] hover:bg-[#3a3a3a] text-white rounded-lg text-xs font-semibold transition-colors border-0"
                       title="Send WhatsApp Reminder"
                     >
                       <Send size={12} /> WhatsApp
@@ -419,7 +419,7 @@ export default function DashboardTab({
                     {isEmailEnabled && (
                       <a
                         href={emailData.mailtoLink}
-                        className="p-1.5 bg-[#333333] hover:bg-[#3a3a3a] border border-[#444444] text-slate-200 rounded-lg text-xs transition-colors"
+                        className="p-1.5 bg-[#333333] hover:bg-[#3a3a3a] text-slate-200 rounded-lg text-xs transition-colors border-0"
                         title="Draft Email Reminder"
                       >
                         <Mail size={13} />
@@ -431,7 +431,7 @@ export default function DashboardTab({
                         navigator.clipboard.writeText(`Subject: ${emailData.subject}\n\n${emailData.body}`);
                         alert(`Email reminder template for ${client.name} copied!`);
                       }}
-                      className="p-1.5 text-slate-300 hover:text-white bg-[#333333] hover:bg-[#3a3a3a] border border-[#444444] rounded-lg text-xs transition-colors cursor-pointer"
+                      className="p-1.5 text-slate-300 hover:text-white bg-[#333333] hover:bg-[#3a3a3a] rounded-lg text-xs transition-colors cursor-pointer border-0"
                       title="Copy Email Text"
                     >
                       <Copy size={13} />
@@ -446,7 +446,7 @@ export default function DashboardTab({
 
       {/* Metric Cards */}
       <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6">
-        <div className="bg-[#282828] border border-[#444444] p-2.5 sm:p-4 md:p-6 rounded-xl shadow-xs flex flex-col sm:flex-row items-start gap-1.5 sm:gap-3 md:gap-4 min-w-0">
+        <div className="bg-[#282828] p-2.5 sm:p-4 md:p-6 rounded-xl shadow-xs flex flex-col sm:flex-row items-start gap-1.5 sm:gap-3 md:gap-4 min-w-0">
           <div className="p-1.5 sm:p-2.5 md:p-3 bg-[#333333] text-white rounded-lg shrink-0">
             <IndianRupee size={16} className="sm:hidden" />
             <IndianRupee size={22} className="hidden sm:block" />
@@ -461,7 +461,7 @@ export default function DashboardTab({
           </div>
         </div>
         
-        <div className="bg-[#282828] border border-[#444444] p-2.5 sm:p-4 md:p-6 rounded-xl shadow-xs flex flex-col sm:flex-row items-start gap-1.5 sm:gap-3 md:gap-4 min-w-0">
+        <div className="bg-[#282828] p-2.5 sm:p-4 md:p-6 rounded-xl shadow-xs flex flex-col sm:flex-row items-start gap-1.5 sm:gap-3 md:gap-4 min-w-0">
           <div className="p-1.5 sm:p-2.5 md:p-3 bg-[#333333] text-white rounded-lg shrink-0">
             <Clock size={16} className="sm:hidden" />
             <Clock size={22} className="hidden sm:block" />
@@ -476,7 +476,7 @@ export default function DashboardTab({
           </div>
         </div>
 
-        <div className="bg-[#282828] border border-[#444444] p-2.5 sm:p-4 md:p-6 rounded-xl shadow-xs flex flex-col sm:flex-row items-start gap-1.5 sm:gap-3 md:gap-4 min-w-0">
+        <div className="bg-[#282828] p-2.5 sm:p-4 md:p-6 rounded-xl shadow-xs flex flex-col sm:flex-row items-start gap-1.5 sm:gap-3 md:gap-4 min-w-0">
           <div className="p-1.5 sm:p-2.5 md:p-3 bg-[#333333] text-white rounded-lg shrink-0">
             <TrendingUp size={16} className="sm:hidden" />
             <TrendingUp size={22} className="hidden sm:block" />
@@ -497,12 +497,12 @@ export default function DashboardTab({
       {/* Analytics & Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
         {/* Monthly Earnings Revenue Comparison Chart */}
-        <div className="lg:col-span-2 bg-[#282828] border border-[#3e3e3e] p-3.5 sm:p-6 rounded-xl shadow-xs flex flex-col min-w-0">
+        <div className="lg:col-span-2 bg-[#282828] p-3.5 sm:p-6 rounded-xl shadow-xs flex flex-col min-w-0">
           <RevenueComparisonChart invoices={invoices} freelanceStartDate={profile?.freelanceStartDate} workItems={workItems} onNavigateToInvoices={onNavigateToInvoices} />
         </div>
 
         {/* Client Distribution Bar Chart */}
-        <div className="lg:col-span-1 bg-[#282828] border border-[#3e3e3e] p-3.5 sm:p-6 rounded-xl shadow-xs flex flex-col min-w-0">
+        <div className="lg:col-span-1 bg-[#282828] p-3.5 sm:p-6 rounded-xl shadow-xs flex flex-col min-w-0">
           <div className="flex items-center justify-between gap-2 mb-4 sm:mb-6">
             <div>
               <h3 className="text-xs sm:text-sm font-semibold text-white uppercase tracking-wider">Client Revenue</h3>
@@ -510,7 +510,7 @@ export default function DashboardTab({
                 {clientRevenueTimeframe === 'month' ? 'Paid revenue this month' : 'Total all-time paid'}
               </p>
             </div>
-            <div className="inline-flex rounded-lg bg-[#282828] border border-[#444444] p-0.5 text-[11px] font-medium shrink-0">
+            <div className="inline-flex rounded-lg bg-[#212121] p-0.5 text-[11px] font-medium shrink-0">
               <button
                 type="button"
                 onClick={() => setClientRevenueTimeframe('all')}
@@ -597,15 +597,15 @@ export default function DashboardTab({
       </div>
 
       {/* Recent Invoices Table */}
-      <div className="bg-[#282828] border border-[#3e3e3e] rounded-xl shadow-xs overflow-hidden flex flex-col">
-        <div className="p-3.5 sm:p-6 flex justify-between items-center bg-[#282828] border-b border-[#3e3e3e]">
+      <div className="bg-[#282828] rounded-xl shadow-xs overflow-hidden flex flex-col">
+        <div className="p-3.5 sm:p-6 flex justify-between items-center bg-[#282828]">
           <h3 className="text-xs sm:text-sm font-semibold text-white uppercase tracking-wider">Recent Invoices</h3>
         </div>
         
         <div className="overflow-x-auto w-full">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-[#1f1f1f] border-b border-[#3e3e3e] text-[10px] sm:text-xs uppercase tracking-wider text-slate-300 font-semibold">
+              <tr className="bg-[#1a1a1a] text-[10px] sm:text-xs uppercase tracking-wider text-slate-300 font-semibold">
                 <th className="px-2.5 sm:px-6 py-2.5 sm:py-3 whitespace-nowrap">Date</th>
                 <th className="px-2.5 sm:px-6 py-2.5 sm:py-3">Client</th>
                 <th className="px-2.5 sm:px-6 py-2.5 sm:py-3 text-right whitespace-nowrap">Amount</th>
@@ -613,7 +613,7 @@ export default function DashboardTab({
                 <th className="px-2.5 sm:px-6 py-2.5 sm:py-3 text-right whitespace-nowrap">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#3e3e3e]">
+            <tbody className="divide-y divide-[#1f1f1f]">
               {recentInvoices.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-4 sm:px-6 py-12 text-center text-slate-500 dark:text-slate-400">
@@ -676,13 +676,13 @@ export default function DashboardTab({
       </div>
 
       {/* Workspace Utilities: Progressive Disclosure */}
-      <div className="bg-[#282828] border border-[#3e3e3e] p-4 sm:p-6 rounded-xl shadow-xs">
+      <div className="bg-[#282828] p-4 sm:p-6 rounded-xl shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 mb-4">
           <div>
             <h3 className="text-xs sm:text-sm font-semibold text-white uppercase tracking-wider">Workspace Tools</h3>
             <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">Quick access to scratchpad notes and Gemini AI summaries</p>
           </div>
-          <div className="inline-flex p-0.5 bg-[#282828] rounded-lg border border-[#444444] shrink-0 self-start sm:self-auto">
+          <div className="inline-flex p-0.5 bg-[#212121] rounded-lg shrink-0 self-start sm:self-auto">
             <button
               type="button"
               onClick={() => setActiveWorkspaceTool(prev => prev === 'notes' ? 'none' : 'notes')}

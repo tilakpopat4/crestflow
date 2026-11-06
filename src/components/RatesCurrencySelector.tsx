@@ -21,7 +21,7 @@ export const RatesCurrencySelector: React.FC<RatesCurrencySelectorProps> = ({
       <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
         Payment Currency *
       </label>
-      <div className="grid grid-cols-4 gap-1.5 bg-slate-100 dark:bg-slate-950 p-1 rounded-xl">
+      <div className="grid grid-cols-4 gap-1.5 bg-[#212121] p-1 rounded-xl">
         {FREELANCE_CURRENCIES.map((c) => {
           const isSelected = currency === c.code;
           return (
@@ -32,14 +32,14 @@ export const RatesCurrencySelector: React.FC<RatesCurrencySelectorProps> = ({
               whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
               className={`relative py-2 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 cursor-pointer border-0 select-none transition-colors duration-120 ${
                 isSelected
-                  ? 'text-slate-900 dark:text-slate-100'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                  ? 'text-white'
+                  : 'text-slate-400 hover:text-white'
               }`}
             >
               {isSelected && (
                 <motion.div
                   layoutId="activeCurrencyIndicator"
-                  className="absolute inset-0 bg-white dark:bg-slate-800 rounded-lg shadow-2xs"
+                  className="absolute inset-0 bg-[#333333] rounded-lg shadow-2xs"
                   transition={
                     shouldReduceMotion
                       ? { duration: 0 }

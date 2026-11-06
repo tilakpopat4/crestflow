@@ -409,16 +409,16 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
         <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap w-full sm:w-auto">
           <button
             onClick={handleCopyReviewLink}
-            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-2xs cursor-pointer ${
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-2xs cursor-pointer border-0 ${
               copiedReviewLink 
-                ? 'bg-slate-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400' 
-                : 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100/50 dark:hover:bg-indigo-900/50'
+                ? 'bg-[#242424] text-slate-200' 
+                : 'bg-[#212121] text-slate-300 hover:text-white hover:bg-[#1a1a1a]'
             }`}
             title="Copy feedback request link for this client"
           >
             {copiedReviewLink ? (
               <>
-                <CheckCircle2 size={13} className="text-indigo-600 dark:text-indigo-400" /> Link Copied!
+                <CheckCircle2 size={13} className="text-slate-200" /> Link Copied!
               </>
             ) : (
               <>
@@ -533,14 +533,14 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                   console.error(err);
                 }
               }}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border-0 text-xs font-semibold transition-all cursor-pointer ${
                 client.emailRemindersEnabled !== false 
-                  ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-800 dark:text-indigo-300' 
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  ? 'bg-[#212121] text-white' 
+                  : 'bg-[#242424] text-slate-400 hover:text-white hover:bg-[#1f1f1f]'
               }`}
               title="Toggle email reminders for overdue payments"
             >
-              <Mail size={13} className={client.emailRemindersEnabled !== false ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'} />
+              <Mail size={13} className={client.emailRemindersEnabled !== false ? 'text-white' : 'text-slate-400'} />
               <span>Email: {client.emailRemindersEnabled !== false ? 'ON' : 'OFF'}</span>
             </button>
 
@@ -679,15 +679,15 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
             whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
             className={`relative pb-4 text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2 outline-none cursor-pointer select-none ${
               activeTab === 'work'
-                ? 'text-indigo-600 dark:text-indigo-400'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                ? 'text-white'
+                : 'text-slate-400 hover:text-white'
             }`}
           >
             <ClipboardList size={16} /> Work Logs ({clientWorkItems.length})
             {activeTab === 'work' && (
               <motion.div
                 layoutId="clientDashboardTabIndicator"
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 dark:bg-indigo-400 rounded-full"
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-white rounded-full"
                 transition={
                   shouldReduceMotion
                     ? { duration: 0 }
@@ -702,15 +702,15 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
             whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
             className={`relative pb-4 text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2 outline-none cursor-pointer select-none ${
               activeTab === 'invoices'
-                ? 'text-indigo-600 dark:text-indigo-400'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                ? 'text-white'
+                : 'text-slate-400 hover:text-white'
             }`}
           >
             <FileText size={16} /> Invoices ({clientInvoices.length})
             {activeTab === 'invoices' && (
               <motion.div
                 layoutId="clientDashboardTabIndicator"
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 dark:bg-indigo-400 rounded-full"
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-white rounded-full"
                 transition={
                   shouldReduceMotion
                     ? { duration: 0 }
@@ -725,15 +725,15 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
             whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
             className={`relative pb-4 text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2 outline-none cursor-pointer select-none ${
               activeTab === 'settings'
-                ? 'text-indigo-600 dark:text-indigo-400'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                ? 'text-white'
+                : 'text-slate-400 hover:text-white'
             }`}
           >
             <DollarSign size={16} /> Client Rates & Info
             {activeTab === 'settings' && (
               <motion.div
                 layoutId="clientDashboardTabIndicator"
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 dark:bg-indigo-400 rounded-full"
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-white rounded-full"
                 transition={
                   shouldReduceMotion
                     ? { duration: 0 }

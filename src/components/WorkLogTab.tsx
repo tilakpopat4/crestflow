@@ -773,7 +773,7 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
                               clientName: client?.name
                             });
                           }}
-                          className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
+                          className="text-xs font-semibold text-slate-300 hover:text-white hover:underline inline-flex items-center gap-1 cursor-pointer"
                         >
                           <Play size={12} /> Watch Preview
                         </button>
@@ -890,7 +890,7 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
                                   clientName: client?.name
                                 });
                               }}
-                              className="text-xs font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 inline-flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+                              className="text-xs font-medium text-slate-300 hover:text-white inline-flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
                               title={`Watch embedded preview: ${videoUrl}`}
                             >
                               <Play size={14} /> Watch Preview
@@ -923,7 +923,7 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
                                 clientName: client?.name
                               });
                             }}
-                            className="p-1.5 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 rounded transition-colors cursor-pointer"
+                            className="p-1.5 text-slate-400 hover:text-white hover:bg-[#333333] rounded transition-colors cursor-pointer"
                             title="Play embedded preview"
                           >
                             <Play size={15} />

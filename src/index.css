@@ -91,11 +91,11 @@ nav,
   background-color: #333333 !important;
 }
 
-/* Sub-sections, cards & modals: highlighted & separated by #282828 on #333333 canvas */
+/* Sub-sections, cards & modals: highlighted & separated purely by #282828 on #333333 canvas without borders */
 .bg-white,
 [class*="bg-white"] {
   background-color: #282828 !important;
-  border-color: #3e3e3e !important;
+  border-color: transparent !important;
 }
 
 .bg-slate-100,
@@ -106,25 +106,61 @@ nav,
   background-color: #242424 !important;
 }
 
-body,
-main,
-.bg-white,
-[class*="bg-white"],
-.bg-slate-50,
-.text-slate-900,
-.text-slate-800,
-.text-slate-700 {
+/* Prevent white-on-white text clipping for dark container elements */
+.bg-slate-900,
+.bg-slate-950 {
+  background-color: #1f1f1f !important;
+}
+
+/* Header of every table should be a little dark in color */
+table thead,
+table thead tr,
+table th,
+thead,
+thead tr {
+  background-color: #1a1a1a !important;
+  color: #aaaaaa !important;
+  border-color: #242424 !important;
+}
+
+tbody tr {
+  border-color: #242424 !important;
+}
+
+/* Ensure strong contrast across all text classes so same-color text never hides */
+body, main, .bg-white, [class*="bg-white"], .bg-slate-50,
+.text-slate-950, .text-slate-900, .text-slate-800, .text-slate-700,
+.text-slate-300, .text-slate-200, .text-slate-100,
+.text-neutral-950, .text-neutral-900, .text-neutral-800, .text-neutral-700,
+.text-gray-950, .text-gray-900, .text-gray-800, .text-gray-700,
+.text-zinc-950, .text-zinc-900, .text-zinc-800, .text-zinc-700,
+.text-indigo-600, .text-indigo-500, .text-indigo-400,
+.text-blue-600, .text-blue-500, .text-blue-400, .text-black {
   color: #f1f1f1 !important;
 }
 
-.text-slate-600,
-.text-slate-500 {
+.text-slate-600, .text-slate-500, .text-slate-400,
+.text-neutral-600, .text-neutral-500, .text-neutral-400,
+.text-gray-600, .text-gray-500, .text-gray-400,
+.text-zinc-600, .text-zinc-500, .text-zinc-400 {
   color: #aaaaaa !important;
 }
 
-.border-slate-200,
-.border-slate-100 {
-  border-color: #444444 !important;
+/* Ensure hover states transition to pure white */
+.hover\:text-neutral-950:hover, .hover\:text-neutral-900:hover,
+.hover\:text-slate-900:hover, .hover\:text-slate-800:hover,
+.hover\:text-white:hover, .hover\:text-black:hover {
+  color: #ffffff !important;
+}
+
+/* Remove all light white borders from every boxes - separate purely by background */
+.border-slate-200, .border-slate-100, .border-slate-300,
+.border-neutral-200, .border-neutral-100, .border-neutral-300,
+.border-gray-200, .border-gray-100, .border-gray-300,
+.border-zinc-200, .border-zinc-100, .border-zinc-300,
+.border-white, [class*="border-white"], [class*="border-amber"],
+[class*="border-indigo-100"], [class*="border-indigo-200"], [class*="border-indigo-300"] {
+  border-color: transparent !important;
 }
 
 .bg-white input:not([type="checkbox"]):not([type="radio"]),
@@ -135,7 +171,12 @@ select,
 textarea {
   background-color: #242424 !important;
   color: #f1f1f1 !important;
-  border-color: #444444 !important;
+  border: 1px solid #444444 !important;
+}
+
+select option {
+  background-color: #242424 !important;
+  color: #f1f1f1 !important;
 }
 
 input::placeholder,

@@ -167,8 +167,8 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
                 >
                   {copiedClientId === selectedClient.id ? (
                     <>
-                      <Check className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-                      <span className="text-indigo-600 dark:text-indigo-400 font-medium">Link Copied</span>
+                      <Check className="w-3.5 h-3.5 text-slate-200" />
+                      <span className="text-slate-200 font-medium">Link Copied</span>
                     </>
                   ) : (
                     <>

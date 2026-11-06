@@ -111,7 +111,7 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
           <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mt-1 flex-wrap">
             <span>Signed in as:</span>
             <span className="font-semibold text-slate-700 dark:text-slate-200 font-mono">{currentUser?.email}</span>
-            {isSuperAdmin && <span className="text-indigo-600 dark:text-indigo-400 font-medium">(Super Admin)</span>}
+            {isSuperAdmin && <span className="text-white font-medium">(Super Admin)</span>}
           </div>
         </div>
         <div className="flex items-center gap-2.5 flex-wrap">
@@ -182,7 +182,7 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
         </div>
         <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs border border-slate-200 dark:border-slate-800">
           <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Active Subscriptions</div>
-          <div className="text-2xl sm:text-3xl font-bold text-indigo-600 dark:text-indigo-400">{unifiedStats.activeSubscribers}</div>
+          <div className="text-2xl sm:text-3xl font-bold text-white">{unifiedStats.activeSubscribers}</div>
         </div>
         <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs border border-slate-200 dark:border-slate-800">
           <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">VIP Whitelist</div>
@@ -213,7 +213,7 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
               {isActive && (
                 <motion.div
                   layoutId="adminActiveTabIndicator"
-                  className="absolute inset-0 bg-indigo-600 rounded-lg shadow-xs -z-0"
+                  className="absolute inset-0 bg-[#212121] rounded-lg shadow-xs -z-0"
                   transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 450, damping: 38 }}
                 />
               )}

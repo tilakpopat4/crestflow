@@ -146,10 +146,10 @@ export default function Footer({
     return (
       <footer
         aria-labelledby="ft-simple-title"
-        className={`w-full border-t transition-colors ${
+        className={`w-full transition-colors ${
           transparent
-            ? 'border-white/20 bg-transparent text-white/80'
-            : 'border-[#3e3e3e] bg-[#282828] text-slate-400'
+            ? 'bg-transparent text-white/80'
+            : 'bg-[#282828] text-slate-400'
         } px-4 md:px-8 ${className}`}
       >
         <h2 id="ft-simple-title" className="sr-only">
@@ -176,7 +176,7 @@ export default function Footer({
   return (
     <footer
       aria-labelledby="ft-simple-title"
-      className={`border-t border-[#3e3e3e] bg-[#282828] px-4 md:px-8 ${className}`}
+      className={`bg-[#282828] px-4 md:px-8 ${className}`}
     >
       <h2 id="ft-simple-title" className="sr-only">
         Footer
@@ -202,7 +202,7 @@ export default function Footer({
             </ul>
           </nav>
         </div>
-        <div className="flex flex-col gap-4 border-t border-[#3e3e3e] py-6 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 border-t border-[#333333] py-6 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <p className="text-slate-400">
               {config.copyrightText}{' '}

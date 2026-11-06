@@ -257,7 +257,7 @@ export default function BulkEditWorkModal({
         {/* Header */}
         <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded-xl border border-indigo-100 dark:border-indigo-900/60">
+            <div className="p-2.5 bg-[#212121] text-white rounded-xl">
               <Layers size={20} />
             </div>
             <div>

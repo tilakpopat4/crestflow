@@ -533,15 +533,15 @@ export default function GlobalHeader({
             <span
               className={`w-1.5 h-1.5 rounded-full ${
                 subscriptionState.isPaidActive
-                  ? 'bg-indigo-600 dark:bg-indigo-400'
-                  : 'bg-red-600 dark:bg-red-400'
+                  ? 'bg-slate-300'
+                  : 'bg-red-500'
               }`}
             />
             <span
               className={
                 subscriptionState.isPaidActive
-                  ? 'text-indigo-600 dark:text-indigo-400 font-medium text-[13px]'
-                  : 'text-red-600 dark:text-red-400 font-medium text-[13px]'
+                  ? 'text-slate-200 font-medium text-[13px]'
+                  : 'text-red-400 font-medium text-[13px]'
               }
             >
               {subscriptionState.isPaidActive

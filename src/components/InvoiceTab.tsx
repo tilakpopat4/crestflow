@@ -913,7 +913,7 @@ export default function InvoiceTab({
             <button
               type="button"
               onClick={onOpenSubscriptionModal}
-              className="font-medium text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+              className="font-medium text-slate-300 hover:text-white hover:underline cursor-pointer"
             >
               Upgrade to Pro &rarr;
             </button>
@@ -1694,7 +1694,7 @@ export default function InvoiceTab({
                     <td colSpan={3} className="p-3.5 text-right font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                       Total Earned (Paid Invoices):
                     </td>
-                    <td className="p-3.5 text-right font-black text-indigo-600 dark:text-indigo-400 text-sm">
+                    <td className="p-3.5 text-right font-black text-white text-sm">
                       ₹{totalEarnedTillToday.toLocaleString('en-IN')}
                     </td>
                     <td colSpan={2} className="p-3.5 text-slate-500 dark:text-slate-400 text-xs">
@@ -1894,7 +1894,7 @@ export default function InvoiceTab({
                       navigator.clipboard.writeText(`Subject: ${emailModalData.subject}\n\n${emailModalData.body}`);
                       alert("Invoice email content copied to clipboard!");
                     }}
-                    className="text-[11px] text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1"
+                    className="text-[11px] text-slate-300 hover:text-white font-semibold flex items-center gap-1 cursor-pointer"
                   >
                     <Copy size={12} /> Copy Text
                   </button>

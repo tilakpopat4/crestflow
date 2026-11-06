@@ -264,19 +264,19 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-end gap-2.5 pt-3.5 border-t border-slate-100 dark:border-slate-800">
+          <div className="flex justify-end gap-2.5 pt-3.5 border-t border-[#333333]">
             <button
               type="button"
               onClick={onClose}
               disabled={isSaving}
-              className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg cursor-pointer border-0 transition-colors duration-120"
+              className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white bg-[#242424] hover:bg-[#1f1f1f] rounded-lg cursor-pointer border-0 transition-colors duration-120"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSaving}
-              className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-xs font-semibold transition-colors duration-120 border-0 cursor-pointer"
+              className="bg-[#1f1f1f] hover:bg-[#181818] disabled:opacity-50 text-white px-5 py-2 rounded-lg text-xs font-semibold transition-colors duration-120 border-0 cursor-pointer shadow-xs"
             >
               <span>{isSaving ? 'Saving…' : 'Save Rates'}</span>
             </button>

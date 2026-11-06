@@ -211,7 +211,7 @@ export default function Sidebar({
           >
             <div className="flex items-center gap-2">
               <span
-                className={`w-2 h-2 rounded-full shrink-0 ${subscriptionState?.isPaidActive ? 'bg-indigo-600' : 'bg-red-500'}`}
+                className={`w-2 h-2 rounded-full shrink-0 ${subscriptionState?.isPaidActive ? 'bg-slate-300' : 'bg-red-500'}`}
               />
               <AnimatePresence initial={false}>
                 {!isIconOnly && (
@@ -236,7 +236,7 @@ export default function Sidebar({
                   animate={{ opacity: 1, width: 'auto' }}
                   exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, width: 0 }}
                   transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
-                  className="text-[11px] text-indigo-600 font-semibold group-hover:underline whitespace-nowrap overflow-hidden"
+                  className="text-[11px] text-slate-300 font-semibold group-hover:underline whitespace-nowrap overflow-hidden"
                 >
                   ₹49/mo
                 </motion.span>
