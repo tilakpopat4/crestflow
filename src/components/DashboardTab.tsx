@@ -3,15 +3,9 @@ import { Invoice, WorkItem, Client } from '../types';
 import { 
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid 
 } from 'recharts';
-import { IndianRupee, Clock, TrendingUp, CheckCircle2, DownloadCloud, UploadCloud, AlertTriangle, Send, Users, ArrowRight, Mail, Copy, X, FileText, StickyNote as StickyNoteIcon, Award } from 'lucide-react';
+import { IndianRupee, Clock, TrendingUp, CheckCircle2, DownloadCloud, UploadCloud, Users, ArrowRight, X, FileText, StickyNote as StickyNoteIcon, Award } from 'lucide-react';
 import { User } from 'firebase/auth';
 import { useFirestore, safeStringify } from '../hooks/useFirestore';
-import { 
-  getPaymentStatusInfo, 
-  calculateClientFinancials, 
-  generateWhatsAppReminder,
-  generateEmailReminder
-} from '../lib/paymentUtils';
 import StickyNotesWidget from './StickyNotesWidget';
 import PaymentDateModal from './PaymentDateModal';
 import AISummarizer from './AISummarizer';
@@ -47,7 +41,6 @@ export default function DashboardTab({
   const { batchReplaceAll: batchReplaceClients } = useFirestore<any>('clients', user?.uid);
   const { data: workItems, addOrUpdateItem: updateWorkItem } = useFirestore<WorkItem>('workItems', user?.uid);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isNotificationDismissed, setIsNotificationDismissed] = useState(false);
   const [isAnnivBannerDismissed, setIsAnnivBannerDismissed] = useState(false);
   const [activeWorkspaceTool, setActiveWorkspaceTool] = useState<'none' | 'notes' | 'ai'>('none');
   const journey = calculateWorkJourney(profile?.freelanceStartDate);
@@ -56,19 +49,6 @@ export default function DashboardTab({
 
   // Automated notification mailer when any client's payment is due today
   usePaymentDueNotifier(user, clients, invoices, workItems);
-
-  // Client statuses & notifications
-  const clientStatuses = useMemo(() => {
-    return clients.map(c => ({
-      client: c,
-      statusInfo: getPaymentStatusInfo(c, invoices, workItems),
-      financials: calculateClientFinancials(c.id, invoices, workItems)
-    }));
-  }, [clients, invoices, workItems]);
-
-  const activeNotifications = useMemo(() => {
-    return clientStatuses.filter(cs => !cs.client.isClosed && cs.statusInfo.isNotificationRequired);
-  }, [clientStatuses]);
 
   // Calculate metrics for current month & overall pending amounts
   const metrics = useMemo(() => {
@@ -352,97 +332,6 @@ export default function DashboardTab({
         onNavigateToWork={onNavigateToWork}
         onNavigateToInvoices={onNavigateToInvoices}
       />
-
-      {!isNotificationDismissed && activeNotifications.length > 0 && (
-        <div className="bg-[#282828] rounded-xl p-4 sm:p-5 shadow-xs space-y-3 relative">
-          <button
-            onClick={() => setIsNotificationDismissed(true)}
-            className="absolute top-3.5 right-3.5 text-slate-400 hover:text-white p-1 rounded-md transition-colors cursor-pointer"
-            title="Dismiss notification"
-            aria-label="Close notification"
-          >
-            <X size={16} />
-          </button>
-          <div className="flex items-center justify-between gap-2 pr-8">
-            <div className="flex items-center gap-2 text-white font-bold text-sm">
-              <AlertTriangle className="text-red-500 shrink-0" size={16} />
-              <span>Payment Reminders ({activeNotifications.length})</span>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              {onNavigateToClients && (
-                <button 
-                  onClick={onNavigateToClients}
-                  className="text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1 cursor-pointer"
-                >
-                  Directory <ArrowRight size={11} />
-                </button>
-              )}
-            </div>
-          </div>
-
-          <div className="divide-y divide-[#444444]">
-            {activeNotifications.map(({ client, statusInfo, financials }) => {
-              const emailData = generateEmailReminder(client, statusInfo);
-              const isEmailEnabled = client.emailRemindersEnabled !== false;
-
-              return (
-                <div 
-                  key={client.id}
-                  className="py-3 first:pt-1 last:pb-0 flex flex-col md:flex-row md:items-center justify-between gap-3"
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-white text-sm truncate">{client.name}</span>
-                      <StatusBadge status={statusInfo.code} label={statusInfo.label} />
-                    </div>
-
-                    <div className="text-xs text-slate-400 flex items-center gap-3 flex-wrap">
-                      <span>Due: <strong className="text-slate-200">{new Date(statusInfo.nextDueDate).toLocaleDateString('en-IN')}</strong></span>
-                      {financials.totalPendingAmount > 0 && (
-                        <span>Pending: <strong className="text-rose-400">₹{financials.totalPendingAmount.toLocaleString('en-IN')}</strong></span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-1.5 flex-wrap shrink-0">
-                    <a
-                      href={generateWhatsAppReminder(client, statusInfo)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#333333] hover:bg-[#3a3a3a] text-white rounded-lg text-xs font-semibold transition-colors border-0"
-                      title="Send WhatsApp Reminder"
-                    >
-                      <Send size={12} /> WhatsApp
-                    </a>
-
-                    {isEmailEnabled && (
-                      <a
-                        href={emailData.mailtoLink}
-                        className="p-1.5 bg-[#333333] hover:bg-[#3a3a3a] text-slate-200 rounded-lg text-xs transition-colors border-0"
-                        title="Draft Email Reminder"
-                      >
-                        <Mail size={13} />
-                      </a>
-                    )}
-
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(`Subject: ${emailData.subject}\n\n${emailData.body}`);
-                        alert(`Email reminder template for ${client.name} copied!`);
-                      }}
-                      className="p-1.5 text-slate-300 hover:text-white bg-[#333333] hover:bg-[#3a3a3a] rounded-lg text-xs transition-colors cursor-pointer border-0"
-                      title="Copy Email Text"
-                    >
-                      <Copy size={13} />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
 
       {/* Metric Cards */}
       <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6">

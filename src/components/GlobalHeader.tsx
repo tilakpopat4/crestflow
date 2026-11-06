@@ -10,6 +10,7 @@ import Logo from './Logo';
 import { calculateWorkJourney } from '../lib/anniversary';
 import StatusBadge from './StatusBadge';
 import { SubscriptionState } from '../hooks/useSubscription';
+import NotificationBellPopover from './notifications/NotificationBellPopover';
 
 interface GlobalHeaderProps {
   user: User | null;
@@ -402,6 +403,14 @@ export default function GlobalHeader({
 
         {/* Right Actions Bar (Streak, Theme, Profile, Logout) */}
         <div className="flex items-center gap-1 sm:gap-2 md:gap-3 shrink-0 ml-auto md:ml-0">
+          <NotificationBellPopover
+            user={user}
+            clients={clients}
+            invoices={invoices}
+            workItems={workItems}
+            onNavigateToClients={() => setActiveTab('clients')}
+          />
+
           {/* Worked Days / Career Journey Widget */}
           <div className="relative shrink-0" ref={journeyMenuRef}>
           {journey ? (
