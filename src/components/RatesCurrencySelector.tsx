@@ -33,13 +33,13 @@ export const RatesCurrencySelector: React.FC<RatesCurrencySelectorProps> = ({
               className={`relative py-2 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 cursor-pointer border-0 select-none transition-colors duration-120 ${
                 isSelected
                   ? 'text-white'
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-slate-400 hover:text-white hover:bg-[#282828] active:bg-[#333333]'
               }`}
             >
               {isSelected && (
                 <motion.div
                   layoutId="activeCurrencyIndicator"
-                  className="absolute inset-0 bg-[#333333] rounded-lg shadow-2xs"
+                  className="absolute inset-0 bg-[#383838] rounded-lg shadow-2xs z-0"
                   transition={
                     shouldReduceMotion
                       ? { duration: 0 }

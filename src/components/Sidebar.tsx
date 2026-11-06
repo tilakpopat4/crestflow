@@ -62,7 +62,7 @@ export default function Sidebar({
     <nav
       style={{ '--sidebar-width': `${width}px` } as React.CSSProperties}
       className={clsx(
-        "fixed md:relative bottom-0 left-0 w-full bg-white text-slate-900 flex md:flex-col md:h-full z-20 border-r border-slate-200 border-t md:border-t-0 pb-[max(env(safe-area-inset-bottom),4px)] md:pb-0",
+        "fixed md:relative bottom-0 left-0 w-full bg-[#1e1e1e] text-slate-100 flex md:flex-col md:h-full z-20 border-r border-[#2a2a2a] border-t md:border-t-0 pb-[max(env(safe-area-inset-bottom),4px)] md:pb-0",
         isResizing ? "transition-none" : "transition-all duration-200 ease-in-out",
         isCollapsed
           ? "md:w-0 md:-translate-x-full md:opacity-0 md:pointer-events-none md:border-r-0 overflow-hidden"
@@ -71,7 +71,7 @@ export default function Sidebar({
     >
       <div
         className={clsx(
-          "hidden md:block border-b border-slate-200 mb-2 transition-all duration-200",
+          "hidden md:block border-b border-[#2a2a2a] mb-2 transition-all duration-200",
           isIconOnly ? "p-3" : "p-6"
         )}
       >
@@ -102,7 +102,7 @@ export default function Sidebar({
             <button
               type="button"
               onClick={onCollapse}
-              className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer border-none bg-transparent shrink-0"
+              className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-[#282828] active:bg-[#333333] transition-colors cursor-pointer border-none bg-transparent shrink-0"
               title="Collapse sidebar"
               aria-label="Collapse sidebar"
             >
@@ -139,20 +139,20 @@ export default function Sidebar({
             <motion.button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              whileTap={shouldReduceMotion ? undefined : { scale: 0.96 }}
+              whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
               title={item.label}
               className={clsx(
-                "relative flex items-center justify-center px-1 min-[380px]:px-2 md:px-3 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-medium flex-1 md:flex-initial md:w-full md:max-w-none flex-shrink md:flex-shrink-0 min-w-0 min-h-[44px] md:min-h-0 transition-colors duration-150 outline-none select-none cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
+                "group relative flex items-center justify-center px-1 min-[380px]:px-2 md:px-3 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-medium flex-1 md:flex-initial md:w-full md:max-w-none flex-shrink md:flex-shrink-0 min-w-0 min-h-[44px] md:min-h-0 transition-colors duration-120 outline-none select-none cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500",
                 isIconOnly ? "md:justify-center" : "md:justify-start md:space-x-3",
                 isActive
                   ? "text-white"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                  : "text-[#aaaaaa] hover:text-white hover:bg-[#282828] active:bg-[#333333]"
               )}
             >
               {isActive && (
                 <motion.div
                   layoutId="sidebarActiveTabIndicator"
-                  className="absolute inset-0 bg-indigo-600 rounded-xl shadow-xs -z-0"
+                  className="absolute inset-0 bg-[#333333] rounded-xl shadow-xs z-0"
                   transition={
                     shouldReduceMotion
                       ? { duration: 0 }
@@ -162,14 +162,14 @@ export default function Sidebar({
               )}
               <span
                 className={clsx(
-                  "relative z-10 flex items-center justify-center w-full transition-all duration-200",
+                  "relative z-10 flex items-center justify-center w-full transition-all duration-120",
                   isIconOnly ? "md:justify-center" : "md:justify-start md:space-x-3"
                 )}
               >
                 <Icon
                   size={20}
                   className={clsx(
-                    isActive ? "text-white" : "text-slate-500",
+                    isActive ? "text-white" : "text-[#aaaaaa] group-hover:text-white",
                     "shrink-0 transition-colors md:w-[18px] md:h-[18px]"
                   )}
                 />
@@ -181,7 +181,10 @@ export default function Sidebar({
                       animate={{ opacity: 1, width: 'auto' }}
                       exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, width: 0 }}
                       transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
-                      className="hidden md:inline-block truncate leading-tight overflow-hidden whitespace-nowrap"
+                      className={clsx(
+                        "hidden md:inline-block truncate leading-tight overflow-hidden whitespace-nowrap",
+                        isActive ? "font-semibold text-white" : "text-[#aaaaaa] group-hover:text-white"
+                      )}
                     >
                       {item.label}
                     </motion.span>
@@ -196,7 +199,7 @@ export default function Sidebar({
       {subscriptionState?.isSubscriptionFeatureEnabled && onOpenSubscriptionModal && (
         <div
           className={clsx(
-            "hidden md:block border-t border-slate-200 transition-all duration-200",
+            "hidden md:block border-t border-[#2a2a2a] transition-all duration-200",
             isIconOnly ? "px-2 py-2" : "px-4 py-2"
           )}
         >
@@ -204,7 +207,7 @@ export default function Sidebar({
             type="button"
             onClick={onOpenSubscriptionModal}
             className={clsx(
-              "w-full flex items-center p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-xs text-slate-800 transition-colors cursor-pointer border border-slate-200 group",
+              "w-full flex items-center p-2.5 rounded-xl bg-[#242424] hover:bg-[#2c2c2c] active:bg-[#333333] text-xs text-slate-200 transition-colors cursor-pointer border border-[#333333] group",
               isIconOnly ? "justify-center" : "justify-between"
             )}
             title={subscriptionState?.isPaidActive ? "Pro Active (Manage)" : "Subscribe to Pro"}

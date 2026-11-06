@@ -28,13 +28,13 @@ export const RatesBasisSelector: React.FC<RatesBasisSelectorProps> = ({
           className={`relative p-3 rounded-lg text-left cursor-pointer border-0 select-none transition-colors duration-120 ${
             paymentBasis === 'per_reel'
               ? 'text-white'
-              : 'text-slate-400 hover:text-white'
+              : 'text-slate-400 hover:text-white hover:bg-[#282828] active:bg-[#333333]'
           }`}
         >
           {paymentBasis === 'per_reel' && (
             <motion.div
               layoutId="activePaymentBasisIndicator"
-              className="absolute inset-0 bg-[#333333] rounded-lg shadow-2xs"
+              className="absolute inset-0 bg-[#383838] rounded-lg shadow-2xs z-0"
               transition={
                 shouldReduceMotion
                   ? { duration: 0 }
@@ -55,13 +55,13 @@ export const RatesBasisSelector: React.FC<RatesBasisSelectorProps> = ({
           className={`relative p-3 rounded-lg text-left cursor-pointer border-0 select-none transition-colors duration-120 ${
             paymentBasis === 'monthly_retainer'
               ? 'text-white'
-              : 'text-slate-400 hover:text-white'
+              : 'text-slate-400 hover:text-white hover:bg-[#282828] active:bg-[#333333]'
           }`}
         >
           {paymentBasis === 'monthly_retainer' && (
             <motion.div
               layoutId="activePaymentBasisIndicator"
-              className="absolute inset-0 bg-[#333333] rounded-lg shadow-2xs"
+              className="absolute inset-0 bg-[#383838] rounded-lg shadow-2xs z-0"
               transition={
                 shouldReduceMotion
                   ? { duration: 0 }

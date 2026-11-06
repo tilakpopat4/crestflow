@@ -4,8 +4,8 @@
 
 @theme {
   --color-slate-50: #333333;
-  --color-slate-100: #282828;
-  --color-slate-200: #444444;
+  --color-slate-100: #333333;
+  --color-slate-200: #404040;
   --color-slate-300: #666666;
   --color-slate-400: #aaaaaa;
   --color-slate-500: #717171;
@@ -19,11 +19,11 @@
   --color-indigo-100: #242424;
   --color-indigo-200: #383838;
   --color-indigo-300: #525252;
-  --color-indigo-400: #888888;
-  --color-indigo-500: #aaaaaa;
-  --color-indigo-600: #282828;
-  --color-indigo-700: #1c1c1c;
-  --color-indigo-800: #141414;
+  --color-indigo-400: #6f92c2;
+  --color-indigo-500: #557eb6;
+  --color-indigo-600: #4870aa;
+  --color-indigo-700: #3b5e90;
+  --color-indigo-800: #2f4c75;
   --color-indigo-900: #0f0f0f;
   --color-indigo-950: #0a0a0a;
 
@@ -31,11 +31,11 @@
   --color-blue-100: #242424;
   --color-blue-200: #383838;
   --color-blue-300: #525252;
-  --color-blue-400: #888888;
-  --color-blue-500: #aaaaaa;
-  --color-blue-600: #282828;
-  --color-blue-700: #1c1c1c;
-  --color-blue-800: #141414;
+  --color-blue-400: #6f92c2;
+  --color-blue-500: #557eb6;
+  --color-blue-600: #4870aa;
+  --color-blue-700: #3b5e90;
+  --color-blue-800: #2f4c75;
   --color-blue-900: #0f0f0f;
 
   --color-red-500: #eb2b4f;
@@ -86,24 +86,46 @@
 body,
 main,
 header,
-nav,
 .bg-slate-50 {
   background-color: #333333 !important;
 }
 
+/* Sidebar navigation panel: clean dark surface per GEMINI.md */
+nav {
+  background-color: #1e1e1e !important;
+  border-color: #2a2a2a !important;
+}
+
 /* Sub-sections, cards & modals: highlighted & separated purely by #282828 on #333333 canvas without borders */
-.bg-white:not(input):not(select):not(textarea),
-[class*="bg-white"]:not(input):not(select):not(textarea) {
+.bg-white:not(input):not(select):not(textarea):not(button):not([role="button"]):not(a),
+[class*="bg-white"]:not(input):not(select):not(textarea):not(button):not([role="button"]):not(a):not(:hover) {
   background-color: #282828 !important;
   border-color: transparent !important;
 }
 
-.bg-slate-100,
-.bg-indigo-50,
-.bg-indigo-100,
-.bg-blue-50,
-.bg-blue-100 {
+.bg-slate-100:not(button):not([role="button"]):not(a):not(:hover),
+.bg-indigo-50:not(button):not([role="button"]):not(a):not(:hover),
+.bg-indigo-100:not(button):not([role="button"]):not(a):not(:hover),
+.bg-blue-50:not(button):not([role="button"]):not(a):not(:hover),
+.bg-blue-100:not(button):not([role="button"]):not(a):not(:hover) {
   background-color: #242424 !important;
+}
+
+/* Universal Button & Interactive Element Hover & Active Feedback per GEMINI.md */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]) {
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease, filter 120ms ease, opacity 120ms ease;
+}
+
+button:not(:disabled):hover,
+[role="button"]:not([aria-disabled="true"]):hover {
+  filter: brightness(1.18);
+}
+
+button:not(:disabled):active,
+[role="button"]:not([aria-disabled="true"]):active {
+  filter: brightness(0.88);
 }
 
 /* Prevent white-on-white text clipping for dark container elements */

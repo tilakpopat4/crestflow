@@ -410,8 +410,8 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
                 onClick={() => setShowClosed(prev => !prev)}
                 className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-colors cursor-pointer ${
                   showClosed
-                    ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    ? 'bg-[#383838] text-white shadow-xs'
+                    : 'bg-[#242424] text-slate-300 hover:bg-[#303030] hover:text-white active:bg-[#383838]'
                 }`}
                 title={showClosed ? "Hide work logs of closed clients" : "Show work logs of closed clients"}
               >

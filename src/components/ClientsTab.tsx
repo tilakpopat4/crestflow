@@ -504,8 +504,8 @@ export default function ClientsTab({
           <button
             onClick={() => setFilterType('all')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 ${filterType === 'all'
-                ? 'bg-slate-900 dark:bg-indigo-600 text-white shadow-xs'
-                : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                ? 'bg-[#383838] text-white shadow-xs'
+                : 'bg-[#242424] text-slate-300 hover:bg-[#303030] hover:text-white active:bg-[#383838]'
               }`}
           >
             Active ({clients.length - closedClientsCount})
@@ -515,8 +515,8 @@ export default function ClientsTab({
             onClick={() => setFilterType('due')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer whitespace-nowrap shrink-0 ${
               filterType === 'due'
-                ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                ? 'bg-[#383838] text-white shadow-xs'
+                : 'bg-[#242424] text-slate-300 hover:bg-[#303030] hover:text-white active:bg-[#383838]'
             }`}
           >
             <Clock size={12} className="shrink-0" /> Due ({notificationClients.length})
@@ -526,8 +526,8 @@ export default function ClientsTab({
             onClick={() => setFilterType('uptodate')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
               filterType === 'uptodate'
-                ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                ? 'bg-[#383838] text-white shadow-xs'
+                : 'bg-[#242424] text-slate-300 hover:bg-[#303030] hover:text-white active:bg-[#383838]'
             }`}
           >
             Up to Date
@@ -537,8 +537,8 @@ export default function ClientsTab({
             <button
               onClick={() => setFilterType('closed')}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap shrink-0 ${filterType === 'closed'
-                  ? 'bg-slate-500 text-white shadow-xs'
-                  : 'bg-slate-100 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
+                  ? 'bg-[#383838] text-white shadow-xs'
+                  : 'bg-[#242424] text-slate-300 hover:bg-[#303030] hover:text-white active:bg-[#383838]'
                 }`}
             >
               <Archive size={12} className="shrink-0" /> Closed ({closedClientsCount})
