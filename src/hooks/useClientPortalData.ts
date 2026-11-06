@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { User } from 'firebase/auth';
 import { collection, query, where, onSnapshot, doc, getDoc, setDoc, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
-import { Client, Invoice, WorkItem, UserProfile } from '../types';
+import { Client, Invoice, WorkItem, UserProfile, DeliverableComment } from '../types';
 import { calculateClientFinancials, getPaymentStatusInfo } from '../lib/paymentUtils';
 
 /**
@@ -197,6 +197,42 @@ export function useClientPortalData(user: User | null) {
     }
   };
 
+  // Deliverable Approval & Revision Feedback Handler
+  const handleUpdateApproval = async (
+    itemId: string,
+    status: 'approved' | 'changes_requested',
+    commentText?: string,
+    timestamp?: string
+  ) => {
+    const targetItem = workItems.find((w) => w.id === itemId);
+    if (!targetItem) return;
+
+    const workRef = doc(db, 'workItems', itemId);
+    const updates: Partial<WorkItem> = {
+      approvalStatus: status,
+      updatedAt: Date.now(),
+    };
+
+    if (status === 'approved') {
+      updates.approvedAt = Date.now();
+    } else if (status === 'changes_requested') {
+      updates.revisionCount = (targetItem.revisionCount || 0) + 1;
+    }
+
+    if (commentText) {
+      const newComment: DeliverableComment = {
+        id: `c_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        timestamp: timestamp || undefined,
+        text: commentText,
+        author: currentClient?.name || user?.email || 'Client',
+        createdAt: Date.now(),
+      };
+      updates.comments = [...(targetItem.comments || []), newComment];
+    }
+
+    await setDoc(workRef, updates, { merge: true });
+  };
+
   return {
     clients,
     selectedClientId,
@@ -220,5 +256,6 @@ export function useClientPortalData(user: User | null) {
     existingReview,
     checkingReview,
     handleReviewSubmit,
+    handleUpdateApproval,
   };
 }

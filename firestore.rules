@@ -121,7 +121,8 @@ service cloud.firestore {
       allow read: if isOwner(resource.data.userId) || (('clientEmail' in resource.data) && isClient(resource.data.clientEmail)) || isAdmin();
       allow delete: if isOwner(resource.data.userId) && hasActiveSubscription();
       allow create: if isOwner(request.resource.data.userId) && hasActiveSubscription() && isValidId(workItemId) && isValidWorkItem(request.resource.data);
-      allow update: if isOwner(resource.data.userId) && isOwner(request.resource.data.userId) && hasActiveSubscription() && isValidWorkItem(request.resource.data);
+      allow update: if (isOwner(resource.data.userId) && isOwner(request.resource.data.userId) && hasActiveSubscription() && isValidWorkItem(request.resource.data))
+        || (('clientEmail' in resource.data) && isClient(resource.data.clientEmail) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['approvalStatus', 'comments', 'revisionCount', 'approvedAt', 'updatedAt']) && (!('approvalStatus' in request.resource.data) || request.resource.data.approvalStatus in ['pending_review', 'approved', 'changes_requested']) && (!('revisionCount' in request.resource.data) || request.resource.data.revisionCount is int));
     }
 
     // 4. Profiles (Public Info on Root Document)

@@ -3,40 +3,44 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { Search, X, Play, ExternalLink } from 'lucide-react';
-import { WorkItem } from '../../types';
+import React, { useState } from 'react';
+import { Search, X, Play, ExternalLink, MessageSquare, CheckCircle2 } from 'lucide-react';
+import { WorkItem, Client } from '../../types';
 import StatusBadge from '../StatusBadge';
+import { DeliverableFeedbackModal } from './DeliverableFeedbackModal';
 
 interface ClientPortalWorkLogProps {
   workItems: WorkItem[];
+  client?: Client | null;
+  currentUserEmail?: string;
   searchQuery: string;
   onSearchChange: (query: string) => void;
   statusFilter: 'all' | 'Uninvoiced' | 'Invoiced';
   onStatusFilterChange: (status: 'all' | 'Uninvoiced' | 'Invoiced') => void;
   onOpenVideoEmbed: (url: string, title: string) => void;
+  onUpdateApproval: (
+    itemId: string,
+    status: 'approved' | 'changes_requested',
+    commentText?: string,
+    timestamp?: string
+  ) => Promise<void>;
 }
 
-/**
- * Work Log tab for Client Portal.
- * Adapts between mobile list cards on small screens and a desktop data table on larger screens.
- */
 export const ClientPortalWorkLog: React.FC<ClientPortalWorkLogProps> = ({
   workItems,
+  client,
+  currentUserEmail,
   searchQuery,
   onSearchChange,
   statusFilter,
   onStatusFilterChange,
   onOpenVideoEmbed,
+  onUpdateApproval,
 }) => {
+  const [reviewItem, setReviewItem] = useState<WorkItem | null>(null);
   const filteredWork = workItems.filter((item) => {
-    const matchesSearch =
-      !searchQuery.trim() ||
-      item.description.toLowerCase().includes(searchQuery.toLowerCase().trim());
-    const matchesStatus =
-      statusFilter === 'all' ||
-      (statusFilter === 'Invoiced' && item.status === 'Invoiced') ||
-      (statusFilter === 'Uninvoiced' && item.status !== 'Invoiced');
+    const matchesSearch = !searchQuery.trim() || item.description.toLowerCase().includes(searchQuery.toLowerCase().trim());
+    const matchesStatus = statusFilter === 'all' || (statusFilter === 'Invoiced' && item.status === 'Invoiced') || (statusFilter === 'Uninvoiced' && item.status !== 'Invoiced');
     return matchesSearch && matchesStatus;
   });
 
@@ -45,10 +49,7 @@ export const ClientPortalWorkLog: React.FC<ClientPortalWorkLogProps> = ({
       {/* Controls: Search input & Status filter buttons */}
       <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
         <div className="relative w-full sm:w-80">
-          <Search
-            size={14}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 pointer-events-none"
-          />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 pointer-events-none" />
           <input
             type="text"
             placeholder="Search work descriptions..."
@@ -60,7 +61,7 @@ export const ClientPortalWorkLog: React.FC<ClientPortalWorkLogProps> = ({
             <button
               type="button"
               onClick={() => onSearchChange('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer min-h-[32px] min-w-[32px] flex items-center justify-center"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-200 cursor-pointer min-h-[32px] min-w-[32px] flex items-center justify-center"
               aria-label="Clear search"
             >
               <X size={13} />
@@ -102,9 +103,7 @@ export const ClientPortalWorkLog: React.FC<ClientPortalWorkLogProps> = ({
                 return (
                   <div key={item.id} className="p-4 space-y-2.5">
                     <div className="flex items-start justify-between gap-2">
-                      <div className="font-medium text-xs text-slate-900 dark:text-slate-100 leading-snug">
-                        {item.description}
-                      </div>
+                      <div className="font-medium text-xs text-slate-900 dark:text-slate-100 leading-snug">{item.description}</div>
                       <StatusBadge status={item.status === 'Invoiced' ? 'Invoiced' : 'Pending'} />
                     </div>
 
@@ -115,9 +114,7 @@ export const ClientPortalWorkLog: React.FC<ClientPortalWorkLogProps> = ({
                         <span>•</span>
                         <span>₹{item.rate}/ea</span>
                         <span>•</span>
-                        <span className="font-bold text-slate-900 dark:text-slate-100">
-                          ₹{totalItemAmount.toLocaleString('en-IN')}
-                        </span>
+                        <span className="font-bold text-slate-900 dark:text-slate-100">₹{totalItemAmount.toLocaleString('en-IN')}</span>
                       </div>
                     </div>
 
@@ -126,7 +123,7 @@ export const ClientPortalWorkLog: React.FC<ClientPortalWorkLogProps> = ({
                         <button
                           type="button"
                           onClick={() => onOpenVideoEmbed(item.videoUrl!, item.description)}
-                          className="inline-flex items-center gap-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 py-1.5 px-2 rounded-md min-h-[44px] cursor-pointer"
+                          className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-300 hover:text-white py-1.5 px-2 rounded-md min-h-[44px] cursor-pointer"
                         >
                           <Play size={13} />
                           <span>Watch Preview</span>
@@ -135,13 +132,30 @@ export const ClientPortalWorkLog: React.FC<ClientPortalWorkLogProps> = ({
                           href={item.videoUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-md min-h-[44px] min-w-[44px]"
+                          className="inline-flex items-center justify-center p-2 text-slate-400 hover:text-slate-200 rounded-md min-h-[44px] min-w-[44px]"
                           title="Open external link"
                         >
                           <ExternalLink size={13} />
                         </a>
                       </div>
                     )}
+
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
+                      <div className="flex items-center gap-1.5">
+                        <span className={`w-1.5 h-1.5 rounded-full ${item.approvalStatus === 'approved' ? 'bg-[#4870aa]' : item.approvalStatus === 'changes_requested' ? 'bg-red-500' : 'bg-slate-500'}`} />
+                        <span className={`font-medium ${item.approvalStatus === 'approved' ? 'text-indigo-400' : item.approvalStatus === 'changes_requested' ? 'text-red-400' : 'text-slate-400'}`}>
+                          {item.approvalStatus === 'approved' ? 'Approved' : item.approvalStatus === 'changes_requested' ? `Changes Requested (${item.revisionCount || 1})` : 'Pending Review'}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setReviewItem(item)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-white bg-[#282828] hover:bg-[#383838] border border-[#3a3a3a] rounded-lg transition-colors cursor-pointer"
+                      >
+                        <MessageSquare size={12} />
+                        <span>Review</span>
+                      </button>
+                    </div>
                   </div>
                 );
               })}
@@ -157,8 +171,9 @@ export const ClientPortalWorkLog: React.FC<ClientPortalWorkLogProps> = ({
                     <th className="py-3 px-4">Qty</th>
                     <th className="py-3 px-4">Rate</th>
                     <th className="py-3 px-4">Amount</th>
-                    <th className="py-3 px-4">Status</th>
-                    <th className="py-3 px-4 text-right">Links</th>
+                    <th className="py-3 px-4">Billing</th>
+                    <th className="py-3 px-4">Approval</th>
+                    <th className="py-3 px-4 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -166,49 +181,54 @@ export const ClientPortalWorkLog: React.FC<ClientPortalWorkLogProps> = ({
                     const totalItemAmount = (Number(item.quantity) || 1) * (Number(item.rate) || 0);
                     return (
                       <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                        <td className="py-3 px-4 font-mono text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                          {new Date(item.date).toLocaleDateString()}
-                        </td>
-                        <td className="py-3 px-4 font-medium text-slate-900 dark:text-slate-100 max-w-sm">
-                          {item.description}
-                        </td>
-                        <td className="py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">
-                          {item.quantity}
-                        </td>
-                        <td className="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">
-                          ₹{item.rate.toLocaleString('en-IN')}
-                        </td>
-                        <td className="py-3 px-4 font-mono font-semibold text-slate-900 dark:text-slate-100">
-                          ₹{totalItemAmount.toLocaleString('en-IN')}
-                        </td>
-                        <td className="py-3 px-4">
-                          <StatusBadge status={item.status === 'Invoiced' ? 'Invoiced' : 'Pending'} />
+                        <td className="py-3 px-4 font-mono text-slate-500 dark:text-slate-400 whitespace-nowrap">{new Date(item.date).toLocaleDateString()}</td>
+                        <td className="py-3 px-4 font-medium text-slate-900 dark:text-slate-100 max-w-sm">{item.description}</td>
+                        <td className="py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">{item.quantity}</td>
+                        <td className="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">₹{item.rate.toLocaleString('en-IN')}</td>
+                        <td className="py-3 px-4 font-mono font-semibold text-slate-900 dark:text-slate-100">₹{totalItemAmount.toLocaleString('en-IN')}</td>
+                        <td className="py-3 px-4"><StatusBadge status={item.status === 'Invoiced' ? 'Invoiced' : 'Pending'} /></td>
+                        <td className="py-3 px-4 whitespace-nowrap">
+                          <div className="flex items-center gap-1.5">
+                            <span className={`w-1.5 h-1.5 rounded-full ${item.approvalStatus === 'approved' ? 'bg-[#4870aa]' : item.approvalStatus === 'changes_requested' ? 'bg-red-500' : 'bg-slate-500'}`} />
+                            <span className={`font-medium text-xs ${item.approvalStatus === 'approved' ? 'text-indigo-400' : item.approvalStatus === 'changes_requested' ? 'text-red-400' : 'text-slate-400'}`}>
+                              {item.approvalStatus === 'approved' ? 'Approved' : item.approvalStatus === 'changes_requested' ? `Changes (${item.revisionCount || 1})` : 'Pending'}
+                            </span>
+                          </div>
                         </td>
                         <td className="py-3 px-4 text-right whitespace-nowrap">
-                          {item.videoUrl ? (
-                            <div className="inline-flex items-center justify-end gap-1.5">
-                              <button
-                                type="button"
-                                onClick={() => onOpenVideoEmbed(item.videoUrl!, item.description)}
-                                className="text-xs font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 inline-flex items-center gap-1.5 py-1 px-2 cursor-pointer"
-                                title="Watch Preview"
-                              >
-                                <Play size={13} />
-                                <span>Watch Preview</span>
-                              </button>
-                              <a
-                                href={item.videoUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-md transition-colors inline-flex items-center justify-center"
-                                title="Open in external tab"
-                              >
-                                <ExternalLink size={13} />
-                              </a>
-                            </div>
-                          ) : (
-                            <span className="text-slate-300 dark:text-slate-600">-</span>
-                          )}
+                          <div className="inline-flex items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => setReviewItem(item)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-white bg-[#282828] hover:bg-[#383838] border border-[#3a3a3a] rounded-md transition-colors cursor-pointer"
+                              title="Review, Approve, or Request Changes"
+                            >
+                              <MessageSquare size={12} />
+                              <span>Review</span>
+                            </button>
+                            {item.videoUrl && (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => onOpenVideoEmbed(item.videoUrl!, item.description)}
+                                  className="text-xs font-medium text-slate-300 hover:text-white inline-flex items-center gap-1 py-1 px-2 cursor-pointer"
+                                  title="Watch Preview"
+                                >
+                                  <Play size={13} />
+                                  <span>Preview</span>
+                                </button>
+                                <a
+                                  href={item.videoUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="p-1.5 text-slate-400 hover:text-slate-200 rounded-md transition-colors inline-flex items-center justify-center"
+                                  title="Open in external tab"
+                                >
+                                  <ExternalLink size={13} />
+                                </a>
+                              </>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );
@@ -219,6 +239,16 @@ export const ClientPortalWorkLog: React.FC<ClientPortalWorkLogProps> = ({
           </>
         )}
       </div>
+
+      {/* Review & Feedback Modal */}
+      <DeliverableFeedbackModal
+        isOpen={!!reviewItem}
+        onClose={() => setReviewItem(null)}
+        item={reviewItem}
+        client={client}
+        currentUserEmail={currentUserEmail}
+        onUpdateApproval={onUpdateApproval}
+      />
     </div>
   );
 };

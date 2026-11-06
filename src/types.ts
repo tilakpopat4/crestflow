@@ -29,6 +29,7 @@ export interface Client {
   websiteMakingRate?: number;
   lastPaymentDate?: number; // timestamp in ms of previous payment date
   paymentCycleDays?: number; // default 30 days
+  revisionsIncluded?: number; // Revisions included per deliverable (e.g. 2 revisions)
   emailRemindersEnabled?: boolean; // toggle for overdue payment email reminders
   notes?: string;
   isClosed?: boolean; // soft-archive: work is closed, data is preserved
@@ -51,6 +52,14 @@ export interface Reel {
   workItemId?: string;
 }
 
+export interface DeliverableComment {
+  id: string;
+  timestamp?: string; // e.g. "01:23"
+  text: string;
+  author: string; // Client name or email
+  createdAt: number;
+}
+
 export interface WorkItem {
   id: string;
   clientId: string;
@@ -64,6 +73,10 @@ export interface WorkItem {
   status: 'Uninvoiced' | 'Invoiced';
   invoiceId?: string;
   videoUrl?: string;
+  approvalStatus?: 'pending_review' | 'approved' | 'changes_requested';
+  revisionCount?: number;
+  comments?: DeliverableComment[];
+  approvedAt?: number;
   createdAt: number;
   updatedAt?: number;
 }

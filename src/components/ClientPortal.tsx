@@ -52,6 +52,7 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
     existingReview,
     checkingReview,
     handleReviewSubmit,
+    handleUpdateApproval,
   } = useClientPortalData(user);
 
   // Tab & Modal UI state
@@ -137,10 +138,13 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
             {activeTab === 'work' && (
               <ClientPortalWorkLog
                 workItems={workItems}
+                client={currentClient}
+                currentUserEmail={user.email || undefined}
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
                 statusFilter={workStatusFilter}
                 onStatusFilterChange={setWorkStatusFilter}
+                onUpdateApproval={handleUpdateApproval}
                 onOpenVideoEmbed={(url, title) =>
                   setEmbedModalData({
                     isOpen: true,

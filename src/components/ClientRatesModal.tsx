@@ -17,6 +17,7 @@ interface ClientRatesModalProps {
     monthlyRetainerAmount?: number;
     onSiteShootRate?: number;
     websiteMakingRate?: number;
+    revisionsIncluded?: number;
   }) => Promise<void>;
 }
 
@@ -53,6 +54,9 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
   const [websiteMakingRate, setWebsiteMakingRate] = useState<string>(
     client.websiteMakingRate ? String(client.websiteMakingRate) : ''
   );
+  const [revisionsIncluded, setRevisionsIncluded] = useState<string>(
+    client.revisionsIncluded !== undefined ? String(client.revisionsIncluded) : ''
+  );
   const [isSaving, setIsSaving] = useState(false);
   const shouldReduceMotion = useReducedMotion();
 
@@ -73,6 +77,7 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
       setDefaultRate(String(client.defaultRate || ''));
       setOnSiteShootRate(client.onSiteShootRate ? String(client.onSiteShootRate) : '');
       setWebsiteMakingRate(client.websiteMakingRate ? String(client.websiteMakingRate) : '');
+      setRevisionsIncluded(client.revisionsIncluded !== undefined ? String(client.revisionsIncluded) : '');
       setIsSaving(false);
     }
   }, [isOpen, client]);
@@ -100,6 +105,7 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
             : undefined,
         onSiteShootRate: onSiteShootRate ? Number(onSiteShootRate) : undefined,
         websiteMakingRate: websiteMakingRate ? Number(websiteMakingRate) : undefined,
+        revisionsIncluded: revisionsIncluded !== '' ? Math.max(0, parseInt(revisionsIncluded, 10)) : undefined,
       });
       onClose();
     } catch (err: any) {
@@ -261,6 +267,22 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
                 placeholder="e.g. 15000"
               />
             </div>
+          </div>
+
+          {/* Revisions Included */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+              Revisions Included per Deliverable (Optional)
+            </label>
+            <input
+              type="number"
+              min="0"
+              step="1"
+              value={revisionsIncluded}
+              onChange={(e) => setRevisionsIncluded(e.target.value)}
+              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-3.5 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 outline-none transition-colors focus:border-indigo-600"
+              placeholder="e.g. 2 (leave blank for unlimited)"
+            />
           </div>
 
           {/* Action Buttons */}

@@ -73,6 +73,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
     monthlyRetainerAmount?: number;
     onSiteShootRate?: number;
     websiteMakingRate?: number;
+    revisionsIncluded?: number;
   }) => {
     const updatedClient: Client = {
       ...client,
@@ -82,9 +83,11 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
       monthlyRetainerAmount: rates.monthlyRetainerAmount,
       onSiteShootRate: rates.onSiteShootRate,
       websiteMakingRate: rates.websiteMakingRate,
+      revisionsIncluded: rates.revisionsIncluded,
     };
     if (!rates.onSiteShootRate) delete updatedClient.onSiteShootRate;
     if (!rates.websiteMakingRate) delete updatedClient.websiteMakingRate;
+    if (rates.revisionsIncluded === undefined) delete updatedClient.revisionsIncluded;
     if (rates.paymentBasis !== 'monthly_retainer') delete updatedClient.monthlyRetainerAmount;
 
     await updateClient(updatedClient);
@@ -993,6 +996,28 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                               status={item.status === 'Invoiced' ? 'Invoiced' : 'Pending'} 
                               label={item.status === 'Invoiced' ? 'Invoiced' : 'Uninvoiced'} 
                             />
+                            <div className="flex items-center justify-center gap-1 mt-1 text-[11px]">
+                              <span className={`w-1.5 h-1.5 rounded-full ${
+                                item.approvalStatus === 'approved'
+                                  ? 'bg-[#4870aa]'
+                                  : item.approvalStatus === 'changes_requested'
+                                  ? 'bg-red-500'
+                                  : 'bg-slate-500'
+                              }`} />
+                              <span className={`font-medium ${
+                                item.approvalStatus === 'approved'
+                                  ? 'text-indigo-400'
+                                  : item.approvalStatus === 'changes_requested'
+                                  ? 'text-red-400'
+                                  : 'text-slate-400'
+                              }`}>
+                                {item.approvalStatus === 'approved'
+                                  ? 'Approved'
+                                  : item.approvalStatus === 'changes_requested'
+                                  ? `Changes (${item.revisionCount || 1})`
+                                  : 'Pending'}
+                              </span>
+                            </div>
                           </td>
                           <td className="p-3.5 text-right space-x-2">
                             {videoUrl && (

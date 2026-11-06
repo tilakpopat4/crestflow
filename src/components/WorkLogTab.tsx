@@ -12,6 +12,7 @@ import { DateInput } from './DateInput';
 import { formatLocalDateToYMD, parseYMDToTimestamp } from '../lib/dateUtils';
 import StatusBadge from './StatusBadge';
 import Checkbox from './ui/Checkbox';
+import { DeliverableFeedbackViewerModal } from './work/DeliverableFeedbackViewerModal';
 
 interface WorkLogTabProps {
   user: User;
@@ -27,6 +28,7 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDriveModalOpen, setIsDriveModalOpen] = useState(false);
   const [embedModalData, setEmbedModalData] = useState<{ isOpen: boolean; url: string; title: string; clientName?: string } | null>(null);
+  const [feedbackViewerItem, setFeedbackViewerItem] = useState<{ item: WorkItem; clientName?: string } | null>(null);
   const [editingWorkId, setEditingWorkId] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
@@ -740,7 +742,40 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
                       </div>
                     </div>
 
-                    <StatusBadge status={work.status === 'Invoiced' ? 'Invoiced' : 'Pending'} />
+                    <div className="flex flex-col items-end gap-1">
+                      <StatusBadge status={work.status === 'Invoiced' ? 'Invoiced' : 'Pending'} />
+                      <div className="flex items-center gap-1 text-[11px]">
+                        <span className={`w-1.5 h-1.5 rounded-full ${
+                          work.approvalStatus === 'approved'
+                            ? 'bg-[#4870aa]'
+                            : work.approvalStatus === 'changes_requested'
+                            ? 'bg-red-500'
+                            : 'bg-slate-500'
+                        }`} />
+                        <span className={`font-medium ${
+                          work.approvalStatus === 'approved'
+                            ? 'text-indigo-400'
+                            : work.approvalStatus === 'changes_requested'
+                            ? 'text-red-400'
+                            : 'text-slate-400'
+                        }`}>
+                          {work.approvalStatus === 'approved'
+                            ? 'Approved'
+                            : work.approvalStatus === 'changes_requested'
+                            ? `Changes (${work.revisionCount || 1})`
+                            : 'Pending'}
+                        </span>
+                        {work.comments && work.comments.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => setFeedbackViewerItem({ item: work, clientName: client?.name })}
+                            className="text-slate-400 hover:text-white underline cursor-pointer"
+                          >
+                            ({work.comments.length})
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   </div>
 
                   <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-3 border border-slate-100 dark:border-slate-800 space-y-1.5">
@@ -832,6 +867,7 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
                   <th className="py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Description / Video Link</th>
                   <th className="py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Amount</th>
                   <th className="py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
+                  <th className="py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Approval</th>
                   <th className="py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">Actions</th>
                 </tr>
               </thead>
@@ -902,6 +938,43 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
                       </td>
                       <td className="py-4 px-4 text-sm font-medium">
                         <StatusBadge status={work.status === 'Invoiced' ? 'Invoiced' : 'Pending'} />
+                      </td>
+                      <td className="py-4 px-4 text-sm whitespace-nowrap">
+                        <div className="flex items-center gap-1.5">
+                          <span className={`w-1.5 h-1.5 rounded-full ${
+                            work.approvalStatus === 'approved'
+                              ? 'bg-[#4870aa]'
+                              : work.approvalStatus === 'changes_requested'
+                              ? 'bg-red-500'
+                              : 'bg-slate-500'
+                          }`} />
+                          <span className={`font-medium text-xs ${
+                            work.approvalStatus === 'approved'
+                              ? 'text-indigo-400'
+                              : work.approvalStatus === 'changes_requested'
+                              ? 'text-red-400'
+                              : 'text-slate-400'
+                          }`}>
+                            {work.approvalStatus === 'approved'
+                              ? 'Approved'
+                              : work.approvalStatus === 'changes_requested'
+                              ? `Changes (${work.revisionCount || 1})`
+                              : 'Pending Review'}
+                          </span>
+                          {work.comments && work.comments.length > 0 && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setFeedbackViewerItem({ item: work, clientName: client?.name });
+                              }}
+                              className="ml-1 text-[11px] text-slate-400 hover:text-white underline inline-flex items-center gap-0.5 cursor-pointer"
+                              title="View client comments"
+                            >
+                              ({work.comments.length} note{work.comments.length === 1 ? '' : 's'})
+                            </button>
+                          )}
+                        </div>
                       </td>
                       <td className="py-4 px-4 text-sm text-right flex justify-end items-center gap-1">
                         {videoUrl && (
@@ -1033,6 +1106,16 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
           url={embedModalData.url}
           title={embedModalData.title}
           clientName={embedModalData.clientName}
+        />
+      )}
+
+      {/* Deliverable Feedback & Revision History Viewer */}
+      {feedbackViewerItem && (
+        <DeliverableFeedbackViewerModal
+          isOpen={!!feedbackViewerItem}
+          onClose={() => setFeedbackViewerItem(null)}
+          item={feedbackViewerItem.item}
+          clientName={feedbackViewerItem.clientName}
         />
       )}
     </div>

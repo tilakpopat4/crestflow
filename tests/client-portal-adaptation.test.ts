@@ -75,4 +75,20 @@ describe('Client Portal Professional Adaptation & Architecture', () => {
       'ClientPortalWorkLog should have 44px min touch targets'
     );
   });
+
+  it('verifies firestore.rules permits clients to update deliverable approval and feedback', () => {
+    const rules = fs.readFileSync(path.resolve('firestore.rules'), 'utf-8');
+    assert.ok(
+      rules.includes('isClient(resource.data.clientEmail)'),
+      'Rules must authorize verified client matching clientEmail'
+    );
+    assert.ok(
+      rules.includes("'approvalStatus', 'comments', 'revisionCount', 'approvedAt', 'updatedAt'"),
+      'Rules must restrict client updates to deliverable approval fields'
+    );
+    assert.ok(
+      rules.includes("request.resource.data.approvalStatus in ['pending_review', 'approved', 'changes_requested']"),
+      'Rules must validate approvalStatus enum values'
+    );
+  });
 });
