@@ -49,28 +49,28 @@ export const RevenueScrubberColumns: React.FC<RevenueScrubberColumnsProps> = ({
                 cy={yAt(p.now)}
                 r="4.5"
                 strokeWidth="2"
-                className="fill-[#282828] stroke-white group-data-off-now/plot:hidden dark:fill-indigo-400 dark:stroke-slate-800"
+                className="fill-white stroke-[#282828] group-data-off-now/plot:hidden"
               />
             </svg>
 
             <span
               aria-hidden="true"
-              className={`pointer-events-none absolute top-0 z-20 hidden w-44 rounded-lg bg-white dark:bg-slate-800 p-3 text-left text-xs shadow-md border border-slate-200 dark:border-slate-700 group-data-active/pt:block sm:w-48 ${
+              className={`pointer-events-none absolute top-0 z-20 hidden w-44 rounded-lg bg-[#282828] p-3 text-left text-xs shadow-md border border-[#444444] group-data-active/pt:block sm:w-48 ${
                 i < months.length / 2 ? 'left-[calc(50%+12px)]' : 'right-[calc(50%+12px)]'
               }`}
             >
-              <span className="block font-semibold text-slate-900 dark:text-slate-100">
+              <span className="block font-semibold text-white">
                 {p.month} {p.year}
               </span>
-              <span className="mt-1.5 flex items-center gap-1.5 whitespace-nowrap text-slate-600 group-data-off-now/plot:hidden dark:text-slate-400">
-                <span className="h-0.5 w-3 shrink-0 rounded-full bg-[#282828] dark:bg-indigo-400" />
+              <span className="mt-1.5 flex items-center gap-1.5 whitespace-nowrap text-slate-300 group-data-off-now/plot:hidden">
+                <span className="h-0.5 w-3 shrink-0 rounded-full bg-white" />
                 Paid
-                <span className="ml-auto pl-2 font-semibold text-slate-900 tabular-nums dark:text-slate-100">
+                <span className="ml-auto pl-2 font-semibold text-white tabular-nums">
                   {formatCurrency(p.now)}
                 </span>
               </span>
-              <span className="mt-1.5 flex items-center gap-1.5 whitespace-nowrap text-slate-600 group-data-off-prev/plot:hidden dark:text-slate-400">
-                <span className="w-3 shrink-0 border-t-2 border-dashed border-slate-400 dark:border-slate-500" />
+              <span className="mt-1.5 flex items-center gap-1.5 whitespace-nowrap text-slate-300 group-data-off-prev/plot:hidden">
+                <span className="w-3 shrink-0 border-t-2 border-dashed border-white/70" />
                 {hasPrevYearData ? `${p.year - 1}` : 'Invoiced'}
                 <span className="ml-auto pl-2 font-semibold text-slate-900 tabular-nums dark:text-slate-100">
                   {formatCurrency(p.prev)}

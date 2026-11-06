@@ -168,7 +168,7 @@ export default function RevenueComparisonChart({
             />
             <path
               d={`${line('now')} L${x(months.length - 1)} 200 L${x(0)} 200 Z`}
-              className="fill-[#282828]/5 group-data-off-now/plot:hidden dark:fill-indigo-400/10"
+              className="fill-white/10 group-data-off-now/plot:hidden"
             />
             <path
               d={line('prev')}
@@ -176,16 +176,16 @@ export default function RevenueComparisonChart({
               strokeWidth="1.5"
               strokeDasharray="4 4"
               vectorEffect="non-scaling-stroke"
-              className="stroke-slate-400 dark:stroke-slate-500 group-data-off-prev/plot:hidden"
+              className="stroke-white/70 group-data-off-prev/plot:hidden"
             />
             <path
               d={line('now')}
               fill="none"
-              strokeWidth="2"
+              strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"
               vectorEffect="non-scaling-stroke"
-              className="stroke-[#282828] group-data-off-now/plot:hidden dark:stroke-indigo-400"
+              className="stroke-white group-data-off-now/plot:hidden"
             />
           </svg>
 
@@ -199,7 +199,7 @@ export default function RevenueComparisonChart({
               cy={yAt(last.now)}
               r="4.5"
               strokeWidth="2"
-              className="fill-[#282828] stroke-white dark:fill-indigo-400 dark:stroke-slate-800"
+              className="fill-white stroke-[#282828]"
             />
             <text
               x={left(months.length - 1)}

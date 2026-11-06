@@ -70,7 +70,7 @@ export const RevenueChartHeader: React.FC<RevenueChartHeaderProps> = ({
             aria-hidden="true"
             className="flex size-3.5 shrink-0 items-center justify-center group-aria-[pressed=false]/key:opacity-30"
           >
-            <span className="h-0.5 w-3.5 shrink-0 rounded-full bg-[#282828] dark:bg-indigo-400" />
+            <span className="h-0.5 w-3.5 shrink-0 rounded-full bg-white" />
           </span>
           <span>{seriesButtonLabel}</span>
         </button>
@@ -85,7 +85,7 @@ export const RevenueChartHeader: React.FC<RevenueChartHeaderProps> = ({
             aria-hidden="true"
             className="flex size-3.5 shrink-0 items-center justify-center group-aria-[pressed=false]/key:opacity-30"
           >
-            <span className="w-3.5 shrink-0 border-t-2 border-dashed border-slate-400 dark:border-slate-500" />
+            <span className="w-3.5 shrink-0 border-t-2 border-dashed border-white/70" />
           </span>
           <span>{hasPrevYearData ? 'Year before' : 'Total Invoiced'}</span>
         </button>

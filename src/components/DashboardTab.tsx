@@ -497,16 +497,16 @@ export default function DashboardTab({
       {/* Analytics & Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
         {/* Monthly Earnings Revenue Comparison Chart */}
-        <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-3.5 sm:p-6 rounded-xl shadow-xs flex flex-col min-w-0">
+        <div className="lg:col-span-2 bg-[#282828] border border-[#3e3e3e] p-3.5 sm:p-6 rounded-xl shadow-xs flex flex-col min-w-0">
           <RevenueComparisonChart invoices={invoices} freelanceStartDate={profile?.freelanceStartDate} workItems={workItems} onNavigateToInvoices={onNavigateToInvoices} />
         </div>
 
         {/* Client Distribution Bar Chart */}
-        <div className="lg:col-span-1 bg-white dark:bg-slate-800 p-3.5 sm:p-6 rounded-xl shadow-xs flex flex-col min-w-0">
+        <div className="lg:col-span-1 bg-[#282828] border border-[#3e3e3e] p-3.5 sm:p-6 rounded-xl shadow-xs flex flex-col min-w-0">
           <div className="flex items-center justify-between gap-2 mb-4 sm:mb-6">
             <div>
-              <h3 className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Client Revenue</h3>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+              <h3 className="text-xs sm:text-sm font-semibold text-white uppercase tracking-wider">Client Revenue</h3>
+              <p className="text-[11px] text-slate-400 mt-0.5">
                 {clientRevenueTimeframe === 'month' ? 'Paid revenue this month' : 'Total all-time paid'}
               </p>
             </div>
@@ -539,28 +539,28 @@ export default function DashboardTab({
             {activeClientRevenueData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={activeClientRevenueData} layout="vertical" margin={{ top: 0, right: 10, left: 10, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={isDark ? "#334155" : "#e2e8f0"} />
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#444444" />
                   <XAxis type="number" hide />
-                  <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: isDark ? '#94a3b8' : '#64748b' }} width={95} />
+                  <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#aaaaaa' }} width={95} />
                   <Tooltip 
-                    cursor={{ fill: isDark ? 'rgba(51, 65, 85, 0.4)' : 'rgba(226, 232, 240, 0.6)' }}
+                    cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
                     formatter={(value: number) => [`₹${value.toLocaleString('en-IN')}`, 'Revenue']}
                     contentStyle={{
                       borderRadius: '8px',
-                      border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
-                      backgroundColor: isDark ? '#1e293b' : '#ffffff',
-                      color: isDark ? '#f8fafc' : '#0f172a',
-                      boxShadow: isDark ? '0 4px 6px -1px rgb(0 0 0 / 0.4)' : '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                      border: '1px solid #444444',
+                      backgroundColor: '#282828',
+                      color: '#ffffff',
+                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.4)'
                     }}
                     itemStyle={{
-                      color: isDark ? '#f8fafc' : '#0f172a'
+                      color: '#ffffff'
                     }}
                     labelStyle={{
-                      color: isDark ? '#94a3b8' : '#64748b',
+                      color: '#aaaaaa',
                       fontWeight: 600
                     }}
                   />
-                  <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24} fill="#282828" />
+                  <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24} fill="#ffffff" />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -597,15 +597,15 @@ export default function DashboardTab({
       </div>
 
       {/* Recent Invoices Table */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xs overflow-hidden flex flex-col">
-        <div className="p-3.5 sm:p-6 flex justify-between items-center bg-white dark:bg-slate-800">
-          <h3 className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Recent Invoices</h3>
+      <div className="bg-[#282828] border border-[#3e3e3e] rounded-xl shadow-xs overflow-hidden flex flex-col">
+        <div className="p-3.5 sm:p-6 flex justify-between items-center bg-[#282828] border-b border-[#3e3e3e]">
+          <h3 className="text-xs sm:text-sm font-semibold text-white uppercase tracking-wider">Recent Invoices</h3>
         </div>
         
         <div className="overflow-x-auto w-full">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700 text-[10px] sm:text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-semibold">
+              <tr className="bg-[#1f1f1f] border-b border-[#3e3e3e] text-[10px] sm:text-xs uppercase tracking-wider text-slate-300 font-semibold">
                 <th className="px-2.5 sm:px-6 py-2.5 sm:py-3 whitespace-nowrap">Date</th>
                 <th className="px-2.5 sm:px-6 py-2.5 sm:py-3">Client</th>
                 <th className="px-2.5 sm:px-6 py-2.5 sm:py-3 text-right whitespace-nowrap">Amount</th>
@@ -613,7 +613,7 @@ export default function DashboardTab({
                 <th className="px-2.5 sm:px-6 py-2.5 sm:py-3 text-right whitespace-nowrap">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+            <tbody className="divide-y divide-[#3e3e3e]">
               {recentInvoices.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-4 sm:px-6 py-12 text-center text-slate-500 dark:text-slate-400">
@@ -676,11 +676,11 @@ export default function DashboardTab({
       </div>
 
       {/* Workspace Utilities: Progressive Disclosure */}
-      <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
+      <div className="bg-[#282828] border border-[#3e3e3e] p-4 sm:p-6 rounded-xl shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 mb-4">
           <div>
-            <h3 className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Workspace Tools</h3>
-            <p className="text-[11px] sm:text-xs text-slate-400 dark:text-slate-500 mt-0.5">Quick access to scratchpad notes and Gemini AI summaries</p>
+            <h3 className="text-xs sm:text-sm font-semibold text-white uppercase tracking-wider">Workspace Tools</h3>
+            <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">Quick access to scratchpad notes and Gemini AI summaries</p>
           </div>
           <div className="inline-flex p-0.5 bg-[#282828] rounded-lg border border-[#444444] shrink-0 self-start sm:self-auto">
             <button
