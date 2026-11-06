@@ -1480,25 +1480,39 @@ export default function InvoiceTab({
         </div>
 
         {displayedInvoices.length === 0 ? (
-          <div className="py-12 px-4 border border-slate-200 dark:border-slate-700 rounded-xl text-center text-slate-500 dark:text-slate-400 space-y-3 max-w-md mx-auto my-4 bg-white dark:bg-slate-800 shadow-xs">
-            <Receipt className="mx-auto h-10 w-10 text-slate-400 dark:text-slate-500" />
-            <div className="space-y-1">
-              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">No invoices generated yet</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+          <div className="py-12 px-6 rounded-xl text-center text-slate-400 space-y-4 max-w-lg mx-auto my-4 bg-[#282828] shadow-xs">
+            <div className="w-12 h-12 rounded-xl bg-[#333333] text-slate-300 flex items-center justify-center mx-auto">
+              <Receipt className="h-6 w-6 text-slate-300" />
+            </div>
+            <div className="space-y-1.5">
+              <p className="text-base font-bold text-white">No invoices generated yet</p>
+              <p className="text-xs text-slate-400 leading-relaxed max-w-md mx-auto">
                 {clients.length === 0
-                  ? "Add a client first, then create invoices with payment QR codes and breakdown."
-                  : "Choose a client in the generator above and click 'Download PDF Invoice'."}
+                  ? "Add a client first, then create professional invoices with embedded UPI scan-to-pay QR codes."
+                  : "Generate branded PDF invoices with your UPI QR code embedded for instant payments without chasing."}
               </p>
             </div>
-            {clients.length === 0 && onNavigateToClients && (
-              <button
-                type="button"
-                onClick={onNavigateToClients}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
-              >
-                <Users size={13} /> Add First Client
-              </button>
-            )}
+            <div className="pt-2">
+              {clients.length === 0 && onNavigateToClients ? (
+                <button
+                  type="button"
+                  onClick={onNavigateToClients}
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                >
+                  <Users size={14} /> Add First Client
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                >
+                  <Receipt size={14} /> Generate First Invoice
+                </button>
+              )}
+            </div>
           </div>
         ) : (
           <>

@@ -3,7 +3,7 @@ import { Invoice, WorkItem, Client } from '../types';
 import { 
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid 
 } from 'recharts';
-import { IndianRupee, Clock, TrendingUp, CheckCircle2, DownloadCloud, UploadCloud, Users, ArrowRight, X, FileText, StickyNote as StickyNoteIcon, Award } from 'lucide-react';
+import { IndianRupee, Clock, TrendingUp, CheckCircle2, DownloadCloud, UploadCloud, Users, ArrowRight, X, FileText, StickyNote as StickyNoteIcon, Award, AlertCircle } from 'lucide-react';
 import { User } from 'firebase/auth';
 import { useFirestore, safeStringify } from '../hooks/useFirestore';
 import StickyNotesWidget from './StickyNotesWidget';
@@ -42,7 +42,7 @@ export default function DashboardTab({
   const { data: workItems, addOrUpdateItem: updateWorkItem } = useFirestore<WorkItem>('workItems', user?.uid);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isAnnivBannerDismissed, setIsAnnivBannerDismissed] = useState(false);
-  const [activeWorkspaceTool, setActiveWorkspaceTool] = useState<'none' | 'notes' | 'ai'>('none');
+  const [activeWorkspaceTool, setActiveWorkspaceTool] = useState<'none' | 'notes' | 'ai' | 'milestones'>('none');
   const journey = calculateWorkJourney(profile?.freelanceStartDate);
   const [paymentModalState, setPaymentModalState] = useState<{ invoiceId: string | null, isOpen: boolean }>({ invoiceId: null, isOpen: false });
   const [clientRevenueTimeframe, setClientRevenueTimeframe] = useState<'all' | 'month'>('all');
@@ -100,6 +100,19 @@ export default function DashboardTab({
       })
       .reduce((sum, inv) => sum + (Number(inv.totalAmount) || 0), 0);
 
+    // 3. Calculate Overdue Amount from pending invoices past client payment cycle due date
+    const overdueAmount = invoices
+      .filter(inv => {
+        if (inv.status !== 'Pending') return false;
+        const clientObj = clients.find(c => c.id === inv.clientId || c.name === inv.clientName);
+        if (clientObj?.isClosed) return false;
+        const cycleDays = Number(clientObj?.paymentCycleDays) || 30;
+        const invoiceTime = new Date(inv.date).getTime();
+        const dueTime = invoiceTime + cycleDays * 24 * 60 * 60 * 1000;
+        return now.getTime() > dueTime;
+      })
+      .reduce((sum, inv) => sum + (Number(inv.totalAmount) || 0), 0);
+
     const allTimeChartData = Array.from(allTimeClientRevenueMap.entries())
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
@@ -110,7 +123,7 @@ export default function DashboardTab({
 
     const chartData = allTimeChartData.length > 0 ? allTimeChartData : monthChartData;
 
-    return { totalEarned, totalDue, totalInvoicesThisMonth, chartData, allTimeChartData, monthChartData };
+    return { totalEarned, totalDue, overdueAmount, totalInvoicesThisMonth, chartData, allTimeChartData, monthChartData };
   }, [invoices, clients]);
 
   const activeClientRevenueData = useMemo(() => {
@@ -289,37 +302,6 @@ export default function DashboardTab({
       </div>
 
 
-      {/* Career Anniversary Milestone Banner if currently active */}
-      {journey?.currentAnniversary && !isAnnivBannerDismissed && (
-        <div className="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 p-4 sm:p-5 rounded-xl shadow-xs flex items-center justify-between gap-4 relative overflow-hidden animate-in fade-in duration-200">
-          <div className="flex items-center gap-3.5 relative z-10">
-            <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
-              <Award size={20} />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-medium uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded">
-                  Career Anniversary Milestone
-                </span>
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                  {journey.workedDays} days freelancing
-                </span>
-              </div>
-              <h3 className="text-base font-bold mt-0.5 text-slate-900 dark:text-slate-100">{journey.currentAnniversary.title}!</h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400 max-w-xl">{journey.currentAnniversary.description}</p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => setIsAnnivBannerDismissed(true)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0 cursor-pointer"
-            title="Dismiss banner"
-          >
-            <X size={16} />
-          </button>
-        </div>
-      )}
-
       {/* Onboarding Getting Started Guide */}
       <GettingStartedCard
         userId={user?.uid}
@@ -333,8 +315,9 @@ export default function DashboardTab({
         onNavigateToInvoices={onNavigateToInvoices}
       />
 
-      {/* Metric Cards */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6">
+      {/* Metric Cards: Top Financial Pulse */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
+        {/* Total Earned This Month */}
         <div className="bg-[#282828] p-2.5 sm:p-4 md:p-6 rounded-xl shadow-xs flex flex-col sm:flex-row items-start gap-1.5 sm:gap-3 md:gap-4 min-w-0">
           <div className="p-1.5 sm:p-2.5 md:p-3 bg-[#333333] text-white rounded-lg shrink-0">
             <IndianRupee size={16} className="sm:hidden" />
@@ -350,6 +333,7 @@ export default function DashboardTab({
           </div>
         </div>
         
+        {/* Total Due */}
         <div className="bg-[#282828] p-2.5 sm:p-4 md:p-6 rounded-xl shadow-xs flex flex-col sm:flex-row items-start gap-1.5 sm:gap-3 md:gap-4 min-w-0">
           <div className="p-1.5 sm:p-2.5 md:p-3 bg-[#333333] text-white rounded-lg shrink-0">
             <Clock size={16} className="sm:hidden" />
@@ -357,7 +341,7 @@ export default function DashboardTab({
           </div>
           <div className="min-w-0 flex-1 w-full">
             <p className="text-[8px] min-[360px]:text-[9px] min-[400px]:text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-tight sm:tracking-wider leading-tight line-clamp-2 sm:line-clamp-1 mb-0.5 sm:mb-1">
-              Total Pending Invoices Amount
+              Total Due
             </p>
             <h3 className="text-sm min-[360px]:text-base sm:text-2xl md:text-3xl font-bold text-white truncate">
               ₹{metrics.totalDue.toLocaleString('en-IN')}
@@ -365,6 +349,23 @@ export default function DashboardTab({
           </div>
         </div>
 
+        {/* Overdue Amount */}
+        <div className="bg-[#282828] p-2.5 sm:p-4 md:p-6 rounded-xl shadow-xs flex flex-col sm:flex-row items-start gap-1.5 sm:gap-3 md:gap-4 min-w-0">
+          <div className="p-1.5 sm:p-2.5 md:p-3 bg-[#333333] text-white rounded-lg shrink-0">
+            <AlertCircle size={16} className={`sm:hidden ${metrics.overdueAmount > 0 ? 'text-[#e1002d]' : 'text-slate-400'}`} />
+            <AlertCircle size={22} className={`hidden sm:block ${metrics.overdueAmount > 0 ? 'text-[#e1002d]' : 'text-slate-400'}`} />
+          </div>
+          <div className="min-w-0 flex-1 w-full">
+            <p className="text-[8px] min-[360px]:text-[9px] min-[400px]:text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-tight sm:tracking-wider leading-tight line-clamp-2 sm:line-clamp-1 mb-0.5 sm:mb-1">
+              Overdue Amount
+            </p>
+            <h3 className={`text-sm min-[360px]:text-base sm:text-2xl md:text-3xl font-bold truncate ${metrics.overdueAmount > 0 ? 'text-[#e1002d]' : 'text-white'}`}>
+              ₹{metrics.overdueAmount.toLocaleString('en-IN')}
+            </h3>
+          </div>
+        </div>
+
+        {/* Invoices Issued */}
         <div className="bg-[#282828] p-2.5 sm:p-4 md:p-6 rounded-xl shadow-xs flex flex-col sm:flex-row items-start gap-1.5 sm:gap-3 md:gap-4 min-w-0">
           <div className="p-1.5 sm:p-2.5 md:p-3 bg-[#333333] text-white rounded-lg shrink-0">
             <TrendingUp size={16} className="sm:hidden" />
@@ -372,7 +373,7 @@ export default function DashboardTab({
           </div>
           <div className="min-w-0 flex-1 w-full">
             <p className="text-[8px] min-[360px]:text-[9px] min-[400px]:text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-tight sm:tracking-wider leading-tight line-clamp-2 sm:line-clamp-1 mb-0.5 sm:mb-1">
-              Invoices This Month
+              Invoices Issued
             </p>
             <h3 className="text-sm min-[360px]:text-base sm:text-2xl md:text-3xl font-bold text-white truncate">
               {metrics.totalInvoicesThisMonth}
@@ -571,7 +572,7 @@ export default function DashboardTab({
             <h3 className="text-xs sm:text-sm font-semibold text-white uppercase tracking-wider">Workspace Tools</h3>
             <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">Quick access to scratchpad notes and Gemini AI summaries</p>
           </div>
-          <div className="inline-flex p-0.5 bg-[#212121] rounded-lg shrink-0 self-start sm:self-auto">
+          <div className="inline-flex p-0.5 bg-[#212121] rounded-lg shrink-0 self-start sm:self-auto flex-wrap">
             <button
               type="button"
               onClick={() => setActiveWorkspaceTool(prev => prev === 'notes' ? 'none' : 'notes')}
@@ -594,6 +595,19 @@ export default function DashboardTab({
             >
               <FileText size={13} /> AI Summarizer {activeWorkspaceTool === 'ai' ? '(Active)' : ''}
             </button>
+            {journey && (
+              <button
+                type="button"
+                onClick={() => setActiveWorkspaceTool(prev => prev === 'milestones' ? 'none' : 'milestones')}
+                className={`px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  activeWorkspaceTool === 'milestones'
+                    ? 'bg-[#333333] text-white shadow-2xs'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Award size={13} /> Milestones {activeWorkspaceTool === 'milestones' ? '(Active)' : ''}
+              </button>
+            )}
           </div>
         </div>
 
@@ -606,6 +620,34 @@ export default function DashboardTab({
         {activeWorkspaceTool === 'ai' && (
           <div className="animate-in fade-in duration-200">
             <AISummarizer clients={clients} workItems={workItems} profile={profile} />
+          </div>
+        )}
+
+        {activeWorkspaceTool === 'milestones' && journey && (
+          <div className="bg-[#212121] text-white p-4 sm:p-5 rounded-xl flex items-center justify-between gap-4 relative animate-in fade-in duration-200">
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-lg bg-[#333333] flex items-center justify-center shrink-0 text-slate-300">
+                <Award size={20} />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-medium uppercase tracking-wider bg-[#333333] text-slate-300 px-2 py-0.5 rounded">
+                    Freelancing Journey
+                  </span>
+                  <span className="text-xs text-slate-400 font-medium">
+                    {journey.workedDays} days worked ({journey.formattedDuration})
+                  </span>
+                </div>
+                {journey.currentAnniversary ? (
+                  <>
+                    <h3 className="text-base font-bold mt-0.5 text-white">{journey.currentAnniversary.title}!</h3>
+                    <p className="text-xs text-slate-400 max-w-xl">{journey.currentAnniversary.description}</p>
+                  </>
+                ) : (
+                  <p className="text-xs text-slate-400 mt-0.5">Started on {journey.startDateFormatted}. Next milestone: {journey.nextMilestone?.badge || 'Career growth'}.</p>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </div>

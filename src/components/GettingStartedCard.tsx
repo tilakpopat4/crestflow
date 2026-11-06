@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Circle, X, UserCheck, Users, Check } from 'lucide-react';
+import { Circle, X, Check, Users, Clock, FileText, QrCode, Send } from 'lucide-react';
 import { Client, Invoice, WorkItem, UserProfile } from '../types';
 import { db } from '../firebase';
 import { doc, setDoc } from 'firebase/firestore';
@@ -16,11 +16,6 @@ interface GettingStartedCardProps {
   onNavigateToInvoices?: () => void;
 }
 
-/**
- * GettingStartedCard renders a lightweight, professional checklist for first-time onboarding.
- * Helps users configure their profile, add clients, and generate their first invoice.
- * Once dismissed, it is permanently dismissed across all devices (Firestore) and never shown again.
- */
 export default function GettingStartedCard({
   userId,
   profile,
@@ -33,59 +28,47 @@ export default function GettingStartedCard({
   onNavigateToInvoices
 }: GettingStartedCardProps) {
   const storageKey = userId ? `crestflow_onboarding_dismissed_${userId}` : 'crestflow_onboarding_dismissed';
+  const reminderKey = userId ? `crestflow_reminder_sent_${userId}` : 'crestflow_reminder_sent_guest';
 
   const checkIsDismissed = (): boolean => {
     if (typeof window === 'undefined') return false;
-    // 1. Account profile in Cloud Firestore (permanent across all devices for this account)
     if (profile?.gettingStartedDismissed === true) return true;
-    // 2. Global device storage (if closed once from any account on this device)
     if (localStorage.getItem('crestflow_onboarding_dismissed_global') === 'true') return true;
     if (localStorage.getItem('crestflow_onboarding_dismissed') === 'true') return true;
-    // 3. User-specific local storage
     if (storageKey && localStorage.getItem(storageKey) === 'true') return true;
     return false;
   };
 
   const [isDismissed, setIsDismissed] = useState<boolean>(checkIsDismissed);
+  const [hasSentReminder, setHasSentReminder] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(reminderKey) === 'true';
+    } catch {
+      return false;
+    }
+  });
 
-  // Sync state when profile loads from Firestore
   useEffect(() => {
     if (profile?.gettingStartedDismissed === true) {
       setIsDismissed(true);
     }
   }, [profile?.gettingStartedDismissed]);
 
-  // If dismissed locally, guarantee it is synced to the user's Firestore profile for life
-  useEffect(() => {
-    if (userId && !profile?.gettingStartedDismissed) {
-      const isLocallyDismissed = (
-        localStorage.getItem('crestflow_onboarding_dismissed_global') === 'true' ||
-        localStorage.getItem('crestflow_onboarding_dismissed') === 'true' ||
-        (storageKey && localStorage.getItem(storageKey) === 'true')
-      );
-      if (isLocallyDismissed) {
-        setIsDismissed(true);
-        setDoc(doc(db, 'profiles', userId), { gettingStartedDismissed: true }, { merge: true }).catch((err) => {
-          console.warn('Could not sync gettingStartedDismissed to Firestore:', err);
-        });
-      }
-    }
-  }, [userId, profile?.gettingStartedDismissed, storageKey]);
-
-  const isProfileComplete = Boolean(
-    profile?.name &&
-    profile?.name.trim() !== '' &&
-    profile?.upiId &&
-    profile.upiId !== 'Not specified'
-  );
-
+  // Step completions
   const isClientAdded = clients.length > 0;
-  const isWorkOrInvoiceDone = workItems.length > 0 || invoices.length > 0;
+  const isWorkLogged = workItems.length > 0;
+  const isInvoiceGenerated = invoices.length > 0;
+  const isUpiAdded = Boolean(profile?.upiId && profile.upiId.trim() !== '' && profile.upiId !== 'Not specified');
+  const isReminderSent = hasSentReminder;
 
-  const stepsCompleted = (isProfileComplete ? 1 : 0) + (isClientAdded ? 1 : 0) + (isWorkOrInvoiceDone ? 1 : 0);
+  const stepsCompleted = (isClientAdded ? 1 : 0) +
+    (isWorkLogged ? 1 : 0) +
+    (isInvoiceGenerated ? 1 : 0) +
+    (isUpiAdded ? 1 : 0) +
+    (isReminderSent ? 1 : 0);
 
-  // If user has dismissed the guide or completed it, do not render
-  if (isDismissed) {
+  // Hide automatically if all 5 steps are complete or guide dismissed
+  if (isDismissed || stepsCompleted === 5) {
     return null;
   }
 
@@ -94,170 +77,167 @@ export default function GettingStartedCard({
     if (typeof window !== 'undefined') {
       localStorage.setItem('crestflow_onboarding_dismissed_global', 'true');
       localStorage.setItem('crestflow_onboarding_dismissed', 'true');
-      if (storageKey) {
-        localStorage.setItem(storageKey, 'true');
-      }
+      if (storageKey) localStorage.setItem(storageKey, 'true');
     }
     if (userId) {
       try {
         await setDoc(doc(db, 'profiles', userId), { gettingStartedDismissed: true }, { merge: true });
       } catch (err) {
-        console.warn('Failed to persist gettingStartedDismissed to Firestore:', err);
+        console.warn('Failed to persist gettingStartedDismissed:', err);
       }
     }
   };
 
+  const handleTriggerReminderStep = () => {
+    setHasSentReminder(true);
+    try {
+      localStorage.setItem(reminderKey, 'true');
+    } catch { /* ignore */ }
+    if (onNavigateToClients) {
+      onNavigateToClients();
+    }
+  };
+
+  const steps = [
+    {
+      number: 1,
+      title: 'Add first client',
+      description: 'Set payment cycle days, currency, and agreed deliverable rates.',
+      isDone: isClientAdded,
+      actionLabel: isClientAdded ? 'Completed' : 'Add Client',
+      icon: Users,
+      onClick: onNavigateToClients
+    },
+    {
+      number: 2,
+      title: 'Log first work item',
+      description: 'Record editing tasks, deliverables, and preview links.',
+      isDone: isWorkLogged,
+      actionLabel: isWorkLogged ? 'Completed' : 'Log Work',
+      icon: Clock,
+      onClick: onNavigateToWork
+    },
+    {
+      number: 3,
+      title: 'Generate first invoice',
+      description: 'Create a branded PDF invoice with embedded UPI QR payment.',
+      isDone: isInvoiceGenerated,
+      actionLabel: isInvoiceGenerated ? 'Completed' : 'Create Invoice',
+      icon: FileText,
+      onClick: onNavigateToInvoices
+    },
+    {
+      number: 4,
+      title: 'Add UPI ID',
+      description: 'Set your UPI VPA to receive direct payments without chasing.',
+      isDone: isUpiAdded,
+      actionLabel: isUpiAdded ? 'Completed' : 'Set UPI ID',
+      icon: QrCode,
+      onClick: onEditProfile
+    },
+    {
+      number: 5,
+      title: 'Send reminder',
+      description: 'Send a 1-click WhatsApp or email reminder on payment due day.',
+      isDone: isReminderSent,
+      actionLabel: isReminderSent ? 'Completed' : 'Send Reminder',
+      icon: Send,
+      onClick: handleTriggerReminderStep
+    }
+  ];
+
+  const progressPercent = Math.round((stepsCompleted / 5) * 100);
+
   return (
-    <div className="bg-white dark:bg-slate-800 border  rounded-xl p-5 shadow-xs space-y-4">
+    <div className="bg-[#282828] rounded-xl p-4 sm:p-5 shadow-xs space-y-4 text-white">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
-              Getting Started with CrestFlow
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-white">
+              Getting Started
             </h3>
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-              ({stepsCompleted} of 3 completed)
+            <span className="text-xs text-slate-400 font-medium">
+              ({stepsCompleted} of 5 completed)
             </span>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Follow these 3 steps to set up your workflow, manage client payment cycles, and issue branded invoices.
+          <p className="text-xs text-slate-400 mt-1">
+            Log work, get paid by UPI without chasing.
           </p>
         </div>
 
         <button
           type="button"
           onClick={handleDismiss}
-          className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer shrink-0"
-          title="Dismiss guide"
+          className="p-1.5 text-slate-400 hover:text-white rounded-lg transition-colors cursor-pointer shrink-0"
+          title="Dismiss onboarding guide"
           aria-label="Dismiss onboarding guide"
         >
           <X size={16} />
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 pt-1">
-        {/* Step 1: Profile & Payment Info */}
-        <div className={`p-4 rounded-lg border transition-colors flex flex-col justify-between space-y-3 ${
-          isProfileComplete
-            ? 'bg-slate-50/50 dark:bg-slate-900/30  text-slate-600 dark:text-slate-400'
-            : 'bg-white dark:bg-slate-800  text-slate-900 dark:text-slate-100'
-        }`}>
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                Step 1
-              </span>
-              {isProfileComplete ? (
-                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-indigo-600 dark:text-indigo-400">
-                  <Check size={13} /> Completed
-                </span>
-              ) : (
-                <Circle size={14} className="text-slate-300 dark:text-slate-600" />
-              )}
-            </div>
-            <h4 className="text-sm font-bold">Freelancer Profile</h4>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              Set your name, title, and UPI ID for automated invoice branding and scan-to-pay QR codes.
-            </p>
-          </div>
+      {/* Progress Bar */}
+      <div className="w-full bg-[#212121] h-1.5 rounded-full overflow-hidden">
+        <div
+          className="h-full bg-white transition-all duration-300"
+          style={{ width: `${progressPercent}%` }}
+        />
+      </div>
 
-          <div>
-            <button
-              type="button"
-              onClick={onEditProfile}
-              className={`w-full py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
-                isProfileComplete
-                  ? 'bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-                  : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+      {/* 5-Step Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-1">
+        {steps.map((step) => {
+          const StepIcon = step.icon;
+          return (
+            <div
+              key={step.number}
+              className={`p-3.5 rounded-xl flex flex-col justify-between space-y-2.5 transition-colors ${
+                step.isDone
+                  ? 'bg-[#212121] text-slate-300 opacity-90'
+                  : 'bg-[#212121] text-white'
               }`}
             >
-              <UserCheck size={13} /> {isProfileComplete ? 'Edit Profile' : 'Set Up Profile'}
-            </button>
-          </div>
-        </div>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                    Step {step.number}
+                  </span>
+                  {step.isDone ? (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-200">
+                      <Check size={12} strokeWidth={2.5} /> Done
+                    </span>
+                  ) : (
+                    <Circle size={13} className="text-slate-500" />
+                  )}
+                </div>
 
-        {/* Step 2: Add First Client */}
-        <div className={`p-4 rounded-lg border transition-colors flex flex-col justify-between space-y-3 ${
-          isClientAdded
-            ? 'bg-slate-50/50 dark:bg-slate-900/30  text-slate-600 dark:text-slate-400'
-            : 'bg-white dark:bg-slate-800  text-slate-900 dark:text-slate-100'
-        }`}>
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                Step 2
-              </span>
-              {isClientAdded ? (
-                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-indigo-600 dark:text-indigo-400">
-                  <Check size={13} /> Completed
-                </span>
-              ) : (
-                <Circle size={14} className="text-slate-300 dark:text-slate-600" />
-              )}
+                <div className="flex items-center gap-1.5">
+                  <StepIcon size={14} className={step.isDone ? 'text-slate-400' : 'text-white'} />
+                  <h4 className="text-xs font-bold truncate">{step.title}</h4>
+                </div>
+
+                <p className="text-[11px] text-slate-400 leading-relaxed line-clamp-3">
+                  {step.description}
+                </p>
+              </div>
+
+              <div>
+                <button
+                  type="button"
+                  onClick={step.onClick}
+                  disabled={step.isDone}
+                  className={`w-full py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-colors ${
+                    step.isDone
+                      ? 'bg-[#282828] text-slate-500 cursor-default'
+                      : 'bg-[#333333] hover:bg-[#3d3d3d] text-white cursor-pointer'
+                  }`}
+                >
+                  {step.isDone ? 'Completed' : step.actionLabel}
+                </button>
+              </div>
             </div>
-            <h4 className="text-sm font-bold">Add Your First Client</h4>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              Save client contact details, agreed rates (per-reel or monthly retainer), and payment cycle due dates.
-            </p>
-          </div>
-
-          <div>
-            <button
-              type="button"
-              onClick={onNavigateToClients}
-              className={`w-full py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
-                isClientAdded
-                  ? 'bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-                  : 'bg-indigo-600 hover:bg-indigo-700 text-white'
-              }`}
-            >
-              <Users size={13} /> {isClientAdded ? 'View Clients' : 'Add First Client'}
-            </button>
-          </div>
-        </div>
-
-        {/* Step 3: Log Work & Generate Invoice */}
-        <div className={`p-4 rounded-lg border transition-colors flex flex-col justify-between space-y-3 ${
-          isWorkOrInvoiceDone
-            ? 'bg-slate-50/50 dark:bg-slate-900/30  text-slate-600 dark:text-slate-400'
-            : 'bg-white dark:bg-slate-800  text-slate-900 dark:text-slate-100'
-        }`}>
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                Step 3
-              </span>
-              {isWorkOrInvoiceDone ? (
-                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-indigo-600 dark:text-indigo-400">
-                  <Check size={13} /> Completed
-                </span>
-              ) : (
-                <Circle size={14} className="text-slate-300 dark:text-slate-600" />
-              )}
-            </div>
-            <h4 className="text-sm font-bold">Log Work & Invoicing</h4>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              Track deliverables with preview links or generate a PDF invoice statement ready to email to your client.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={onNavigateToWork}
-              className="py-2 px-2 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-center cursor-pointer"
-            >
-              Log Work
-            </button>
-            <button
-              type="button"
-              onClick={onNavigateToInvoices}
-              className="py-2 px-2 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white transition-colors text-center cursor-pointer"
-            >
-              Create Invoice
-            </button>
-          </div>
-        </div>
+          );
+        })}
       </div>
     </div>
   );

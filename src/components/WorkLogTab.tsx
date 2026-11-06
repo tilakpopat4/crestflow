@@ -645,29 +645,22 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
             </>
           ) : workItems.length === 0 ? (
             <>
-              <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-400 flex items-center justify-center mx-auto">
+              <div className="w-12 h-12 rounded-xl bg-[#333333] text-slate-300 flex items-center justify-center mx-auto">
                 <Clock size={24} />
               </div>
-              <div className="space-y-1">
-                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">No work logged yet</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Record video deliverables, reels, or editing projects to effortlessly generate invoices and keep track of uninvoiced work.
+              <div className="space-y-1.5">
+                <h3 className="text-base font-bold text-white">No work logged yet</h3>
+                <p className="text-xs text-slate-400 leading-relaxed max-w-md mx-auto">
+                  Record video deliverables, reels, or editing tasks to automatically aggregate them into invoices with UPI payment QR codes.
                 </p>
               </div>
-              <div className="flex items-center justify-center gap-2 pt-1">
+              <div className="pt-2">
                 <button
                   type="button"
                   onClick={() => setIsFormOpen(true)}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
                 >
-                  <Plus size={14} /> Log Work Item
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsDriveModalOpen(true)}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
-                >
-                  <UploadCloud size={14} /> Upload to Drive
+                  <Plus size={14} /> Log First Work Item
                 </button>
               </div>
             </>
