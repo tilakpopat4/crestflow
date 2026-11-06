@@ -85,22 +85,22 @@ export default function Footer({
   };
 
   const navLinkClass =
-    'rounded-sm text-sm text-neutral-600 transition-colors duration-150 hover:text-neutral-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 dark:text-neutral-400 dark:hover:text-neutral-50 dark:focus-visible:outline-zinc-50';
+    'rounded-sm text-sm text-slate-400 transition-colors duration-150 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-50';
 
   const bottomLinkClass =
-    'rounded-sm whitespace-nowrap transition-colors duration-150 hover:text-neutral-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 dark:hover:text-neutral-50 dark:focus-visible:outline-zinc-50';
+    'rounded-sm whitespace-nowrap text-slate-400 transition-colors duration-150 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-50';
 
   const socialLinkClass =
-    'inline-flex size-8 items-center justify-center rounded-lg text-neutral-600 transition-colors duration-150 hover:bg-neutral-100 hover:text-neutral-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-50 dark:focus-visible:outline-zinc-50';
+    'inline-flex size-8 items-center justify-center rounded-lg text-slate-400 transition-colors duration-150 hover:bg-[#333333] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-50';
 
   const brandLogo = (
     <a
       href="/"
       onClick={(e) => handleLinkClick(e, { id: 'home', name: config.brandName, url: '/', route: 'dashboard' })}
-      className="flex shrink-0 items-center gap-2.5 rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 dark:focus-visible:outline-zinc-50 group"
+      className="flex shrink-0 items-center gap-2.5 rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-50 group"
     >
       <Logo className="w-7 h-7 rounded-lg shadow-xs group-hover:scale-105 transition-transform duration-150" />
-      <span className="text-[15px] font-semibold tracking-tight text-neutral-950 dark:text-neutral-50">
+      <span className="text-[15px] font-semibold tracking-tight text-white">
         {config.brandName}
       </span>
     </a>
@@ -149,19 +149,19 @@ export default function Footer({
         className={`w-full border-t transition-colors ${
           transparent
             ? 'border-white/20 bg-transparent text-white/80'
-            : 'border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950'
+            : 'border-[#3e3e3e] bg-[#282828] text-slate-400'
         } px-4 md:px-8 ${className}`}
       >
         <h2 id="ft-simple-title" className="sr-only">
           Footer
         </h2>
         <div className="mx-auto max-w-7xl">
-          <div className="flex flex-col gap-4 py-6 text-sm text-neutral-600 sm:flex-row sm:items-center sm:justify-between dark:text-neutral-400">
+          <div className="flex flex-col gap-4 py-6 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-              <p>
+              <p className="text-slate-400">
                 {config.copyrightText}{' '}
                 {config.versionText && (
-                  <span className="opacity-70">&bull; Version {config.versionText}</span>
+                  <span className="text-slate-500">&bull; Version {config.versionText}</span>
                 )}
               </p>
               {legalLinks}
@@ -176,7 +176,7 @@ export default function Footer({
   return (
     <footer
       aria-labelledby="ft-simple-title"
-      className={`border-t border-neutral-200 bg-white px-4 md:px-8 dark:border-neutral-800 dark:bg-neutral-950 ${className}`}
+      className={`border-t border-[#3e3e3e] bg-[#282828] px-4 md:px-8 ${className}`}
     >
       <h2 id="ft-simple-title" className="sr-only">
         Footer
@@ -202,12 +202,12 @@ export default function Footer({
             </ul>
           </nav>
         </div>
-        <div className="flex flex-col gap-4 border-t border-neutral-200 py-6 text-sm text-neutral-600 sm:flex-row sm:items-center sm:justify-between dark:border-neutral-800 dark:text-neutral-400">
+        <div className="flex flex-col gap-4 border-t border-[#3e3e3e] py-6 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <p>
+            <p className="text-slate-400">
               {config.copyrightText}{' '}
               {config.versionText && (
-                <span className="opacity-70">&bull; Version {config.versionText}</span>
+                <span className="text-slate-500">&bull; Version {config.versionText}</span>
               )}
             </p>
             {legalLinks}

@@ -39,8 +39,8 @@ export function getStatusConfig(status: StatusVariant): StatusConfig {
   switch (normalized) {
     case 'paid':
       return {
-        textColor: 'text-indigo-600 dark:text-indigo-400',
-        dotColor: 'bg-indigo-600 dark:bg-indigo-400',
+        textColor: 'text-slate-700 dark:text-slate-300',
+        dotColor: 'bg-slate-700 dark:bg-slate-400',
         defaultLabel: 'Paid',
       };
 
@@ -60,8 +60,8 @@ export function getStatusConfig(status: StatusVariant): StatusConfig {
     case 'due_in_3_days':
     case 'due_in_1_day':
       return {
-        textColor: 'text-slate-700 dark:text-slate-300',
-        dotColor: 'bg-slate-600 dark:bg-slate-400',
+        textColor: 'text-slate-400 dark:text-slate-400',
+        dotColor: 'bg-slate-400 dark:bg-slate-400',
         defaultLabel: normalized === 'active' ? 'Active' : 'Invoiced',
       };
 
@@ -71,8 +71,8 @@ export function getStatusConfig(status: StatusVariant): StatusConfig {
     case 'closed':
     default:
       return {
-        textColor: 'text-slate-500 dark:text-slate-400',
-        dotColor: 'bg-slate-400 dark:bg-slate-500',
+        textColor: 'text-slate-400 dark:text-slate-400',
+        dotColor: 'bg-slate-400 dark:bg-slate-400',
         defaultLabel: status || 'Draft',
       };
   }
