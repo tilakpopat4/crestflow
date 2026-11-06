@@ -16,6 +16,7 @@ interface ProfilePublicSectionProps {
   setBio: (val: string) => void;
   freelanceStartDate: string;
   setFreelanceStartDate: (val: string) => void;
+  onAutoSaveDate?: (val: string) => void;
   isSaving: boolean;
   isSaved: boolean;
   isDirty: boolean;
@@ -39,6 +40,7 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
   setBio,
   freelanceStartDate,
   setFreelanceStartDate,
+  onAutoSaveDate,
   isSaving,
   isSaved,
   isDirty,
@@ -198,7 +200,12 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
               id="profile-start-date"
               type="date"
               value={freelanceStartDate}
-              onChange={(e) => setFreelanceStartDate(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                setFreelanceStartDate(val);
+                onAutoSaveDate?.(val);
+              }}
+              onBlur={() => onAutoSaveDate?.(freelanceStartDate)}
               className="block h-10 w-full rounded-lg bg-slate-50 dark:bg-slate-800/60 px-3 text-sm text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 placeholder:text-slate-400 focus:border-indigo-600 dark:focus:border-indigo-400 outline-none transition-colors"
             />
             <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">

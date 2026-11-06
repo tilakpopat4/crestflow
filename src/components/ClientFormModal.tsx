@@ -1,6 +1,9 @@
 import React from 'react';
-import { X, CheckCircle2, Film, Calendar, Mail, Coins } from 'lucide-react';
-import { FREELANCE_CURRENCIES, getCurrencySymbol } from '../lib/currencyUtils';
+import { X, Mail } from 'lucide-react';
+import { useReducedMotion } from 'motion/react';
+import { getCurrencySymbol } from '../lib/currencyUtils';
+import { RatesCurrencySelector } from './RatesCurrencySelector';
+import { RatesBasisSelector } from './RatesBasisSelector';
 
 export interface ClientFormData {
   name: string;
@@ -40,6 +43,8 @@ export const ClientFormModal: React.FC<ClientFormModalProps> = ({
   onSubmit,
   onClose,
 }) => {
+  const shouldReduceMotion = useReducedMotion();
+
   if (!isOpen) return null;
 
   const currencySymbol = getCurrencySymbol(formData.currency);
@@ -110,125 +115,124 @@ export const ClientFormModal: React.FC<ClientFormModalProps> = ({
             <input required type="date" value={formData.lastPaymentDate} onChange={(e) => update('lastPaymentDate', e.target.value)} className={inputCls} />
           </div>
 
-          {/* Payment Currency */}
-          <div className="space-y-1.5 md:col-span-2">
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-              Payment Currency *
-            </label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {FREELANCE_CURRENCIES.map((curr) => {
-                const isSelected = (formData.currency || 'INR') === curr.code;
-                return (
-                  <button
-                    key={curr.code}
-                    type="button"
-                    onClick={() => update('currency', curr.code)}
-                    className={`px-3 py-2 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors duration-120 cursor-pointer ${
-                      isSelected
-                        ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-900 dark:text-indigo-200 shadow-2xs font-bold'
-                        : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-                    }`}
-                  >
-                    <span className="font-mono text-sm">{curr.symbol}</span>
-                    <span>{curr.code}</span>
-                  </button>
-                );
-              })}
-            </div>
+          {/* Payment Currency Switcher */}
+          <div className="space-y-1 md:col-span-2">
+            <RatesCurrencySelector
+              currency={formData.currency || 'INR'}
+              onChange={(curr) => update('currency', curr)}
+              shouldReduceMotion={shouldReduceMotion}
+            />
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
               Selected currency applies to invoices, work items, and rate calculations for this client.
             </p>
           </div>
 
-          {/* Payment Basis */}
-          <div className="space-y-1.5 md:col-span-2">
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Payment Basis / Billing Type *</label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              <button
-                type="button"
-                onClick={() => update('paymentBasis', 'per_reel')}
-                className={`p-3 rounded-xl border text-left flex items-start gap-2.5 transition-all cursor-pointer ${
-                  formData.paymentBasis === 'per_reel'
-                    ? 'border-indigo-600 bg-indigo-50/60 dark:bg-indigo-950/40 text-indigo-900 dark:text-indigo-200 shadow-2xs'
-                    : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300'
-                }`}
-              >
-                <div className={`p-1.5 rounded-lg shrink-0 ${formData.paymentBasis === 'per_reel' ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-600'}`}>
-                  <Film size={14} />
-                </div>
-                <div>
-                  <div className="text-xs font-bold">Per Reel / Deliverable</div>
-                  <div className="text-[11px] opacity-75 mt-0.5">Calculated per deliverable item</div>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => update('paymentBasis', 'monthly_retainer')}
-                className={`p-3 rounded-xl border text-left flex items-start gap-2.5 transition-all cursor-pointer ${
-                  formData.paymentBasis === 'monthly_retainer'
-                    ? 'border-indigo-600 bg-indigo-50/60 dark:bg-indigo-950/40 text-indigo-900 dark:text-indigo-200 shadow-2xs'
-                    : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300'
-                }`}
-              >
-                <div className={`p-1.5 rounded-lg shrink-0 ${formData.paymentBasis === 'monthly_retainer' ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-600'}`}>
-                  <Calendar size={14} />
-                </div>
-                <div>
-                  <div className="text-xs font-bold">Monthly Retainer (Fixed)</div>
-                  <div className="text-[11px] opacity-75 mt-0.5">Fixed monthly fee, no per-reel math</div>
-                </div>
-              </button>
-            </div>
+          {/* Payment Basis Switcher - Borderless, clean light button backgrounds */}
+          <div className="md:col-span-2">
+            <RatesBasisSelector
+              paymentBasis={formData.paymentBasis}
+              onChange={(basis) => update('paymentBasis', basis)}
+              shouldReduceMotion={shouldReduceMotion}
+            />
           </div>
 
           {formData.paymentBasis === 'monthly_retainer' ? (
-            <div className="space-y-1.5 md:col-span-2 p-3.5 bg-indigo-50/40 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40 rounded-xl">
-              <label className="block text-xs font-semibold text-indigo-950 dark:text-indigo-200">Fixed Monthly Retainer ({currencySymbol}) *</label>
+            <div className="space-y-1.5 md:col-span-2 p-3.5 bg-slate-50 dark:bg-slate-900/60 rounded-xl">
+              <label className="block text-xs font-semibold text-slate-800 dark:text-slate-200">
+                Fixed Monthly Retainer ({currencySymbol}) *
+              </label>
               <div className="relative">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">{currencySymbol}</span>
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">
+                  {currencySymbol}
+                </span>
                 <input
                   required
                   type="number"
                   min="0"
                   value={formData.monthlyRetainerAmount || formData.defaultRate}
-                  onChange={(e) => setFormData((p) => ({ ...p, monthlyRetainerAmount: e.target.value, defaultRate: e.target.value }))}
-                  className="w-full border border-indigo-200 dark:border-indigo-800 rounded-xl pl-8 pr-3.5 py-2.5 text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-600"
+                  onChange={(e) =>
+                    setFormData((p) => ({
+                      ...p,
+                      monthlyRetainerAmount: e.target.value,
+                      defaultRate: e.target.value,
+                    }))
+                  }
+                  className="w-full border border-slate-200 dark:border-slate-700 rounded-xl pl-8 pr-3.5 py-2.5 text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-600"
                   placeholder="25000"
                 />
               </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                Invoices for this client will automatically bill this exact fixed amount each month.
+              </p>
             </div>
           ) : (
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Default Rate per Reel ({currencySymbol}) *</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                Default Rate per Reel ({currencySymbol}) *
+              </label>
               <div className="relative">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">{currencySymbol}</span>
-                <input required type="number" min="0" value={formData.defaultRate} onChange={(e) => update('defaultRate', e.target.value)} className={`${inputCls} pl-8`} placeholder="1500" />
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">
+                  {currencySymbol}
+                </span>
+                <input
+                  required
+                  type="number"
+                  min="0"
+                  value={formData.defaultRate}
+                  onChange={(e) => update('defaultRate', e.target.value)}
+                  className={`${inputCls} pl-8`}
+                  placeholder="1500"
+                />
               </div>
             </div>
           )}
 
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">On Site Shoot Rate ({currencySymbol})</label>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+              On Site Shoot Rate ({currencySymbol})
+            </label>
             <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">{currencySymbol}</span>
-              <input type="number" min="0" value={formData.onSiteShootRate} onChange={(e) => update('onSiteShootRate', e.target.value)} className={`${inputCls} pl-8`} placeholder="5000" />
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">
+                {currencySymbol}
+              </span>
+              <input
+                type="number"
+                min="0"
+                value={formData.onSiteShootRate}
+                onChange={(e) => update('onSiteShootRate', e.target.value)}
+                className={`${inputCls} pl-8`}
+                placeholder="5000"
+              />
             </div>
           </div>
 
           <div className="space-y-1.5 md:col-span-2">
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Website Making Rate ({currencySymbol})</label>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+              Website Making Rate ({currencySymbol})
+            </label>
             <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">{currencySymbol}</span>
-              <input type="number" min="0" value={formData.websiteMakingRate} onChange={(e) => update('websiteMakingRate', e.target.value)} className={`${inputCls} pl-8`} placeholder="15000" />
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">
+                {currencySymbol}
+              </span>
+              <input
+                type="number"
+                min="0"
+                value={formData.websiteMakingRate}
+                onChange={(e) => update('websiteMakingRate', e.target.value)}
+                className={`${inputCls} pl-8`}
+                placeholder="15000"
+              />
             </div>
           </div>
 
-          <div className="md:col-span-2 p-3 bg-indigo-50/60 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/40 rounded-xl flex items-center justify-between">
+          <div className="md:col-span-2 p-3 bg-slate-100/70 dark:bg-slate-900/50 rounded-xl flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <Mail size={18} className="text-indigo-600 dark:text-indigo-400 shrink-0" />
               <div>
-                <label htmlFor="emailRemindersModalToggle" className="text-xs font-bold text-slate-900 dark:text-slate-100 cursor-pointer">
+                <label
+                  htmlFor="emailRemindersModalToggle"
+                  className="text-xs font-bold text-slate-900 dark:text-slate-100 cursor-pointer"
+                >
                   Enable Overdue Payment Email Reminders
                 </label>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400">
@@ -249,15 +253,14 @@ export const ClientFormModal: React.FC<ClientFormModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-slate-700 dark:text-slate-300 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+              className="px-4 py-2 rounded-xl text-slate-700 dark:text-slate-300 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer border-0"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-sm cursor-pointer"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer border-0"
             >
-              <CheckCircle2 size={16} />
               {isEditing ? 'Save Changes' : 'Save Client Profile'}
             </button>
           </div>

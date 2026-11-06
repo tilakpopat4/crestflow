@@ -29,6 +29,16 @@ export function useUserProfile(user: User | null) {
         return null;
       }
     }
+    // Pre-hydrate from any saved profile in localStorage during initial load before auth resolves
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith('crestflow_profile_') && !k.includes('completed')) {
+          const saved = localStorage.getItem(k);
+          if (saved) return JSON.parse(saved);
+        }
+      }
+    } catch {}
     return null;
   });
 
@@ -206,7 +216,15 @@ export function useUserProfile(user: User | null) {
       userId: user.uid,
       isPublicProfile: true,
     });
-    await setDoc(profileRef, sanitizedPublic, { merge: true });
+
+    const profileDocData: Record<string, any> = { ...sanitizedPublic };
+    if (profileWithMeta.freelanceStartDate && profileWithMeta.freelanceStartDate.trim()) {
+      profileDocData.freelanceStartDate = profileWithMeta.freelanceStartDate.trim();
+    } else if (rawProfile?.freelanceStartDate) {
+      profileDocData.freelanceStartDate = deleteField();
+    }
+
+    await setDoc(profileRef, profileDocData, { merge: true });
 
     // 3. Update private settings in-memory & cache
     const newPrivateSettings: UserProfilePrivate = {

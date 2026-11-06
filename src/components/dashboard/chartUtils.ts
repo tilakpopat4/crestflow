@@ -26,10 +26,11 @@ export function calculateChange(now: number, prev: number): number {
 }
 
 /**
- * Computes calendar months of invoice earnings from live invoices starting from
- * when the freelancer started their work (freelanceStartDate or earliest invoice/work activity),
- * up to the current month (capped at a rolling 12 months max).
- * Does not display months prior to the freelancer starting their work.
+ * Computes calendar months of invoice earnings from live invoices starting strictly from
+ * when the freelancer started their work (either explicit freelanceStartDate in profile,
+ * or earliest month of actual paid/invoiced activity), up to the current month (capped
+ * at a rolling 12 months max).
+ * Does not display empty months prior to the freelancer starting their work.
  * Returns hasData: false when the account has no paid or invoiced records yet.
  */
 export function buildMonthlyDataFromInvoices(
@@ -45,66 +46,70 @@ export function buildMonthlyDataFromInvoices(
   const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const defaultTwelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1);
 
-  // Collect candidate start dates to find when the freelancer started work
-  const candidateDates: Date[] = [];
+  let effectiveStartMonth: Date;
 
-  // 1. Career start date explicitly defined in freelancer profile
-  if (freelanceStartDate && typeof freelanceStartDate === 'string') {
-    const parts = freelanceStartDate.split('-');
+  // 1. Explicit career start date configured in freelancer profile takes priority
+  if (freelanceStartDate && typeof freelanceStartDate === 'string' && freelanceStartDate.trim() !== '') {
+    let dt: Date | null = null;
+    const parts = freelanceStartDate.trim().split('-');
     if (parts.length === 3) {
       const y = parseInt(parts[0], 10);
       const m = parseInt(parts[1], 10) - 1;
       const d = parseInt(parts[2], 10);
-      const dt = new Date(y, m, d);
-      if (!isNaN(dt.getTime())) candidateDates.push(dt);
+      dt = new Date(y, m, d);
     } else {
-      const dt = new Date(freelanceStartDate);
-      if (!isNaN(dt.getTime())) candidateDates.push(dt);
+      dt = new Date(freelanceStartDate.trim());
     }
-  }
 
-  // 2. Dates from invoices (creation, invoice date, payment date)
-  if (invoices && invoices.length > 0) {
-    invoices.forEach((inv) => {
-      if (inv.date) {
-        const d = new Date(inv.date);
-        if (!isNaN(d.getTime())) candidateDates.push(d);
+    if (dt && !isNaN(dt.getTime())) {
+      const parsedMonthStart = new Date(dt.getFullYear(), dt.getMonth(), 1);
+      // Cap at rolling 12 months if they started earlier than 12 months ago
+      effectiveStartMonth = parsedMonthStart < defaultTwelveMonthsAgo ? defaultTwelveMonthsAgo : parsedMonthStart;
+      if (effectiveStartMonth > currentMonthStart) {
+        effectiveStartMonth = currentMonthStart;
       }
-      if (inv.lastPaymentDate) {
-        const d = new Date(inv.lastPaymentDate);
-        if (!isNaN(d.getTime())) candidateDates.push(d);
-      }
-      if (inv.createdAt) {
-        const d = new Date(inv.createdAt);
-        if (!isNaN(d.getTime())) candidateDates.push(d);
-      }
-    });
-  }
+    } else {
+      effectiveStartMonth = defaultTwelveMonthsAgo;
+    }
+  } else {
+    // 2. No explicit profile start date: infer from earliest month of actual revenue/work activity
+    const activityDates: Date[] = [];
 
-  // 3. Dates from work items
-  if (workItems && workItems.length > 0) {
-    workItems.forEach((w) => {
-      if (w.date) {
-        const d = new Date(w.date);
-        if (!isNaN(d.getTime())) candidateDates.push(d);
-      }
-      if (w.createdAt) {
-        const d = new Date(w.createdAt);
-        if (!isNaN(d.getTime())) candidateDates.push(d);
-      }
-    });
-  }
+    if (invoices && invoices.length > 0) {
+      invoices.forEach((inv) => {
+        const amt = Number(inv.totalAmount) || 0;
+        if (amt > 0 || inv.status === 'Paid') {
+          if (inv.date) {
+            const d = new Date(inv.date);
+            if (!isNaN(d.getTime())) activityDates.push(d);
+          }
+          if (inv.lastPaymentDate) {
+            const d = new Date(inv.lastPaymentDate);
+            if (!isNaN(d.getTime())) activityDates.push(d);
+          }
+        }
+      });
+    }
 
-  // Determine earliest start month
-  let effectiveStartMonth = defaultTwelveMonthsAgo;
-  if (candidateDates.length > 0) {
-    const earliestTimestamp = Math.min(...candidateDates.map((d) => d.getTime()));
-    const earliestDate = new Date(earliestTimestamp);
-    const earliestMonthStart = new Date(earliestDate.getFullYear(), earliestDate.getMonth(), 1);
+    if (workItems && workItems.length > 0) {
+      workItems.forEach((w) => {
+        if (w.date) {
+          const d = new Date(w.date);
+          if (!isNaN(d.getTime())) activityDates.push(d);
+        }
+      });
+    }
 
-    if (earliestMonthStart > defaultTwelveMonthsAgo && earliestMonthStart <= currentMonthStart) {
-      effectiveStartMonth = earliestMonthStart;
-    } else if (earliestMonthStart > currentMonthStart) {
+    if (activityDates.length > 0) {
+      const earliestTimestamp = Math.min(...activityDates.map((d) => d.getTime()));
+      const earliestDate = new Date(earliestTimestamp);
+      const earliestMonthStart = new Date(earliestDate.getFullYear(), earliestDate.getMonth(), 1);
+
+      effectiveStartMonth = earliestMonthStart < defaultTwelveMonthsAgo ? defaultTwelveMonthsAgo : earliestMonthStart;
+      if (effectiveStartMonth > currentMonthStart) {
+        effectiveStartMonth = currentMonthStart;
+      }
+    } else {
       effectiveStartMonth = currentMonthStart;
     }
   }
@@ -185,8 +190,7 @@ export function buildMonthlyDataFromInvoices(
   const totalInvoiced = months.reduce((acc, m) => acc + m.invoiced, 0);
   const hasData = totalPaid > 0 || totalInvoiced > 0;
 
-  // If no explicit career start date was configured in profile, only show from the month
-  // the freelancer actually had their first invoice or paid activity (never show months before work started)
+  // Safety filter: ensure no leading month prior to the freelancer's start activity is included
   let resultMonths = months;
   if (!freelanceStartDate) {
     const firstActiveIndex = months.findIndex((m) => m.now > 0 || m.invoiced > 0);
