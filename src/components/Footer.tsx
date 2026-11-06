@@ -125,7 +125,7 @@ export default function Footer({
   );
 
   const legalLinks = (
-    <ul className="flex flex-wrap gap-x-4 gap-y-2">
+    <ul className="flex flex-wrap gap-x-4 gap-y-2 bg-transparent">
       {config.legalLinks.map((link) => (
         <li key={link.id}>
           <a
@@ -184,8 +184,8 @@ export default function Footer({
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col items-start gap-6 py-10 md:flex-row md:items-center md:justify-between">
           {brandLogo}
-          <nav aria-label="Footer">
-            <ul className="flex flex-wrap gap-x-6 gap-y-3">
+          <nav aria-label="Footer" className="bg-transparent">
+            <ul className="flex flex-wrap gap-x-6 gap-y-3 bg-transparent">
               {config.primaryLinks.map((link) => (
                 <li key={link.id}>
                   <a

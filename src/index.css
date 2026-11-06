@@ -19,11 +19,11 @@
   --color-indigo-100: #242424;
   --color-indigo-200: #383838;
   --color-indigo-300: #525252;
-  --color-indigo-400: #6f92c2;
-  --color-indigo-500: #557eb6;
-  --color-indigo-600: #4870aa;
-  --color-indigo-700: #3b5e90;
-  --color-indigo-800: #2f4c75;
+  --color-indigo-400: #717171;
+  --color-indigo-500: #aaaaaa;
+  --color-indigo-600: #282828;
+  --color-indigo-700: #1c1c1c;
+  --color-indigo-800: #141414;
   --color-indigo-900: #0f0f0f;
   --color-indigo-950: #0a0a0a;
 
@@ -31,11 +31,11 @@
   --color-blue-100: #242424;
   --color-blue-200: #383838;
   --color-blue-300: #525252;
-  --color-blue-400: #6f92c2;
-  --color-blue-500: #557eb6;
-  --color-blue-600: #4870aa;
-  --color-blue-700: #3b5e90;
-  --color-blue-800: #2f4c75;
+  --color-blue-400: #717171;
+  --color-blue-500: #aaaaaa;
+  --color-blue-600: #282828;
+  --color-blue-700: #1c1c1c;
+  --color-blue-800: #141414;
   --color-blue-900: #0f0f0f;
 
   --color-red-500: #eb2b4f;
@@ -91,9 +91,17 @@ header,
 }
 
 /* Sidebar navigation panel: clean dark surface per GEMINI.md */
-nav {
+nav:not([aria-label="Footer"]):not(footer nav) {
   background-color: #1e1e1e !important;
   border-color: #2a2a2a !important;
+}
+
+/* Footer: completely transparent link and list areas */
+footer nav,
+footer ul,
+footer li,
+footer a {
+  background-color: transparent !important;
 }
 
 /* Sub-sections, cards & modals: highlighted & separated purely by #282828 on #333333 canvas without borders */
@@ -221,8 +229,8 @@ input[type="checkbox"]:hover {
 
 input[type="checkbox"]:checked,
 input[type="checkbox"]:indeterminate {
-  background-color: #4870aa !important;
-  border-color: #4870aa !important;
+  background-color: #555555 !important;
+  border-color: #888888 !important;
 }
 
 /* Safe area insets for notched iPhones (bottom nav) */
