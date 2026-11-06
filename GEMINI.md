@@ -58,8 +58,8 @@ Hard rules:
 
 ## Palette (Creator & Studio System)
 - Page background: studio canvas light (#f1f1f1), dark (#0f0f0f)
-- Cards & modals: white (#ffffff) with 1px #e3e3e3 border in light; elevated surface (#212121 / #121212) in dark
-- Primary action / buttons / active nav: vibrant cyan-blue (#3ea6ff), white text
+- Cards & modals: elevated graphite (#333333) with 1px #444444 border in light; elevated surface (#212121 / #121212) in dark
+- Primary action / buttons / active nav: graphite (#282828), white text
 - Sidebar / left panel: clean light/dark surface with 1px border (#e3e3e3 / #2a2a2a)
 - Primary text: black (#000000) / white (#ffffff). Secondary text and table headers: slate (#717171 / #aaaaaa)
 - Destructive / Delete / Overdue: red (#e1002d)

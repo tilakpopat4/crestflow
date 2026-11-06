@@ -15,28 +15,28 @@
   --color-slate-900: #121212;
   --color-slate-950: #0f0f0f;
 
-  --color-indigo-50: #f5faff;
-  --color-indigo-100: #eaf5ff;
-  --color-indigo-200: #d4ecff;
-  --color-indigo-300: #b1daff;
-  --color-indigo-400: #88c8ff;
-  --color-indigo-500: #62b7ff;
-  --color-indigo-600: #3ea6ff;
-  --color-indigo-700: #2b92e4;
-  --color-indigo-800: #1b7ec9;
-  --color-indigo-900: #135f99;
-  --color-indigo-950: #0d3e64;
+  --color-indigo-50: #f5f5f5;
+  --color-indigo-100: #ebebeb;
+  --color-indigo-200: #d4d4d4;
+  --color-indigo-300: #a3a3a3;
+  --color-indigo-400: #525252;
+  --color-indigo-500: #383838;
+  --color-indigo-600: #282828;
+  --color-indigo-700: #1c1c1c;
+  --color-indigo-800: #141414;
+  --color-indigo-900: #0f0f0f;
+  --color-indigo-950: #0a0a0a;
 
-  --color-blue-50: #f5faff;
-  --color-blue-100: #eaf5ff;
-  --color-blue-200: #d4ecff;
-  --color-blue-300: #b1daff;
-  --color-blue-400: #88c8ff;
-  --color-blue-500: #62b7ff;
-  --color-blue-600: #3ea6ff;
-  --color-blue-700: #2b92e4;
-  --color-blue-800: #1b7ec9;
-  --color-blue-900: #135f99;
+  --color-blue-50: #f5f5f5;
+  --color-blue-100: #ebebeb;
+  --color-blue-200: #d4d4d4;
+  --color-blue-300: #a3a3a3;
+  --color-blue-400: #525252;
+  --color-blue-500: #383838;
+  --color-blue-600: #282828;
+  --color-blue-700: #1c1c1c;
+  --color-blue-800: #141414;
+  --color-blue-900: #0f0f0f;
 
   --color-red-500: #eb2b4f;
   --color-red-600: #e1002d;
@@ -75,9 +75,45 @@
   }
 
   :focus-visible {
-    outline: 2px solid #3ea6ff;
+    outline: 2px solid #282828;
     outline-offset: 2px;
   }
+}
+
+/* Card & surface backgrounds: replace white with #333333 while maintaining high text contrast */
+.bg-white {
+  background-color: #333333;
+  color: #f1f1f1;
+}
+
+.bg-white .text-slate-900,
+.bg-white .text-slate-800,
+.bg-white .text-slate-700 {
+  color: #f1f1f1;
+}
+
+.bg-white .text-slate-600,
+.bg-white .text-slate-500,
+.bg-white .text-slate-400 {
+  color: #aaaaaa;
+}
+
+.bg-white .border-slate-200,
+.bg-white .border-slate-100 {
+  border-color: #444444;
+}
+
+.bg-white input:not([type="checkbox"]):not([type="radio"]),
+.bg-white select,
+.bg-white textarea {
+  background-color: #242424;
+  color: #f1f1f1;
+  border-color: #444444;
+}
+
+.bg-white input::placeholder,
+.bg-white textarea::placeholder {
+  color: #717171;
 }
 
 /* Safe area insets for notched iPhones (bottom nav) */

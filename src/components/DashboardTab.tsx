@@ -560,7 +560,7 @@ export default function DashboardTab({
                       fontWeight: 600
                     }}
                   />
-                  <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24} fill="#3ea6ff" />
+                  <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24} fill="#282828" />
                 </BarChart>
               </ResponsiveContainer>
             ) : (

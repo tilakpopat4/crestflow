@@ -85,7 +85,7 @@ export default function PricingPage({
           contact: profile?.phone || '',
         },
         theme: {
-          color: '#3ea6ff',
+          color: '#282828',
         },
         handler: function () {
           setIsActivatingOpen(true);
