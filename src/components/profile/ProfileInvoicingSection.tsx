@@ -128,37 +128,37 @@ export const ProfileInvoicingSection: React.FC<ProfileInvoicingSectionProps> = (
           </div>
 
           {/* Client Intake Channel */}
-          <div className="sm:col-span-2 p-3.5 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="sm:col-span-2 p-3.5 rounded-lg bg-[#181818] border border-[#2a2a2a] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="min-w-0">
-              <span className="block text-xs font-semibold text-slate-900 dark:text-slate-100">
+              <span className="block text-xs font-semibold text-white">
                 Direct client onboarding link
               </span>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+              <p className="text-[11px] text-slate-400 truncate mt-0.5 font-mono">
                 {onboardingLink}
               </p>
             </div>
             <button
               type="button"
               onClick={handleCopyLink}
-              className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-white dark:bg-slate-800 px-3 text-xs font-medium text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/80 cursor-pointer shrink-0 transition-colors duration-120"
+              className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-[#282828] hover:bg-[#383838] px-3 text-xs font-semibold text-slate-300 hover:text-white border border-[#3a3a3a] cursor-pointer shrink-0 transition-colors duration-120"
             >
-              {copiedLink ? <Check size={12} className="text-indigo-600 dark:text-indigo-400" /> : <Copy size={12} />}
+              {copiedLink ? <Check size={12} className="text-slate-300" /> : <Copy size={12} className="text-slate-400" />}
               <span>{copiedLink ? 'Link copied' : 'Copy link'}</span>
             </button>
           </div>
         </div>
 
         {/* Section Action Bar */}
-        <div className="flex min-h-14 flex-wrap items-center justify-end gap-x-3 gap-y-2 border-t border-slate-100 dark:border-slate-800 px-5 py-3 sm:px-6">
-          <p className="mr-auto flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+        <div className="flex min-h-14 flex-wrap items-center justify-end gap-x-3 gap-y-2 border-t border-[#333333] px-5 py-3 sm:px-6">
+          <p className="mr-auto flex items-center gap-1.5 text-xs text-slate-400">
             {isSaved ? (
-              <span className="inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-medium">
+              <span className="inline-flex items-center gap-1 text-slate-300 font-medium">
                 <Check size={13} />
                 <span>Saved just now</span>
               </span>
             ) : isDirty ? (
-              <span className="inline-flex items-center gap-1.5 text-slate-700 dark:text-slate-300 font-medium">
-                <span className="size-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400" />
+              <span className="inline-flex items-center gap-1.5 text-slate-300 font-medium">
+                <span className="size-1.5 rounded-full bg-slate-400" />
                 <span>You have unsaved changes</span>
               </span>
             ) : (
@@ -171,7 +171,7 @@ export const ProfileInvoicingSection: React.FC<ProfileInvoicingSectionProps> = (
               type="button"
               disabled={isSaving}
               onClick={onDiscard}
-              className="inline-flex h-9 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 px-3.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer border-0 transition-colors duration-120"
+              className="inline-flex h-9 items-center justify-center rounded-lg bg-[#282828] hover:bg-[#383838] border border-[#3a3a3a] px-3.5 text-xs font-semibold text-slate-300 hover:text-white cursor-pointer transition-colors duration-120"
             >
               Discard
             </button>

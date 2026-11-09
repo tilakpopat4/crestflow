@@ -89,7 +89,7 @@ export const ProfileSubscriptionSection: React.FC<ProfileSubscriptionSectionProp
                   <button
                     type="button"
                     onClick={onOpenSubscriptionModal}
-                    className="h-8.5 px-3.5 rounded-lg text-xs font-semibold bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-600 border-0 cursor-pointer transition-colors duration-120"
+                    className="h-8.5 px-3.5 rounded-lg text-xs font-semibold bg-[#282828] hover:bg-[#383838] text-slate-300 hover:text-white border border-[#3a3a3a] cursor-pointer transition-colors duration-120"
                   >
                     Change plan
                   </button>

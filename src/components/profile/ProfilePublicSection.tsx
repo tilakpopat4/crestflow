@@ -260,7 +260,7 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
               type="button"
               disabled={isSaving}
               onClick={onDiscard}
-              className="inline-flex h-9 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 px-3.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer border-0 transition-colors duration-120"
+              className="inline-flex h-9 items-center justify-center rounded-lg bg-[#282828] hover:bg-[#383838] border border-[#3a3a3a] px-3.5 text-xs font-semibold text-slate-300 hover:text-white cursor-pointer transition-colors duration-120"
             >
               Discard
             </button>

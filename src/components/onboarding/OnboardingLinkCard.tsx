@@ -94,7 +94,7 @@ export const OnboardingLinkCard: React.FC<OnboardingLinkCardProps> = ({
               target="_blank"
               rel="noopener noreferrer"
               whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
-              className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-xl text-sm font-semibold transition-colors cursor-pointer border-0"
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[#282828] hover:bg-[#383838] text-slate-300 hover:text-white border border-[#3a3a3a] rounded-xl text-sm font-semibold transition-colors cursor-pointer"
               title="Open client onboarding page in new tab"
             >
               <ExternalLink size={15} />
@@ -105,10 +105,10 @@ export const OnboardingLinkCard: React.FC<OnboardingLinkCardProps> = ({
               type="button"
               onClick={() => setShowQr(!showQr)}
               whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
-              className={`inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer border-0 ${
+              className={`inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer border border-[#3a3a3a] ${
                 showQr
-                  ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400'
-                  : 'bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200'
+                  ? 'bg-[#383838] text-white'
+                  : 'bg-[#282828] hover:bg-[#383838] text-slate-300 hover:text-white'
               }`}
               title="Toggle QR Code display"
             >
@@ -121,13 +121,13 @@ export const OnboardingLinkCard: React.FC<OnboardingLinkCardProps> = ({
 
       {/* Secondary Link (Public Freelancer Profile) */}
       {publicProfileUrl && (
-        <div className="pt-2 border-t border-slate-100 dark:border-slate-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+        <div className="pt-2 border-t border-[#333333] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
           <div className="flex items-center gap-2 min-w-0">
-            <span className="text-slate-500 dark:text-slate-400 shrink-0 font-medium inline-flex items-center gap-1">
-              <User size={13} className="text-indigo-600 dark:text-indigo-400" />
+            <span className="text-slate-400 shrink-0 font-medium inline-flex items-center gap-1">
+              <User size={13} className="text-slate-400" />
               Public Freelancer Profile:
             </span>
-            <span className="font-mono text-slate-700 dark:text-slate-300 truncate">
+            <span className="font-mono text-slate-300 truncate">
               {publicProfileUrl}
             </span>
           </div>
@@ -135,16 +135,16 @@ export const OnboardingLinkCard: React.FC<OnboardingLinkCardProps> = ({
             <button
               type="button"
               onClick={() => handleCopy(publicProfileUrl, 'profile')}
-              className="px-2.5 py-1 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-md font-medium cursor-pointer border-0 transition-colors inline-flex items-center gap-1"
+              className="px-2.5 py-1 text-slate-300 hover:text-white bg-[#282828] hover:bg-[#383838] border border-[#3a3a3a] rounded-md font-medium cursor-pointer transition-colors inline-flex items-center gap-1"
             >
-              {copiedType === 'profile' ? <Check size={12} className="text-indigo-600" /> : <Copy size={12} />}
+              {copiedType === 'profile' ? <Check size={12} className="text-slate-300" /> : <Copy size={12} />}
               <span>{copiedType === 'profile' ? 'Copied' : 'Copy'}</span>
             </button>
             <a
               href={publicProfileUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-2.5 py-1 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-md font-medium transition-colors inline-flex items-center gap-1"
+              className="px-2.5 py-1 text-slate-300 hover:text-white bg-[#282828] hover:bg-[#383838] border border-[#3a3a3a] rounded-md font-medium transition-colors inline-flex items-center gap-1"
             >
               <ExternalLink size={12} />
               <span>Open</span>
