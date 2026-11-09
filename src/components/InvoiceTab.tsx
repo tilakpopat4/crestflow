@@ -1399,7 +1399,7 @@ export default function InvoiceTab({
                   type="button"
                   onClick={() => handlePrintDocument(undefined, undefined, false)}
                   disabled={!selectedClient || effectiveReels.length === 0}
-                  className="flex justify-center items-center gap-1.5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 text-white px-3 py-2 rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer"
+                  className="flex justify-center items-center gap-1.5 bg-[#282828] hover:bg-[#383838] disabled:opacity-50 text-white border border-[#3a3a3a] px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer"
                   title="Print official invoice statement"
                 >
                   <Printer size={14} className="text-slate-400" />
@@ -1410,10 +1410,10 @@ export default function InvoiceTab({
                   type="button"
                   onClick={() => handlePrintWorkSummary()}
                   disabled={!selectedClient || effectiveReels.length === 0}
-                  className="flex justify-center items-center gap-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 disabled:bg-slate-100 text-slate-700 dark:text-slate-200 disabled:text-slate-400 px-3 py-2 rounded-xl text-xs font-semibold transition-all border border-slate-200 dark:border-slate-600 cursor-pointer"
+                  className="flex justify-center items-center gap-1.5 bg-[#282828] hover:bg-[#383838] disabled:opacity-50 text-slate-300 hover:text-white border border-[#3a3a3a] px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer"
                   title="Print work deliverables list without financial details"
                 >
-                  <ListChecks size={14} className="text-slate-600 dark:text-slate-300" />
+                  <ListChecks size={14} className="text-slate-400" />
                   Print Summary
                 </button>
               </div>
@@ -1424,14 +1424,14 @@ export default function InvoiceTab({
         </div>
 
       {/* Invoice History & Email Actions Section */}
-      <div className="mt-12 bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6 space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-700 pb-4">
+      <div className="mt-12 bg-[#212121] border border-[#333333] rounded-xl shadow-xs p-6 space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#333333] pb-4">
           <div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
-              <Receipt size={20} className="text-indigo-600 dark:text-indigo-400" />
+            <h3 className="text-lg font-bold text-white tracking-tight flex items-center gap-2">
+              <Receipt size={20} className="text-slate-400" />
               Invoice History & Email Dispatch
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-slate-400">
               View generated cycle invoices and resend email notifications with itemized work details.
             </p>
           </div>
@@ -1439,18 +1439,18 @@ export default function InvoiceTab({
           <div className="flex items-center gap-3">
             {/* Local Invoice Search Bar */}
             <div className="relative w-full md:w-64">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
                 value={invoiceSearchQuery}
                 onChange={(e) => setInvoiceSearchQuery(e.target.value)}
                 placeholder="Filter invoices or client..."
-                className="w-full bg-slate-50 dark:bg-slate-900 text-sm pl-9 pr-7 py-2 rounded-xl border border-slate-200 dark:border-slate-700 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500 outline-none text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                className="w-full bg-[#181818] text-sm pl-9 pr-7 py-2 rounded-xl border border-[#333333] focus:border-indigo-500 outline-none text-white placeholder:text-slate-500"
               />
               {invoiceSearchQuery && (
                 <button
                   onClick={() => setInvoiceSearchQuery('')}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
                 >
                   <X size={12} />
                 </button>
@@ -1461,10 +1461,10 @@ export default function InvoiceTab({
               <button
                 type="button"
                 onClick={() => setShowClosed(prev => !prev)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-colors cursor-pointer shrink-0 ${
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-colors cursor-pointer shrink-0 border border-[#3a3a3a] ${
                   showClosed
-                    ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    ? 'bg-[#282828] text-white'
+                    : 'bg-[#181818] text-slate-400 hover:text-white'
                 }`}
                 title={showClosed ? "Hide invoices of closed clients" : "Show invoices of closed clients"}
               >
@@ -1473,7 +1473,7 @@ export default function InvoiceTab({
               </button>
             )}
 
-            <span className="text-sm font-medium px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg shrink-0">
+            <span className="text-sm font-medium px-2.5 py-1 bg-[#181818] border border-[#2a2a2a] text-slate-400 rounded-lg shrink-0">
               {displayedInvoices.length} Invoices
             </span>
           </div>
@@ -1519,7 +1519,7 @@ export default function InvoiceTab({
             <div className="overflow-x-auto w-full">
             <table className="w-full text-left border-collapse min-w-[960px]">
               <thead>
-                <tr className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                <tr className="bg-[#181818] border-b border-[#333333] text-xs font-semibold text-slate-400 uppercase tracking-wider">
                   <th className="py-3.5 px-4 whitespace-nowrap min-w-[130px]">Invoice No / Date</th>
                   <th className="py-3.5 px-4 whitespace-nowrap min-w-[170px]">Client</th>
                   <th className="py-3.5 px-4 whitespace-nowrap min-w-[190px]">Items / Summary</th>
@@ -1528,7 +1528,7 @@ export default function InvoiceTab({
                   <th className="py-3.5 px-4 text-right whitespace-nowrap min-w-[280px]">Email Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm">
+              <tbody className="divide-y divide-[#2a2a2a] text-sm">
                 {displayedInvoices
                   .filter(inv => {
                     if (!invoiceSearchQuery.trim()) return true;
@@ -1554,41 +1554,41 @@ export default function InvoiceTab({
                     const emailDetails = generateInvoiceEmailDetails(clientObj, inv, profile);
 
                     return (
-                      <tr key={inv.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
-                        <td className="py-3 px-4 font-mono text-sm text-slate-700 dark:text-slate-300 whitespace-nowrap min-w-[130px]">
-                          <div className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5 whitespace-nowrap">
+                      <tr key={inv.id} className="hover:bg-[#282828]/50 transition-colors">
+                        <td className="py-3 px-4 font-mono text-sm text-slate-300 whitespace-nowrap min-w-[130px]">
+                          <div className="font-bold text-white flex items-center gap-1.5 whitespace-nowrap">
                             <span className="whitespace-nowrap">{formatInvoiceNumber(inv, invoices)}</span>
                           </div>
-                          <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 whitespace-nowrap">
+                          <div className="text-xs text-slate-400 mt-0.5 whitespace-nowrap">
                             {new Date(inv.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                           </div>
                         </td>
                         <td className="py-3 px-4 text-sm min-w-[170px] max-w-[220px]">
-                          <div className="font-semibold text-slate-900 dark:text-slate-100 truncate" title={inv.clientName}>{inv.clientName}</div>
+                          <div className="font-semibold text-white truncate" title={inv.clientName}>{inv.clientName}</div>
                           {clientObj.email && (
-                            <div className="text-xs text-slate-500 dark:text-slate-400 font-normal mt-0.5 truncate" title={clientObj.email}>{clientObj.email}</div>
+                            <div className="text-xs text-slate-400 font-normal mt-0.5 truncate" title={clientObj.email}>{clientObj.email}</div>
                           )}
                         </td>
-                        <td className="py-3 px-4 text-slate-600 dark:text-slate-300 text-sm min-w-[190px] max-w-[260px]">
+                        <td className="py-3 px-4 text-slate-300 text-sm min-w-[190px] max-w-[260px]">
                           <div className="flex items-center gap-1.5 whitespace-nowrap">
-                            <span className="font-semibold text-xs text-slate-800 dark:text-slate-200">
+                            <span className="font-semibold text-xs text-slate-200">
                               {inv.invoiceType === 'monthly_retainer' ? '1 Retainer' : `${inv.reels.length} item(s)`}
                             </span>
                             {inv.invoiceType === 'monthly_retainer' && (
-                              <span className="text-[12px] font-medium text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                              <span className="text-[12px] font-medium text-slate-400 whitespace-nowrap">
                                 Monthly Retainer
                               </span>
                             )}
                           </div>
-                          <div className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[240px] mt-0.5" title={inv.reels.map(r => r.title).join(', ')}>
+                          <div className="text-xs text-slate-400 truncate max-w-[240px] mt-0.5" title={inv.reels.map(r => r.title).join(', ')}>
                             {inv.reels.map(r => r.title).join(', ')}
                           </div>
                         </td>
                         <td className="py-3 px-4 text-right whitespace-nowrap min-w-[110px]">
-                          <div className="font-bold text-slate-900 dark:text-slate-100 text-sm sm:text-base whitespace-nowrap">
+                          <div className="font-bold text-white text-sm sm:text-base whitespace-nowrap">
                             ₹{inv.totalAmount.toLocaleString('en-IN')}
                           </div>
-                          <div className="text-[11px] font-normal text-slate-400 dark:text-slate-500 mt-0.5 whitespace-nowrap">
+                          <div className="text-[11px] font-normal text-slate-400 mt-0.5 whitespace-nowrap">
                             {inv.invoiceType === 'monthly_retainer' ? 'Retainer' : 'Itemized'}
                           </div>
                         </td>
@@ -1603,32 +1603,32 @@ export default function InvoiceTab({
                           <div className="flex items-center justify-end gap-1.5 whitespace-nowrap shrink-0">
                             <button
                               onClick={() => handleEditInvoice(inv)}
-                              className="px-2.5 py-1.5 bg-white dark:bg-slate-700 hover:bg-indigo-50 dark:hover:bg-slate-600 text-indigo-700 dark:text-indigo-300 border border-slate-200 dark:border-slate-600 hover:border-indigo-200 dark:hover:border-slate-500 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 shadow-2xs cursor-pointer whitespace-nowrap shrink-0"
+                              className="px-2.5 py-1.5 bg-[#282828] hover:bg-[#383838] text-slate-300 hover:text-white border border-[#3a3a3a] rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer whitespace-nowrap shrink-0"
                               title="Load invoice into generator to edit"
                             >
-                              <Pencil size={13} /> Edit
+                              <Pencil size={13} className="text-slate-400" /> Edit
                             </button>
 
                             <button
                               onClick={() => handleRedownloadPdf(inv)}
                               disabled={downloadingPdfId === inv.id}
-                              className="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 disabled:bg-slate-100 dark:disabled:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer whitespace-nowrap shrink-0"
+                              className="px-2.5 py-1.5 bg-[#282828] hover:bg-[#383838] disabled:opacity-50 text-slate-300 hover:text-white border border-[#3a3a3a] rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer whitespace-nowrap shrink-0"
                               title="Re-download PDF Invoice file"
                             >
                               {downloadingPdfId === inv.id ? (
-                                <Loader2 size={13} className="animate-spin text-indigo-600 dark:text-indigo-400" />
+                                <Loader2 size={13} className="animate-spin text-slate-300" />
                               ) : (
-                                <Download size={13} className="text-slate-600 dark:text-slate-300" />
+                                <Download size={13} className="text-slate-400" />
                               )}
                               PDF
                             </button>
 
                             <button
                               onClick={() => handlePrintDocument(inv, clientObj, false)}
-                              className="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer whitespace-nowrap shrink-0"
+                              className="px-2.5 py-1.5 bg-[#282828] hover:bg-[#383838] text-slate-300 hover:text-white border border-[#3a3a3a] rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer whitespace-nowrap shrink-0"
                               title="Print official invoice statement"
                             >
-                              <Printer size={13} className="text-slate-600 dark:text-slate-300" />
+                              <Printer size={13} className="text-slate-400" />
                               Print
                             </button>
 
@@ -1664,18 +1664,18 @@ export default function InvoiceTab({
                                   gmailStatus: { sending: false }
                                 });
                               }}
-                              className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors shadow-xs cursor-pointer whitespace-nowrap shrink-0"
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-[#282828] hover:bg-[#383838] text-white border border-[#3a3a3a] rounded-lg text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0"
                               title="Send Invoice PDF via Gmail"
                             >
-                              <Mail size={13} /> Send via Gmail
+                              <Mail size={13} className="text-slate-400" /> Send via Gmail
                             </button>
 
                             <a
                               href={emailDetails.mailtoLink}
-                              className="p-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold transition-colors shrink-0"
+                              className="p-1.5 bg-[#282828] hover:bg-[#383838] text-slate-300 hover:text-white border border-[#3a3a3a] rounded-lg text-xs font-semibold transition-colors shrink-0"
                               title="Open Default Mail App"
                             >
-                              <Send size={13} />
+                              <Send size={13} className="text-slate-400" />
                             </a>
 
                             <button
@@ -1683,15 +1683,15 @@ export default function InvoiceTab({
                                 navigator.clipboard.writeText(`Subject: ${emailDetails.subject}\n\n${emailDetails.body}`);
                                 alert(`Invoice email details for ${inv.clientName} copied to clipboard!`);
                               }}
-                              className="p-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer shrink-0"
+                              className="p-1.5 bg-[#282828] hover:bg-[#383838] text-slate-300 hover:text-white border border-[#3a3a3a] rounded-lg text-xs font-semibold transition-colors cursor-pointer shrink-0"
                               title="Copy Email Text to Clipboard"
                             >
-                              <Copy size={13} />
+                              <Copy size={13} className="text-slate-400" />
                             </button>
 
                             <button
                               onClick={() => handleDeleteInvoice(inv.id)}
-                              className="p-1.5 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-xs transition-colors cursor-pointer border-none bg-transparent shrink-0"
+                              className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-[#282828] rounded-lg text-xs transition-colors cursor-pointer border-none bg-transparent shrink-0"
                               title="Delete Invoice"
                             >
                               <Trash2 size={13} />
@@ -1703,15 +1703,15 @@ export default function InvoiceTab({
                   })}
               </tbody>
               {invoices.length > 0 && (
-                <tfoot className="bg-slate-50 dark:bg-slate-900/80 border-t border-slate-200 dark:border-slate-700 font-semibold text-xs text-slate-800 dark:text-slate-200">
+                <tfoot className="bg-[#181818] border-t border-[#333333] font-semibold text-xs text-slate-300">
                   <tr>
-                    <td colSpan={3} className="p-3.5 text-right font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    <td colSpan={3} className="p-3.5 text-right font-bold uppercase tracking-wider text-slate-400">
                       Total Earned (Paid Invoices):
                     </td>
                     <td className="p-3.5 text-right font-black text-white text-sm">
                       ₹{totalEarnedTillToday.toLocaleString('en-IN')}
                     </td>
-                    <td colSpan={2} className="p-3.5 text-slate-500 dark:text-slate-400 text-xs">
+                    <td colSpan={2} className="p-3.5 text-slate-400 text-xs">
                       {paidInvoicesCount} Paid ({invoices.length} total)
                     </td>
                   </tr>
