@@ -26,7 +26,12 @@ function pemToDer(pem: string): Uint8Array {
 /**
  * Parses and validates the service account credentials from worker secrets.
  */
-export function parseServiceAccount(rawJson: string): ServiceAccountCredentials {
+export function parseServiceAccount(rawJson?: string): ServiceAccountCredentials {
+  if (!rawJson || rawJson === 'undefined' || typeof rawJson !== 'string' || !rawJson.trim()) {
+    throw new Error(
+      'FIREBASE_SERVICE_ACCOUNT secret is missing or empty in the Cloudflare Worker environment. Please configure it using `npx wrangler secret put FIREBASE_SERVICE_ACCOUNT`.'
+    );
+  }
   try {
     const creds = JSON.parse(rawJson);
     if (!creds.client_email || !creds.private_key || !creds.project_id) {
