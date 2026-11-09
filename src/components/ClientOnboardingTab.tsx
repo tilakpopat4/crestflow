@@ -130,32 +130,32 @@ export default function ClientOnboardingTab({
 
       {/* Summary Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-5 sm:p-6 shadow-xs flex items-center justify-between">
+        <div className="bg-[#212121] border border-[#333333] rounded-xl p-5 sm:p-6 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Pending Inquiries</p>
-            <p className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 mt-1">{counts.pending}</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Pending Inquiries</p>
+            <p className="text-2xl sm:text-3xl font-bold text-white mt-1">{counts.pending}</p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+          <div className="w-12 h-12 rounded-xl bg-[#282828] border border-[#3a3a3a] flex items-center justify-center text-slate-300">
             <Inbox size={22} />
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-5 sm:p-6 shadow-xs flex items-center justify-between">
+        <div className="bg-[#212121] border border-[#333333] rounded-xl p-5 sm:p-6 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Accepted Clients</p>
-            <p className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 mt-1">{counts.accepted}</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Accepted Clients</p>
+            <p className="text-2xl sm:text-3xl font-bold text-white mt-1">{counts.accepted}</p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+          <div className="w-12 h-12 rounded-xl bg-[#282828] border border-[#3a3a3a] flex items-center justify-center text-slate-300">
             <CheckCircle2 size={22} />
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-5 sm:p-6 shadow-xs flex items-center justify-between">
+        <div className="bg-[#212121] border border-[#333333] rounded-xl p-5 sm:p-6 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Leads</p>
-            <p className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 mt-1">{counts.all}</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Leads</p>
+            <p className="text-2xl sm:text-3xl font-bold text-white mt-1">{counts.all}</p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300">
+          <div className="w-12 h-12 rounded-xl bg-[#282828] border border-[#3a3a3a] flex items-center justify-center text-slate-300">
             <Users size={22} />
           </div>
         </div>

@@ -56,66 +56,66 @@ export default function AdminPlatformHistory({
     <div className="space-y-6">
       {/* Top Aggregation Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1 shadow-2xs border border-slate-200 dark:border-slate-800">
-          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+        <div className="bg-[#212121] border border-[#333333] rounded-xl p-4 sm:p-5 space-y-1 shadow-xs">
+          <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
             Total Invoices Created
           </div>
-          <div className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
+          <div className="text-2xl sm:text-3xl font-bold text-white">
             {stats.totalInvoices}
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1 shadow-2xs border border-slate-200 dark:border-slate-800">
-          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+        <div className="bg-[#212121] border border-[#333333] rounded-xl p-4 sm:p-5 space-y-1 shadow-xs">
+          <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
             Total Billed Volume
           </div>
-          <div className="text-2xl sm:text-3xl font-bold text-indigo-600 dark:text-indigo-400">
+          <div className="text-2xl sm:text-3xl font-bold text-white">
             ₹{stats.totalBilledVolume.toLocaleString()}
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1 shadow-2xs border border-slate-200 dark:border-slate-800">
-          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+        <div className="bg-[#212121] border border-[#333333] rounded-xl p-4 sm:p-5 space-y-1 shadow-xs">
+          <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
             Total Clients Added
           </div>
-          <div className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
+          <div className="text-2xl sm:text-3xl font-bold text-white">
             {stats.totalClients}
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1 shadow-2xs border border-slate-200 dark:border-slate-800">
-          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+        <div className="bg-[#212121] border border-[#333333] rounded-xl p-4 sm:p-5 space-y-1 shadow-xs">
+          <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
             Work Items Logged
           </div>
-          <div className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
+          <div className="text-2xl sm:text-3xl font-bold text-white">
             {stats.totalWorkItems}
           </div>
         </div>
       </div>
 
       {/* Invoices Audit Table */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-2xs">
-        <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800">
+      <div className="bg-[#212121] border border-[#333333] rounded-xl overflow-hidden shadow-xs">
+        <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#333333]">
           <div>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+            <h2 className="text-lg font-bold text-white">
               Platform Activity & Invoices Log
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-400 mt-0.5">
               Complete historical record of all invoices generated across the application.
             </p>
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
             {/* Filter Pills */}
-            <div className="flex bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg text-xs font-medium">
+            <div className="flex bg-[#181818] p-1 rounded-lg text-xs font-medium border border-[#2a2a2a]">
               {(['all', 'paid', 'invoiced', 'overdue'] as const).map((st) => (
                 <button
                   key={st}
                   onClick={() => setStatusFilter(st)}
-                  className={`px-2.5 py-1 rounded-md capitalize transition-colors duration-120 border-0 cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-md capitalize transition-colors duration-120 border-0 cursor-pointer text-xs ${
                     statusFilter === st
-                      ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-semibold shadow-2xs'
-                      : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
+                      ? 'bg-[#282828] text-white font-semibold shadow-xs'
+                      : 'text-slate-400 hover:text-white'
                   }`}
                 >
                   {st}
@@ -131,13 +131,13 @@ export default function AdminPlatformHistory({
                 placeholder="Search invoice, client, UID..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg pl-9 pr-3.5 py-1.5 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 outline-none focus:border-indigo-500 transition-colors duration-120"
+                className="w-full bg-[#181818] border border-[#333333] rounded-lg pl-9 pr-3.5 py-1.5 text-xs text-white placeholder:text-slate-500 outline-none focus:border-indigo-500 transition-colors duration-120"
               />
             </div>
 
             <button
               onClick={onRefresh}
-              className="p-1.5 text-slate-500 hover:text-slate-900 dark:text-slate-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 border-0 cursor-pointer"
+              className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-[#282828] border-0 cursor-pointer"
               title="Refresh activity feed"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -147,13 +147,13 @@ export default function AdminPlatformHistory({
 
         <div className="overflow-x-auto">
           {loading ? (
-            <div className="p-12 text-center text-slate-500 text-xs">Loading platform history...</div>
+            <div className="p-12 text-center text-slate-400 text-xs">Loading platform history...</div>
           ) : filteredInvoices.length === 0 ? (
-            <div className="p-12 text-center text-slate-500 text-xs">No invoices matching criteria.</div>
+            <div className="p-12 text-center text-slate-400 text-xs">No invoices matching criteria.</div>
           ) : (
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-50 dark:bg-slate-950 text-slate-500 uppercase tracking-wider font-semibold border-b border-slate-200 dark:border-slate-800">
+                <tr className="bg-[#181818] text-slate-400 uppercase tracking-wider font-semibold border-b border-[#333333]">
                   <th className="p-4">Invoice #</th>
                   <th className="p-4">Freelancer</th>
                   <th className="p-4">Client</th>
@@ -162,51 +162,51 @@ export default function AdminPlatformHistory({
                   <th className="p-4 text-right">Created Date</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+              <tbody className="divide-y divide-[#2a2a2a]">
                 {filteredInvoices.map((inv: any) => (
                   <tr
                     key={inv.id}
-                    className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors duration-120"
+                    className="hover:bg-[#282828]/50 transition-colors duration-120"
                   >
-                    <td className="p-4 font-mono font-bold text-slate-800 dark:text-slate-200">
+                    <td className="p-4 font-mono font-bold text-slate-300">
                       {inv.invoiceNumber || inv.id.slice(0, 8)}
                     </td>
                     <td className="p-4">
-                      <div className="font-semibold text-slate-900 dark:text-slate-100">
+                      <div className="font-semibold text-white">
                         {inv.freelancerName}
                       </div>
                       <div className="text-[11px] text-slate-400 font-mono">{inv.freelancerEmail}</div>
                     </td>
                     <td className="p-4">
-                      <div className="font-semibold text-slate-900 dark:text-slate-100">
+                      <div className="font-semibold text-white">
                         {inv.clientName || 'Unnamed Client'}
                       </div>
                       {inv.clientEmail && (
                         <div className="text-[11px] text-slate-400">{inv.clientEmail}</div>
                       )}
                     </td>
-                    <td className="p-4 font-bold text-slate-900 dark:text-slate-100 text-sm">
+                    <td className="p-4 font-bold text-white text-sm">
                       {inv.currency || '₹'} {Number(inv.totalAmount || 0).toLocaleString()}
                     </td>
                     <td className="p-4">
                       {inv.status === 'paid' ? (
-                        <span className="inline-flex items-center gap-1.5 font-medium text-indigo-600 dark:text-indigo-400">
-                          <span className="w-2 h-2 rounded-full bg-indigo-600" />
+                        <span className="inline-flex items-center gap-1.5 font-medium text-indigo-400">
+                          <span className="w-2 h-2 rounded-full bg-indigo-500" />
                           Paid
                         </span>
                       ) : inv.status === 'overdue' ? (
-                        <span className="inline-flex items-center gap-1.5 font-medium text-red-600 dark:text-red-400">
-                          <span className="w-2 h-2 rounded-full bg-red-600" />
+                        <span className="inline-flex items-center gap-1.5 font-medium text-red-400">
+                          <span className="w-2 h-2 rounded-full bg-red-500" />
                           Overdue
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 font-medium text-slate-600 dark:text-slate-400">
-                          <span className="w-2 h-2 rounded-full bg-slate-400" />
+                        <span className="inline-flex items-center gap-1.5 font-medium text-slate-400">
+                          <span className="w-2 h-2 rounded-full bg-slate-500" />
                           {inv.status || 'Draft'}
                         </span>
                       )}
                     </td>
-                    <td className="p-4 text-right text-slate-500 font-medium">
+                    <td className="p-4 text-right text-slate-400 font-medium">
                       {inv.createdAt ? new Date(inv.createdAt).toLocaleDateString() : '—'}
                     </td>
                   </tr>

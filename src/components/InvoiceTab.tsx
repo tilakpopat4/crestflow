@@ -1152,14 +1152,14 @@ export default function InvoiceTab({
                 </div>
 
                 {/* Quick Set Direct Grand Total */}
-                <div className="mb-5 p-3.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl">
+                <div className="mb-5 p-3.5 bg-[#212121] border border-[#333333] rounded-xl">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
-                      <span className="text-xs font-bold text-indigo-900 dark:text-indigo-300 uppercase tracking-wider flex items-center gap-1.5">
-                        <Calculator size={15} className="text-indigo-600 dark:text-indigo-400" />
+                      <span className="text-xs font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                        <Calculator size={15} className="text-slate-400" />
                         Direct Grand Total Split
                       </span>
-                      <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">
+                      <p className="text-xs text-slate-400 mt-0.5">
                         Enter target grand total to divide equally across all {reels.length} item{reels.length === 1 ? '' : 's'}.
                       </p>
                     </div>
@@ -1723,26 +1723,26 @@ export default function InvoiceTab({
       )}
 
         {/* Last Bar: Total Earned Till Today */}
-        <div className="mt-6 bg-slate-900 text-white rounded-xl p-5 md:p-6 flex flex-col md:flex-row items-center justify-between gap-5 relative overflow-hidden">
+        <div className="mt-6 bg-[#212121] border border-[#333333] text-white rounded-xl p-5 md:p-6 flex flex-col md:flex-row items-center justify-between gap-5 relative overflow-hidden">
           <div className="flex items-center gap-4 relative z-10 w-full md:w-auto">
-            <div className="w-12 h-12 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-indigo-400 shrink-0">
+            <div className="w-12 h-12 rounded-lg bg-[#282828] border border-[#3a3a3a] flex items-center justify-center text-slate-300 shrink-0">
               <IndianRupee size={24} className="stroke-[2.5]" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700 px-2.5 py-0.5 rounded-md">
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-[#282828] text-slate-300 border border-[#3a3a3a] px-2.5 py-0.5 rounded-md">
                   Lifetime Revenue
                 </span>
                 <span className="text-xs text-slate-400">Paid Invoices Till Today</span>
               </div>
               <h3 className="text-2xl sm:text-3xl font-black tracking-tight mt-1 text-white">
                 Total Earned Till Today:{' '}
-                <span className="text-indigo-400">₹{totalEarnedTillToday.toLocaleString('en-IN')}</span>
+                <span className="text-white">₹{totalEarnedTillToday.toLocaleString('en-IN')}</span>
               </h3>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 sm:gap-6 relative z-10 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-slate-800 pt-3 md:pt-0">
+          <div className="flex items-center gap-4 sm:gap-6 relative z-10 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-[#333333] pt-3 md:pt-0">
             <div className="text-left md:text-right">
               <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Paid Invoices</span>
               <span className="text-base font-bold text-white">
@@ -1750,14 +1750,14 @@ export default function InvoiceTab({
               </span>
             </div>
             {pendingAmount > 0 && (
-              <div className="text-left md:text-right border-l border-slate-800 pl-4 sm:pl-6">
+              <div className="text-left md:text-right border-l border-[#333333] pl-4 sm:pl-6">
                 <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Pending Clearance</span>
                 <span className="text-base font-bold text-white">
                   ₹{pendingAmount.toLocaleString('en-IN')}
                 </span>
               </div>
             )}
-            <div className="text-left md:text-right border-l border-slate-800 pl-4 sm:pl-6">
+            <div className="text-left md:text-right border-l border-[#333333] pl-4 sm:pl-6">
               <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Total Invoiced</span>
               <span className="text-base font-bold text-white">
                 ₹{totalInvoicedAmount.toLocaleString('en-IN')}
@@ -1802,26 +1802,26 @@ export default function InvoiceTab({
 
             {/* Gmail Live Status Banner */}
             {emailModalData.gmailStatus?.sending ? (
-              <div className="p-3.5 bg-indigo-50 border border-indigo-200 rounded-xl text-xs text-indigo-900 flex items-center gap-2.5 font-medium">
-                <Loader2 size={16} className="animate-spin text-indigo-600 shrink-0" />
+              <div className="p-3.5 bg-[#282828] border border-[#3a3a3a] rounded-xl text-xs text-white flex items-center gap-2.5 font-medium">
+                <Loader2 size={16} className="animate-spin text-slate-300 shrink-0" />
                 <span>Sending Invoice PDF directly to <strong>{emailModalData.clientEmail || 'client'}</strong> via Gmail API...</span>
               </div>
             ) : emailModalData.gmailStatus?.success ? (
-              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 flex items-center justify-between">
+              <div className="p-3.5 bg-[#212121] border border-[#333333] rounded-xl text-xs text-white flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <CheckCircle2 className="text-indigo-600 w-5 h-5 shrink-0" />
+                  <CheckCircle2 className="text-slate-300 w-5 h-5 shrink-0" />
                   <div>
                     <p className="font-bold">Invoice PDF successfully sent via Gmail!</p>
-                    <p className="text-[11px] text-slate-600">Delivered to <strong>{emailModalData.clientEmail}</strong> with PDF attached.</p>
+                    <p className="text-[11px] text-slate-400">Delivered to <strong>{emailModalData.clientEmail}</strong> with PDF attached.</p>
                   </div>
                 </div>
-                <span className="text-[10px] bg-slate-100 text-slate-700 font-mono font-medium px-2 py-0.5 rounded">Gmail API</span>
+                <span className="text-[10px] bg-[#282828] text-slate-300 border border-[#3a3a3a] font-mono font-medium px-2 py-0.5 rounded">Gmail API</span>
               </div>
             ) : (
-              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 space-y-1">
+              <div className="p-3.5 bg-[#212121] border border-[#333333] rounded-xl text-xs text-slate-300 space-y-1">
                 <div className="flex items-center justify-between">
-                  <p className="font-bold text-slate-900 flex items-center gap-1.5">
-                    <AlertCircle className="w-4 h-4 text-slate-500 shrink-0" /> Gmail Automatic Delivery Status:
+                  <p className="font-bold text-white flex items-center gap-1.5">
+                    <AlertCircle className="w-4 h-4 text-slate-400 shrink-0" /> Gmail Automatic Delivery Status:
                   </p>
                   {emailModalData.gmailStatus?.error && (
                     <span className="text-[10px] text-red-600 font-mono font-semibold max-w-xs truncate" title={emailModalData.gmailStatus.error}>

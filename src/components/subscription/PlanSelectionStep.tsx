@@ -51,7 +51,7 @@ export const PlanSelectionStep: React.FC<PlanSelectionStepProps> = ({
               {isSelected && (
                 <motion.div
                   layoutId="planTabIndicator"
-                  className="absolute inset-0 bg-white dark:bg-slate-900 rounded shadow-xs -z-10"
+                  className="absolute inset-0 bg-[#282828] rounded shadow-xs -z-10"
                   transition={
                     shouldReduceMotion
                       ? { duration: 0 }
