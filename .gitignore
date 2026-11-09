@@ -7,4 +7,7 @@ coverage/
 .env*
 !.env.example
 client_secret*.json
+*-firebase-adminsdk-*.json
+*serviceAccount*.json
+*.pem
 .agent/
