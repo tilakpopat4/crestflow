@@ -2,7 +2,7 @@
  * CrestFlow 4 Subscription Plans (Monthly, Quarterly, 6-Month, Yearly) & Limits.
  */
 
-export type PlanIntervalKey = 'monthly' | 'quarterly' | 'half' | 'yearly';
+export type PlanIntervalKey = 'trial' | 'monthly' | 'quarterly' | 'half' | 'yearly';
 
 export interface PlanPricing {
   id: PlanIntervalKey;
@@ -17,11 +17,34 @@ export interface PlanPricing {
   savingsBadge?: string;
   description: string;
   features: string[];
+  isTrial?: boolean;
 }
 
 export const FREE_TIER_LIMITS = {
   maxClients: 2,
   maxInvoicesPerMonth: 3,
+};
+
+export const TRIAL_PLAN: PlanPricing = {
+  id: 'trial',
+  planCode: 'pro_trial',
+  name: '7-Day Trial',
+  price: 1,
+  currency: 'INR',
+  interval: '7 days',
+  durationDays: 7,
+  periodLabel: 'for 7 days',
+  monthlyEquivalent: 1,
+  savingsBadge: 'Single-Use',
+  description: 'Full Pro access for 7 days. One-time trial per account.',
+  isTrial: true,
+  features: [
+    '7 days full access to all Pro features',
+    'Unlimited clients, deliverables & invoices',
+    'Automated 6:00 AM delivery scheduling',
+    'Client review portal & public freelancer portfolio',
+    'Direct UPI payment tracking without commission',
+  ],
 };
 
 export const PRO_PLANS: PlanPricing[] = [
@@ -98,6 +121,11 @@ export const PRO_PLANS: PlanPricing[] = [
       'Custom domain & priority beta features',
     ],
   },
+];
+
+export const ALL_DISPLAY_PLANS: PlanPricing[] = [
+  TRIAL_PLAN,
+  ...PRO_PLANS,
 ];
 
 /**

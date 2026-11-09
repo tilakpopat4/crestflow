@@ -283,4 +283,63 @@ describe('Trial Ledger Anti-Abuse & Anti-Bypass Suite', () => {
     const data = await res.json();
     assert.strictEqual(data.isFirstTime, true);
   });
+
+  it('7. Direct Paid Plan: Directly pays for plan immediately without trial delay', async () => {
+    const token = getToken('user_direct_pay_1', 'directpay@gmail.com');
+    const req = new Request('http://localhost/api/create-subscription', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ planKey: 'monthly', isDirect: true, isTrial: false }),
+    });
+
+    const res = await handleCreateSubscription(req, TEST_ENV);
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.strictEqual(data.isFirstTime, false, 'Direct paid plan must not have trial delay or trial addon');
+  });
+
+  it('8. Dedicated Trial Plan: First-time user gets single-use trial with ₹1 addon', async () => {
+    const token = getToken('user_trial_single_1', 'firsttimetrial@gmail.com');
+    const req = new Request('http://localhost/api/create-subscription', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ planKey: 'trial', isTrial: true }),
+    });
+
+    const res = await handleCreateSubscription(req, TEST_ENV);
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.strictEqual(data.isFirstTime, true, 'Dedicated trial plan must initiate 7-day trial');
+  });
+
+  it('9. Trial Single-Use Enforcement: Rejects 2nd trial attempt with 403', async () => {
+    const usedUid = 'user_already_trialed';
+    state.firestoreSubscriptions.set(usedUid, {
+      userId: usedUid,
+      status: 'expired',
+      hasHadTrial: true,
+      updatedAt: Date.now() - 50000,
+    });
+
+    const token = getToken(usedUid, 'previoustrial@gmail.com');
+    const req = new Request('http://localhost/api/create-subscription', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ planKey: 'trial', isTrial: true }),
+    });
+
+    const res = await handleCreateSubscription(req, TEST_ENV);
+    assert.strictEqual(res.status, 403, 'Users who already used a trial must be rejected with 403');
+    const data = await res.json();
+    assert.ok(data.error.includes('trial is only available once per account'));
+  });
 });

@@ -8,7 +8,7 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import { PlanSelectionStep } from './subscription/PlanSelectionStep';
 import { SubscriptionSuccessStep } from './subscription/SubscriptionSuccessStep';
 
-import { PlanIntervalKey } from '../lib/subscriptionPlans';
+import { PlanIntervalKey, ALL_DISPLAY_PLANS, TRIAL_PLAN } from '../lib/subscriptionPlans';
 
 interface SubscriptionModalProps {
   isOpen: boolean;
@@ -48,18 +48,42 @@ export default function SubscriptionModal({
   onLogout,
 }: SubscriptionModalProps) {
   const [step, setStep] = useState<'select' | 'activating' | 'success'>('select');
-  const [selectedCycle, setSelectedCycle] = useState<PlanIntervalKey>('monthly');
+  const [selectedCycle, setSelectedCycle] = useState<PlanIntervalKey>('trial');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [subData, setSubData] = useState<any>(null);
+
+  // Listen to Firestore for user subscription history to know if trial has been claimed
+  useEffect(() => {
+    if (!user?.uid) return;
+    const unsub = onSnapshot(doc(db, 'subscriptions', user.uid), (snap) => {
+      if (snap.exists()) {
+        const data = snap.data();
+        setSubData(data);
+      }
+    });
+    return () => unsub();
+  }, [user?.uid]);
+
+  const isTrialUsed = Boolean(
+    subData?.hasHadTrial ||
+    subData?.hasHadSubscription ||
+    subData?.trialEndsAt ||
+    subData?.status === 'active' ||
+    subData?.status === 'trialing' ||
+    subData?.status === 'cancelled' ||
+    subData?.status === 'expired'
+  );
 
   // Reset state when modal opens
   useEffect(() => {
     if (isOpen) {
       setStep('select');
+      setSelectedCycle(isTrialUsed ? 'monthly' : 'trial');
       setLoading(false);
       setError(null);
     }
-  }, [isOpen]);
+  }, [isOpen, isTrialUsed]);
 
   // While in 'activating' step, listen to Firestore in real time for webhook confirmation
   useEffect(() => {
@@ -88,6 +112,9 @@ export default function SubscriptionModal({
     setLoading(true);
     setError(null);
 
+    const isTrial = selectedCycle === 'trial';
+    const activePlan = ALL_DISPLAY_PLANS.find((p) => p.id === selectedCycle) || TRIAL_PLAN;
+
     try {
       // 1. Ensure Razorpay Checkout script is loaded
       const isLoaded = await loadRazorpayScript();
@@ -105,7 +132,11 @@ export default function SubscriptionModal({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${idToken}`,
         },
-        body: JSON.stringify({ planKey: selectedCycle }),
+        body: JSON.stringify({
+          planKey: isTrial ? 'trial' : selectedCycle,
+          isTrial,
+          isDirect: !isTrial,
+        }),
       });
 
       if (!res.ok) {
@@ -125,7 +156,9 @@ export default function SubscriptionModal({
         key: rzpKey,
         subscription_id: subscriptionId,
         name: 'CrestFlow Pro',
-        description: `CrestFlow Pro (${selectedCycle === 'yearly' ? 'Yearly' : 'Monthly'})`,
+        description: isTrial
+          ? 'CrestFlow Pro 7-Day Trial (₹1)'
+          : `CrestFlow Pro ${activePlan.name} (₹${activePlan.price.toLocaleString('en-IN')})`,
         image: '/app_logo_icon.png',
         prefill: {
           name: profile?.name || user.displayName || '',
@@ -226,6 +259,7 @@ export default function SubscriptionModal({
                   onStartPayment={handleStartPayment}
                   isMandatory={isMandatory}
                   onLogout={onLogout}
+                  isTrialUsed={isTrialUsed}
                 />
               )}
 

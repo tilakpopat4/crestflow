@@ -283,6 +283,7 @@ export async function handleRazorpayWebhook(request: Request, env: Env): Promise
         ? null
         : (existing?.graceUntil || null),
     hasHadSubscription: true,
+    hasHadTrial: existing?.hasHadTrial || newStatus === 'trialing' || Boolean(trialEndsAtIso) || false,
     razorpaySubscriptionId: subId,
     cancelAtPeriodEnd,
     lastEventTimestamp: eventCreatedAtMs,

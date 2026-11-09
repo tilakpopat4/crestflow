@@ -2,7 +2,7 @@
  * Cloudflare Worker environment bindings and subscription types.
  */
 
-export type PlanKey = 'monthly' | 'quarterly' | 'half' | 'yearly';
+export type PlanKey = 'trial' | 'monthly' | 'quarterly' | 'half' | 'yearly';
 
 export interface Env {
   // Cloudflare Static Assets Binding
@@ -93,6 +93,7 @@ export interface SubscriptionRecord {
   accessUntil?: string | Date;
   trialEndsAt?: string | Date | null;
   graceUntil?: string | null;
+  hasHadTrial?: boolean;
   hasHadSubscription?: boolean;
   razorpaySubscriptionId?: string;
   razorpayPlanId?: string;

@@ -39,6 +39,7 @@ export function getBearerToken(request: Request): string | null {
  */
 export function resolveServerPlanId(env: Env, planKey: string): string | null {
   const planMap: Record<PlanKey, string | undefined> = {
+    trial: env.RAZORPAY_PLAN_MONTHLY,
     monthly: env.RAZORPAY_PLAN_MONTHLY,
     quarterly: env.RAZORPAY_PLAN_QUARTERLY,
     half: env.RAZORPAY_PLAN_HALF,
@@ -69,14 +70,18 @@ export async function handleCreateSubscription(request: Request, env: Env): Prom
   const body = (await request.json().catch(() => ({}))) as {
     plan?: string;
     planKey?: string;
+    isTrial?: boolean;
+    isDirect?: boolean;
   };
   const requestedPlanKey = (body.planKey || body.plan || 'monthly').toLowerCase();
+  const isDirect = body.isDirect === true || body.isTrial === false;
+  const isTrialRequest = requestedPlanKey === 'trial' || body.isTrial === true;
 
   const planId = resolveServerPlanId(env, requestedPlanKey);
   if (!planId) {
     return jsonResponse(
       {
-        error: `Invalid plan key '${requestedPlanKey}' or plan ID is not configured on the server. Supported plans: monthly, quarterly, half, yearly.`,
+        error: `Invalid plan key '${requestedPlanKey}' or plan ID is not configured on the server. Supported plans: trial, monthly, quarterly, half, yearly.`,
       },
       400
     );
@@ -84,6 +89,27 @@ export async function handleCreateSubscription(request: Request, env: Env): Prom
 
   // 1. Idempotency Lock & Existing Subscription Verification
   const existing = await getSubscriptionFromFirestore(creds, verifiedUser.uid);
+
+  // Single-use 7-day trial guard: reject trial request if account has ever used a trial or subscription
+  const hasAlreadyHadTrial = Boolean(
+    existing &&
+      (existing.hasHadTrial ||
+        existing.hasHadSubscription ||
+        existing.trialEndsAt ||
+        existing.status === 'active' ||
+        existing.status === 'trialing' ||
+        existing.status === 'cancelled' ||
+        existing.status === 'expired')
+  );
+
+  if (isTrialRequest && hasAlreadyHadTrial) {
+    return jsonResponse(
+      {
+        error: 'The 7-day trial is only available once per account. Please select one of our paid plans.',
+      },
+      403
+    );
+  }
 
   // One live subscription per user check: reject if active or trialing
   if (existing && (existing.status === 'active' || existing.status === 'trialing')) {
@@ -124,7 +150,7 @@ export async function handleCreateSubscription(request: Request, env: Env): Prom
     lockTimestamp: Date.now(),
   });
 
-  // 2. First-time user vs Returning user detection
+  // 2. First-time trial user vs direct payment user
   const isReturningUser =
     existing &&
     (existing.hasHadSubscription ||
@@ -132,28 +158,34 @@ export async function handleCreateSubscription(request: Request, env: Env): Prom
       existing.status === 'cancelled' ||
       existing.status === 'expired');
 
-  let isFirstTime = !isReturningUser;
+  // isFirstTime = true causes Razorpay to delay billing by 7 days and attach a ₹1 (100 paise) addon.
+  // Direct paid plans (isDirect: true) charge immediately upon checkout with isFirstTime = false.
+  let isFirstTime = false;
+  if (isTrialRequest) {
+    isFirstTime = true;
+  } else if (!isDirect && !isReturningUser) {
+    // Backwards-compatible fallback for tests or legacy callers that do not specify isDirect: true
+    isFirstTime = true;
+  }
 
-  // 3. Anti-abuse Trial Ledger: Reserve Google email hash
+  // 3. Anti-abuse Trial Ledger: Reserve Google email hash if starting trial
   let emailHash = '';
-  if (verifiedUser.email) {
+  if (verifiedUser.email && isFirstTime) {
     const normalizedEmail = normalizeGoogleEmail(verifiedUser.email);
     emailHash = await hashIdentifier(normalizedEmail, env.TRIAL_LEDGER_PEPPER);
 
-    if (isFirstTime) {
-      const reservation = await reserveTrialLedgerEntry(creds, emailHash, 'email', verifiedUser.uid);
-      if (!reservation.success) {
-        return jsonResponse(
-          {
-            error: reservation.reason || 'Free trial already claimed for this Google account. Please choose a paid plan.',
-          },
-          403
-        );
-      }
+    const reservation = await reserveTrialLedgerEntry(creds, emailHash, 'email', verifiedUser.uid);
+    if (!reservation.success) {
+      return jsonResponse(
+        {
+          error: reservation.reason || 'Free trial already claimed for this Google account. Please choose a paid plan.',
+        },
+        403
+      );
     }
   }
 
-  // 4. Create Subscription in Razorpay (sets notes.uid, expire_by 30m, start_at + 7d & 100 paise addon if first time)
+  // 4. Create Subscription in Razorpay
   const rzpSub = await createRazorpaySubscription(
     env,
     planId,
@@ -163,14 +195,16 @@ export async function handleCreateSubscription(request: Request, env: Env): Prom
     verifiedUser.name
   );
 
-  // 4. Update Firestore Subscription Record
+  // 5. Update Firestore Subscription Record
+  const effectivePlan = requestedPlanKey === 'trial' ? 'monthly' : requestedPlanKey;
   await updateSubscriptionInFirestore(creds, verifiedUser.uid, {
     userId: verifiedUser.uid,
     userEmail: verifiedUser.email,
     userName: verifiedUser.name,
-    plan: requestedPlanKey as any,
-    billingCycle: requestedPlanKey as any,
+    plan: effectivePlan as any,
+    billingCycle: effectivePlan as any,
     status: 'pending',
+    hasHadTrial: isTrialRequest || existing?.hasHadTrial || false,
     razorpaySubscriptionId: rzpSub.id,
     razorpayPlanId: planId,
     cancelAtPeriodEnd: false,

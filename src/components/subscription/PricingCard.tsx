@@ -79,7 +79,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
       <div>
         {/* Regulatory Disclosure */}
         <div className="mb-4 p-2.5 rounded bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 text-[11px] leading-relaxed text-slate-600 dark:text-slate-400">
-          {isFirstTime ? (
+          {plan.isTrial ? (
             <span>{disclosureText}</span>
           ) : (
             <span>₹{plan.price.toLocaleString('en-IN')} charged today; renews every {plan.interval}. Cancel anytime.</span>
@@ -99,9 +99,9 @@ export const PricingCard: React.FC<PricingCardProps> = ({
         >
           {isLoading && isSelected
             ? 'Initializing...'
-            : isFirstTime
+            : plan.isTrial
             ? 'Start 7-Day Trial (₹1)'
-            : `Subscribe for ₹${plan.price.toLocaleString('en-IN')}`}
+            : `Pay ₹${plan.price.toLocaleString('en-IN')} & Subscribe`}
         </button>
       </div>
     </div>

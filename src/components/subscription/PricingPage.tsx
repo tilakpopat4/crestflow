@@ -58,7 +58,11 @@ export default function PricingPage({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${idToken}`,
         },
-        body: JSON.stringify({ planKey: plan.id }),
+        body: JSON.stringify({
+          planKey: plan.id,
+          isDirect: true,
+          isTrial: false,
+        }),
       });
 
       if (!res.ok) {
