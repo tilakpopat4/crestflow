@@ -157,8 +157,8 @@ export default function GlobalHeader({
     <header className="sticky top-0 z-30 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-3 py-2.5 md:px-8 md:py-3 transition-colors">
       <div className="max-w-7xl mx-auto flex flex-wrap md:flex-nowrap items-center justify-between gap-2 md:gap-4">
         {/* Mobile Logo Branding */}
-        <div className="flex items-center gap-1.5 md:hidden shrink-0">
-          <Logo className="w-6 h-6 min-[380px]:w-7 min-[380px]:h-7" />
+        <div className="flex items-center gap-2 md:hidden shrink-0">
+          <Logo className="w-7 h-7" />
           <span className="font-extrabold text-slate-900 dark:text-white tracking-tight text-sm">CrestFlow</span>
         </div>
 
