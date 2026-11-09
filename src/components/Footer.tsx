@@ -85,29 +85,29 @@ export default function Footer({
   };
 
   const navLinkClass =
-    'rounded-sm text-sm text-slate-400 transition-colors duration-150 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-50';
+    'rounded-sm text-xs md:text-sm text-slate-400 transition-colors duration-150 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-50';
 
   const bottomLinkClass =
-    'rounded-sm whitespace-nowrap text-slate-400 transition-colors duration-150 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-50';
+    'rounded-sm whitespace-nowrap text-xs md:text-sm text-slate-400 transition-colors duration-150 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-50';
 
   const socialLinkClass =
-    'inline-flex size-8 items-center justify-center rounded-lg text-slate-400 transition-colors duration-150 hover:bg-[#333333] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-50';
+    'inline-flex size-7 md:size-8 items-center justify-center rounded-lg text-slate-400 transition-colors duration-150 hover:bg-[#333333] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-50';
 
   const brandLogo = (
     <a
       href="/"
       onClick={(e) => handleLinkClick(e, { id: 'home', name: config.brandName, url: '/', route: 'dashboard' })}
-      className="flex shrink-0 items-center gap-2.5 rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-50 group"
+      className="flex shrink-0 items-center gap-2 rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-50 group"
     >
-      <Logo className="w-7 h-7 rounded-lg shadow-xs group-hover:scale-105 transition-transform duration-150" />
-      <span className="text-[15px] font-semibold tracking-tight text-white">
+      <Logo className="w-6 h-6 md:w-7 md:h-7 rounded-lg shadow-xs group-hover:scale-105 transition-transform duration-150" />
+      <span className="text-sm md:text-[15px] font-semibold tracking-tight text-white">
         {config.brandName}
       </span>
     </a>
   );
 
   const socialLinks = (
-    <ul className="-ml-2 flex items-center gap-1 sm:-mr-2 sm:ml-0">
+    <ul className="-ml-1.5 flex items-center gap-0.5 sm:-mr-2 sm:ml-0 md:gap-1">
       {config.socialLinks.map((item) => (
         <li key={item.id}>
           <a
@@ -125,7 +125,7 @@ export default function Footer({
   );
 
   const legalLinks = (
-    <ul className="flex flex-wrap gap-x-4 gap-y-2 !bg-transparent border-none">
+    <ul className="flex flex-wrap gap-x-3 gap-y-1 md:gap-x-4 md:gap-y-2 !bg-transparent border-none text-xs md:text-sm">
       {config.legalLinks.map((link) => (
         <li key={link.id} className="!bg-transparent border-none">
           <a
@@ -156,8 +156,8 @@ export default function Footer({
           Footer
         </h2>
         <div className="mx-auto max-w-7xl">
-          <div className="flex flex-col gap-4 py-6 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <div className="flex flex-col gap-2 py-3 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between sm:text-sm sm:py-4">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 sm:gap-x-4 sm:gap-y-2">
               <p className="text-slate-400">
                 {config.copyrightText}{' '}
                 {config.versionText && (
@@ -182,10 +182,10 @@ export default function Footer({
         Footer
       </h2>
       <div className="mx-auto max-w-7xl">
-        <div className="flex flex-col items-start gap-6 py-10 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col items-start gap-2.5 py-3 md:gap-6 md:py-5 md:flex-row md:items-center md:justify-between">
           {brandLogo}
           <nav aria-label="Footer" className="!bg-transparent border-none">
-            <ul className="flex flex-wrap gap-x-6 gap-y-3 !bg-transparent border-none">
+            <ul className="flex flex-wrap gap-x-3.5 gap-y-1 md:gap-x-6 md:gap-y-3 !bg-transparent border-none">
               {config.primaryLinks.map((link) => (
                 <li key={link.id} className="!bg-transparent border-none">
                   <a
@@ -202,8 +202,8 @@ export default function Footer({
             </ul>
           </nav>
         </div>
-        <div className="flex flex-col gap-4 border-t border-[#333333] py-6 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+        <div className="flex flex-col gap-2 border-t border-[#333333] py-2.5 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between sm:text-sm sm:py-3.5 md:gap-4">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 sm:gap-x-4 sm:gap-y-2">
             <p className="text-slate-400">
               {config.copyrightText}{' '}
               {config.versionText && (

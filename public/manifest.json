@@ -4,8 +4,8 @@
   "description": "A dashboard for freelance video editors to manage clients and invoices.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f8fafc",
-  "theme_color": "#4f46e5",
+  "background_color": "#0f0f0f",
+  "theme_color": "#0f0f0f",
   "gcm_sender_id": "103953800507",
   "icons": [
     {
