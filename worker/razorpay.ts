@@ -203,3 +203,48 @@ export async function refundRazorpayPayment(
 
   return await res.json();
 }
+
+/**
+ * Creates a Razorpay Order for direct plan checkout or trial fee.
+ */
+export async function createRazorpayOrder(
+  env: Env,
+  amountPaise: number,
+  userId: string,
+  planKey: string,
+  userEmail?: string,
+  userName?: string
+): Promise<{ id: string; amount: number; currency: string }> {
+  const authHeader = `Basic ${btoa(`${env.RAZORPAY_KEY_ID}:${env.RAZORPAY_KEY_SECRET}`)}`;
+  const res = await fetch('https://api.razorpay.com/v1/orders', {
+    method: 'POST',
+    headers: {
+      Authorization: authHeader,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      amount: amountPaise,
+      currency: 'INR',
+      receipt: `rcpt_${userId.substring(0, 8)}_${Date.now()}`,
+      notes: {
+        uid: userId,
+        userId,
+        planKey,
+        userEmail: userEmail || '',
+        userName: userName || '',
+      },
+    }),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Razorpay create order failed: ${res.status} ${errorText}`);
+  }
+
+  const data = (await res.json()) as { id: string; amount: number; currency: string };
+  return {
+    id: data.id,
+    amount: data.amount,
+    currency: data.currency,
+  };
+}

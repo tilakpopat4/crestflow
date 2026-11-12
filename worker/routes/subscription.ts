@@ -7,6 +7,7 @@ import {
 } from '../firestore';
 import {
   createRazorpaySubscription,
+  createRazorpayOrder,
   cancelRazorpaySubscription,
 } from '../razorpay';
 import {
@@ -78,14 +79,6 @@ export async function handleCreateSubscription(request: Request, env: Env): Prom
   const isTrialRequest = requestedPlanKey === 'trial' || body.isTrial === true;
 
   const planId = resolveServerPlanId(env, requestedPlanKey);
-  if (!planId) {
-    return jsonResponse(
-      {
-        error: `Invalid plan key '${requestedPlanKey}' or plan ID is not configured on the server. Supported plans: trial, monthly, quarterly, half, yearly.`,
-      },
-      400
-    );
-  }
 
   // 1. Idempotency Lock & Existing Subscription Verification
   const existing = await getSubscriptionFromFirestore(creds, verifiedUser.uid);
@@ -185,15 +178,49 @@ export async function handleCreateSubscription(request: Request, env: Env): Prom
     }
   }
 
-  // 4. Create Subscription in Razorpay
-  const rzpSub = await createRazorpaySubscription(
-    env,
-    planId,
-    verifiedUser.uid,
-    isFirstTime,
-    verifiedUser.email,
-    verifiedUser.name
-  );
+  // 4. Create Subscription or Order in Razorpay
+  let rzpSubId = '';
+  let isOrder = false;
+  let orderAmount = 0;
+
+  if (planId) {
+    try {
+      const rzpSub = await createRazorpaySubscription(
+        env,
+        planId,
+        verifiedUser.uid,
+        isFirstTime,
+        verifiedUser.email,
+        verifiedUser.name
+      );
+      rzpSubId = rzpSub.id;
+    } catch (subErr: any) {
+      console.warn('[Subscription] Recurring subscription failed, using Order:', subErr.message);
+    }
+  }
+
+  // Fallback to Razorpay Order checkout (works on all Razorpay accounts out of the box)
+  if (!rzpSubId) {
+    const planPrices: Record<string, number> = {
+      trial: 100,
+      monthly: 7900,
+      quarterly: 19900,
+      half: 44900,
+      yearly: 89900,
+    };
+    const amountPaise = isTrialRequest ? 100 : planPrices[requestedPlanKey] || 7900;
+    const rzpOrder = await createRazorpayOrder(
+      env,
+      amountPaise,
+      verifiedUser.uid,
+      requestedPlanKey,
+      verifiedUser.email,
+      verifiedUser.name
+    );
+    rzpSubId = rzpOrder.id;
+    isOrder = true;
+    orderAmount = rzpOrder.amount;
+  }
 
   // 5. Update Firestore Subscription Record
   const effectivePlan = requestedPlanKey === 'trial' ? 'monthly' : requestedPlanKey;
@@ -205,17 +232,19 @@ export async function handleCreateSubscription(request: Request, env: Env): Prom
     billingCycle: effectivePlan as any,
     status: 'pending',
     hasHadTrial: isTrialRequest || existing?.hasHadTrial || false,
-    razorpaySubscriptionId: rzpSub.id,
-    razorpayPlanId: planId,
+    razorpaySubscriptionId: rzpSubId,
+    razorpayPlanId: planId || (isOrder ? 'order_mode' : ''),
     cancelAtPeriodEnd: false,
     lockTimestamp: 0,
     updatedAt: Date.now(),
   });
 
   return jsonResponse({
-    subscriptionId: rzpSub.id,
+    subscriptionId: isOrder ? undefined : rzpSubId,
+    orderId: isOrder ? rzpSubId : undefined,
+    amount: orderAmount,
+    currency: 'INR',
     keyId: env.RAZORPAY_KEY_ID,
-    shortUrl: rzpSub.shortUrl,
     isFirstTime,
   });
 }
@@ -245,3 +274,4 @@ export async function handleGetMe(request: Request, env: Env): Promise<Response>
 }
 
 export { handleCancelSubscription, handleChangePlan } from './planManagement';
+export { handleVerifyPayment } from './paymentVerify';

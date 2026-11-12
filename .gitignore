@@ -10,4 +10,5 @@ client_secret*.json
 *-firebase-adminsdk-*.json
 *serviceAccount*.json
 *.pem
+*.mp4
 .agent/

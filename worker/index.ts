@@ -6,6 +6,7 @@ import {
   handleGetMe,
   handleCancelSubscription,
   handleChangePlan,
+  handleVerifyPayment,
 } from './routes/subscription';
 import { handleRazorpayWebhook } from './routes/webhook';
 import { handleCronReconciliation } from './reconcile';
@@ -178,6 +179,11 @@ Sitemap: ${baseUrl}/sitemap.xml
       // 1. POST /api/create-subscription
       if (url.pathname === '/api/create-subscription' && request.method === 'POST') {
         return await handleCreateSubscription(request, env);
+      }
+
+      // 1b. POST /api/verify-payment
+      if (url.pathname === '/api/verify-payment' && request.method === 'POST') {
+        return await handleVerifyPayment(request, env);
       }
 
       // 2. GET /api/me

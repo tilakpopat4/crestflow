@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CrestFlow — 3D POV Hook & Dashboard Animation</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-void: #1E1E1E;
+      --bg-surface: #282828;
+      --bg-card: #333333;
+      --text-muted: #AAAAAA;
+      --text-primary: #F1F1F1;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #121212;
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+       flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 16:9 Aspect Ratio Stage Container */
+    #viewport-wrapper {
+      position: relative;
+      width: 100vw;
+      height: 56.25vw; /* 16:9 ratio */
+      max-height: 100vh;
+      max-width: 177.78vh;
+      background-color: var(--bg-void);
+      overflow: hidden;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(170, 170, 170, 0.12);
+      perspective: 1500px;
+      transform-style: preserve-3d;
+    }
+
+    /* Subtle Ambient Radial Lighting & Grid */
+    .ambient-grid {
+      position: absolute;
+      inset: -40%;
+      background-image: 
+        linear-gradient(to right, rgba(170, 170, 170, 0.035) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(170, 170, 170, 0.035) 1px, transparent 1px);
+      background-size: 48px 48px;
+      transform: translateZ(-320px);
+      pointer-events: none;
+    }
+
+    .ambient-glow {
+      position: absolute;
+      width: 900px;
+      height: 900px;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) translateZ(-250px);
+      background: radial-gradient(circle, rgba(241, 241, 241, 0.06) 0%, rgba(40, 40, 40, 0.02) 45%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* 3D Camera Rig */
+    #camera-rig {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+
+    /* Reference 1920x1080 Logical Canvas Scaled Responsively */
+    #scene-scaler {
+      position: absolute;
+      width: 1920px;
+      height: 1080px;
+      left: 50%;
+      top: 50%;
+      transform-origin: center center;
+      transform-style: preserve-3d;
+    }
+
+    /* 3D Elevated Cards */
+    .layer-base {
+      transform-style: preserve-3d;
+      background-color: var(--bg-surface);
+      border: 1px solid rgba(170, 170, 170, 0.14);
+      box-shadow: 0 40px 100px rgba(0, 0, 0, 0.75);
+    }
+
+    .layer-card {
+      transform-style: preserve-3d;
+      background-color: var(--bg-card);
+      border: 1px solid rgba(170, 170, 170, 0.18);
+      box-shadow: 
+        0 24px 48px rgba(0, 0, 0, 0.55),
+        inset 0 1px 0 rgba(241, 241, 241, 0.12);
+      transition: box-shadow 0.3s ease;
+    }
+
+    .layer-card-glow {
+      box-shadow: 
+        0 28px 60px rgba(0, 0, 0, 0.75),
+        0 0 35px rgba(241, 241, 241, 0.12),
+        inset 0 1px 0 rgba(241, 241, 241, 0.35);
+      border-color: rgba(241, 241, 241, 0.45);
+    }
+
+    /* SVG Line Draw Utility */
+    .chart-line-solid {
+      stroke-dasharray: 1200;
+      stroke-dashoffset: 1200;
+    }
+    .chart-line-dashed {
+      stroke-dasharray: 8 8;
+    }
+
+    /* Oversized 3D Cursor */
+    #virtual-cursor {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 56px;
+      height: 56px;
+      pointer-events: none;
+      transform-style: preserve-3d;
+      z-index: 9999;
+      filter: drop-shadow(0 18px 24px rgba(0, 0, 0, 0.85));
+      will-change: transform;
+    }
+
+    #cursor-ripple {
+      position: absolute;
+      top: -18px;
+      left: -18px;
+      width: 64px;
+      height: 64px;
+      border-radius: 9999px;
+      border: 3px solid #F1F1F1;
+      opacity: 0;
+      transform: scale(0.2);
+      pointer-events: none;
+    }
+
+    .ripple-active {
+      animation: clickRipple 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes clickRipple {
+      0% { opacity: 0.95; transform: scale(0.25); }
+      100% { opacity: 0; transform: scale(2.1); }
+    }
+
+    /* Vignette & Film Polish */
+    .cinema-vignette {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at center, transparent 58%, rgba(12, 12, 12, 0.68) 100%);
+      z-index: 60;
+    }
+
+    /* Custom Scrollbar Removal */
+    ::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 16:9 4K-Ready Viewport Container -->
+  <div id="viewport-wrapper">
+    <div class="ambient-grid"></div>
+    <div class="ambient-glow"></div>
+
+    <!-- HERO FINALE KINETIC OVERLAY (8.5s - 10.0s) -->
+    <div id="finale-text-overlay" class="absolute inset-x-0 bottom-14 flex flex-col items-center justify-center z-40 pointer-events-none opacity-0 transition-opacity duration-300">
+      <div class="px-7 py-4 rounded-2xl bg-[#1E1E1E]/90 border border-[#F1F1F1]/25 backdrop-blur-xl shadow-[0_25px_70px_rgba(0,0,0,0.9)] flex items-center gap-5">
+        <div class="w-11 h-11 rounded-xl bg-[#F1F1F1] text-[#1E1E1E] flex items-center justify-center font-extrabold text-xl shadow-inner">
+          CF
+        </div>
+        <div>
+          <div class="text-xs font-mono uppercase tracking-widest text-[#AAAAAA]">CrestFlow Workspace</div>
+          <div class="text-xl sm:text-2xl font-bold text-[#F1F1F1] tracking-tight">Meet Your Freelance Command Center.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3D CAMERA RIG -->
+    <div id="camera-rig">
+      <div id="scene-scaler">
+
+        <!-- FLOATING 3D UNIVERSAL SEARCH MODAL (⌘K) - Prominent in 0.8s to 2.7s -->
+        <div id="cmdk-modal" style="position: absolute; left: 560px; top: 440px; width: 800px; transform: translateZ(260px);" class="rounded-2xl bg-[#333333] border border-[#F1F1F1]/30 shadow-[0_35px_90px_rgba(0,0,0,0.95)] p-5 opacity-0 pointer-events-none">
+          <div class="flex items-center justify-between gap-4">
+            <div class="flex items-center gap-4 flex-1">
+              <svg class="w-7 h-7 text-[#F1F1F1]" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <div class="flex items-center text-2xl font-medium text-[#F1F1F1] tracking-tight font-mono">
+                <span id="cmdk-typed-text"></span>
+                <span id="cmdk-caret" class="inline-block w-0.5 h-7 bg-[#F1F1F1] ml-1 animate-pulse"></span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="px-3 py-1.5 rounded-lg bg-[#282828] border border-[#AAAAAA]/30 text-[#AAAAAA] text-sm font-mono">⌘K</span>
+              <span id="cmdk-enter-pill" class="px-3 py-1.5 rounded-lg bg-[#F1F1F1] text-[#1E1E1E] text-sm font-semibold font-mono transition-transform">↵ Enter</span>
+            </div>
+          </div>
+          <!-- Instant Search Suggestions Dropdown -->
+          <div class="mt-4 pt-3 border-t border-[#AAAAAA]/15 flex items-center justify-between text-sm text-[#AAAAAA]">
+            <div class="flex items-center gap-3">
+              <span class="px-2.5 py-1 rounded bg-[#282828] text-[#F1F1F1] font-medium">Jump to: Executive Dashboard</span>
+              <span>•</span>
+              <span>14 Active Retainers</span>
+              <span>•</span>
+              <span>UPI QR Ready</span>
+            </div>
+            <span class="font-mono text-xs text-[#F1F1F1]/80">0ms instant index</span>
+          </div>
+        </div>
+
+        <!-- MAIN CRESTFLOW DASHBOARD PORTAL (1760x980 centered inside 1920x1080) -->
+        <div id="dashboard-portal" style="position: absolute; left: 80px; top: 50px; width: 1760px; height: 980px;" class="layer-base rounded-3xl overflow-visible flex">
+
+          <!-- LEFT FLUID SIDEBAR RAIL (Floats +30px in Z) -->
+          <aside id="sidebar-rail" style="width: 255px; transform: translateZ(30px);" class="h-full bg-[#1E1E1E] rounded-l-3xl border-r border-[#AAAAAA]/15 flex flex-col justify-between p-5 shrink-0 shadow-2xl">
+            <div>
+              <!-- Brand Header -->
+              <div class="flex items-center justify-between mb-2 px-1">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg bg-[#F1F1F1] text-[#1E1E1E] flex items-center justify-center font-bold">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M4 5a2 2 0 012-2h12a2 2 0 012 2v3a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm0 9a2 2 0 012-2h6a2 2 0 012 2v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5zm11 0a2 2 0 012-2h1a2 2 0 012 2v5a2 2 0 01-2 2h-1a2 2 0 01-2-2v-5z"/>
+                    </svg>
+                  </div>
+                  <span class="text-xl font-bold tracking-tight text-[#F1F1F1]">CrestFlow</span>
+                </div>
+                <span class="text-[#AAAAAA] text-sm">&lt;</span>
+              </div>
+              <div class="text-xs text-[#AAAAAA] px-1 mb-7 font-medium">Freelancing Client Manager</div>
+
+              <!-- Nav Links -->
+              <nav class="space-y-2">
+                <div class="flex items-center gap-3.5 px-4 py-3 rounded-xl bg-[#282828] border border-[#AAAAAA]/25 text-[#F1F1F1] font-semibold text-sm shadow-md">
+                  <svg class="w-4 h-4 text-[#F1F1F1]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+                  <span>Dashboard</span>
+                </div>
+                <div class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-[#AAAAAA] font-medium text-sm">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  <span>Clients</span>
+                </div>
+                <div class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-[#AAAAAA] font-medium text-sm">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="m9 14 2 2 4-4"/></svg>
+                  <span>Work Log</span>
+                </div>
+                <div class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-[#AAAAAA] font-medium text-sm">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                  <span>Invoices</span>
+                </div>
+                <div class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-[#AAAAAA] font-medium text-sm">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  <span>Reviews</span>
+                </div>
+                <div class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-[#AAAAAA] font-medium text-sm">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+                  <span>Onboarding</span>
+                </div>
+              </nav>
+            </div>
+
+            <!-- Sanitized User Profile Footer -->
+            <div class="pt-4 border-t border-[#AAAAAA]/15 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-[#333333] border border-[#F1F1F1]/30 flex items-center justify-center font-bold text-sm text-[#F1F1F1]">
+                  AM
+                </div>
+                <div>
+                  <div class="text-sm font-bold text-[#F1F1F1] leading-tight">Aarav Mehta</div>
+                  <div class="text-xs text-[#AAAAAA]">Creative Director</div>
+                </div>
+              </div>
+              <svg class="w-4 h-4 text-[#AAAAAA]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </div>
+          </aside>
+
+          <!-- RIGHT MAIN WORKSPACE AREA -->
+          <div class="flex-1 flex flex-col h-full" style="transform-style: preserve-3d;">
+
+            <!-- TOP UTILITY HEADER BAR -->
+            <header style="transform: translateZ(25px);" class="h-16 bg-[#1E1E1E] rounded-tr-3xl border-b border-[#AAAAAA]/15 px-10 flex items-center justify-between shrink-0">
+              <!-- Sidebar collapse icon -->
+              <div class="flex items-center gap-3 text-[#AAAAAA]">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+              </div>
+
+              <!-- Top Search Bar Pill -->
+              <div class="w-[540px] h-10 rounded-xl bg-[#282828] border border-[#AAAAAA]/20 px-4 flex items-center justify-between text-xs text-[#AAAAAA]">
+                <div class="flex items-center gap-2.5">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <span>Search clients, work items, video links, invoices...</span>
+                </div>
+                <span class="px-2 py-0.5 rounded bg-[#333333] text-[#F1F1F1] font-mono text-[11px]">⌘K</span>
+              </div>
+
+              <!-- Streak Milestone Badge & Notifications -->
+              <div class="flex items-center gap-5">
+                <svg class="w-5 h-5 text-[#AAAAAA]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                <div id="streak-badge" class="px-3.5 py-1.5 rounded-xl bg-[#282828] border border-[#AAAAAA]/25 flex items-center gap-2 text-xs text-[#F1F1F1] transition-all duration-300">
+                  <svg class="w-4 h-4 text-[#F1F1F1]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  <span class="font-bold font-mono">365</span>
+                  <span class="text-[#AAAAAA]">days worked</span>
+                </div>
+              </div>
+            </header>
+
+            <!-- INNER DASHBOARD CONTENT (With generous padding & 3D Z-elevation) -->
+            <div class="flex-1 px-14 py-8 flex flex-col justify-between" style="transform-style: preserve-3d;">
+
+              <!-- ROW 1: Dashboard Title & JSON/CSV Portability Buttons -->
+              <div style="transform: translateZ(20px);" class="flex items-center justify-between">
+                <div>
+                  <h2 class="text-3xl font-extrabold text-[#F1F1F1] tracking-tight">Dashboard</h2>
+                  <p class="text-sm text-[#AAAAAA] mt-0.5">Financial overview &amp; payment cycles.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                  <button class="px-4 py-2 rounded-xl bg-[#333333] border border-[#AAAAAA]/25 text-xs font-semibold text-[#F1F1F1] flex items-center gap-2 shadow">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Export
+                  </button>
+                  <button class="px-4 py-2 rounded-xl bg-[#333333] border border-[#AAAAAA]/25 text-xs font-semibold text-[#F1F1F1] flex items-center gap-2 shadow">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Import
+                  </button>
+                </div>
+              </div>
+
+              <!-- ROW 2: 4 ELEVATED KPI CARDS (Float +55px in Z-space) -->
+              <div class="grid grid-cols-4 gap-6" style="transform-style: preserve-3d;">
+                <!-- KPI 1: Total Earned This Month -->
+                <div id="kpi-card-1" style="transform: translateZ(55px);" class="layer-card rounded-2xl p-5 flex items-center gap-4">
+                  <div class="w-12 h-12 rounded-xl bg-[#282828] border border-[#AAAAAA]/20 flex items-center justify-center text-lg font-bold text-[#F1F1F1]">
+                    ₹
+                  </div>
+                  <div>
+                    <div class="text-[11px] font-semibold tracking-wider uppercase text-[#AAAAAA]">Total Earned This Month</div>
+                    <div id="kpi-earned-val" class="text-2xl font-extrabold text-[#F1F1F1] mt-0.5 tracking-tight font-mono">₹0</div>
+                  </div>
+                </div>
+
+                <!-- KPI 2: Total Due -->
+                <div id="kpi-card-2" style="transform: translateZ(55px);" class="layer-card rounded-2xl p-5 flex items-center gap-4">
+                  <div class="w-12 h-12 rounded-xl bg-[#282828] border border-[#AAAAAA]/20 flex items-center justify-center text-[#F1F1F1]">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  </div>
+                  <div>
+                    <div class="text-[11px] font-semibold tracking-wider uppercase text-[#AAAAAA]">Total Due</div>
+                    <div id="kpi-due-val" class="text-2xl font-extrabold text-[#F1F1F1] mt-0.5 tracking-tight font-mono">₹25,000</div>
+                  </div>
+                </div>
+
+                <!-- KPI 3: Overdue Amount -->
+                <div id="kpi-card-3" style="transform: translateZ(55px);" class="layer-card rounded-2xl p-5 flex items-center gap-4">
+                  <div class="w-12 h-12 rounded-xl bg-[#282828] border border-[#AAAAAA]/20 flex items-center justify-center text-[#F1F1F1]">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  </div>
+                  <div>
+                    <div class="text-[11px] font-semibold tracking-wider uppercase text-[#AAAAAA]">Overdue Amount</div>
+                    <div class="text-2xl font-extrabold text-[#F1F1F1] mt-0.5 tracking-tight font-mono">₹0</div>
+                  </div>
+                </div>
+
+                <!-- KPI 4: Invoices Issued -->
+                <div id="kpi-card-4" style="transform: translateZ(55px);" class="layer-card rounded-2xl p-5 flex items-center gap-4">
+                  <div class="w-12 h-12 rounded-xl bg-[#282828] border border-[#AAAAAA]/20 flex items-center justify-center text-[#F1F1F1]">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                  </div>
+                  <div>
+                    <div class="text-[11px] font-semibold tracking-wider uppercase text-[#AAAAAA]">Invoices Issued</div>
+                    <div id="kpi-invoices-val" class="text-2xl font-extrabold text-[#F1F1F1] mt-0.5 tracking-tight font-mono">14</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ROW 3: CHARTS SECTION (Float +75px in Z-space) -->
+              <div class="grid grid-cols-12 gap-6" style="transform-style: preserve-3d;">
+
+                <!-- Left 8 Cols: Net Revenue By Month (INR) -->
+                <div id="revenue-chart-card" style="transform: translateZ(75px);" class="col-span-8 layer-card rounded-2xl p-6 flex flex-col justify-between h-[360px]">
+                  <div class="flex items-start justify-between">
+                    <div>
+                      <div class="text-[11px] font-semibold uppercase tracking-wider text-[#AAAAAA]">Net Revenue By Month, INR</div>
+                      <div class="text-lg font-bold text-[#F1F1F1] mt-0.5">Revenue is up 34% this quarter</div>
+                      <div class="text-xs text-[#AAAAAA] mt-0.5">
+                        <span class="text-[#F1F1F1] font-semibold">₹8,40,000</span> across the last 10 months (since Feb 2026) against ₹8,65,000 in invoiced.
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-4 text-xs font-semibold">
+                      <span class="text-[#F1F1F1]">Last 10 months</span>
+                      <span class="text-[#AAAAAA]">Total Invoiced</span>
+                    </div>
+                  </div>
+
+                  <!-- Animated SVG Line Graph -->
+                  <div class="relative w-full h-[215px] mt-3">
+                    <svg class="w-full h-full overflow-visible" viewBox="0 0 780 200">
+                      <defs>
+                        <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stop-color="#F1F1F1" stop-opacity="0.22"/>
+                          <stop offset="100%" stop-color="#F1F1F1" stop-opacity="0.0"/>
+                        </linearGradient>
+                      </defs>
+
+                      <!-- Horizontal Grid Lines & Y-Axis Labels -->
+                      <g class="text-[11px] fill-[#AAAAAA] font-mono">
+                        <text x="0" y="20">₹180k</text>
+                        <line x1="45" y1="16" x2="760" y2="16" stroke="#AAAAAA" stroke-opacity="0.12" stroke-dasharray="3 3"/>
+
+                        <text x="0" y="65">₹135k</text>
+                        <line x1="45" y1="61" x2="760" y2="61" stroke="#AAAAAA" stroke-opacity="0.12" stroke-dasharray="3 3"/>
+
+                        <text x="0" y="110">₹90k</text>
+                        <line x1="45" y1="106" x2="760" y2="106" stroke="#AAAAAA" stroke-opacity="0.12" stroke-dasharray="3 3"/>
+
+                        <text x="0" y="155">₹45k</text>
+                        <line x1="45" y1="151" x2="760" y2="151" stroke="#AAAAAA" stroke-opacity="0.12" stroke-dasharray="3 3"/>
+
+                        <text x="12" y="185">₹0</text>
+                        <line x1="45" y1="181" x2="760" y2="181" stroke="#AAAAAA" stroke-opacity="0.25"/>
+                      </g>
+
+                      <!-- Area Fill under Paid Curve -->
+                      <path id="svg-area-fill" d="M 60 175 L 135 162 L 210 148 L 285 135 L 360 112 L 435 72 L 510 88 L 585 52 L 660 38 L 735 22 L 735 181 L 60 181 Z" fill="url(#areaGrad)" opacity="0"/>
+
+                      <!-- Dashed Invoiced Curve -->
+                      <path id="svg-dashed-line" class="chart-line-dashed" d="M 60 170 L 135 155 L 210 140 L 285 120 L 360 98 L 435 42 L 510 74 L 585 40 L 660 28 L 735 16" fill="none" stroke="#AAAAAA" stroke-width="1.8" opacity="0"/>
+
+                      <!-- Solid Collected Revenue Curve -->
+                      <path id="svg-solid-line" class="chart-line-solid" d="M 60 175 L 135 162 L 210 148 L 285 135 L 360 112 L 435 72 L 510 88 L 585 52 L 660 38 L 735 22" fill="none" stroke="#F1F1F1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+                      <!-- Active Data Point Node on Nov -->
+                      <g id="svg-end-node" opacity="0">
+                        <circle cx="735" cy="22" r="6" fill="#F1F1F1"/>
+                        <circle cx="735" cy="22" r="12" fill="#F1F1F1" fill-opacity="0.2"/>
+                        <rect x="688" y="-8" width="68" height="22" rx="6" fill="#1E1E1E" stroke="#F1F1F1" stroke-width="1"/>
+                        <text id="svg-node-label" x="722" y="7" text-anchor="middle" fill="#F1F1F1" class="text-[11px] font-mono font-bold">₹145k</text>
+                      </g>
+
+                      <!-- X-Axis Months -->
+                      <g class="text-[11px] fill-[#AAAAAA]" text-anchor="middle">
+                        <text x="60" y="198">Feb</text>
+                        <text x="135" y="198">Mar</text>
+                        <text x="210" y="198">Apr</text>
+                        <text x="285" y="198">May</text>
+                        <text x="360" y="198">Jun</text>
+                        <text x="435" y="198">Jul</text>
+                        <text x="510" y="198">Aug</text>
+                        <text x="585" y="198">Sep</text>
+                        <text x="660" y="198">Oct</text>
+                        <text x="735" y="198" fill="#F1F1F1" font-weight="600">Nov</text>
+                      </g>
+                    </svg>
+                  </div>
+
+                  <div class="flex items-center justify-between text-[11px] text-[#AAAAAA] pt-2 border-t border-[#AAAAAA]/10">
+                    <span>CrestFlow · Paid invoices, net of refunds · Updated 12 Nov 2026</span>
+                    <span class="flex items-center gap-1.5 text-[#F1F1F1] font-medium">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                      View as table
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Right 4 Cols: Client Revenue Bar Chart -->
+                <div id="client-chart-card" style="transform: translateZ(75px);" class="col-span-4 layer-card rounded-2xl p-6 flex flex-col justify-between h-[360px]">
+                  <div class="flex items-start justify-between">
+                    <div>
+                      <div class="text-xs font-bold uppercase tracking-wider text-[#F1F1F1]">Client Revenue</div>
+                      <div class="text-[11px] text-[#AAAAAA] mt-0.5">Total all-time paid</div>
+                    </div>
+                    <div class="flex items-center rounded-lg bg-[#282828] p-0.5 border border-[#AAAAAA]/20 text-[11px]">
+                      <span class="px-2.5 py-1 rounded-md bg-[#333333] text-[#F1F1F1] font-semibold">All Time</span>
+                      <span class="px-2.5 py-1 text-[#AAAAAA]">This Month</span>
+                    </div>
+                  </div>
+
+                  <!-- Horizontal Bars with Sanitized Sample Agencies -->
+                  <div class="my-auto space-y-8 pr-2 relative">
+                    <!-- Vertical dashed guide lines -->
+                    <div class="absolute inset-y-0 left-28 right-2 flex justify-between pointer-events-none">
+                      <div class="border-l border-dashed border-[#AAAAAA]/15 h-full"></div>
+                      <div class="border-l border-dashed border-[#AAAAAA]/15 h-full"></div>
+                      <div class="border-l border-dashed border-[#AAAAAA]/15 h-full"></div>
+                      <div class="border-l border-dashed border-[#AAAAAA]/15 h-full"></div>
+                    </div>
+
+                    <!-- Bar 1: Apex Studios -->
+                    <div class="flex items-center gap-4 relative z-10">
+                      <div class="w-24 text-right text-xs font-medium text-[#AAAAAA] leading-tight">Apex Studios</div>
+                      <div class="flex-1 h-7 bg-[#282828] rounded-md overflow-hidden p-0.5">
+                        <div id="bar-1" class="h-full bg-[#F1F1F1] rounded transition-all duration-300" style="width: 0%;"></div>
+                      </div>
+                    </div>
+
+                    <!-- Bar 2: Nova Media -->
+                    <div class="flex items-center gap-4 relative z-10">
+                      <div class="w-24 text-right text-xs font-medium text-[#AAAAAA] leading-tight">Nova Media</div>
+                      <div class="flex-1 h-7 bg-[#282828] rounded-md overflow-hidden p-0.5">
+                        <div id="bar-2" class="h-full bg-[#F1F1F1] rounded transition-all duration-300" style="width: 0%;"></div>
+                      </div>
+                    </div>
+
+                    <!-- Bar 3: Vertex Labs -->
+                    <div class="flex items-center gap-4 relative z-10">
+                      <div class="w-24 text-right text-xs font-medium text-[#AAAAAA] leading-tight">Vertex Labs</div>
+                      <div class="flex-1 h-7 bg-[#282828] rounded-md overflow-hidden p-0.5">
+                        <div id="bar-3" class="h-full bg-[#F1F1F1] rounded transition-all duration-300" style="width: 0%;"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="text-[11px] text-[#AAAAAA] flex justify-between pt-2 border-t border-[#AAAAAA]/10 font-mono">
+                    <span>Top Retainer: Apex Studios</span>
+                    <span class="text-[#F1F1F1]">₹4,20,000</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ROW 4: RECENT INVOICES TABLE (Floats +65px in Z-space) -->
+              <div id="invoices-table-card" style="transform: translateZ(65px);" class="layer-card rounded-2xl overflow-hidden">
+                <div class="px-6 py-4 border-b border-[#AAAAAA]/15 flex items-center justify-between">
+                  <span class="text-xs font-bold uppercase tracking-wider text-[#F1F1F1]">Recent Invoices</span>
+                  <span class="text-[11px] font-mono text-[#AAAAAA]">NPCI Dynamic UPI Sync Active</span>
+                </div>
+
+                <div class="divide-y divide-[#AAAAAA]/10 text-xs">
+                  <!-- Table Header -->
+                  <div class="grid grid-cols-12 px-6 py-2.5 bg-[#282828]/60 text-[11px] font-semibold uppercase tracking-wider text-[#AAAAAA]">
+                    <div class="col-span-2">Date</div>
+                    <div class="col-span-4">Client</div>
+                    <div class="col-span-2">Amount</div>
+                    <div class="col-span-2">Status</div>
+                    <div class="col-span-2 text-right">Actions</div>
+                  </div>
+
+                  <!-- Invoice Row 1 -->
+                  <div class="grid grid-cols-12 px-6 py-3.5 items-center">
+                    <div class="col-span-2 text-[#AAAAAA]">12 Nov 2026</div>
+                    <div class="col-span-4 font-bold text-[#F1F1F1]">Apex Studios</div>
+                    <div class="col-span-2 font-bold text-[#F1F1F1] font-mono">₹45,000</div>
+                    <div class="col-span-2 flex items-center gap-2 font-semibold text-[#F1F1F1]">
+                      <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                      <span>Paid</span>
+                    </div>
+                    <div class="col-span-2 text-right space-x-3">
+                      <span class="text-[#AAAAAA]">Mark Pending</span>
+                      <span class="text-rose-400/90">Delete</span>
+                    </div>
+                  </div>
+
+                  <!-- Invoice Row 2 (Interactive Target Row for Cursor Click at 7.0s) -->
+                  <div id="target-invoice-row" class="grid grid-cols-12 px-6 py-3.5 items-center transition-colors duration-300">
+                    <div class="col-span-2 text-[#AAAAAA]">04 Nov 2026</div>
+                    <div class="col-span-4 font-bold text-[#F1F1F1]">Nova Media</div>
+                    <div class="col-span-2 font-bold text-[#F1F1F1] font-mono">₹25,000</div>
+                    <div class="col-span-2 flex items-center gap-2 font-semibold">
+                      <span id="nova-status-dot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+                      <span id="nova-status-text" class="text-[#AAAAAA]">Pending</span>
+                    </div>
+                    <div class="col-span-2 text-right space-x-3">
+                      <span id="approve-btn" class="px-2.5 py-1 rounded-md bg-[#282828] border border-[#AAAAAA]/30 text-[#F1F1F1] font-semibold transition-all">Approve Payment</span>
+                      <span class="text-rose-400/90">Delete</span>
+                    </div>
+                  </div>
+
+                  <!-- Invoice Row 3 -->
+                  <div class="grid grid-cols-12 px-6 py-3.5 items-center">
+                    <div class="col-span-2 text-[#AAAAAA]">28 Oct 2026</div>
+                    <div class="col-span-4 font-bold text-[#F1F1F1]">Vertex Labs</div>
+                    <div class="col-span-2 font-bold text-[#F1F1F1] font-mono">₹30,000</div>
+                    <div class="col-span-2 flex items-center gap-2 font-semibold text-[#F1F1F1]">
+                      <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                      <span>Paid</span>
+                    </div>
+                    <div class="col-span-2 text-right space-x-3">
+                      <span class="text-[#AAAAAA]">Mark Pending</span>
+                      <span class="text-rose-400/90">Delete</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- OVERSIZED 3D CURSOR IN SCENE SPACE -->
+        <div id="virtual-cursor" style="transform: translate3d(960px, 540px, 310px);">
+          <div id="cursor-ripple"></div>
+          <svg width="52" height="52" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 4L29 16.5L18.5 19.5L14 30L7 4Z" fill="#F1F1F1" stroke="#1E1E1E" stroke-width="2.5" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Subtle Cinema Vignette -->
+    <div class="cinema-vignette"></div>
+  </div>
+
+  <script>
+    /*************************************************************************
+     * 1. RESPONSIVE 1920x1080 SCENE SCALER
+     *************************************************************************/
+    const viewportWrapper = document.getElementById('viewport-wrapper');
+    const sceneScaler = document.getElementById('scene-scaler');
+
+    function updateSceneScale() {
+      const rect = viewportWrapper.getBoundingClientRect();
+      const scale = rect.width / 1920;
+      sceneScaler.style.transform = `translate(-50%, -50%) scale(${scale})`;
+    }
+    window.addEventListener('resize', updateSceneScale);
+    updateSceneScale();
+
+    /*************************************************************************
+     * 2. SYNTHESIZED WEB AUDIO API SOUND ENGINE (Keyboard Clacks, Whoosh, Chime)
+     *************************************************************************/
+    class PromoSoundEngine {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+        this.triggeredCues = new Set();
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playKeyClick(pitch = 800) {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(pitch, now);
+        osc.frequency.exponentialRampToValueAtTime(140, now + 0.035);
+
+        gain.gain.setValueAtTime(0.14, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.04);
+      }
+
+      playWhoosh() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(90, now);
+        osc.frequency.exponentialRampToValueAtTime(260, now + 0.22);
+        osc.frequency.exponentialRampToValueAtTime(65, now + 0.55);
+
+        gain.gain.setValueAtTime(0.01, now);
+        gain.gain.linearRampToValueAtTime(0.18, now + 0.18);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.56);
+      }
+
+      playPaymentChime() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const freqs = [587.33, 880, 1174.66]; // D5, A5, D6 crisp fintech chord
+        freqs.forEach((f, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(f, now + idx * 0.055);
+
+          gain.gain.setValueAtTime(0.12, now + idx * 0.055);
+          gain.gain.exponentialRampToValueAtTime(0.0008, now + idx * 0.055 + 0.65);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + idx * 0.055);
+          osc.stop(now + idx * 0.055 + 0.66);
+        });
+      }
+
+      resetCues() {
+        this.triggeredCues.clear();
+      }
+
+      triggerOnce(id, fn) {
+        if (!this.triggeredCues.has(id)) {
+          this.triggeredCues.add(id);
+          fn();
+        }
+      }
+    }
+
+    const sfx = new PromoSoundEngine();
+
+    /*************************************************************************
+     * 3. MATH & EASING UTILITIES FOR 3D CAMERA KEYFRAMES
+     *************************************************************************/
+    const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
+    const lerp = (a, b, t) => a + (b - a) * t;
+
+    function easeInOutCubic(x) {
+      return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+    }
+
+    function easeOutBack(x) {
+      const c1 = 1.70158;
+      const c3 = c1 + 1;
+      return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
+    }
+
+    function easeOutExpo(x) {
+      return x === 1 ? 1 : 1 - Math.pow(2, -10 * x);
+    }
+
+    function formatINR(num) {
+      const n = Math.round(num);
+      return '₹' + n.toLocaleString('en-IN');
+    }
+
+    /*************************************************************************
+     * 4. DOM ELEMENT REFERENCES
+     *************************************************************************/
+    const cameraRig = document.getElementById('camera-rig');
+    const finaleTextOverlay = document.getElementById('finale-text-overlay');
+    const cmdkModal = document.getElementById('cmdk-modal');
+    const cmdkTypedText = document.getElementById('cmdk-typed-text');
+    const cmdkEnterPill = document.getElementById('cmdk-enter-pill');
+    const dashboardPortal = document.getElementById('dashboard-portal');
+    const virtualCursor = document.getElementById('virtual-cursor');
+    const cursorRipple = document.getElementById('cursor-ripple');
+
+    const kpiEarnedVal = document.getElementById('kpi-earned-val');
+    const kpiDueVal = document.getElementById('kpi-due-val');
+    const kpiCard1 = document.getElementById('kpi-card-1');
+
+    const svgSolidLine = document.getElementById('svg-solid-line');
+    const svgDashedLine = document.getElementById('svg-dashed-line');
+    const svgAreaFill = document.getElementById('svg-area-fill');
+    const svgEndNode = document.getElementById('svg-end-node');
+    const svgNodeLabel = document.getElementById('svg-node-label');
+
+    const bar1 = document.getElementById('bar-1');
+    const bar2 = document.getElementById('bar-2');
+    const bar3 = document.getElementById('bar-3');
+
+    const targetInvoiceRow = document.getElementById('target-invoice-row');
+    const novaStatusDot = document.getElementById('nova-status-dot');
+    const novaStatusText = document.getElementById('nova-status-text');
+    const approveBtn = document.getElementById('approve-btn');
+    const streakBadge = document.getElementById('streak-badge');
+
+    const timelineSlider = document.getElementById('timeline-slider');
+    const timeReadout = document.getElementById('time-Readout');
+    const scenePhaseBadge = document.getElementById('scene-phase-badge');
+
+    /*************************************************************************
+     * 5. 10-SECOND MASTER 3D MOTION GRAPHICS TIMELINE ENGINE
+     *************************************************************************/
+    const DURATION = 10.0; // seconds
+    let currentTime = 0;
+    let isPlaying = true;
+    let lastFrameTimestamp = performance.now();
+
+    function triggerCursorRipple() {
+      cursorRipple.classList.remove('ripple-active');
+      void cursorRipple.offsetWidth;
+      cursorRipple.classList.add('ripple-active');
+    }
+
+    function renderTimelineAt(t) {
+      // Update Scrubber UI if present
+      if (timelineSlider) timelineSlider.value = t.toFixed(2);
+      if (timeReadout) timeReadout.textContent = `${t.toFixed(1).padStart(4, '0')}s / 10.0s`;
+
+      // Phase badge text if present
+      if (scenePhaseBadge) {
+        if (t < 2.5) {
+          scenePhaseBadge.textContent = '01 · ⌘K SEARCH';
+        } else if (t < 6.0) {
+          scenePhaseBadge.textContent = '02 · 3D PORTAL UNFOLDS';
+        } else if (t < 8.5) {
+          scenePhaseBadge.textContent = '03 · INSTANT RECONCILE';
+        } else {
+          scenePhaseBadge.textContent = '04 · HERO RESOLVE';
+        }
+      }
+
+      /* -------------------------------------------------------------------
+       * A. UNIVERSAL SEARCH (⌘K) MODAL (0.0s -> 2.5s)
+       * ------------------------------------------------------------------- */
+      // ⌘K Modal pop-in at 0.05s, zoom-through dissolve at 2.1s - 2.5s
+      if (t <= 2.55) {
+        let modalAlpha = 1;
+        let modalZ = 260;
+        if (t < 0.45) {
+          const p = easeOutBack(t / 0.45);
+          modalAlpha = clamp(t / 0.3, 0, 1);
+          modalZ = lerp(120, 260, p);
+        } else if (t > 2.1) {
+          const p = easeInOutCubic((t - 2.1) / 0.4);
+          modalAlpha = 1 - p;
+          modalZ = lerp(260, 720, p);
+        }
+        cmdkModal.style.opacity = modalAlpha;
+        cmdkModal.style.transform = `translateZ(${modalZ}px)`;
+      } else {
+        cmdkModal.style.opacity = 0;
+      }
+
+      // Typing "dashboard" inside ⌘K between 0.45s and 1.8s
+      const word = "dashboard";
+      if (t < 0.45) {
+        cmdkTypedText.textContent = "";
+      } else if (t >= 0.45 && t <= 1.85) {
+        const charCount = Math.floor(((t - 0.45) / 1.4) * word.length);
+        const clampedChars = clamp(charCount, 0, word.length);
+        cmdkTypedText.textContent = word.slice(0, clampedChars);
+        if (clampedChars > 0) {
+          sfx.triggerOnce(`type_${clampedChars}`, () => sfx.playKeyClick(650 + clampedChars * 35));
+        }
+      } else {
+        cmdkTypedText.textContent = word;
+      }
+
+      // Enter key press pulse at 1.95s
+      if (t >= 1.92 && t <= 2.18) {
+        cmdkEnterPill.style.transform = 'scale(0.9)';
+        sfx.triggerOnce('enter_click', () => {
+          sfx.playKeyClick(420);
+          sfx.playWhoosh();
+          triggerCursorRipple();
+        });
+      } else {
+        cmdkEnterPill.style.transform = 'scale(1)';
+      }
+
+      /* -------------------------------------------------------------------
+       * B. MAIN DASHBOARD OPACITY & 3D CAMERA RIG PATH (0.0s -> 10.0s)
+       * ------------------------------------------------------------------- */
+      // Dashboard blurs/fades in as we zoom through ⌘K around 2.0s
+      if (t < 1.9) {
+        dashboardPortal.style.opacity = 0.08;
+      } else if (t >= 1.9 && t <= 2.55) {
+        dashboardPortal.style.opacity = lerp(0.08, 1, (t - 1.9) / 0.65);
+      } else {
+        dashboardPortal.style.opacity = 1;
+      }
+
+      // Continuous 3D POV Camera Keyframes
+      let camX = 0, camY = 0, camZ = 0, rotX = 0, rotY = 0, rotZ = 0;
+
+      if (t < 2.15) {
+        // Phase 1: Tight on ⌘K search bar floating in 3D space
+        const p = easeInOutCubic(t / 2.15);
+        camX = lerp(0, -30, p);
+        camY = lerp(20, -10, p);
+        camZ = lerp(260, 320, p);
+        rotX = lerp(8, 14, p);
+        rotY = lerp(-8, -14, p);
+        rotZ = lerp(0, 1.5, p);
+      } else if (t < 4.5) {
+        // Phase 2: Swooping pullback & dramatic 3D POV tilt over KPIs & Revenue Charts
+        const p = easeOutExpo((t - 2.15) / 2.35);
+        camX = lerp(-30, 55, p);
+        camY = lerp(-10, 45, p);
+        camZ = lerp(320, -90, p);
+        rotX = lerp(14, 18, p);
+        rotY = lerp(-14, -20, p);
+        rotZ = lerp(1.5, 2.5, p);
+      } else if (t < 6.3) {
+        // Phase 3: Smooth glide across the charts toward the right Client Bars & Streak
+        const p = easeInOutCubic((t - 4.5) / 1.8);
+        camX = lerp(55, -140, p);
+        camY = lerp(45, -35, p);
+        camZ = lerp(-90, 95, p);
+        rotX = lerp(18, 15, p);
+        rotY = lerp(-20, 14, p);
+        rotZ = lerp(2.5, -1.8, p);
+      } else if (t < 8.4) {
+        // Phase 4: Push in on Recent Invoices Table ("Approve Payment") & KPI update
+        const p = easeInOutCubic((t - 6.3) / 2.1);
+        camX = lerp(-140, -195, p);
+        camY = lerp(-35, -210, p);
+        camZ = lerp(95, 230, p);
+        rotX = lerp(15, 21, p);
+        rotY = lerp(14, -12, p);
+        rotZ = lerp(-1.8, 1.4, p);
+      } else {
+        // Phase 5: Wide Hero Resolve Angle (8.4s -> 10.0s)
+        const p = easeInOutCubic((t - 8.4) / 1.6);
+        camX = lerp(-195, 0, p);
+        camY = lerp(-210, 20, p);
+        camZ = lerp(230, -150, p);
+        rotX = lerp(21, 12, p);
+        rotY = lerp(-12, -9, p);
+        rotZ = lerp(1.4, 0.8, p);
+      }
+
+      cameraRig.style.transform = `
+        translate3d(${camX}px, ${camY}px, ${camZ}px)
+        rotateX(${rotX}deg)
+        rotateY(${rotY}deg)
+        rotateZ(${rotZ}deg)
+      `;
+
+      /* -------------------------------------------------------------------
+       * C. OVERSIZED 3D CURSOR CHOREOGRAPHY
+       * ------------------------------------------------------------------- */
+      let curX = 960, curY = 540, curZ = 310;
+      if (t < 2.15) {
+        // Cursor clicks ⌘K Enter button
+        const p = easeInOutCubic(clamp(t / 1.95, 0, 1));
+        curX = lerp(1150, 1275, p);
+        curY = lerp(640, 485, p);
+        curZ = 295;
+      } else if (t < 5.8) {
+        // Cursor glides over Total Earned KPI then traces Revenue Chart peak
+        const p = easeInOutCubic((t - 2.15) / 3.65);
+        curX = lerp(1275, 1140, p);
+        curY = lerp(485, 495, p);
+        curZ = 140;
+      } else if (t < 7.15) {
+        // Cursor swoops down directly onto Nova Media's "Approve Payment" button
+        const p = easeInOutCubic((t - 5.8) / 1.35);
+        curX = lerp(1140, 1545, p);
+        curY = lerp(495, 912, p);
+        curZ = 135;
+      } else {
+        // Cursor rests gracefully after clicking Approve Payment
+        const p = easeInOutCubic(clamp((t - 7.15) / 1.8, 0, 1));
+        curX = lerp(1545, 1380, p);
+        curY = lerp(912, 680, p);
+        curZ = 135;
+      }
+      virtualCursor.style.transform = `translate3d(${curX}px, ${curY}px, ${curZ}px)`;
+        // Cursor clicks ⌘K Enter button
+        const p = easeInOutCubic(clamp((t - 0.8) / 1.4, 0, 1));
+        curX = lerp(1150, 1275, p);
+        curY = lerp(640, 485, p);
+        curZ = 295;
+      } else if (t < 5.8) {
+        // Cursor glides over Total Earned KPI then traces Revenue Chart peak
+        const p = easeInOutCubic((t - 2.35) / 3.45);
+        curX = lerp(1275, 1140, p);
+        curY = lerp(485, 495, p);
+        curZ = 140;
+      } else if (t < 7.15) {
+        // Cursor swoops down directly onto Nova Media's "Approve Payment" button
+        const p = easeInOutCubic((t - 5.8) / 1.35);
+        curX = lerp(1140, 1545, p);
+        curY = lerp(495, 912, p);
+        curZ = 135;
+      } else {
+        // Cursor rests gracefully after clicking Approve Payment
+        const p = easeInOutCubic(clamp((t - 7.15) / 1.8, 0, 1));
+        curX = lerp(1545, 1380, p);
+        curY = lerp(912, 680, p);
+        curZ = 135;
+      }
+      virtualCursor.style.transform = `translate3d(${curX}px, ${curY}px, ${curZ}px)`;
+
+      /* -------------------------------------------------------------------
+       * D. KPI COUNTERS, SVG LINE GRAPH & CLIENT BARS ANIMATION
+       * ------------------------------------------------------------------- */
+      // KPI 1: Rolls from ₹0 to ₹1,45,000 (2.6s -> 4.6s), then jumps to ₹1,70,000 at 7.15s!
+      if (t < 2.6) {
+        kpiEarnedVal.textContent = '₹0';
+        kpiDueVal.textContent = '₹25,000';
+        kpiCard1.classList.remove('layer-card-glow');
+      } else if (t < 7.15) {
+        const p = easeOutExpo(clamp((t - 2.6) / 2.0, 0, 1));
+        kpiEarnedVal.textContent = formatINR(145000 * p);
+        kpiDueVal.textContent = '₹25,000';
+        kpiCard1.classList.remove('layer-card-glow');
+      } else {
+        // Payment approved! Counter ticks up from ₹1,45,000 to ₹1,70,000 & Due drops to ₹0
+        const p = easeOutExpo(clamp((t - 7.15) / 0.75, 0, 1));
+        kpiEarnedVal.textContent = formatINR(lerp(145000, 170000, p));
+        kpiDueVal.textContent = formatINR(lerp(25000, 0, p));
+        kpiCard1.classList.add('layer-card-glow');
+      }
+
+      // SVG Line Chart Draw-On (2.7s -> 5.0s)
+      const chartProgress = easeInOutCubic(clamp((t - 2.7) / 2.2, 0, 1));
+      svgSolidLine.style.strokeDashoffset = 1200 * (1 - chartProgress);
+      svgDashedLine.style.opacity = clamp((t - 3.0) / 1.0, 0, 0.75);
+      svgAreaFill.style.opacity = clamp((t - 3.2) / 1.2, 0, 1);
+      svgEndNode.style.opacity = chartProgress > 0.92 ? 1 : 0;
+      svgNodeLabel.textContent = t >= 7.15 ? '₹170k' : '₹145k';
+
+      // Horizontal Client Revenue Bars (3.1s -> 5.2s)
+      const barProg = easeOutBack(clamp((t - 3.1) / 1.6, 0, 1));
+      bar1.style.width = `${clamp(88 * barProg, 0, 100)}%`;
+      bar2.style.width = `${clamp((t >= 7.15 ? 72 : 56) * barProg, 0, 100)}%`;
+      bar3.style.width = `${clamp(34 * barProg, 0, 100)}%`;
+
+      /* -------------------------------------------------------------------
+       * E. INTERACTIVE INVOICE APPROVAL & STREAK MILESTONE (7.15s)
+       * ------------------------------------------------------------------- */
+      if (t >= 7.15) {
+        sfx.triggerOnce('payment_approved', () => {
+          sfx.playPaymentChime();
+          triggerCursorRipple();
+        });
+
+        novaStatusDot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+        novaStatusText.textContent = 'Paid';
+        novaStatusText.className = 'text-[#F1F1F1]';
+        approveBtn.textContent = 'Mark Pending';
+        approveBtn.className = 'text-[#AAAAAA]';
+        targetInvoiceRow.style.backgroundColor = 'rgba(241, 241, 241, 0.05)';
+
+        // Highlight 365 days worked streak badge
+        streakBadge.classList.add('layer-card-glow');
+      } else {
+        novaStatusDot.className = 'w-2 h-2 rounded-full bg-amber-400';
+        novaStatusText.textContent = 'Pending';
+        novaStatusText.className = 'text-[#AAAAAA]';
+        approveBtn.textContent = 'Approve Payment';
+        approveBtn.className = 'px-2.5 py-1 rounded-md bg-[#282828] border border-[#AAAAAA]/30 text-[#F1F1F1] font-semibold transition-all';
+        targetInvoiceRow.style.backgroundColor = 'transparent';
+        streakBadge.classList.remove('layer-card-glow');
+      }
+
+      /* -------------------------------------------------------------------
+       * F. FINALE HERO CALLOUT OVERLAY (8.5s -> 10.0s)
+       * ------------------------------------------------------------------- */
+      if (t >= 8.5) {
+        finaleTextOverlay.style.opacity = 1;
+      } else {
+        finaleTextOverlay.style.opacity = 0;
+      }
+    }
+
+    // Expose for external recorders and automation
+    window.renderTimelineAt = renderTimelineAt;
+    window.TOTAL_DURATION = DURATION;
+
+    /*************************************************************************
+     * 6. ANIMATION LOOP & AUTO-PLAY
+     *************************************************************************/
+    function tick(now) {
+      const dt = (now - lastFrameTimestamp) / 1000;
+      lastFrameTimestamp = now;
+
+      if (isPlaying) {
+        currentTime += dt;
+        if (currentTime > DURATION) {
+          currentTime = 0;
+          sfx.resetCues();
+        }
+        renderTimelineAt(currentTime);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    // Optional Keyboard shortcut: Space to toggle play/pause
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        isPlaying = !isPlaying;
+      }
+    });
+
+    // Start Animation Loop on Load
+    window.onload = () => {
+      renderTimelineAt(0);
+      requestAnimationFrame((ts) => {
+        lastFrameTimestamp = ts;
+        requestAnimationFrame(tick);
+      });
+    };
+  </script>
+</body>
+</html>
