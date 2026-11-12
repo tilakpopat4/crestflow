@@ -164,4 +164,21 @@ describe('Pricing Page, Plans Disclosure & Server-Governed Access Suite', () => 
       assert.ok(content.includes('899'), `File ${relPath} must reference valid yearly price ₹899`);
     }
   });
+
+  it('5. Safe Subscription Cancellation: non-recurring or order IDs resolve safely without throwing 400', async () => {
+    const { cancelRazorpaySubscription } = await import('../worker/razorpay');
+    const mockEnv = {
+      RAZORPAY_KEY_ID: 'rzp_test_123',
+      RAZORPAY_KEY_SECRET: 'secret_123',
+    } as any;
+
+    // Order ID (from standard one-time checkout)
+    const orderResult = await cancelRazorpaySubscription(mockEnv, 'order_mock_test_123');
+    assert.equal(orderResult.status, 'cancelled');
+    assert.equal(orderResult.id, 'order_mock_test_123');
+
+    // Empty or non-sub ID
+    const emptyResult = await cancelRazorpaySubscription(mockEnv, '');
+    assert.equal(emptyResult.status, 'cancelled');
+  });
 });

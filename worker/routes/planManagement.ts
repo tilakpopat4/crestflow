@@ -28,42 +28,29 @@ export async function handleCancelSubscription(request: Request, env: Env): Prom
   const verifiedUser = await verifyFirebaseIdToken(idToken, projectId);
 
   const currentSub = await getSubscriptionFromFirestore(creds, verifiedUser.uid);
-  if (!currentSub || !currentSub.razorpaySubscriptionId) {
-    return jsonResponse({ error: 'No active recurring subscription found to cancel' }, 404);
+  if (!currentSub) {
+    return jsonResponse({ error: 'No active subscription found to cancel' }, 404);
   }
 
   const isTrialing = currentSub.status === 'trialing';
 
-  if (isTrialing) {
-    // Trialing: Cancel immediately in Razorpay so auto-renewal charge never executes
-    await cancelRazorpaySubscription(env, currentSub.razorpaySubscriptionId, false);
-
-    // Keep access in Firestore until trialEndsAt (or accessUntil)
-    const retainedAccessUntil = currentSub.trialEndsAt || currentSub.accessUntil;
-
-    await updateSubscriptionInFirestore(creds, verifiedUser.uid, {
-      cancelAtPeriodEnd: true,
-      status: 'cancelled',
-      accessUntil: retainedAccessUntil,
-      updatedAt: Date.now(),
-    });
-
-    return jsonResponse({
-      success: true,
-      status: 'cancelled',
-      cancelAtPeriodEnd: true,
-      accessUntil: retainedAccessUntil,
-      isTrialing: true,
-      message: 'Trial subscription cancelled. You retain full access until your trial ends.',
-    });
+  if (currentSub.razorpaySubscriptionId) {
+    try {
+      await cancelRazorpaySubscription(env, currentSub.razorpaySubscriptionId, !isTrialing);
+    } catch (err: any) {
+      console.warn('[handleCancelSubscription] Razorpay cancel notice:', err?.message || err);
+    }
   }
 
-  // Active / Past Due: Cancel at cycle end in Razorpay
-  await cancelRazorpaySubscription(env, currentSub.razorpaySubscriptionId, true);
+  const retainedAccessUntil =
+    currentSub.trialEndsAt ||
+    currentSub.accessUntil ||
+    (currentSub.currentPeriodEnd ? new Date(currentSub.currentPeriodEnd).toISOString() : undefined);
 
   await updateSubscriptionInFirestore(creds, verifiedUser.uid, {
     cancelAtPeriodEnd: true,
     status: 'cancelled',
+    accessUntil: retainedAccessUntil,
     updatedAt: Date.now(),
   });
 
@@ -71,9 +58,11 @@ export async function handleCancelSubscription(request: Request, env: Env): Prom
     success: true,
     status: 'cancelled',
     cancelAtPeriodEnd: true,
-    accessUntil: currentSub.accessUntil,
-    isTrialing: false,
-    message: 'Subscription will cancel automatically at the end of the current billing cycle.',
+    accessUntil: retainedAccessUntil,
+    isTrialing,
+    message: isTrialing
+      ? 'Trial subscription cancelled. You retain full access until your trial ends.'
+      : 'Subscription will cancel automatically at the end of the current billing cycle.',
   });
 }
 
@@ -119,8 +108,14 @@ export async function handleChangePlan(request: Request, env: Env): Promise<Resp
     return jsonResponse({ error: `User is already subscribed to the ${targetPlanKey} plan.` }, 400);
   }
 
-  // 1. Cancel current subscription at cycle end
-  await cancelRazorpaySubscription(env, currentSub.razorpaySubscriptionId, true);
+  // 1. Cancel current subscription at cycle end if recurring
+  if (currentSub.razorpaySubscriptionId) {
+    try {
+      await cancelRazorpaySubscription(env, currentSub.razorpaySubscriptionId, true);
+    } catch (err: any) {
+      console.warn('[handleChangePlan] Current subscription cancel notice:', err?.message || err);
+    }
+  }
 
   // 2. Determine target start_at date (epoch seconds)
   const nowSec = Math.floor(Date.now() / 1000);

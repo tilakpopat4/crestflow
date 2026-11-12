@@ -123,6 +123,12 @@ export async function cancelRazorpaySubscription(
   subscriptionId: string,
   cancelAtCycleEnd = true
 ): Promise<{ id: string; status: string }> {
+  // If the ID is empty, missing, or an order/payment ID (not a recurring subscription sub_...)
+  if (!subscriptionId || !subscriptionId.startsWith('sub_')) {
+    console.warn(`[Razorpay] Skipping cancel for non-recurring or order ID: ${subscriptionId}`);
+    return { id: subscriptionId || '', status: 'cancelled' };
+  }
+
   const authHeader = `Basic ${btoa(`${env.RAZORPAY_KEY_ID}:${env.RAZORPAY_KEY_SECRET}`)}`;
 
   const res = await fetch(
@@ -141,6 +147,18 @@ export async function cancelRazorpaySubscription(
 
   if (!res.ok) {
     const errorText = await res.text();
+    // If the subscription is already cancelled, expired, completed, or not found on Razorpay, treat as handled
+    if (
+      res.status === 400 &&
+      (errorText.includes('could not be found') ||
+        errorText.includes('invalid') ||
+        errorText.includes('already cancelled') ||
+        errorText.includes('completed') ||
+        errorText.includes('BAD_REQUEST_ERROR'))
+    ) {
+      console.warn(`[Razorpay] Subscription ${subscriptionId} cancel handled safely: ${errorText}`);
+      return { id: subscriptionId, status: 'cancelled' };
+    }
     throw new Error(`Razorpay cancel subscription failed: ${res.status} ${errorText}`);
   }
 
