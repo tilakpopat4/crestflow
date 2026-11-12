@@ -159,7 +159,13 @@ export default function GlobalHeader({
         {/* Mobile Logo Branding */}
         <div className="flex items-center gap-2 md:hidden shrink-0">
           <Logo className="w-7 h-7" />
-          <span className="font-extrabold text-slate-900 dark:text-white tracking-tight text-sm">CrestFlow</span>
+          <span className="font-extrabold text-slate-900 dark:text-white tracking-tight text-sm">
+            {subscriptionState?.hasAccess && !subscriptionState?.isTrialing ? (
+              <>CrestFlow<span className="text-indigo-600 dark:text-indigo-400 font-bold">Pro</span></>
+            ) : (
+              'CrestFlow'
+            )}
+          </span>
         </div>
 
         {/* Desktop Sidebar Toggle Button */}

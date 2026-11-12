@@ -39,6 +39,7 @@ export default function Sidebar({
   onCollapse,
 }: SidebarProps) {
   const shouldReduceMotion = useReducedMotion();
+  const isUpgradedPro = Boolean(subscriptionState?.hasAccess && !subscriptionState?.isTrialing);
   const {
     width,
     isIconOnly,
@@ -93,7 +94,11 @@ export default function Sidebar({
                   transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
                   className="text-xl font-bold tracking-tight text-slate-900 overflow-hidden whitespace-nowrap"
                 >
-                  CrestFlow
+                  {isUpgradedPro ? (
+                    <>CrestFlow<span className="text-indigo-600 dark:text-indigo-400 font-bold">Pro</span></>
+                  ) : (
+                    'CrestFlow'
+                  )}
                 </motion.span>
               )}
             </AnimatePresence>
