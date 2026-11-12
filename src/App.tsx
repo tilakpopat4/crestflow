@@ -18,6 +18,7 @@ import { SignInScreen } from './components/auth/SignInScreen';
 import { AppRouterView } from './components/layout/AppRouterView';
 import { SidebarSwipeReveal } from './components/layout/SidebarSwipeReveal';
 import { MembershipBanner } from './components/subscription/MembershipBanner';
+import { PwaInstallPrompt } from './components/pwa/PwaInstallPrompt';
 import Footer from './components/Footer';
 import ErrorBoundary from './components/ErrorBoundary';
 import { lazyWithRetry } from './lib/lazyWithRetry';
@@ -284,6 +285,8 @@ export default function App() {
           />
         </Suspense>
       )}
+
+      <PwaInstallPrompt />
     </div>
   );
 }

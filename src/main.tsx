@@ -17,6 +17,30 @@ if (typeof window !== 'undefined') {
       window.location.reload();
     }
   });
+
+  // Register PWA Service Worker for offline capability and browser install popup
+  if ('serviceWorker' in navigator && (import.meta.env.PROD || window.location.protocol === 'https:')) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker
+        .register('/sw.js', { scope: '/' })
+        .then((reg) => {
+          // Check for worker updates
+          reg.onupdatefound = () => {
+            const installing = reg.installing;
+            if (installing) {
+              installing.onstatechange = () => {
+                if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+                  console.info('[PWA] New version available');
+                }
+              };
+            }
+          };
+        })
+        .catch((err) => {
+          console.warn('[PWA] Service worker registration failed:', err);
+        });
+    });
+  }
 }
 
 createRoot(document.getElementById('root')!).render(

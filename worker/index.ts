@@ -13,6 +13,7 @@ import {
   handleCancelEmail, handleProcessEmailQueue,
 } from './routes/notifications';
 import { handleAdminGrantSubscription, handleAdminRevokeSubscription } from './routes/adminSubscriptions';
+import { handleSeoRoutes } from './routes/seo';
 import { processDueEmailJobs } from './emailDispatcher';
 
 export default {
@@ -43,90 +44,35 @@ export default {
 
     // Serve SEO crawler files directly with correct Content-Type headers
     const baseUrl = env.BASE_URL || url.origin;
-    if (url.pathname === '/robots.txt') {
-      const robots = `# CrestFlow robots.txt
-User-agent: *
-Allow: /
-Allow: /pricing
-Allow: /billing
-Allow: /contact
-Allow: /privacy
-Allow: /terms
-Allow: /refund
-Allow: /*/onboarding
-Allow: /*/publicprofile
-Allow: /onboarding/
-
-Disallow: /admin
-Disallow: /api/
-
-Sitemap: ${baseUrl}/sitemap.xml
-`;
-      return new Response(robots, {
-        headers: {
-          'Content-Type': 'text/plain; charset=utf-8',
-          'Cache-Control': 'public, max-age=86400',
-        },
-      });
-    }
-
-    if (url.pathname === '/sitemap.xml') {
-      const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>${baseUrl}/</loc>
-    <lastmod>2026-11-02</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/pricing</loc>
-    <lastmod>2026-11-02</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/billing</loc>
-    <lastmod>2026-11-02</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/contact</loc>
-    <lastmod>2026-11-02</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/refund</loc>
-    <lastmod>2026-11-02</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/terms</loc>
-    <lastmod>2026-11-02</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/privacy</loc>
-    <lastmod>2026-11-02</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-</urlset>`;
-      return new Response(sitemap, {
-        headers: {
-          'Content-Type': 'application/xml; charset=utf-8',
-          'Cache-Control': 'public, max-age=86400',
-        },
-      });
+    const seoResponse = handleSeoRoutes(url, baseUrl);
+    if (seoResponse) {
+      return seoResponse;
     }
 
     // Only intercept /api/* routes; everything else serves static SPA assets
     if (!url.pathname.startsWith('/api/')) {
       const response = await env.ASSETS.fetch(request);
+
+      // PWA Service Worker & Manifest headers
+      if (url.pathname === '/sw.js') {
+        const newHeaders = new Headers(response.headers);
+        newHeaders.set('Content-Type', 'application/javascript; charset=utf-8');
+        newHeaders.set('Service-Worker-Allowed', '/');
+        newHeaders.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        return new Response(response.body, {
+          status: response.status,
+          headers: newHeaders,
+        });
+      }
+
+      if (url.pathname === '/manifest.json') {
+        const newHeaders = new Headers(response.headers);
+        newHeaders.set('Content-Type', 'application/manifest+json; charset=utf-8');
+        return new Response(response.body, {
+          status: response.status,
+          headers: newHeaders,
+        });
+      }
 
       // 1. Missing JS/CSS Chunk Handling:
       // When single-page-application mode is enabled in wrangler.jsonc, missing assets return 200 with index.html.

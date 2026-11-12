@@ -1,9 +1,10 @@
 import React from 'react';
-import { LogOut } from 'lucide-react';
+import { LogOut, Download } from 'lucide-react';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'motion/react';
 import { User } from 'firebase/auth';
 import { UserProfile } from '../../types';
+import { usePwaInstall } from '../../hooks/usePwaInstall';
 
 interface SidebarProfileFooterProps {
   user?: User;
@@ -28,6 +29,8 @@ export const SidebarProfileFooter: React.FC<SidebarProfileFooterProps> = ({
   isIconOnly,
   shouldReduceMotion,
 }) => {
+  const { isInstallable, isInstalled, promptInstall } = usePwaInstall();
+
   return (
     <div
       className={clsx(
@@ -75,8 +78,20 @@ export const SidebarProfileFooter: React.FC<SidebarProfileFooterProps> = ({
         </AnimatePresence>
       </button>
 
-      {onLogout && (
-        <div className="flex items-center shrink-0">
+      <div className="flex items-center shrink-0 gap-1">
+        {isInstallable && !isInstalled && (
+          <button
+            type="button"
+            onClick={() => promptInstall()}
+            className="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-[#282828] active:bg-[#333333] transition-colors cursor-pointer border-none bg-transparent"
+            title="Install CrestFlow App"
+            aria-label="Install CrestFlow App"
+          >
+            <Download size={16} />
+          </button>
+        )}
+
+        {onLogout && (
           <button
             onClick={onLogout}
             className="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-[#282828] active:bg-[#333333] transition-colors cursor-pointer border-none bg-transparent"
@@ -85,8 +100,8 @@ export const SidebarProfileFooter: React.FC<SidebarProfileFooterProps> = ({
           >
             <LogOut size={16} />
           </button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
