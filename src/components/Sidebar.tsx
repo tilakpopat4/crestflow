@@ -202,59 +202,6 @@ export default function Sidebar({
         })}
       </div>
 
-      {subscriptionState?.isSubscriptionFeatureEnabled && onOpenSubscriptionModal && (
-        <div
-          className={clsx(
-            "hidden md:block border-t border-[#2a2a2a] transition-all duration-200",
-            isIconOnly ? "px-2 py-2" : "px-4 py-2"
-          )}
-        >
-          <button
-            type="button"
-            onClick={onOpenSubscriptionModal}
-            className={clsx(
-              "w-full flex items-center p-2.5 rounded-xl bg-[#242424] hover:bg-[#2c2c2c] active:bg-[#333333] text-xs text-slate-200 transition-colors cursor-pointer border border-[#333333] group",
-              isIconOnly ? "justify-center" : "justify-between"
-            )}
-            title={subscriptionState?.isPaidActive ? "Pro Active (Manage)" : "Subscribe to Pro"}
-          >
-            <div className="flex items-center gap-2">
-              <span
-                className={`w-2 h-2 rounded-full shrink-0 ${subscriptionState?.isPaidActive ? 'bg-slate-300' : 'bg-red-500'}`}
-              />
-              <AnimatePresence initial={false}>
-                {!isIconOnly && (
-                  <motion.span
-                    key="sub-status"
-                    initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, width: 0 }}
-                    animate={{ opacity: 1, width: 'auto' }}
-                    exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, width: 0 }}
-                    transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
-                    className="font-semibold whitespace-nowrap overflow-hidden"
-                  >
-                    {subscriptionState?.isPaidActive ? 'Pro Active' : 'Subscribe'}
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </div>
-            <AnimatePresence initial={false}>
-              {!isIconOnly && (
-                <motion.span
-                  key="sub-price"
-                  initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: 'auto' }}
-                  exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, width: 0 }}
-                  transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
-                  className="text-[11px] text-slate-300 font-semibold group-hover:underline whitespace-nowrap overflow-hidden"
-                >
-                  ₹49/mo
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </button>
-        </div>
-      )}
-
       <SidebarProfileFooter
         user={user}
         profile={profile}
