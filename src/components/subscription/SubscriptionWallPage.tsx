@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User } from 'firebase/auth';
-import { LogOut, Check, ShieldCheck, RefreshCw } from 'lucide-react';
+import { LogOut, Check, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { UserProfile } from '../../types';
@@ -79,7 +79,7 @@ export default function SubscriptionWallPage({ user, profile, subscriptionState,
         description: isTrial ? 'CrestFlow Pro 7-Day Trial (₹1)' : `CrestFlow Pro ${activePlan.name} (₹${activePlan.price.toLocaleString('en-IN')})`,
         image: '/app_logo_icon.png',
         prefill: { name: profile?.name || user.displayName || '', email: user.email || '', contact: profile?.phone || '' },
-        theme: { color: '#4870aa' },
+        theme: { color: '#282828' },
         handler: async function (response: any) {
           setIsVerifying(true);
           try {
@@ -159,10 +159,6 @@ export default function SubscriptionWallPage({ user, profile, subscriptionState,
       {/* Main Paywall Content */}
       <div className="w-full max-w-3xl mx-auto py-8 sm:py-10 space-y-5">
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-slate-800/80 border border-slate-700 text-slate-200 text-xs font-medium">
-            <ShieldCheck size={14} className="text-indigo-400" />
-            <span>Membership Required</span>
-          </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
             Unlock Full Access to CrestFlow
           </h1>
