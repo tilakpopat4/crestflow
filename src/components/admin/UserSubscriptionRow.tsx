@@ -83,18 +83,18 @@ export default function UserSubscriptionRow({
       </td>
       <td className="p-4">
         {isBlocked ? (
-          <div className="inline-flex items-center gap-1.5 text-sm font-medium text-red-600 dark:text-red-400">
-            <span className="w-2 h-2 rounded-full bg-red-600 dark:bg-red-400" />
+          <div className="inline-flex items-center gap-1.5 text-sm font-medium text-red-500">
+            <span className="w-2 h-2 rounded-full bg-red-500" />
             <span>Blocked</span>
           </div>
         ) : isSubActive ? (
-          <div className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 dark:text-indigo-400">
-            <span className="w-2 h-2 rounded-full bg-indigo-600 dark:bg-indigo-400" />
+          <div className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-200">
+            <span className="w-2 h-2 rounded-full admin-indicator-active" />
             <span>Active Pro</span>
           </div>
         ) : (
-          <div className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 dark:text-slate-400">
-            <span className="w-2 h-2 rounded-full bg-slate-400" />
+          <div className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-400">
+            <span className="w-2 h-2 rounded-full admin-indicator-inactive" />
             <span>No Active Plan</span>
           </div>
         )}

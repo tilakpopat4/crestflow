@@ -146,29 +146,32 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
       <div className="bg-white dark:bg-slate-900 rounded-xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs border border-slate-200 dark:border-slate-800">
         <div className="space-y-1">
           <div className="flex items-center gap-2.5">
-            <span className={`w-3 h-3 rounded-full ${isSubscriptionEnabled ? 'bg-indigo-600' : 'bg-slate-400'}`} />
-            <h2 className="text-base font-bold">Platform Subscription System: {isSubscriptionEnabled ? 'ACTIVE (ON)' : 'DISABLED (OFF)'}</h2>
+            <span className={`w-2.5 h-2.5 rounded-full ${isSubscriptionEnabled ? 'admin-indicator-active' : 'admin-indicator-inactive'}`} />
+            <h2 className="text-base font-bold text-slate-100">Platform Subscription System: {isSubscriptionEnabled ? 'ACTIVE (ON)' : 'DISABLED (OFF)'}</h2>
           </div>
-          <p className="text-sm text-slate-500 dark:text-slate-400 max-w-2xl leading-relaxed">
+          <p className="text-sm text-slate-400 max-w-2xl leading-relaxed">
             {isSubscriptionEnabled
               ? 'Subscriptions are currently active across the main portal. Users are prompted for ₹49/mo membership unless whitelisted.'
               : 'Subscriptions are currently turned OFF. All subscription banners, badges, upgrade buttons, and paywalls are completely removed from the main portal.'}
           </p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
-          <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+          <span className="text-sm font-medium text-slate-200">
             {isSubscriptionEnabled ? 'Subscriptions ON' : 'Subscriptions OFF'}
           </span>
           <button
             type="button"
+            role="switch"
+            aria-checked={isSubscriptionEnabled}
+            aria-label="Toggle Platform Subscription System"
             onClick={() => handleToggleSubscription(!isSubscriptionEnabled)}
             disabled={togglingSubscription}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-150 focus:outline-none cursor-pointer border-0 ${
-              isSubscriptionEnabled ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-700'
+            className={`admin-toggle-switch relative inline-flex items-center rounded-full transition-colors duration-150 focus:outline-none cursor-pointer border-0 ${
+              isSubscriptionEnabled ? 'admin-toggle-active' : 'admin-toggle-inactive'
             }`}
           >
-            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-150 ${
-              isSubscriptionEnabled ? 'translate-x-6' : 'translate-x-1'
+            <span className={`admin-toggle-knob inline-block h-4 w-4 transform rounded-full transition-transform duration-150 ${
+              isSubscriptionEnabled ? 'translate-x-5' : 'translate-x-0.5'
             }`} />
           </button>
         </div>

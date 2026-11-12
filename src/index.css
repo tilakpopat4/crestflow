@@ -62,13 +62,16 @@
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   }
 
+  *, *::before, *::after {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
   body {
     background-color: #333333;
     color: #f1f1f1;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
   }
 
   html.dark body {
@@ -149,6 +152,43 @@ a.bg-blue-700:hover,
   background-color: #383838 !important;
   color: #ffffff !important;
   border-color: #4a4a4a !important;
+}
+
+/* Toggle switches and indicator knobs (exempt from button graphite overrides) */
+button.admin-toggle-switch,
+.admin-toggle-switch {
+  width: 2.75rem !important;
+  height: 1.5rem !important;
+  padding: 2px !important;
+  border-radius: 9999px !important;
+  transition: background-color 150ms ease, border-color 150ms ease !important;
+}
+
+button.admin-toggle-switch.admin-toggle-active,
+.admin-toggle-switch.admin-toggle-active {
+  background-color: #4870aa !important;
+  border: 1px solid #3b5e90 !important;
+}
+
+button.admin-toggle-switch.admin-toggle-inactive,
+.admin-toggle-switch.admin-toggle-inactive {
+  background-color: #383838 !important;
+  border: 1px solid #484848 !important;
+}
+
+.admin-toggle-knob,
+span.admin-toggle-knob {
+  background-color: #ffffff !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+}
+
+.admin-indicator-active {
+  background-color: #4870aa !important;
+}
+
+.admin-indicator-inactive {
+  background-color: #666666 !important;
 }
 
 /* Sub-sections, cards & modals: highlighted & separated purely by #282828 on #333333 canvas without borders */
