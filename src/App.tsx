@@ -69,15 +69,16 @@ export default function App() {
     closeAnniversaryModal,
   } = useAnniversaryCheck(user, profile?.freelanceStartDate);
 
-  // Prompt onboarding if profile setup is incomplete
+  // Prompt onboarding if profile setup is incomplete and subscription access is granted
   useEffect(() => {
-    if (user && !profilesLoading) {
+    const hasPaidAccess = !subscriptionState.isSubscriptionFeatureEnabled || subscriptionState.hasAccess;
+    if (user && !profilesLoading && hasPaidAccess) {
       const hasCompleted = localStorage.getItem(`crestflow_onboarded_${user.uid}`) || profile?.upiId;
       if (!hasCompleted) {
         setIsOnboardingModalOpen(true);
       }
     }
-  }, [user, profile, profilesLoading]);
+  }, [user, profile, profilesLoading, subscriptionState.isSubscriptionFeatureEnabled, subscriptionState.hasAccess]);
 
   if (isSpecialMode === 'feedback') {
     return (
@@ -158,11 +159,6 @@ export default function App() {
         <Suspense fallback={<ViewLoadingFallback />}>
           <SubscriptionWallPage user={user} profile={profile} subscriptionState={subscriptionState} onLogout={handleLogout} onNavigate={r => navigate(r)} />
         </Suspense>
-        {isOnboardingModalOpen && (
-          <Suspense fallback={null}>
-            <UserOnboardingModal user={user} profile={profile} isOpen={isOnboardingModalOpen} onComplete={() => { localStorage.setItem(`crestflow_onboarded_${user.uid}`, 'true'); setIsOnboardingModalOpen(false); }} />
-          </Suspense>
-        )}
         <Footer onNavigate={(r) => navigate(r)} />
       </div>
     );
