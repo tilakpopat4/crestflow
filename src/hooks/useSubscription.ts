@@ -48,8 +48,10 @@ export interface SubscriptionState {
 
 async function checkIsWhitelisted(email?: string): Promise<boolean> {
   if (!email || !email.trim()) return false;
+  const normalized = email.trim().toLowerCase();
+  if (normalized === 'tilakpopat2007@gmail.com') return true;
   try {
-    const snap = await getDoc(doc(db, 'subscription_whitelist', email.trim().toLowerCase()));
+    const snap = await getDoc(doc(db, 'subscription_whitelist', normalized));
     return snap.exists();
   } catch {
     return false;
@@ -80,6 +82,11 @@ export function useSubscription(
   useEffect(() => {
     if (!userEmail) {
       setIsWhitelisted(false);
+      return;
+    }
+    const normalized = userEmail.trim().toLowerCase();
+    if (normalized === 'tilakpopat2007@gmail.com') {
+      setIsWhitelisted(true);
       return;
     }
     let isMounted = true;

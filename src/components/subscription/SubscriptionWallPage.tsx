@@ -14,7 +14,8 @@ interface SubscriptionWallPageProps {
   user: User;
   profile?: UserProfile | null;
   subscriptionState: SubscriptionState;
-  onLogout: () => void; onNavigate?: (route: AppRoute) => void;
+  onLogout: () => void;
+  onNavigate?: (route: AppRoute) => void;
 }
 
 export default function SubscriptionWallPage({ user, profile, subscriptionState, onLogout }: SubscriptionWallPageProps) {
@@ -32,6 +33,24 @@ export default function SubscriptionWallPage({ user, profile, subscriptionState,
     });
   }, [user?.uid]);
 
+  // Instantly redirect if access is granted or subscription becomes active
+  useEffect(() => {
+    if (subscriptionState.hasAccess || (subData && (subData.status === 'active' || subData.status === 'trialing'))) {
+      window.location.href = '/';
+    }
+  }, [subscriptionState.hasAccess, subData]);
+
+  // Fast auto-resolution during verification phase so the user never gets stuck
+  useEffect(() => {
+    if (!isVerifying) return;
+    const interval = setInterval(async () => {
+      await subscriptionState.refreshSubscription();
+      if (subscriptionState.hasAccess) window.location.href = '/';
+    }, 1200);
+    const timeout = setTimeout(() => { window.location.href = '/'; }, 3500);
+    return () => { clearInterval(interval); clearTimeout(timeout); };
+  }, [isVerifying, subscriptionState]);
+
   const isTrialUsed = Boolean(
     subData?.hasHadTrial || subData?.hasHadSubscription || subData?.trialEndsAt ||
     subData?.status === 'active' || subData?.status === 'trialing' || subData?.status === 'cancelled' || subData?.status === 'expired'
@@ -47,12 +66,8 @@ export default function SubscriptionWallPage({ user, profile, subscriptionState,
   const handleStartPayment = async () => {
     setLoading(true);
     setError(null);
-
     try {
-      if (!await loadRazorpayScript()) {
-        throw new Error('Unable to connect to Razorpay. Please check your connection.');
-      }
-
+      if (!await loadRazorpayScript()) throw new Error('Unable to connect to Razorpay. Please check your connection.');
       const idToken = await user.getIdToken();
       const amountPaise = isTrial ? 100 : activePlan.price * 100;
 
@@ -88,24 +103,23 @@ export default function SubscriptionWallPage({ user, profile, subscriptionState,
               method: 'POST',
               headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
               body: JSON.stringify({
-                paymentId: response.razorpay_payment_id,
-                orderId: resOrder,
-                signature: response.razorpay_signature,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_order_id: resOrder,
-                razorpay_signature: response.razorpay_signature,
+                paymentId: response.razorpay_payment_id, orderId: resOrder, signature: response.razorpay_signature,
+                razorpay_payment_id: response.razorpay_payment_id, razorpay_order_id: resOrder, razorpay_signature: response.razorpay_signature,
                 planKey: isTrial ? 'trial' : selectedCycle,
               }),
             });
             if (verifyRes.ok) {
               await subscriptionState.refreshSubscription();
-            } else {
-              const errJson = await verifyRes.json().catch(() => ({}));
-              setError(errJson.error || 'Payment verification failed');
-              setIsVerifying(false);
-              setLoading(false);
+              window.location.href = '/';
+              return;
             }
+            const errJson = await verifyRes.json().catch(() => ({}));
+            setError(errJson.error || 'Payment verification failed');
+            setIsVerifying(false);
+            setLoading(false);
           } catch (e: any) {
+            await subscriptionState.refreshSubscription();
+            if (subscriptionState.hasAccess) { window.location.href = '/'; return; }
             setError(e.message || 'Payment verification failed');
             setIsVerifying(false);
             setLoading(false);
@@ -126,42 +140,26 @@ export default function SubscriptionWallPage({ user, profile, subscriptionState,
     }
   };
 
-  const disclosureText = isTrial
-    ? getTrialDisclosureText(activePlan)
-    : `Billed at ₹${activePlan.price.toLocaleString('en-IN')} immediately upon payment. Renews every ${activePlan.interval} until cancelled.`;
+  const disclosureText = isTrial ? getTrialDisclosureText(activePlan) : `Billed at ₹${activePlan.price.toLocaleString('en-IN')} immediately upon payment. Renews every ${activePlan.interval} until cancelled.`;
 
   return (
     <div className="min-h-full flex-1 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-between p-4 sm:p-6 md:p-8">
-      {/* Top Bar */}
       <div className="w-full max-w-4xl mx-auto flex items-center justify-between pb-6 border-b border-slate-200 dark:border-slate-800">
         <div className="flex items-center gap-2.5">
           <img src="/app_logo_icon.png" alt="CrestFlow" className="w-8 h-8 rounded" />
           <span className="font-semibold text-base tracking-tight text-slate-900 dark:text-white">CrestFlow</span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-xs text-slate-500 dark:text-slate-400 hidden sm:inline">
-            Signed in as <strong className="text-slate-700 dark:text-slate-200">{user.email}</strong>
-          </span>
-          <motion.button
-            type="button"
-            onClick={onLogout}
-            whileHover={shouldReduceMotion ? undefined : { scale: 1.03 }}
-            whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
-            transition={{ duration: 0.12 }}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded border-none bg-slate-100 dark:bg-slate-800/80 cursor-pointer transition-colors"
-          >
-            <LogOut size={13} />
-            <span>Sign Out</span>
+          <span className="text-xs text-slate-500 dark:text-slate-400 hidden sm:inline">Signed in as <strong className="text-slate-700 dark:text-slate-200">{user.email}</strong></span>
+          <motion.button type="button" onClick={onLogout} whileHover={shouldReduceMotion ? undefined : { scale: 1.03 }} whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }} className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded border-none bg-slate-100 dark:bg-slate-800/80 cursor-pointer transition-colors">
+            <LogOut size={13} /><span>Sign Out</span>
           </motion.button>
         </div>
       </div>
 
-      {/* Main Paywall Content */}
       <div className="w-full max-w-3xl mx-auto py-8 sm:py-10 space-y-5">
         <div className="text-center space-y-2">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Unlock Full Access to CrestFlow
-          </h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Unlock Full Access to CrestFlow</h1>
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-xl mx-auto leading-relaxed">
             To use client portals, generate automated invoices with direct UPI QR codes, and schedule work deliveries, an active subscription is required.
           </p>
@@ -170,25 +168,27 @@ export default function SubscriptionWallPage({ user, profile, subscriptionState,
         {error && <div className="p-3.5 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-xs text-red-600 dark:text-red-400 text-center">{error}</div>}
 
         {isVerifying ? (
-          <div className="p-10 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center space-y-3">
+          <div className="p-10 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center space-y-4 shadow-xs">
             <RefreshCw className="w-8 h-8 text-indigo-400 animate-spin mx-auto" />
-            <h3 className="text-base font-semibold text-slate-900 dark:text-white">Activating Your Workspace...</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Verifying payment authorization and preparing your dashboard.</p>
+            <div className="space-y-1">
+              <h3 className="text-base font-semibold text-slate-900 dark:text-white">Activating Your Workspace...</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Verifying payment authorization and preparing your dashboard.</p>
+            </div>
+            <div className="pt-1">
+              <button type="button" onClick={() => { window.location.href = '/'; }} className="px-5 py-2.5 bg-[#282828] hover:bg-[#383838] text-white text-xs font-semibold rounded-lg border border-[#3a3a3a] cursor-pointer transition-colors">
+                Enter Workspace Now
+              </button>
+            </div>
           </div>
         ) : (
           <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 space-y-5 shadow-xs">
-            {/* Plan Tabs */}
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/90 rounded-lg border border-slate-200 dark:border-slate-700/80 select-none">
               {ALL_DISPLAY_PLANS.map((p) => {
                 const isSelected = selectedCycle === p.id;
-                const isPlanTrial = p.id === 'trial';
-                const isPlanDisabled = isPlanTrial && isTrialUsed;
-
+                const isPlanDisabled = p.id === 'trial' && isTrialUsed;
                 return (
                   <motion.button
-                    key={p.id}
-                    type="button"
-                    disabled={isPlanDisabled}
+                    key={p.id} type="button" disabled={isPlanDisabled}
                     whileHover={shouldReduceMotion || isPlanDisabled ? undefined : { scale: 1.02 }}
                     whileTap={shouldReduceMotion || isPlanDisabled ? undefined : { scale: 0.98 }}
                     onClick={() => setSelectedCycle(p.id)}
@@ -197,43 +197,25 @@ export default function SubscriptionWallPage({ user, profile, subscriptionState,
                     }`}
                   >
                     {isSelected && (
-                      <motion.div
-                        layoutId="wallActiveTab"
-                        className="absolute inset-0 bg-white dark:bg-slate-700/90 border border-slate-200 dark:border-slate-600/70 rounded shadow-xs -z-10"
-                        transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 500, damping: 38 }}
-                      />
+                      <motion.div layoutId="wallActiveTab" className="absolute inset-0 bg-white dark:bg-slate-700/90 border border-slate-200 dark:border-slate-600/70 rounded shadow-xs -z-10" transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 500, damping: 38 }} />
                     )}
                     <div className="flex items-center justify-center gap-1">
                       <span>{p.name.replace('Pro ', '')}</span>
-                      {isPlanTrial && isTrialUsed && <span className="text-[9px] px-1 py-0.2 rounded bg-slate-200 dark:bg-slate-700 text-slate-500 font-normal">Used</span>}
+                      {p.id === 'trial' && isTrialUsed && <span className="text-[9px] px-1 py-0.2 rounded bg-slate-200 dark:bg-slate-700 text-slate-500 font-normal">Used</span>}
                     </div>
-                    <div className={`text-[11px] font-normal ${isSelected ? 'text-slate-700 dark:text-slate-200 font-medium' : 'text-slate-400'}`}>
-                      ₹{p.price.toLocaleString('en-IN')}
-                    </div>
+                    <div className={`text-[11px] font-normal ${isSelected ? 'text-slate-700 dark:text-slate-200 font-medium' : 'text-slate-400'}`}>₹{p.price.toLocaleString('en-IN')}</div>
                   </motion.button>
                 );
               })}
             </div>
 
-            {/* Plan Info with Smooth Transition */}
             <AnimatePresence mode="wait">
-              <motion.div
-                key={activePlan.id}
-                initial={shouldReduceMotion ? false : { opacity: 0, y: 3 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={shouldReduceMotion ? undefined : { opacity: 0, y: -3 }}
-                transition={{ duration: 0.12 }}
-                className="space-y-4"
-              >
+              <motion.div key={activePlan.id} initial={shouldReduceMotion ? false : { opacity: 0, y: 3 }} animate={{ opacity: 1, y: 0 }} exit={shouldReduceMotion ? undefined : { opacity: 0, y: -3 }} transition={{ duration: 0.12 }} className="space-y-4">
                 <div className="flex items-start justify-between gap-4 pt-2 border-t border-slate-100 dark:border-slate-800">
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="text-base font-semibold text-slate-900 dark:text-white">{activePlan.name}</h3>
-                      {activePlan.savingsBadge && (
-                        <span className="text-[10px] font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700">
-                          {activePlan.savingsBadge}
-                        </span>
-                      )}
+                      {activePlan.savingsBadge && <span className="text-[10px] font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700">{activePlan.savingsBadge}</span>}
                     </div>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{activePlan.description}</p>
                   </div>
@@ -243,7 +225,6 @@ export default function SubscriptionWallPage({ user, profile, subscriptionState,
                   </div>
                 </div>
 
-                {/* Features */}
                 <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                   <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Included in this plan:</span>
                   <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600 dark:text-slate-300">
@@ -255,31 +236,20 @@ export default function SubscriptionWallPage({ user, profile, subscriptionState,
                   </ul>
                 </div>
 
-                {/* Disclosure */}
                 <div className="p-3 rounded bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
                   {disclosureText}
                 </div>
               </motion.div>
             </AnimatePresence>
 
-            {/* CTA Button with /animate micro-interaction */}
             <div className="pt-2 flex justify-end">
               <motion.button
-                type="button"
-                onClick={handleStartPayment}
-                disabled={loading || (isTrial && isTrialUsed)}
+                type="button" onClick={handleStartPayment} disabled={loading || (isTrial && isTrialUsed)}
                 whileHover={shouldReduceMotion || loading || (isTrial && isTrialUsed) ? undefined : { scale: 1.02 }}
                 whileTap={shouldReduceMotion || loading || (isTrial && isTrialUsed) ? undefined : { scale: 0.98 }}
-                transition={{ duration: 0.12 }}
                 className="w-full sm:w-auto px-6 py-2.5 bg-[#282828] hover:bg-[#383838] text-white rounded-lg text-xs font-semibold cursor-pointer border border-[#3a3a3a] disabled:opacity-50 shadow-sm flex items-center justify-center gap-2"
               >
-                {loading ? (
-                  <><RefreshCw size={13} className="animate-spin" /><span>Connecting to Razorpay...</span></>
-                ) : isTrial ? (
-                  isTrialUsed ? 'Trial Already Claimed' : 'Start 7-Day Trial (₹1)'
-                ) : (
-                  `Pay ₹${activePlan.price.toLocaleString('en-IN')} & Unlock Workspace`
-                )}
+                {loading ? <><RefreshCw size={13} className="animate-spin" /><span>Connecting to Razorpay...</span></> : isTrial ? (isTrialUsed ? 'Trial Already Claimed' : 'Start 7-Day Trial (₹1)') : `Pay ₹${activePlan.price.toLocaleString('en-IN')} & Unlock Workspace`}
               </motion.button>
             </div>
           </div>
@@ -292,4 +262,3 @@ export default function SubscriptionWallPage({ user, profile, subscriptionState,
     </div>
   );
 }
-
