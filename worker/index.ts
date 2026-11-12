@@ -1,27 +1,18 @@
 import { Env } from './types';
 import {
-  jsonResponse,
-  getBearerToken,
-  handleCreateSubscription,
-  handleGetMe,
-  handleCancelSubscription,
-  handleChangePlan,
-  handleVerifyPayment,
+  jsonResponse, getBearerToken, handleCreateSubscription, handleGetMe,
+  handleCancelSubscription, handleChangePlan, handleVerifyPayment,
 } from './routes/subscription';
 import { handleCreateOrder } from './routes/order';
 import { handleRazorpayWebhook } from './routes/webhook';
 import { handleCronReconciliation } from './reconcile';
 import { constantTimeCompare } from './razorpay';
 import {
-  handleNotifyContact,
-  handleNotifyWelcome,
-  handleNotifyNewClientRequest,
-  handleNotifyMilestone,
-  handleNotifyPaymentDueToday,
-  handleScheduleEmail,
-  handleCancelEmail,
-  handleProcessEmailQueue,
+  handleNotifyContact, handleNotifyWelcome, handleNotifyNewClientRequest,
+  handleNotifyMilestone, handleNotifyPaymentDueToday, handleScheduleEmail,
+  handleCancelEmail, handleProcessEmailQueue,
 } from './routes/notifications';
+import { handleAdminGrantSubscription, handleAdminRevokeSubscription } from './routes/adminSubscriptions';
 import { processDueEmailJobs } from './emailDispatcher';
 
 export default {
@@ -205,6 +196,14 @@ Sitemap: ${baseUrl}/sitemap.xml
       // 4. POST /api/change-plan
       if (url.pathname === '/api/change-plan' && request.method === 'POST') {
         return await handleChangePlan(request, env);
+      }
+
+      // 4b. Admin subscription grant/revoke
+      if (url.pathname === '/api/admin/grant-subscription' && request.method === 'POST') {
+        return await handleAdminGrantSubscription(request, env);
+      }
+      if (url.pathname === '/api/admin/revoke-subscription' && request.method === 'POST') {
+        return await handleAdminRevokeSubscription(request, env);
       }
 
       // 5. POST /api/razorpay-webhook

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../../firebase';
+import { db, auth } from '../../firebase';
 import { collection, onSnapshot, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { Search, RefreshCw, Users } from 'lucide-react';
 import UserSubscriptionRow, { ProfileRowData } from './UserSubscriptionRow';
@@ -55,20 +55,17 @@ export default function AdminUserSubscriptions({
     if (!window.confirm(`Grant 30 extra days of Pro access to ${userName || 'this user'}?`)) return;
     setActionLoading(userId);
     try {
-      const now = Date.now();
-      const currentEnd = users.find((p) => p.id === userId)?.current_period_end;
-      const base = currentEnd && new Date(currentEnd).getTime() > now ? new Date(currentEnd).getTime() : now;
-      const newEnd = base + 30 * 24 * 60 * 60 * 1000;
-      await setDoc(
-        doc(db, 'profiles', userId),
-        {
-          subscriptionStatus: 'active',
-          subscriptionPlan: 'pro',
-          currentPeriodEnd: newEnd,
-          updatedAt: now,
-        },
-        { merge: true }
-      );
+      if (!auth.currentUser) throw new Error('You must be signed in as admin');
+      const token = await auth.currentUser.getIdToken();
+      const res = await fetch('/api/admin/grant-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ userId, days: 30 }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Failed to grant subscription');
+      }
       onRefresh();
     } catch (err: any) {
       alert(`Error granting subscription: ${err.message || err}`);
@@ -81,16 +78,17 @@ export default function AdminUserSubscriptions({
     if (!window.confirm(`Revoke subscription access for ${userName || 'this user'}?`)) return;
     setActionLoading(userId);
     try {
-      const now = Date.now();
-      await setDoc(
-        doc(db, 'profiles', userId),
-        {
-          subscriptionStatus: 'expired',
-          currentPeriodEnd: now,
-          updatedAt: now,
-        },
-        { merge: true }
-      );
+      if (!auth.currentUser) throw new Error('You must be signed in as admin');
+      const token = await auth.currentUser.getIdToken();
+      const res = await fetch('/api/admin/revoke-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ userId }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Failed to revoke access');
+      }
       onRefresh();
     } catch (err: any) {
       alert(`Error revoking access: ${err.message || err}`);
