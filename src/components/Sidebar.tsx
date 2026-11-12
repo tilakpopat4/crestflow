@@ -142,13 +142,25 @@ export default function Sidebar({
               whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
               title={isIconOnly ? item.label : undefined}
               className={clsx(
-                "group relative flex items-center justify-center px-1 min-[380px]:px-2 md:px-3 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-medium flex-1 md:flex-initial md:w-full md:max-w-none flex-shrink md:flex-shrink-0 min-w-0 min-h-[44px] md:min-h-0 transition-colors duration-120 outline-none select-none cursor-pointer border",
+                "group relative flex items-center justify-center px-1 min-[380px]:px-2 md:px-3 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-medium flex-1 md:flex-initial md:w-full md:max-w-none flex-shrink md:flex-shrink-0 min-w-0 min-h-[44px] md:min-h-0 outline-none select-none cursor-pointer",
                 isIconOnly ? "md:justify-center" : "md:justify-start md:space-x-3",
                 isActive
-                  ? "text-white bg-[#282828] border-[#3a3a3a]"
-                  : "text-[#aaaaaa] hover:text-white hover:bg-[#282828] active:bg-[#333333] border-transparent"
+                  ? "text-white"
+                  : "text-[#aaaaaa] hover:text-white hover:bg-[#282828]/50 active:bg-[#333333] transition-colors duration-120"
               )}
             >
+              {isActive && (
+                <motion.div
+                  layoutId="active-sidebar-nav-pill"
+                  className="absolute inset-0 rounded-xl bg-[#282828] border border-[#3a3a3a]"
+                  transition={
+                    shouldReduceMotion
+                      ? { duration: 0 }
+                      : { type: 'spring', stiffness: 500, damping: 38 }
+                  }
+                  aria-hidden="true"
+                />
+              )}
               <span
                 className={clsx(
                   "relative z-10 flex items-center justify-center w-full transition-all duration-120",
