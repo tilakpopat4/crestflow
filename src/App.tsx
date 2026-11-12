@@ -95,7 +95,7 @@ export default function App() {
     );
   }
 
-  if (loading || (user && (profilesLoading || isBlocked === null))) {
+  if (loading || (user && (profilesLoading || subscriptionState.loading || isBlocked === null))) {
     return (
       <div className="flex items-center justify-center h-screen w-full bg-slate-50 dark:bg-slate-950">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 dark:border-indigo-400" />

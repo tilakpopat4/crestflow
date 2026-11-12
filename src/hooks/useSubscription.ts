@@ -6,44 +6,20 @@ import { useSubscriptionConfig } from '../lib/subscriptionConfig';
 import { FREE_TIER_LIMITS } from '../lib/subscriptionPlans';
 
 export interface SubscriptionDoc {
-  userId: string;
-  plan: string;
-  billingCycle?: string;
+  userId: string; plan: string; billingCycle?: string;
   status: 'active' | 'trialing' | 'pending' | 'past_due' | 'cancelled' | 'halted' | 'expired';
-  currentPeriodStart?: number;
-  currentPeriodEnd?: number;
-  accessUntil?: string;
-  trialEndsAt?: string | null;
-  razorpaySubscriptionId?: string;
-  cancelAtPeriodEnd?: boolean;
-  updatedAt?: number;
+  currentPeriodStart?: number; currentPeriodEnd?: number; accessUntil?: string; trialEndsAt?: string | null;
+  razorpaySubscriptionId?: string; cancelAtPeriodEnd?: boolean; updatedAt?: number;
 }
 
 export interface SubscriptionState {
   status: 'active' | 'trialing' | 'pending' | 'past_due' | 'cancelled' | 'halted' | 'expired' | 'none';
-  plan: string;
-  isPro: boolean;
-  hasAccess: boolean;
-  isTrialing: boolean;
-  isPastDue: boolean;
-  isExpired: boolean;
-  isCancelled: boolean;
-  isPaidActive: boolean;
-  isWhitelisted: boolean;
-  cancelAtPeriodEnd: boolean;
-  billingCycle?: string;
-  accessUntil?: string | null;
-  trialEndsAt?: string | null;
-  daysRemaining: number;
-  serverNow?: string;
-  currentPeriodEnd?: number;
-  isSubscriptionFeatureEnabled: boolean;
-  limits: typeof FREE_TIER_LIMITS;
-  canCreateClient: (count: number) => boolean;
-  canCreateInvoice: (count: number) => boolean;
-  refreshSubscription: () => Promise<void>;
-  cancelSubscription: () => Promise<void>;
-  checkAccess: () => boolean;
+  plan: string; isPro: boolean; hasAccess: boolean; isTrialing: boolean; isPastDue: boolean;
+  isExpired: boolean; isCancelled: boolean; isPaidActive: boolean; isWhitelisted: boolean; loading: boolean;
+  cancelAtPeriodEnd: boolean; billingCycle?: string; accessUntil?: string | null; trialEndsAt?: string | null;
+  daysRemaining: number; serverNow?: string; currentPeriodEnd?: number; isSubscriptionFeatureEnabled: boolean;
+  limits: typeof FREE_TIER_LIMITS; canCreateClient: (count: number) => boolean; canCreateInvoice: (count: number) => boolean;
+  refreshSubscription: () => Promise<void>; cancelSubscription: () => Promise<void>; checkAccess: () => boolean;
 }
 
 async function checkIsWhitelisted(email?: string): Promise<boolean> {
@@ -70,7 +46,23 @@ export function useSubscription(
 ): SubscriptionState {
   const { isEnabled: isSubscriptionFeatureEnabled } = useSubscriptionConfig();
   const [isWhitelisted, setIsWhitelisted] = useState(false);
-  const [subscriptionDoc, setSubscriptionDoc] = useState<SubscriptionDoc | null>(null);
+
+  const cachedDoc = useMemo<SubscriptionDoc | null>(() => {
+    if (!userId || typeof window === 'undefined') return null;
+    try {
+      const raw = localStorage.getItem(`crestflow_sub_${userId}`);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }, [userId]);
+
+  const [subscriptionDoc, setSubscriptionDoc] = useState<SubscriptionDoc | null>(cachedDoc);
+  const [loading, setLoading] = useState<boolean>(() => {
+    if (!userId) return false;
+    if (cachedDoc?.accessUntil && new Date(cachedDoc.accessUntil).getTime() > Date.now()) return false;
+    return true;
+  });
   const [serverMe, setServerMe] = useState<{
     serverNow: string;
     status: string;
@@ -123,19 +115,31 @@ export function useSubscription(
   useEffect(() => {
     if (!userId) {
       setSubscriptionDoc(null);
+      setLoading(false);
       return;
     }
 
     const unsub = onSnapshot(
       doc(db, 'subscriptions', userId),
       (snap) => {
+        setLoading(false);
         if (snap.exists()) {
-          setSubscriptionDoc(snap.data() as SubscriptionDoc);
+          const data = snap.data() as SubscriptionDoc;
+          setSubscriptionDoc(data);
+          try {
+            localStorage.setItem(`crestflow_sub_${userId}`, JSON.stringify(data));
+          } catch {}
         } else {
           setSubscriptionDoc(null);
+          try {
+            localStorage.removeItem(`crestflow_sub_${userId}`);
+          } catch {}
         }
       },
-      (err) => console.warn('[useSubscription] onSnapshot warning:', err)
+      (err) => {
+        console.warn('[useSubscription] onSnapshot warning:', err);
+        setLoading(false);
+      }
     );
 
     return () => unsub();
@@ -262,6 +266,7 @@ export function useSubscription(
 
   return {
     ...computedState,
+    loading,
     isWhitelisted,
     isSubscriptionFeatureEnabled,
     limits: FREE_TIER_LIMITS,

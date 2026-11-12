@@ -33,23 +33,22 @@ export default function SubscriptionWallPage({ user, profile, subscriptionState,
     });
   }, [user?.uid]);
 
-  // Instantly redirect if access is granted or subscription becomes active
-  useEffect(() => {
-    if (subscriptionState.hasAccess || (subData && (subData.status === 'active' || subData.status === 'trialing'))) {
-      window.location.href = '/';
-    }
-  }, [subscriptionState.hasAccess, subData]);
-
   // Fast auto-resolution during verification phase so the user never gets stuck
   useEffect(() => {
     if (!isVerifying) return;
     const interval = setInterval(async () => {
       await subscriptionState.refreshSubscription();
-      if (subscriptionState.hasAccess) window.location.href = '/';
+      if (subscriptionState.hasAccess) {
+        setIsVerifying(false);
+        if (onNavigate) onNavigate('dashboard');
+      }
     }, 1200);
-    const timeout = setTimeout(() => { window.location.href = '/'; }, 3500);
+    const timeout = setTimeout(() => {
+      setIsVerifying(false);
+      if (onNavigate) onNavigate('dashboard');
+    }, 4000);
     return () => { clearInterval(interval); clearTimeout(timeout); };
-  }, [isVerifying, subscriptionState]);
+  }, [isVerifying, subscriptionState, onNavigate]);
 
   const isTrialUsed = Boolean(
     subData?.hasHadTrial || subData?.hasHadSubscription || subData?.trialEndsAt ||
@@ -109,8 +108,19 @@ export default function SubscriptionWallPage({ user, profile, subscriptionState,
               }),
             });
             if (verifyRes.ok) {
+              const verifyData = await verifyRes.json().catch(() => ({}));
+              if (verifyData.accessUntil) {
+                try {
+                  localStorage.setItem(`crestflow_sub_${user.uid}`, JSON.stringify({
+                    userId: user.uid, status: verifyData.subscriptionStatus || 'active', plan: 'pro',
+                    accessUntil: verifyData.accessUntil, trialEndsAt: verifyData.subscriptionStatus === 'trialing' ? verifyData.accessUntil : null,
+                  }));
+                } catch {}
+              }
               await subscriptionState.refreshSubscription();
-              window.location.href = '/';
+              setIsVerifying(false);
+              setLoading(false);
+              if (onNavigate) onNavigate('dashboard');
               return;
             }
             const errJson = await verifyRes.json().catch(() => ({}));
@@ -119,10 +129,10 @@ export default function SubscriptionWallPage({ user, profile, subscriptionState,
             setLoading(false);
           } catch (e: any) {
             await subscriptionState.refreshSubscription();
-            if (subscriptionState.hasAccess) { window.location.href = '/'; return; }
-            setError(e.message || 'Payment verification failed');
             setIsVerifying(false);
             setLoading(false);
+            if (subscriptionState.hasAccess && onNavigate) { onNavigate('dashboard'); return; }
+            setError(e.message || 'Payment verification failed');
           }
         },
         modal: { ondismiss: () => setLoading(false) },
@@ -175,7 +185,15 @@ export default function SubscriptionWallPage({ user, profile, subscriptionState,
               <p className="text-xs text-slate-500 dark:text-slate-400">Verifying payment authorization and preparing your dashboard.</p>
             </div>
             <div className="pt-1">
-              <button type="button" onClick={() => { window.location.href = '/'; }} className="px-5 py-2.5 bg-[#282828] hover:bg-[#383838] text-white text-xs font-semibold rounded-lg border border-[#3a3a3a] cursor-pointer transition-colors">
+              <button
+                type="button"
+                onClick={async () => {
+                  await subscriptionState.refreshSubscription();
+                  setIsVerifying(false);
+                  if (onNavigate) onNavigate('dashboard');
+                }}
+                className="px-5 py-2.5 bg-[#282828] hover:bg-[#383838] text-white text-xs font-semibold rounded-lg border border-[#3a3a3a] cursor-pointer transition-colors"
+              >
                 Enter Workspace Now
               </button>
             </div>
