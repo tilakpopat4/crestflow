@@ -11,4 +11,5 @@ client_secret*.json
 *serviceAccount*.json
 *.pem
 *.mp4
+*.csv
 .agent/
