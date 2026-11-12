@@ -8,6 +8,7 @@ import {
   handleChangePlan,
   handleVerifyPayment,
 } from './routes/subscription';
+import { handleCreateOrder } from './routes/order';
 import { handleRazorpayWebhook } from './routes/webhook';
 import { handleCronReconciliation } from './reconcile';
 import { constantTimeCompare } from './razorpay';
@@ -181,7 +182,12 @@ Sitemap: ${baseUrl}/sitemap.xml
         return await handleCreateSubscription(request, env);
       }
 
-      // 1b. POST /api/verify-payment
+      // 1b. POST /api/create-order (Razorpay Standard Web Checkout)
+      if (url.pathname === '/api/create-order' && request.method === 'POST') {
+        return await handleCreateOrder(request, env);
+      }
+
+      // 1c. POST /api/verify-payment
       if (url.pathname === '/api/verify-payment' && request.method === 'POST') {
         return await handleVerifyPayment(request, env);
       }

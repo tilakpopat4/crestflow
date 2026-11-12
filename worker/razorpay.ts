@@ -248,3 +248,17 @@ export async function createRazorpayOrder(
     currency: data.currency,
   };
 }
+
+/**
+ * Verifies Razorpay payment signature for standard checkout: HMAC-SHA256(order_id + "|" + payment_id, secret)
+ */
+export async function verifyRazorpayPaymentSignature(
+  orderId: string,
+  paymentId: string,
+  signature: string,
+  secret: string
+): Promise<boolean> {
+  if (!orderId || !paymentId || !signature || !secret) return false;
+  const payload = `${orderId}|${paymentId}`;
+  return await verifyRazorpayWebhookSignature(payload, signature, secret);
+}

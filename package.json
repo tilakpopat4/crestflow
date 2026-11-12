@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
-    "test": "tsx --test tests/gemini-service-versatility.test.ts tests/tab-layout-consistency.test.ts tests/email-system.test.ts tests/routing-navigation.test.ts tests/phase3-verification.test.ts tests/sidebar-resize.test.ts tests/admin-auth.test.ts tests/chunk-recovery.test.ts tests/client-portal-adaptation.test.ts tests/profile-gemini-key.test.ts tests/webhook-security.test.ts tests/trial-ledger-security.test.ts tests/reconcile-and-lifecycle.test.ts tests/pricing-and-billing-flow.test.ts tests/billing-review-fixes.test.ts tests/billing-refund-and-cron.test.ts tests/notification-bell.test.ts tests/promise-and-onboarding.test.ts",
+    "test": "tsx --test tests/gemini-service-versatility.test.ts tests/tab-layout-consistency.test.ts tests/email-system.test.ts tests/routing-navigation.test.ts tests/phase3-verification.test.ts tests/sidebar-resize.test.ts tests/admin-auth.test.ts tests/chunk-recovery.test.ts tests/client-portal-adaptation.test.ts tests/profile-gemini-key.test.ts tests/webhook-security.test.ts tests/trial-ledger-security.test.ts tests/reconcile-and-lifecycle.test.ts tests/pricing-and-billing-flow.test.ts tests/billing-review-fixes.test.ts tests/billing-refund-and-cron.test.ts tests/notification-bell.test.ts tests/promise-and-onboarding.test.ts tests/razorpay-standard-checkout.test.ts",
     "test:security": "npx firebase-tools emulators:exec --only firestore \"npx tsx --test tests/billing-anti-bypass.test.ts\"",
     "deploy": "npm run build && npx wrangler deploy"
   },
@@ -34,6 +34,7 @@
     "papaparse": "^5.5.4",
     "qrcode": "^1.5.4",
     "qrcode.react": "^4.2.0",
+    "razorpay": "^2.9.8",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
     "recharts": "^3.9.0",
