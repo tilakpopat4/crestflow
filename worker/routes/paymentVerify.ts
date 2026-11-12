@@ -3,6 +3,7 @@ import { verifyFirebaseIdToken } from '../auth';
 import { parseServiceAccount, updateSubscriptionInFirestore, getSubscriptionFromFirestore } from '../firestore';
 import { jsonResponse, getBearerToken } from './subscription';
 import { verifyRazorpayPaymentSignature } from '../razorpay';
+import { sendWelcomeEmailForUser } from './notifications';
 
 /**
  * Handles POST /api/verify-payment
@@ -77,20 +78,40 @@ export async function handleVerifyPayment(request: Request, env: Env): Promise<R
   const accessUntil = new Date(nowMs + days * 86400 * 1000).toISOString();
   const creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
   const existing = await getSubscriptionFromFirestore(creds, verifiedUser.uid).catch(() => null);
+
+  const paymentAmount = payData.amount ? payData.amount / 100 : (isTrial ? 1 : 79);
+  const paymentMethod = payData.method || (payData.vpa ? 'upi' : 'card');
+  const paymentVpa = payData.vpa || null;
+  const effectiveCycle = isTrial ? 'trial' : planKey || 'monthly';
+
   await updateSubscriptionInFirestore(creds, verifiedUser.uid, {
     userId: verifiedUser.uid,
     status: isTrial ? 'trialing' : 'active',
     plan: 'pro',
+    billingCycle: effectiveCycle,
     currentPeriodStart: nowMs,
     currentPeriodEnd: nowMs + days * 86400 * 1000,
     accessUntil,
     trialEndsAt: isTrial ? accessUntil : null,
     hasHadSubscription: true,
     hasHadTrial: isTrial ? true : (existing?.hasHadTrial || false),
+    lastPaymentId: paymentId,
+    lastPaymentAmount: paymentAmount,
+    lastPaymentMethod: paymentMethod,
+    lastPaymentVpa: paymentVpa,
+    lastPaymentAt: nowMs,
     razorpaySubscriptionId: orderId || paymentId,
     cancelAtPeriodEnd: false,
     updatedAt: nowMs,
   });
+
+  // Welcome email on first-time subscription payment
+  const isFirstPayment = !existing?.hasHadSubscription && !existing?.trialEndsAt && !existing?.lastPaymentAt;
+  if (isFirstPayment && verifiedUser.email) {
+    sendWelcomeEmailForUser(env, creds, verifiedUser.uid, verifiedUser.email, verifiedUser.name).catch((err) =>
+      console.warn('[paymentVerify] Welcome email dispatch error:', err)
+    );
+  }
 
   return jsonResponse({
     status: 'ok',

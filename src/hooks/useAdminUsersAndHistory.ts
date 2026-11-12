@@ -15,6 +15,15 @@ export interface AdminUserUnified {
   created_at: string;
   updated_at?: string;
   photo_url?: string;
+  last_payment_id?: string;
+  last_payment_amount?: number;
+  last_payment_method?: string;
+  last_payment_vpa?: string;
+  last_payment_at?: string;
+  billing_cycle?: string;
+  razorpay_subscription_id?: string;
+  trial_ends_at?: string;
+  has_had_trial?: boolean;
   // History metrics
   invoicesCount: number;
   totalBilled: number;
@@ -67,40 +76,16 @@ export function useAdminUsersAndHistory(isAdmin: boolean) {
       let clientsSnap: any = null;
       let workSnap: any = null;
 
-      try {
-        profilesSnap = await getDocs(collection(db, 'profiles'));
-      } catch (e) {
-        console.warn('Error reading profiles collection:', e);
+      try { profilesSnap = await getDocs(collection(db, 'profiles')); } catch (e) { console.warn('profiles err:', e); }
+      try { subsSnap = await getDocs(collection(db, 'subscriptions')); } catch (e) { console.warn('subs err:', e); }
+      try { invoicesSnap = await getDocs(collection(db, 'invoices')); } catch {
+        if (curr?.uid) invoicesSnap = await getDocs(query(collection(db, 'invoices'), where('userId', '==', curr.uid))).catch(() => null);
       }
-
-      try {
-        subsSnap = await getDocs(collection(db, 'subscriptions'));
-      } catch (e) {
-        console.warn('Error reading subscriptions collection:', e);
+      try { clientsSnap = await getDocs(collection(db, 'clients')); } catch {
+        if (curr?.uid) clientsSnap = await getDocs(query(collection(db, 'clients'), where('userId', '==', curr.uid))).catch(() => null);
       }
-
-      try {
-        invoicesSnap = await getDocs(collection(db, 'invoices'));
-      } catch (e) {
-        if (curr?.uid) {
-          invoicesSnap = await getDocs(query(collection(db, 'invoices'), where('userId', '==', curr.uid))).catch(() => null);
-        }
-      }
-
-      try {
-        clientsSnap = await getDocs(collection(db, 'clients'));
-      } catch (e) {
-        if (curr?.uid) {
-          clientsSnap = await getDocs(query(collection(db, 'clients'), where('userId', '==', curr.uid))).catch(() => null);
-        }
-      }
-
-      try {
-        workSnap = await getDocs(collection(db, 'workItems'));
-      } catch (e) {
-        if (curr?.uid) {
-          workSnap = await getDocs(query(collection(db, 'workItems'), where('userId', '==', curr.uid))).catch(() => null);
-        }
+      try { workSnap = await getDocs(collection(db, 'workItems')); } catch {
+        if (curr?.uid) workSnap = await getDocs(query(collection(db, 'workItems'), where('userId', '==', curr.uid))).catch(() => null);
       }
 
       const userMap = new Map<string, Partial<AdminUserUnified>>();
@@ -109,19 +94,9 @@ export function useAdminUsersAndHistory(isAdmin: boolean) {
       const getOrCreate = (uid: string): Partial<AdminUserUnified> => {
         if (!userMap.has(uid)) {
           userMap.set(uid, {
-            id: uid,
-            name: '',
-            email: '',
-            subscription_status: 'inactive',
-            subscription_plan: 'free',
-            created_at: new Date().toISOString(),
-            invoicesCount: 0,
-            totalBilled: 0,
-            clientsCount: 0,
-            workItemsCount: 0,
-            invoices: [],
-            clients: [],
-            workItems: [],
+            id: uid, name: '', email: '', subscription_status: 'inactive', subscription_plan: 'free',
+            created_at: new Date().toISOString(), invoicesCount: 0, totalBilled: 0, clientsCount: 0,
+            workItemsCount: 0, invoices: [], clients: [], workItems: [],
           });
         }
         return userMap.get(uid)!;
@@ -160,6 +135,15 @@ export function useAdminUsersAndHistory(isAdmin: boolean) {
         const u = getOrCreate(uid);
         if (data.status) u.subscription_status = data.status;
         if (data.plan) u.subscription_plan = data.plan;
+        if (data.billingCycle) u.billing_cycle = data.billingCycle;
+        if (data.lastPaymentId) u.last_payment_id = data.lastPaymentId;
+        if (data.lastPaymentAmount) u.last_payment_amount = data.lastPaymentAmount;
+        if (data.lastPaymentMethod) u.last_payment_method = data.lastPaymentMethod;
+        if (data.lastPaymentVpa) u.last_payment_vpa = data.lastPaymentVpa;
+        if (data.lastPaymentAt) u.last_payment_at = new Date(data.lastPaymentAt).toISOString();
+        if (data.razorpaySubscriptionId) u.razorpay_subscription_id = data.razorpaySubscriptionId;
+        if (data.trialEndsAt) u.trial_ends_at = String(data.trialEndsAt);
+        if (data.hasHadTrial !== undefined) u.has_had_trial = data.hasHadTrial;
         if (data.accessUntil) {
           const date = data.accessUntil.toDate ? data.accessUntil.toDate() : new Date(data.accessUntil);
           u.current_period_end = date.toISOString();
@@ -223,22 +207,15 @@ export function useAdminUsersAndHistory(isAdmin: boolean) {
 
       // Finalize user list
       const unifiedList: AdminUserUnified[] = Array.from(userMap.values()).map((u) => ({
-        id: u.id || 'unknown',
-        name: u.name || (u.email ? u.email.split('@')[0] : 'Freelancer'),
-        email: u.email || '',
-        phone: u.phone || '',
-        upi_id: u.upi_id || '',
-        professional_title: u.professional_title || '',
-        subscription_status: u.subscription_status || 'inactive',
-        subscription_plan: u.subscription_plan || 'free',
-        current_period_end: u.current_period_end,
-        created_at: u.created_at || new Date().toISOString(),
-        updated_at: u.updated_at,
-        photo_url: u.photo_url,
-        invoicesCount: u.invoicesCount || 0,
-        totalBilled: u.totalBilled || 0,
-        clientsCount: u.clientsCount || 0,
-        workItemsCount: u.workItemsCount || 0,
+        id: u.id || 'unknown', name: u.name || (u.email ? u.email.split('@')[0] : 'Freelancer'),
+        email: u.email || '', phone: u.phone || '', upi_id: u.upi_id || '', professional_title: u.professional_title || '',
+        subscription_status: u.subscription_status || 'inactive', subscription_plan: u.subscription_plan || 'free',
+        current_period_end: u.current_period_end, created_at: u.created_at || new Date().toISOString(),
+        updated_at: u.updated_at, photo_url: u.photo_url, last_payment_id: u.last_payment_id,
+        last_payment_amount: u.last_payment_amount, last_payment_method: u.last_payment_method,
+        last_payment_vpa: u.last_payment_vpa, last_payment_at: u.last_payment_at, billing_cycle: u.billing_cycle,
+        razorpay_subscription_id: u.razorpay_subscription_id, trial_ends_at: u.trial_ends_at, has_had_trial: u.has_had_trial,
+        invoicesCount: u.invoicesCount || 0, totalBilled: u.totalBilled || 0, clientsCount: u.clientsCount || 0, workItemsCount: u.workItemsCount || 0,
         invoices: (u.invoices || []).sort((a: any, b: any) => (b.createdAt || 0) - (a.createdAt || 0)),
         clients: (u.clients || []).sort((a: any, b: any) => (b.createdAt || 0) - (a.createdAt || 0)),
         workItems: (u.workItems || []).sort((a: any, b: any) => (b.createdAt || 0) - (a.createdAt || 0)),

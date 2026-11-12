@@ -4,6 +4,7 @@ import { verifyRazorpayWebhookSignature, fetchRazorpaySubscription, cancelRazorp
 import { normalizeGoogleEmail, normalizeUpiVpa, hashIdentifier, markTrialLedgerUsed } from '../trialLedger';
 import { jsonResponse } from './subscription';
 import { sendPaymentChargedReceipt } from '../emailDispatcher';
+import { sendWelcomeEmailForUser } from './notifications';
 
 /**
  * Handles POST /api/razorpay-webhook
@@ -226,17 +227,16 @@ export async function handleRazorpayWebhook(request: Request, env: Env): Promise
     accessUntilIso = new Date(currentPeriodEndMs).toISOString();
 
     if (eventType === 'subscription.charged' && userEmail) {
-      const planAmt = payloadData.payment?.entity?.amount ? `₹${(payloadData.payment.entity.amount / 100).toFixed(0)}` : '₹49';
+      const planAmt = payloadData.payment?.entity?.amount ? `₹${(payloadData.payment.entity.amount / 100).toFixed(0)}` : '₹79';
       sendPaymentChargedReceipt(env, creds, {
-        userId,
-        userEmail,
-        planName: 'Pro',
-        amountFormatted: planAmt,
-        periodStartMs: currentPeriodStartMs || nowMs,
-        periodEndMs: currentPeriodEndMs,
-        subId,
-        eventId,
+        userId, userEmail, planName: 'Pro', amountFormatted: planAmt,
+        periodStartMs: currentPeriodStartMs || nowMs, periodEndMs: currentPeriodEndMs, subId, eventId,
       }).catch((err) => console.warn('[Webhook] Payment receipt error:', err));
+    }
+    const userName = rzpSub.notes?.userName || rzpSub.notes?.name || existing?.userName;
+    const isFirstPayment = !existing?.hasHadSubscription && !existing?.trialEndsAt && !existing?.lastPaymentAt;
+    if (isFirstPayment && userEmail) {
+      sendWelcomeEmailForUser(env, creds, userId, userEmail, userName).catch(() => {});
     }
   } else if (
     eventType === 'subscription.pending' ||
@@ -256,34 +256,24 @@ export async function handleRazorpayWebhook(request: Request, env: Env): Promise
     newStatus = 'cancelled';
     cancelAtPeriodEnd = true;
     accessUntilIso = new Date(currentPeriodEndMs).toISOString();
-  } else if (
-    eventType === 'subscription.halted' ||
-    eventType === 'subscription.completed' ||
-    rzpStatus === 'halted' ||
-    rzpStatus === 'completed'
-  ) {
-    // Halted/Completed -> Immediately Expired
+  } else if (eventType === 'subscription.halted' || eventType === 'subscription.completed' || rzpStatus === 'halted' || rzpStatus === 'completed') {
     newStatus = 'expired';
     accessUntilIso = new Date(nowMs - 1000).toISOString();
   }
 
   // 8. Write to Firestore `subscriptions/{userId}`
   await updateSubscriptionInFirestore(creds, userId, {
-    userId,
-    status: newStatus,
-    plan: newStatus === 'expired' ? 'free' : 'pro',
-    currentPeriodStart: currentPeriodStartMs,
-    currentPeriodEnd: currentPeriodEndMs,
-    accessUntil: accessUntilIso,
-    trialEndsAt: trialEndsAtIso,
-    graceUntil:
-      newStatus === 'past_due'
-        ? (existing?.graceUntil || accessUntilIso)
-        : newStatus === 'active'
-        ? null
-        : (existing?.graceUntil || null),
+    userId, status: newStatus, plan: newStatus === 'expired' ? 'free' : 'pro',
+    currentPeriodStart: currentPeriodStartMs, currentPeriodEnd: currentPeriodEndMs,
+    accessUntil: accessUntilIso, trialEndsAt: trialEndsAtIso,
+    graceUntil: newStatus === 'past_due' ? (existing?.graceUntil || accessUntilIso) : newStatus === 'active' ? null : (existing?.graceUntil || null),
     hasHadSubscription: true,
     hasHadTrial: existing?.hasHadTrial || newStatus === 'trialing' || Boolean(trialEndsAtIso) || false,
+    lastPaymentId: payloadData.payment?.entity?.id || subId,
+    lastPaymentAmount: payloadData.payment?.entity?.amount ? payloadData.payment.entity.amount / 100 : (newStatus === 'trialing' ? 1 : 79),
+    lastPaymentMethod: payloadData.payment?.entity?.method || (payloadData.payment?.entity?.vpa ? 'upi' : 'card'),
+    lastPaymentVpa: payloadData.payment?.entity?.vpa || null,
+    lastPaymentAt: nowMs,
     razorpaySubscriptionId: subId,
     cancelAtPeriodEnd,
     lastEventTimestamp: eventCreatedAtMs,

@@ -157,6 +157,55 @@ export async function handleNotifyContact(request: Request, env: Env): Promise<R
 }
 
 /**
+ * Helper to dispatch welcome email to a first-time subscriber or newly registered freelancer.
+ * Enforces strict deduplication via idempotencyKey = welcome_${uid}.
+ */
+export async function sendWelcomeEmailForUser(
+  env: Env,
+  creds: any,
+  uid: string,
+  email: string,
+  name?: string
+): Promise<{ success: boolean; duplicate?: boolean }> {
+  if (!email || !EMAIL_REGEX.test(email)) return { success: false };
+  const idempotencyKey = `welcome_${uid}`;
+  const { jobId, duplicate } = await enqueueEmailJob(creds, {
+    eventType: 'welcome_freelancer',
+    recipient: email,
+    templateData: {
+      name: name || undefined,
+      workspaceUrl: `${env.BASE_URL || 'https://crestflow.app'}/profile`,
+    },
+    idempotencyKey,
+    createdBy: uid,
+  });
+
+  if (duplicate) return { success: true, duplicate: true };
+
+  const job = {
+    jobId,
+    eventType: 'welcome_freelancer' as SupportedEventType,
+    recipient: email,
+    templateId: 'welcome_freelancer',
+    templateData: {
+      name: name || undefined,
+      workspaceUrl: `${env.BASE_URL || 'https://crestflow.app'}/profile`,
+    },
+    status: 'queued' as const,
+    scheduledAt: Date.now(),
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    attemptCount: 0,
+    maxAttempts: 3,
+    nextAttemptAt: Date.now(),
+    idempotencyKey,
+  };
+
+  const dispatchResult = await dispatchEmailJob(env, creds, job);
+  return { success: dispatchResult.success };
+}
+
+/**
  * 2. POST /api/notify/welcome
  * Authenticated welcome email for newly registered or first-time freelancers.
  */
@@ -174,43 +223,8 @@ export async function handleNotifyWelcome(request: Request, env: Env): Promise<R
     return jsonResponse({ error: 'User does not have a valid email address' }, 400);
   }
 
-  const idempotencyKey = `welcome_${verifiedUser.uid}`;
-  const { jobId, duplicate } = await enqueueEmailJob(creds, {
-    eventType: 'welcome_freelancer',
-    recipient: targetEmail,
-    templateData: {
-      name: verifiedUser.name || undefined,
-      workspaceUrl: `${env.BASE_URL || 'https://crestflow.app'}/profile`,
-    },
-    idempotencyKey,
-    createdBy: verifiedUser.uid,
-  });
-
-  if (duplicate) {
-    return jsonResponse({ success: true, jobId, already_sent: true });
-  }
-
-  const job = {
-    jobId,
-    eventType: 'welcome_freelancer' as SupportedEventType,
-    recipient: targetEmail,
-    templateId: 'welcome_freelancer',
-    templateData: {
-      name: verifiedUser.name || undefined,
-      workspaceUrl: `${env.BASE_URL || 'https://crestflow.app'}/profile`,
-    },
-    status: 'queued' as const,
-    scheduledAt: Date.now(),
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-    attemptCount: 0,
-    maxAttempts: 3,
-    nextAttemptAt: Date.now(),
-    idempotencyKey,
-  };
-
-  const dispatchResult = await dispatchEmailJob(env, creds, job);
-  return jsonResponse({ success: true, jobId, dispatched: dispatchResult.success });
+  const res = await sendWelcomeEmailForUser(env, creds, verifiedUser.uid, targetEmail, verifiedUser.name);
+  return jsonResponse({ success: true, already_sent: res.duplicate, dispatched: res.success });
 }
 
 /**

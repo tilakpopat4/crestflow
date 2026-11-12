@@ -7,6 +7,7 @@ export interface UserHistoryDetails {
   clients: any[];
   workItems: any[];
   profile: any;
+  subscription: any;
   invoicesCount: number;
   totalBilled: number;
   clientsCount: number;
@@ -24,6 +25,7 @@ export function useFetchUserHistory(userId?: string | null, userEmail?: string |
   const [clients, setClients] = useState<any[]>([]);
   const [workItems, setWorkItems] = useState<any[]>([]);
   const [profile, setProfile] = useState<any>(null);
+  const [subscription, setSubscription] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,6 +35,7 @@ export function useFetchUserHistory(userId?: string | null, userEmail?: string |
       setClients([]);
       setWorkItems([]);
       setProfile(null);
+      setSubscription(null);
       setLoading(false);
       return;
     }
@@ -74,6 +77,10 @@ export function useFetchUserHistory(userId?: string | null, userEmail?: string |
         const profSnap = await getDoc(doc(db, 'profiles', userId)).catch(() => null);
         const profData = profSnap?.exists() ? profSnap.data() : null;
 
+        // 5. Fetch Subscription Doc
+        const subSnap = await getDoc(doc(db, 'subscriptions', userId)).catch(() => null);
+        const subData = subSnap?.exists() ? subSnap.data() : null;
+
         if (isMounted) {
           invList.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
           clientsList.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
@@ -83,6 +90,7 @@ export function useFetchUserHistory(userId?: string | null, userEmail?: string |
           setClients(clientsList);
           setWorkItems(workList);
           setProfile(profData);
+          setSubscription(subData);
           setLoading(false);
         }
       } catch (err: any) {
@@ -108,6 +116,7 @@ export function useFetchUserHistory(userId?: string | null, userEmail?: string |
     clients,
     workItems,
     profile,
+    subscription,
     invoicesCount: invoices.length,
     totalBilled,
     clientsCount: clients.length,
