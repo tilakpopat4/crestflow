@@ -38,26 +38,27 @@ export default function PricingPage({
 
       const idToken = await user.getIdToken();
 
-      const res = await fetch('/api/create-subscription', {
+      const res = await fetch('/api/create-order', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${idToken}`,
         },
         body: JSON.stringify({
+          amount: plan.price * 100,
+          currency: 'INR',
           planKey: plan.id,
-          isDirect: true,
-          isTrial: false,
         }),
       });
 
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || 'Failed to initialize subscription session');
+        throw new Error(errData.error || 'Failed to initialize payment order');
       }
 
-      const { subscriptionId, orderId, keyId, amount } = await res.json();
-      const rzpKey = (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || keyId;
+      const { order_id, orderId, key_id, keyId, amount: resAmount } = await res.json();
+      const effectiveOrderId = order_id || orderId;
+      const rzpKey = (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || key_id || keyId;
 
       if (!rzpKey) {
         throw new Error('Razorpay public key is missing.');
@@ -65,6 +66,9 @@ export default function PricingPage({
 
       const options: any = {
         key: rzpKey,
+        order_id: effectiveOrderId,
+        amount: resAmount || plan.price * 100,
+        currency: 'INR',
         name: 'CrestFlow Pro',
         description: `${plan.name} Subscription`,
         image: '/app_logo_icon.png',
@@ -81,8 +85,7 @@ export default function PricingPage({
           setLoading(false);
           try {
             const paymentId = response.razorpay_payment_id;
-            const resOrder = response.razorpay_order_id || orderId;
-            const resSub = response.razorpay_subscription_id || subscriptionId;
+            const resOrder = response.razorpay_order_id || effectiveOrderId;
 
             await fetch('/api/verify-payment', {
               method: 'POST',
@@ -93,8 +96,10 @@ export default function PricingPage({
               body: JSON.stringify({
                 paymentId,
                 orderId: resOrder,
-                subscriptionId: resSub,
                 signature: response.razorpay_signature,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: resOrder,
+                razorpay_signature: response.razorpay_signature,
                 planKey: plan.id,
               }),
             });
@@ -108,13 +113,6 @@ export default function PricingPage({
           },
         },
       };
-
-      if (orderId) {
-        options.order_id = orderId;
-        if (amount) options.amount = amount;
-      } else if (subscriptionId) {
-        options.subscription_id = subscriptionId;
-      }
 
       const rzp = new (window as any).Razorpay(options);
       rzp.on('payment.failed', function (resp: any) {

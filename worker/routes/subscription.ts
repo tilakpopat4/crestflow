@@ -123,8 +123,10 @@ export async function handleCreateSubscription(request: Request, env: Env): Prom
     existing.razorpaySubscriptionId &&
     Date.now() - existing.updatedAt < 15 * 60 * 1000
   ) {
+    const isOrder = existing.razorpaySubscriptionId.startsWith('order_') || existing.razorpayPlanId === 'order_mode';
     return jsonResponse({
-      subscriptionId: existing.razorpaySubscriptionId,
+      subscriptionId: isOrder ? undefined : existing.razorpaySubscriptionId,
+      orderId: isOrder ? existing.razorpaySubscriptionId : undefined,
       keyId: env.RAZORPAY_KEY_ID,
       idempotent: true,
     });

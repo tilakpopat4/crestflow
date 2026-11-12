@@ -39,13 +39,9 @@ export default function SubscriptionModal({
   }, [user?.uid]);
 
   const isTrialUsed = Boolean(
-    subData?.hasHadTrial ||
-    subData?.hasHadSubscription ||
-    subData?.trialEndsAt ||
-    subData?.status === 'active' ||
-    subData?.status === 'trialing' ||
-    subData?.status === 'cancelled' ||
-    subData?.status === 'expired'
+    subData?.hasHadTrial || subData?.hasHadSubscription || subData?.trialEndsAt ||
+    subData?.status === 'active' || subData?.status === 'trialing' ||
+    subData?.status === 'cancelled' || subData?.status === 'expired'
   );
 
   // Reset state when modal opens
@@ -98,27 +94,29 @@ export default function SubscriptionModal({
       // 2. Fetch Firebase ID token
       const idToken = await user.getIdToken();
 
-      // 3. Request subscription creation from Cloudflare Worker
-      const res = await fetch('/api/create-subscription', {
+      // 3. Request order creation from Cloudflare Worker
+      const amountPaise = isTrial ? 100 : activePlan.price * 100;
+      const res = await fetch('/api/create-order', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${idToken}`,
         },
         body: JSON.stringify({
+          amount: amountPaise,
+          currency: 'INR',
           planKey: isTrial ? 'trial' : selectedCycle,
-          isTrial,
-          isDirect: !isTrial,
         }),
       });
 
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || 'Failed to initialize subscription session');
+        throw new Error(errData.error || 'Failed to initialize payment order');
       }
 
-      const { subscriptionId, orderId, keyId, amount } = await res.json();
-      const rzpKey = (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || keyId;
+      const { order_id, orderId, key_id, keyId, amount: resAmount } = await res.json();
+      const effectiveOrderId = order_id || orderId;
+      const rzpKey = (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || key_id || keyId;
 
       if (!rzpKey) {
         throw new Error('Razorpay public key is missing.');
@@ -127,6 +125,9 @@ export default function SubscriptionModal({
       // 4. Open Razorpay Checkout modal
       const options: any = {
         key: rzpKey,
+        order_id: effectiveOrderId,
+        amount: resAmount || amountPaise,
+        currency: 'INR',
         name: 'CrestFlow Pro',
         description: isTrial
           ? 'CrestFlow Pro 7-Day Trial (₹1)'
@@ -144,20 +145,18 @@ export default function SubscriptionModal({
           setStep('activating');
           try {
             const paymentId = response.razorpay_payment_id;
-            const resOrder = response.razorpay_order_id || orderId;
-            const resSub = response.razorpay_subscription_id || subscriptionId;
+            const resOrder = response.razorpay_order_id || effectiveOrderId;
 
             const verifyRes = await fetch('/api/verify-payment', {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${idToken}`,
-              },
+              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
               body: JSON.stringify({
-                paymentId,
+                paymentId: response.razorpay_payment_id,
                 orderId: resOrder,
-                subscriptionId: resSub,
                 signature: response.razorpay_signature,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: resOrder,
+                razorpay_signature: response.razorpay_signature,
                 planKey: isTrial ? 'trial' : selectedCycle,
               }),
             });
@@ -167,9 +166,17 @@ export default function SubscriptionModal({
               if (onSubscriptionUpdated) {
                 await onSubscriptionUpdated();
               }
+            } else {
+              const errJson = await verifyRes.json().catch(() => ({}));
+              setError(errJson.error || 'Payment verification failed');
+              setStep('select');
+              setLoading(false);
             }
-          } catch (e) {
+          } catch (e: any) {
             console.warn('[SubscriptionModal] verify-payment fallback:', e);
+            setError(e.message || 'Payment verification failed');
+            setStep('select');
+            setLoading(false);
           }
         },
         modal: {
@@ -178,13 +185,6 @@ export default function SubscriptionModal({
           },
         },
       };
-
-      if (orderId) {
-        options.order_id = orderId;
-        if (amount) options.amount = amount;
-      } else if (subscriptionId) {
-        options.subscription_id = subscriptionId;
-      }
 
       const rzp = new (window as any).Razorpay(options);
       rzp.on('payment.failed', function (resp: any) {
