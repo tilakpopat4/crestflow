@@ -108,7 +108,7 @@ export const ProfileGeneralCard: React.FC<ProfileGeneralCardProps> = ({
           </label>
           <input
             type="text"
-            placeholder="e.g. Video Editor &amp; Motion Designer"
+            placeholder="e.g. UI/UX Designer, Web Developer, Video Editor"
             value={professionalTitle}
             onChange={(e) => setProfessionalTitle(e.target.value)}
             className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white outline-none focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 transition-colors"

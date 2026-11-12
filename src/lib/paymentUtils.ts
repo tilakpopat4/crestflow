@@ -155,13 +155,13 @@ export function getPaymentStatusInfo(
   };
 }
 
-export function generateWhatsAppReminder(client: Client, statusInfo: PaymentStatusInfo, senderName: string = 'Video Editor'): string {
+export function generateWhatsAppReminder(client: Client, statusInfo: PaymentStatusInfo, senderName: string = 'Freelancer'): string {
   const dueDateStr = new Date(statusInfo.nextDueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
   const pendingAmountStr = statusInfo.totalPendingAmount > 0 
     ? `Amount due: ₹${statusInfo.totalPendingAmount.toLocaleString('en-IN')}\n`
     : '';
 
-  let message = `Hi ${client.name},\n\nHope you are doing well!\n\nThis is a friendly reminder regarding your video editing service cycle ending on ${dueDateStr}.\n${pendingAmountStr}\nKindly request you to clear the payment at your earliest convenience.\n\nThank you!\n${senderName}`;
+  let message = `Hi ${client.name},\n\nHope you are doing well!\n\nThis is a friendly reminder regarding your service cycle ending on ${dueDateStr}.\n${pendingAmountStr}\nKindly request you to clear the payment at your earliest convenience.\n\nThank you!\n${senderName}`;
 
   if (statusInfo.daysRemaining < 0) {
     message = `Hi ${client.name},\n\nHope you are doing well!\n\nThis is a follow-up regarding the payment due on ${dueDateStr} (${Math.abs(statusInfo.daysRemaining)} days delayed).\n${pendingAmountStr}\nPlease share the transaction update once done.\n\nThank you!\n${senderName}`;
@@ -170,7 +170,7 @@ export function generateWhatsAppReminder(client: Client, statusInfo: PaymentStat
   return `https://wa.me/${client.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
 }
 
-export function generateEmailReminder(client: Client, statusInfo: PaymentStatusInfo, senderName: string = 'Video Editor') {
+export function generateEmailReminder(client: Client, statusInfo: PaymentStatusInfo, senderName: string = 'Freelancer') {
   const dueDateStr = new Date(statusInfo.nextDueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
   const pendingAmountStr = statusInfo.totalPendingAmount > 0
     ? `Pending Amount: ₹${statusInfo.totalPendingAmount.toLocaleString('en-IN')}`
@@ -186,13 +186,13 @@ export function generateEmailReminder(client: Client, statusInfo: PaymentStatusI
   let body = `Dear ${client.name},\n\n`;
 
   if (isOverdue) {
-    body += `This is an email reminder regarding your video production and editing service payment that was due on ${dueDateStr} (${overdueDays} day${overdueDays > 1 ? 's' : ''} overdue).\n\n`;
+    body += `This is an email reminder regarding your services payment that was due on ${dueDateStr} (${overdueDays} day${overdueDays > 1 ? 's' : ''} overdue).\n\n`;
     if (statusInfo.totalPendingAmount > 0) {
       body += `Outstanding Total: ₹${statusInfo.totalPendingAmount.toLocaleString('en-IN')}\n\n`;
     }
     body += `Kindly arrange for the payment to be processed at your earliest convenience. If you have already completed the transaction, please disregard this note or reply with the payment confirmation.\n\n`;
   } else {
-    body += `This is a friendly reminder that your monthly video production payment cycle due date is ${dueDateStr}.\n\n`;
+    body += `This is a friendly reminder that your monthly payment cycle due date is ${dueDateStr}.\n\n`;
     if (statusInfo.totalPendingAmount > 0) {
       body += `Current Pending Amount: ₹${statusInfo.totalPendingAmount.toLocaleString('en-IN')}\n\n`;
     }
@@ -232,14 +232,14 @@ export function generateInvoiceEmailDetails(
     ? `${new Date(dateFrom).toLocaleDateString('en-IN', { month: 'short', day: '2-digit' })} - ${new Date(dateTo).toLocaleDateString('en-IN', { month: 'short', day: '2-digit', year: 'numeric' })}`
     : new Date(invoice.date).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
 
-  const senderName = profile?.name || 'Video Editor';
+  const senderName = profile?.name || 'Freelancer';
   const upiId = profile?.upiId || '';
 
   const invoiceNo = formatInvoiceNumber(invoice);
   const subject = `Invoice ${invoiceNo} - ${client.name} (${monthCycleStr})`;
 
   let body = `Dear ${client.name},\n\n`;
-  body += `Please find below the detailed invoice breakdown for your video production & editing services cycle (${monthCycleStr}).\n\n`;
+  body += `Please find below the detailed invoice breakdown for your services cycle (${monthCycleStr}).\n\n`;
   body += `========================================\n`;
   body += `INVOICE SUMMARY:\n`;
   body += `========================================\n`;

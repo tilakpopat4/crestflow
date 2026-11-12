@@ -33,7 +33,7 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
 
   const getReviewLink = (client: Client) => {
     const baseUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
-    const nameParam = encodeURIComponent(profile?.name || user.displayName || 'Video Editor');
+    const nameParam = encodeURIComponent(profile?.name || user.displayName || 'Freelancer');
     const clientNameParam = encodeURIComponent(client.name);
     return `${baseUrl}?feedback=true&uid=${user.uid}&name=${nameParam}&clientId=${client.id}&clientName=${clientNameParam}`;
   };
@@ -48,9 +48,9 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
 
   const handleEmailRequest = (client: Client) => {
     const link = getReviewLink(client);
-    const subject = encodeURIComponent('Feedback Request - Video Editing Services');
+    const subject = encodeURIComponent('Feedback Request - Freelance Services');
     const body = encodeURIComponent(
-      `Hi ${client.name},\n\nHope you're doing well!\n\nThank you for working with me on your recent video projects. I would really appreciate it if you could take 1 minute to leave a review of your experience using this link:\n\n${link}\n\nYour feedback helps me improve my services and builds trust with future clients.\n\nBest regards,\n${profile?.name || user.displayName || 'Video Editor'}`
+      `Hi ${client.name},\n\nHope you're doing well!\n\nThank you for working with me on our recent projects. I would really appreciate it if you could take 1 minute to leave a review of your experience using this link:\n\n${link}\n\nYour feedback helps me improve my services and builds trust with future clients.\n\nBest regards,\n${profile?.name || user.displayName || 'Freelancer'}`
     );
     window.open(`mailto:${client.email || ''}?subject=${subject}&body=${body}`);
   };

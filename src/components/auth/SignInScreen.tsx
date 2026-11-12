@@ -1,5 +1,5 @@
 import React from 'react';
-import { Film, Calendar, FileText } from 'lucide-react';
+import { Briefcase, Calendar, FileText, Layers } from 'lucide-react';
 import Logo from '../Logo';
 import Footer from '../Footer';
 
@@ -27,14 +27,14 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
           <div className="lg:col-span-7 space-y-6">
             <div>
               <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-[#212121] text-slate-200 border border-[#333333] text-xs font-mono uppercase tracking-wider mb-3">
-                <Film size={12} className="text-slate-300" />
-                Built for Video Editors &amp; Creators
+                <Briefcase size={12} className="text-slate-300" />
+                Built for Freelancers &amp; Creators
               </div>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
                 Manage your clients, deliverables, and invoices in one calm workspace.
               </h1>
               <p className="mt-3 text-sm md:text-base text-slate-400 leading-relaxed max-w-xl">
-                CrestFlow replaces messy spreadsheets and WhatsApp threads with a purpose-built system for creative freelancers.
+                CrestFlow replaces messy spreadsheets and WhatsApp threads with a purpose-built system for independent freelancers and creative professionals.
               </p>
             </div>
 
@@ -42,11 +42,11 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
               <div className="p-3.5 rounded-lg border border-[#333333] bg-[#212121] shadow-xs">
                 <div className="p-1.5 w-fit rounded bg-[#282828] text-slate-300 mb-2">
-                  <Film size={15} />
+                  <Layers size={15} />
                 </div>
                 <h2 className="text-xs font-semibold text-white">Deliverables</h2>
                 <p className="text-[11px] text-slate-400 mt-1 leading-normal">
-                  Reels, longform edits &amp; Drive links.
+                  Design, code, video &amp; client assets.
                 </p>
               </div>
 
@@ -84,15 +84,15 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
               <div className="space-y-2">
                 <div className="flex items-center justify-between p-2 rounded bg-[#282828]">
                   <div className="space-y-0.5">
-                    <p className="font-medium text-slate-200">YouTube Longform - Ep 14 (Rough Cut)</p>
-                    <p className="text-[11px] text-slate-400">DaVinci Resolve • 4K DCI • Turnaround: 2 days</p>
+                    <p className="font-medium text-slate-200">Brand Identity &amp; Design System</p>
+                    <p className="text-[11px] text-slate-400">Figma • Vector Assets • Turnaround: 3 days</p>
                   </div>
                   <span className="text-slate-300 font-medium text-[13px]">Invoiced</span>
                 </div>
                 <div className="flex items-center justify-between p-2 rounded bg-[#282828]">
                   <div className="space-y-0.5">
-                    <p className="font-medium text-slate-200">Instagram Reels Batch (3 Videos)</p>
-                    <p className="text-[11px] text-slate-400">Premiere Pro • 9:16 Vertical • Client approved</p>
+                    <p className="font-medium text-slate-200">Web App Frontend &amp; Deliverables Batch</p>
+                    <p className="text-[11px] text-slate-400">React • Clean Architecture • Client approved</p>
                   </div>
                   <span className="text-slate-300 font-medium text-[13px]">Paid</span>
                 </div>
@@ -102,7 +102,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
             {/* Workflow Tags */}
             <div className="pt-1 flex flex-wrap items-center gap-2 text-xs text-slate-300">
               <span className="font-mono text-[11px] uppercase tracking-wider text-slate-400">Workflow:</span>
-              {['Premiere Pro', 'DaVinci Resolve', 'After Effects', 'Final Cut Pro'].map((app) => (
+              {['Figma', 'VS Code', 'Premiere Pro', 'Notion', 'DaVinci Resolve', 'Drive'].map((app) => (
                 <span
                   key={app}
                   className="px-2 py-0.5 rounded bg-[#212121] text-slate-300 text-[11px] font-medium border border-[#333333]"
@@ -122,12 +122,12 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
               </div>
 
               <h2 className="text-xl font-bold text-white mb-1">
-                {isAdminRoute ? 'Admin Portal' : 'Creator Sign In'}
+                {isAdminRoute ? 'Admin Portal' : 'Freelancer Sign In'}
               </h2>
               <p className="text-slate-400 mb-6 text-xs sm:text-sm leading-relaxed">
                 {isAdminRoute 
                   ? 'Please sign in with Google to authenticate and load the Admin database console.' 
-                  : 'Sign in with your Google account to access your freelancing workspace, clients, and active deliverables.'}
+                  : 'Sign in with your Google account to access your workspace, clients, and active deliverables.'}
               </p>
 
               <button 

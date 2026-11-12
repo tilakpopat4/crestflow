@@ -27,7 +27,7 @@ export function renderDocumentHtml(params: {
       : '—');
 
   const senderName = params.profile?.name || 'Tilak Popat';
-  const senderTitle = params.profile?.professionalTitle || params.profile?.servicesDescription || 'Video Editor';
+  const senderTitle = params.profile?.professionalTitle || params.profile?.servicesDescription || 'Freelancer';
   const senderEmail = params.profile?.email || 'you@example.com';
   const senderPhone = params.profile?.phone || '+91 00000 00000';
   const upiId = (params.customUpiId && params.customUpiId.trim())

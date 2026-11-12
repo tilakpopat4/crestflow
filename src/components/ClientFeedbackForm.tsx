@@ -8,7 +8,7 @@ import Footer from './Footer';
 
 export default function ClientFeedbackForm() {
   const [freelancerUid, setFreelancerUid] = useState('');
-  const [freelancerName, setFreelancerName] = useState('your Video Editor');
+  const [freelancerName, setFreelancerName] = useState('your Freelancer');
   const [clientName, setClientName] = useState('');
   const [clientId, setClientId] = useState('');
   const [projectName, setProjectName] = useState('');
@@ -128,7 +128,7 @@ export default function ClientFeedbackForm() {
               <Logo className="w-5 h-5" />
               <span className="text-xs font-bold text-slate-400 dark:text-slate-500 tracking-wider uppercase">CrestFlow Portal</span>
             </div>
-            <p className="text-[10px] text-slate-400 dark:text-slate-500">Professional client workflow manager for video editors</p>
+            <p className="text-[10px] text-slate-400 dark:text-slate-500">Professional client workflow manager for freelancers &amp; creators</p>
           </div>
         </div>
       </div>

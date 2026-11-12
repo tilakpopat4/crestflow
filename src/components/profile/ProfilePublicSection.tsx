@@ -142,7 +142,7 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
               type="text"
               value={professionalTitle}
               onChange={(e) => setProfessionalTitle(e.target.value)}
-              placeholder="e.g. Video Editor / Motion Designer"
+              placeholder="e.g. UI/UX Designer, Web Developer, Video Editor"
               className="block h-10 w-full rounded-lg bg-slate-50 dark:bg-slate-800/60 px-3 text-sm text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 placeholder:text-slate-400 focus:border-indigo-600 dark:focus:border-indigo-400 outline-none transition-colors"
             />
             <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
@@ -227,7 +227,7 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
               maxLength={160}
               value={bio}
               onChange={(e) => setBio(e.target.value)}
-              placeholder="e.g. Video editor specializing in short-form retention edits and high-converting YouTube storytelling."
+              placeholder="e.g. Independent creative specializing in high-impact design, development, or video storytelling."
               className="block w-full resize-y rounded-lg bg-slate-50 dark:bg-slate-800/60 p-3 text-sm text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 placeholder:text-slate-400 focus:border-indigo-600 dark:focus:border-indigo-400 outline-none transition-colors"
             />
             <div className="mt-1 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">

@@ -32,26 +32,23 @@ export default function ProfilePage({
   // Live form state
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
-  const [phone, setPhone] = useState('');
-  const [upiId, setUpiId] = useState('');
-  const [professionalTitle, setProfessionalTitle] = useState('Video Editor');
-  const [servicesDescription, setServicesDescription] = useState('Video Editing Services');
-  const [geminiApiKey, setGeminiApiKey] = useState('');
-  const [freelanceStartDate, setFreelanceStartDate] = useState('');
+  const [phone, setPhone] = useState(''); const [upiId, setUpiId] = useState('');
+  const [professionalTitle, setProfessionalTitle] = useState('Freelancer');
+  const [servicesDescription, setServicesDescription] = useState('Freelance Services');
+  const [geminiApiKey, setGeminiApiKey] = useState(''); const [freelanceStartDate, setFreelanceStartDate] = useState('');
   const [workExperienceBio, setWorkExperienceBio] = useState('');
 
   // Saved snapshot for dirty checking and discarding
   const [savedSnapshot, setSavedSnapshot] = useState({
     name: '', username: '', phone: '', upiId: '',
-    professionalTitle: 'Video Editor', servicesDescription: 'Video Editing Services',
+    professionalTitle: 'Freelancer', servicesDescription: 'Freelance Services',
     geminiApiKey: '', freelanceStartDate: '', workExperienceBio: '',
   });
 
   const [activeSection, setActiveSection] = useState<SettingsSectionId>('profile');
   const [isSaving, setIsSaving] = useState(false);
   const [savedSection, setSavedSection] = useState<SettingsSectionId | null>(null);
-  const [error, setError] = useState('');
-  const [upiError, setUpiError] = useState('');
+  const [error, setError] = useState(''); const [upiError, setUpiError] = useState('');
 
   const isInitializedRef = useRef(false);
   const hasLoadedInitialKeyRef = useRef(false);
@@ -65,8 +62,8 @@ export default function ProfilePage({
           username: initialHandle,
           phone: profile.phone || '',
           upiId: profile.upiId || '',
-          professionalTitle: profile.professionalTitle || 'Video Editor',
-          servicesDescription: profile.servicesDescription || 'Video Editing Services',
+          professionalTitle: profile.professionalTitle || 'Freelancer',
+          servicesDescription: profile.servicesDescription || 'Freelance Services',
           geminiApiKey: profile.geminiApiKey || '',
           freelanceStartDate: profile.freelanceStartDate || '',
           workExperienceBio: profile.workExperienceBio || '',
@@ -154,34 +151,27 @@ export default function ProfilePage({
 
     try {
       const cleanHandle = cleanUsername(username) || getUserHandle(profile, user);
-      const updatedProfile: UserProfile = {
-        id: user.uid,
+      const snapshotData = {
         name: trimmedName,
         username: cleanHandle,
         phone: phone.trim(),
         upiId: trimmedUpi,
-        professionalTitle: professionalTitle.trim() || 'Video Editor',
-        servicesDescription: servicesDescription.trim() || 'Video Editing Services',
+        professionalTitle: professionalTitle.trim() || 'Freelancer',
+        servicesDescription: servicesDescription.trim() || 'Freelance Services',
+        geminiApiKey: geminiApiKey.trim(),
+        freelanceStartDate: freelanceStartDate.trim(),
+        workExperienceBio: workExperienceBio.trim(),
+      };
+      await onSave({
+        ...snapshotData,
+        id: user.uid,
         geminiApiKey: geminiApiKey.trim() || undefined,
         freelanceStartDate: freelanceStartDate.trim() || undefined,
         workExperienceBio: workExperienceBio.trim() || undefined,
         isPublicProfile: true,
         createdAt: profile?.createdAt || Date.now(),
-      };
-
-      await onSave(updatedProfile);
-
-      setSavedSnapshot({
-        name: trimmedName,
-        username: cleanHandle,
-        phone: phone.trim(),
-        upiId: trimmedUpi,
-        professionalTitle: professionalTitle.trim() || 'Video Editor',
-        servicesDescription: servicesDescription.trim() || 'Video Editing Services',
-        geminiApiKey: geminiApiKey.trim(),
-        freelanceStartDate: freelanceStartDate.trim(),
-        workExperienceBio: workExperienceBio.trim(),
       });
+      setSavedSnapshot(snapshotData);
 
       setSavedSection(section);
       setTimeout(() => setSavedSection(null), 3000);
@@ -199,19 +189,12 @@ export default function ProfilePage({
     try {
       const cleanHandle = cleanUsername(username) || getUserHandle(profile, user);
       await onSave({
-        ...(profile || {}),
-        id: user.uid,
-        name: name.trim() || user.displayName || 'Creator',
-        username: cleanHandle,
-        phone: phone.trim(),
-        upiId: upiId.trim(),
-        professionalTitle: professionalTitle.trim() || 'Video Editor',
-        servicesDescription: servicesDescription.trim() || 'Video Editing Services',
-        geminiApiKey: geminiApiKey.trim() || undefined,
-        freelanceStartDate: trimmed || undefined,
-        workExperienceBio: workExperienceBio.trim() || undefined,
-        isPublicProfile: true,
-        createdAt: profile?.createdAt || Date.now(),
+        ...(profile || {}), id: user.uid, name: name.trim() || user.displayName || 'Creator',
+        username: cleanHandle, phone: phone.trim(), upiId: upiId.trim(),
+        professionalTitle: professionalTitle.trim() || 'Freelancer',
+        servicesDescription: servicesDescription.trim() || 'Freelance Services',
+        geminiApiKey: geminiApiKey.trim() || undefined, freelanceStartDate: trimmed || undefined,
+        workExperienceBio: workExperienceBio.trim() || undefined, isPublicProfile: true, createdAt: profile?.createdAt || Date.now(),
       } as UserProfile);
       setSavedSnapshot((prev) => ({ ...prev, freelanceStartDate: trimmed }));
       setSavedSection('profile');

@@ -50,7 +50,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
   const handleCopyReviewLink = () => {
     if (!user) return;
     const baseUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
-    const nameParam = encodeURIComponent(profile?.name || user.displayName || 'Video Editor');
+    const nameParam = encodeURIComponent(profile?.name || user.displayName || 'Freelancer');
     const clientNameParam = encodeURIComponent(client.name);
     const link = `${baseUrl}?feedback=true&uid=${user.uid}&name=${nameParam}&clientId=${client.id}&clientName=${clientNameParam}`;
     

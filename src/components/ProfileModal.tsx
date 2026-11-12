@@ -29,8 +29,8 @@ export default function ProfileModal({
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [upiId, setUpiId] = useState('');
-  const [professionalTitle, setProfessionalTitle] = useState('Video Editor Pro');
-  const [servicesDescription, setServicesDescription] = useState('Video Editing Services');
+  const [professionalTitle, setProfessionalTitle] = useState(initialProfile?.professionalTitle || 'Freelancer');
+  const [servicesDescription, setServicesDescription] = useState(initialProfile?.servicesDescription || 'Freelance Services');
   const [geminiApiKey, setGeminiApiKey] = useState('');
   const [freelanceStartDate, setFreelanceStartDate] = useState('');
   const [workExperienceBio, setWorkExperienceBio] = useState('');
@@ -42,8 +42,8 @@ export default function ProfileModal({
       setName(initialProfile?.name || user.displayName || '');
       setPhone(initialProfile?.phone || '');
       setUpiId(initialProfile?.upiId || '');
-      setProfessionalTitle(initialProfile?.professionalTitle || 'Video Editor');
-      setServicesDescription(initialProfile?.servicesDescription || 'Video Editing Services');
+      setProfessionalTitle(initialProfile?.professionalTitle || 'Freelancer');
+      setServicesDescription(initialProfile?.servicesDescription || 'Freelance Services');
       setGeminiApiKey(initialProfile?.geminiApiKey || '');
       setFreelanceStartDate(initialProfile?.freelanceStartDate || '');
       setWorkExperienceBio(initialProfile?.workExperienceBio || '');
@@ -155,7 +155,7 @@ export default function ProfileModal({
             <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Professional Title *</label>
             <input
               type="text"
-              placeholder="e.g. Video Editor"
+              placeholder="e.g. UI/UX Designer, Web Developer, Video Editor"
               className="w-full border border-slate-200 dark:border-slate-700 rounded-lg px-3.5 py-2 text-sm bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 outline-none transition-all focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900"
               value={professionalTitle}
               onChange={(e) => setProfessionalTitle(e.target.value)}
