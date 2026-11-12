@@ -86,13 +86,9 @@ export async function handleCreateSubscription(request: Request, env: Env): Prom
   // Single-use 7-day trial guard: reject trial request if account has ever used a trial or subscription
   const hasAlreadyHadTrial = Boolean(
     existing &&
-      (existing.hasHadTrial ||
-        existing.hasHadSubscription ||
-        existing.trialEndsAt ||
-        existing.status === 'active' ||
-        existing.status === 'trialing' ||
-        existing.status === 'cancelled' ||
-        existing.status === 'expired')
+      (existing.status === 'trialing' ||
+        Boolean(existing.trialEndsAt) ||
+        (existing.hasHadTrial && existing.status !== 'pending'))
   );
 
   if (isTrialRequest && hasAlreadyHadTrial) {
@@ -233,7 +229,7 @@ export async function handleCreateSubscription(request: Request, env: Env): Prom
     plan: effectivePlan as any,
     billingCycle: effectivePlan as any,
     status: 'pending',
-    hasHadTrial: isTrialRequest || existing?.hasHadTrial || false,
+    hasHadTrial: existing?.hasHadTrial && existing?.status !== 'pending' ? true : false,
     razorpaySubscriptionId: rzpSubId,
     razorpayPlanId: planId || (isOrder ? 'order_mode' : ''),
     cancelAtPeriodEnd: false,

@@ -3,6 +3,7 @@ import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 import { ThemeProvider } from './context/ThemeContext.tsx';
+import ErrorBoundary from './components/ErrorBoundary.tsx';
 
 // Global handler for Vite dynamic preload errors (when chunk hash changes after deployment)
 if (typeof window !== 'undefined') {
@@ -21,7 +22,9 @@ if (typeof window !== 'undefined') {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeProvider>
-      <App />
+      <ErrorBoundary fallbackTitle="An unexpected application error occurred">
+        <App />
+      </ErrorBoundary>
     </ThemeProvider>
   </StrictMode>,
 );

@@ -1,6 +1,6 @@
 import { Env } from '../types';
 import { verifyFirebaseIdToken } from '../auth';
-import { parseServiceAccount, updateSubscriptionInFirestore } from '../firestore';
+import { parseServiceAccount, updateSubscriptionInFirestore, getSubscriptionFromFirestore } from '../firestore';
 import { jsonResponse, getBearerToken } from './subscription';
 import { verifyRazorpayPaymentSignature } from '../razorpay';
 
@@ -76,6 +76,7 @@ export async function handleVerifyPayment(request: Request, env: Env): Promise<R
 
   const accessUntil = new Date(nowMs + days * 86400 * 1000).toISOString();
   const creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
+  const existing = await getSubscriptionFromFirestore(creds, verifiedUser.uid).catch(() => null);
   await updateSubscriptionInFirestore(creds, verifiedUser.uid, {
     userId: verifiedUser.uid,
     status: isTrial ? 'trialing' : 'active',
@@ -85,7 +86,7 @@ export async function handleVerifyPayment(request: Request, env: Env): Promise<R
     accessUntil,
     trialEndsAt: isTrial ? accessUntil : null,
     hasHadSubscription: true,
-    hasHadTrial: true,
+    hasHadTrial: isTrial ? true : (existing?.hasHadTrial || false),
     razorpaySubscriptionId: orderId || paymentId,
     cancelAtPeriodEnd: false,
     updatedAt: nowMs,

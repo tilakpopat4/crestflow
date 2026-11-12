@@ -41,7 +41,12 @@ export async function handleCreateOrder(request: Request, env: Env): Promise<Res
 
   const existing = await getSubscriptionFromFirestore(creds, verifiedUser.uid);
   const isTrialRequest = body.planKey === 'trial' || amountPaise === 100;
-  if (isTrialRequest && (existing?.hasHadTrial || existing?.status === 'active' || existing?.status === 'trialing')) {
+  const hasUsedTrial = Boolean(
+    existing?.status === 'trialing' ||
+    Boolean(existing?.trialEndsAt) ||
+    (existing?.hasHadTrial && existing?.status !== 'pending' && Boolean(existing?.trialEndsAt || existing?.hasHadSubscription))
+  );
+  if (isTrialRequest && (hasUsedTrial || existing?.status === 'active')) {
     return jsonResponse(
       { error: 'The 7-day trial is only available once per account. Please select one of our paid plans.' },
       403
@@ -92,7 +97,7 @@ export async function handleCreateOrder(request: Request, env: Env): Promise<Res
       plan: effectivePlan as any,
       billingCycle: effectivePlan as any,
       status: 'pending',
-      hasHadTrial: isTrialRequest || existing?.hasHadTrial || false,
+      hasHadTrial: existing?.hasHadTrial && existing?.status !== 'pending' ? true : false,
       razorpaySubscriptionId: orderData.id,
       razorpayPlanId: 'order_mode',
       cancelAtPeriodEnd: false,

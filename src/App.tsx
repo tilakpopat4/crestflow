@@ -19,6 +19,7 @@ import { AppRouterView } from './components/layout/AppRouterView';
 import { SidebarSwipeReveal } from './components/layout/SidebarSwipeReveal';
 import { MembershipBanner } from './components/subscription/MembershipBanner';
 import Footer from './components/Footer';
+import ErrorBoundary from './components/ErrorBoundary';
 import { lazyWithRetry } from './lib/lazyWithRetry';
 
 const ClientPortal = lazyWithRetry(() => import('./components/ClientPortal'));
@@ -29,7 +30,7 @@ const SubscriptionModal = lazyWithRetry(() => import('./components/SubscriptionM
 const AnniversaryModal = lazyWithRetry(() => import('./components/AnniversaryModal'));
 const NotFoundScreen = lazyWithRetry(() => import('./components/NotFoundScreen'));
 const SubscriptionWallPage = lazyWithRetry(() => import('./components/subscription/SubscriptionWallPage'));
-const UserOnboardingModal = lazyWithRetry(() => import('./components/onboarding/UserOnboardingModal'), m => ({ default: m.UserOnboardingModal }));
+const UserOnboardingModal = lazyWithRetry(() => import('./components/onboarding/UserOnboardingModal'), m => ({ default: m.default || m.UserOnboardingModal }));
 
 const ViewLoadingFallback = () => (
   <div className="flex-1 flex flex-col items-center justify-center p-12 min-h-[360px] animate-in fade-in duration-150 select-none">
@@ -52,22 +53,17 @@ export default function App() {
   const [selectedClientIdFromSearch, setSelectedClientIdFromSearch] = useState<string | null>(null);
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
   const [isOnboardingCompleted, setIsOnboardingCompleted] = useState(false);
+  const [authTimeout, setAuthTimeout] = useState(false);
 
-  const {
-    isCollapsed: isSidebarCollapsed,
-    toggleSidebar,
-    collapseSidebar,
-    expandSidebar,
-  } = useSidebarCollapse();
+  useEffect(() => {
+    const timer = setTimeout(() => setAuthTimeout(true), 3500);
+    return () => clearTimeout(timer);
+  }, []);
 
+  const { isCollapsed: isSidebarCollapsed, toggleSidebar, collapseSidebar, expandSidebar } = useSidebarCollapse();
   const { profile, profilesLoading, handleSaveProfile } = useUserProfile(user);
   const subscriptionState = useSubscription(user?.uid, profile, user?.email || undefined);
-  const {
-    journey,
-    isAnniversaryModalOpen,
-    openAnniversaryModal,
-    closeAnniversaryModal,
-  } = useAnniversaryCheck(user, profile?.freelanceStartDate);
+  const { journey, isAnniversaryModalOpen, openAnniversaryModal, closeAnniversaryModal } = useAnniversaryCheck(user, profile?.freelanceStartDate);
 
   if (isSpecialMode === 'feedback') {
     return (
@@ -95,7 +91,7 @@ export default function App() {
     );
   }
 
-  if (loading || (user && (profilesLoading || subscriptionState.loading || isBlocked === null))) {
+  if (!authTimeout && (loading || (user && (profilesLoading || subscriptionState.loading || isBlocked === null)))) {
     return (
       <div className="flex items-center justify-center h-screen w-full bg-slate-50 dark:bg-slate-950">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 dark:border-indigo-400" />
@@ -143,25 +139,28 @@ export default function App() {
   const hasCompletedProfile = Boolean(
     isOnboardingCompleted ||
     (user && localStorage.getItem(`crestflow_onboarded_${user.uid}`)) ||
-    profile?.upiId
+    profile?.upiId ||
+    (profile?.name && profile?.professionalTitle)
   );
 
   // 1. Let the user first complete & set up their profile before showing subscription
   if (user && !profilesLoading && !hasCompletedProfile && !isSupportingRoute) {
     return (
       <div className="h-screen w-full bg-slate-50 dark:bg-slate-950 overflow-y-auto flex flex-col justify-between">
-        <Suspense fallback={<ViewLoadingFallback />}>
-          <UserOnboardingModal
-            user={user}
-            profile={profile}
-            isOpen={true}
-            onLogout={handleLogout}
-            onComplete={() => {
-              localStorage.setItem(`crestflow_onboarded_${user.uid}`, 'true');
-              setIsOnboardingCompleted(true);
-            }}
-          />
-        </Suspense>
+        <ErrorBoundary fallbackTitle="Workspace Setup">
+          <Suspense fallback={<ViewLoadingFallback />}>
+            <UserOnboardingModal
+              user={user}
+              profile={profile}
+              isOpen={true}
+              onLogout={handleLogout}
+              onComplete={() => {
+                localStorage.setItem(`crestflow_onboarded_${user.uid}`, 'true');
+                setIsOnboardingCompleted(true);
+              }}
+            />
+          </Suspense>
+        </ErrorBoundary>
         <Footer onNavigate={(r) => navigate(r)} />
       </div>
     );
@@ -171,9 +170,11 @@ export default function App() {
   if (user && subscriptionState.isSubscriptionFeatureEnabled && !subscriptionState.hasAccess && !isSupportingRoute) {
     return (
       <div className="h-screen w-full bg-slate-50 dark:bg-slate-950 overflow-y-auto flex flex-col">
-        <Suspense fallback={<ViewLoadingFallback />}>
-          <SubscriptionWallPage user={user} profile={profile} subscriptionState={subscriptionState} onLogout={handleLogout} onNavigate={r => navigate(r)} />
-        </Suspense>
+        <ErrorBoundary fallbackTitle="Subscription Activation">
+          <Suspense fallback={<ViewLoadingFallback />}>
+            <SubscriptionWallPage user={user} profile={profile} subscriptionState={subscriptionState} onLogout={handleLogout} onNavigate={r => navigate(r)} />
+          </Suspense>
+        </ErrorBoundary>
         <Footer onNavigate={(r) => navigate(r)} />
       </div>
     );

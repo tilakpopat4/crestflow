@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User } from 'firebase/auth';
 import { LogOut, Check, RefreshCw } from 'lucide-react';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { UserProfile } from '../../types';
 import { SubscriptionState } from '../../hooks/useSubscription';
@@ -51,8 +51,9 @@ export default function SubscriptionWallPage({ user, profile, subscriptionState,
   }, [isVerifying, subscriptionState, onNavigate]);
 
   const isTrialUsed = Boolean(
-    subData?.hasHadTrial || subData?.hasHadSubscription || subData?.trialEndsAt ||
-    subData?.status === 'active' || subData?.status === 'trialing' || subData?.status === 'cancelled' || subData?.status === 'expired'
+    subData?.status === 'trialing' ||
+    Boolean(subData?.trialEndsAt) ||
+    (subData?.hasHadTrial && subData?.status !== 'pending' && Boolean(subData?.trialEndsAt || subData?.currentPeriodEnd))
   );
 
   useEffect(() => {

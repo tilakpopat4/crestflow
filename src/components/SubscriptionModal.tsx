@@ -39,9 +39,9 @@ export default function SubscriptionModal({
   }, [user?.uid]);
 
   const isTrialUsed = Boolean(
-    subData?.hasHadTrial || subData?.hasHadSubscription || subData?.trialEndsAt ||
-    subData?.status === 'active' || subData?.status === 'trialing' ||
-    subData?.status === 'cancelled' || subData?.status === 'expired'
+    subData?.status === 'trialing' ||
+    Boolean(subData?.trialEndsAt) ||
+    (subData?.hasHadTrial && subData?.status !== 'pending' && Boolean(subData?.trialEndsAt || subData?.currentPeriodEnd))
   );
 
   // Reset state when modal opens
