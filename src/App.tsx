@@ -51,7 +51,7 @@ export default function App() {
   const [globalSearchQuery, setGlobalSearchQuery] = useState('');
   const [selectedClientIdFromSearch, setSelectedClientIdFromSearch] = useState<string | null>(null);
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
-  const [isOnboardingModalOpen, setIsOnboardingModalOpen] = useState(false);
+  const [isOnboardingCompleted, setIsOnboardingCompleted] = useState(false);
 
   const {
     isCollapsed: isSidebarCollapsed,
@@ -68,17 +68,6 @@ export default function App() {
     openAnniversaryModal,
     closeAnniversaryModal,
   } = useAnniversaryCheck(user, profile?.freelanceStartDate);
-
-  // Prompt onboarding if profile setup is incomplete and subscription access is granted
-  useEffect(() => {
-    const hasPaidAccess = !subscriptionState.isSubscriptionFeatureEnabled || subscriptionState.hasAccess;
-    if (user && !profilesLoading && hasPaidAccess) {
-      const hasCompleted = localStorage.getItem(`crestflow_onboarded_${user.uid}`) || profile?.upiId;
-      if (!hasCompleted) {
-        setIsOnboardingModalOpen(true);
-      }
-    }
-  }, [user, profile, profilesLoading, subscriptionState.isSubscriptionFeatureEnabled, subscriptionState.hasAccess]);
 
   if (isSpecialMode === 'feedback') {
     return (
@@ -151,8 +140,34 @@ export default function App() {
   }
 
   const isSupportingRoute = currentRoute === 'privacy' || currentRoute === 'terms' || currentRoute === 'contact' || currentRoute === 'refund';
+  const hasCompletedProfile = Boolean(
+    isOnboardingCompleted ||
+    (user && localStorage.getItem(`crestflow_onboarded_${user.uid}`)) ||
+    profile?.upiId
+  );
 
-  // Compulsory paywall: once user signs in, they cannot use the tool without an active subscription
+  // 1. Let the user first complete & set up their profile before showing subscription
+  if (user && !profilesLoading && !hasCompletedProfile && !isSupportingRoute) {
+    return (
+      <div className="h-screen w-full bg-slate-50 dark:bg-slate-950 overflow-y-auto flex flex-col justify-between">
+        <Suspense fallback={<ViewLoadingFallback />}>
+          <UserOnboardingModal
+            user={user}
+            profile={profile}
+            isOpen={true}
+            onLogout={handleLogout}
+            onComplete={() => {
+              localStorage.setItem(`crestflow_onboarded_${user.uid}`, 'true');
+              setIsOnboardingCompleted(true);
+            }}
+          />
+        </Suspense>
+        <Footer onNavigate={(r) => navigate(r)} />
+      </div>
+    );
+  }
+
+  // 2. Once profile is set up, enforce compulsory subscription to access the tool
   if (user && subscriptionState.isSubscriptionFeatureEnabled && !subscriptionState.hasAccess && !isSupportingRoute) {
     return (
       <div className="h-screen w-full bg-slate-50 dark:bg-slate-950 overflow-y-auto flex flex-col">
@@ -253,20 +268,6 @@ export default function App() {
             }}
             isMandatory={!subscriptionState.hasAccess}
             onLogout={handleLogout}
-          />
-        </Suspense>
-      )}
-
-      {user && isOnboardingModalOpen && (
-        <Suspense fallback={null}>
-          <UserOnboardingModal
-            user={user}
-            profile={profile}
-            isOpen={isOnboardingModalOpen}
-            onComplete={() => {
-              localStorage.setItem(`crestflow_onboarded_${user.uid}`, 'true');
-              setIsOnboardingModalOpen(false);
-            }}
           />
         </Suspense>
       )}

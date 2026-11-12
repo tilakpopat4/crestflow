@@ -10,33 +10,33 @@ interface UserOnboardingModalProps {
   profile?: UserProfile | null;
   isOpen: boolean;
   onComplete: () => void;
+  onLogout?: () => void;
 }
 
-const POPULAR_SPECIALTIES = [
-  'Video Editor', 'UI/UX Designer', 'Web Developer', 'Graphic Designer', 'Content Writer', 'Consultant', 'Photographer', 'Freelancer'
-];
+const POPULAR_SPECIALTIES = ['Video Editor', 'UI/UX Designer', 'Web Developer', 'Graphic Designer', 'Content Writer', 'Consultant', 'Photographer', 'Freelancer'];
+const INPUT_CLS = "w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-indigo-600 outline-none transition-colors duration-120";
+const LBL_CLS = "block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5";
+const BTN_PRI = "px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors duration-120 cursor-pointer border-0 disabled:opacity-50";
+const BTN_SEC = "px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold transition-colors duration-120 cursor-pointer border-0";
 
 export const UserOnboardingModal: React.FC<UserOnboardingModalProps> = ({
   user,
   profile,
   isOpen,
   onComplete,
+  onLogout,
 }) => {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Step 1: Profile
+  // Form State
   const [displayName, setDisplayName] = useState(profile?.name || user.displayName || '');
   const [title, setTitle] = useState(profile?.professionalTitle || '');
   const [phone, setPhone] = useState(profile?.phone || '');
-
-  // Step 2: First Client
   const [clientName, setClientName] = useState('');
   const [clientEmail, setClientEmail] = useState('');
   const [clientRate, setClientRate] = useState('');
-
-  // Step 3: UPI ID
   const [upiId, setUpiId] = useState(profile?.upiId || '');
 
   if (!isOpen) return null;
@@ -44,7 +44,6 @@ export const UserOnboardingModal: React.FC<UserOnboardingModalProps> = ({
   const handleFinish = async () => {
     setSaving(true);
     setError(null);
-
     try {
       const resolvedTitle = title.trim() || 'Freelancer';
       await setDoc(doc(db, 'profiles', user.uid), {
@@ -73,7 +72,6 @@ export const UserOnboardingModal: React.FC<UserOnboardingModalProps> = ({
           console.warn('[UserOnboardingModal] Initial client creation deferred:', clientErr);
         }
       }
-
       onComplete();
     } catch (err: any) {
       console.error('[UserOnboardingModal] Save error:', err);
@@ -84,23 +82,29 @@ export const UserOnboardingModal: React.FC<UserOnboardingModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 select-none">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 select-none">
       <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 sm:p-7 shadow-xl">
-        {/* Step Indicator Header */}
         <div className="flex items-center justify-between pb-4 mb-5 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-baseline gap-2">
             <span className="text-sm font-bold text-slate-900 dark:text-slate-100 tracking-tight">Workspace Setup</span>
             <span className="text-xs font-medium text-slate-500 dark:text-slate-400">({step}/3)</span>
           </div>
-          <div className="flex items-center gap-1.5" aria-label={`Step ${step} of 3`}>
-            {[1, 2, 3].map((s) => (
-              <span
-                key={s}
-                className={`h-1.5 rounded-full transition-all duration-120 ${
-                  s === step ? 'w-6 bg-indigo-600 dark:bg-indigo-400' : s < step ? 'w-3 bg-indigo-200 dark:bg-indigo-900/60' : 'w-3 bg-slate-200 dark:bg-slate-800'
-                }`}
-              />
-            ))}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5" aria-label={`Step ${step} of 3`}>
+              {[1, 2, 3].map((s) => (
+                <span
+                  key={s}
+                  className={`h-1.5 rounded-full transition-all duration-120 ${
+                    s === step ? 'w-6 bg-indigo-600 dark:bg-indigo-400' : s < step ? 'w-3 bg-indigo-200 dark:bg-indigo-900/60' : 'w-3 bg-slate-200 dark:bg-slate-800'
+                  }`}
+                />
+              ))}
+            </div>
+            {onLogout && (
+              <button type="button" onClick={onLogout} className="text-xs text-slate-400 hover:text-slate-200 cursor-pointer bg-transparent border-0">
+                Sign Out
+              </button>
+            )}
           </div>
         </div>
 
@@ -119,28 +123,14 @@ export const UserOnboardingModal: React.FC<UserOnboardingModalProps> = ({
                 Appears on your client invoices and shared project delivery portals.
               </p>
             </div>
-
             <div className="space-y-3.5">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Display Name</label>
-                <input
-                  type="text"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="e.g., Tilak Popat"
-                  className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 outline-none transition-colors duration-120"
-                />
+                <label className={LBL_CLS}>Display Name</label>
+                <input type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="e.g., Tilak Popat" className={INPUT_CLS} />
               </div>
-
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Primary Specialty / Role</label>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g., UI/UX Designer, Web Developer, Video Editor"
-                  className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 outline-none transition-colors duration-120"
-                />
+                <label className={LBL_CLS}>Primary Specialty / Role</label>
+                <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g., UI/UX Designer, Web Developer, Video Editor" className={INPUT_CLS} />
                 <div className="flex flex-wrap gap-1 mt-2">
                   {POPULAR_SPECIALTIES.map((spec) => (
                     <button
@@ -158,26 +148,13 @@ export const UserOnboardingModal: React.FC<UserOnboardingModalProps> = ({
                   ))}
                 </div>
               </div>
-
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Phone / WhatsApp (Optional)</label>
-                <input
-                  type="text"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+91 98765 43210"
-                  className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 outline-none transition-colors duration-120"
-                />
+                <label className={LBL_CLS}>Phone / WhatsApp (Optional)</label>
+                <input type="text" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+91 98765 43210" className={INPUT_CLS} />
               </div>
             </div>
-
             <div className="pt-3 flex justify-end border-t border-slate-100 dark:border-slate-800">
-              <button
-                type="button"
-                onClick={() => { setError(null); setStep(2); }}
-                disabled={!displayName.trim()}
-                className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors duration-120 cursor-pointer border-0 disabled:opacity-50"
-              >
+              <button type="button" onClick={() => { setError(null); setStep(2); }} disabled={!displayName.trim()} className={BTN_PRI}>
                 Next: Add First Client
               </button>
             </div>
@@ -193,57 +170,23 @@ export const UserOnboardingModal: React.FC<UserOnboardingModalProps> = ({
                 Organize projects, milestones, deliverables, and automated invoices for this client.
               </p>
             </div>
-
             <div className="space-y-3.5">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Client Name or Company</label>
-                <input
-                  type="text"
-                  value={clientName}
-                  onChange={(e) => setClientName(e.target.value)}
-                  placeholder="e.g., Acme Corp or Alex Rivera"
-                  className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 outline-none transition-colors duration-120"
-                />
+                <label className={LBL_CLS}>Client Name or Company</label>
+                <input type="text" value={clientName} onChange={(e) => setClientName(e.target.value)} placeholder="e.g., Acme Corp or Alex Rivera" className={INPUT_CLS} />
               </div>
-
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Client Contact Email (Optional)</label>
-                <input
-                  type="email"
-                  value={clientEmail}
-                  onChange={(e) => setClientEmail(e.target.value)}
-                  placeholder="client@example.com"
-                  className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 outline-none transition-colors duration-120"
-                />
+                <label className={LBL_CLS}>Client Contact Email (Optional)</label>
+                <input type="email" value={clientEmail} onChange={(e) => setClientEmail(e.target.value)} placeholder="client@example.com" className={INPUT_CLS} />
               </div>
-
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Default Rate or Retainer (INR)</label>
-                <input
-                  type="number"
-                  value={clientRate}
-                  onChange={(e) => setClientRate(e.target.value)}
-                  placeholder="e.g., 25000"
-                  className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 outline-none transition-colors duration-120"
-                />
+                <label className={LBL_CLS}>Default Rate or Retainer (INR)</label>
+                <input type="number" value={clientRate} onChange={(e) => setClientRate(e.target.value)} placeholder="e.g., 25000" className={INPUT_CLS} />
               </div>
             </div>
-
             <div className="pt-3 flex items-center justify-between border-t border-slate-100 dark:border-slate-800">
-              <button
-                type="button"
-                onClick={() => { setError(null); setStep(1); }}
-                className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold transition-colors duration-120 cursor-pointer border-0"
-              >
-                Back
-              </button>
-              <button
-                type="button"
-                onClick={() => { setError(null); setStep(3); }}
-                className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors duration-120 cursor-pointer border-0"
-              >
-                Next: Direct UPI Setup
-              </button>
+              <button type="button" onClick={() => { setError(null); setStep(1); }} className={BTN_SEC}>Back</button>
+              <button type="button" onClick={() => { setError(null); setStep(3); }} className={BTN_PRI}>Next: Direct UPI Setup</button>
             </div>
           </div>
         )}
@@ -257,35 +200,16 @@ export const UserOnboardingModal: React.FC<UserOnboardingModalProps> = ({
                 Invoices embed your direct UPI QR code so clients pay 100% directly to your bank account with zero platform fees.
               </p>
             </div>
-
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Your UPI VPA</label>
-              <input
-                type="text"
-                value={upiId}
-                onChange={(e) => setUpiId(e.target.value)}
-                placeholder="e.g., username@okaxis or creator@okhdfcbank"
-                className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 outline-none transition-colors duration-120 font-mono text-xs"
-              />
+              <label className={LBL_CLS}>Your UPI VPA</label>
+              <input type="text" value={upiId} onChange={(e) => setUpiId(e.target.value)} placeholder="e.g., username@okaxis or creator@okhdfcbank" className={`${INPUT_CLS} font-mono text-xs`} />
               <span className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 block leading-normal">
                 Standard UPI handles supported (GPay, PhonePe, Paytm, BHIM).
               </span>
             </div>
-
             <div className="pt-3 flex items-center justify-between border-t border-slate-100 dark:border-slate-800">
-              <button
-                type="button"
-                onClick={() => { setError(null); setStep(2); }}
-                className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold transition-colors duration-120 cursor-pointer border-0"
-              >
-                Back
-              </button>
-              <button
-                type="button"
-                onClick={handleFinish}
-                disabled={saving}
-                className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors duration-120 cursor-pointer border-0 disabled:opacity-50"
-              >
+              <button type="button" onClick={() => { setError(null); setStep(2); }} className={BTN_SEC}>Back</button>
+              <button type="button" onClick={handleFinish} disabled={saving} className={BTN_PRI}>
                 {saving ? 'Completing Setup...' : 'Complete Workspace Setup'}
               </button>
             </div>

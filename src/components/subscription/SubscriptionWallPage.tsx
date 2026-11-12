@@ -271,7 +271,7 @@ export default function SubscriptionWallPage({ user, profile, subscriptionState,
                 whileHover={shouldReduceMotion || loading || (isTrial && isTrialUsed) ? undefined : { scale: 1.02 }}
                 whileTap={shouldReduceMotion || loading || (isTrial && isTrialUsed) ? undefined : { scale: 0.98 }}
                 transition={{ duration: 0.12 }}
-                className="w-full sm:w-auto px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold cursor-pointer border-none disabled:opacity-50 shadow-sm flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-6 py-2.5 bg-[#282828] hover:bg-[#383838] text-white rounded-lg text-xs font-semibold cursor-pointer border border-[#3a3a3a] disabled:opacity-50 shadow-sm flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <><RefreshCw size={13} className="animate-spin" /><span>Connecting to Razorpay...</span></>
