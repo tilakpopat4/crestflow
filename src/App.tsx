@@ -28,10 +28,8 @@ const ClientFeedbackForm = lazyWithRetry(() => import('./components/ClientFeedba
 const SubscriptionModal = lazyWithRetry(() => import('./components/SubscriptionModal'));
 const AnniversaryModal = lazyWithRetry(() => import('./components/AnniversaryModal'));
 const NotFoundScreen = lazyWithRetry(() => import('./components/NotFoundScreen'));
-const UserOnboardingModal = lazyWithRetry(
-  () => import('./components/onboarding/UserOnboardingModal'),
-  (m) => ({ default: m.UserOnboardingModal })
-);
+const SubscriptionWallPage = lazyWithRetry(() => import('./components/subscription/SubscriptionWallPage'));
+const UserOnboardingModal = lazyWithRetry(() => import('./components/onboarding/UserOnboardingModal'), m => ({ default: m.UserOnboardingModal }));
 
 const ViewLoadingFallback = () => (
   <div className="flex-1 flex flex-col items-center justify-center p-12 min-h-[360px] animate-in fade-in duration-150 select-none">
@@ -152,6 +150,24 @@ export default function App() {
   }
 
   const isSupportingRoute = currentRoute === 'privacy' || currentRoute === 'terms' || currentRoute === 'contact' || currentRoute === 'refund';
+
+  // Compulsory paywall: once user signs in, they cannot use the tool without an active subscription
+  if (user && subscriptionState.isSubscriptionFeatureEnabled && !subscriptionState.hasAccess && !isSupportingRoute) {
+    return (
+      <div className="h-screen w-full bg-slate-50 dark:bg-slate-950 overflow-y-auto flex flex-col">
+        <Suspense fallback={<ViewLoadingFallback />}>
+          <SubscriptionWallPage user={user} profile={profile} subscriptionState={subscriptionState} onLogout={handleLogout} onNavigate={r => navigate(r)} />
+        </Suspense>
+        {isOnboardingModalOpen && (
+          <Suspense fallback={null}>
+            <UserOnboardingModal user={user} profile={profile} isOpen={isOnboardingModalOpen} onComplete={() => { localStorage.setItem(`crestflow_onboarded_${user.uid}`, 'true'); setIsOnboardingModalOpen(false); }} />
+          </Suspense>
+        )}
+        <Footer onNavigate={(r) => navigate(r)} />
+      </div>
+    );
+  }
+
   const sidebarTab = currentRoute === 'invoices' ? 'invoice' : currentRoute;
 
   return (
