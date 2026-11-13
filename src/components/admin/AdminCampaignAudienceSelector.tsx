@@ -15,7 +15,7 @@ interface AdminCampaignAudienceSelectorProps {
 
 /**
  * AdminCampaignAudienceSelector handles user cohort segmentation and custom recipient input.
- * Strictly adheres to GEMINI.md design standards: no emojis, flat aesthetic.
+ * Strictly adheres to GEMINI.md design standards: dark grey selection, no emojis, flat aesthetic.
  */
 export default function AdminCampaignAudienceSelector({
   audienceType,
@@ -33,13 +33,13 @@ export default function AdminCampaignAudienceSelector({
   ];
 
   return (
-    <div className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-lg space-y-2.5 border border-slate-100 dark:border-slate-800">
+    <div className="p-3.5 bg-[#181818] rounded-lg space-y-2.5 border border-[#2e2e2e]">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5 font-semibold text-slate-800 dark:text-slate-200">
-          <Users className="w-3.5 h-3.5 text-slate-500" />
+        <div className="flex items-center gap-1.5 font-semibold text-slate-200">
+          <Users className="w-3.5 h-3.5 text-slate-400" />
           <span>Target Audience Cohort</span>
         </div>
-        <span className="text-[11px] font-mono text-indigo-600 dark:text-indigo-400 font-semibold">
+        <span className="text-[11px] font-mono text-indigo-400 font-semibold">
           {targetedCount} Recipient{targetedCount === 1 ? '' : 's'}
         </span>
       </div>
@@ -50,14 +50,18 @@ export default function AdminCampaignAudienceSelector({
             key={aud.id}
             type="button"
             onClick={() => setAudienceType(aud.id)}
-            className={`p-2 rounded-lg border text-left cursor-pointer transition-colors ${
+            className={`p-2.5 rounded-lg border text-left cursor-pointer transition-colors duration-120 ${
               audienceType === aud.id
-                ? 'bg-[#282828] text-white border-[#3a3a3a] shadow-xs'
-                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-300'
+                ? 'bg-[#282828] text-white border-[#444444] shadow-xs'
+                : 'bg-[#1e1e1e] border-[#2a2a2a] text-slate-400 hover:text-white hover:bg-[#242424]'
             }`}
           >
-            <div className="font-semibold">{aud.label}</div>
-            {aud.count !== null && <div className="text-[10px] text-slate-400">{aud.count} accounts</div>}
+            <div className={`font-semibold text-xs ${audienceType === aud.id ? 'text-white' : 'text-slate-300'}`}>
+              {aud.label}
+            </div>
+            {aud.count !== null && (
+              <div className="text-[10px] text-slate-500 mt-0.5">{aud.count} accounts</div>
+            )}
           </button>
         ))}
       </div>
@@ -68,7 +72,7 @@ export default function AdminCampaignAudienceSelector({
           placeholder="Enter email addresses separated by commas or lines..."
           value={customEmails}
           onChange={(e) => setCustomEmails(e.target.value)}
-          className="w-full p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-600 font-mono text-[11px]"
+          className="w-full p-2.5 bg-[#1e1e1e] border border-[#333333] rounded-lg text-white placeholder:text-slate-500 outline-none focus:border-indigo-500 font-mono text-[11px]"
         />
       )}
     </div>
