@@ -20,6 +20,8 @@ export async function sendResendEmail(
   env: Env,
   params: EmailParams
 ): Promise<{ success: boolean; id?: string; error?: string; statusCode?: number }> {
+  let primaryError: string | undefined;
+
   // 1. Primary Dispatcher: Direct Google Gmail API
   try {
     let gmailConfig = {
@@ -49,9 +51,11 @@ export async function sendResendEmail(
       if (gmailResult.success) {
         return gmailResult;
       }
+      primaryError = gmailResult.error;
       console.warn('[Direct Gmail API] Dispatched with fallback due to:', gmailResult.error);
     }
   } catch (gmailErr: any) {
+    primaryError = gmailErr.message;
     console.warn('[Direct Gmail API] Exception:', gmailErr.message);
   }
 
@@ -107,10 +111,18 @@ export async function sendResendEmail(
 
     const errorText = await res.text();
     console.warn(`[EmailJS Error] ${res.status}: ${errorText}`);
-    return { success: false, error: `EmailJS_${res.status}: ${errorText}`, statusCode: res.status };
+    return {
+      success: false,
+      error: primaryError ? `Gmail: ${primaryError}; Fallback: ${errorText}` : `EmailJS_${res.status}: ${errorText}`,
+      statusCode: res.status,
+    };
   } catch (err: any) {
     console.warn('[EmailJS Network Error]', err);
-    return { success: false, error: err.message, statusCode: 599 };
+    return {
+      success: false,
+      error: primaryError ? `Gmail: ${primaryError}; Fallback: ${err.message}` : err.message,
+      statusCode: 599,
+    };
   }
 }
 

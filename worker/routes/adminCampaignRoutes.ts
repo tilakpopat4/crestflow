@@ -144,6 +144,15 @@ export async function handleAdminSendCampaign(request: Request, env: Env): Promi
       }
     }
 
+    if (!isScheduled && dispatchedCount === 0 && failedCount > 0) {
+      return jsonResponse({
+        success: false,
+        error: `Delivery failed for all ${failedCount} recipients. Please verify the Gmail API configuration or check Email History.`,
+        totalTargeted: validRecipients.length,
+        failedCount,
+      }, 500);
+    }
+
     return jsonResponse({
       success: true,
       campaignId,

@@ -15,23 +15,26 @@ export async function getAuthoritativeGmailConfig(creds: any, env: Env): Promise
     senderEmail: env.GMAIL_USER_EMAIL || 'support.crestflow@gmail.com',
   };
 
-  try {
-    const token = await getGoogleAccessToken(creds);
-    const docUrl = `https://firestore.googleapis.com/v1/projects/${creds.project_id}/databases/(default)/documents/system_settings/gmail_config`;
-    const res = await fetch(docUrl, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+  // Only query Firestore if any required credentials are not in environment secrets
+  if (!config.clientId || !config.clientSecret || !config.refreshToken) {
+    try {
+      const token = await getGoogleAccessToken(creds);
+      const docUrl = `https://firestore.googleapis.com/v1/projects/${creds.project_id}/databases/(default)/documents/system_settings/gmail_config`;
+      const res = await fetch(docUrl, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    if (res.ok) {
-      const data = (await res.json()) as { fields?: Record<string, any> };
-      const raw = data.fields || {};
-      if (raw.clientId?.stringValue) config.clientId = raw.clientId.stringValue;
-      if (raw.clientSecret?.stringValue) config.clientSecret = raw.clientSecret.stringValue;
-      if (raw.refreshToken?.stringValue) config.refreshToken = raw.refreshToken.stringValue;
-      if (raw.senderEmail?.stringValue) config.senderEmail = raw.senderEmail.stringValue;
+      if (res.ok) {
+        const data = (await res.json()) as { fields?: Record<string, any> };
+        const raw = data.fields || {};
+        if (!config.clientId && raw.clientId?.stringValue) config.clientId = raw.clientId.stringValue;
+        if (!config.clientSecret && raw.clientSecret?.stringValue) config.clientSecret = raw.clientSecret.stringValue;
+        if (!config.refreshToken && raw.refreshToken?.stringValue) config.refreshToken = raw.refreshToken.stringValue;
+        if (!config.senderEmail && raw.senderEmail?.stringValue) config.senderEmail = raw.senderEmail.stringValue;
+      }
+    } catch (err) {
+      console.warn('[GmailConfig] Firestore read fallback to env:', err);
     }
-  } catch (err) {
-    console.warn('[GmailConfig] Firestore read fallback to env:', err);
   }
 
   return config;

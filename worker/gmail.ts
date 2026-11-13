@@ -20,13 +20,31 @@ export interface DirectEmailParams {
 let cachedGmailToken: { token: string; expiresAt: number } | null = null;
 
 /**
- * Encodes a string as RFC 4648 Base64URL without padding.
+ * Encodes a string as RFC 4648 Base64URL without padding using standard TextEncoder.
  */
 function toBase64Url(str: string): string {
-  return btoa(unescape(encodeURIComponent(str)))
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary)
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
     .replace(/=+$/, '');
+}
+
+/**
+ * Encodes an email subject header cleanly as UTF-8 Base64.
+ */
+function encodeMimeSubject(subject: string): string {
+  const bytes = new TextEncoder().encode(subject);
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return `=?utf-8?B?${btoa(binary)}?=`;
 }
 
 /**
@@ -92,7 +110,7 @@ export async function sendGmailDirect(
   try {
     const accessToken = await getGmailAccessToken(clientId, clientSecret, refreshToken);
 
-    const subjectEncoded = `=?utf-8?B?${btoa(unescape(encodeURIComponent(params.subject)))}?=`;
+    const subjectEncoded = encodeMimeSubject(params.subject);
     const mimeLines = [
       `From: "${senderName}" <${senderEmail}>`,
       `To: ${params.to}`,
