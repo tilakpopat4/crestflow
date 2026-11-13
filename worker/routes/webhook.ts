@@ -228,7 +228,7 @@ export async function handleRazorpayWebhook(request: Request, env: Env): Promise
 
     if (eventType === 'subscription.charged' && userEmail) {
       const planAmt = payloadData.payment?.entity?.amount ? `₹${(payloadData.payment.entity.amount / 100).toFixed(0)}` : '₹79';
-      sendPaymentChargedReceipt(env, creds, {
+      await sendPaymentChargedReceipt(env, creds, {
         userId, userEmail, planName: 'Pro', amountFormatted: planAmt,
         periodStartMs: currentPeriodStartMs || nowMs, periodEndMs: currentPeriodEndMs, subId, eventId,
       }).catch((err) => console.warn('[Webhook] Payment receipt error:', err));

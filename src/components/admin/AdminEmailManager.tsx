@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Mail, CheckCircle2, Send, Server, RefreshCw } from 'lucide-react';
 import { AUTOMATED_TRIGGERS } from './emailTriggersData';
 import { auth } from '../../firebase';
+import AdminEmailHistoryTable from './AdminEmailHistoryTable';
 
 /**
  * AdminEmailManager renders email infrastructure metrics, configuration IDs,
@@ -12,6 +13,7 @@ export default function AdminEmailManager() {
   const [testEmail, setTestEmail] = useState('');
   const [isSendingTest, setIsSendingTest] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
 
   const handleSendTest = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,6 +45,7 @@ export default function AdminEmailManager() {
         success: true,
         message: `Live test email dispatched successfully to ${recipient} via ${data.provider} (ID: ${data.id}). Please check your Inbox and Spam folder.`,
       });
+      setHistoryRefreshKey((prev) => prev + 1);
     } catch (err: any) {
       setTestResult({
         success: false,
@@ -193,6 +196,9 @@ export default function AdminEmailManager() {
           )}
         </div>
       </div>
+
+      {/* Live Mail History Log */}
+      <AdminEmailHistoryTable refreshSignal={historyRefreshKey} />
 
       {/* Automated Triggers Directory Table */}
       <div className="bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-2xs">

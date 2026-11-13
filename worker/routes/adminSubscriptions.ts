@@ -5,7 +5,7 @@ import { jsonResponse, getBearerToken } from './subscription';
 
 const SUPER_ADMIN_EMAIL = 'tilakpopat2007@gmail.com';
 
-async function verifyAdminCaller(request: Request, env: Env) {
+export async function verifyAdminCaller(request: Request, env: Env) {
   const idToken = getBearerToken(request);
   if (!idToken) throw new Error('Missing Authorization header');
   const creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);

@@ -219,7 +219,28 @@ export function createMockFetch(state: MockWebhookState, originalFetch: typeof g
       return new Response('Not found', { status: 404 });
     }
 
-    // 10. Firestore emailJobs/{jobId}
+    // 10a. Firestore list emailJobs: /documents/emailJobs?pageSize=...
+    if (urlStr.includes('/documents/emailJobs') && !urlStr.includes('/documents/emailJobs/')) {
+      const documents: any[] = [];
+      if (state.emailJobs) {
+        for (const [jobId, job] of state.emailJobs.entries()) {
+          const fields: Record<string, any> = {};
+          for (const [k, v] of Object.entries(job)) {
+            fields[k] = toMockFirestoreValue(v);
+          }
+          documents.push({
+            name: `projects/demo/databases/(default)/documents/emailJobs/${jobId}`,
+            fields,
+          });
+        }
+      }
+      return new Response(JSON.stringify({ documents }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // 10b. Firestore emailJobs/{jobId}
     if (urlStr.includes('/documents/emailJobs/')) {
       const jobId = urlStr.split('/').pop()?.split('?')[0] || '';
       if (!state.emailJobs) state.emailJobs = new Map();

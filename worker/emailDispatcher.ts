@@ -8,6 +8,7 @@ import { parseServiceAccount } from './firestore';
 import { renderEmailTemplate } from './emailTemplates';
 import {
   EmailJob,
+  enqueueEmailJob,
   claimDueEmailJobs,
   completeEmailJob,
   failEmailJob,
@@ -37,7 +38,7 @@ export async function dispatchEmailJob(
     });
 
     if (res.success && res.id) {
-      await completeEmailJob(creds, job.jobId, res.id);
+      await completeEmailJob(creds, job.jobId, res.id, rendered.subject);
       return { success: true, id: res.id };
     }
 
@@ -48,7 +49,7 @@ export async function dispatchEmailJob(
     const isRetryable = status === 429 || status >= 500;
     const errorCode = `RESEND_${status}: ${res.error || 'Unknown error'}`;
 
-    await failEmailJob(creds, job, errorCode, isRetryable);
+    await failEmailJob(creds, job, errorCode, isRetryable, rendered.subject);
     return { success: false, error: errorCode };
   } catch (err: any) {
     console.error(`[Dispatcher Error] Job ${job.jobId} failed:`, err);
@@ -108,8 +109,24 @@ export async function sendPaymentChargedReceipt(
   const pStart = new Date(params.periodStartMs).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
   const pEnd = new Date(params.periodEndMs).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
 
+  const { jobId } = await enqueueEmailJob(creds, {
+    eventType: 'payment_charged',
+    recipient: params.userEmail,
+    templateData: {
+      name: params.userName,
+      planName: params.planName,
+      amountFormatted: params.amountFormatted,
+      periodStart: pStart,
+      periodEnd: pEnd,
+      nextBillingDate: pEnd,
+      invoiceId: params.subId,
+    },
+    idempotencyKey: `pay_${params.eventId}`,
+    createdBy: params.userId,
+  });
+
   const job: EmailJob = {
-    jobId: `pay_${params.eventId}`,
+    jobId,
     eventType: 'payment_charged',
     recipient: params.userEmail,
     templateId: 'payment_charged',

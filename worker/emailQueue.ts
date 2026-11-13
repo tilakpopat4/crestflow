@@ -267,11 +267,23 @@ export async function claimDueEmailJobs(
 export async function completeEmailJob(
   creds: ServiceAccountCredentials,
   jobId: string,
-  providerMessageId: string
+  providerMessageId: string,
+  subject?: string
 ): Promise<void> {
   const token = await getGoogleAccessToken(creds);
   const now = Date.now();
-  const url = `https://firestore.googleapis.com/v1/projects/${creds.project_id}/databases/(default)/documents/emailJobs/${jobId}?updateMask.fieldPaths=status&updateMask.fieldPaths=sentAt&updateMask.fieldPaths=providerMessageId&updateMask.fieldPaths=updatedAt`;
+  let mask = 'updateMask.fieldPaths=status&updateMask.fieldPaths=sentAt&updateMask.fieldPaths=providerMessageId&updateMask.fieldPaths=updatedAt';
+  const fields: Record<string, any> = {
+    status: toFirestoreValue('sent'),
+    sentAt: toFirestoreValue(now),
+    providerMessageId: toFirestoreValue(providerMessageId),
+    updatedAt: toFirestoreValue(now),
+  };
+  if (subject) {
+    mask += '&updateMask.fieldPaths=subject';
+    fields.subject = toFirestoreValue(subject);
+  }
+  const url = `https://firestore.googleapis.com/v1/projects/${creds.project_id}/databases/(default)/documents/emailJobs/${jobId}?${mask}`;
 
   await fetch(url, {
     method: 'PATCH',
@@ -279,14 +291,7 @@ export async function completeEmailJob(
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      fields: {
-        status: toFirestoreValue('sent'),
-        sentAt: toFirestoreValue(now),
-        providerMessageId: toFirestoreValue(providerMessageId),
-        updatedAt: toFirestoreValue(now),
-      },
-    }),
+    body: JSON.stringify({ fields }),
   });
 }
 
@@ -297,7 +302,8 @@ export async function failEmailJob(
   creds: ServiceAccountCredentials,
   job: EmailJob,
   errorCode: string,
-  isRetryable: boolean
+  isRetryable: boolean,
+  subject?: string
 ): Promise<void> {
   const token = await getGoogleAccessToken(creds);
   const now = Date.now();
@@ -311,7 +317,19 @@ export async function failEmailJob(
   const newStatus: EmailJobStatus = willRetry ? 'retry_pending' : 'failed';
   const nextAttempt = willRetry ? now + backoffMs : now;
 
-  const url = `https://firestore.googleapis.com/v1/projects/${creds.project_id}/databases/(default)/documents/emailJobs/${job.jobId}?updateMask.fieldPaths=status&updateMask.fieldPaths=lastErrorCode&updateMask.fieldPaths=nextAttemptAt&updateMask.fieldPaths=updatedAt`;
+  let mask = 'updateMask.fieldPaths=status&updateMask.fieldPaths=lastErrorCode&updateMask.fieldPaths=nextAttemptAt&updateMask.fieldPaths=updatedAt';
+  const fields: Record<string, any> = {
+    status: toFirestoreValue(newStatus),
+    lastErrorCode: toFirestoreValue(errorCode),
+    nextAttemptAt: toFirestoreValue(nextAttempt),
+    updatedAt: toFirestoreValue(now),
+  };
+  if (subject) {
+    mask += '&updateMask.fieldPaths=subject';
+    fields.subject = toFirestoreValue(subject);
+  }
+
+  const url = `https://firestore.googleapis.com/v1/projects/${creds.project_id}/databases/(default)/documents/emailJobs/${job.jobId}?${mask}`;
 
   await fetch(url, {
     method: 'PATCH',
@@ -319,14 +337,7 @@ export async function failEmailJob(
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      fields: {
-        status: toFirestoreValue(newStatus),
-        lastErrorCode: toFirestoreValue(errorCode),
-        nextAttemptAt: toFirestoreValue(nextAttempt),
-        updatedAt: toFirestoreValue(now),
-      },
-    }),
+    body: JSON.stringify({ fields }),
   });
 }
 

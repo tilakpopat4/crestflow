@@ -13,6 +13,7 @@ import {
   handleCancelEmail, handleProcessEmailQueue, handleNotifyTestEmail,
 } from './routes/notifications';
 import { handleAdminGrantSubscription, handleAdminRevokeSubscription } from './routes/adminSubscriptions';
+import { handleGetAdminEmailHistory, handleRetryAdminEmail } from './routes/adminEmailHistory';
 import { handleSeoRoutes } from './routes/seo';
 import { processDueEmailJobs } from './emailDispatcher';
 
@@ -218,6 +219,16 @@ export default {
       // 13. POST /api/email/process-queue
       if (url.pathname === '/api/email/process-queue' && request.method === 'POST') {
         return await handleProcessEmailQueue(request, env);
+      }
+
+      // 14. GET /api/admin/email-history
+      if (url.pathname === '/api/admin/email-history' && request.method === 'GET') {
+        return await handleGetAdminEmailHistory(request, env);
+      }
+
+      // 15. POST /api/admin/email-retry
+      if (url.pathname === '/api/admin/email-retry' && request.method === 'POST') {
+        return await handleRetryAdminEmail(request, env);
       }
 
       return jsonResponse({ error: 'Endpoint not found' }, 404);

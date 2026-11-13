@@ -310,8 +310,19 @@ export async function handleNotifyTestEmail(request: Request, env: Env): Promise
   const body = (await request.json().catch(() => ({}))) as { targetEmail?: string };
   const targetEmail = body.targetEmail || verifiedUser.email || 'tilakpopat2007@gmail.com';
 
+  const { jobId } = await enqueueEmailJob(creds, {
+    eventType: 'welcome_freelancer',
+    recipient: targetEmail,
+    templateData: {
+      name: verifiedUser.name || 'Admin',
+      workspaceUrl: `${env.BASE_URL || 'https://crestflow.app'}/dashboard`,
+    },
+    idempotencyKey: `test_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+    createdBy: verifiedUser.uid,
+  });
+
   const res = await dispatchEmailJob(env, creds, {
-    jobId: `test_${Date.now()}`,
+    jobId,
     eventType: 'welcome_freelancer',
     recipient: targetEmail,
     templateId: 'welcome_freelancer',

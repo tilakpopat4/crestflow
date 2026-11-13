@@ -580,5 +580,54 @@ describe('Production-Ready Automated Email System Suite', () => {
       assert.equal(data.success, true);
       assert.ok(data.stats);
     });
+
+    it('rejects /api/admin/email-history without authorization token (401)', async () => {
+      const res = await worker.fetch(
+        new Request('https://crestflow.app/api/admin/email-history', { method: 'GET' }),
+        testEnv
+      );
+      assert.equal(res.status, 401);
+    });
+
+    it('returns email history list for authorized super admin', async () => {
+      const adminToken = createMockIdToken('admin_uid_1', 'tilakpopat2007@gmail.com', keyPair.privateKey);
+      const res = await worker.fetch(
+        new Request('https://crestflow.app/api/admin/email-history?limit=50', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${adminToken}`,
+          },
+        }),
+        testEnv
+      );
+
+      assert.equal(res.status, 200);
+      const data = await res.json();
+      assert.equal(data.success, true);
+      assert.ok(Array.isArray(data.emails));
+      assert.ok(data.count >= 1);
+    });
+
+    it('retries a queued or failed email job via /api/admin/email-retry', async () => {
+      const adminToken = createMockIdToken('admin_uid_1', 'tilakpopat2007@gmail.com', keyPair.privateKey);
+      const sampleJobId = Array.from(mockState.emailJobs?.keys() || [])[0];
+      assert.ok(sampleJobId, 'Should have at least one email job in mockState');
+
+      const res = await worker.fetch(
+        new Request('https://crestflow.app/api/admin/email-retry', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${adminToken}`,
+          },
+          body: JSON.stringify({ jobId: sampleJobId }),
+        }),
+        testEnv
+      );
+
+      assert.equal(res.status, 200);
+      const data = await res.json();
+      assert.equal(data.success, true);
+    });
   });
 });
