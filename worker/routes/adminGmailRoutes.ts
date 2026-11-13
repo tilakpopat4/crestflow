@@ -152,3 +152,4 @@ export async function handleClearAdminEmailHistory(request: Request, env: Env): 
     return jsonResponse({ error: err.message || 'Unauthorized' }, 401);
   }
 }
+
