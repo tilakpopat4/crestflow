@@ -111,15 +111,36 @@ export async function sendGmailDirect(
     const accessToken = await getGmailAccessToken(clientId, clientSecret, refreshToken);
 
     const subjectEncoded = encodeMimeSubject(params.subject);
+    const dateHeader = new Date().toUTCString();
+    const messageId = `<${Date.now()}.${Math.random().toString(36).substring(2, 10)}@gmail.com>`;
+    const boundary = `bnd_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+
+    const textBody = params.text || (params.html ? params.html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '');
+    const htmlBody = params.html || `<p>${params.text || ''}</p>`;
+
     const mimeLines = [
       `From: "${senderName}" <${senderEmail}>`,
       `To: ${params.to}`,
       `Subject: ${subjectEncoded}`,
+      `Date: ${dateHeader}`,
+      `Message-ID: ${messageId}`,
       `Reply-To: ${params.replyTo || senderEmail}`,
       'MIME-Version: 1.0',
-      'Content-Type: text/html; charset=utf-8',
+      `Content-Type: multipart/alternative; boundary="${boundary}"`,
       '',
-      params.html || params.text || '',
+      `--${boundary}`,
+      'Content-Type: text/plain; charset=utf-8',
+      'Content-Transfer-Encoding: 8bit',
+      '',
+      textBody,
+      '',
+      `--${boundary}`,
+      'Content-Type: text/html; charset=utf-8',
+      'Content-Transfer-Encoding: 8bit',
+      '',
+      htmlBody,
+      '',
+      `--${boundary}--`,
     ];
 
     const rawMime = mimeLines.join('\r\n');
