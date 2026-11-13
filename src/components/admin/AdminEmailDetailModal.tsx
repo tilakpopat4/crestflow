@@ -86,3 +86,4 @@ export default function AdminEmailDetailModal({ email, onClose, formatDate }: Ad
     </div>
   );
 }
+
