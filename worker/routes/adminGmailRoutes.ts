@@ -54,7 +54,7 @@ export async function handleGetGmailConfig(request: Request, env: Env): Promise<
       success: true,
       isConnected,
       senderEmail: config.senderEmail || 'support.crestflow@gmail.com',
-      clientId: config.clientId ? `${config.clientId.slice(0, 12)}...` : null,
+      clientId: config.clientId || '',
       hasClientSecret: Boolean(config.clientSecret),
       hasRefreshToken: Boolean(config.refreshToken),
     });

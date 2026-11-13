@@ -38,6 +38,7 @@ export default function AdminEmailManager({ users = [] }: AdminEmailManagerProps
         .then((r) => r.json())
         .then((d) => {
           if (d.isConnected) setIsGmailConnected(true);
+          if (d.clientId) setClientId(d.clientId);
         })
         .catch(() => {});
     });
