@@ -559,14 +559,15 @@ const StyledWrapper = styled.div`
     margin-bottom: 2em;
     align-items: center;
     justify-content: center;
-    opacity: 0.5;
-    color: #475569;
+    opacity: 0.9;
+    color: #ffffff;
   }
   .text_4041,
   .text_4042,
   .text_4043 {
     transform: scaleY(24.5) scaleX(9);
     font-weight: 900;
+    color: #ffffff;
   }
 
   @media only screen and (max-width: 495px) {
