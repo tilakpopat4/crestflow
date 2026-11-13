@@ -90,95 +90,7 @@ export function useSubscription(
     };
   }, [userEmail]);
 
-  // 2. Fetch authoritative state from GET /api/me with immediate access propagation
-  const fetchMe = useCallback(async () => {
-    if (!auth.currentUser) return;
-    try {
-      const token = await auth.currentUser.getIdToken();
-      const res = await fetch('/api/me', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setServerMe(data);
-        if (data.accessUntil && new Date(data.accessUntil).getTime() > Date.now()) {
-          setSubscriptionDoc((prev) => {
-            if (prev && prev.accessUntil === data.accessUntil && prev.status === data.status) return prev;
-            const updated: SubscriptionDoc = {
-              userId: auth.currentUser!.uid,
-              plan: data.plan || 'pro',
-              billingCycle: data.billingCycle || 'monthly',
-              status: (data.status as any) || 'active',
-              accessUntil: data.accessUntil,
-              trialEndsAt: data.trialEndsAt,
-              updatedAt: Date.now(),
-            };
-            try {
-              localStorage.setItem(`crestflow_sub_${auth.currentUser!.uid}`, JSON.stringify(updated));
-            } catch {}
-            return updated;
-          });
-        }
-      }
-    } catch (err) {
-      console.warn('[useSubscription] Failed to fetch /api/me:', err);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (userId) fetchMe();
-  }, [userId, fetchMe]);
-
-  // Continuous Polling: Live connection between Razorpay payments & CrestFlow
-  useEffect(() => {
-    if (!userId) return;
-    const intervalMs = computedState.hasAccess ? 45000 : 2500;
-    const timer = setInterval(() => { fetchMe(); }, intervalMs);
-    const onFocus = () => { fetchMe(); };
-    window.addEventListener('focus', onFocus);
-    document.addEventListener('visibilitychange', onFocus);
-    return () => {
-      clearInterval(timer);
-      window.removeEventListener('focus', onFocus);
-      document.removeEventListener('visibilitychange', onFocus);
-    };
-  }, [userId, computedState.hasAccess, fetchMe]);
-
-  // 3. Realtime Firestore listener on `subscriptions/{userId}`
-  useEffect(() => {
-    if (!userId) {
-      setSubscriptionDoc(null);
-      setLoading(false);
-      return;
-    }
-
-    const unsub = onSnapshot(
-      doc(db, 'subscriptions', userId),
-      (snap) => {
-        setLoading(false);
-        if (snap.exists()) {
-          const data = snap.data() as SubscriptionDoc;
-          setSubscriptionDoc(data);
-          try {
-            localStorage.setItem(`crestflow_sub_${userId}`, JSON.stringify(data));
-          } catch {}
-        } else {
-          setSubscriptionDoc(null);
-          try {
-            localStorage.removeItem(`crestflow_sub_${userId}`);
-          } catch {}
-        }
-      },
-      (err) => {
-        console.warn('[useSubscription] onSnapshot warning:', err);
-        setLoading(false);
-      }
-    );
-
-    return () => unsub();
-  }, [userId]);
-
-  // 4. Compute access strictly from server accessUntil
+  // 2. Compute access strictly from server accessUntil
   const computedState = useMemo(() => {
     if (!isSubscriptionFeatureEnabled || isWhitelisted) {
       return {
@@ -220,6 +132,94 @@ export function useSubscription(
       serverNow: serverMe?.serverNow, currentPeriodEnd: subscriptionDoc?.currentPeriodEnd,
     };
   }, [subscriptionDoc, serverMe, isWhitelisted, isSubscriptionFeatureEnabled]);
+
+  // 3. Fetch authoritative state from GET /api/me with immediate access propagation
+  const fetchMe = useCallback(async () => {
+    if (!auth.currentUser) return;
+    try {
+      const token = await auth.currentUser.getIdToken();
+      const res = await fetch('/api/me', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setServerMe(data);
+        if (data.accessUntil && new Date(data.accessUntil).getTime() > Date.now()) {
+          setSubscriptionDoc((prev) => {
+            if (prev && prev.accessUntil === data.accessUntil && prev.status === data.status) return prev;
+            const updated: SubscriptionDoc = {
+              userId: auth.currentUser!.uid,
+              plan: data.plan || 'pro',
+              billingCycle: data.billingCycle || 'monthly',
+              status: (data.status as any) || 'active',
+              accessUntil: data.accessUntil,
+              trialEndsAt: data.trialEndsAt,
+              updatedAt: Date.now(),
+            };
+            try {
+              localStorage.setItem(`crestflow_sub_${auth.currentUser!.uid}`, JSON.stringify(updated));
+            } catch {}
+            return updated;
+          });
+        }
+      }
+    } catch (err) {
+      console.warn('[useSubscription] Failed to fetch /api/me:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (userId) fetchMe();
+  }, [userId, fetchMe]);
+
+  // 4. Continuous Polling: Live connection between Razorpay payments & CrestFlow
+  useEffect(() => {
+    if (!userId) return;
+    const intervalMs = computedState.hasAccess ? 45000 : 2500;
+    const timer = setInterval(() => { fetchMe(); }, intervalMs);
+    const onFocus = () => { fetchMe(); };
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onFocus);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onFocus);
+    };
+  }, [userId, computedState.hasAccess, fetchMe]);
+
+  // 5. Realtime Firestore listener on `subscriptions/{userId}`
+  useEffect(() => {
+    if (!userId) {
+      setSubscriptionDoc(null);
+      setLoading(false);
+      return;
+    }
+
+    const unsub = onSnapshot(
+      doc(db, 'subscriptions', userId),
+      (snap) => {
+        setLoading(false);
+        if (snap.exists()) {
+          const data = snap.data() as SubscriptionDoc;
+          setSubscriptionDoc(data);
+          try {
+            localStorage.setItem(`crestflow_sub_${userId}`, JSON.stringify(data));
+          } catch {}
+        } else {
+          setSubscriptionDoc(null);
+          try {
+            localStorage.removeItem(`crestflow_sub_${userId}`);
+          } catch {}
+        }
+      },
+      (err) => {
+        console.warn('[useSubscription] onSnapshot warning:', err);
+        setLoading(false);
+      }
+    );
+
+    return () => unsub();
+  }, [userId]);
 
   const refreshSubscription = useCallback(async () => {
     if (!userId) return;
