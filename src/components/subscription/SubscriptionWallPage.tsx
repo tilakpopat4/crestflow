@@ -18,7 +18,13 @@ interface SubscriptionWallPageProps {
   onNavigate?: (route: AppRoute) => void;
 }
 
-export default function SubscriptionWallPage({ user, profile, subscriptionState, onLogout }: SubscriptionWallPageProps) {
+export default function SubscriptionWallPage({
+  user,
+  profile,
+  subscriptionState,
+  onLogout,
+  onNavigate,
+}: SubscriptionWallPageProps) {
   const shouldReduceMotion = useReducedMotion();
   const [selectedCycle, setSelectedCycle] = useState<PlanIntervalKey>('trial');
   const [loading, setLoading] = useState(false);

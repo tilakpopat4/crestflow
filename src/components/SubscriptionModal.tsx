@@ -11,6 +11,16 @@ import { SubscriptionSuccessStep } from './subscription/SubscriptionSuccessStep'
 import { PlanIntervalKey, ALL_DISPLAY_PLANS, TRIAL_PLAN } from '../lib/subscriptionPlans';
 import { loadRazorpayScript } from '../lib/razorpay';
 
+export interface SubscriptionModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  user: User;
+  profile?: UserProfile | null;
+  onSubscriptionUpdated?: () => void;
+  isMandatory?: boolean;
+  onLogout?: () => void;
+}
+
 export default function SubscriptionModal({
   isOpen,
   onClose,

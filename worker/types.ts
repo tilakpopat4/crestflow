@@ -105,5 +105,8 @@ export interface SubscriptionRecord {
   notifiedChargeFailed?: boolean;
   notifiedExpired?: boolean;
   pendingPlanChange?: PendingPlanChange;
+  lastPaymentAt?: number;
+  lastPaymentId?: string;
+  welcomeEmailSent?: boolean;
   updatedAt: number;
 }

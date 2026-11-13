@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { User as FirebaseUser } from 'firebase/auth';
-import { UserProfile, SubscriptionState } from '../types';
+import { UserProfile } from '../types';
+import { SubscriptionState } from '../hooks/useSubscription';
 import ProfileNavSidebar, { SettingsSectionId } from './profile/ProfileNavSidebar';
 import ProfilePublicSection from './profile/ProfilePublicSection';
 import ProfileInvoicingSection from './profile/ProfileInvoicingSection';

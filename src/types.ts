@@ -80,7 +80,6 @@ export interface WorkItem {
   createdAt: number;
   updatedAt?: number;
 }
-
 export interface InvoiceDeliverable {
   id?: string;
   title: string;
@@ -149,7 +148,6 @@ export interface SubscriptionWhitelistItem {
   createdAt: number;
   updatedAt?: number;
 }
-
 export interface SubscriptionPayment {
   id: string;
   userId: string;
@@ -166,7 +164,6 @@ export interface SubscriptionPayment {
   createdAt: number;
   updatedAt?: number;
 }
-
 export interface UserProfile {
   id: string;
   userId?: string;
@@ -229,7 +226,6 @@ export interface ClientReview {
   createdAt: number;
   updatedAt?: number;
 }
-
 export interface ServiceRequest {
   id: string;
   userId: string; // Freelancer's UID (userId so useFirestore can filter it)
@@ -244,3 +240,6 @@ export interface ServiceRequest {
   createdAt: number;
   updatedAt?: number;
 }
+
+export type { SubscriptionState } from './hooks/useSubscription';
+
