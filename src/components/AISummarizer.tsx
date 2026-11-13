@@ -95,9 +95,10 @@ export default function AISummarizer({ clients, workItems, profile }: AISummariz
         )}
 
         {isGenerating && (
-          <div className="py-6 flex flex-col items-center justify-center gap-2 select-none">
-            <div className="w-5 h-5 rounded-full border-2 border-indigo-600 dark:border-indigo-400 border-t-transparent animate-spin" />
-            <span className="text-xs text-slate-400 dark:text-slate-500">Generating summary...</span>
+          <div className="py-4 space-y-2.5" aria-busy="true">
+            <div className="h-3.5 w-3/4 rounded-md bg-neutral-200 motion-safe:animate-pulse dark:bg-neutral-800" />
+            <div className="h-3.5 w-full rounded-md bg-neutral-100 motion-safe:animate-pulse dark:bg-neutral-800" />
+            <div className="h-3.5 w-5/6 rounded-md bg-neutral-100 motion-safe:animate-pulse dark:bg-neutral-800" />
           </div>
         )}
 

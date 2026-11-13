@@ -204,8 +204,19 @@ export default function ClientOnboardingTab({
 
       {/* Requests Grid */}
       {loading ? (
-        <div className="p-12 text-center text-sm text-slate-400">
-          Loading incoming requests...
+        <div className="space-y-3" aria-busy="true">
+          {[1, 2, 3].map((item) => (
+            <div
+              key={item}
+              className="p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 flex items-center justify-between gap-4"
+            >
+              <div className="space-y-2 flex-1 min-w-0">
+                <div className="h-4 w-40 rounded-md bg-neutral-200 motion-safe:animate-pulse dark:bg-neutral-800" />
+                <div className="h-3 w-56 rounded-md bg-neutral-100 motion-safe:animate-pulse dark:bg-neutral-800" />
+              </div>
+              <div className="h-8 w-24 rounded-lg bg-neutral-100 motion-safe:animate-pulse dark:bg-neutral-800" />
+            </div>
+          ))}
         </div>
       ) : (
         <AnimatePresence mode="wait">

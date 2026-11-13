@@ -17,6 +17,7 @@ import { ClientPortalInvoices } from './client-portal/ClientPortalInvoices';
 import { ClientPortalReview } from './client-portal/ClientPortalReview';
 import { ClientPortalInvoiceModal } from './client-portal/ClientPortalInvoiceModal';
 import { ClientPortalNoAccount } from './client-portal/ClientPortalNoAccount';
+import CardListAndTableSkeletons from './skeletons/CardListAndTableSkeletons';
 
 interface ClientPortalProps {
   user: User;
@@ -66,8 +67,12 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-950">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 dark:border-indigo-400" />
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+        <CardListAndTableSkeletons
+          title="Client Portal"
+          subtitle="Loading your deliverables & invoices…"
+          statusText="Loading client portal…"
+        />
       </div>
     );
   }

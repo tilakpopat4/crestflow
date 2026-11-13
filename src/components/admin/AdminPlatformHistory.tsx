@@ -147,7 +147,17 @@ export default function AdminPlatformHistory({
 
         <div className="overflow-x-auto">
           {loading ? (
-            <div className="p-12 text-center text-slate-400 text-xs">Loading platform history...</div>
+            <div className="p-4 space-y-3" aria-busy="true">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="flex items-center justify-between gap-4 py-2 border-b border-[#282828] last:border-b-0">
+                  <div className="h-3.5 w-20 rounded-md bg-neutral-200 motion-safe:animate-pulse dark:bg-neutral-800" />
+                  <div className="h-3.5 w-32 rounded-md bg-neutral-200 motion-safe:animate-pulse dark:bg-neutral-800" />
+                  <div className="h-3.5 w-28 rounded-md bg-neutral-100 motion-safe:animate-pulse dark:bg-neutral-800" />
+                  <div className="h-3.5 w-16 rounded-md bg-neutral-200 motion-safe:animate-pulse dark:bg-neutral-800" />
+                  <div className="h-6 w-16 rounded-full bg-neutral-100 motion-safe:animate-pulse dark:bg-neutral-800" />
+                </div>
+              ))}
+            </div>
           ) : filteredInvoices.length === 0 ? (
             <div className="p-12 text-center text-slate-400 text-xs">No invoices matching criteria.</div>
           ) : (

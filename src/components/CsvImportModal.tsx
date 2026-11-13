@@ -212,9 +212,10 @@ export default function CsvImportModal({ isOpen, onClose, userId, onImportSucces
               ${isImporting ? 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 opacity-75 cursor-not-allowed' : 'border-indigo-200 dark:border-indigo-800/80 bg-indigo-50/50 dark:bg-indigo-950/30 hover:bg-indigo-50 dark:hover:bg-indigo-950/50'}`}
             >
               {isImporting ? (
-                <div className="flex flex-col items-center gap-3">
-                  <Loader2 size={32} className="text-indigo-600 dark:text-indigo-400 animate-spin" />
-                  <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Processing file...</span>
+                <div className="flex flex-col items-center gap-3 w-full max-w-xs mx-auto py-2" aria-busy="true">
+                  <div className="h-4 w-32 rounded-md bg-neutral-200 motion-safe:animate-pulse dark:bg-neutral-800" />
+                  <div className="h-2.5 w-48 rounded-md bg-neutral-100 motion-safe:animate-pulse dark:bg-neutral-800" />
+                  <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Processing file…</span>
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-3">
