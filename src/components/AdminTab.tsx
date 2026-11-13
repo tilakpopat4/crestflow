@@ -243,7 +243,7 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
             {activeSection === 'history' && <AdminPlatformHistory users={users} stats={unifiedStats} loading={loadingUnified} onRefresh={refreshUnified} />}
             {activeSection === 'whitelist' && <AdminWhitelistManager />}
             {activeSection === 'admins' && <AdminUsersManager currentUserEmail={currentUser?.email} />}
-            {activeSection === 'email' && <AdminEmailManager />}
+            {activeSection === 'email' && <AdminEmailManager users={users} />}
             {activeSection === 'footer' && <AdminFooterManager />}
             {activeSection === 'sitemap' && <AdminSitemapManager />}
           </motion.div>

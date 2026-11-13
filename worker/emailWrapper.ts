@@ -17,7 +17,8 @@ export type SupportedEventType =
   | 'work_milestone'
   | 'payment_due_today'
   | 'new_client_request'
-  | 'scheduled_reminder';
+  | 'scheduled_reminder'
+  | 'promotional_campaign';
 
 /**
  * Escapes HTML characters to prevent XSS and template injection.

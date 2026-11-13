@@ -3,17 +3,24 @@ import { Mail, CheckCircle2, Send, Server, RefreshCw } from 'lucide-react';
 import { AUTOMATED_TRIGGERS } from './emailTriggersData';
 import { auth } from '../../firebase';
 import AdminEmailHistoryTable from './AdminEmailHistoryTable';
+import AdminCampaignPlannerModal from './AdminCampaignPlannerModal';
+import { AdminUserUnified } from '../../hooks/useAdminUsersAndHistory';
+
+interface AdminEmailManagerProps {
+  users?: AdminUserUnified[];
+}
 
 /**
  * AdminEmailManager renders email infrastructure metrics, configuration IDs,
- * interactive live test mail dispatch, and the directory of automated email triggers.
+ * interactive live test mail dispatch, campaign planner, and the directory of automated email triggers.
  * Follows GEMINI.md design standards: flat, restrained SaaS aesthetic, no emojis.
  */
-export default function AdminEmailManager() {
+export default function AdminEmailManager({ users = [] }: AdminEmailManagerProps) {
   const [testEmail, setTestEmail] = useState('');
   const [isSendingTest, setIsSendingTest] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
+  const [isCampaignModalOpen, setIsCampaignModalOpen] = useState(false);
 
   const handleSendTest = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,6 +65,29 @@ export default function AdminEmailManager() {
 
   return (
     <div className="space-y-6">
+      {/* Promotional Campaign & Bulk Mail Action Banner */}
+      <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs border border-slate-200 dark:border-slate-800">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <Mail className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+            <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100">
+              Promotional Campaigns & Bulk Mail
+            </h2>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-2xl">
+            Design announcements, target user segments or custom email lists, test dispatches, and schedule broadcasts.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setIsCampaignModalOpen(true)}
+          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold cursor-pointer transition-colors duration-120 border-0 flex items-center justify-center gap-1.5 shrink-0"
+        >
+          <Send className="w-3.5 h-3.5" />
+          <span>Plan & Send Bulk Mail</span>
+        </button>
+      </div>
+
       {/* Top Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs">
@@ -251,6 +281,14 @@ export default function AdminEmailManager() {
           </table>
         </div>
       </div>
+
+      {/* Promotional Campaign Planner & Bulk Mail Modal */}
+      <AdminCampaignPlannerModal
+        isOpen={isCampaignModalOpen}
+        onClose={() => setIsCampaignModalOpen(false)}
+        users={users}
+        onCampaignDispatched={() => setHistoryRefreshKey((prev) => prev + 1)}
+      />
     </div>
   );
 }

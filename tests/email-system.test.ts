@@ -629,5 +629,128 @@ describe('Production-Ready Automated Email System Suite', () => {
       const data = await res.json();
       assert.equal(data.success, true);
     });
+
+    it('renders promotional_campaign template correctly without emojis', () => {
+      const rendered = renderEmailTemplate('promotional_campaign', {
+        name: 'Alex',
+        subject: 'Special 50% Off Lifetime Pro',
+        headline: 'Upgrade your CrestFlow workflow today',
+        message: 'Take advantage of our exclusive creator promotion with direct UPI payouts.',
+        bannerText: 'LIMITED TIME OFFER',
+        actionLabel: 'Claim 50% Off Now',
+        actionUrl: 'https://crestflow.app/pricing?code=PROMO50',
+      });
+
+      assert.equal(rendered.subject, 'Special 50% Off Lifetime Pro');
+      assert.ok(rendered.html.includes('Upgrade your CrestFlow workflow today'));
+      assert.ok(rendered.html.includes('LIMITED TIME OFFER'));
+      assert.ok(rendered.html.includes('Claim 50% Off Now'));
+      assert.ok(rendered.html.includes('https://crestflow.app/pricing?code=PROMO50'));
+      assert.ok(rendered.text.includes('Upgrade your CrestFlow workflow today'));
+      assert.ok(rendered.text.includes('LIMITED TIME OFFER'));
+    });
+
+    it('rejects /api/admin/send-campaign without authorization token (401)', async () => {
+      const res = await worker.fetch(
+        new Request('https://crestflow.app/api/admin/send-campaign', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            subject: 'Unauthorized campaign',
+            headline: 'Test',
+            message: 'Hello',
+            recipients: [{ email: 'target@example.com' }],
+          }),
+        }),
+        testEnv
+      );
+      assert.equal(res.status, 401);
+    });
+
+    it('rejects /api/admin/send-campaign for non-admin user (403)', async () => {
+      const regularToken = createMockIdToken('user_regular_99', 'regularuser@example.com', keyPair.privateKey);
+      const res = await worker.fetch(
+        new Request('https://crestflow.app/api/admin/send-campaign', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${regularToken}`,
+          },
+          body: JSON.stringify({
+            subject: 'Unauthorized campaign',
+            headline: 'Test',
+            message: 'Hello',
+            recipients: [{ email: 'target@example.com' }],
+          }),
+        }),
+        testEnv
+      );
+      assert.equal(res.status, 403);
+    });
+
+    it('successfully dispatches immediate promotional campaign to multiple recipients via /api/admin/send-campaign', async () => {
+      const adminToken = createMockIdToken('admin_uid_1', 'tilakpopat2007@gmail.com', keyPair.privateKey);
+      const res = await worker.fetch(
+        new Request('https://crestflow.app/api/admin/send-campaign', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${adminToken}`,
+          },
+          body: JSON.stringify({
+            subject: 'Diwali Special Creator Pack',
+            headline: 'Celebrate with CrestFlow Pro',
+            message: 'Generate professional invoices and accept zero-fee UPI payments directly to your bank account.',
+            bannerText: 'SPECIAL ANNOUNCEMENT',
+            actionLabel: 'Explore Pro Features',
+            actionUrl: 'https://crestflow.app/pricing',
+            recipients: [
+              { email: 'editor1@example.com', name: 'Editor One' },
+              { email: 'designer2@example.com', name: 'Designer Two' },
+            ],
+          }),
+        }),
+        testEnv
+      );
+
+      assert.equal(res.status, 200);
+      const data = await res.json();
+      assert.equal(data.success, true);
+      assert.equal(data.totalTargeted, 2);
+      assert.equal(data.enqueuedCount, 2);
+      assert.equal(data.dispatchedCount, 2);
+      assert.equal(data.isScheduled, false);
+      assert.ok(data.campaignId.startsWith('camp_'));
+    });
+
+    it('successfully schedules promotional campaign for a future date/time', async () => {
+      const adminToken = createMockIdToken('admin_uid_1', 'tilakpopat2007@gmail.com', keyPair.privateKey);
+      const futureTime = Date.now() + 86400000; // 24 hours in future
+      const res = await worker.fetch(
+        new Request('https://crestflow.app/api/admin/send-campaign', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${adminToken}`,
+          },
+          body: JSON.stringify({
+            subject: 'Scheduled Announcement',
+            headline: 'Coming Soon',
+            message: 'This campaign is scheduled for future delivery.',
+            scheduledAt: futureTime,
+            recipients: [{ email: 'future_reader@example.com', name: 'Future Reader' }],
+          }),
+        }),
+        testEnv
+      );
+
+      assert.equal(res.status, 200);
+      const data = await res.json();
+      assert.equal(data.success, true);
+      assert.equal(data.isScheduled, true);
+      assert.equal(data.dispatchedCount, 0);
+      assert.equal(data.enqueuedCount, 1);
+      assert.equal(data.scheduledAt, futureTime);
+    });
   });
 });

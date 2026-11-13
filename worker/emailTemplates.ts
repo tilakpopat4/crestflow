@@ -27,7 +27,8 @@ export type SupportedEventType =
   | 'work_milestone'
   | 'payment_due_today'
   | 'new_client_request'
-  | 'scheduled_reminder';
+  | 'scheduled_reminder'
+  | 'promotional_campaign';
 
 /**
  * 1. Contact Form Submission (Sent to CrestFlow Support)
@@ -316,6 +317,50 @@ export function renderScheduledReminderTemplate(data: {
 }
 
 /**
+ * 9. Promotional Campaign & Bulk Announcements
+ */
+export function renderPromotionalCampaignTemplate(data: {
+  name?: string;
+  subject: string;
+  headline: string;
+  message: string;
+  actionLabel?: string;
+  actionUrl?: string;
+  bannerText?: string;
+  footerNote?: string;
+}): EmailTemplateRenderResult {
+  const name = data.name ? escapeHtml(data.name) : 'Creator';
+  const headline = escapeHtml(data.headline);
+  const msg = escapeHtml(data.message).replace(/\n/g, '<br>');
+  const banner = data.bannerText
+    ? `<div style="display: inline-block; padding: 4px 10px; background: #e0e7ff; color: #4338ca; font-size: 11px; font-weight: 600; border-radius: 4px; margin-bottom: 12px; letter-spacing: 0.5px; text-transform: uppercase;">${escapeHtml(data.bannerText)}</div>`
+    : '';
+  const buttonHtml = data.actionUrl && data.actionLabel
+    ? `<p style="margin-top: 24px;"><a href="${escapeHtml(data.actionUrl)}" class="btn">${escapeHtml(data.actionLabel)}</a></p>`
+    : '';
+  const footerNote = data.footerNote
+    ? `<p style="font-size: 12px; color: #64748b; margin-top: 24px;">${escapeHtml(data.footerNote)}</p>`
+    : '';
+
+  const emailSubject = data.subject;
+  const text = `${data.bannerText ? `[${data.bannerText}]\n\n` : ''}${data.headline}\n\nHi ${name},\n\n${data.message}\n\n${data.actionUrl ? `${data.actionLabel || 'Visit'}: ${data.actionUrl}\n\n` : ''}— The CrestFlow Team`;
+
+  const html = wrapEmailHtml(
+    emailSubject,
+    `${banner}
+     <h1>${headline}</h1>
+     <p>Hi ${name},</p>
+     <div style="font-size: 14px; line-height: 1.6; color: #334155; margin: 16px 0;">
+       ${msg}
+     </div>
+     ${buttonHtml}
+     ${footerNote}`
+  );
+
+  return { subject: emailSubject, html, text };
+}
+
+/**
  * Master dispatcher that renders any supported event type with schema validation.
  */
 export function renderEmailTemplate(eventType: SupportedEventType, data: any): EmailTemplateRenderResult {
@@ -336,6 +381,8 @@ export function renderEmailTemplate(eventType: SupportedEventType, data: any): E
       return renderNewClientRequestTemplate(data);
     case 'scheduled_reminder':
       return renderScheduledReminderTemplate(data);
+    case 'promotional_campaign':
+      return renderPromotionalCampaignTemplate(data);
     default:
       throw new Error(`Unsupported email event type: ${eventType}`);
   }

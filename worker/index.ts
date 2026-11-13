@@ -14,6 +14,7 @@ import {
 } from './routes/notifications';
 import { handleAdminGrantSubscription, handleAdminRevokeSubscription } from './routes/adminSubscriptions';
 import { handleGetAdminEmailHistory, handleRetryAdminEmail } from './routes/adminEmailHistory';
+import { handleAdminSendCampaign } from './routes/adminCampaignRoutes';
 import { handleSeoRoutes } from './routes/seo';
 import { processDueEmailJobs } from './emailDispatcher';
 
@@ -229,6 +230,11 @@ export default {
       // 15. POST /api/admin/email-retry
       if (url.pathname === '/api/admin/email-retry' && request.method === 'POST') {
         return await handleRetryAdminEmail(request, env);
+      }
+
+      // 16. POST /api/admin/send-campaign (Promotional & Bulk Mail Planner)
+      if (url.pathname === '/api/admin/send-campaign' && request.method === 'POST') {
+        return await handleAdminSendCampaign(request, env);
       }
 
       return jsonResponse({ error: 'Endpoint not found' }, 404);
