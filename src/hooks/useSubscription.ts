@@ -90,7 +90,7 @@ export function useSubscription(
     };
   }, [userEmail]);
 
-  // 2. Fetch authoritative state from GET /api/me
+  // 2. Fetch authoritative state from GET /api/me with immediate access propagation
   const fetchMe = useCallback(async () => {
     if (!auth.currentUser) return;
     try {
@@ -101,6 +101,24 @@ export function useSubscription(
       if (res.ok) {
         const data = await res.json();
         setServerMe(data);
+        if (data.accessUntil && new Date(data.accessUntil).getTime() > Date.now()) {
+          setSubscriptionDoc((prev) => {
+            if (prev && prev.accessUntil === data.accessUntil && prev.status === data.status) return prev;
+            const updated: SubscriptionDoc = {
+              userId: auth.currentUser!.uid,
+              plan: data.plan || 'pro',
+              billingCycle: data.billingCycle || 'monthly',
+              status: (data.status as any) || 'active',
+              accessUntil: data.accessUntil,
+              trialEndsAt: data.trialEndsAt,
+              updatedAt: Date.now(),
+            };
+            try {
+              localStorage.setItem(`crestflow_sub_${auth.currentUser!.uid}`, JSON.stringify(updated));
+            } catch {}
+            return updated;
+          });
+        }
       }
     } catch (err) {
       console.warn('[useSubscription] Failed to fetch /api/me:', err);
@@ -110,6 +128,21 @@ export function useSubscription(
   useEffect(() => {
     if (userId) fetchMe();
   }, [userId, fetchMe]);
+
+  // Continuous Polling: Live connection between Razorpay payments & CrestFlow
+  useEffect(() => {
+    if (!userId) return;
+    const intervalMs = computedState.hasAccess ? 45000 : 2500;
+    const timer = setInterval(() => { fetchMe(); }, intervalMs);
+    const onFocus = () => { fetchMe(); };
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onFocus);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onFocus);
+    };
+  }, [userId, computedState.hasAccess, fetchMe]);
 
   // 3. Realtime Firestore listener on `subscriptions/{userId}`
   useEffect(() => {
@@ -149,22 +182,11 @@ export function useSubscription(
   const computedState = useMemo(() => {
     if (!isSubscriptionFeatureEnabled || isWhitelisted) {
       return {
-        status: 'active' as const,
-        plan: 'pro_yearly',
-        isPro: true,
-        hasAccess: true,
-        isTrialing: false,
-        isPastDue: false,
-        isExpired: false,
-        isCancelled: false,
-        isPaidActive: true,
-        cancelAtPeriodEnd: false,
-        billingCycle: 'yearly',
-        accessUntil: undefined,
-        trialEndsAt: undefined,
-        daysRemaining: 999,
-        serverNow: serverMe?.serverNow,
-        currentPeriodEnd: undefined,
+        status: 'active' as const, plan: 'pro_yearly', isPro: true, hasAccess: true,
+        isTrialing: false, isPastDue: false, isExpired: false, isCancelled: false,
+        isPaidActive: true, cancelAtPeriodEnd: false, billingCycle: 'yearly',
+        accessUntil: undefined, trialEndsAt: undefined, daysRemaining: 999,
+        serverNow: serverMe?.serverNow, currentPeriodEnd: undefined,
       };
     }
 
@@ -184,32 +206,18 @@ export function useSubscription(
     const isPaidActive = (rawStatus === 'active' || rawStatus === 'cancelled') && hasAccess;
     const isExpired = !hasAccess && rawStatus !== 'none';
 
-    // Days left display counter based on serverNow
     let targetEndMs = accessUntilMs;
-    if (isTrialing && trialEndsAtMs > 0) {
-      targetEndMs = trialEndsAtMs;
-    }
+    if (isTrialing && trialEndsAtMs > 0) targetEndMs = trialEndsAtMs;
     const daysRemaining = targetEndMs > serverNowMs
       ? Math.max(0, Math.ceil((targetEndMs - serverNowMs) / (24 * 60 * 60 * 1000)))
       : 0;
 
     return {
-      status: rawStatus,
-      plan: subscriptionDoc?.plan || 'pro_monthly',
-      isPro: hasAccess,
-      hasAccess,
-      isTrialing,
-      isPastDue,
-      isExpired,
-      isCancelled,
-      isPaidActive,
-      cancelAtPeriodEnd: isCancelled,
-      billingCycle: subscriptionDoc?.billingCycle || 'monthly',
-      accessUntil: accessUntilStr,
-      trialEndsAt: trialEndsAtStr,
-      daysRemaining,
-      serverNow: serverMe?.serverNow,
-      currentPeriodEnd: subscriptionDoc?.currentPeriodEnd,
+      status: rawStatus, plan: subscriptionDoc?.plan || 'pro_monthly',
+      isPro: hasAccess, hasAccess, isTrialing, isPastDue, isExpired, isCancelled, isPaidActive,
+      cancelAtPeriodEnd: isCancelled, billingCycle: subscriptionDoc?.billingCycle || 'monthly',
+      accessUntil: accessUntilStr, trialEndsAt: trialEndsAtStr, daysRemaining,
+      serverNow: serverMe?.serverNow, currentPeriodEnd: subscriptionDoc?.currentPeriodEnd,
     };
   }, [subscriptionDoc, serverMe, isWhitelisted, isSubscriptionFeatureEnabled]);
 

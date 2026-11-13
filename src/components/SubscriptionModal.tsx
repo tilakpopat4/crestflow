@@ -143,39 +143,34 @@ export default function SubscriptionModal({
           ? 'CrestFlow Pro 7-Day Trial (₹1)'
           : `CrestFlow Pro ${activePlan.name} (₹${activePlan.price.toLocaleString('en-IN')})`,
         image: '/app_logo_icon.png',
-        prefill: {
-          name: profile?.name || user.displayName || '',
-          email: user.email || '',
-          contact: profile?.phone || '',
-        },
-        theme: {
-          color: '#282828',
-        },
+        prefill: { name: profile?.name || user.displayName || '', email: user.email || '', contact: profile?.phone || '' },
+        theme: { color: '#282828' },
         handler: async function (response: any) {
           setStep('activating');
           try {
-            const paymentId = response.razorpay_payment_id;
             const resOrder = response.razorpay_order_id || effectiveOrderId;
-
             const verifyRes = await fetch('/api/verify-payment', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
               body: JSON.stringify({
-                paymentId: response.razorpay_payment_id,
-                orderId: resOrder,
-                signature: response.razorpay_signature,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_order_id: resOrder,
-                razorpay_signature: response.razorpay_signature,
+                paymentId: response.razorpay_payment_id, orderId: resOrder, signature: response.razorpay_signature,
+                razorpay_payment_id: response.razorpay_payment_id, razorpay_order_id: resOrder, razorpay_signature: response.razorpay_signature,
                 planKey: isTrial ? 'trial' : selectedCycle,
               }),
             });
 
             if (verifyRes.ok) {
-              setStep('success');
-              if (onSubscriptionUpdated) {
-                await onSubscriptionUpdated();
+              const verifyData = await verifyRes.json().catch(() => ({}));
+              if (verifyData.accessUntil) {
+                try {
+                  localStorage.setItem(`crestflow_sub_${user.uid}`, JSON.stringify({
+                    userId: user.uid, status: verifyData.subscriptionStatus || 'active', plan: 'pro',
+                    accessUntil: verifyData.accessUntil, trialEndsAt: verifyData.subscriptionStatus === 'trialing' ? verifyData.accessUntil : null,
+                  }));
+                } catch {}
               }
+              setStep('success');
+              if (onSubscriptionUpdated) await onSubscriptionUpdated();
             } else {
               const errJson = await verifyRes.json().catch(() => ({}));
               setError(errJson.error || 'Payment verification failed');
@@ -183,17 +178,12 @@ export default function SubscriptionModal({
               setLoading(false);
             }
           } catch (e: any) {
-            console.warn('[SubscriptionModal] verify-payment fallback:', e);
             setError(e.message || 'Payment verification failed');
             setStep('select');
             setLoading(false);
           }
         },
-        modal: {
-          ondismiss: function () {
-            setLoading(false);
-          },
-        },
+        modal: { ondismiss: () => setLoading(false) },
       };
 
       const rzp = new (window as any).Razorpay(options);

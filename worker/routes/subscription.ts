@@ -263,11 +263,18 @@ export async function handleGetMe(request: Request, env: Env): Promise<Response>
 
   const existing = await getSubscriptionFromFirestore(creds, verifiedUser.uid);
 
+  const nowMs = Date.now();
+  const accessUntilMs = existing?.accessUntil ? new Date(existing.accessUntil).getTime() : 0;
+  const hasAccess = accessUntilMs > nowMs;
+
   return jsonResponse({
-    serverNow: new Date().toISOString(),
+    serverNow: new Date(nowMs).toISOString(),
     status: existing?.status || 'none',
+    plan: existing?.plan || 'pro',
+    billingCycle: existing?.billingCycle || 'monthly',
     accessUntil: existing?.accessUntil || null,
     trialEndsAt: existing?.trialEndsAt || null,
+    hasAccess,
   });
 }
 

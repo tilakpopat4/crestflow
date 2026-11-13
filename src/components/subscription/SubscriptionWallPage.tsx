@@ -11,19 +11,12 @@ import { ALL_DISPLAY_PLANS, PlanIntervalKey, TRIAL_PLAN, getTrialDisclosureText 
 import { loadRazorpayScript } from '../../lib/razorpay';
 
 interface SubscriptionWallPageProps {
-  user: User;
-  profile?: UserProfile | null;
-  subscriptionState: SubscriptionState;
-  onLogout: () => void;
-  onNavigate?: (route: AppRoute) => void;
+  user: User; profile?: UserProfile | null; subscriptionState: SubscriptionState;
+  onLogout: () => void; onNavigate?: (route: AppRoute) => void;
 }
 
 export default function SubscriptionWallPage({
-  user,
-  profile,
-  subscriptionState,
-  onLogout,
-  onNavigate,
+  user, profile, subscriptionState, onLogout, onNavigate,
 }: SubscriptionWallPageProps) {
   const shouldReduceMotion = useReducedMotion();
   const [selectedCycle, setSelectedCycle] = useState<PlanIntervalKey>('trial');
@@ -35,24 +28,36 @@ export default function SubscriptionWallPage({
   useEffect(() => {
     if (!user?.uid) return;
     return onSnapshot(doc(db, 'subscriptions', user.uid), (snap) => {
-      if (snap.exists()) setSubData(snap.data());
+      if (snap.exists()) {
+        const data = snap.data();
+        setSubData(data);
+        if (data.accessUntil && new Date(data.accessUntil).getTime() > Date.now()) {
+          subscriptionState.refreshSubscription();
+        }
+      }
     });
-  }, [user?.uid]);
+  }, [user?.uid, subscriptionState]);
+
+  // Live polling: continuously fetch subscription status while on the wall
+  useEffect(() => {
+    if (subscriptionState.hasAccess) {
+      if (onNavigate) onNavigate('dashboard');
+      return;
+    }
+    const timer = setInterval(() => {
+      subscriptionState.refreshSubscription();
+    }, 2500);
+    return () => clearInterval(timer);
+  }, [subscriptionState.hasAccess, subscriptionState.refreshSubscription, onNavigate]);
 
   // Fast auto-resolution during verification phase so the user never gets stuck
   useEffect(() => {
     if (!isVerifying) return;
     const interval = setInterval(async () => {
       await subscriptionState.refreshSubscription();
-      if (subscriptionState.hasAccess) {
-        setIsVerifying(false);
-        if (onNavigate) onNavigate('dashboard');
-      }
+      if (subscriptionState.hasAccess) { setIsVerifying(false); onNavigate?.('dashboard'); }
     }, 1200);
-    const timeout = setTimeout(() => {
-      setIsVerifying(false);
-      if (onNavigate) onNavigate('dashboard');
-    }, 4000);
+    const timeout = setTimeout(() => { setIsVerifying(false); onNavigate?.('dashboard'); }, 4000);
     return () => { clearInterval(interval); clearTimeout(timeout); };
   }, [isVerifying, subscriptionState, onNavigate]);
 
@@ -92,10 +97,7 @@ export default function SubscriptionWallPage({
       if (!rzpKey) throw new Error('Razorpay public key is missing.');
 
       const options: any = {
-        key: rzpKey,
-        order_id: effectiveOrderId,
-        amount: resAmount || amountPaise,
-        currency: 'INR',
+        key: rzpKey, order_id: effectiveOrderId, amount: resAmount || amountPaise, currency: 'INR',
         name: 'CrestFlow Pro',
         description: isTrial ? 'CrestFlow Pro 7-Day Trial (₹1)' : `CrestFlow Pro ${activePlan.name} (₹${activePlan.price.toLocaleString('en-IN')})`,
         image: '/app_logo_icon.png',
@@ -125,19 +127,16 @@ export default function SubscriptionWallPage({
                 } catch {}
               }
               await subscriptionState.refreshSubscription();
-              setIsVerifying(false);
-              setLoading(false);
+              setIsVerifying(false); setLoading(false);
               if (onNavigate) onNavigate('dashboard');
               return;
             }
             const errJson = await verifyRes.json().catch(() => ({}));
             setError(errJson.error || 'Payment verification failed');
-            setIsVerifying(false);
-            setLoading(false);
+            setIsVerifying(false); setLoading(false);
           } catch (e: any) {
             await subscriptionState.refreshSubscription();
-            setIsVerifying(false);
-            setLoading(false);
+            setIsVerifying(false); setLoading(false);
             if (subscriptionState.hasAccess && onNavigate) { onNavigate('dashboard'); return; }
             setError(e.message || 'Payment verification failed');
           }
@@ -184,12 +183,18 @@ export default function SubscriptionWallPage({
 
         {error && <div className="p-3.5 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-xs text-red-600 dark:text-red-400 text-center">{error}</div>}
 
-        {isVerifying ? (
+        {isVerifying || subscriptionState.hasAccess ? (
           <div className="p-10 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center space-y-4 shadow-xs">
             <RefreshCw className="w-8 h-8 text-indigo-400 animate-spin mx-auto" />
             <div className="space-y-1">
-              <h3 className="text-base font-semibold text-slate-900 dark:text-white">Activating Your Workspace...</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Verifying payment authorization and preparing your dashboard.</p>
+              <h3 className="text-base font-semibold text-slate-900 dark:text-white">
+                {subscriptionState.hasAccess ? 'Subscription Active' : 'Activating Your Workspace...'}
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {subscriptionState.hasAccess
+                  ? 'Access granted. Redirecting to your workspace dashboard...'
+                  : 'Verifying payment authorization and preparing your dashboard.'}
+              </p>
             </div>
             <div className="pt-1">
               <button
@@ -221,9 +226,7 @@ export default function SubscriptionWallPage({
                       isPlanDisabled ? 'text-slate-500 opacity-60 cursor-not-allowed' : isSelected ? 'text-slate-900 dark:text-white font-semibold cursor-pointer' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium cursor-pointer'
                     }`}
                   >
-                    {isSelected && (
-                      <motion.div layoutId="wallActiveTab" className="absolute inset-0 bg-white dark:bg-slate-700/90 border border-slate-200 dark:border-slate-600/70 rounded shadow-xs -z-10" transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 500, damping: 38 }} />
-                    )}
+                    {isSelected && <motion.div layoutId="wallActiveTab" className="absolute inset-0 bg-white dark:bg-slate-700/90 border border-slate-200 dark:border-slate-600/70 rounded shadow-xs -z-10" transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 500, damping: 38 }} />}
                     <div className="flex items-center justify-center gap-1">
                       <span>{p.name.replace('Pro ', '')}</span>
                       {p.id === 'trial' && isTrialUsed && <span className="text-[9px] px-1 py-0.2 rounded bg-slate-200 dark:bg-slate-700 text-slate-500 font-normal">Used</span>}
@@ -254,9 +257,7 @@ export default function SubscriptionWallPage({
                   <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Included in this plan:</span>
                   <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600 dark:text-slate-300">
                     {activePlan.features.map((feat, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <Check size={14} className="text-indigo-400 shrink-0 mt-0.5" /><span>{feat}</span>
-                      </li>
+                      <li key={i} className="flex items-start gap-2"><Check size={14} className="text-indigo-400 shrink-0 mt-0.5" /><span>{feat}</span></li>
                     ))}
                   </ul>
                 </div>

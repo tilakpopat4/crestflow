@@ -5,6 +5,7 @@ import { normalizeGoogleEmail, normalizeUpiVpa, hashIdentifier, markTrialLedgerU
 import { jsonResponse } from './subscription';
 import { sendPaymentChargedReceipt } from '../emailDispatcher';
 import { sendWelcomeEmailForUser } from './notifications';
+import { handleOrderWebhook } from './webhookOrderHandler';
 
 /**
  * Handles POST /api/razorpay-webhook
@@ -46,6 +47,11 @@ export async function handleRazorpayWebhook(request: Request, env: Env): Promise
   }
   await markEventProcessed(creds, eventId);
 
+  const nowMs = Date.now();
+  const eventCreatedAtMs = eventPayload.created_at
+    ? eventPayload.created_at * 1000
+    : nowMs;
+
   const eventType: string = eventPayload.event || '';
   const payloadData = eventPayload.payload || {};
 
@@ -56,8 +62,8 @@ export async function handleRazorpayWebhook(request: Request, env: Env): Promise
     null;
 
   if (!subId) {
-    // Non-subscription related event or direct one-off payment
-    return jsonResponse({ status: 'ok', ignored: 'no subscription_id in event payload' }, 200);
+    // Handle one-off / standard web checkout orders (order.paid, payment.captured)
+    return handleOrderWebhook(eventPayload, env, creds, eventCreatedAtMs);
   }
 
   // 3. Re-fetch authoritative subscription from Razorpay API
@@ -77,11 +83,6 @@ export async function handleRazorpayWebhook(request: Request, env: Env): Promise
   }
 
   // 5. Guard against out-of-order events
-  const nowMs = Date.now();
-  const eventCreatedAtMs = eventPayload.created_at
-    ? eventPayload.created_at * 1000
-    : nowMs;
-
   const existing = await getSubscriptionFromFirestore(creds, userId);
   if (existing?.lastEventTimestamp && eventCreatedAtMs < existing.lastEventTimestamp) {
     console.warn(
