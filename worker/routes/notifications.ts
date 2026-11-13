@@ -165,10 +165,11 @@ export async function sendWelcomeEmailForUser(
   creds: any,
   uid: string,
   email: string,
-  name?: string
+  name?: string,
+  force = false
 ): Promise<{ success: boolean; duplicate?: boolean }> {
   if (!email || !EMAIL_REGEX.test(email)) return { success: false };
-  const idempotencyKey = `welcome_${uid}`;
+  const idempotencyKey = force ? `welcome_${uid}_${Date.now()}` : `welcome_${uid}`;
   const { jobId, duplicate } = await enqueueEmailJob(creds, {
     eventType: 'welcome_freelancer',
     recipient: email,
@@ -180,7 +181,7 @@ export async function sendWelcomeEmailForUser(
     createdBy: uid,
   });
 
-  if (duplicate) return { success: true, duplicate: true };
+  if (duplicate && !force) return { success: true, duplicate: true };
 
   const job = {
     jobId,
@@ -292,4 +293,48 @@ export async function handleNotifyMilestone(request: Request, env: Env): Promise
 
   const dispatchResult = await dispatchEmailJob(env, creds, job);
   return jsonResponse({ success: true, jobId, dispatched: dispatchResult.success });
+}
+
+/**
+ * 4. POST /api/notify/test-email
+ * Interactive test dispatch for administrator console
+ */
+export async function handleNotifyTestEmail(request: Request, env: Env): Promise<Response> {
+  const token = getBearerToken(request);
+  if (!token) {
+    return jsonResponse({ error: 'Missing Authorization header' }, 401);
+  }
+
+  const creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
+  const verifiedUser = await verifyFirebaseIdToken(token, creds.project_id);
+  const body = (await request.json().catch(() => ({}))) as { targetEmail?: string };
+  const targetEmail = body.targetEmail || verifiedUser.email || 'tilakpopat2007@gmail.com';
+
+  const res = await dispatchEmailJob(env, creds, {
+    jobId: `test_${Date.now()}`,
+    eventType: 'welcome_freelancer',
+    recipient: targetEmail,
+    templateId: 'welcome_freelancer',
+    templateData: {
+      name: verifiedUser.name || 'Admin',
+      workspaceUrl: `${env.BASE_URL || 'https://crestflow.app'}/dashboard`,
+    },
+    status: 'queued',
+    scheduledAt: Date.now(),
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    attemptCount: 0,
+    maxAttempts: 1,
+    nextAttemptAt: Date.now(),
+    idempotencyKey: `test_${Date.now()}`,
+    createdBy: verifiedUser.uid,
+  });
+
+  return jsonResponse({
+    success: res.success,
+    id: res.id,
+    error: res.error,
+    recipient: targetEmail,
+    provider: env.RESEND_API_KEY ? 'Resend' : 'EmailJS',
+  });
 }

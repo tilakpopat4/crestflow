@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Mail, CheckCircle2, Send, Server, RefreshCw } from 'lucide-react';
 import { AUTOMATED_TRIGGERS } from './emailTriggersData';
+import { auth } from '../../firebase';
 
 /**
  * AdminEmailManager renders email infrastructure metrics, configuration IDs,
@@ -14,58 +15,33 @@ export default function AdminEmailManager() {
 
   const handleSendTest = async (e: React.FormEvent) => {
     e.preventDefault();
-    const recipient = testEmail.trim() || 'support.crestflow@gmail.com';
+    const recipient = testEmail.trim() || 'tilakpopat2007@gmail.com';
     setIsSendingTest(true);
     setTestResult(null);
 
     try {
-      const payload = {
-        service_id: 'service_u6nm96l',
-        template_id: 'template_g3ojhpa',
-        user_id: 'MY75lMNsMx8rYRLa4',
-        accessToken: 'Ts55PbuNCO6ND4LDZNEfI',
-        template_params: {
-          to_email: recipient,
-          email: recipient,
-          to: recipient,
-          recipient: recipient,
-          user_email: recipient,
-          to_name: recipient.split('@')[0],
-          from_name: 'CrestFlow Support',
-          subject: 'Admin Test Dispatch | CrestFlow Mailer',
-          message: `Email System Operational\n\nThis is a test notification from CrestFlow Admin Command Center dispatched via support.crestflow@gmail.com to ${recipient}.`,
-          message_html: `<div style="font-family: sans-serif; padding: 20px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
-            <h2 style="color: #0f172a; margin-top: 0;">Email System Operational</h2>
-            <p style="color: #475569; font-size: 14px;">This is a test notification dispatched from the CrestFlow Admin Command Center.</p>
-            <table style="font-size: 13px; color: #334155; margin: 16px 0;">
-              <tr><td style="font-weight: bold; width: 120px;">Sender:</td><td>support.crestflow@gmail.com</td></tr>
-              <tr><td style="font-weight: bold;">Recipient:</td><td>${recipient}</td></tr>
-              <tr><td style="font-weight: bold;">Provider:</td><td>EmailJS (Google OAuth)</td></tr>
-              <tr><td style="font-weight: bold;">Timestamp:</td><td>${new Date().toLocaleString('en-IN')}</td></tr>
-            </table>
-          </div>`,
-          message_text: `Email System Operational\n\nThis is a test notification from CrestFlow Admin Command Center dispatched via support.crestflow@gmail.com.`,
-          reply_to: 'support.crestflow@gmail.com',
-        },
-      };
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) {
+        throw new Error('Please sign in to authorized admin account to dispatch test emails');
+      }
 
-      const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+      const res = await fetch('/api/notify/test-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          origin: window.location.origin || 'https://crestflow.app',
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ targetEmail: recipient }),
       });
 
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(errorText || `Status ${res.status}`);
+      const data = (await res.json().catch(() => ({}))) as any;
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || `Server dispatch failed (${res.status})`);
       }
 
       setTestResult({
         success: true,
-        message: `Test email dispatched to ${recipient} via EmailJS. If not in Inbox, please check Spam/Promotions or the EmailJS History dashboard.`,
+        message: `Live test email dispatched successfully to ${recipient} via ${data.provider} (ID: ${data.id}). Please check your Inbox and Spam folder.`,
       });
     } catch (err: any) {
       setTestResult({

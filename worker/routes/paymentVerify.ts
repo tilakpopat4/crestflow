@@ -4,6 +4,7 @@ import { parseServiceAccount, updateSubscriptionInFirestore, getSubscriptionFrom
 import { jsonResponse, getBearerToken } from './subscription';
 import { verifyRazorpayPaymentSignature } from '../razorpay';
 import { sendWelcomeEmailForUser } from './notifications';
+import { sendPaymentChargedReceipt } from '../emailDispatcher';
 
 /**
  * Handles POST /api/verify-payment
@@ -105,12 +106,33 @@ export async function handleVerifyPayment(request: Request, env: Env): Promise<R
     updatedAt: nowMs,
   });
 
-  // Welcome email on first-time subscription payment
-  const isFirstPayment = !existing?.hasHadSubscription && !existing?.trialEndsAt && !existing?.lastPaymentAt;
+  // 1. Send Payment Receipt Email for any successful payment
+  if (verifiedUser.email) {
+    const planName = isTrial ? 'Pro 7-Day Trial' : (effectiveCycle === 'yearly' ? 'Pro Yearly' : 'Pro Monthly');
+    const amountStr = `₹${paymentAmount.toLocaleString('en-IN')}`;
+    sendPaymentChargedReceipt(env, creds, {
+      userId: verifiedUser.uid,
+      userEmail: verifiedUser.email,
+      userName: verifiedUser.name,
+      planName,
+      amountFormatted: amountStr,
+      periodStartMs: nowMs,
+      periodEndMs: nowMs + days * 86400 * 1000,
+      subId: orderId || paymentId,
+      eventId: `pay_${paymentId}`,
+    }).catch((err) => console.warn('[paymentVerify] Payment receipt email dispatch error:', err));
+  }
+
+  // 2. Welcome email on first-time subscription payment or if not sent yet
+  const isFirstPayment = !existing?.hasHadSubscription || !existing?.lastPaymentAt || !existing?.welcomeEmailSent;
   if (isFirstPayment && verifiedUser.email) {
-    sendWelcomeEmailForUser(env, creds, verifiedUser.uid, verifiedUser.email, verifiedUser.name).catch((err) =>
-      console.warn('[paymentVerify] Welcome email dispatch error:', err)
-    );
+    sendWelcomeEmailForUser(env, creds, verifiedUser.uid, verifiedUser.email, verifiedUser.name, true)
+      .then(() => {
+        updateSubscriptionInFirestore(creds, verifiedUser.uid, { welcomeEmailSent: true }).catch(() => {});
+      })
+      .catch((err) =>
+        console.warn('[paymentVerify] Welcome email dispatch error:', err)
+      );
   }
 
   return jsonResponse({

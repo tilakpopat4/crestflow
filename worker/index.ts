@@ -10,7 +10,7 @@ import { constantTimeCompare } from './razorpay';
 import {
   handleNotifyContact, handleNotifyWelcome, handleNotifyNewClientRequest,
   handleNotifyMilestone, handleNotifyPaymentDueToday, handleScheduleEmail,
-  handleCancelEmail, handleProcessEmailQueue,
+  handleCancelEmail, handleProcessEmailQueue, handleNotifyTestEmail,
 } from './routes/notifications';
 import { handleAdminGrantSubscription, handleAdminRevokeSubscription } from './routes/adminSubscriptions';
 import { handleSeoRoutes } from './routes/seo';
@@ -183,6 +183,11 @@ export default {
       // 8. POST /api/notify/welcome
       if (url.pathname === '/api/notify/welcome' && request.method === 'POST') {
         return await handleNotifyWelcome(request, env);
+      }
+
+      // 8b. POST /api/notify/test-email (Admin test email dispatch)
+      if (url.pathname === '/api/notify/test-email' && request.method === 'POST') {
+        return await handleNotifyTestEmail(request, env);
       }
 
       // 9. POST /api/notify/new-client-request

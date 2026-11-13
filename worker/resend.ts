@@ -16,12 +16,50 @@ export async function sendResendEmail(
   env: Env,
   params: EmailParams
 ): Promise<{ success: boolean; id?: string; error?: string; statusCode?: number }> {
+  // 1. Primary Dispatcher: Resend API (Direct high-deliverability transactional delivery)
+  if (env.RESEND_API_KEY) {
+    const fromEmail = env.RESEND_FROM_EMAIL || 'CrestFlow <onboarding@resend.dev>';
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${env.RESEND_API_KEY}`,
+      'Content-Type': 'application/json',
+    };
+
+    if (params.idempotencyKey) {
+      headers['Idempotency-Key'] = params.idempotencyKey;
+    }
+
+    try {
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          from: fromEmail,
+          to: [params.to],
+          reply_to: params.replyTo || 'support.crestflow@gmail.com',
+          subject: params.subject,
+          html: params.html,
+          text: params.text,
+        }),
+      });
+
+      if (res.ok) {
+        const data = (await res.json()) as { id: string };
+        return { success: true, id: data.id, statusCode: res.status };
+      }
+
+      const errorText = await res.text();
+      console.warn(`[Resend Warning] Status ${res.status}: ${errorText}. Falling back to EmailJS if available.`);
+    } catch (err: any) {
+      console.warn('[Resend Network Error]', err);
+    }
+  }
+
+  // 2. Secondary Fallback: EmailJS API (Direct Google OAuth sending via support.crestflow@gmail.com)
   const emailJsServiceId = env.EMAILJS_SERVICE_ID || 'service_u6nm96l';
   const emailJsTemplateId = env.EMAILJS_TEMPLATE_ID || 'template_g3ojhpa';
   const emailJsPublicKey = env.EMAILJS_PUBLIC_KEY || 'MY75lMNsMx8rYRLa4';
   const emailJsPrivateKey = env.EMAILJS_PRIVATE_KEY || 'Ts55PbuNCO6ND4LDZNEfI';
 
-  // 1. Primary Dispatcher: EmailJS (Sends directly from support.crestflow@gmail.com)
   if (emailJsServiceId && emailJsTemplateId && emailJsPublicKey) {
     try {
       const payload = {
@@ -60,53 +98,14 @@ export async function sendResendEmail(
 
       const errorText = await res.text();
       console.warn(`[EmailJS Error] ${res.status}: ${errorText}`);
+      return { success: false, error: `EmailJS_${res.status}: ${errorText}`, statusCode: res.status };
     } catch (err: any) {
       console.warn('[EmailJS Network Error]', err);
+      return { success: false, error: err.message, statusCode: 599 };
     }
   }
 
-  // 2. Secondary Fallback: Resend API
-  if (!env.RESEND_API_KEY) {
-    console.warn('[Resend] RESEND_API_KEY is not configured and EmailJS failed. Skipping email.');
-    return { success: false, error: 'No email service configured' };
-  }
-
-  const fromEmail = env.RESEND_FROM_EMAIL || 'CrestFlow <onboarding@resend.dev>';
-  const headers: Record<string, string> = {
-    Authorization: `Bearer ${env.RESEND_API_KEY}`,
-    'Content-Type': 'application/json',
-  };
-
-  if (params.idempotencyKey) {
-    headers['Idempotency-Key'] = params.idempotencyKey;
-  }
-
-  try {
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        from: fromEmail,
-        to: [params.to],
-        reply_to: params.replyTo || 'support.crestflow@gmail.com',
-        subject: params.subject,
-        html: params.html,
-        text: params.text,
-      }),
-    });
-
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error(`[Resend Error] ${res.status}: ${errorText}`);
-      return { success: false, error: errorText, statusCode: res.status };
-    }
-
-    const data = (await res.json()) as { id: string };
-    return { success: true, id: data.id, statusCode: res.status };
-  } catch (err: any) {
-    console.error('[Resend Network Error]', err);
-    return { success: false, error: err.message, statusCode: 599 };
-  }
+  return { success: false, error: 'No active email provider configured', statusCode: 500 };
 }
 
 /**
