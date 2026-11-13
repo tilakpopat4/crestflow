@@ -33,10 +33,14 @@ const NotFoundScreen = lazyWithRetry(() => import('./components/NotFoundScreen')
 const SubscriptionWallPage = lazyWithRetry(() => import('./components/subscription/SubscriptionWallPage'));
 const UserOnboardingModal = lazyWithRetry(() => import('./components/onboarding/UserOnboardingModal'), m => ({ default: m.default || m.UserOnboardingModal }));
 
-import { WorkspaceSkeleton } from './components/skeletons/WorkspaceSkeleton';
-
 const ViewLoadingFallback = () => (
-  <WorkspaceSkeleton statusText="Loading workspace…" />
+  <div className="flex-1 flex flex-col items-center justify-center p-12 min-h-[360px] animate-in fade-in duration-150 select-none">
+    <div className="relative flex items-center justify-center mb-3.5">
+      <div className="w-9 h-9 rounded-full border-2 border-indigo-100 dark:border-indigo-950/60" />
+      <div className="absolute w-9 h-9 rounded-full border-2 border-indigo-600 dark:border-indigo-400 border-t-transparent animate-spin" />
+    </div>
+    <span className="text-xs font-medium text-slate-400 dark:text-slate-500 tracking-wide">Loading workspace...</span>
+  </div>
 );
 
 export type Tab = 'dashboard' | 'clients' | 'work' | 'invoice' | 'reviews' | 'onboarding' | 'admin' | 'profile';
@@ -90,8 +94,8 @@ export default function App() {
 
   if (!authTimeout && (loading || (user && (profilesLoading || subscriptionState.loading || isBlocked === null)))) {
     return (
-      <div className="flex items-center justify-center min-h-screen w-full bg-slate-50 dark:bg-slate-950">
-        <WorkspaceSkeleton statusText="Loading workspace…" />
+      <div className="flex items-center justify-center h-screen w-full bg-slate-50 dark:bg-slate-950">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 dark:border-indigo-400" />
       </div>
     );
   }

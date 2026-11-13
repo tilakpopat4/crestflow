@@ -425,8 +425,8 @@ export default function GoogleDriveUploadModal({
               {isUploading && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                      <span className="size-2 rounded-full bg-indigo-600 motion-safe:animate-pulse inline-block" /> Uploading to Google Drive...
+                    <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                      <Loader2 size={14} className="animate-spin text-indigo-600" /> Uploading to Google Drive...
                     </span>
                     <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">
                       {uploadProgress}%

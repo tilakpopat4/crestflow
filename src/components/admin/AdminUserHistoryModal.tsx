@@ -183,16 +183,9 @@ export default function AdminUserHistoryModal({ user, isOpen, onClose }: AdminUs
         {/* Tab Body Content */}
         <div className="flex-1 overflow-y-auto p-5 text-sm">
           {loading ? (
-            <div className="space-y-3 py-6 px-2" aria-busy="true">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center justify-between gap-4 p-3 rounded-lg border border-neutral-200 dark:border-neutral-800">
-                  <div className="space-y-1.5 flex-1">
-                    <div className="h-3.5 w-32 rounded-md bg-neutral-200 motion-safe:animate-pulse dark:bg-neutral-800" />
-                    <div className="h-3 w-48 rounded-md bg-neutral-100 motion-safe:animate-pulse dark:bg-neutral-800" />
-                  </div>
-                  <div className="h-4 w-16 rounded-md bg-neutral-200 motion-safe:animate-pulse dark:bg-neutral-800" />
-                </div>
-              ))}
+            <div className="flex items-center justify-center py-16 text-slate-400 gap-2 text-xs">
+              <RefreshCw className="w-4 h-4 animate-spin text-indigo-600" />
+              <span>Fetching history and details from Firebase...</span>
             </div>
           ) : error ? (
             <div className="p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-red-600 dark:text-red-400">

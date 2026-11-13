@@ -172,15 +172,8 @@ export default function AdminUserSubscriptions({
 
         <div className="overflow-x-auto">
           {loading ? (
-            <div className="p-4 space-y-3" aria-busy="true">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="flex items-center justify-between gap-4 py-2 border-b border-slate-100 dark:border-slate-800 last:border-b-0">
-                  <div className="h-3.5 w-40 rounded-md bg-neutral-200 motion-safe:animate-pulse dark:bg-neutral-800" />
-                  <div className="h-3.5 w-24 rounded-md bg-neutral-100 motion-safe:animate-pulse dark:bg-neutral-800" />
-                  <div className="h-3.5 w-20 rounded-md bg-neutral-100 motion-safe:animate-pulse dark:bg-neutral-800" />
-                  <div className="h-6 w-16 rounded-full bg-neutral-100 motion-safe:animate-pulse dark:bg-neutral-800" />
-                </div>
-              ))}
+            <div className="p-12 text-center text-slate-500 text-sm">
+              Loading all historical and current users...
             </div>
           ) : filtered.length === 0 ? (
             <div className="p-12 text-center text-slate-500 text-sm">

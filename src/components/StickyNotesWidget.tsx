@@ -222,23 +222,9 @@ export default function StickyNotesWidget({ user, clients }: StickyNotesWidgetPr
 
       {/* Sticky Notes Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" aria-busy="true">
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 space-y-3"
-            >
-              <div className="flex items-center justify-between">
-                <div className="h-3.5 w-24 rounded-md bg-neutral-200 motion-safe:animate-pulse dark:bg-neutral-800" />
-                <div className="size-5 rounded-full bg-neutral-100 motion-safe:animate-pulse dark:bg-neutral-800" />
-              </div>
-              <div className="h-14 w-full rounded-md bg-neutral-100 motion-safe:animate-pulse dark:bg-neutral-800" />
-              <div className="flex items-center justify-between pt-1">
-                <div className="h-3 w-16 rounded-md bg-neutral-200 motion-safe:animate-pulse dark:bg-neutral-800" />
-                <div className="h-3 w-12 rounded-md bg-neutral-100 motion-safe:animate-pulse dark:bg-neutral-800" />
-              </div>
-            </div>
-          ))}
+        <div className="py-12 flex flex-col items-center justify-center gap-2 select-none">
+          <div className="w-5 h-5 rounded-full border-2 border-indigo-600 dark:border-indigo-400 border-t-transparent animate-spin" />
+          <span className="text-xs text-slate-400 dark:text-slate-500">Loading sticky notes...</span>
         </div>
       ) : filteredNotes.length === 0 ? (
         <div className="py-12 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl text-center space-y-2">

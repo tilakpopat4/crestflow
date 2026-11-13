@@ -17,7 +17,6 @@ import ClientDashboard from './ClientDashboard';
 import CsvImportModal from './CsvImportModal';
 import StatusBadge from './StatusBadge';
 import ClientFormModal, { ClientFormData } from './ClientFormModal';
-import { TableSkeletonView } from './skeletons/TableSkeletonView';
 import { SubscriptionState } from '../hooks/useSubscription';
 import { getCurrencySymbol, formatCurrencyAmount } from '../lib/currencyUtils';
 
@@ -372,11 +371,13 @@ export default function ClientsTab({
 
   if (clientsLoading) {
     return (
-      <TableSkeletonView
-        title="Clients"
-        subtitle="Client Directory & Profiles"
-        statusText="Loading clients…"
-      />
+      <div className="flex-1 flex flex-col items-center justify-center p-12 min-h-[360px] select-none">
+        <div className="relative flex items-center justify-center mb-3">
+          <div className="w-8 h-8 rounded-full border-2 border-slate-200 dark:border-slate-800" />
+          <div className="absolute w-8 h-8 rounded-full border-2 border-indigo-600 dark:border-indigo-400 border-t-transparent animate-spin" />
+        </div>
+        <span className="text-xs font-medium text-slate-400 dark:text-slate-500">Loading clients...</span>
+      </div>
     );
   }
 

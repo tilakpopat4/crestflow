@@ -24,10 +24,14 @@ const ContactPage = lazyWithRetry(() => import('../ContactPage'));
 const RefundPolicyPage = lazyWithRetry(() => import('../RefundPolicyPage'));
 const NotFoundScreen = lazyWithRetry(() => import('../NotFoundScreen'));
 
-import { WorkspaceSkeleton } from '../skeletons/WorkspaceSkeleton';
-
 const ViewLoadingFallback = () => (
-  <WorkspaceSkeleton statusText="Loading workspace…" />
+  <div className="flex-1 flex flex-col items-center justify-center p-12 min-h-[360px] animate-in fade-in duration-150 select-none">
+    <div className="relative flex items-center justify-center mb-3.5">
+      <div className="w-9 h-9 rounded-full border-2 border-indigo-100 dark:border-indigo-950/60" />
+      <div className="absolute w-9 h-9 rounded-full border-2 border-indigo-600 dark:border-indigo-400 border-t-transparent animate-spin" />
+    </div>
+    <span className="text-xs font-medium text-slate-400 dark:text-slate-500 tracking-wide">Loading workspace...</span>
+  </div>
 );
 
 interface AppRouterViewProps {

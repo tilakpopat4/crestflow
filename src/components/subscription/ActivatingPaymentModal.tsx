@@ -65,11 +65,7 @@ export const ActivatingPaymentModal: React.FC<ActivatingPaymentModalProps> = ({
       <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 shadow-sm text-center">
         {!isConfirmed ? (
           <div>
-            <div className="space-y-2.5 mb-5 max-w-xs mx-auto" aria-busy="true">
-              <div className="h-4 w-3/4 mx-auto rounded-md bg-neutral-200 motion-safe:animate-pulse dark:bg-neutral-800" />
-              <div className="h-3 w-full mx-auto rounded-md bg-neutral-100 motion-safe:animate-pulse dark:bg-neutral-800" />
-              <div className="h-3 w-2/3 mx-auto rounded-md bg-neutral-100 motion-safe:animate-pulse dark:bg-neutral-800" />
-            </div>
+            <div className="w-8 h-8 mx-auto mb-4 border-2 border-indigo-600 dark:border-indigo-400 border-t-transparent rounded-full animate-spin" />
             <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-2">
               Activating your membership…
             </h3>

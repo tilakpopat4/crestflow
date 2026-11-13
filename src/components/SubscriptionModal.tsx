@@ -271,10 +271,9 @@ export default function SubscriptionModal({
               )}
 
               {step === 'activating' && (
-                <div className="text-center py-10 space-y-4" aria-busy="true">
-                  <div className="space-y-2.5 max-w-xs mx-auto">
-                    <div className="h-4 w-40 mx-auto rounded-md bg-neutral-200 motion-safe:animate-pulse dark:bg-neutral-800" />
-                    <div className="h-3 w-56 mx-auto rounded-md bg-neutral-100 motion-safe:animate-pulse dark:bg-neutral-800" />
+                <div className="text-center py-10 space-y-4">
+                  <div className="relative flex items-center justify-center w-12 h-12 mx-auto">
+                    <RefreshCw className="w-8 h-8 text-indigo-600 dark:text-indigo-400 animate-spin" />
                   </div>
                   <div className="space-y-1">
                     <h3 className="text-base font-bold text-slate-900 dark:text-white">
