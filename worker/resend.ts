@@ -10,107 +10,69 @@ export interface EmailParams {
 }
 
 /**
- * Sends a transactional email using EmailJS (via support.crestflow@gmail.com) with Resend fallback.
+ * Sends a transactional email exclusively using EmailJS (via support.crestflow@gmail.com).
  */
 export async function sendResendEmail(
   env: Env,
   params: EmailParams
 ): Promise<{ success: boolean; id?: string; error?: string; statusCode?: number }> {
-  // 1. Primary Dispatcher: Resend API (Direct high-deliverability transactional delivery)
-  if (env.RESEND_API_KEY) {
-    const fromEmail = env.RESEND_FROM_EMAIL || 'CrestFlow <onboarding@resend.dev>';
-    const headers: Record<string, string> = {
-      Authorization: `Bearer ${env.RESEND_API_KEY}`,
-      'Content-Type': 'application/json',
-    };
-
-    if (params.idempotencyKey) {
-      headers['Idempotency-Key'] = params.idempotencyKey;
-    }
-
-    try {
-      const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          from: fromEmail,
-          to: [params.to],
-          reply_to: params.replyTo || 'support.crestflow@gmail.com',
-          subject: params.subject,
-          html: params.html,
-          text: params.text,
-        }),
-      });
-
-      if (res.ok) {
-        const data = (await res.json()) as { id: string };
-        return { success: true, id: data.id, statusCode: res.status };
-      }
-
-      const errorText = await res.text();
-      console.warn(`[Resend Warning] Status ${res.status}: ${errorText}. Falling back to EmailJS if available.`);
-    } catch (err: any) {
-      console.warn('[Resend Network Error]', err);
-    }
-  }
-
-  // 2. Secondary Fallback: EmailJS API (Direct Google OAuth sending via support.crestflow@gmail.com)
+  // Primary & Exclusive Dispatcher: EmailJS API (Direct Google OAuth via support.crestflow@gmail.com)
   const emailJsServiceId = env.EMAILJS_SERVICE_ID || 'service_u6nm96l';
   const emailJsTemplateId = env.EMAILJS_TEMPLATE_ID || 'template_g3ojhpa';
   const emailJsPublicKey = env.EMAILJS_PUBLIC_KEY || 'MY75lMNsMx8rYRLa4';
   const emailJsPrivateKey = env.EMAILJS_PRIVATE_KEY || 'Ts55PbuNCO6ND4LDZNEfI';
 
-  if (emailJsServiceId && emailJsTemplateId && emailJsPublicKey) {
-    try {
-      const payload = {
-        service_id: emailJsServiceId,
-        template_id: emailJsTemplateId,
-        user_id: emailJsPublicKey,
-        accessToken: emailJsPrivateKey,
-        template_params: {
-          to_email: params.to,
-          email: params.to,
-          to: params.to,
-          recipient: params.to,
-          user_email: params.to,
-          recipient_email: params.to,
-          client_email: params.to,
-          to_name: params.to.split('@')[0],
-          name: 'CrestFlow',
-          from_name: 'CrestFlow Support',
-          subject: params.subject,
-          title: params.subject,
-          time: new Date().toLocaleString('en-IN'),
-          message: params.text || params.html.replace(/<[^>]+>/g, ''),
-          message_html: params.html,
-          message_text: params.text,
-          reply_to: params.replyTo || 'support.crestflow@gmail.com',
-        },
-      };
-
-      const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'origin': env.BASE_URL || 'https://crestflow.app',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (res.ok) {
-        return { success: true, id: `emailjs_${Date.now()}`, statusCode: 200 };
-      }
-
-      const errorText = await res.text();
-      console.warn(`[EmailJS Error] ${res.status}: ${errorText}`);
-      return { success: false, error: `EmailJS_${res.status}: ${errorText}`, statusCode: res.status };
-    } catch (err: any) {
-      console.warn('[EmailJS Network Error]', err);
-      return { success: false, error: err.message, statusCode: 599 };
-    }
+  if (!emailJsServiceId || !emailJsTemplateId || !emailJsPublicKey) {
+    return { success: false, error: 'EmailJS credentials not configured', statusCode: 500 };
   }
 
-  return { success: false, error: 'No active email provider configured', statusCode: 500 };
+  try {
+    const payload = {
+      service_id: emailJsServiceId,
+      template_id: emailJsTemplateId,
+      user_id: emailJsPublicKey,
+      accessToken: emailJsPrivateKey,
+      template_params: {
+        to_email: params.to,
+        email: params.to,
+        to: params.to,
+        recipient: params.to,
+        user_email: params.to,
+        recipient_email: params.to,
+        client_email: params.to,
+        to_name: params.to.split('@')[0],
+        name: 'CrestFlow',
+        from_name: 'CrestFlow Support',
+        subject: params.subject,
+        title: params.subject,
+        time: new Date().toLocaleString('en-IN'),
+        message: params.text || params.html.replace(/<[^>]+>/g, ''),
+        message_html: params.html,
+        message_text: params.text,
+        reply_to: params.replyTo || 'support.crestflow@gmail.com',
+      },
+    };
+
+    const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'origin': env.BASE_URL || 'https://crestflow.app',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (res.ok) {
+      return { success: true, id: `emailjs_${Date.now()}`, statusCode: 200 };
+    }
+
+    const errorText = await res.text();
+    console.warn(`[EmailJS Error] ${res.status}: ${errorText}`);
+    return { success: false, error: `EmailJS_${res.status}: ${errorText}`, statusCode: res.status };
+  } catch (err: any) {
+    console.warn('[EmailJS Network Error]', err);
+    return { success: false, error: err.message, statusCode: 599 };
+  }
 }
 
 /**

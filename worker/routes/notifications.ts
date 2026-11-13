@@ -346,6 +346,6 @@ export async function handleNotifyTestEmail(request: Request, env: Env): Promise
     id: res.id,
     error: res.error,
     recipient: targetEmail,
-    provider: env.RESEND_API_KEY ? 'Resend' : 'EmailJS',
+    provider: 'EmailJS',
   });
 }

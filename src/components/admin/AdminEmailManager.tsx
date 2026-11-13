@@ -117,13 +117,13 @@ export default function AdminEmailManager({ users = [] }: AdminEmailManagerProps
 
         <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs">
           <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            Fallback Service
+            Engine Mode
           </div>
           <div className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
-            Resend API
+            Exclusive
           </div>
           <div className="text-xs text-slate-500 dark:text-slate-400">
-            Standby Failover Delivery
+            EmailJS Direct Routing
           </div>
         </div>
 
