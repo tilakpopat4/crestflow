@@ -159,16 +159,16 @@ export default function AdminEmailHistoryTable({ refreshSignal }: { refreshSigna
             />
           </div>
 
-          <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg text-xs">
+          <div className="flex items-center bg-[#181818] p-1 rounded-lg text-xs font-medium border border-[#2a2a2a]">
             {(['all', 'sent', 'failed', 'queued'] as const).map((s) => (
               <button
                 key={s}
                 type="button"
                 onClick={() => setStatusFilter(s)}
-                className={`px-2.5 py-1 rounded-md capitalize font-medium cursor-pointer transition-colors ${
+                className={`px-3 py-1 rounded-md capitalize font-medium cursor-pointer transition-colors duration-120 border-0 text-xs ${
                   statusFilter === s
-                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-2xs'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+                    ? 'bg-[#282828] text-white font-semibold shadow-xs'
+                    : 'text-slate-400 hover:text-white'
                 }`}
               >
                 {s}
