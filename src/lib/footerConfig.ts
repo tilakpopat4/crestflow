@@ -30,7 +30,7 @@ export interface FooterConfig {
 export const DEFAULT_FOOTER_CONFIG: FooterConfig = {
   brandName: 'CrestFlow',
   tagline: 'Freelancing client manager',
-  copyrightText: '© 2026 CrestFlow Inc.',
+  copyrightText: '© 2026 CrestFlow. Built in India by Tilak Popat.',
   versionText: '1.1.0',
   primaryLinks: [
     { id: 'prod', name: 'Product', url: '/', route: 'dashboard' },

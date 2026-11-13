@@ -85,6 +85,64 @@
   }
 }
 
+/* Sign-in / Landing screen styling */
+.font-display {
+  font-family: 'Space Grotesk', 'Plus Jakarta Sans', system-ui, sans-serif;
+  letter-spacing: -0.035em;
+}
+
+.text-accent-indigo {
+  color: #6366f1 !important;
+}
+
+.bg-accent-indigo {
+  background-color: #6366f1 !important;
+}
+
+.bg-accent-indigo-hover:hover {
+  background-color: #4f46e5 !important;
+}
+
+.border-accent-indigo {
+  border-color: #6366f1 !important;
+}
+
+.landing-grid-pattern {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.hero-border-beam {
+  position: relative;
+}
+
+.hero-border-beam::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.4), transparent);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  background-size: 200% 100%;
+  animation: beamMove 4s linear infinite;
+}
+
+@keyframes beamMove {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-border-beam::after {
+    animation: none !important;
+    background: transparent !important;
+  }
+}
+
 /* Eliminate white background anywhere across the application */
 body,
 main,
