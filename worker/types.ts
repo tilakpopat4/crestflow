@@ -43,6 +43,12 @@ export interface Env {
   EMAILJS_TEMPLATE_ID?: string;
   EMAILJS_PUBLIC_KEY?: string;
   EMAILJS_PRIVATE_KEY?: string;
+
+  // Direct Gmail REST API Configuration (support.crestflow@gmail.com)
+  GMAIL_CLIENT_ID?: string;
+  GMAIL_CLIENT_SECRET?: string;
+  GMAIL_REFRESH_TOKEN?: string;
+  GMAIL_USER_EMAIL?: string;
 }
 
 export interface TrialLedgerEntry {

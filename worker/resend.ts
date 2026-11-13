@@ -1,4 +1,7 @@
 import { Env } from './types';
+import { parseServiceAccount } from './firestore';
+import { sendGmailDirect } from './gmail';
+import { getAuthoritativeGmailConfig } from './routes/adminGmailRoutes';
 
 export interface EmailParams {
   to: string;
@@ -10,20 +13,56 @@ export interface EmailParams {
 }
 
 /**
- * Sends a transactional email exclusively using EmailJS (via support.crestflow@gmail.com).
+ * Sends a transactional email using Direct Gmail API (support.crestflow@gmail.com),
+ * falling back gracefully to secondary dispatchers if direct Gmail is not yet configured.
  */
 export async function sendResendEmail(
   env: Env,
   params: EmailParams
 ): Promise<{ success: boolean; id?: string; error?: string; statusCode?: number }> {
-  // Primary & Exclusive Dispatcher: EmailJS API (Direct Google OAuth via support.crestflow@gmail.com)
+  // 1. Primary Dispatcher: Direct Google Gmail API
+  try {
+    let gmailConfig = {
+      clientId: env.GMAIL_CLIENT_ID,
+      clientSecret: env.GMAIL_CLIENT_SECRET,
+      refreshToken: env.GMAIL_REFRESH_TOKEN,
+      senderEmail: env.GMAIL_USER_EMAIL || 'support.crestflow@gmail.com',
+    };
+
+    if (env.FIREBASE_SERVICE_ACCOUNT) {
+      try {
+        const creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
+        gmailConfig = await getAuthoritativeGmailConfig(creds, env);
+      } catch {}
+    }
+
+    if (gmailConfig.clientId && gmailConfig.clientSecret && gmailConfig.refreshToken) {
+      const gmailResult = await sendGmailDirect(gmailConfig, {
+        to: params.to,
+        subject: params.subject,
+        html: params.html,
+        text: params.text,
+        replyTo: params.replyTo || 'support.crestflow@gmail.com',
+        senderName: 'CrestFlow',
+      });
+
+      if (gmailResult.success) {
+        return gmailResult;
+      }
+      console.warn('[Direct Gmail API] Dispatched with fallback due to:', gmailResult.error);
+    }
+  } catch (gmailErr: any) {
+    console.warn('[Direct Gmail API] Exception:', gmailErr.message);
+  }
+
+  // 2. Secondary Dispatcher: EmailJS API (Direct Google OAuth via support.crestflow@gmail.com)
   const emailJsServiceId = env.EMAILJS_SERVICE_ID || 'service_u6nm96l';
   const emailJsTemplateId = env.EMAILJS_TEMPLATE_ID || 'template_g3ojhpa';
   const emailJsPublicKey = env.EMAILJS_PUBLIC_KEY || 'MY75lMNsMx8rYRLa4';
   const emailJsPrivateKey = env.EMAILJS_PRIVATE_KEY || 'Ts55PbuNCO6ND4LDZNEfI';
 
   if (!emailJsServiceId || !emailJsTemplateId || !emailJsPublicKey) {
-    return { success: false, error: 'EmailJS credentials not configured', statusCode: 500 };
+    return { success: false, error: 'Email service credentials not configured', statusCode: 500 };
   }
 
   try {

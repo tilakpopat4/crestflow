@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Mail, Search, RefreshCw } from 'lucide-react';
+import { Mail, Search, RefreshCw, Trash2 } from 'lucide-react';
 import { auth } from '../../firebase';
 import AdminEmailDetailModal from './AdminEmailDetailModal';
 import AdminEmailHistoryRow from './AdminEmailHistoryRow';
@@ -32,6 +32,29 @@ export default function AdminEmailHistoryTable({ refreshSignal }: { refreshSigna
   const [selectedEmail, setSelectedEmail] = useState<EmailRecord | null>(null);
   const [retryingJobId, setRetryingJobId] = useState<string | null>(null);
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
+  const [isClearing, setIsClearing] = useState(false);
+
+  const handleClearHistory = async () => {
+    if (!window.confirm('Are you sure you want to clear all email history records?')) return;
+    setIsClearing(true);
+    setActionFeedback(null);
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) throw new Error('Authentication required');
+      const res = await fetch('/api/admin/clear-email-history', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) throw new Error(data.error || 'Failed to clear history');
+      setActionFeedback(data.message || 'History cleared');
+      await fetchEmailHistory();
+    } catch (err: any) {
+      setActionFeedback(`Clear error: ${err.message}`);
+    } finally {
+      setIsClearing(false);
+    }
+  };
 
   const fetchEmailHistory = async () => {
     setLoading(true);
@@ -95,14 +118,9 @@ export default function AdminEmailHistoryTable({ refreshSignal }: { refreshSigna
 
   const filteredEmails = useMemo(() => {
     return emails.filter((item) => {
-      const matchesSearch =
-        !search.trim() ||
-        item.recipient.toLowerCase().includes(search.toLowerCase()) ||
-        (item.subject && item.subject.toLowerCase().includes(search.toLowerCase())) ||
-        item.jobId.toLowerCase().includes(search.toLowerCase());
-
+      const q = search.trim().toLowerCase();
+      const matchesSearch = !q || item.recipient.toLowerCase().includes(q) || (item.subject && item.subject.toLowerCase().includes(q)) || item.jobId.toLowerCase().includes(q);
       if (!matchesSearch) return false;
-
       if (statusFilter === 'all') return true;
       if (statusFilter === 'sent') return item.status === 'sent';
       if (statusFilter === 'failed') return item.status === 'failed' || item.status === 'retry_pending';
@@ -185,6 +203,19 @@ export default function AdminEmailHistoryTable({ refreshSignal }: { refreshSigna
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
+
+          {emails.length > 0 && (
+            <button
+              type="button"
+              onClick={handleClearHistory}
+              disabled={isClearing}
+              className="px-2.5 py-1.5 bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 text-xs font-medium rounded-lg cursor-pointer transition-colors flex items-center gap-1.5 border border-red-200 dark:border-red-900/60"
+              title="Clear all previous records"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>{isClearing ? 'Clearing...' : 'Clear History'}</span>
+            </button>
+          )}
         </div>
       </div>
 

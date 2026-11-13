@@ -15,6 +15,7 @@ import {
 import { handleAdminGrantSubscription, handleAdminRevokeSubscription } from './routes/adminSubscriptions';
 import { handleGetAdminEmailHistory, handleRetryAdminEmail } from './routes/adminEmailHistory';
 import { handleAdminSendCampaign } from './routes/adminCampaignRoutes';
+import { handleGetGmailConfig, handleSaveGmailConfig, handleClearAdminEmailHistory } from './routes/adminGmailRoutes';
 import { handleSeoRoutes } from './routes/seo';
 import { processDueEmailJobs } from './emailDispatcher';
 
@@ -235,6 +236,17 @@ export default {
       // 16. POST /api/admin/send-campaign (Promotional & Bulk Mail Planner)
       if (url.pathname === '/api/admin/send-campaign' && request.method === 'POST') {
         return await handleAdminSendCampaign(request, env);
+      }
+
+      // 17. Direct Gmail API Configuration & Cleanup Routes
+      if (url.pathname === '/api/admin/gmail/config' && request.method === 'GET') {
+        return await handleGetGmailConfig(request, env);
+      }
+      if (url.pathname === '/api/admin/gmail/config' && request.method === 'POST') {
+        return await handleSaveGmailConfig(request, env);
+      }
+      if (url.pathname === '/api/admin/clear-email-history' && request.method === 'POST') {
+        return await handleClearAdminEmailHistory(request, env);
       }
 
       return jsonResponse({ error: 'Endpoint not found' }, 404);
