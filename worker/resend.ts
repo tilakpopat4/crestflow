@@ -73,6 +73,8 @@ export async function sendResendEmail(
           to: params.to,
           recipient: params.to,
           user_email: params.to,
+          recipient_email: params.to,
+          client_email: params.to,
           to_name: params.to.split('@')[0],
           from_name: 'CrestFlow Support',
           subject: params.subject,
