@@ -62,7 +62,11 @@ export function wrapEmailHtml(title: string, contentHtml: string): string {
     <div class="brand">CrestFlow</div>
     ${contentHtml}
     <div class="footer">
-      This is an automated operational notification from CrestFlow. Need help? Contact our team at <a href="mailto:support.crestflow@gmail.com" style="color: #64748B;">support.crestflow@gmail.com</a>.
+      CrestFlow Workspace &middot; Client Management &amp; Invoicing<br>
+      You received this operational email because of your CrestFlow account.
+      <br>
+      <a href="mailto:support.crestflow@gmail.com?subject=Unsubscribe" style="color: #64748B; text-decoration: underline;">Unsubscribe</a> &middot;
+      <a href="mailto:support.crestflow@gmail.com" style="color: #64748B; text-decoration: underline;">Contact Support</a>
     </div>
   </div>
 </body>

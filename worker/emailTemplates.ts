@@ -75,7 +75,7 @@ export function renderContactAutoReplyTemplate(data: {
   const msg = data.originalMessage ? escapeHtml(data.originalMessage).replace(/\n/g, '<br>') : '';
 
   const emailSubject = `We received your message — Our team will contact you within 48 hours | CrestFlow`;
-  const text = `Hi ${data.senderName},\n\nThank you for getting in touch with CrestFlow.\n\nWe have received your message regarding "${data.subject}". Our team will contact you within 48 hours.\n\n${data.originalMessage ? `Your inquiry:\n${data.originalMessage}\n\n` : ''}If you have any urgent follow-up details, please reply directly to this email at support.crestflow@gmail.com.\n\nBest regards,\n— The CrestFlow Support Team`;
+  const text = `Hi ${data.senderName},\n\nThank you for getting in touch with CrestFlow.\n\nWe have received your message regarding "${data.subject}". Our team will contact you within 48 hours.\n\n${data.originalMessage ? `Your inquiry:\n${data.originalMessage}\n\n` : ''}If you have any follow-up details, please reply directly to this email at support.crestflow@gmail.com.\n\nBest regards,\n— The CrestFlow Support Team`;
 
   const html = wrapEmailHtml(
     emailSubject,

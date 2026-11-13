@@ -125,6 +125,8 @@ export async function sendGmailDirect(
       `Date: ${dateHeader}`,
       `Message-ID: ${messageId}`,
       `Reply-To: ${params.replyTo || senderEmail}`,
+      `List-Unsubscribe: <mailto:${params.replyTo || senderEmail}?subject=Unsubscribe>`,
+      `List-Unsubscribe-Post: List-Unsubscribe=One-Click`,
       'MIME-Version: 1.0',
       `Content-Type: multipart/alternative; boundary="${boundary}"`,
       '',

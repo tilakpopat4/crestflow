@@ -219,7 +219,7 @@ export async function sendChargeFailedEmail(
 ): Promise<{ success: boolean; id?: string; error?: string }> {
   const baseUrl = env.BASE_URL || 'https://crestflow.app';
   const greeting = name ? `Hi ${name},` : 'Hello,';
-  const subject = 'Action Required: Payment failed for your CrestFlow subscription';
+  const subject = 'Payment failed for your CrestFlow subscription';
   const text = `${greeting}\n\nWe were unable to process the recurring payment for your CrestFlow subscription.\n\nA 3-day grace period has been applied to your account. Your write access (creating invoices, updating client delivery dates) remains active for the next 3 days while payment is retried.\n\nPlease update your payment details promptly to avoid your account switching to read-only mode.\n\nUpdate Payment Method: ${baseUrl}/billing\n\n— The CrestFlow Team`;
 
   const html = wrapEmailHtml(

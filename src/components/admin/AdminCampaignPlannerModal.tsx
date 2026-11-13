@@ -76,7 +76,7 @@ export default function AdminCampaignPlannerModal({
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
-          subject: `[TEST] ${subject}`,
+          subject: subject,
           headline,
           message,
           bannerText: bannerText || undefined,
