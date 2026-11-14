@@ -53,4 +53,27 @@ describe('Invoice Printing & Offscreen PDF Generation Suite', () => {
       'onclone must normalize coordinates inside html2canvas cloned iframe'
     );
   });
+
+  test('3. invoice table has compact professional spacing without vertical row stretching', () => {
+    // Verify table does not have height: 100% forcing vertical stretching
+    assert.doesNotMatch(
+      invoiceRendererSource,
+      /<table\s+style="[^"]*height:\s*100%/,
+      'Invoice table must not have height: 100% which causes rows to stretch vertically across the page'
+    );
+
+    // Verify .pdf-page does not use justify-content: space-between
+    assert.doesNotMatch(
+      invoiceRendererSource,
+      /class="pdf-page"[^>]*justify-content:\s*space-between/,
+      '.pdf-page container must not use justify-content: space-between'
+    );
+
+    // Verify single page limit accommodates up to 12 items before pagination
+    assert.match(
+      invoiceRendererSource,
+      /const\s+singlePageLimit\s*=\s*isWorkSummary\s*\?\s*16\s*:\s*12/,
+      'singlePageLimit must accommodate up to 12 items on a single page'
+    );
+  });
 });

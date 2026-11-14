@@ -75,16 +75,12 @@ export function renderDocumentHtml(params: {
                 : [{ id: '1', title: reels[0]?.title || 'Monthly Video Editing & Creative Retainer', quantity: 1, rate: grandTotal, date: params.invoice.date }]))
         : (reels.length > 0 ? reels : [{ id: '1', title: 'Video Editing / Content Creation Services', quantity: 1, rate: grandTotal, date: params.invoice.date }]));
 
-  const singlePageLimit = isWorkSummary ? 14 : 10;
+  const singlePageLimit = isWorkSummary ? 16 : 12;
   const pagesData: any[][] = [];
   if (allItems.length <= singlePageLimit) {
     pagesData.push(allItems);
-  } else if (allItems.length <= 20) {
-    const page1Count = Math.ceil(allItems.length / 2);
-    pagesData.push(allItems.slice(0, page1Count));
-    pagesData.push(allItems.slice(page1Count));
   } else {
-    const page1Limit = isWorkSummary ? 15 : 11;
+    const page1Limit = isWorkSummary ? 16 : 12;
     const subsequentLimit = isWorkSummary ? 18 : 14;
     pagesData.push(allItems.slice(0, page1Limit));
     let remaining = allItems.slice(page1Limit);
@@ -183,80 +179,14 @@ export function renderDocumentHtml(params: {
     // Table rows
     const count = pageItems.length;
 
-    // Dynamically calculate sizing based on number of items so work logs cover most of the page with minimal empty gap
-    let rowPaddingY = 10;
-    let titleFontSize = '12.5px';
-    let titleLineHeight = '1.3';
-    let subtitleFontSize = '11px';
-    let subtitleMarginTop = '3px';
-    let cellFontSize = '12px';
-    let numberFontSize = '11.5px';
-
-    if (count === 1) {
-      rowPaddingY = 38;
-      titleFontSize = '15.5px';
-      titleLineHeight = '1.45';
-      subtitleFontSize = '13px';
-      subtitleMarginTop = '6px';
-      cellFontSize = '14px';
-      numberFontSize = '13px';
-    } else if (count === 2) {
-      rowPaddingY = 28;
-      titleFontSize = '14.5px';
-      titleLineHeight = '1.4';
-      subtitleFontSize = '12px';
-      subtitleMarginTop = '5px';
-      cellFontSize = '13.5px';
-      numberFontSize = '12.5px';
-    } else if (count === 3) {
-      rowPaddingY = 22;
-      titleFontSize = '14px';
-      titleLineHeight = '1.35';
-      subtitleFontSize = '11.5px';
-      subtitleMarginTop = '4px';
-      cellFontSize = '13px';
-      numberFontSize = '12px';
-    } else if (count === 4) {
-      rowPaddingY = 18;
-      titleFontSize = '13.5px';
-      titleLineHeight = '1.35';
-      subtitleFontSize = '11px';
-      subtitleMarginTop = '3px';
-      cellFontSize = '12.5px';
-      numberFontSize = '11.5px';
-    } else if (count <= 6) {
-      rowPaddingY = 14;
-      titleFontSize = '13px';
-      titleLineHeight = '1.3';
-      subtitleFontSize = '11px';
-      subtitleMarginTop = '3px';
-      cellFontSize = '12px';
-      numberFontSize = '11.5px';
-    } else if (count <= 8) {
-      rowPaddingY = 11;
-      titleFontSize = '12.5px';
-      titleLineHeight = '1.3';
-      subtitleFontSize = '10.5px';
-      subtitleMarginTop = '2px';
-      cellFontSize = '12px';
-      numberFontSize = '11px';
-    } else if (count <= 11) {
-      rowPaddingY = 8;
-      titleFontSize = '12px';
-      titleLineHeight = '1.25';
-      subtitleFontSize = '10px';
-      subtitleMarginTop = '2px';
-      cellFontSize = '11.5px';
-      numberFontSize = '10.5px';
-    } else {
-      rowPaddingY = 6;
-      titleFontSize = '11px';
-      titleLineHeight = '1.2';
-      subtitleFontSize = '9.5px';
-      subtitleMarginTop = '1px';
-      cellFontSize = '11px';
-      numberFontSize = '10px';
-    }
+    // Consistent, professional compact row padding and typography (prevents awkward stretching)
+    const rowPaddingY = count <= 6 ? 9 : (count <= 10 ? 8 : 6.5);
+    const titleFontSize = count <= 8 ? '13px' : '12px';
+    const titleLineHeight = '1.3';
+    const subtitleFontSize = count <= 8 ? '11px' : '10px';
+    const subtitleMarginTop = '2px';
+    const cellFontSize = count <= 8 ? '12px' : '11.5px';
+    const numberFontSize = '11px';
 
     let tableRowsHtml = '';
     if (isWorkSummary) {
@@ -324,7 +254,7 @@ export function renderDocumentHtml(params: {
 
     // Table Header HTML
     const tableHeaderHtml = isWorkSummary ? `
-      <table style="width: 100%; height: 100%; border-collapse: collapse; margin-top: 4px; margin-bottom: 6px; box-sizing: border-box;">
+      <table style="width: 100%; border-collapse: collapse; margin-top: 4px; margin-bottom: 6px; box-sizing: border-box;">
         <thead>
           <tr style="border-top: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; background: #f8fafc; height: 32px;">
             <th style="padding: 7px 8px; font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #475569; text-align: left; width: 34px;">#</th>
@@ -337,7 +267,7 @@ export function renderDocumentHtml(params: {
         </tbody>
       </table>
     ` : `
-      <table style="width: 100%; height: 100%; border-collapse: collapse; margin-top: 4px; margin-bottom: 6px; box-sizing: border-box;">
+      <table style="width: 100%; border-collapse: collapse; margin-top: 4px; margin-bottom: 6px; box-sizing: border-box;">
         <thead>
           <tr style="border-top: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; background: #f8fafc; height: 32px;">
             <th style="padding: 7px 8px; font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #475569; text-align: left; width: 34px;">#</th>
@@ -467,7 +397,7 @@ export function renderDocumentHtml(params: {
 
     // Centered Footer
     const pageFooterHtml = `
-      <div style="text-align: center; margin-top: auto; padding-top: 18px;">
+      <div style="text-align: center; padding-top: 8px;">
         <div style="font-size: 11px; color: #64748b; margin-bottom: 2px;">
           Thank you for your business.
         </div>
@@ -478,20 +408,26 @@ export function renderDocumentHtml(params: {
     `;
 
     return `
-      <div class="pdf-page" style="width: 794px; min-height: 1123px; max-height: 1123px; padding: 38px 46px 26px 46px; background: #ffffff; color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; position: relative;">
+      <div class="pdf-page" style="width: 794px; min-height: 1123px; max-height: 1123px; padding: 38px 46px 26px 46px; background: #ffffff; color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden; position: relative;">
         <!-- Top Section -->
         <div style="width: 100%; flex-shrink: 0;">
           ${pageHeaderHtml}
         </div>
 
-        <!-- Work Log Section (Fills majority of the page with minimal empty gap) -->
-        <div style="width: 100%; flex: 1; display: flex; flex-direction: column; min-height: 0; margin-top: 4px; margin-bottom: 8px;">
+        <!-- Work Log Section -->
+        <div style="width: 100%; margin-top: 4px; margin-bottom: 6px;">
           ${tableHeaderHtml}
         </div>
 
-        <!-- Bottom & Footer Content -->
+        <!-- Bottom & Payment Section -->
+        ${bottomSectionHtml ? `
+          <div style="width: 100%; flex-shrink: 0; margin-top: 10px;">
+            ${bottomSectionHtml}
+          </div>
+        ` : ''}
+
+        <!-- Centered Footer (Pinned cleanly to bottom) -->
         <div style="width: 100%; flex-shrink: 0; margin-top: auto;">
-          ${bottomSectionHtml}
           ${pageFooterHtml}
         </div>
       </div>
@@ -556,7 +492,7 @@ export function printDocumentHtml(htmlContent: string, documentTitle: string = '
             background: #ffffff;
             display: flex !important;
             flex-direction: column !important;
-            justify-content: space-between !important;
+            justify-content: flex-start !important;
             overflow: hidden !important;
           }
           .pdf-page:last-child {
