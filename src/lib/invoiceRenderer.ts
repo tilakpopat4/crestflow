@@ -572,7 +572,16 @@ export function printDocumentHtml(htmlContent: string, documentTitle: string = '
   `);
   doc.close();
 
+  let hasPrinted = false;
+  let fallbackTimer: ReturnType<typeof setTimeout> | null = null;
+
   const triggerPrint = () => {
+    if (hasPrinted) return;
+    hasPrinted = true;
+    if (fallbackTimer) {
+      clearTimeout(fallbackTimer);
+      fallbackTimer = null;
+    }
     try {
       printIframe.contentWindow?.focus();
       printIframe.contentWindow?.print();
@@ -589,13 +598,17 @@ export function printDocumentHtml(htmlContent: string, documentTitle: string = '
 
   const images = Array.from(doc.images || []);
   if (images.length === 0) {
-    setTimeout(triggerPrint, 350);
+    fallbackTimer = setTimeout(triggerPrint, 350);
   } else {
     let loaded = 0;
     const checkAllLoaded = () => {
       loaded++;
       if (loaded >= images.length) {
-        setTimeout(triggerPrint, 200);
+        if (fallbackTimer) {
+          clearTimeout(fallbackTimer);
+          fallbackTimer = null;
+        }
+        setTimeout(triggerPrint, 150);
       }
     };
     images.forEach(img => {
@@ -606,7 +619,8 @@ export function printDocumentHtml(htmlContent: string, documentTitle: string = '
         img.onerror = checkAllLoaded;
       }
     });
-    setTimeout(triggerPrint, 1500);
+    // Fallback timer in case an external image fails to trigger onload/onerror
+    fallbackTimer = setTimeout(triggerPrint, 1500);
   }
 }
 
@@ -622,10 +636,11 @@ export async function generateOffscreenPdfBlob(params: {
   deliverables?: InvoiceDeliverable[];
 }): Promise<Blob> {
   const container = document.createElement('div');
+  container.setAttribute('data-offscreen-pdf-container', 'true');
   container.style.position = 'fixed';
-  container.style.left = '0px';
+  container.style.left = '-99999px';
   container.style.top = '0px';
-  container.style.zIndex = '999999';
+  container.style.zIndex = '-99999';
   container.style.width = '794px';
   container.style.backgroundColor = '#ffffff';
   container.style.color = '#0f172a';
@@ -788,6 +803,17 @@ export async function generateOffscreenPdfBlob(params: {
         height: 1123,
         logging: false,
         onclone: (clonedDoc: Document, clonedElement: HTMLElement) => {
+          // Normalize position within the cloned document to guarantee zero coordinate clipping
+          const clonedContainer = (clonedElement.closest('[data-offscreen-pdf-container]') as HTMLElement) || clonedElement.parentElement;
+          if (clonedContainer) {
+            clonedContainer.style.position = 'static';
+            clonedContainer.style.left = '0px';
+            clonedContainer.style.top = '0px';
+          }
+          clonedElement.style.position = 'relative';
+          clonedElement.style.left = '0px';
+          clonedElement.style.top = '0px';
+
           patchClonedDocumentStylesheets(clonedDoc);
           preprocessElementStylesForPdf(clonedElement);
         }
