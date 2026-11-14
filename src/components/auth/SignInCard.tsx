@@ -19,18 +19,18 @@ export const SignInCard: React.FC<SignInCardProps> = ({
   onSupportingNavigate,
 }) => {
   return (
-    <div className="w-full max-w-md mx-auto">
-      <div className="bg-[#1c1c1c]/90 backdrop-blur-md p-6 sm:p-8 rounded-2xl shadow-2xl border border-white/10 text-center transition-all duration-150 focus-within:border-accent-indigo focus-within:ring-1 focus-within:ring-accent-indigo">
+    <div className="w-full max-w-[390px] mx-auto">
+      <div className="bg-[#181818] border border-[#2b2b2b] p-6 sm:p-7 rounded-2xl shadow-2xl text-center">
         {/* Brand Header */}
-        <div className="flex items-center justify-center gap-2.5 mb-5">
-          <Logo className="w-10 h-10 shadow-xs" />
-          <span className="text-xl font-bold text-white tracking-tight">CrestFlow</span>
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <Logo className="w-7 h-7" />
+          <span className="text-base font-bold text-white tracking-tight">CrestFlow</span>
         </div>
 
-        <h2 className="text-xl font-bold text-white mb-1.5">
+        <h2 className="text-lg sm:text-xl font-bold text-white mb-1.5">
           {isAdminRoute ? 'Admin Database Portal' : 'Welcome to CrestFlow'}
         </h2>
-        <p className="text-slate-400 mb-6 text-xs sm:text-sm leading-relaxed">
+        <p className="text-slate-400 mb-6 text-xs leading-relaxed max-w-[280px] mx-auto">
           {isAdminRoute
             ? 'Sign in with your authorized Google account to load the Admin console.'
             : 'Sign in to access your dashboard, automated invoicing, and client portals.'}
@@ -41,7 +41,7 @@ export const SignInCard: React.FC<SignInCardProps> = ({
           type="button"
           onClick={onLogin}
           disabled={isSigningIn}
-          className="w-full flex items-center justify-center gap-3 bg-accent-indigo hover:bg-accent-indigo-hover disabled:opacity-50 text-white py-3 px-4 rounded-xl font-semibold text-sm transition-all duration-150 cursor-pointer disabled:cursor-not-allowed shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1c1c1c] focus-visible:ring-indigo-400"
+          className="w-full flex items-center justify-center gap-2.5 bg-[#5468ff] hover:bg-[#4355e8] disabled:opacity-50 text-white py-2.5 px-4 rounded-xl font-medium text-xs sm:text-sm transition-colors cursor-pointer disabled:cursor-not-allowed shadow-sm border-none outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#181818] focus-visible:ring-indigo-400"
         >
           {isSigningIn ? (
             <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
@@ -70,10 +70,10 @@ export const SignInCard: React.FC<SignInCardProps> = ({
         )}
 
         {/* Terms, Privacy & Trust Disclosures */}
-        <div className="mt-6 pt-4 border-t border-[#2a2a2a] text-center space-y-2">
+        <div className="mt-6 pt-4 text-center space-y-1.5">
           {!isAdminRoute && (
-            <p className="text-[11px] font-medium text-slate-400">
-              Start with 7 days full access for ₹1 · Cancel anytime
+            <p className="text-[11px] text-slate-400 font-normal">
+              Start with 7 days full access for ₹1 • Cancel anytime
             </p>
           )}
 
@@ -85,7 +85,7 @@ export const SignInCard: React.FC<SignInCardProps> = ({
                 e.preventDefault();
                 onSupportingNavigate('terms');
               }}
-              className="text-slate-400 hover:text-white underline"
+              className="text-slate-400 hover:text-white underline underline-offset-2"
             >
               Terms of Service
             </a>{' '}
@@ -96,14 +96,14 @@ export const SignInCard: React.FC<SignInCardProps> = ({
                 e.preventDefault();
                 onSupportingNavigate('privacy');
               }}
-              className="text-slate-400 hover:text-white underline"
+              className="text-slate-400 hover:text-white underline underline-offset-2"
             >
               Privacy Policy
             </a>
             .
           </p>
 
-          <p className="text-[11px] text-slate-500 pt-1">
+          <p className="text-[11px] text-slate-500 pt-0.5">
             Questions?{' '}
             <a
               href="/contact"
@@ -111,7 +111,7 @@ export const SignInCard: React.FC<SignInCardProps> = ({
                 e.preventDefault();
                 onSupportingNavigate('contact');
               }}
-              className="text-slate-400 hover:text-white underline"
+              className="text-slate-400 hover:text-white underline underline-offset-2"
             >
               Contact Support
             </a>

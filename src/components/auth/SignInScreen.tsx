@@ -1,10 +1,8 @@
 import React from 'react';
 import { motion, useReducedMotion } from 'motion/react';
-import { TrustSignalsBar } from './TrustSignalsBar';
-import { HeroProductMock } from './HeroProductMock';
-import { BentoFeaturesGrid } from './BentoFeaturesGrid';
 import { SignInCard } from './SignInCard';
-import Footer from '../Footer';
+import { WorkflowIllustration } from './WorkflowIllustration';
+import { Instagram, Github, Linkedin, Youtube } from 'lucide-react';
 
 interface SignInScreenProps {
   isAdminRoute: boolean;
@@ -14,9 +12,11 @@ interface SignInScreenProps {
 }
 
 /**
- * SignInScreen provides the editorial studio dark landing view for CrestFlow.
- * Presents a focused headline, truthful trust signals, an interactive product
- * preview, bento feature tiles, and a glass-style authentication card.
+ * SignInScreen renders the exact landing / sign-in screen:
+ * - Moody studio grey radial vignette (lighter grey center, dark charcoal/black corners)
+ * - Left column: Italic bold "Invoice. Scan. Get Paid." heading, subtext, and workflow diagram
+ * - Right column: Elevated dark SignInCard
+ * - Bottom bar: Version copyright & social media links
  */
 export const SignInScreen: React.FC<SignInScreenProps> = ({
   isAdminRoute,
@@ -26,106 +26,101 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
 }) => {
   const shouldReduceMotion = useReducedMotion();
 
-  // If admin route, display ONLY the focused sign-in card without marketing hero
-  if (isAdminRoute) {
-    return (
-      <div className="min-h-screen w-full flex flex-col justify-between font-sans relative overflow-x-hidden selection:bg-[#333333] selection:text-white bg-[#0f0f0f] text-slate-100">
-        <div className="absolute inset-0 landing-grid-pattern pointer-events-none opacity-40" />
-        <main className="flex-1 flex items-center justify-center p-4 sm:p-6 relative z-10 max-w-md mx-auto w-full">
-          <SignInCard
-            isAdminRoute={isAdminRoute}
-            isSigningIn={isSigningIn}
-            onLogin={onLogin}
-            onSupportingNavigate={onSupportingNavigate}
-          />
-        </main>
-        <Footer variant="minimal" transparent={true} onNavigate={onSupportingNavigate} />
-      </div>
-    );
-  }
-
-  const containerVariants = {
-    hidden: { opacity: shouldReduceMotion ? 1 : 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: shouldReduceMotion ? 0 : 0.08,
-        duration: shouldReduceMotion ? 0 : 0.35,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: shouldReduceMotion ? 1 : 0, y: shouldReduceMotion ? 0 : 12 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: shouldReduceMotion ? 0 : 0.35, ease: 'easeOut' },
-    },
-  };
-
   return (
-    <div className="min-h-screen w-full flex flex-col justify-between font-sans relative overflow-x-hidden selection:bg-[#333333] selection:text-white bg-[#0f0f0f] text-slate-100">
-      {/* Background Grid & Subtle Ambient Indigo Glow */}
-      <div className="absolute inset-0 landing-grid-pattern pointer-events-none opacity-40" />
-      <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-[420px] pointer-events-none"
-        style={{
-          background: 'radial-gradient(ellipse at 50% 0%, rgba(99, 102, 241, 0.12), transparent 70%)',
-        }}
-        aria-hidden="true"
-      />
-
-      {/* Main Content Area */}
-      <main className="flex-1 flex items-center justify-center px-4 py-8 sm:px-6 sm:py-12 lg:px-8 lg:py-16 relative z-10 max-w-7xl mx-auto w-full">
+    <div
+      className="min-h-screen w-full flex flex-col justify-between font-sans relative overflow-x-hidden select-none text-slate-100"
+      style={{
+        background: 'radial-gradient(ellipse 90% 90% at 50% 48%, #2e2e2e 0%, #1c1c1c 55%, #0e0e0e 100%)',
+      }}
+    >
+      {/* Main Hero & Placement Section */}
+      <main className="flex-1 flex items-center justify-center px-6 py-8 sm:px-10 lg:px-16 relative z-10 max-w-7xl mx-auto w-full">
         <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start w-full"
+          initial={{ opacity: shouldReduceMotion ? 1 : 0, y: shouldReduceMotion ? 0 : 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.3 }}
+          className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center w-full"
         >
-          {/* Left Column on Desktop / Flow on Mobile */}
-          <div className="lg:col-span-7 space-y-8 flex flex-col">
-            <motion.div variants={itemVariants}>
-              <TrustSignalsBar />
-            </motion.div>
-
-            <motion.div variants={itemVariants}>
-              <HeroProductMock />
-            </motion.div>
-
-            {/* Mobile-only Sign-In Card: placed right below hero so mobile users don't have to scroll through features */}
-            <div className="block lg:hidden pt-2">
-              <SignInCard
-                isAdminRoute={isAdminRoute}
-                isSigningIn={isSigningIn}
-                onLogin={onLogin}
-                onSupportingNavigate={onSupportingNavigate}
-              />
+          {/* Left Column: Heading, Subtitle & Workflow Illustration */}
+          <div className="lg:col-span-7 flex flex-col justify-center space-y-4 sm:space-y-5">
+            <div>
+              <h1 className="text-4xl sm:text-5xl lg:text-[54px] font-black italic tracking-tight text-white leading-[1.08]">
+                Invoice. Scan. <span className="text-[#6366f1]">Get Paid.</span>
+              </h1>
+              <p className="text-xs sm:text-[13px] text-slate-400 mt-3 sm:mt-4 leading-relaxed max-w-lg">
+                Clients, deliverables, invoices and reminders for Indian freelancers. Invoices carry a UPI QR, and money goes straight to your bank with zero fees.
+              </p>
             </div>
 
-            <motion.div variants={itemVariants}>
-              <BentoFeaturesGrid />
-            </motion.div>
+            {/* Workflow Diagram Illustration */}
+            <div className="pt-2 sm:pt-4 flex justify-start">
+              <WorkflowIllustration className="w-full max-w-[500px]" />
+            </div>
           </div>
 
-          {/* Right Column: Desktop Sign-In Card (Sticky) */}
-          <motion.div
-            variants={itemVariants}
-            className="hidden lg:flex lg:col-span-5 lg:sticky lg:top-12 flex-col justify-center items-center h-full pt-4"
-          >
+          {/* Right Column: Sign-In Card */}
+          <div className="lg:col-span-5 flex justify-center lg:justify-end items-center w-full">
             <SignInCard
               isAdminRoute={isAdminRoute}
               isSigningIn={isSigningIn}
               onLogin={onLogin}
               onSupportingNavigate={onSupportingNavigate}
             />
-          </motion.div>
+          </div>
         </motion.div>
       </main>
 
-      {/* Minimal Landing Footer */}
-      <Footer variant="minimal" transparent={true} onNavigate={onSupportingNavigate} />
+      {/* Bottom Bar: Copyright & Social Links */}
+      <footer className="border-t border-[#262626] px-6 py-3.5 sm:px-10 lg:px-16 w-full">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+          <div>
+            <span>© 2026 CrestFlow Inc. • Version 1.1.0</span>
+          </div>
+
+          <div className="flex items-center gap-4 text-slate-400">
+            <a
+              href="https://instagram.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition-colors"
+              title="Instagram"
+              aria-label="Instagram"
+            >
+              <Instagram size={15} />
+            </a>
+            <a
+              href="https://github.com/tilakpopat4/crestflow"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition-colors"
+              title="GitHub"
+              aria-label="GitHub"
+            >
+              <Github size={15} />
+            </a>
+            <a
+              href="https://linkedin.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition-colors"
+              title="LinkedIn"
+              aria-label="LinkedIn"
+            >
+              <Linkedin size={15} />
+            </a>
+            <a
+              href="https://youtube.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition-colors"
+              title="YouTube"
+              aria-label="YouTube"
+            >
+              <Youtube size={15} />
+            </a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
