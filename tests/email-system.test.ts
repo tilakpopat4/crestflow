@@ -333,6 +333,44 @@ describe('Production-Ready Automated Email System Suite', () => {
       assert.equal(mockState.sentEmails.length, initialCount + 1);
     });
 
+    it('blocks concurrent race-condition dispatches for the exact same milestone', async () => {
+      const token = createMockIdToken('usr_concurrent_milestone', 'concurrent@test.com', keyPair.privateKey);
+      const initialCount = mockState.sentEmails.length;
+
+      const makeRequest = () =>
+        worker.fetch(
+          new Request('https://crestflow.app/api/notify/milestone', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              milestoneId: '9_months',
+              milestoneTitle: '9 Months Milestone',
+              daysWorked: 273,
+              durationFormatted: '8 mos, 29 days',
+            }),
+          }),
+          testEnv
+        );
+
+      // Fire 2 concurrent requests at the exact same moment
+      const [res1, res2] = await Promise.all([makeRequest(), makeRequest()]);
+      assert.equal(res1.status, 200);
+      assert.equal(res2.status, 200);
+
+      const [data1, data2] = await Promise.all([res1.json(), res2.json()]);
+
+      // Exactly one was dispatched, and the other was flagged as already celebrated
+      const dispatchedCount = (data1.dispatched ? 1 : 0) + (data2.dispatched ? 1 : 0);
+      const duplicateCount = (data1.already_celebrated ? 1 : 0) + (data2.already_celebrated ? 1 : 0);
+
+      assert.equal(dispatchedCount, 1, 'Exactly one concurrent request must be dispatched');
+      assert.equal(duplicateCount, 1, 'The other concurrent request must be marked already_celebrated');
+      assert.equal(mockState.sentEmails.length, initialCount + 1, 'Only 1 email must be sent to inbox');
+    });
+
     it('dispatches payment due today notification to freelancer with daily deduplication', async () => {
       const token = createMockIdToken('usr_due_freelancer', 'freelancer.due@test.com', keyPair.privateKey);
       const initialCount = mockState.sentEmails.length;

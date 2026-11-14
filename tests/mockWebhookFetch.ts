@@ -207,6 +207,13 @@ export function createMockFetch(state: MockWebhookState, originalFetch: typeof g
       const key = urlStr.split('/').pop()?.split('?')[0] || '';
       if (!state.emailIdempotency) state.emailIdempotency = new Map();
       if (init?.method === 'PATCH') {
+        const hasPrecondition = urlStr.includes('currentDocument.exists=false');
+        if (hasPrecondition && state.emailIdempotency.has(key)) {
+          return new Response(JSON.stringify({ error: { code: 412, message: 'Precondition failed: document exists' } }), {
+            status: 412,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
         const body = JSON.parse((init.body as string) || '{}');
         const jobId = body.fields?.jobId?.stringValue || 'job_mock';
         state.emailIdempotency.set(key, { jobId });

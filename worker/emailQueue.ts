@@ -96,6 +96,36 @@ export async function registerIdempotency(
 }
 
 /**
+ * Atomically registers an idempotency key before job creation.
+ * Returns true if claimed, false if another concurrent request claimed it first.
+ */
+export async function registerIdempotencyAtomic(
+  creds: ServiceAccountCredentials,
+  idempotencyKey: string,
+  jobId: string
+): Promise<boolean> {
+  const token = await getGoogleAccessToken(creds);
+  const cleanKey = encodeURIComponent(idempotencyKey.replace(/[^a-zA-Z0-9_-]/g, '_'));
+  const url = `https://firestore.googleapis.com/v1/projects/${creds.project_id}/databases/(default)/documents/emailIdempotency/${cleanKey}?currentDocument.exists=false`;
+
+  const res = await fetch(url, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      fields: {
+        jobId: toFirestoreValue(jobId),
+        createdAt: toFirestoreValue(Date.now()),
+      },
+    }),
+  });
+
+  return res.status === 200;
+}
+
+/**
  * Enqueues or schedules an email job idempotently in Firestore.
  */
 export async function enqueueEmailJob(
@@ -110,7 +140,7 @@ export async function enqueueEmailJob(
     createdBy?: string;
   }
 ): Promise<{ jobId: string; duplicate: boolean }> {
-  // 1. Check idempotency
+  // 1. Check idempotency first (fast-path)
   const existingJobId = await checkIdempotency(creds, params.idempotencyKey);
   if (existingJobId) {
     return { jobId: existingJobId, duplicate: true };
@@ -120,6 +150,13 @@ export async function enqueueEmailJob(
   const scheduledTime = params.scheduledAt && params.scheduledAt > now ? params.scheduledAt : now;
   const isFutureScheduled = scheduledTime > now;
   const jobId = `job_${now}_${Math.random().toString(36).substring(2, 8)}`;
+
+  // 2. Atomic lock: Claim idempotency key BEFORE creating job to eliminate race conditions
+  const claimed = await registerIdempotencyAtomic(creds, params.idempotencyKey, jobId);
+  if (!claimed) {
+    const activeJobId = (await checkIdempotency(creds, params.idempotencyKey)) || 'existing';
+    return { jobId: activeJobId, duplicate: true };
+  }
 
   const job: EmailJob = {
     jobId,
@@ -159,9 +196,6 @@ export async function enqueueEmailJob(
     const errorText = await res.text();
     throw new Error(`Failed to enqueue email job: ${res.status} ${errorText}`);
   }
-
-  // 2. Register idempotency key
-  await registerIdempotency(creds, params.idempotencyKey, jobId);
 
   return { jobId, duplicate: false };
 }
