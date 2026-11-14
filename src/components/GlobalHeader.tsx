@@ -424,39 +424,39 @@ export default function GlobalHeader({
               <button
                 type="button"
                 onClick={() => setShowJourneyMenu(!showJourneyMenu)}
-                className="py-1.5 px-2 md:py-2 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors cursor-pointer flex items-center gap-1.5"
+                className="py-1.5 px-2 md:py-2 text-xs font-medium text-slate-400 hover:text-white hover:bg-[#282828] rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 border-none bg-transparent"
                 title={`Started: ${journey.startDateFormatted} (${journey.workedDays} days freelancing). Click for details.`}
               >
-                <Calendar size={14} className="text-slate-500 dark:text-slate-400" />
-                <span className="font-medium text-slate-700 dark:text-slate-300">
+                <Calendar size={14} className="text-slate-400" />
+                <span className="font-medium text-slate-200">
                   {journey.workedDays}
                 </span>
-                <span className="hidden sm:inline text-slate-500 dark:text-slate-400">
+                <span className="hidden sm:inline text-slate-400">
                   days worked
                 </span>
-                <span className="sm:hidden text-slate-500 dark:text-slate-400">
+                <span className="sm:hidden text-slate-400">
                   d
                 </span>
               </button>
 
               {/* Journey Details Popover */}
               {showJourneyMenu && (
-                <div className="absolute right-0 top-full mt-2 w-72 md:w-80 bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800 p-4 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                  <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                <div className="absolute right-0 top-full mt-2 w-72 md:w-80 max-w-[calc(100vw-1.5rem)] bg-[#212121] text-white rounded-xl shadow-2xl border border-[#333333] p-4 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="flex items-center justify-between pb-3 border-b border-[#333333]">
                     <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center">
+                      <div className="w-7 h-7 rounded-lg bg-[#282828] border border-[#383838] text-white flex items-center justify-center">
                         <Award size={16} />
                       </div>
                       <div>
-                        <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">Freelancing Journey</h4>
-                        <p className="text-[10px] text-slate-400">Since {journey.startDateFormatted}</p>
+                        <h4 className="text-xs font-bold text-white">Freelancing Journey</h4>
+                        <p className="text-[10px] text-[#aaaaaa]">Since {journey.startDateFormatted}</p>
                       </div>
                     </div>
                     {onEditProfile && (
                       <button
                         type="button"
                         onClick={() => { setShowJourneyMenu(false); onEditProfile(); }}
-                        className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                        className="text-[10px] font-semibold text-slate-300 hover:text-white hover:underline cursor-pointer bg-transparent border-none"
                       >
                         Edit Date
                       </button>
@@ -464,37 +464,37 @@ export default function GlobalHeader({
                   </div>
 
                   <div className="py-3 space-y-2.5">
-                    <div className="bg-slate-50 dark:bg-slate-800/60 rounded-xl p-3 border border-slate-200/60 dark:border-slate-800 flex items-center justify-between">
+                    <div className="bg-[#282828] rounded-xl p-3 border border-[#383838] flex items-center justify-between">
                       <div>
-                        <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">Total Worked</span>
-                        <span className="text-lg font-black text-slate-900 dark:text-white">
-                          {journey.workedDays} <span className="text-xs font-normal text-slate-500">days</span>
+                        <span className="text-[10px] uppercase font-bold tracking-wider text-[#aaaaaa] block">Total Worked</span>
+                        <span className="text-lg font-black text-white">
+                          {journey.workedDays} <span className="text-xs font-normal text-[#888888]">days</span>
                         </span>
                       </div>
                       <div className="text-right">
-                        <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">Duration</span>
-                        <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        <span className="text-[10px] uppercase font-bold tracking-wider text-[#aaaaaa] block">Duration</span>
+                        <span className="text-xs font-semibold text-white">
                           {journey.formattedDuration}
                         </span>
                       </div>
                     </div>
 
                     {journey.currentAnniversary && (
-                      <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl p-3">
+                      <div className="bg-[#282828] border border-[#383838] rounded-xl p-3">
                         <div className="flex items-center gap-2 mb-1">
-                          <Award size={14} className="text-indigo-600 dark:text-indigo-400 shrink-0" />
-                          <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                          <Award size={14} className="text-white shrink-0" />
+                          <span className="text-xs font-bold text-white">
                             {journey.currentAnniversary.title}
                           </span>
                         </div>
-                        <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed mb-2">
+                        <p className="text-[11px] text-[#aaaaaa] leading-relaxed mb-2">
                           {journey.currentAnniversary.description}
                         </p>
                         {onOpenAnniversaryModal && (
                           <button
                             type="button"
                             onClick={() => { setShowJourneyMenu(false); onOpenAnniversaryModal(); }}
-                            className="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium transition-colors cursor-pointer"
+                            className="w-full py-1.5 bg-[#282828] hover:bg-[#333333] text-white border border-[#444444] rounded-lg text-xs font-medium transition-colors cursor-pointer"
                           >
                             View Celebration Card
                           </button>
@@ -503,14 +503,14 @@ export default function GlobalHeader({
                     )}
 
                     {journey.nextMilestone && (
-                      <div className="bg-slate-50 dark:bg-slate-800/80 rounded-xl p-3 border border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs">
+                      <div className="bg-[#282828] rounded-xl p-3 border border-[#383838] flex items-center justify-between text-xs">
                         <div className="flex items-center gap-2">
-                          <Calendar size={14} className="text-slate-500 dark:text-slate-400 shrink-0" />
-                          <div className="text-[11px] text-slate-700 dark:text-slate-300">
-                            Next milestone: <strong className="font-semibold text-slate-900 dark:text-white">{journey.nextMilestone.badge}</strong>
+                          <Calendar size={14} className="text-[#aaaaaa] shrink-0" />
+                          <div className="text-[11px] text-white">
+                            Next milestone: <strong className="font-semibold text-white">{journey.nextMilestone.badge}</strong>
                           </div>
                         </div>
-                        <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                        <span className="text-[11px] font-medium text-[#aaaaaa]">
                           in {Math.abs(journey.nextMilestone.diffDays)}d
                         </span>
                       </div>
@@ -574,14 +574,14 @@ export default function GlobalHeader({
             <button
               type="button"
               onClick={onEditProfile}
-              className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              className="p-1 rounded-full hover:bg-[#282828] transition-colors cursor-pointer border-none bg-transparent"
               title="Open Profile Settings"
               aria-label="Open Profile Settings"
             >
               {user?.photoURL ? (
-                <img src={user.photoURL} alt="Profile" className="w-7 h-7 rounded-full object-cover border border-slate-200 dark:border-slate-700" />
+                <img src={user.photoURL} alt="Profile" className="w-7 h-7 rounded-full object-cover border border-[#383838]" />
               ) : (
-                <div className="w-7 h-7 rounded-full bg-slate-700 text-white flex items-center justify-center text-xs font-semibold">
+                <div className="w-7 h-7 rounded-full bg-[#282828] border border-[#383838] text-white flex items-center justify-center text-xs font-semibold">
                   {(profile?.name || user?.displayName)?.charAt(0) || 'U'}
                 </div>
               )}
@@ -592,7 +592,7 @@ export default function GlobalHeader({
             <button
               type="button"
               onClick={onLogout}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#282828] transition-colors cursor-pointer border-none bg-transparent"
               title="Sign Out"
               aria-label="Sign Out"
             >

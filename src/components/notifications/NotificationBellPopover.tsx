@@ -2,12 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Bell, X, Send, Mail, Copy, Check } from 'lucide-react';
 import { User } from 'firebase/auth';
 import { Client, Invoice, WorkItem } from '../../types';
-import { 
-  getPaymentStatusInfo, 
-  calculateClientFinancials, 
-  generateWhatsAppReminder, 
-  generateEmailReminder 
-} from '../../lib/paymentUtils';
+import { getPaymentStatusInfo, calculateClientFinancials, generateWhatsAppReminder, generateEmailReminder } from '../../lib/paymentUtils';
 
 export interface NotificationBellPopoverProps {
   user: User | null;
@@ -36,21 +31,18 @@ export default function NotificationBellPopover({
     try {
       const raw = localStorage.getItem(`crestflow_dismissed_notifs_${user?.uid || 'guest'}`);
       return raw ? new Set(JSON.parse(raw)) : new Set();
-    } catch {
-      return new Set();
-    }
+    } catch { return new Set(); }
   });
 
   const [seenKeys, setSeenKeys] = useState<Set<string>>(() => {
     try {
       const raw = localStorage.getItem(`crestflow_seen_notifs_${user?.uid || 'guest'}`);
       return raw ? new Set(JSON.parse(raw)) : new Set();
-    } catch {
-      return new Set();
-    }
+    } catch { return new Set(); }
   });
 
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [mobileTop, setMobileTop] = useState<number>(64);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Sync state if user changes
@@ -63,17 +55,27 @@ export default function NotificationBellPopover({
     } catch { /* ignore */ }
   }, [user?.uid]);
 
+  // Position popover cleanly on mobile below header
+  useEffect(() => {
+    if (isOpen && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setMobileTop(Math.round(rect.bottom + 8));
+    }
+  }, [isOpen]);
+
   // Close on outside click or escape
   useEffect(() => {
-    const handlePointerDown = (e: MouseEvent) => {
+    const handlePointerDown = (e: MouseEvent | TouchEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) setIsOpen(false);
     };
     const handleKeyDown = (e: KeyboardEvent) => { if (e.key === 'Escape') setIsOpen(false); };
 
     document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('touchstart', handlePointerDown);
     window.addEventListener('keydown', handleKeyDown);
     return () => {
       document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('touchstart', handlePointerDown);
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
@@ -138,8 +140,7 @@ export default function NotificationBellPopover({
   };
 
   const handleDismiss = (cycleKey: string) => {
-    const updated = new Set(dismissedKeys);
-    updated.add(cycleKey);
+    const updated = new Set(dismissedKeys).add(cycleKey);
     saveDismissed(updated);
   };
 
@@ -160,7 +161,11 @@ export default function NotificationBellPopover({
       <button
         type="button"
         onClick={handleToggle}
-        className="p-1.5 sm:p-2 text-slate-300 hover:text-white rounded-lg hover:bg-slate-800 transition-colors cursor-pointer relative"
+        className={`p-1.5 sm:p-2 rounded-lg transition-colors cursor-pointer relative border-none ${
+          isOpen
+            ? 'bg-[#282828] text-white'
+            : 'bg-transparent text-[#aaaaaa] hover:text-white hover:bg-[#282828] active:bg-[#333333]'
+        }`}
         title="Payment Notifications"
         aria-label="Payment Notifications"
       >
@@ -174,7 +179,10 @@ export default function NotificationBellPopover({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-[#282828] rounded-xl shadow-2xl p-4 z-50 text-white animate-in fade-in duration-100">
+        <div 
+          style={{ top: typeof window !== 'undefined' && window.innerWidth < 640 ? `${mobileTop}px` : undefined }}
+          className="fixed sm:absolute left-3 right-3 sm:left-auto sm:right-0 sm:top-full mt-0 sm:mt-2 w-auto sm:w-96 max-w-sm sm:max-w-none mx-auto sm:mx-0 bg-[#212121] border border-[#333333] rounded-xl shadow-2xl p-4 z-50 text-white animate-in fade-in duration-100"
+        >
           <div className="flex items-center justify-between pb-3 border-b border-[#333333]">
             <div className="flex items-center gap-2">
               <span className="font-semibold text-sm text-white">Notifications</span>
@@ -250,29 +258,27 @@ export default function NotificationBellPopover({
                         href={generateWhatsAppReminder(client, statusInfo)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 px-2 py-1 bg-[#333333] hover:bg-[#3d3d3d] text-white rounded-md text-[11px] font-medium transition-colors"
+                        className="inline-flex items-center gap-1 px-2 py-1 bg-[#282828] hover:bg-[#333333] border border-[#383838] text-white rounded-md text-[11px] font-medium transition-colors"
                         title="Send WhatsApp Reminder"
                       >
                         <Send size={11} /> WhatsApp
                       </a>
-
                       {isEmailEnabled && (
                         <a
                           href={emailData.mailtoLink}
-                          className="p-1.5 bg-[#333333] hover:bg-[#3d3d3d] text-slate-300 hover:text-white rounded-md text-[11px] transition-colors"
+                          className="p-1.5 bg-[#282828] hover:bg-[#333333] border border-[#383838] text-[#aaaaaa] hover:text-white rounded-md text-[11px] transition-colors"
                           title="Draft Email Reminder"
                         >
                           <Mail size={12} />
                         </a>
                       )}
-
                       <button
                         type="button"
                         onClick={() => handleCopyEmail(cycleKey, emailData.subject, emailData.body)}
-                        className="p-1.5 bg-[#333333] hover:bg-[#3d3d3d] text-slate-300 hover:text-white rounded-md text-[11px] transition-colors cursor-pointer"
+                        className="p-1.5 bg-[#282828] hover:bg-[#333333] border border-[#383838] text-[#aaaaaa] hover:text-white rounded-md text-[11px] transition-colors cursor-pointer"
                         title="Copy Email Template"
                       >
-                        {copiedKey === cycleKey ? <Check size={12} className="text-slate-200" /> : <Copy size={12} />}
+                        {copiedKey === cycleKey ? <Check size={12} className="text-white" /> : <Copy size={12} />}
                       </button>
                     </div>
                   </div>
