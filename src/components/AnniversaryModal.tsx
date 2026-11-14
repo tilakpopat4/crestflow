@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Trophy, Award, Calendar, ArrowRight } from 'lucide-react';
 import { AnniversaryMilestone, WorkJourneyStats } from '../lib/anniversary';
+import MilestoneCelebrationParticles from './MilestoneCelebrationParticles';
 
 interface AnniversaryModalProps {
   isOpen: boolean;
@@ -25,12 +26,15 @@ export default function AnniversaryModal({
     <div
       id="anniversary-modal-overlay"
       onClick={onClose}
-      className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 cursor-pointer animate-in fade-in duration-200 select-none"
+      className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 cursor-pointer animate-in fade-in duration-200 select-none overflow-hidden"
     >
+      {/* Background festive celebration crackers animation */}
+      <MilestoneCelebrationParticles />
+
       <div
         id="anniversary-modal-card"
         onClick={(e) => e.stopPropagation()}
-        className="bg-[#212121] border border-[#333333] text-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden cursor-default relative animate-in zoom-in-95 duration-200"
+        className="bg-[#212121] border border-[#333333] text-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden cursor-default relative z-10 animate-in zoom-in-95 duration-200"
       >
         {/* Top header banner */}
         <div className="relative bg-[#181818] p-6 text-white text-center border-b border-[#2e2e2e]">
