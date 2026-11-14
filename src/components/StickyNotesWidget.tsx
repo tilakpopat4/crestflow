@@ -257,24 +257,29 @@ export default function StickyNotesWidget({ user, clients }: StickyNotesWidgetPr
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 min-w-0">
                       <Pin size={14} className={`${style.pin} rotate-45 shrink-0`} />
-                      <span className="text-[10px] font-medium uppercase tracking-wider px-2 py-0.5 rounded bg-black/5 dark:bg-white/10 text-slate-700 dark:text-slate-300">
+                      <span
+                        style={{ backgroundColor: 'transparent' }}
+                        className="text-[10.5px] font-bold uppercase tracking-wider text-inherit opacity-90 truncate !bg-transparent"
+                      >
                         {client ? client.name : 'General Note'}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-1 opacity-90 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-1 opacity-90 sm:opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                       <button
                         onClick={() => handleOpenEdit(note)}
-                        className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
+                        style={{ backgroundColor: 'transparent' }}
+                        className="p-1 rounded hover:bg-black/5 dark:hover:bg-black/10 text-inherit opacity-75 hover:opacity-100 transition-opacity cursor-pointer !bg-transparent border-none"
                         title="Edit note"
                       >
                         <Edit3 size={14} />
                       </button>
                       <button
                         onClick={() => handleDelete(note.id)}
-                        className="p-1 rounded hover:bg-red-500/10 text-rose-600 dark:text-rose-400 transition-colors cursor-pointer"
+                        style={{ backgroundColor: 'transparent' }}
+                        className="p-1 rounded hover:bg-red-500/10 text-rose-600 dark:text-rose-400 transition-colors cursor-pointer !bg-transparent border-none"
                         title="Delete note"
                       >
                         <Trash2 size={14} />

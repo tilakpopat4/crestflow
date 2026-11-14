@@ -146,6 +146,18 @@ describe('Professional Skeleton Loaders & Latency Reduction Suite', () => {
   });
 
   describe('3. Image Loading Optimization', () => {
+    test('StickyNotesWidget client name has same background color as the note (transparent)', () => {
+      const widgetContent = fs.readFileSync(path.join(process.cwd(), 'src/components/StickyNotesWidget.tsx'), 'utf-8');
+      assert.ok(
+        widgetContent.includes('!bg-transparent') && widgetContent.includes("backgroundColor: 'transparent'"),
+        'Sticky note client name must inherit note background color with transparent styling'
+      );
+      assert.ok(
+        !widgetContent.includes('dark:bg-white/10 text-slate-700'),
+        'Sticky note client name must not have dark contrasting background pill'
+      );
+    });
+
     test('user avatars and images include referrerPolicy="no-referrer" and decoding="async"', () => {
       const headerContent = fs.readFileSync(path.join(process.cwd(), 'src/components/GlobalHeader.tsx'), 'utf-8');
       assert.ok(
