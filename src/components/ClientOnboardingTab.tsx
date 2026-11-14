@@ -7,12 +7,13 @@ import { useFirestore } from '../hooks/useFirestore';
 import { generateUUID } from '../lib/utils';
 import { OnboardingLinkCard } from './onboarding/OnboardingLinkCard';
 import { OnboardingRequestCard } from './onboarding/OnboardingRequestCard';
-import { getUserHandle, getOnboardingUrl, getPublicProfileUrl } from '../lib/userHandle';
+import { getUserHandle, getOnboardingUrl, getPublicProfileUrl, hasConfiguredUsername } from '../lib/userHandle';
 
 interface ClientOnboardingTabProps {
   user: User;
   profile: UserProfile | null;
   onNavigateToClients?: () => void;
+  onNavigateToProfile?: () => void;
 }
 
 type FilterStatus = 'pending' | 'accepted' | 'declined' | 'all';
@@ -26,6 +27,7 @@ export default function ClientOnboardingTab({
   user,
   profile,
   onNavigateToClients,
+  onNavigateToProfile,
 }: ClientOnboardingTabProps) {
   const shouldReduceMotion = useReducedMotion();
   const [searchQuery, setSearchQuery] = useState('');
@@ -36,7 +38,8 @@ export default function ClientOnboardingTab({
   const { addOrUpdateItem: saveClient } =
     useFirestore<Client>('clients', user.uid);
 
-  const handle = useMemo(() => getUserHandle(profile, user), [profile, user]);
+  const hasUsername = useMemo(() => hasConfiguredUsername(profile), [profile]);
+  const handle = useMemo(() => (hasUsername ? profile!.username! : getUserHandle(profile, user)), [hasUsername, profile, user]);
   const onboardingUrl = useMemo(() => getOnboardingUrl(handle), [handle]);
   const publicProfileUrl = useMemo(() => getPublicProfileUrl(handle), [handle]);
 
@@ -126,6 +129,8 @@ export default function ClientOnboardingTab({
         onboardingUrl={onboardingUrl}
         publicProfileUrl={publicProfileUrl}
         profile={profile}
+        hasUsername={hasUsername}
+        onNavigateToProfile={onNavigateToProfile}
       />
 
       {/* Summary Stat Cards */}

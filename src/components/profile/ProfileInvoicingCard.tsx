@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Copy, Check, QrCode } from 'lucide-react';
+import { getOnboardingUrl } from '../../lib/userHandle';
 
 interface ProfileInvoicingCardProps {
   upiId: string;
@@ -17,7 +18,7 @@ export const ProfileInvoicingCard: React.FC<ProfileInvoicingCardProps> = ({
   userId
 }) => {
   const [copiedLink, setCopiedLink] = useState(false);
-  const onboardingLink = `${typeof window !== 'undefined' ? window.location.origin : ''}/onboarding/${userId}`;
+  const onboardingLink = getOnboardingUrl(userId);
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(onboardingLink);

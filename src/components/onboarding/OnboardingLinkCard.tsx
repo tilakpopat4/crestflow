@@ -8,6 +8,8 @@ interface OnboardingLinkCardProps {
   onboardingUrl: string;
   publicProfileUrl?: string;
   profile: UserProfile | null;
+  hasUsername?: boolean;
+  onNavigateToProfile?: () => void;
 }
 
 /**
@@ -18,6 +20,8 @@ export const OnboardingLinkCard: React.FC<OnboardingLinkCardProps> = ({
   onboardingUrl,
   publicProfileUrl,
   profile,
+  hasUsername = true,
+  onNavigateToProfile,
 }) => {
   const shouldReduceMotion = useReducedMotion();
   const [copiedType, setCopiedType] = useState<'onboarding' | 'profile' | null>(null);
@@ -62,65 +66,89 @@ export const OnboardingLinkCard: React.FC<OnboardingLinkCardProps> = ({
         )}
       </div>
 
-      {/* Main Link Input (Onboarding Intake) */}
-      <div className="space-y-1">
-        <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">
-          Client Onboarding Intake URL
-        </label>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-0.5">
-          <div className="relative flex-1 min-w-0">
-            <input
-              type="text"
-              readOnly
-              value={onboardingUrl}
-              onClick={(e) => (e.target as HTMLInputElement).select()}
-              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-mono text-slate-800 dark:text-slate-200 outline-none select-all"
-            />
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <motion.button
-              type="button"
-              onClick={() => handleCopy(onboardingUrl, 'onboarding')}
-              whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
-              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[#282828] hover:bg-[#383838] text-white border border-[#3a3a3a] rounded-xl text-sm font-semibold transition-colors cursor-pointer"
-            >
-              {copiedType === 'onboarding' ? <Check size={15} /> : <Copy size={15} />}
-              <span>{copiedType === 'onboarding' ? 'Copied' : 'Copy Onboarding'}</span>
-            </motion.button>
-
-            <motion.a
-              href={onboardingUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
-              className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[#282828] hover:bg-[#383838] text-slate-300 hover:text-white border border-[#3a3a3a] rounded-xl text-sm font-semibold transition-colors cursor-pointer"
-              title="Open client onboarding page in new tab"
-            >
-              <ExternalLink size={15} />
-              <span className="hidden sm:inline">Preview</span>
-            </motion.a>
-
-            <motion.button
-              type="button"
-              onClick={() => setShowQr(!showQr)}
-              whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
-              className={`inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer border border-[#3a3a3a] ${
-                showQr
-                  ? 'bg-[#383838] text-white'
-                  : 'bg-[#282828] hover:bg-[#383838] text-slate-300 hover:text-white'
-              }`}
-              title="Toggle QR Code display"
-            >
-              <QrCode size={15} />
-              <span className="hidden sm:inline">QR</span>
-            </motion.button>
+      {/* Main Link Input or Set Username Prompt */}
+      {!hasUsername ? (
+        <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 space-y-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                Username required
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Set a custom username in your Profile settings first to generate your shareable client onboarding link, client portal, and portfolio.
+              </p>
+            </div>
+            {onNavigateToProfile && (
+              <button
+                type="button"
+                onClick={onNavigateToProfile}
+                className="px-3.5 py-2 bg-[#282828] hover:bg-[#383838] text-white rounded-lg text-xs font-semibold cursor-pointer transition-colors shrink-0 border-0"
+              >
+                Set Username in Profile
+              </button>
+            )}
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+            Client Onboarding Intake URL
+          </label>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-0.5">
+            <div className="relative flex-1 min-w-0">
+              <input
+                type="text"
+                readOnly
+                value={onboardingUrl}
+                onClick={(e) => (e.target as HTMLInputElement).select()}
+                className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-mono text-slate-800 dark:text-slate-200 outline-none select-all"
+              />
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <motion.button
+                type="button"
+                onClick={() => handleCopy(onboardingUrl, 'onboarding')}
+                whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
+                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[#282828] hover:bg-[#383838] text-white border border-[#3a3a3a] rounded-xl text-sm font-semibold transition-colors cursor-pointer"
+              >
+                {copiedType === 'onboarding' ? <Check size={15} /> : <Copy size={15} />}
+                <span>{copiedType === 'onboarding' ? 'Copied' : 'Copy Onboarding'}</span>
+              </motion.button>
+
+              <motion.a
+                href={onboardingUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
+                className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[#282828] hover:bg-[#383838] text-slate-300 hover:text-white border border-[#3a3a3a] rounded-xl text-sm font-semibold transition-colors cursor-pointer"
+                title="Open client onboarding page in new tab"
+              >
+                <ExternalLink size={15} />
+                <span className="hidden sm:inline">Preview</span>
+              </motion.a>
+
+              <motion.button
+                type="button"
+                onClick={() => setShowQr(!showQr)}
+                whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
+                className={`inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer border border-[#3a3a3a] ${
+                  showQr
+                    ? 'bg-[#383838] text-white'
+                    : 'bg-[#282828] hover:bg-[#383838] text-slate-300 hover:text-white'
+                }`}
+                title="Toggle QR Code display"
+              >
+                <QrCode size={15} />
+                <span className="hidden sm:inline">QR</span>
+              </motion.button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Secondary Link (Public Freelancer Profile) */}
-      {publicProfileUrl && (
+      {hasUsername && publicProfileUrl && (
         <div className="pt-2 border-t border-[#333333] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
           <div className="flex items-center gap-2 min-w-0">
             <span className="text-slate-400 shrink-0 font-medium inline-flex items-center gap-1">

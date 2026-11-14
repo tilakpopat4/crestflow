@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
-import { getOnboardingUrl } from '../../lib/userHandle';
+import { getOnboardingUrl, isValidUsername } from '../../lib/userHandle';
 
 interface ProfileInvoicingSectionProps {
   upiId: string;
@@ -40,9 +40,14 @@ export const ProfileInvoicingSection: React.FC<ProfileInvoicingSectionProps> = (
   onDiscard,
 }) => {
   const [copiedLink, setCopiedLink] = useState(false);
-  const onboardingLink = getOnboardingUrl(handle || userId);
+  const isHandleConfigured = Boolean(handle && isValidUsername(handle));
+  const onboardingLink = isHandleConfigured ? getOnboardingUrl(handle!) : '';
 
   const handleCopyLink = () => {
+    if (!isHandleConfigured || !onboardingLink) {
+      alert('Please set your username in the Public Profile section first.');
+      return;
+    }
     navigator.clipboard.writeText(onboardingLink);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
@@ -134,13 +139,18 @@ export const ProfileInvoicingSection: React.FC<ProfileInvoicingSectionProps> = (
                 Direct client onboarding link
               </span>
               <p className="text-[11px] text-slate-400 truncate mt-0.5 font-mono">
-                {onboardingLink}
+                {isHandleConfigured ? onboardingLink : 'Set username in Public Profile to activate'}
               </p>
             </div>
             <button
               type="button"
               onClick={handleCopyLink}
-              className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-[#282828] hover:bg-[#383838] px-3 text-xs font-semibold text-slate-300 hover:text-white border border-[#3a3a3a] cursor-pointer shrink-0 transition-colors duration-120"
+              disabled={!isHandleConfigured}
+              className={`inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold border shrink-0 transition-colors duration-120 ${
+                !isHandleConfigured
+                  ? 'bg-[#282828] text-slate-500 border-[#333333] cursor-not-allowed opacity-60'
+                  : 'bg-[#282828] hover:bg-[#383838] text-slate-300 hover:text-white border-[#3a3a3a] cursor-pointer'
+              }`}
             >
               {copiedLink ? <Check size={12} className="text-slate-300" /> : <Copy size={12} className="text-slate-400" />}
               <span>{copiedLink ? 'Link copied' : 'Copy link'}</span>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Copy, Check, ExternalLink, Link2, Sparkles } from 'lucide-react';
+import { isValidUsername } from '../../lib/userHandle';
 
 interface ProfilePublicLinksCardProps {
   cleanHandle: string;
@@ -17,8 +18,10 @@ export const ProfilePublicLinksCard: React.FC<ProfilePublicLinksCardProps> = ({
   publicProfileUrl,
 }) => {
   const [copiedLink, setCopiedLink] = useState<'onboarding' | 'profile' | null>(null);
+  const isHandleValid = isValidUsername(cleanHandle);
 
   const copyUrl = async (url: string, type: 'onboarding' | 'profile') => {
+    if (!isHandleValid) return;
     try {
       await navigator.clipboard.writeText(url);
       setCopiedLink(type);
@@ -34,6 +37,19 @@ export const ProfilePublicLinksCard: React.FC<ProfilePublicLinksCardProps> = ({
       setTimeout(() => setCopiedLink(null), 2000);
     }
   };
+
+  if (!isHandleValid) {
+    return (
+      <div className="sm:col-span-2 p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-1">
+        <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+          Username required
+        </p>
+        <p className="text-[11px] text-slate-500 dark:text-slate-400">
+          Enter and save a valid username above (3-30 alphanumeric characters) to activate your branded intake and portfolio links.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">

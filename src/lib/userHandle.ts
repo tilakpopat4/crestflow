@@ -1,4 +1,5 @@
 import { UserProfile } from '../types';
+import { SITE_URL } from './siteConfig';
 
 /**
  * List of reserved system keywords that cannot be used as user handles.
@@ -60,6 +61,13 @@ export function isValidUsername(handle: string): boolean {
 }
 
 /**
+ * Checks whether the profile has an explicitly configured, valid username.
+ */
+export function hasConfiguredUsername(profile?: Partial<UserProfile> | null): boolean {
+  return Boolean(profile?.username && isValidUsername(profile.username));
+}
+
+/**
  * Resolves the professional username handle for a freelancer.
  * Prefers explicitly configured profile.username, then email prefix, then name, then uid.
  */
@@ -95,10 +103,9 @@ export function getUserHandle(
  * Format: https://<domain>/<username>/onboarding
  */
 export function getOnboardingUrl(handle: string, customOrigin?: string): string {
-  const origin =
-    customOrigin || (typeof window !== 'undefined' && window.location.origin ? window.location.origin : '');
+  const origin = (customOrigin || SITE_URL).replace(/\/+$/, '');
   const clean = cleanUsername(handle) || handle;
-  return `${origin}/${clean}/onboarding`;
+  return `${origin}/${encodeURIComponent(clean)}/onboarding`;
 }
 
 /**
@@ -106,8 +113,18 @@ export function getOnboardingUrl(handle: string, customOrigin?: string): string 
  * Format: https://<domain>/<username>/publicprofile
  */
 export function getPublicProfileUrl(handle: string, customOrigin?: string): string {
-  const origin =
-    customOrigin || (typeof window !== 'undefined' && window.location.origin ? window.location.origin : '');
+  const origin = (customOrigin || SITE_URL).replace(/\/+$/, '');
   const clean = cleanUsername(handle) || handle;
-  return `${origin}/${clean}/publicprofile`;
+  return `${origin}/${encodeURIComponent(clean)}/publicprofile`;
+}
+
+/**
+ * Returns the canonical public client portal URL for a given handle.
+ * Format: https://<domain>/portal?freelancerId=<username>
+ */
+export function getPortalUrl(handle?: string, customOrigin?: string): string {
+  const origin = (customOrigin || SITE_URL).replace(/\/+$/, '');
+  if (!handle) return `${origin}/portal`;
+  const clean = cleanUsername(handle) || handle;
+  return `${origin}/portal?freelancerId=${encodeURIComponent(clean)}`;
 }

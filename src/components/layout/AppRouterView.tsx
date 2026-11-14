@@ -144,6 +144,7 @@ export const AppRouterView: React.FC<AppRouterViewProps> = ({
                     user={user}
                     profile={profile}
                     onNavigateToClients={() => onNavigate('clients')}
+                    onNavigateToProfile={() => onNavigate('profile')}
                   />
                 )}
 

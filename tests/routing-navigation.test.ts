@@ -7,7 +7,10 @@ import {
   getUserHandle,
   getOnboardingUrl,
   getPublicProfileUrl,
+  hasConfiguredUsername,
+  getPortalUrl,
 } from '../src/lib/userHandle';
+import { SITE_URL } from '../src/lib/siteConfig';
 
 describe('CrestFlow Multi-Page Routing Architecture', () => {
   it('resolves root "/" to dashboard', () => {
@@ -117,7 +120,20 @@ describe('CrestFlow Multi-Page Routing Architecture', () => {
     // 3. From user displayName when no email
     assert.strictEqual(getUserHandle({ name: 'Tilak Popat' }, null), 'tilak-popat');
 
-    // 4. URL builders
+    // 4. URL builders with centralized SITE_URL and custom origins
+    assert.strictEqual(SITE_URL, 'https://crestflow.nonum.online');
+    assert.strictEqual(
+      getOnboardingUrl('tilakpopat2007'),
+      'https://crestflow.nonum.online/tilakpopat2007/onboarding'
+    );
+    assert.strictEqual(
+      getPublicProfileUrl('tilakpopat2007'),
+      'https://crestflow.nonum.online/tilakpopat2007/publicprofile'
+    );
+    assert.strictEqual(
+      getPortalUrl('tilakpopat2007'),
+      'https://crestflow.nonum.online/portal?freelancerId=tilakpopat2007'
+    );
     assert.strictEqual(
       getOnboardingUrl('tilakpopat2007', 'https://crestflow.tilakpopat2007.workers.dev'),
       'https://crestflow.tilakpopat2007.workers.dev/tilakpopat2007/onboarding'
@@ -132,6 +148,9 @@ describe('CrestFlow Multi-Page Routing Architecture', () => {
     assert.strictEqual(isValidUsername('tilakpopat2007'), true);
     assert.strictEqual(isValidUsername('admin'), false); // Reserved
     assert.strictEqual(isValidUsername('ab'), false); // Too short
+    assert.strictEqual(hasConfiguredUsername({ username: 'tilakpopat2007' }), true);
+    assert.strictEqual(hasConfiguredUsername({ username: '' }), false);
+    assert.strictEqual(hasConfiguredUsername({}), false);
   });
 
   it('generates canonical route paths with optional query parameters', () => {
