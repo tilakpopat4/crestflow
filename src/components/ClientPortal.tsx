@@ -17,6 +17,7 @@ import { ClientPortalInvoices } from './client-portal/ClientPortalInvoices';
 import { ClientPortalReview } from './client-portal/ClientPortalReview';
 import { ClientPortalInvoiceModal } from './client-portal/ClientPortalInvoiceModal';
 import { ClientPortalNoAccount } from './client-portal/ClientPortalNoAccount';
+import { ClientPortalSkeleton } from './skeletons';
 
 interface ClientPortalProps {
   user: User;
@@ -65,11 +66,7 @@ export default function ClientPortal({ user, onLogout, onSwitchToFreelancer }: C
   const [embedModalData, setEmbedModalData] = useState<{ isOpen: boolean; url: string; title: string; clientName?: string } | null>(null);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-950">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 dark:border-indigo-400" />
-      </div>
-    );
+    return <ClientPortalSkeleton />;
   }
 
   // If no client profile is linked to this Google account

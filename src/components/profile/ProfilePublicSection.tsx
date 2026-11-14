@@ -85,6 +85,8 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
                   src={user.photoURL}
                   alt={name || 'Profile Photo'}
                   className="size-16 rounded-full bg-slate-100 dark:bg-slate-800 object-cover outline-1 -outline-offset-1 outline-black/5"
+                  referrerPolicy="no-referrer"
+                  decoding="async"
                 />
               ) : (
                 <span className="flex size-16 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-xl font-semibold text-slate-900 dark:text-slate-100 select-none">

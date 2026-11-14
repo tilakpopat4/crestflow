@@ -19,6 +19,7 @@ import StatusBadge from './StatusBadge';
 import ClientFormModal, { ClientFormData } from './ClientFormModal';
 import { SubscriptionState } from '../hooks/useSubscription';
 import { getCurrencySymbol, formatCurrencyAmount } from '../lib/currencyUtils';
+import { ClientsSkeleton } from './skeletons';
 
 interface ClientsTabProps {
   user: User | null;
@@ -370,15 +371,7 @@ export default function ClientsTab({
   };
 
   if (clientsLoading) {
-    return (
-      <div className="flex-1 flex flex-col items-center justify-center p-12 min-h-[360px] select-none">
-        <div className="relative flex items-center justify-center mb-3">
-          <div className="w-8 h-8 rounded-full border-2 border-slate-200 dark:border-slate-800" />
-          <div className="absolute w-8 h-8 rounded-full border-2 border-indigo-600 dark:border-indigo-400 border-t-transparent animate-spin" />
-        </div>
-        <span className="text-xs font-medium text-slate-400 dark:text-slate-500">Loading clients...</span>
-      </div>
-    );
+    return <ClientsSkeleton />;
   }
 
   return (
@@ -636,6 +629,9 @@ export default function ClientsTab({
                         <img
                           src={getDriveDirectImageUrl(client.logoUrl)}
                           alt={client.name}
+                          loading="lazy"
+                          decoding="async"
+                          referrerPolicy="no-referrer"
                           className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl object-cover shadow-xs shrink-0 bg-indigo-50 dark:bg-indigo-950"
                           onError={(e) => {
                             e.currentTarget.onerror = null;

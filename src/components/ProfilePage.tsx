@@ -8,6 +8,7 @@ import ProfileInvoicingSection from './profile/ProfileInvoicingSection';
 import ProfilePreferencesCard from './profile/ProfilePreferencesCard';
 import ProfileSubscriptionSection from './profile/ProfileSubscriptionSection';
 import { getUserHandle, cleanUsername } from '../lib/userHandle';
+import { ProfileSkeleton } from './skeletons';
 
 interface ProfilePageProps {
   user: FirebaseUser;
@@ -100,18 +101,8 @@ export default function ProfilePage({
   }, [profile, user]);
 
   // Dirty state checks per section
-  const isProfileDirty =
-    name !== savedSnapshot.name ||
-    username !== savedSnapshot.username ||
-    professionalTitle !== savedSnapshot.professionalTitle ||
-    freelanceStartDate !== savedSnapshot.freelanceStartDate ||
-    workExperienceBio !== savedSnapshot.workExperienceBio;
-
-  const isInvoicingDirty =
-    upiId !== savedSnapshot.upiId ||
-    phone !== savedSnapshot.phone ||
-    servicesDescription !== savedSnapshot.servicesDescription;
-
+  const isProfileDirty = name !== savedSnapshot.name || username !== savedSnapshot.username || professionalTitle !== savedSnapshot.professionalTitle || freelanceStartDate !== savedSnapshot.freelanceStartDate || workExperienceBio !== savedSnapshot.workExperienceBio;
+  const isInvoicingDirty = upiId !== savedSnapshot.upiId || phone !== savedSnapshot.phone || servicesDescription !== savedSnapshot.servicesDescription;
   const isAiDirty = geminiApiKey !== savedSnapshot.geminiApiKey;
 
   // Discard handlers
@@ -212,6 +203,10 @@ export default function ProfilePage({
       targetElement.scrollIntoView({ behavior: 'smooth' });
     }
   };
+
+  if (!profile && !user.displayName) {
+    return <ProfileSkeleton />;
+  }
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 w-full min-w-0 flex-1">

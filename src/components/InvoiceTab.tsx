@@ -17,6 +17,7 @@ import { renderDocumentHtml, printDocumentHtml, generateOffscreenPdfBlob } from 
 import { generateUpiQrCodeDataUrl, buildUpiPaymentUri } from '../lib/upiQr';
 import { formatInvoiceNumber, getNextInvoiceNumber } from '../lib/invoiceUtils';
 import { SubscriptionState } from '../hooks/useSubscription';
+import { InvoicesSkeleton } from './skeletons';
 
 interface InvoiceTabProps {
   user: User | null;
@@ -885,15 +886,7 @@ export default function InvoiceTab({
   };
 
   if (clientsLoading) {
-    return (
-      <div className="flex-1 flex flex-col items-center justify-center p-12 min-h-[360px] select-none">
-        <div className="relative flex items-center justify-center mb-3">
-          <div className="w-8 h-8 rounded-full border-2 border-slate-200 dark:border-slate-800" />
-          <div className="absolute w-8 h-8 rounded-full border-2 border-indigo-600 dark:border-indigo-400 border-t-transparent animate-spin" />
-        </div>
-        <span className="text-xs font-medium text-slate-400 dark:text-slate-500">Loading invoices...</span>
-      </div>
-    );
+    return <InvoicesSkeleton />;
   }
 
     return (

@@ -46,6 +46,8 @@ export const ProfileGeneralCard: React.FC<ProfileGeneralCardProps> = ({
             src={user.photoURL}
             alt={name || 'Profile Picture'}
             className="w-16 h-16 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 shadow-xs shrink-0"
+            referrerPolicy="no-referrer"
+            decoding="async"
           />
         ) : (
           <div className="w-16 h-16 rounded-full bg-slate-800 text-white flex items-center justify-center text-xl font-bold border-2 border-slate-200 dark:border-slate-700 shrink-0">

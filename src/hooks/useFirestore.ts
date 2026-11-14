@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { db, auth } from '../firebase';
 import { collection, onSnapshot, doc, setDoc, deleteDoc, query, where, writeBatch } from 'firebase/firestore';
 
@@ -113,9 +113,23 @@ export function sanitizePayload(val: any): any {
 }
 
 export function useFirestore<T extends { id: string }>(collectionName: string, userId?: string) {
-  const [data, setData] = useState<T[]>([]);
-  const [loading, setLoading] = useState(true);
+  const getInitialCache = (): { items: T[]; hasCache: boolean } => {
+    if (!userId || typeof window === 'undefined') return { items: [], hasCache: false };
+    try {
+      const raw = localStorage.getItem(`crestflow_cache_${userId}_${collectionName}`);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return { items: parsed, hasCache: true };
+      }
+    } catch {}
+    return { items: [], hasCache: false };
+  };
+
+  const initial = useMemo(() => getInitialCache(), [collectionName, userId]);
+  const [data, setData] = useState<T[]>(initial.items);
+  const [loading, setLoading] = useState<boolean>(!initial.hasCache);
   const [error, setError] = useState<string | null>(null);
+  const [retryAttempt, setRetryAttempt] = useState(0);
 
   useEffect(() => {
     if (!userId) {
@@ -125,33 +139,74 @@ export function useFirestore<T extends { id: string }>(collectionName: string, u
       return;
     }
     
-    setLoading(true);
+    // Seed from cache if available to prevent 3-4 second blank screen
+    const cache = getInitialCache();
+    if (cache.hasCache && data.length === 0) {
+      setData(cache.items);
+      setLoading(false);
+    } else if (!cache.hasCache && data.length === 0) {
+      setLoading(true);
+    }
     setError(null);
+
+    let isSubscribed = true;
+    let retryTimer: ReturnType<typeof setTimeout> | null = null;
+
     const q = query(collection(db, collectionName), where("userId", "==", userId));
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
+        if (!isSubscribed) return;
         const items: T[] = [];
         snapshot.forEach((docSnapshot) => {
           items.push({ id: docSnapshot.id, ...docSnapshot.data() } as T);
         });
         setData(items);
         setLoading(false);
+        setError(null);
+        try {
+          if (typeof window !== 'undefined' && userId) {
+            localStorage.setItem(`crestflow_cache_${userId}_${collectionName}`, JSON.stringify(items));
+          }
+        } catch {}
       },
       (err) => {
+        if (!isSubscribed) return;
         const formattedErr = handleFirestoreError(err, OperationType.GET, collectionName);
+        console.warn(`[useFirestore:${collectionName}] Snapshot warning:`, formattedErr.message);
         setError(formattedErr.message);
         setLoading(false);
+
+        // Auto retry with exponential backoff on connection disconnect (1.5s, 3s, 6s)
+        const delay = Math.min(1500 * Math.pow(2, retryAttempt), 6000);
+        retryTimer = setTimeout(() => {
+          if (isSubscribed) {
+            setRetryAttempt((prev) => prev + 1);
+          }
+        }, delay);
       }
     );
 
-    return () => unsubscribe();
-  }, [collectionName, userId]);
+    return () => {
+      isSubscribed = false;
+      if (retryTimer) clearTimeout(retryTimer);
+      unsubscribe();
+    };
+  }, [collectionName, userId, retryAttempt]);
 
   const addOrUpdateItem = async (item: T) => {
     if (!userId) return;
     try {
       const sanitized = sanitizePayload({ ...item, userId });
+      // Optimistic update for instant UI feedback
+      setData((prev) => {
+        const idx = prev.findIndex((i) => i.id === item.id);
+        const next = idx >= 0 ? prev.map((i, iIdx) => (iIdx === idx ? { ...item, userId } : i)) : [...prev, { ...item, userId }];
+        try {
+          localStorage.setItem(`crestflow_cache_${userId}_${collectionName}`, JSON.stringify(next));
+        } catch {}
+        return next;
+      });
       await setDoc(doc(db, collectionName, item.id), sanitized, { merge: true });
     } catch (err) {
       throw handleFirestoreError(err, OperationType.WRITE, `${collectionName}/${item.id}`);
@@ -161,6 +216,13 @@ export function useFirestore<T extends { id: string }>(collectionName: string, u
   const removeItem = async (id: string) => {
     if (!userId) return;
     try {
+      setData((prev) => {
+        const next = prev.filter((i) => i.id !== id);
+        try {
+          localStorage.setItem(`crestflow_cache_${userId}_${collectionName}`, JSON.stringify(next));
+        } catch {}
+        return next;
+      });
       await deleteDoc(doc(db, collectionName, id));
     } catch (err) {
       throw handleFirestoreError(err, OperationType.DELETE, `${collectionName}/${id}`);
@@ -182,6 +244,10 @@ export function useFirestore<T extends { id: string }>(collectionName: string, u
         });
         await batch.commit();
       }
+      setData(items);
+      try {
+        localStorage.setItem(`crestflow_cache_${userId}_${collectionName}`, JSON.stringify(items));
+      } catch {}
     } catch (err) {
       throw handleFirestoreError(err, OperationType.WRITE, collectionName);
     }

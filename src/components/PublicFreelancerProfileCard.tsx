@@ -27,6 +27,8 @@ export default function PublicFreelancerProfileCard({
             src={photoUrl}
             alt={profile.name}
             className="w-16 h-16 rounded-full object-cover border-2 border-slate-100 dark:border-slate-800 shadow-xs shrink-0"
+            referrerPolicy="no-referrer"
+            decoding="async"
           />
         ) : (
           <div className="w-16 h-16 rounded-full bg-slate-800 text-white flex items-center justify-center text-xl font-bold border-2 border-slate-100 dark:border-slate-800 shrink-0">

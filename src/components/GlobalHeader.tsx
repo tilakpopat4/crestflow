@@ -579,7 +579,13 @@ export default function GlobalHeader({
               aria-label="Open Profile Settings"
             >
               {user?.photoURL ? (
-                <img src={user.photoURL} alt="Profile" className="w-7 h-7 rounded-full object-cover border border-[#383838]" />
+                <img
+                  src={user.photoURL}
+                  alt="Profile"
+                  className="w-7 h-7 rounded-full object-cover border border-[#383838]"
+                  referrerPolicy="no-referrer"
+                  decoding="async"
+                />
               ) : (
                 <div className="w-7 h-7 rounded-full bg-[#282828] border border-[#383838] text-white flex items-center justify-center text-xs font-semibold">
                   {(profile?.name || user?.displayName)?.charAt(0) || 'U'}

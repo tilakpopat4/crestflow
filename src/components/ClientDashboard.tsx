@@ -476,6 +476,9 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
               <img 
                 src={getDriveDirectImageUrl(client.logoUrl)} 
                 alt={client.name} 
+                loading="lazy"
+                decoding="async"
+                referrerPolicy="no-referrer"
                 className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl object-cover shadow-xs shrink-0 bg-indigo-50 dark:bg-indigo-950" 
                 onError={(e) => {
                   e.currentTarget.onerror = null;
@@ -1500,6 +1503,9 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                             <img 
                               src={getDriveDirectImageUrl(sc.logoUrl)} 
                               alt={sc.name} 
+                              loading="lazy"
+                              decoding="async"
+                              referrerPolicy="no-referrer"
                               className="w-10 h-10 rounded-lg object-cover shadow-sm shrink-0 bg-slate-100 dark:bg-slate-800" 
                               onError={(e) => {
                                 e.currentTarget.onerror = null;

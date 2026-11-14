@@ -13,6 +13,7 @@ import { formatLocalDateToYMD, parseYMDToTimestamp } from '../lib/dateUtils';
 import StatusBadge from './StatusBadge';
 import Checkbox from './ui/Checkbox';
 import { DeliverableFeedbackViewerModal } from './work/DeliverableFeedbackViewerModal';
+import { WorkLogSkeleton } from './skeletons';
 
 interface WorkLogTabProps {
   user: User;
@@ -323,7 +324,7 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
   };
 
   if (clientsLoading || workLoading || invoicesLoading) {
-    return <div className="p-8 flex justify-center items-center h-full"><p className="text-slate-500 dark:text-slate-400">Loading work logs...</p></div>;
+    return <WorkLogSkeleton />;
   }
 
   const filteredWork = workItems.filter(w => {

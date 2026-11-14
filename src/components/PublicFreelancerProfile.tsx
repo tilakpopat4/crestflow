@@ -11,6 +11,7 @@ import PublicOnboardingForm from './PublicOnboardingForm';
 import PublicFreelancerProfileSubmitted from './PublicFreelancerProfileSubmitted';
 import { lookupPublicProfile } from '../lib/profileLookup';
 import { AlertCircle } from 'lucide-react';
+import { PublicProfileSkeleton } from './skeletons';
 
 interface PublicFreelancerProfileProps {
   freelancerId: string;
@@ -171,12 +172,7 @@ export default function PublicFreelancerProfile({ freelancerId, mode = 'onboardi
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 p-4 transition-colors duration-150">
-        <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-        <p className="mt-4 text-xs font-medium text-slate-500 dark:text-slate-400">Loading creator profile...</p>
-      </div>
-    );
+    return <PublicProfileSkeleton />;
   }
 
   if (error || !profile) {

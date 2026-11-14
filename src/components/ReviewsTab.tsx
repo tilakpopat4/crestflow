@@ -3,6 +3,7 @@ import { User } from 'firebase/auth';
 import { Client, ClientReview, UserProfile } from '../types';
 import { useFirestore } from '../hooks/useFirestore';
 import { Star, MessageSquare, Copy, Check, Mail, Trash2, Search, ArrowUpRight, Share2, Sparkles, Filter } from 'lucide-react';
+import { ReviewsSkeleton } from './skeletons';
 
 interface ReviewsTabProps {
   user: User;
@@ -10,8 +11,8 @@ interface ReviewsTabProps {
 }
 
 export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
-  const { data: clients } = useFirestore<Client>('clients', user.uid);
-  const { data: reviews, removeItem: deleteReview } = useFirestore<ClientReview>('reviews', user.uid);
+  const { data: clients, loading: clientsLoading } = useFirestore<Client>('clients', user.uid);
+  const { data: reviews, loading: reviewsLoading, removeItem: deleteReview } = useFirestore<ClientReview>('reviews', user.uid);
 
   const [selectedClientId, setSelectedClientId] = useState('');
   const [copiedClientId, setCopiedClientId] = useState<string | null>(null);
@@ -70,6 +71,10 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
     .sort((a, b) => b.createdAt - a.createdAt);
 
   const selectedClient = clients.find(c => c.id === selectedClientId);
+
+  if (clientsLoading && reviewsLoading && reviews.length === 0) {
+    return <ReviewsSkeleton />;
+  }
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 w-full min-w-0 pb-24 md:pb-8">

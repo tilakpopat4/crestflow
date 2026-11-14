@@ -7,7 +7,10 @@ export function useAuthSession() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSigningIn, setIsSigningIn] = useState(false);
-  const [isBlocked, setIsBlocked] = useState<boolean | null>(null);
+  const [isBlocked, setIsBlocked] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem('crestflow_is_blocked') === 'true';
+  });
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -40,7 +43,15 @@ export function useAuthSession() {
     const unsub = onSnapshot(
       doc(db, 'blocked_users', user.uid),
       (snap) => {
-        setIsBlocked(snap.exists());
+        const blocked = snap.exists();
+        setIsBlocked(blocked);
+        try {
+          if (blocked) {
+            localStorage.setItem('crestflow_is_blocked', 'true');
+          } else {
+            localStorage.removeItem('crestflow_is_blocked');
+          }
+        } catch {}
       },
       () => setIsBlocked(false)
     );

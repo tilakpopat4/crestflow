@@ -22,6 +22,7 @@ import { PwaInstallPrompt } from './components/pwa/PwaInstallPrompt';
 import Footer from './components/Footer';
 import ErrorBoundary from './components/ErrorBoundary';
 import { lazyWithRetry } from './lib/lazyWithRetry';
+import { WorkspaceShellSkeleton } from './components/skeletons';
 
 const ClientPortal = lazyWithRetry(() => import('./components/ClientPortal'));
 const AdminTab = lazyWithRetry(() => import('./components/AdminTab'));
@@ -92,12 +93,8 @@ export default function App() {
     );
   }
 
-  if (!authTimeout && (loading || (user && (profilesLoading || subscriptionState.loading || isBlocked === null)))) {
-    return (
-      <div className="flex items-center justify-center h-screen w-full bg-slate-50 dark:bg-slate-950">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 dark:border-indigo-400" />
-      </div>
-    );
+  if (!authTimeout && (loading || (user && (profilesLoading || subscriptionState.loading)))) {
+    return <WorkspaceShellSkeleton />;
   }
 
   if (user && isBlocked === true) {

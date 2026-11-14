@@ -23,16 +23,35 @@ const TermsOfServicePage = lazyWithRetry(() => import('../TermsOfServicePage'));
 const ContactPage = lazyWithRetry(() => import('../ContactPage'));
 const RefundPolicyPage = lazyWithRetry(() => import('../RefundPolicyPage'));
 const NotFoundScreen = lazyWithRetry(() => import('../NotFoundScreen'));
+import {
+  DashboardSkeleton,
+  ClientsSkeleton,
+  InvoicesSkeleton,
+  WorkLogSkeleton,
+  ReviewsSkeleton,
+  ProfileSkeleton,
+  BillingSkeleton
+} from '../skeletons';
 
-const ViewLoadingFallback = () => (
-  <div className="flex-1 flex flex-col items-center justify-center p-12 min-h-[360px] animate-in fade-in duration-150 select-none">
-    <div className="relative flex items-center justify-center mb-3.5">
-      <div className="w-9 h-9 rounded-full border-2 border-indigo-100 dark:border-indigo-950/60" />
-      <div className="absolute w-9 h-9 rounded-full border-2 border-indigo-600 dark:border-indigo-400 border-t-transparent animate-spin" />
-    </div>
-    <span className="text-xs font-medium text-slate-400 dark:text-slate-500 tracking-wide">Loading workspace...</span>
-  </div>
-);
+const getRouteSkeleton = (route: AppRoute) => {
+  switch (route) {
+    case 'clients':
+      return <ClientsSkeleton />;
+    case 'invoices':
+      return <InvoicesSkeleton />;
+    case 'work':
+      return <WorkLogSkeleton />;
+    case 'reviews':
+      return <ReviewsSkeleton />;
+    case 'profile':
+      return <ProfileSkeleton />;
+    case 'billing':
+      return <BillingSkeleton />;
+    case 'dashboard':
+    default:
+      return <DashboardSkeleton />;
+  }
+};
 
 interface AppRouterViewProps {
   currentRoute: AppRoute;
@@ -63,7 +82,7 @@ export const AppRouterView: React.FC<AppRouterViewProps> = ({
     <div className="flex-1 overflow-y-auto overflow-x-hidden relative flex flex-col">
       <div className="flex-1 flex flex-col">
         <ErrorBoundary fallbackTitle="Unable to display this view">
-          <Suspense fallback={<ViewLoadingFallback />}>
+          <Suspense fallback={getRouteSkeleton(currentRoute)}>
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={currentRoute}

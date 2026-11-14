@@ -51,7 +51,13 @@ export const SidebarProfileFooter: React.FC<SidebarProfileFooterProps> = ({
         title={isIconOnly ? (profile?.name || user?.displayName || 'Profile Settings') : "Open Profile Settings"}
       >
         {user?.photoURL ? (
-          <img src={user.photoURL} alt="Profile" className="w-8 h-8 rounded-full shrink-0" />
+          <img
+            src={user.photoURL}
+            alt="Profile"
+            className="w-8 h-8 rounded-full shrink-0"
+            referrerPolicy="no-referrer"
+            decoding="async"
+          />
         ) : (
           <div className="w-8 h-8 rounded-full bg-[#333333] text-slate-200 flex items-center justify-center text-xs font-semibold shrink-0">
             {(profile?.name || user?.displayName)?.charAt(0) || 'U'}
