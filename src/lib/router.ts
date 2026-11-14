@@ -169,6 +169,14 @@ export function resolveRoute(pathname: string, search: string = ''): RouteMatch 
     case '/contact':
       return { route: 'contact', path: '/contact', params };
 
+    case '/login':
+    case '/signin':
+      return { route: 'dashboard', path: '/login', params, isSpecialMode: 'auth' };
+
+    case '/signup':
+    case '/register':
+      return { route: 'dashboard', path: '/signup', params, isSpecialMode: 'auth' };
+
     case '/refund':
     case '/refund-policy':
     case '/cancellation':

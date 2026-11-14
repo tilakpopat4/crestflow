@@ -18,6 +18,7 @@ import { handleAdminSendCampaign } from './routes/adminCampaignRoutes';
 import { handleGetGmailConfig, handleSaveGmailConfig, handleClearAdminEmailHistory } from './routes/adminGmailRoutes';
 import { handleSeoRoutes } from './routes/seo';
 import { processDueEmailJobs } from './emailDispatcher';
+import { handleStaticAsset } from './staticHandler';
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -54,66 +55,7 @@ export default {
 
     // Only intercept /api/* routes; everything else serves static SPA assets
     if (!url.pathname.startsWith('/api/')) {
-      const response = await env.ASSETS.fetch(request);
-
-      // PWA Service Worker & Manifest headers
-      if (url.pathname === '/sw.js') {
-        const newHeaders = new Headers(response.headers);
-        newHeaders.set('Content-Type', 'application/javascript; charset=utf-8');
-        newHeaders.set('Service-Worker-Allowed', '/');
-        newHeaders.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-        return new Response(response.body, {
-          status: response.status,
-          headers: newHeaders,
-        });
-      }
-
-      if (url.pathname === '/manifest.json') {
-        const newHeaders = new Headers(response.headers);
-        newHeaders.set('Content-Type', 'application/manifest+json; charset=utf-8');
-        return new Response(response.body, {
-          status: response.status,
-          headers: newHeaders,
-        });
-      }
-
-      // 1. Missing JS/CSS Chunk Handling:
-      // When single-page-application mode is enabled in wrangler.jsonc, missing assets return 200 with index.html.
-      // If a browser tries to dynamic import a deleted/stale chunk and receives text/html instead of javascript,
-      // it throws a SyntaxError and fails hard.
-      // By returning a 404 for missing /assets/* files, Vite and lazyWithRetry immediately detect the missing chunk
-      // and perform a clean automatic reload to fetch the latest deployment.
-      if (url.pathname.startsWith('/assets/')) {
-        const ct = response.headers.get('content-type') || '';
-        if (ct.includes('text/html') || response.status === 404) {
-          return new Response('Asset not found', {
-            status: 404,
-            headers: {
-              'Content-Type': 'text/plain',
-              'Cache-Control': 'no-store, no-cache, must-revalidate',
-            },
-          });
-        }
-        return response;
-      }
-
-      // 2. Prevent Stale index.html Caching:
-      // index.html contains hashed links to all lazy chunks. It must NEVER be cached by browsers
-      // so clients always discover newly deployed chunks immediately upon reload.
-      const ct = response.headers.get('content-type') || '';
-      if (ct.includes('text/html') || url.pathname === '/' || !url.pathname.includes('.')) {
-        const headers = new Headers(response.headers);
-        headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-        headers.set('Pragma', 'no-cache');
-        headers.set('Expires', '0');
-        return new Response(response.body, {
-          status: response.status,
-          statusText: response.statusText,
-          headers,
-        });
-      }
-
-      return response;
+      return await handleStaticAsset(request, env);
     }
 
     try {

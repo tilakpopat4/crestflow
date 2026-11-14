@@ -31,6 +31,15 @@ describe('CrestFlow Multi-Page Routing Architecture', () => {
     assert.strictEqual(resolveRoute('/terms').route, 'terms');
     assert.strictEqual(resolveRoute('/contact').route, 'contact');
     assert.strictEqual(resolveRoute('/refund').route, 'refund');
+
+    // /login and /signup routes
+    const loginMatch = resolveRoute('/login');
+    assert.strictEqual(loginMatch.path, '/login');
+    assert.strictEqual(loginMatch.isSpecialMode, 'auth');
+
+    const signupMatch = resolveRoute('/signup');
+    assert.strictEqual(signupMatch.path, '/signup');
+    assert.strictEqual(signupMatch.isSpecialMode, 'auth');
   });
 
   it('resolves legacy path aliases to canonical routes', () => {

@@ -3,7 +3,7 @@
 import React from 'react';
 
 interface PrivacyPolicyPageProps {
-  onNavigate?: (route: 'privacy' | 'terms' | 'contact') => void;
+  onNavigate?: (route: 'privacy' | 'terms' | 'contact' | 'refund' | 'pricing') => void;
 }
 
 export default function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps) {
@@ -25,173 +25,103 @@ export default function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps
           Privacy Policy
         </h1>
         <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-1.5 mb-8">
-          Last updated: October 12, 2026
+          Last updated: October 2026 &bull; Review Status: Pending Legal Verification
         </p>
 
         <div className="space-y-6 text-base text-slate-600 dark:text-slate-300 leading-relaxed">
           <section>
             <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
-              1. Information We Collect
-            </h2>
-            <p className="mb-2">
-              We collect information that you provide directly when setting up and using your CrestFlow account:
-            </p>
-            <ul className="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-300">
-              <li>
-                <strong className="text-slate-800 dark:text-slate-200">Account Details:</strong> When you authenticate via Google Sign-In, we receive your name, email address, profile picture URL, and unique Google account identifier.
-              </li>
-              <li>
-                <strong className="text-slate-800 dark:text-slate-200">User Profile Settings:</strong> Your freelance business name, professional title, contact phone number, default billing basis, UPI payment ID, payment QR code data, and freelance career start date.
-              </li>
-              <li>
-                <strong className="text-slate-800 dark:text-slate-200">Client Records:</strong> Client names, email addresses, billing addresses, phone numbers, payment basis (monthly retainer or per-deliverable), payment cycle intervals, agreed rates, notes, and sub-client structures.
-              </li>
-              <li>
-                <strong className="text-slate-800 dark:text-slate-200">Work Log Entries:</strong> Deliverable titles, descriptions, completion dates, quantities, applied rates, sub-client tags, and invoice association status.
-              </li>
-              <li>
-                <strong className="text-slate-800 dark:text-slate-200">Invoices:</strong> Invoice numbers, line item deliverables, issue dates, due dates, discount and expense line items, payment statuses, and recorded payment dates.
-              </li>
-              <li>
-                <strong className="text-slate-800 dark:text-slate-200">Uploaded Video Links and Media Files:</strong> Google Drive shareable URLs, YouTube or Vimeo video links, uploaded thumbnail and media file metadata associated with your work items.
-              </li>
-              <li>
-                <strong className="text-slate-800 dark:text-slate-200">Client Reviews:</strong> Client submitter names, ratings, written reviews, and timestamps collected through your client portal or feedback forms.
-              </li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
-              2. How We Use Information
-            </h2>
-            <p className="mb-2">
-              We use the collected information strictly to operate, maintain, and provide the features of CrestFlow:
-            </p>
-            <ul className="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-300">
-              <li>To authenticate your account and securely isolate your workspace data.</li>
-              <li>To manage your client directory, track logged deliverables, and calculate financial balances.</li>
-              <li>To generate PDF invoices and receipts directly in your web browser.</li>
-              <li>To compose and send invoice emails with PDF attachments via your authorized Gmail account, strictly upon your explicit user action.</li>
-              <li>To generate optional AI work summaries using the Google Gemini API when initiated by you.</li>
-              <li>To serve the client portal and public booking profile configured by you.</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
-              3. Data Storage and Third-Party Services
-            </h2>
-            <p className="mb-2">
-              CrestFlow relies on trusted infrastructure providers to store and process data:
-            </p>
-            <ul className="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-300">
-              <li>
-                <strong className="text-slate-800 dark:text-slate-200">Authentication & Cloud Database:</strong> Google Firebase Authentication and Google Cloud Firestore. Your database records are stored in secure Firestore collections protected by user-level security rules.
-              </li>
-              <li>
-                <strong className="text-slate-800 dark:text-slate-200">Google Drive:</strong> Used via the Google Drive API (Drive v3) when you upload files directly to your personal Drive or link Drive preview videos.
-              </li>
-              <li>
-                <strong className="text-slate-800 dark:text-slate-200">Gmail:</strong> Used via authorized OAuth scopes (<code className="text-xs bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">gmail.send</code> and <code className="text-xs bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">gmail.compose</code>) exclusively to compose and send invoices from your email account upon your explicit click. We do not read your inbox, access private messages, or store your email logs.
-              </li>
-              <li>
-                <strong className="text-slate-800 dark:text-slate-200">AI Summarization:</strong> Google Gemini API (<code className="text-xs bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">@google/genai</code>) used strictly for processing work log text when you click "Summarize Work".
-              </li>
-              <li>
-                <strong className="text-slate-800 dark:text-slate-200">Hosting:</strong> Vercel and cloud web hosting infrastructure delivering application assets over HTTPS.
-              </li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
-              4. Data Sharing
+              1. Overview
             </h2>
             <p>
-              We do not sell, rent, trade, or share your personal data, client records, or Google user data with any third-party advertisers, data brokers, or marketing platforms. Data is processed solely by the infrastructure providers mentioned above to execute the service functions you request.
+              This Privacy Policy explains how <strong className="text-slate-900 dark:text-slate-100">{`{{LEGAL_ENTITY_NAME}}`}</strong> (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) collects, uses, and safeguards information when you use the CrestFlow platform (&quot;Service&quot;).
             </p>
           </section>
 
           <section>
             <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
-              5. Cookies and Local Storage
+              2. Data We Collect
             </h2>
             <p className="mb-2">
-              CrestFlow does not use tracking cookies or third-party advertising cookies. We use:
+              We collect information strictly necessary to provide freelance workflow and invoicing services:
             </p>
             <ul className="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-300">
-              <li>
-                <strong className="text-slate-800 dark:text-slate-200">Session Cookies:</strong> Maintained securely by Firebase Authentication to keep you signed in.
-              </li>
-              <li>
-                <strong className="text-slate-800 dark:text-slate-200">Local Storage:</strong> Browser localStorage is used strictly for offline performance and preference persistence:
-                <ul className="list-disc pl-5 mt-1 space-y-0.5">
-                  <li><code className="text-xs bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">theme</code>: Stores your light or dark display preference.</li>
-                  <li><code className="text-xs bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">crestflow_profile_*</code>: Local cache of your user profile to prevent layout shift on load.</li>
-                  <li><code className="text-xs bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">crestflow_profile_completed_*</code>: Records completion of initial onboarding.</li>
-                  <li><code className="text-xs bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">crestflow_anniversary_dismissed_*</code>: Records dismissed milestone alerts.</li>
-                </ul>
-              </li>
+              <li><strong className="text-slate-800 dark:text-slate-200">Account Identity:</strong> Google account profile information (email, full name, profile picture) during Google OAuth sign-in.</li>
+              <li><strong className="text-slate-800 dark:text-slate-200">Freelancer Profile:</strong> Professional title, business bio, portfolio links, and freelance start date.</li>
+              <li><strong className="text-slate-800 dark:text-slate-200">Invoicing &amp; Payout Rails:</strong> Personal UPI ID (VPA) and optional bank account details entered by you to render on your client invoices.</li>
+              <li><strong className="text-slate-800 dark:text-slate-200">Workflow Entities:</strong> Client contact details, work item logs, deliverables, and invoice line items.</li>
             </ul>
           </section>
 
           <section>
             <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
-              6. Data Retention and Deletion
-            </h2>
-            <p>
-              Your data is retained for as long as your account is active. You can delete individual client profiles, work log entries, and invoice records at any time directly through the dashboard. If you wish to permanently delete your entire account, profile, and all associated Firestore records, you may submit a request to <a href="mailto:support.crestflow@gmail.com" className="text-slate-900 dark:text-slate-100 hover:underline font-medium">support.crestflow@gmail.com</a> or via our <a href="/contact" onClick={handleContactLink} className="text-slate-900 dark:text-slate-100 hover:underline font-medium">Contact Us</a> page. We process deletion requests within 30 business days.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
-              7. Security
-            </h2>
-            <p>
-              We implement industry-standard safeguards to protect your information. User data is isolated and protected by Cloud Firestore security rules requiring user authentication for document access. All data transmission between your browser and our servers occurs over encrypted HTTPS/TLS connections. We do not store Google account passwords on our servers.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
-              8. Your Rights and Choices
+              3. How Your Information Is Used
             </h2>
             <p className="mb-2">
-              You maintain full ownership and control over your records:
+              Collected information is used solely to operate the core platform:
             </p>
             <ul className="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-300">
-              <li><strong className="text-slate-800 dark:text-slate-200">Access and Correction:</strong> You can review, update, or edit your account information and records directly in the application.</li>
-              <li><strong className="text-slate-800 dark:text-slate-200">Export:</strong> You can export work logs via CSV and download invoices as standard PDF files.</li>
-              <li><strong className="text-slate-800 dark:text-slate-200">Revoke Permissions:</strong> You can revoke CrestFlow's access to your Google account (Gmail and Drive) at any time through your Google Account Security Settings.</li>
+              <li>Generating professional invoices with dynamic QR codes for direct client payment.</li>
+              <li>Hosting branded client review portals for deliverable review and sign-off.</li>
+              <li>Automating delivery scheduling via connected Google Workspace integrations (when authorized by you).</li>
+              <li>Processing Pro subscription orders and webhooks via Razorpay.</li>
             </ul>
           </section>
 
           <section>
             <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
-              9. Changes to This Policy
+              4. Payment Processing via Razorpay
             </h2>
             <p>
-              We may update this Privacy Policy from time to time. When updates are published, the "Last updated" date at the top of this document will be revised accordingly. Continued use of the application after changes constitute acceptance of the updated policy.
+              Subscription payments for CrestFlow Pro are processed through Razorpay. We do not process, receive, or store your credit card numbers, CVVs, or net banking passwords. Transaction data is secured under Razorpay&apos;s PCI-DSS compliant payment gateway standards.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
+              5. Data Retention and Deletion
+            </h2>
+            <p>
+              Your account data and workspace records are retained as long as your account remains active. Upon written request for account deletion, your profile and workspace records are purged from active databases {`{{DATA_RETENTION_PERIOD}}`}, except where retention is legally mandated under Indian accounting and financial compliance laws.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
+              6. User Rights and Controls
+            </h2>
+            <p className="mb-2">
+              As a CrestFlow user, you maintain full control over your information:
+            </p>
+            <ul className="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-300">
+              <li>You may update or remove client, invoice, or UPI details directly within your dashboard at any time.</li>
+              <li>You may revoke Google permissions via your Google Security account settings.</li>
+              <li>You may request an export or complete deletion of your records by contacting support.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
+              7. Governing Law (India)
+            </h2>
+            <p>
+              This Privacy Policy is governed by the laws of India, including the Information Technology Act, 2000 and the Digital Personal Data Protection Act, 2023. Disputes shall be subject to the exclusive jurisdiction of courts located in <strong className="text-slate-900 dark:text-slate-100">{`{{GOVERNING_STATE_AND_CITY}}`}</strong>, India.
             </p>
           </section>
 
           <section className="pt-4 border-t border-slate-200 dark:border-slate-800">
             <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
-              10. Contact Us
+              8. Contact &amp; Grievance Officer
             </h2>
-            <p>
-              If you have any questions, concerns, or requests regarding this Privacy Policy, please contact us at:
-            </p>
-            <div className="mt-3 space-y-1 text-slate-700 dark:text-slate-300">
-              <p><strong className="text-slate-900 dark:text-slate-100">Tilak Popat Films</strong></p>
-              <p>Email: <a href="mailto:support.crestflow@gmail.com" className="text-slate-900 dark:text-slate-100 hover:underline">support.crestflow@gmail.com</a></p>
-              <p>Address: Gandhinagar, Gujarat, 382421</p>
+            <div className="space-y-1 text-slate-700 dark:text-slate-300">
+              <p><strong className="text-slate-900 dark:text-slate-100">{`{{LEGAL_ENTITY_NAME}}`}</strong></p>
+              <p>Support Email: <a href={`mailto:{{SUPPORT_EMAIL}}`} className="text-indigo-600 dark:text-indigo-400 hover:underline">{`{{SUPPORT_EMAIL}}`}</a></p>
+              <p>Address: {`{{COMPANY_ADDRESS}}`}</p>
+              <p>Grievance Officer: {`{{GRIEVANCE_OFFICER_NAME}}`} (<a href={`mailto:{{GRIEVANCE_OFFICER_EMAIL}}`} className="text-indigo-600 dark:text-indigo-400 hover:underline">{`{{GRIEVANCE_OFFICER_EMAIL}}`}</a>)</p>
               <p className="mt-2">
-                Or send us a message directly via our{' '}
-                <a href="/contact" onClick={handleContactLink} className="text-slate-900 dark:text-slate-100 hover:underline font-medium">
-                  Contact Us page
+                Response SLA: Support requests are acknowledged {`{{SUPPORT_RESPONSE_TIME}}`}. You can also reach us via the{' '}
+                <a href="/contact" onClick={handleContactLink} className="text-indigo-600 dark:text-indigo-400 hover:underline font-medium">
+                  Contact Us form
                 </a>.
               </p>
             </div>

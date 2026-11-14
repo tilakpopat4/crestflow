@@ -23,6 +23,8 @@ import Footer from './components/Footer';
 import ErrorBoundary from './components/ErrorBoundary';
 import { lazyWithRetry } from './lib/lazyWithRetry';
 import { WorkspaceShellSkeleton } from './components/skeletons';
+import PublicPageView from './components/layout/PublicPageView';
+import { updatePageMeta } from './lib/seoMeta';
 
 const ClientPortal = lazyWithRetry(() => import('./components/ClientPortal'));
 const AdminTab = lazyWithRetry(() => import('./components/AdminTab'));
@@ -61,6 +63,10 @@ export default function App() {
     const timer = setTimeout(() => setAuthTimeout(true), 3500);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    updatePageMeta(currentRoute);
+  }, [currentRoute]);
 
   const { isCollapsed: isSidebarCollapsed, toggleSidebar, collapseSidebar, expandSidebar } = useSidebarCollapse();
   const { profile, profilesLoading, handleSaveProfile } = useUserProfile(user);
@@ -101,6 +107,24 @@ export default function App() {
     return <BlockedUserScreen user={user} onLogout={handleLogout} />;
   }
 
+  // Redirect authenticated users away from explicit /login and /signup routes
+  if (user && isSpecialMode === 'auth') {
+    navigate('dashboard');
+  }
+
+  // Public supporting pages accessible to all visitors without login
+  if (['privacy', 'terms', 'refund', 'contact', 'pricing'].includes(currentRoute)) {
+    return (
+      <Suspense fallback={<ViewLoadingFallback />}>
+        <PublicPageView
+          currentRoute={currentRoute}
+          user={user}
+          onNavigate={(r) => navigate(r)}
+        />
+      </Suspense>
+    );
+  }
+
   if (!user) {
     return (
       <SignInScreen
@@ -133,7 +157,7 @@ export default function App() {
     );
   }
 
-  const isSupportingRoute = currentRoute === 'privacy' || currentRoute === 'terms' || currentRoute === 'contact' || currentRoute === 'refund';
+  const isSupportingRoute = ['privacy', 'terms', 'contact', 'refund', 'pricing'].includes(currentRoute);
   const hasCompletedProfile = Boolean(
     isOnboardingCompleted ||
     (user && localStorage.getItem(`crestflow_onboarded_${user.uid}`)) ||
@@ -147,16 +171,7 @@ export default function App() {
       <div className="h-screen w-full bg-slate-50 dark:bg-slate-950 overflow-y-auto flex flex-col justify-between">
         <ErrorBoundary fallbackTitle="Workspace Setup">
           <Suspense fallback={<ViewLoadingFallback />}>
-            <UserOnboardingModal
-              user={user}
-              profile={profile}
-              isOpen={true}
-              onLogout={handleLogout}
-              onComplete={() => {
-                localStorage.setItem(`crestflow_onboarded_${user.uid}`, 'true');
-                setIsOnboardingCompleted(true);
-              }}
-            />
+            <UserOnboardingModal user={user} profile={profile} isOpen={true} onLogout={handleLogout} onComplete={() => { localStorage.setItem(`crestflow_onboarded_${user.uid}`, 'true'); setIsOnboardingCompleted(true); }} />
           </Suspense>
         </ErrorBoundary>
         <Footer onNavigate={(r) => navigate(r)} />
@@ -262,9 +277,7 @@ export default function App() {
             onClose={() => setIsSubscriptionModalOpen(false)}
             user={user}
             profile={profile}
-            onSubscriptionUpdated={async () => {
-              await subscriptionState.refreshSubscription();
-            }}
+            onSubscriptionUpdated={async () => { await subscriptionState.refreshSubscription(); }}
             isMandatory={!subscriptionState.hasAccess}
             onLogout={handleLogout}
           />
@@ -273,13 +286,7 @@ export default function App() {
 
       {user && isAnniversaryModalOpen && (
         <Suspense fallback={null}>
-          <AnniversaryModal
-            isOpen={isAnniversaryModalOpen}
-            onClose={closeAnniversaryModal}
-            milestone={journey?.currentAnniversary || null}
-            stats={journey}
-            freelancerName={profile?.name || user.displayName || undefined}
-          />
+          <AnniversaryModal isOpen={isAnniversaryModalOpen} onClose={closeAnniversaryModal} milestone={journey?.currentAnniversary || null} stats={journey} freelancerName={profile?.name || user.displayName || undefined} />
         </Suspense>
       )}
 
