@@ -129,8 +129,8 @@ service cloud.firestore {
     match /profiles/{profileId} {
       allow list: if true;
       allow get: if isOwner(profileId) || resource.data.isPublicProfile == true || !('isPublicProfile' in resource.data) || isAdmin();
-      allow create: if (isOwner(profileId) && isValidProfile(request.resource.data)) || isAdmin();
-      allow update: if (isOwner(profileId) && isValidProfile(request.resource.data) && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['subscriptionStatus', 'subscriptionPlan', 'currentPeriodEnd', 'currentPeriodStart', 'razorpaySubscriptionId', 'cancelAtPeriodEnd']))) || isAdmin();
+      allow create: if (isOwner(profileId) && isValidProfile(request.resource.data) && (!request.resource.data.keys().hasAny(['admin', 'isAdmin', 'is_admin', 'plan', 'subscriptionPlan', 'subscriptionStatus', 'accessUntil', 'trialUsed', 'razorpaySubscriptionId', 'cancelAtPeriodEnd']))) || isAdmin();
+      allow update: if (isOwner(profileId) && isValidProfile(request.resource.data) && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['admin', 'isAdmin', 'is_admin', 'plan', 'subscriptionPlan', 'subscriptionStatus', 'currentPeriodEnd', 'currentPeriodStart', 'razorpaySubscriptionId', 'cancelAtPeriodEnd', 'accessUntil', 'trialUsed', 'createdAt']))) || isAdmin();
       allow delete: if isOwner(profileId) || isAdmin();
 
       // Private Settings Subcollection (geminiApiKey, bank accounts)
@@ -195,7 +195,7 @@ service cloud.firestore {
     // 11. System Settings (Global features like subscription master toggle)
     match /system_settings/{settingId} {
       allow read: if true;
-      allow write: if isSignedIn();
+      allow write: if false;
     }
 
     // 12. Subscriptions (Client read-only for own doc; never write)
@@ -209,23 +209,28 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // 14. Webhook Events (Idempotency and audit ledger; client access denied)
+    // 14. Usage Ledger (Monthly invoice usage counters; client access denied)
+    match /usage_ledger/{ledgerId} {
+      allow read, write: if false;
+    }
+
+    // 15. Webhook Events (Idempotency and audit ledger; client access denied)
     match /webhook_events/{eventId} {
       allow read, write: if false;
     }
 
-    // 15. Legacy Webhook Deduplication Ledger (Client access denied)
+    // 16. Legacy Webhook Deduplication Ledger (Client access denied)
     match /processed_events/{eventId} {
       allow read, write: if false;
     }
 
-    // 14. Subscription Whitelist (Read for authenticated users; write restricted to Admin)
+    // 17. Subscription Whitelist (Read for authenticated users; write restricted to Admin)
     match /subscription_whitelist/{email} {
       allow read: if isSignedIn();
       allow write: if isAdmin();
     }
 
-    // 15. Admin Google Accounts (Read for authenticated users; write restricted to Admin)
+    // 18. Admin Google Accounts (Read for authenticated users; write restricted to Admin)
     match /admin_users/{email} {
       allow read: if isSignedIn();
       allow write: if isAdmin();

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { db } from '../firebase';
+import { db, auth } from '../firebase';
 import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 
 const STORAGE_KEY = 'crestflow_ai_summarizer_enabled';
@@ -46,18 +46,33 @@ export async function setAiSummarizerFeatureEnabled(enabled: boolean): Promise<v
     } catch {}
   }
 
-  // Persist to Firestore system_settings (skip in Node.js test environments)
+  // Persist to server endpoint /api/admin/settings (trusted path)
   if (!isNode) {
     try {
+      const token = await auth.currentUser?.getIdToken();
+      if (token) {
+        const res = await fetch('/api/admin/settings', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            settingId: 'ai_config',
+            data: { isEnabled: enabled, updatedAt: Date.now() },
+          }),
+        });
+        if (res.ok) return;
+      }
       await Promise.race([
         setDoc(doc(db, 'system_settings', 'ai_config'), {
           isEnabled: enabled,
-          updatedAt: Date.now()
+          updatedAt: Date.now(),
         }, { merge: true }),
-        new Promise((resolve) => setTimeout(resolve, 1500))
+        new Promise((resolve) => setTimeout(resolve, 1500)),
       ]);
     } catch (err) {
-      console.warn('[aiConfig] Firestore save warning:', err);
+      console.warn('[aiConfig] Save warning:', err);
     }
   }
 }

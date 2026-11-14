@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { db } from '../firebase';
+import { db, auth } from '../firebase';
 import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 
 export interface FooterLink {
@@ -88,12 +88,27 @@ export async function saveFooterConfig(config: FooterConfig): Promise<void> {
   window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: { config } }));
 
   try {
+    const token = await auth.currentUser?.getIdToken();
+    if (token) {
+      const res = await fetch('/api/admin/settings', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          settingId: 'footer_config',
+          data: { ...config, updatedAt: Date.now() },
+        }),
+      });
+      if (res.ok) return;
+    }
     await setDoc(doc(db, 'system_settings', 'footer_config'), {
       ...config,
       updatedAt: Date.now(),
     }, { merge: true });
   } catch (err) {
-    console.warn('[footerConfig] Firestore save warning:', err);
+    console.warn('[footerConfig] Save warning:', err);
   }
 }
 

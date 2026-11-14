@@ -19,6 +19,8 @@ import { handleGetGmailConfig, handleSaveGmailConfig, handleClearAdminEmailHisto
 import { handleSeoRoutes } from './routes/seo';
 import { processDueEmailJobs } from './emailDispatcher';
 import { handleStaticAsset } from './staticHandler';
+import { handleCreateClient, handleCreateInvoice } from './routes/limits';
+import { handleAdminSettings } from './routes/adminSettings';
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -189,6 +191,19 @@ export default {
       }
       if (url.pathname === '/api/admin/clear-email-history' && request.method === 'POST') {
         return await handleClearAdminEmailHistory(request, env);
+      }
+
+      // 18. POST /api/create-client & POST /api/create-invoice (Server-enforced free limits)
+      if (url.pathname === '/api/create-client' && request.method === 'POST') {
+        return await handleCreateClient(request, env);
+      }
+      if (url.pathname === '/api/create-invoice' && request.method === 'POST') {
+        return await handleCreateInvoice(request, env);
+      }
+
+      // 19. POST /api/admin/settings (Trusted server path for system_settings & footer_config)
+      if (url.pathname === '/api/admin/settings' && request.method === 'POST') {
+        return await handleAdminSettings(request, env);
       }
 
       return jsonResponse({ error: 'Endpoint not found' }, 404);

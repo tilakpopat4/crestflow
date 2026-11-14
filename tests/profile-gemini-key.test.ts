@@ -96,9 +96,26 @@ describe('Gemini API Key Persistence & Profile State Management', () => {
       'firestore.rules must allow public listing/queries of profiles collection'
     );
     assert.ok(
-      rulesContent.includes('allow create: if (isOwner(profileId) && isValidProfile(request.resource.data)) || isAdmin();') ||
-      rulesContent.includes('allow create: if isOwner(profileId) && isValidProfile(request.resource.data);'),
+      rulesContent.includes('isOwner(profileId) && isValidProfile(request.resource.data)'),
       'firestore.rules must allow create for owners without restricting auth UID formats'
+    );
+    assert.ok(
+      rulesContent.includes("!request.resource.data.keys().hasAny(['admin', 'isAdmin', 'is_admin'"),
+      'firestore.rules must protect sensitive fields on profile create'
+    );
+    assert.ok(
+      rulesContent.includes("!request.resource.data.diff(resource.data).affectedKeys().hasAny(['admin', 'isAdmin', 'is_admin'"),
+      'firestore.rules must protect sensitive and immutable fields on profile update'
+    );
+    assert.ok(
+      rulesContent.includes('match /system_settings/{settingId} {\n      allow read: if true;\n      allow write: if false;') ||
+      rulesContent.includes('match /system_settings/{settingId} {\r\n      allow read: if true;\r\n      allow write: if false;'),
+      'firestore.rules must block client writes to system_settings'
+    );
+    assert.ok(
+      rulesContent.includes('match /usage_ledger/{ledgerId} {\n      allow read, write: if false;') ||
+      rulesContent.includes('match /usage_ledger/{ledgerId} {\r\n      allow read, write: if false;'),
+      'firestore.rules must block client reads and writes to usage_ledger'
     );
   });
 });

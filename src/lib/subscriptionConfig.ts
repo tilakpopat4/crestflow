@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { db } from '../firebase';
+import { db, auth } from '../firebase';
 import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 
 const STORAGE_KEY = 'crestflow_subscriptions_enabled';
@@ -30,14 +30,29 @@ export async function setSubscriptionFeatureEnabled(enabled: boolean): Promise<v
   // Broadcast event in current window
   window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: { enabled } }));
 
-  // Persist to Firestore
+  // Persist to server endpoint /api/admin/settings (trusted path)
   try {
+    const token = await auth.currentUser?.getIdToken();
+    if (token) {
+      const res = await fetch('/api/admin/settings', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          settingId: 'subscriptions',
+          data: { isEnabled: enabled, updatedAt: Date.now() },
+        }),
+      });
+      if (res.ok) return;
+    }
     await setDoc(doc(db, 'system_settings', 'subscriptions'), {
       isEnabled: enabled,
-      updatedAt: Date.now()
+      updatedAt: Date.now(),
     }, { merge: true });
   } catch (err) {
-    console.warn('[subscriptionConfig] Firestore save warning:', err);
+    console.warn('[subscriptionConfig] Save warning:', err);
   }
 }
 

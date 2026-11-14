@@ -106,9 +106,8 @@ export const UserOnboardingModal: React.FC<UserOnboardingModalProps> = ({
               {[1, 2, 3].map((s) => (
                 <span
                   key={s}
-                  className={`h-1.5 rounded-full transition-all duration-120 ${
-                    s === step ? 'w-6 bg-indigo-600 dark:bg-indigo-400' : s < step ? 'w-3 bg-indigo-200 dark:bg-indigo-900/60' : 'w-3 bg-slate-200 dark:bg-slate-800'
-                  }`}
+                  className={`h-1.5 rounded-full transition-all duration-120 ${s === step ? 'w-6 bg-indigo-600 dark:bg-indigo-400' : s < step ? 'w-3 bg-indigo-200 dark:bg-indigo-900/60' : 'w-3 bg-slate-200 dark:bg-slate-800'
+                    }`}
                 />
               ))}
             </div>
@@ -149,11 +148,10 @@ export const UserOnboardingModal: React.FC<UserOnboardingModalProps> = ({
                       key={spec}
                       type="button"
                       onClick={() => setTitle(spec)}
-                      className={`px-2 py-0.5 text-[10px] rounded transition-colors border-none cursor-pointer ${
-                        title === spec
+                      className={`px-2 py-0.5 text-[10px] rounded transition-colors border-none cursor-pointer ${title === spec
                           ? 'bg-[#282828] text-white font-medium'
                           : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                      }`}
+                        }`}
                     >
                       {spec}
                     </button>
