@@ -13,10 +13,10 @@ interface SignInScreenProps {
 
 /**
  * SignInScreen renders the editorial landing and sign-in view for CrestFlow:
- * - Unified seamless background across entire screen (#282828) matching the website footer
+ * - Solid studio grey background across entire main content screen (#333333), eliminating side highlighting/darkening
  * - Desktop: Left column (Headline, subtitle, workflow diagram) + Right column (SignInCard)
  * - Mobile (/adapt): Clean stacked hierarchy (Headline -> SignInCard -> Workflow illustration)
- * - Website standard Footer: 100% unified with the page background across all devices
+ * - Website standard Footer: Kept distinct as before with its own footer styling (#282828)
  */
 export const SignInScreen: React.FC<SignInScreenProps> = ({
   isAdminRoute,
@@ -29,7 +29,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
   // If admin route, display the focused admin sign-in card
   if (isAdminRoute) {
     return (
-      <div className="min-h-screen w-full flex flex-col justify-between font-sans relative select-none text-slate-100 bg-[#282828]">
+      <div className="min-h-screen w-full flex flex-col justify-between font-sans relative select-none text-slate-100 bg-[#333333]">
         <main className="flex-1 flex items-center justify-center p-4 sm:p-6 relative z-10 max-w-md mx-auto w-full">
           <SignInCard
             isAdminRoute={isAdminRoute}
@@ -44,7 +44,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
   }
 
   return (
-    <div className="min-h-screen w-full flex flex-col justify-between font-sans relative overflow-x-hidden select-none text-slate-100 bg-[#282828]">
+    <div className="min-h-screen w-full flex flex-col justify-between font-sans relative overflow-x-hidden select-none text-slate-100 bg-[#333333]">
       {/* Main Hero & Placement Section (fullscreen-responsive) */}
       <main className="flex-1 flex items-center justify-center px-4 py-8 sm:px-8 md:px-12 lg:px-16 xl:px-20 lg:py-16 relative z-10 max-w-7xl 2xl:max-w-[1440px] mx-auto w-full">
         <motion.div
