@@ -165,13 +165,13 @@ export default function App() {
     (profile?.name && profile?.professionalTitle)
   );
 
-  // 1. Let the user first complete & set up their profile before showing subscription
-  if (user && !profilesLoading && !hasCompletedProfile && !isSupportingRoute) {
+  // 1. Mandatory subscription wall: without paying (at least 7-day trial), no one can access the tool
+  if (user && subscriptionState.isSubscriptionFeatureEnabled && !subscriptionState.hasAccess && !isSupportingRoute) {
     return (
-      <div className="h-screen w-full bg-slate-50 dark:bg-slate-950 overflow-y-auto flex flex-col justify-between">
-        <ErrorBoundary fallbackTitle="Workspace Setup">
+      <div className="h-screen w-full bg-slate-50 dark:bg-slate-950 overflow-y-auto flex flex-col">
+        <ErrorBoundary fallbackTitle="Subscription Activation">
           <Suspense fallback={<ViewLoadingFallback />}>
-            <UserOnboardingModal user={user} profile={profile} isOpen={true} onLogout={handleLogout} onComplete={() => { localStorage.setItem(`crestflow_onboarded_${user.uid}`, 'true'); setIsOnboardingCompleted(true); }} />
+            <SubscriptionWallPage user={user} profile={profile} subscriptionState={subscriptionState} onLogout={handleLogout} onNavigate={r => navigate(r)} />
           </Suspense>
         </ErrorBoundary>
         <Footer onNavigate={(r) => navigate(r)} />
@@ -179,13 +179,13 @@ export default function App() {
     );
   }
 
-  // 2. Once profile is set up, enforce compulsory subscription to access the tool
-  if (user && subscriptionState.isSubscriptionFeatureEnabled && !subscriptionState.hasAccess && !isSupportingRoute) {
+  // 2. Once subscribed / trial active, user completes first-time onboarding
+  if (user && !profilesLoading && !hasCompletedProfile && !isSupportingRoute) {
     return (
-      <div className="h-screen w-full bg-slate-50 dark:bg-slate-950 overflow-y-auto flex flex-col">
-        <ErrorBoundary fallbackTitle="Subscription Activation">
+      <div className="h-screen w-full bg-slate-50 dark:bg-slate-950 overflow-y-auto flex flex-col justify-between">
+        <ErrorBoundary fallbackTitle="Workspace Setup">
           <Suspense fallback={<ViewLoadingFallback />}>
-            <SubscriptionWallPage user={user} profile={profile} subscriptionState={subscriptionState} onLogout={handleLogout} onNavigate={r => navigate(r)} />
+            <UserOnboardingModal user={user} profile={profile} isOpen={true} onLogout={handleLogout} onComplete={() => { localStorage.setItem(`crestflow_onboarded_${user.uid}`, 'true'); setIsOnboardingCompleted(true); }} />
           </Suspense>
         </ErrorBoundary>
         <Footer onNavigate={(r) => navigate(r)} />

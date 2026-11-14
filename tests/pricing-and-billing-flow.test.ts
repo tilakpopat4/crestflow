@@ -181,4 +181,22 @@ describe('Pricing Page, Plans Disclosure & Server-Governed Access Suite', () => 
     const emptyResult = await cancelRazorpaySubscription(mockEnv, '');
     assert.equal(emptyResult.status, 'cancelled');
   });
+
+  it('6. Compulsory Paywall: subscriptions enabled by default and SubscriptionWall precedes workspace access', async () => {
+    const { getSubscriptionFeatureEnabledSync } = await import('../src/lib/subscriptionConfig');
+    assert.equal(getSubscriptionFeatureEnabledSync(), true, 'Compulsory paywall must be enabled by default');
+
+    const appPath = path.resolve(__dirname, '../src/App.tsx');
+    const appContent = fs.readFileSync(appPath, 'utf8');
+
+    // Ensure SubscriptionWallPage check comes before UserOnboardingModal and workspace layout
+    const wallIndex = appContent.indexOf('SubscriptionWallPage');
+    const onboardingIndex = appContent.indexOf('UserOnboardingModal');
+    const dashboardIndex = appContent.indexOf('sidebarTab');
+
+    assert.ok(wallIndex !== -1, 'App.tsx must include SubscriptionWallPage');
+    assert.ok(onboardingIndex !== -1, 'App.tsx must include UserOnboardingModal');
+    assert.ok(wallIndex < onboardingIndex, 'SubscriptionWallPage must be evaluated before UserOnboardingModal');
+    assert.ok(wallIndex < dashboardIndex, 'SubscriptionWallPage must be evaluated before workspace dashboard');
+  });
 });

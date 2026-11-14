@@ -7,14 +7,17 @@ const EVENT_NAME = 'crestflow:subscription-config-changed';
 
 /**
  * Returns whether subscriptions are currently enabled.
- * Default is false (subscriptions disabled until explicitly enabled in admin portal).
+ * Default is true (compulsory paywall active by default; users cannot use tool without paying).
  */
 export function getSubscriptionFeatureEnabledSync(): boolean {
   try {
     const val = localStorage.getItem(STORAGE_KEY);
-    return val === 'true';
+    if (val !== null) {
+      return val === 'true';
+    }
+    return true;
   } catch {
-    return false;
+    return true;
   }
 }
 
@@ -86,18 +89,25 @@ export function useSubscriptionConfig() {
       unsubscribe = onSnapshot(doc(db, 'system_settings', 'subscriptions'), (snap) => {
         if (snap.exists()) {
           const data = snap.data();
-          const remoteEnabled = Boolean(data?.isEnabled);
+          const remoteEnabled = data?.isEnabled !== undefined ? Boolean(data.isEnabled) : true;
           setIsEnabled(remoteEnabled);
           try {
             localStorage.setItem(STORAGE_KEY, remoteEnabled ? 'true' : 'false');
+          } catch {}
+        } else {
+          setIsEnabled(true);
+          try {
+            localStorage.setItem(STORAGE_KEY, 'true');
           } catch {}
         }
         setLoading(false);
       }, (err) => {
         console.warn('[subscriptionConfig] onSnapshot error:', err);
+        setIsEnabled(true);
         setLoading(false);
       });
     } catch {
+      setIsEnabled(true);
       setLoading(false);
     }
 
