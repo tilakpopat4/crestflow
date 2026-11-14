@@ -108,7 +108,9 @@ export default function Footer({
 
   const socialLinks = (
     <ul className="-ml-1.5 flex items-center gap-0.5 sm:-mr-2 sm:ml-0 md:gap-1">
-      {config.socialLinks.map((item) => (
+      {config.socialLinks
+        .filter((item) => Boolean(item.url && item.url.trim() && item.url !== '#'))
+        .map((item) => (
         <li key={item.id}>
           <a
             href={item.url}

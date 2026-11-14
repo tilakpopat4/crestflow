@@ -161,7 +161,12 @@ export default function GlobalHeader({
           <Logo className="w-7 h-7" />
           <span className="font-extrabold text-slate-900 dark:text-white tracking-tight text-sm">
             {subscriptionState?.hasAccess && !subscriptionState?.isTrialing ? (
-              <>CrestFlow<span className="text-indigo-600 dark:text-indigo-400 font-bold">Pro</span></>
+              <span className="inline-flex items-center gap-1.5">
+                <span>CrestFlow</span>
+                <span className="px-1.5 py-0.5 text-[9px] font-semibold tracking-wider uppercase rounded bg-slate-100 dark:bg-[#282828] text-slate-700 dark:text-slate-200 shrink-0">
+                  PRO
+                </span>
+              </span>
             ) : (
               'CrestFlow'
             )}

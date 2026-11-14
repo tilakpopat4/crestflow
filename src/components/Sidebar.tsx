@@ -92,10 +92,15 @@ export default function Sidebar({
                   animate={{ opacity: 1, width: 'auto' }}
                   exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, width: 0 }}
                   transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
-                  className="text-xl font-bold tracking-tight text-slate-900 overflow-hidden whitespace-nowrap"
+                  className="text-xl font-bold tracking-tight text-white whitespace-nowrap"
                 >
                   {isUpgradedPro ? (
-                    <>CrestFlow<span className="text-indigo-600 dark:text-indigo-400 font-bold">Pro</span></>
+                    <span className="inline-flex items-center gap-1.5">
+                      <span>CrestFlow</span>
+                      <span className="px-1.5 py-0.5 text-[10px] font-semibold tracking-wider uppercase rounded bg-[#282828] text-slate-200 shrink-0">
+                        PRO
+                      </span>
+                    </span>
                   ) : (
                     'CrestFlow'
                   )}

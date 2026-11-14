@@ -47,6 +47,7 @@ export const DEFAULT_FOOTER_CONFIG: FooterConfig = {
     { id: 'cookies', name: 'Cookies', url: '/terms', route: 'terms' },
   ],
   socialLinks: [
+    { id: 'soc_ig', platform: 'instagram', name: 'CrestFlow on Instagram', url: 'https://instagram.com' },
     { id: 'soc_x', platform: 'x', name: 'CrestFlow on X', url: 'https://x.com' },
     { id: 'soc_gh', platform: 'github', name: 'CrestFlow on GitHub', url: 'https://github.com' },
     { id: 'soc_li', platform: 'linkedin', name: 'CrestFlow on LinkedIn', url: 'https://linkedin.com' },
