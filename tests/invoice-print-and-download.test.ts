@@ -2,6 +2,7 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert';
 import fs from 'node:fs';
 import path from 'node:path';
+import { buildUpiPaymentUri, isValidUpiId } from '../src/lib/upiQr';
 
 describe('Invoice Printing & Offscreen PDF Generation Suite', () => {
   const invoiceRendererSource = fs.readFileSync(
@@ -75,5 +76,39 @@ describe('Invoice Printing & Offscreen PDF Generation Suite', () => {
       /const\s+singlePageLimit\s*=\s*isWorkSummary\s*\?\s*16\s*:\s*12/,
       'singlePageLimit must accommodate up to 12 items on a single page'
     );
+  });
+
+  test('4. eliminate developer UPI ID defaults and enforce UPI VPA validation', () => {
+    const invoiceTabSource = fs.readFileSync(
+      path.join(process.cwd(), 'src/components/InvoiceTab.tsx'),
+      'utf-8'
+    );
+
+    // Verify zero occurrences of developer personal UPI ID
+    assert.doesNotMatch(
+      invoiceRendererSource,
+      /tilakpopat2007-1@okaxis/,
+      'invoiceRenderer must never contain developer personal UPI ID'
+    );
+    assert.doesNotMatch(
+      invoiceTabSource,
+      /tilakpopat2007-1@okaxis/,
+      'InvoiceTab must never contain developer personal UPI ID'
+    );
+
+    // Verify buildUpiPaymentUri returns empty string when upiId is invalid or absent
+    assert.strictEqual(buildUpiPaymentUri('', 'Payee', 100), '');
+    assert.strictEqual(buildUpiPaymentUri('invalid-upi', 'Payee', 100), '');
+    assert.strictEqual(
+      buildUpiPaymentUri('freelancer@okhdfcbank', 'Payee', 100),
+      'upi://pay?pa=freelancer@okhdfcbank&pn=Payee&tn=Invoice%20Payment&am=100&cu=INR'
+    );
+
+    // Verify VPA regex validation
+    assert.strictEqual(isValidUpiId('creator@bank'), true);
+    assert.strictEqual(isValidUpiId('john.doe12@okaxis'), true);
+    assert.strictEqual(isValidUpiId('not-a-vpa'), false);
+    assert.strictEqual(isValidUpiId(''), false);
+    assert.strictEqual(isValidUpiId(null), false);
   });
 });

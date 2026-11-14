@@ -132,6 +132,7 @@ export const AppRouterView: React.FC<AppRouterViewProps> = ({
                     profile={profile}
                     initialSearchQuery={globalSearchQuery}
                     onNavigateToClients={() => onNavigate('clients')}
+                    onNavigateToProfile={() => onNavigate('profile')}
                     subscriptionState={subscriptionState}
                     onOpenSubscriptionModal={onOpenSubscriptionModal}
                   />

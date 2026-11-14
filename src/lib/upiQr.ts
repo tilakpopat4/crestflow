@@ -3,14 +3,21 @@ import ReactDOMServer from 'react-dom/server';
 import QRCode from 'qrcode';
 import { QRCodeSVG } from 'qrcode.react';
 
+export const UPI_VPA_REGEX = /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/;
+
+export function isValidUpiId(upiId?: string | null): boolean {
+  if (!upiId) return false;
+  return UPI_VPA_REGEX.test(upiId.trim());
+}
+
 export function buildUpiPaymentUri(
   upiId: string,
   payeeName: string,
   amount: number,
   transactionNote: string = 'Invoice Payment'
 ): string {
-  const cleanUpiId = upiId.trim().replace(/\s+/g, '');
-  if (!cleanUpiId) return '';
+  const cleanUpiId = (upiId || '').trim().replace(/\s+/g, '');
+  if (!cleanUpiId || !isValidUpiId(cleanUpiId)) return '';
 
   // Clean payee name and note (sanitize characters for clean URL encoding)
   const cleanName = payeeName.replace(/[^\w\s.-]/g, '').trim() || 'Payee';

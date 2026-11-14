@@ -4,6 +4,7 @@ import { UserProfile } from '../../types';
 import { db } from '../../firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { generateUUID } from '../../lib/utils';
+import { isValidUpiId } from '../../lib/upiQr';
 
 interface UserOnboardingModalProps {
   user: User;
@@ -47,6 +48,10 @@ export const UserOnboardingModal: React.FC<UserOnboardingModalProps> = ({
     if (!isProfileValid) {
       setError('Name and Role are compulsory to set up your profile.');
       setStep(1);
+      return;
+    }
+    if (step === 3 && upiId.trim() && !isValidUpiId(upiId.trim())) {
+      setError('Please enter a valid UPI ID (e.g. yourname@bank) or skip.');
       return;
     }
     setSaving(true);
@@ -219,7 +224,7 @@ export const UserOnboardingModal: React.FC<UserOnboardingModalProps> = ({
             </div>
             <div>
               <label className={LBL_CLS}>Your UPI VPA</label>
-              <input type="text" value={upiId} onChange={(e) => setUpiId(e.target.value)} placeholder="e.g., username@okaxis or creator@okhdfcbank" className={`${INPUT_CLS} font-mono text-xs`} />
+              <input type="text" value={upiId} onChange={(e) => setUpiId(e.target.value)} placeholder="e.g. yourname@bank" className={`${INPUT_CLS} font-mono text-xs`} />
               <span className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 block leading-normal">
                 Standard UPI handles supported (GPay, PhonePe, Paytm, BHIM).
               </span>

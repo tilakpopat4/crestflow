@@ -14,7 +14,7 @@ import PaymentDateModal from './PaymentDateModal';
 import { formatLocalDateToYMD } from '../lib/dateUtils';
 import StatusBadge from './StatusBadge';
 import { renderDocumentHtml, printDocumentHtml, generateOffscreenPdfBlob } from '../lib/invoiceRenderer';
-import { generateUpiQrCodeDataUrl, buildUpiPaymentUri } from '../lib/upiQr';
+import { generateUpiQrCodeDataUrl, buildUpiPaymentUri, isValidUpiId } from '../lib/upiQr';
 import { formatInvoiceNumber, getNextInvoiceNumber } from '../lib/invoiceUtils';
 import { SubscriptionState } from '../hooks/useSubscription';
 import { InvoicesSkeleton } from './skeletons';
@@ -24,6 +24,7 @@ interface InvoiceTabProps {
   profile: UserProfile | null;
   initialSearchQuery?: string;
   onNavigateToClients?: () => void;
+  onNavigateToProfile?: () => void;
   subscriptionState?: SubscriptionState;
   onOpenSubscriptionModal?: () => void;
 }
@@ -33,6 +34,7 @@ export default function InvoiceTab({
   profile,
   initialSearchQuery = '',
   onNavigateToClients,
+  onNavigateToProfile,
   subscriptionState,
   onOpenSubscriptionModal
 }: InvoiceTabProps) {
@@ -456,16 +458,19 @@ export default function InvoiceTab({
   const grandTotal = Math.max(0, total - discount + extraCost);
 
   useEffect(() => {
-    if (profile?.upiId && profile.upiId !== 'Not specified') {
+    if (profile?.upiId && profile.upiId !== 'Not specified' && isValidUpiId(profile.upiId)) {
       setCustomUpiId(profile.upiId);
-    } else if (!customUpiId) {
-      setCustomUpiId('tilakpopat2007-1@okaxis');
+    } else {
+      setCustomUpiId('');
     }
   }, [profile]);
 
-  const payeeName = profile?.name || user?.displayName || 'Tilak Popat';
-  const activeUpi = customUpiId.trim() || (profile?.upiId && profile.upiId !== 'Not specified' ? profile.upiId : 'tilakpopat2007-1@okaxis');
-  const activeUpiUri = buildUpiPaymentUri(activeUpi, payeeName, grandTotal, 'Invoice Payment');
+  const hasSavedUpi = Boolean(profile?.upiId && profile.upiId !== 'Not specified' && isValidUpiId(profile.upiId));
+  const payeeName = profile?.name || user?.displayName || 'Creator';
+  const activeUpi = (customUpiId.trim() && isValidUpiId(customUpiId.trim()))
+    ? customUpiId.trim()
+    : (hasSavedUpi ? profile!.upiId!.trim() : '');
+  const activeUpiUri = activeUpi ? buildUpiPaymentUri(activeUpi, payeeName, grandTotal, 'Invoice Payment') : '';
 
   const handleEditInvoice = (inv: Invoice) => {
     setSelectedClientId(inv.clientId);
@@ -567,12 +572,12 @@ export default function InvoiceTab({
       : currentBillingDeliverables;
 
     let qrDataUrl = '';
-    const senderName = profile?.name || 'Tilak Popat';
-    const upiId = (customUpiId && customUpiId.trim())
-      || (profile?.upiId && profile.upiId !== 'Not specified' ? profile.upiId.trim() : '')
-      || 'tilakpopat2007-1@okaxis';
+    const senderName = profile?.name || user?.displayName || 'Creator';
+    const upiId = (customUpiId && customUpiId.trim() && isValidUpiId(customUpiId.trim()))
+      ? customUpiId.trim()
+      : (hasSavedUpi ? profile!.upiId!.trim() : '');
 
-    if (!isWorkSummary && upiId) {
+    if (!isWorkSummary && upiId && isValidUpiId(upiId)) {
       try {
         const invShortId = formatInvoiceNumber(targetInvoice, invoices);
         const res = await generateUpiQrCodeDataUrl(upiId, senderName, targetInvoice.totalAmount, `Payment for Invoice ${invShortId}`);
@@ -909,6 +914,25 @@ export default function InvoiceTab({
               className="font-medium text-slate-300 hover:text-white hover:underline cursor-pointer"
             >
               Upgrade to Pro &rarr;
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Missing UPI Notice */}
+      {!hasSavedUpi && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs">
+          <div className="flex items-center gap-2.5 text-slate-700 dark:text-slate-300">
+            <AlertCircle size={16} className="text-slate-400 shrink-0" />
+            <span>Add your UPI ID in Settings to enable QR code payments on invoices.</span>
+          </div>
+          {onNavigateToProfile && (
+            <button
+              type="button"
+              onClick={onNavigateToProfile}
+              className="self-start sm:self-auto px-3 py-1.5 bg-[#282828] hover:bg-[#383838] text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+            >
+              Add UPI ID
             </button>
           )}
         </div>

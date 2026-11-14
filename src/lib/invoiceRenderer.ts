@@ -1,5 +1,5 @@
 import { Invoice, Client, UserProfile, InvoiceDeliverable } from '../types';
-import { generateUpiQrCodeDataUrl } from './upiQr';
+import { generateUpiQrCodeDataUrl, isValidUpiId } from './upiQr';
 import { preprocessElementStylesForPdf, replaceUnsupportedColorsWithRgb } from './pdfColorEngine';
 import { formatInvoiceNumber } from './invoiceUtils';
 
@@ -30,9 +30,9 @@ export function renderDocumentHtml(params: {
   const senderTitle = params.profile?.professionalTitle || params.profile?.servicesDescription || 'Freelancer';
   const senderEmail = params.profile?.email || 'you@example.com';
   const senderPhone = params.profile?.phone || '+91 00000 00000';
-  const upiId = (params.customUpiId && params.customUpiId.trim())
-    || (params.profile?.upiId && params.profile.upiId !== 'Not specified' ? params.profile.upiId.trim() : '')
-    || 'tilakpopat2007-1@okaxis';
+  const rawUpi = (params.customUpiId && params.customUpiId.trim())
+    || (params.profile?.upiId && params.profile.upiId !== 'Not specified' ? params.profile.upiId.trim() : '');
+  const upiId = isValidUpiId(rawUpi) ? rawUpi : '';
 
   const reels = params.invoice.reels || [];
   const discount = params.invoice.discountAmount || 0;
@@ -349,41 +349,50 @@ export function renderDocumentHtml(params: {
             </div>
 
             <!-- Bottom Payment Details & UPI QR Box (No Bank Transfer) -->
-            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box; margin-top: 10px; padding-top: 10px; border-top: 1px solid #cbd5e1;">
-              <!-- Left: Pay via UPI -->
-              <div style="flex: 1; padding-right: 28px;">
-                <div style="font-size: 9.5px; font-weight: 700; letter-spacing: 2px; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
-                  P A Y &nbsp; V I A &nbsp; U P I
-                </div>
-                <div style="font-size: 12px; color: #334155; line-height: 1.6;">
-                  <div>Payee: <span style="font-weight: 700; color: #0f172a;">${senderName}</span></div>
-                  <div>UPI ID: <span style="font-weight: 700; color: #0f172a;">${upiId}</span></div>
-                  <div>Amount: <span style="font-weight: 700; color: #0f172a;">₹ ${grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>
-                  <div>Payment note: <span style="font-weight: 600; color: #0f172a;">${invoiceNo}</span></div>
+            ${upiId ? `
+              <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box; margin-top: 10px; padding-top: 10px; border-top: 1px solid #cbd5e1;">
+                <!-- Left: Pay via UPI -->
+                <div style="flex: 1; padding-right: 28px;">
+                  <div style="font-size: 9.5px; font-weight: 700; letter-spacing: 2px; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
+                    P A Y &nbsp; V I A &nbsp; U P I
+                  </div>
+                  <div style="font-size: 12px; color: #334155; line-height: 1.6;">
+                    <div>Payee: <span style="font-weight: 700; color: #0f172a;">${senderName}</span></div>
+                    <div>UPI ID: <span style="font-weight: 700; color: #0f172a;">${upiId}</span></div>
+                    <div>Amount: <span style="font-weight: 700; color: #0f172a;">₹ ${grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>
+                    <div>Payment note: <span style="font-weight: 600; color: #0f172a;">${invoiceNo}</span></div>
+                  </div>
+
+                  <div style="margin-top: 10px; font-size: 10.5px; color: #64748b; line-height: 1.4;">
+                    Scan the QR with any UPI app (Google Pay, PhonePe, Paytm, BHIM) or pay to the UPI ID above.
+                  </div>
                 </div>
 
-                <div style="margin-top: 10px; font-size: 10.5px; color: #64748b; line-height: 1.4;">
-                  Scan the QR with any UPI app (Google Pay, PhonePe, Paytm, BHIM) or pay to the UPI ID above.
-                </div>
-              </div>
-
-              <!-- Right: UPI QR Box (Exact 34 mm x 34 mm) -->
-              <div style="width: 34mm; flex-shrink: 0; display: flex; flex-direction: column; align-items: center;">
-                <div style="width: 34mm; height: 34mm; border: 1px dashed #94a3b8; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #ffffff; overflow: hidden; position: relative;">
-                  ${params.qrDataUrl ? `
-                    <img src="${params.qrDataUrl}" style="width: 34mm; height: 34mm; object-fit: contain; display: block;" alt="Scan UPI QR" />
-                  ` : `
-                    <div style="text-align: center; color: #64748b; font-size: 8.5px; line-height: 1.35; padding: 2px;">
-                      [Paste UPI QR here]<br/>
-                      <span style="font-size: 8px; color: #94a3b8;">34 mm x 34 mm</span>
+                <!-- Right: UPI QR Box (Exact 34 mm x 34 mm) -->
+                ${params.qrDataUrl ? `
+                  <div style="width: 34mm; flex-shrink: 0; display: flex; flex-direction: column; align-items: center;">
+                    <div style="width: 34mm; height: 34mm; border: 1px solid #cbd5e1; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #ffffff; overflow: hidden; position: relative;">
+                      <img src="${params.qrDataUrl}" style="width: 34mm; height: 34mm; object-fit: contain; display: block;" alt="Scan UPI QR" />
                     </div>
-                  `}
-                </div>
-                <div style="font-size: 9.5px; color: #64748b; margin-top: 6px; text-align: center; white-space: nowrap;">
-                  Scan with any UPI app
+                    <div style="font-size: 9.5px; color: #64748b; margin-top: 6px; text-align: center; white-space: nowrap;">
+                      Scan with any UPI app
+                    </div>
+                  </div>
+                ` : ''}
+              </div>
+            ` : `
+              <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box; margin-top: 10px; padding-top: 10px; border-top: 1px solid #cbd5e1;">
+                <div style="flex: 1;">
+                  <div style="font-size: 9.5px; font-weight: 700; letter-spacing: 2px; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
+                    P A Y M E N T &nbsp; D E T A I L S
+                  </div>
+                  <div style="font-size: 12px; color: #334155; line-height: 1.6;">
+                    <div>Payee: <span style="font-weight: 700; color: #0f172a;">${senderName}</span></div>
+                    <div>Amount due: <span style="font-weight: 700; color: #0f172a;">₹ ${grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>
+                  </div>
                 </div>
               </div>
-            </div>
+            `}
           </div>
         `;
       }
@@ -588,9 +597,9 @@ export async function generateOffscreenPdfBlob(params: {
   container.style.pointerEvents = 'none';
 
   const senderName = params.profile?.name || 'Tilak Popat';
-  const upiId = (params.customUpiId && params.customUpiId.trim())
-    || (params.profile?.upiId && params.profile.upiId !== 'Not specified' ? params.profile.upiId.trim() : '')
-    || 'tilakpopat2007-1@okaxis';
+  const rawUpi = (params.customUpiId && params.customUpiId.trim())
+    || (params.profile?.upiId && params.profile.upiId !== 'Not specified' ? params.profile.upiId.trim() : '');
+  const upiId = isValidUpiId(rawUpi) ? rawUpi : '';
 
   const grandTotal = Math.max(0, params.invoice.totalAmount);
   const invNo = formatInvoiceNumber(params.invoice);

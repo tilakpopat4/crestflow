@@ -86,7 +86,7 @@
                     // Generate Canvas
                     const canvas = document.createElement('canvas');
                     new QRCode(canvas, {
-                        text: "upi://pay?pa=tilakpopat2007-1@okaxis&pn=Tilak&am=4500&cu=INR",
+                        text: "upi://pay?pa=merchant@upi&pn=Payee&am=4500&cu=INR",
                         width: 110,
                         height: 110
                     });
@@ -99,7 +99,7 @@
                     // Generate Image from Canvas
                     const tempDiv = document.createElement('div');
                     new QRCode(tempDiv, {
-                        text: "upi://pay?pa=tilakpopat2007-1@okaxis&pn=Tilak&am=4500&cu=INR",
+                        text: "upi://pay?pa=merchant@upi&pn=Payee&am=4500&cu=INR",
                         width: 110,
                         height: 110
                     });

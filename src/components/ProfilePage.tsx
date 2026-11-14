@@ -8,6 +8,7 @@ import ProfileInvoicingSection from './profile/ProfileInvoicingSection';
 import ProfilePreferencesCard from './profile/ProfilePreferencesCard';
 import ProfileSubscriptionSection from './profile/ProfileSubscriptionSection';
 import { getUserHandle, cleanUsername } from '../lib/userHandle';
+import { isValidUpiId } from '../lib/upiQr';
 import { ProfileSkeleton } from './skeletons';
 import { useAiSummarizerConfig } from '../lib/aiConfig';
 
@@ -130,11 +131,15 @@ export default function ProfilePage({
     const trimmedUpi = upiId.trim();
 
     if (section === 'invoicing') {
-      if (trimmedUpi && !trimmedUpi.includes('@')) {
-        setUpiError('Please enter a valid UPI ID (e.g. username@bank).');
+      if (trimmedUpi && !trimmedUpi.includes('@') || (trimmedUpi && !isValidUpiId(trimmedUpi))) {
+        setUpiError('Please enter a valid UPI ID (e.g. yourname@bank).');
         setActiveSection('invoicing');
         document.getElementById('section-invoicing')?.scrollIntoView({ behavior: 'smooth' });
         return;
+      }
+      if (trimmedUpi && trimmedUpi !== savedSnapshot.upiId) {
+        const confirmed = window.confirm(`Payments from your clients will go to this ID: ${trimmedUpi}. Is this correct?`);
+        if (!confirmed) return;
       }
     }
 
@@ -200,23 +205,15 @@ export default function ProfilePage({
 
   const handleSelectNav = (id: SettingsSectionId) => {
     setActiveSection(id);
-    const targetElement = document.getElementById(`section-${id}`);
-    if (targetElement) {
-      targetElement.scrollIntoView({ behavior: 'smooth' });
-    }
+    document.getElementById(`section-${id}`)?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  if (!profile && !user.displayName) {
-    return <ProfileSkeleton />;
-  }
+  if (!profile && !user.displayName) return <ProfileSkeleton />;
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 w-full min-w-0 flex-1">
-      {/* Page Header */}
       <div className="pb-4 border-b border-slate-200 dark:border-slate-800">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-3xl">
-          Settings
-        </h1>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-3xl">Settings</h1>
         <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
           Your creator identity, client invoicing rails, AI integrations, and CrestFlow membership.
         </p>

@@ -79,7 +79,7 @@ export const ProfileInvoicingSection: React.FC<ProfileInvoicingSectionProps> = (
               type="text"
               value={upiId}
               onChange={(e) => setUpiId(e.target.value)}
-              placeholder="e.g. name@okaxis or creator@okhdfcbank"
+              placeholder="e.g. yourname@bank"
               className={`block h-10 w-full rounded-lg bg-slate-50 dark:bg-slate-800/60 px-3 text-sm text-slate-900 dark:text-slate-100 border ${
                 upiError ? 'border-red-500 focus:border-red-600' : 'border-slate-200 dark:border-slate-700 focus:border-indigo-600 dark:focus:border-indigo-400'
               } placeholder:text-slate-400 outline-none transition-colors`}
