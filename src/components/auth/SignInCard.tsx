@@ -41,7 +41,7 @@ export const SignInCard: React.FC<SignInCardProps> = ({
           type="button"
           onClick={onLogin}
           disabled={isSigningIn}
-          className="w-full flex items-center justify-center gap-2.5 bg-[#5468ff] hover:bg-[#4355e8] disabled:opacity-50 text-white py-2.5 px-4 rounded-xl font-medium text-xs sm:text-sm transition-colors cursor-pointer disabled:cursor-not-allowed shadow-sm border-none outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#181818] focus-visible:ring-indigo-400"
+          className="w-full min-h-[44px] flex items-center justify-center gap-2.5 bg-[#5468ff] hover:bg-[#4355e8] active:bg-[#3d4ec7] disabled:opacity-50 text-white py-3 px-4 rounded-xl font-semibold text-sm transition-colors cursor-pointer disabled:cursor-not-allowed shadow-sm border-none outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#181818] focus-visible:ring-indigo-400"
         >
           {isSigningIn ? (
             <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
