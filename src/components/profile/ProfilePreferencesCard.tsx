@@ -5,6 +5,7 @@
 
 import React, { useState } from 'react';
 import { Eye, EyeOff, CheckCircle2, Check, X, ExternalLink } from 'lucide-react';
+import { useAiSummarizerConfig } from '../../lib/aiConfig';
 
 export interface ProfilePreferencesCardProps {
   geminiApiKey: string;
@@ -30,7 +31,10 @@ export const ProfilePreferencesCard: React.FC<ProfilePreferencesCardProps> = ({
   onSave,
   onDiscard,
 }) => {
+  const { isEnabled: isAiEnabled } = useAiSummarizerConfig();
   const [showKey, setShowKey] = useState(false);
+
+  if (!isAiEnabled) return null;
 
   return (
     <section id="section-ai" className="grid grid-cols-1 gap-x-8 gap-y-4 pt-8 lg:grid-cols-[13rem_minmax(0,1fr)]">

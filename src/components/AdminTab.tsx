@@ -13,6 +13,7 @@ import AdminPlatformHistory from './admin/AdminPlatformHistory';
 import AdminFooterManager from './admin/AdminFooterManager';
 import AdminSitemapManager from './admin/AdminSitemapManager';
 import { useSubscriptionConfig } from '../lib/subscriptionConfig';
+import { useAiSummarizerConfig } from '../lib/aiConfig';
 import { useAdminAuth } from '../hooks/useAdminAuth';
 import { useAdminUsersAndHistory } from '../hooks/useAdminUsersAndHistory';
 
@@ -32,6 +33,8 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
   const { isAdmin, isSuperAdmin, adminEmails } = useAdminAuth(currentUser);
   const { isEnabled: isSubscriptionEnabled, setEnabled: setSubscriptionEnabled } = useSubscriptionConfig();
   const [togglingSubscription, setTogglingSubscription] = useState(false);
+  const { isEnabled: isAiEnabled, setEnabled: setAiEnabled } = useAiSummarizerConfig();
+  const [togglingAi, setTogglingAi] = useState(false);
   const [activeSection, setActiveSection] = useState<AdminSection>('subscriptions');
   const shouldReduceMotion = useReducedMotion();
 
@@ -55,14 +58,16 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
 
   const handleToggleSubscription = async (newVal: boolean) => {
     setTogglingSubscription(true);
-    try {
-      await setSubscriptionEnabled(newVal);
-    } catch (err) {
-      console.error('Failed to toggle subscription:', err);
-      alert('Failed to update subscription status. Please try again.');
-    } finally {
-      setTogglingSubscription(false);
-    }
+    try { await setSubscriptionEnabled(newVal); }
+    catch (err) { console.error('Failed to toggle subscription:', err); alert('Failed to update subscription status. Please try again.'); }
+    finally { setTogglingSubscription(false); }
+  };
+
+  const handleToggleAi = async (newVal: boolean) => {
+    setTogglingAi(true);
+    try { await setAiEnabled(newVal); }
+    catch (err) { console.error('Failed to toggle AI summarizer:', err); alert('Failed to update AI summarizer status. Please try again.'); }
+    finally { setTogglingAi(false); }
   };
 
   const handleRefreshAll = () => {
@@ -142,38 +147,76 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
         </div>
       </div>
 
-      {/* Master Subscription Feature Toggle */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs border border-slate-200 dark:border-slate-800">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2.5">
-            <span className={`w-2.5 h-2.5 rounded-full ${isSubscriptionEnabled ? 'admin-indicator-active' : 'admin-indicator-inactive'}`} />
-            <h2 className="text-base font-bold text-slate-100">Platform Subscription System: {isSubscriptionEnabled ? 'ACTIVE (ON)' : 'DISABLED (OFF)'}</h2>
+      {/* Platform Feature Controls */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Subscription Feature Toggle */}
+        <div className="bg-white dark:bg-slate-900 rounded-xl p-5 sm:p-6 flex flex-col justify-between gap-4 shadow-2xs border border-slate-200 dark:border-slate-800">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2.5">
+              <span className={`w-2.5 h-2.5 rounded-full ${isSubscriptionEnabled ? 'admin-indicator-active' : 'admin-indicator-inactive'}`} />
+              <h2 className="text-base font-bold text-slate-100">Subscriptions: {isSubscriptionEnabled ? 'ACTIVE (ON)' : 'DISABLED (OFF)'}</h2>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+              {isSubscriptionEnabled
+                ? 'Subscriptions are active across the platform. Non-whitelisted freelancers are prompted for membership.'
+                : 'Subscriptions are turned OFF. All membership banners, upgrade buttons, and paywalls are removed.'}
+            </p>
           </div>
-          <p className="text-sm text-slate-400 max-w-2xl leading-relaxed">
-            {isSubscriptionEnabled
-              ? 'Subscriptions are currently active across the main portal. Users are prompted for ₹49/mo membership unless whitelisted.'
-              : 'Subscriptions are currently turned OFF. All subscription banners, badges, upgrade buttons, and paywalls are completely removed from the main portal.'}
-          </p>
+          <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-[#2a2a2a]">
+            <span className="text-xs sm:text-sm font-medium text-slate-200">
+              {isSubscriptionEnabled ? 'Subscriptions ON' : 'Subscriptions OFF'}
+            </span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={isSubscriptionEnabled}
+              aria-label="Toggle Platform Subscription System"
+              onClick={() => handleToggleSubscription(!isSubscriptionEnabled)}
+              disabled={togglingSubscription}
+              className={`admin-toggle-switch relative inline-flex items-center rounded-full transition-colors duration-150 focus:outline-none cursor-pointer border-0 ${
+                isSubscriptionEnabled ? 'admin-toggle-active' : 'admin-toggle-inactive'
+              }`}
+            >
+              <span className={`admin-toggle-knob inline-block h-4 w-4 transform rounded-full transition-transform duration-150 ${
+                isSubscriptionEnabled ? 'translate-x-5' : 'translate-x-0.5'
+              }`} />
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-3 shrink-0">
-          <span className="text-sm font-medium text-slate-200">
-            {isSubscriptionEnabled ? 'Subscriptions ON' : 'Subscriptions OFF'}
-          </span>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={isSubscriptionEnabled}
-            aria-label="Toggle Platform Subscription System"
-            onClick={() => handleToggleSubscription(!isSubscriptionEnabled)}
-            disabled={togglingSubscription}
-            className={`admin-toggle-switch relative inline-flex items-center rounded-full transition-colors duration-150 focus:outline-none cursor-pointer border-0 ${
-              isSubscriptionEnabled ? 'admin-toggle-active' : 'admin-toggle-inactive'
-            }`}
-          >
-            <span className={`admin-toggle-knob inline-block h-4 w-4 transform rounded-full transition-transform duration-150 ${
-              isSubscriptionEnabled ? 'translate-x-5' : 'translate-x-0.5'
-            }`} />
-          </button>
+
+        {/* AI Work Summarizer Feature Toggle */}
+        <div className="bg-white dark:bg-slate-900 rounded-xl p-5 sm:p-6 flex flex-col justify-between gap-4 shadow-2xs border border-slate-200 dark:border-slate-800">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2.5">
+              <span className={`w-2.5 h-2.5 rounded-full ${isAiEnabled ? 'admin-indicator-active' : 'admin-indicator-inactive'}`} />
+              <h2 className="text-base font-bold text-slate-100">AI Summarizer: {isAiEnabled ? 'ACTIVE (ON)' : 'HIDDEN (OFF)'}</h2>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+              {isAiEnabled
+                ? 'AI Summarizer is visible to users. Freelancers can use Gemini AI on their dashboard and configure AI keys.'
+                : 'AI Summarizer is turned OFF. All AI summarizer tools, cards, and settings are hidden from users.'}
+            </p>
+          </div>
+          <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-[#2a2a2a]">
+            <span className="text-xs sm:text-sm font-medium text-slate-200">
+              {isAiEnabled ? 'AI Summarizer ON' : 'AI Summarizer OFF'}
+            </span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={isAiEnabled}
+              aria-label="Toggle AI Work Summarizer"
+              onClick={() => handleToggleAi(!isAiEnabled)}
+              disabled={togglingAi}
+              className={`admin-toggle-switch relative inline-flex items-center rounded-full transition-colors duration-150 focus:outline-none cursor-pointer border-0 ${
+                isAiEnabled ? 'admin-toggle-active' : 'admin-toggle-inactive'
+              }`}
+            >
+              <span className={`admin-toggle-knob inline-block h-4 w-4 transform rounded-full transition-transform duration-150 ${
+                isAiEnabled ? 'translate-x-5' : 'translate-x-0.5'
+              }`} />
+            </button>
+          </div>
         </div>
       </div>
 

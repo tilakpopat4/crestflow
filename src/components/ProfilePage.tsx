@@ -9,6 +9,7 @@ import ProfilePreferencesCard from './profile/ProfilePreferencesCard';
 import ProfileSubscriptionSection from './profile/ProfileSubscriptionSection';
 import { getUserHandle, cleanUsername } from '../lib/userHandle';
 import { ProfileSkeleton } from './skeletons';
+import { useAiSummarizerConfig } from '../lib/aiConfig';
 
 interface ProfilePageProps {
   user: FirebaseUser;
@@ -31,6 +32,7 @@ export default function ProfilePage({
   subscriptionState,
   onOpenSubscriptionModal,
 }: ProfilePageProps) {
+  const { isEnabled: isAiEnabled } = useAiSummarizerConfig();
   // Live form state
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
@@ -272,15 +274,17 @@ export default function ProfilePage({
             onDiscard={handleDiscardInvoicing}
           />
 
-          <ProfilePreferencesCard
-            apiKey={geminiApiKey}
-            setApiKey={setGeminiApiKey}
-            isSaving={isSaving}
-            isSaved={savedSection === 'ai'}
-            isDirty={isAiDirty}
-            onSave={() => handleSaveSection('ai')}
-            onDiscard={handleDiscardAi}
-          />
+          {isAiEnabled && (
+            <ProfilePreferencesCard
+              geminiApiKey={geminiApiKey}
+              setGeminiApiKey={setGeminiApiKey}
+              isSaving={isSaving}
+              isSaved={savedSection === 'ai'}
+              isDirty={isAiDirty}
+              onSave={() => handleSaveSection('ai')}
+              onDiscard={handleDiscardAi}
+            />
+          )}
 
           {subscriptionState && (
             <ProfileSubscriptionSection

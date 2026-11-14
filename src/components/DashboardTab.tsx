@@ -18,6 +18,7 @@ import RevenueComparisonChart from './dashboard/RevenueComparisonChart';
 import { formatInvoiceNumber } from '../lib/invoiceUtils';
 import { usePaymentDueNotifier } from '../hooks/usePaymentDueNotifier';
 import { DashboardSkeleton } from './skeletons';
+import { useAiSummarizerConfig } from '../lib/aiConfig';
 
 interface DashboardTabProps {
   user: User | null;
@@ -44,6 +45,7 @@ export default function DashboardTab({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isAnnivBannerDismissed, setIsAnnivBannerDismissed] = useState(false);
   const [activeWorkspaceTool, setActiveWorkspaceTool] = useState<'none' | 'notes' | 'ai' | 'milestones'>('none');
+  const { isEnabled: isAiEnabled } = useAiSummarizerConfig();
   const journey = calculateWorkJourney(profile?.freelanceStartDate);
   const [paymentModalState, setPaymentModalState] = useState<{ invoiceId: string | null, isOpen: boolean }>({ invoiceId: null, isOpen: false });
   const [clientRevenueTimeframe, setClientRevenueTimeframe] = useState<'all' | 'month'>('all');
@@ -563,7 +565,9 @@ export default function DashboardTab({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 mb-4">
           <div>
             <h3 className="text-xs sm:text-sm font-semibold text-white uppercase tracking-wider">Workspace Tools</h3>
-            <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">Quick access to scratchpad notes and Gemini AI summaries</p>
+            <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">
+              {isAiEnabled ? 'Quick access to scratchpad notes and Gemini AI summaries' : 'Quick access to scratchpad notes and client snippets'}
+            </p>
           </div>
           <div className="inline-flex p-0.5 bg-[#212121] rounded-lg shrink-0 self-start sm:self-auto flex-wrap">
             <button
@@ -577,17 +581,19 @@ export default function DashboardTab({
             >
               <StickyNoteIcon size={13} /> Notes {activeWorkspaceTool === 'notes' ? '(Active)' : ''}
             </button>
-            <button
-              type="button"
-              onClick={() => setActiveWorkspaceTool(prev => prev === 'ai' ? 'none' : 'ai')}
-              className={`px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
-                activeWorkspaceTool === 'ai'
-                  ? 'bg-[#333333] text-white shadow-2xs'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <FileText size={13} /> AI Summarizer {activeWorkspaceTool === 'ai' ? '(Active)' : ''}
-            </button>
+            {isAiEnabled && (
+              <button
+                type="button"
+                onClick={() => setActiveWorkspaceTool(prev => prev === 'ai' ? 'none' : 'ai')}
+                className={`px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  activeWorkspaceTool === 'ai'
+                    ? 'bg-[#333333] text-white shadow-2xs'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <FileText size={13} /> AI Summarizer {activeWorkspaceTool === 'ai' ? '(Active)' : ''}
+              </button>
+            )}
             {journey && (
               <button
                 type="button"
@@ -610,7 +616,7 @@ export default function DashboardTab({
           </div>
         )}
 
-        {activeWorkspaceTool === 'ai' && (
+        {isAiEnabled && activeWorkspaceTool === 'ai' && (
           <div className="animate-in fade-in duration-200">
             <AISummarizer clients={clients} workItems={workItems} profile={profile} />
           </div>

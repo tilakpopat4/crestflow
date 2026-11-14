@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Client, WorkItem, UserProfile } from '../types';
 import { Sparkles, Copy, Calendar, Loader2 } from 'lucide-react';
+import { useAiSummarizerConfig } from '../lib/aiConfig';
 
 interface AISummarizerProps {
   clients: Client[];
@@ -9,6 +10,7 @@ interface AISummarizerProps {
 }
 
 export default function AISummarizer({ clients, workItems, profile }: AISummarizerProps) {
+  const { isEnabled: isAiEnabled } = useAiSummarizerConfig();
   const [targetDate, setTargetDate] = useState<string>(
     new Date().toISOString().split('T')[0]
   );
@@ -44,6 +46,8 @@ export default function AISummarizer({ clients, workItems, profile }: AISummariz
       setTimeout(() => setCopied(false), 2000);
     }
   };
+
+  if (!isAiEnabled) return null;
 
   return (
     <div className="bg-slate-50 dark:bg-slate-900 rounded-xl shadow-xs overflow-hidden flex flex-col mt-8">
