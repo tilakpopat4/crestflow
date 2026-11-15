@@ -75,6 +75,18 @@ export function getDriveEmbedUrl(url: string | undefined | null): string | null 
 }
 
 /**
+ * Returns a high-resolution thumbnail image URL for a Google Drive file.
+ * Defaults to 800px width for sharp playback previews.
+ */
+export function getDriveThumbnailUrl(url: string | undefined | null, width = 800): string | null {
+  const fileId = extractDriveFileId(url);
+  if (fileId) {
+    return `https://lh3.googleusercontent.com/d/${fileId}=w${width}`;
+  }
+  return null;
+}
+
+/**
  * Ensures a valid Google Access Token with Drive file scopes is available.
  * Scope: https://www.googleapis.com/auth/drive.file (allows uploading & managing files created by this app)
  */

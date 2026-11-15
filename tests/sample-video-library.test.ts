@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
 import fs from 'node:fs';
-import { isGoogleDriveUrl, extractDriveFileId, getDriveEmbedUrl } from '../src/lib/driveService';
+import { isGoogleDriveUrl, extractDriveFileId, getDriveEmbedUrl, getDriveThumbnailUrl } from '../src/lib/driveService';
 import { SampleWorkItem, WorkItem } from '../src/types';
 
 describe('Sample Video Library Connected to Google Drive Suite', () => {
@@ -13,12 +13,20 @@ describe('Sample Video Library Connected to Google Drive Suite', () => {
       getDriveEmbedUrl(shareUrl),
       'https://drive.google.com/file/d/1a2B3c4D5e6F7g8H9/preview'
     );
+    assert.strictEqual(
+      getDriveThumbnailUrl(shareUrl),
+      'https://lh3.googleusercontent.com/d/1a2B3c4D5e6F7g8H9=w800'
+    );
 
     const openUrl = 'https://drive.google.com/open?id=xyz987ABC';
     assert.strictEqual(extractDriveFileId(openUrl), 'xyz987ABC');
     assert.strictEqual(
       getDriveEmbedUrl(openUrl),
       'https://drive.google.com/file/d/xyz987ABC/preview'
+    );
+    assert.strictEqual(
+      getDriveThumbnailUrl(openUrl),
+      'https://lh3.googleusercontent.com/d/xyz987ABC=w800'
     );
 
     assert.strictEqual(isGoogleDriveUrl('https://example.com/video.mp4'), false);
@@ -63,13 +71,24 @@ describe('Sample Video Library Connected to Google Drive Suite', () => {
     );
   });
 
-  it('5. File size compliance: All sample video components remain <= 300 lines max per AGENTS.md', () => {
+  it('5. UI Cleanliness: Eliminates duplicate play buttons and translucent backgrounds in cards', () => {
+    const cardContent = fs.readFileSync('src/components/onboarding/SampleVideoCard.tsx', 'utf-8');
+    // Does not render iframe in the card preview (prevents duplicate Google play button)
+    assert.ok(!cardContent.includes('<iframe'), 'SampleVideoCard must not render an iframe in the thumbnail preview');
+    // Uses solid black background for pure pillarboxing without white translucent bleed
+    assert.ok(cardContent.includes('bg-black'), 'Card viewport must use solid bg-black');
+    // Uses single play button
+    assert.ok(cardContent.includes('Exactly One Single Play Button'), 'Card must have exactly one play button');
+  });
+
+  it('6. File size compliance: All sample video components remain <= 300 lines max per AGENTS.md', () => {
     const files = [
       'src/types.ts',
       'src/hooks/useUserProfile.ts',
       'src/components/PublicFreelancerProfileCard.tsx',
       'src/components/PublicFreelancerProfile.tsx',
       'src/components/onboarding/SampleVideoLibrary.tsx',
+      'src/components/onboarding/SampleVideoCard.tsx',
       'src/components/onboarding/ManageSampleVideosModal.tsx',
       'src/components/onboarding/OnboardingSampleVideoBanner.tsx',
       'src/components/onboarding/AddSampleVideoForm.tsx',
