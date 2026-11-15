@@ -12,7 +12,7 @@ export default defineConfig({
   workers: process.env.CI ? 3 : 6,
   reporter: 'html',
   use: {
-    baseURL: 'https://crestflow-new.vercel.app/',
+    baseURL: 'https://crestflow.space/',
     trace: 'on-first-retry',
     viewport: { width: 1366, height: 768 },
   },

@@ -4,7 +4,7 @@ import assert from 'node:assert';
 describe('Dynamic Import Chunk Error Detection', () => {
   it('identifies Vite chunk loading errors accurately', () => {
     const chunkErrors = [
-      'Failed to fetch dynamically imported module: https://crestflow.tilakpopat2007.workers.dev/assets/ClientOnboardingTab-C3Yo3KFN.js',
+      'Failed to fetch dynamically imported module: https://crestflow.space/assets/ClientOnboardingTab-C3Yo3KFN.js',
       'error loading dynamically imported module',
       'Loading chunk 45 failed',
       'Failed to fetch'

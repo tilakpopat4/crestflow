@@ -4,31 +4,31 @@
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
   <url>
-    <loc>https://crestflow.tilakpopat2007.workers.dev/</loc>
+    <loc>https://crestflow.space/</loc>
     <lastmod>2026-10-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://crestflow.tilakpopat2007.workers.dev/contact</loc>
+    <loc>https://crestflow.space/contact</loc>
     <lastmod>2026-10-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://crestflow.tilakpopat2007.workers.dev/refund</loc>
+    <loc>https://crestflow.space/refund</loc>
     <lastmod>2026-10-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://crestflow.tilakpopat2007.workers.dev/terms</loc>
+    <loc>https://crestflow.space/terms</loc>
     <lastmod>2026-10-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://crestflow.tilakpopat2007.workers.dev/privacy</loc>
+    <loc>https://crestflow.space/privacy</loc>
     <lastmod>2026-10-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>

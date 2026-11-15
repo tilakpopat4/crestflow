@@ -152,7 +152,7 @@ export function injectPersonalizedOnboardingMeta(
 
   const serviceSnippet = profile.servicesDescription ? ` in ${profile.servicesDescription}` : '';
   const description = `Having ${expText} experience${serviceSnippet}. Submit your project brief and onboard directly with ${name} on CrestFlow.`;
-  const photoUrl = profile.photoURL || 'https://crestflow.tilakpopat2007.workers.dev/app_logo_icon.png';
+  const photoUrl = profile.photoURL || 'https://crestflow.space/app_logo_icon.png';
 
   const safeTitle = escapeHtml(title);
   const safeDesc = escapeHtml(description);

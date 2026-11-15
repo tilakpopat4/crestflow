@@ -11,4 +11,4 @@ Allow: /onboarding/
 Disallow: /admin
 Disallow: /api/
 
-Sitemap: https://crestflow.tilakpopat2007.workers.dev/sitemap.xml
+Sitemap: https://crestflow.space/sitemap.xml

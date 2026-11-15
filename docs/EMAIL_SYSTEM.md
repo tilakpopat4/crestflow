@@ -173,7 +173,7 @@ npm run deploy
 ## 7. Custom Domain & Resend Sending Limitations
 
 ### Current Limitation: Cloudflare-Assigned Subdomain
-Because the website is hosted on a Cloudflare-assigned subdomain (`*.workers.dev` or `*.pages.dev`) rather than a custom domain, standard DNS records (DKIM, SPF, DMARC) cannot be directly assigned to that subdomain.
+Because the website is hosted on the custom domain `crestflow.space`, standard DNS records (DKIM, SPF, DMARC) can be directly assigned.
 
 ### Recommended Path:
 1. **Testing & Development**: Use the default Resend onboarding sandbox sender (`onboarding@resend.dev`) configured to deliver to your verified account email address.
