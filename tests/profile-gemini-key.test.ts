@@ -92,8 +92,8 @@ describe('Gemini API Key Persistence & Profile State Management', () => {
       'firestore.rules must allow optional username field up to 100 characters'
     );
     assert.ok(
-      rulesContent.includes('allow list: if true;'),
-      'firestore.rules must allow public listing/queries of profiles collection'
+      rulesContent.includes('isOwner(profileId)') || rulesContent.includes('request.auth.uid == profileId'),
+      'firestore.rules must enforce authenticated ownership for profiles collection'
     );
     assert.ok(
       rulesContent.includes('isOwner(profileId) && isValidProfile(request.resource.data)'),
@@ -108,9 +108,11 @@ describe('Gemini API Key Persistence & Profile State Management', () => {
       'firestore.rules must protect sensitive and immutable fields on profile update'
     );
     assert.ok(
-      rulesContent.includes('match /system_settings/{settingId} {\n      allow read: if true;\n      allow write: if false;') ||
-      rulesContent.includes('match /system_settings/{settingId} {\r\n      allow read: if true;\r\n      allow write: if false;'),
-      'firestore.rules must block client writes to system_settings'
+      rulesContent.includes('match /system_settings/{settingId} {\n      allow read, write: if false;') ||
+      rulesContent.includes('match /system_settings/{settingId} {\r\n      allow read, write: if false;') ||
+      rulesContent.includes('match /system_settings/{settingId} {\n      allow read: if isAdmin();\n      allow write: if false;') ||
+      rulesContent.includes('match /system_settings/{settingId} {\r\n      allow read: if isAdmin();\r\n      allow write: if false;'),
+      'firestore.rules must block client reads and writes to system_settings'
     );
     assert.ok(
       rulesContent.includes('match /usage_ledger/{ledgerId} {\n      allow read, write: if false;') ||

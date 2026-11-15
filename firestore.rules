@@ -125,13 +125,12 @@ service cloud.firestore {
         || (('clientEmail' in resource.data) && isClient(resource.data.clientEmail) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['approvalStatus', 'comments', 'revisionCount', 'approvedAt', 'updatedAt']) && (!('approvalStatus' in request.resource.data) || request.resource.data.approvalStatus in ['pending_review', 'approved', 'changes_requested']) && (!('revisionCount' in request.resource.data) || request.resource.data.revisionCount is int));
     }
 
-    // 4. Profiles (Public Info on Root Document)
+    // 4. Profiles
     match /profiles/{profileId} {
-      allow list: if true;
-      allow get: if isOwner(profileId) || resource.data.isPublicProfile == true || !('isPublicProfile' in resource.data) || isAdmin();
-      allow create: if (isOwner(profileId) && isValidProfile(request.resource.data) && (!request.resource.data.keys().hasAny(['admin', 'isAdmin', 'is_admin', 'plan', 'subscriptionPlan', 'subscriptionStatus', 'accessUntil', 'trialUsed', 'razorpaySubscriptionId', 'cancelAtPeriodEnd']))) || isAdmin();
-      allow update: if (isOwner(profileId) && isValidProfile(request.resource.data) && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['admin', 'isAdmin', 'is_admin', 'plan', 'subscriptionPlan', 'subscriptionStatus', 'currentPeriodEnd', 'currentPeriodStart', 'razorpaySubscriptionId', 'cancelAtPeriodEnd', 'accessUntil', 'trialUsed', 'createdAt']))) || isAdmin();
-      allow delete: if isOwner(profileId) || isAdmin();
+      allow read: if isSignedIn() && (request.auth.uid == profileId || (resource != null && 'userId' in resource.data && request.auth.uid == resource.data.userId) || isAdmin());
+      allow create: if isSignedIn() && (request.auth.uid == profileId || (('userId' in request.resource.data) && request.auth.uid == request.resource.data.userId)) && isOwner(profileId) && isValidProfile(request.resource.data) && (!request.resource.data.keys().hasAny(['admin', 'isAdmin', 'is_admin', 'plan', 'subscriptionPlan', 'subscriptionStatus', 'accessUntil', 'trialUsed', 'razorpaySubscriptionId', 'cancelAtPeriodEnd']));
+      allow update: if isSignedIn() && (request.auth.uid == profileId || (resource != null && 'userId' in resource.data && request.auth.uid == resource.data.userId)) && isOwner(profileId) && isValidProfile(request.resource.data) && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['admin', 'isAdmin', 'is_admin', 'plan', 'subscriptionPlan', 'subscriptionStatus', 'currentPeriodEnd', 'currentPeriodStart', 'razorpaySubscriptionId', 'cancelAtPeriodEnd', 'accessUntil', 'trialUsed', 'createdAt']));
+      allow delete: if isSignedIn() && (request.auth.uid == profileId || (resource != null && 'userId' in resource.data && request.auth.uid == resource.data.userId));
 
       // Private Settings Subcollection (geminiApiKey, bank accounts)
       match /private/{docId} {
@@ -192,10 +191,9 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // 11. System Settings (Global features like subscription master toggle)
+    // 11. System Settings (Client read and write completely disabled; Worker service account only)
     match /system_settings/{settingId} {
-      allow read: if true;
-      allow write: if false;
+      allow read, write: if false;
     }
 
     // 12. Subscriptions (Client read-only for own doc; never write)
