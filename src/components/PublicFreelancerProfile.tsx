@@ -41,14 +41,29 @@ export default function PublicFreelancerProfile({ freelancerId }: PublicFreelanc
   useEffect(() => {
     const prevTitle = document.title;
     if (profile?.name) {
-      document.title = `${profile.name} - Client Onboarding | CrestFlow`;
+      const heading = `Claim The Service of ${profile.name}`;
+      document.title = `${heading} - Client Onboarding | CrestFlow`;
+
+      const updateMeta = (prop: string, val: string) => {
+        const el = document.querySelector(`meta[property="${prop}"]`) || document.querySelector(`meta[name="${prop}"]`);
+        if (el) {
+          el.setAttribute('content', val);
+        }
+      };
+
+      updateMeta('og:title', heading);
+      updateMeta('twitter:title', heading);
+      if (profile.photoURL) {
+        updateMeta('og:image', profile.photoURL);
+        updateMeta('twitter:image', profile.photoURL);
+      }
     } else {
       document.title = 'Client Onboarding | CrestFlow';
     }
     return () => {
       document.title = prevTitle;
     };
-  }, [profile?.name]);
+  }, [profile?.name, profile?.photoURL]);
 
   const handleClearForm = () => {
     setClientName('');

@@ -1,4 +1,9 @@
 import { Env } from './types';
+import {
+  extractOnboardingHandle,
+  fetchFreelancerPublicMeta,
+  injectPersonalizedOnboardingMeta,
+} from './onboardingMeta';
 
 export function isKnownAppRoute(pathname: string): boolean {
   const clean = pathname.toLowerCase().replace(/\/+$/, '') || '/';
@@ -94,9 +99,42 @@ export async function handleStaticAsset(request: Request, env: Env): Promise<Res
     headers.set('Expires', '0');
 
     const isKnown = isKnownAppRoute(url.pathname);
+    if (!isKnown) {
+      return new Response(response.body, {
+        status: 404,
+        statusText: 'Not Found',
+        headers,
+      });
+    }
+
+    // Check for personalized onboarding link previews
+    const onboardingHandle = extractOnboardingHandle(url.pathname);
+    if (onboardingHandle) {
+      try {
+        const rawHtml = await response.text();
+        const profile = await fetchFreelancerPublicMeta(onboardingHandle, env);
+        if (profile) {
+          const personalizedHtml = injectPersonalizedOnboardingMeta(rawHtml, profile, url.toString());
+          headers.set('Content-Type', 'text/html; charset=utf-8');
+          return new Response(personalizedHtml, {
+            status: 200,
+            statusText: 'OK',
+            headers,
+          });
+        }
+        return new Response(rawHtml, {
+          status: 200,
+          statusText: 'OK',
+          headers,
+        });
+      } catch (err) {
+        console.warn('[handleStaticAsset] Onboarding meta injection failed:', err);
+      }
+    }
+
     return new Response(response.body, {
-      status: isKnown ? 200 : 404,
-      statusText: isKnown ? 'OK' : 'Not Found',
+      status: 200,
+      statusText: 'OK',
       headers,
     });
   }
