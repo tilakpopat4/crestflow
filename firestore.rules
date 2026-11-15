@@ -88,6 +88,7 @@ service cloud.firestore {
         && (!('freelanceStartDate' in data) || (data.freelanceStartDate is string && data.freelanceStartDate.size() <= 50))
         && (!('workExperienceBio' in data) || (data.workExperienceBio is string && data.workExperienceBio.size() <= 5000))
         && (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 2000))
+        && (!('sampleWorks' in data) || (data.sampleWorks is list))
         && (!('isPublicProfile' in data) || (data.isPublicProfile is bool))
         && (!('gettingStartedDismissed' in data) || (data.gettingStartedDismissed is bool))
         && (!('createdAt' in data) || (data.createdAt is number || data.createdAt is int))

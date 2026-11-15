@@ -2,11 +2,12 @@ import React, { useState, useMemo } from 'react';
 import { User } from 'firebase/auth';
 import { Search, Inbox, Users, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
-import { UserProfile, ServiceRequest, Client } from '../types';
+import { UserProfile, ServiceRequest, Client, WorkItem } from '../types';
 import { useFirestore } from '../hooks/useFirestore';
 import { generateUUID } from '../lib/utils';
 import { OnboardingLinkCard } from './onboarding/OnboardingLinkCard';
 import { OnboardingRequestCard } from './onboarding/OnboardingRequestCard';
+import { OnboardingSampleVideoBanner } from './onboarding/OnboardingSampleVideoBanner';
 import { getUserHandle, getOnboardingUrl, getPublicProfileUrl, hasConfiguredUsername } from '../lib/userHandle';
 
 interface ClientOnboardingTabProps {
@@ -14,6 +15,7 @@ interface ClientOnboardingTabProps {
   profile: UserProfile | null;
   onNavigateToClients?: () => void;
   onNavigateToProfile?: () => void;
+  onSaveProfile?: (profile: UserProfile) => Promise<void>;
 }
 
 type FilterStatus = 'pending' | 'accepted' | 'declined' | 'all';
@@ -28,6 +30,7 @@ export default function ClientOnboardingTab({
   profile,
   onNavigateToClients,
   onNavigateToProfile,
+  onSaveProfile,
 }: ClientOnboardingTabProps) {
   const shouldReduceMotion = useReducedMotion();
   const [searchQuery, setSearchQuery] = useState('');
@@ -37,6 +40,8 @@ export default function ClientOnboardingTab({
     useFirestore<ServiceRequest>('serviceRequests', user.uid);
   const { addOrUpdateItem: saveClient } =
     useFirestore<Client>('clients', user.uid);
+  const { data: workItems } =
+    useFirestore<WorkItem>('workItems', user.uid);
 
   const hasUsername = useMemo(() => hasConfiguredUsername(profile), [profile]);
   const handle = useMemo(() => (hasUsername ? profile!.username! : getUserHandle(profile, user)), [hasUsername, profile, user]);
@@ -131,6 +136,13 @@ export default function ClientOnboardingTab({
         profile={profile}
         hasUsername={hasUsername}
         onNavigateToProfile={onNavigateToProfile}
+      />
+
+      <OnboardingSampleVideoBanner
+        profile={profile}
+        workItems={workItems}
+        onboardingUrl={onboardingUrl}
+        onSaveProfile={onSaveProfile}
       />
 
       {/* Summary Stat Cards */}

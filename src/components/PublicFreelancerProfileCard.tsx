@@ -1,11 +1,13 @@
 import React from 'react';
 import { UserProfile } from '../types';
-import { Briefcase, Phone, Mail } from 'lucide-react';
+import { Briefcase, Phone, Mail, Film } from 'lucide-react';
 import { auth } from '../firebase';
 
 interface PublicFreelancerProfileCardProps {
   profile: UserProfile;
   freelancerId: string;
+  onViewSamples?: () => void;
+  samplesCount?: number;
 }
 
 /**
@@ -15,6 +17,8 @@ interface PublicFreelancerProfileCardProps {
 export default function PublicFreelancerProfileCard({
   profile,
   freelancerId,
+  onViewSamples,
+  samplesCount,
 }: PublicFreelancerProfileCardProps) {
   const photoUrl = profile.photoURL || (auth.currentUser?.uid === freelancerId ? auth.currentUser?.photoURL : null);
 
@@ -74,6 +78,17 @@ export default function PublicFreelancerProfileCard({
           </div>
           <span>Contact via onboarding form</span>
         </div>
+
+        {onViewSamples && samplesCount !== undefined && samplesCount > 0 && (
+          <button
+            type="button"
+            onClick={onViewSamples}
+            className="w-full mt-3 py-2 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 cursor-pointer border-0 transition-colors"
+          >
+            <Film size={14} className="text-indigo-600 dark:text-indigo-400" />
+            View Sample Videos ({samplesCount})
+          </button>
+        )}
       </div>
     </div>
   );

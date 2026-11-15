@@ -9,8 +9,11 @@ import FreelancerExperienceAndClients from './FreelancerExperienceAndClients';
 import PublicFreelancerProfileCard from './PublicFreelancerProfileCard';
 import PublicOnboardingForm from './PublicOnboardingForm';
 import PublicFreelancerProfileSubmitted from './PublicFreelancerProfileSubmitted';
+import SampleVideoLibrary from './onboarding/SampleVideoLibrary';
+import OnboardingViewTabs from './onboarding/OnboardingViewTabs';
 import { lookupPublicProfile } from '../lib/profileLookup';
-import { AlertCircle } from 'lucide-react';
+import { buildWhatsAppLeadUrl } from '../lib/onboardingLead';
+import PublicProfileNotFound from './onboarding/PublicProfileNotFound';
 import { PublicProfileSkeleton } from './skeletons';
 
 interface PublicFreelancerProfileProps {
@@ -37,6 +40,12 @@ export default function PublicFreelancerProfile({ freelancerId }: PublicFreelanc
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submittedWhatsAppUrl, setSubmittedWhatsAppUrl] = useState<string | null>(null);
   const [supportingRoute, setSupportingRoute] = useState<SupportingRoute | null>(null);
+  const [activeView, setActiveView] = useState<'intake' | 'samples'>(() => {
+    if (typeof window !== 'undefined' && (window.location.search.includes('view=samples') || window.location.search.includes('tab=samples'))) {
+      return 'samples';
+    }
+    return 'intake';
+  });
 
   useEffect(() => {
     const prevTitle = document.title;
@@ -161,14 +170,15 @@ export default function PublicFreelancerProfile({ freelancerId }: PublicFreelanc
         }),
       }).catch((notifyErr) => console.warn('Automated lead email notification failed:', notifyErr));
 
-      // Build WhatsApp draft URL and redirect
-      if (profile.phone) {
-        const cleanPhone = profile.phone.replace(/[^0-9]/g, '');
-        const formattedPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
-        const msg = `Hi ${profile.name},\n\nI've submitted my Onboarding Request for *${clientName.trim()}*.\n\n*Contact:* ${contactName.trim()} (${contactPhone.trim()})\n*Email:* ${contactEmail.trim()}${
-          proposedRate ? `\n*Proposed Rate:* ₹${proposedRate}/reel` : ''
-        }\n\n*Project Details:*\n${projectDetails.trim()}\n\nLooking forward to working with you!`;
-        const waUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(msg)}`;
+      const waUrl = buildWhatsAppLeadUrl(profile, {
+        clientName,
+        contactName,
+        contactPhone,
+        contactEmail,
+        proposedRate,
+        projectDetails,
+      });
+      if (waUrl) {
         setSubmittedWhatsAppUrl(waUrl);
         window.open(waUrl, '_blank', 'noopener,noreferrer');
       }
@@ -187,21 +197,7 @@ export default function PublicFreelancerProfile({ freelancerId }: PublicFreelanc
   }
 
   if (error || !profile) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 p-4 text-center text-slate-800 dark:text-slate-200 transition-colors duration-150">
-        <div className="w-16 h-16 bg-red-50 dark:bg-rose-950/40 text-red-500 dark:text-rose-400 border border-red-100 dark:border-rose-900/50 rounded-full flex items-center justify-center mb-4">
-          <AlertCircle className="w-8 h-8" />
-        </div>
-        <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">Profile Not Found</h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm max-w-md">{error}</p>
-        <a
-          href="/"
-          className="mt-5 inline-flex items-center justify-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
-        >
-          Return to CrestFlow
-        </a>
-      </div>
-    );
+    return <PublicProfileNotFound error={error} />;
   }
 
   if (isSubmitted) {
@@ -238,35 +234,54 @@ export default function PublicFreelancerProfile({ freelancerId }: PublicFreelanc
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
           {/* Left Side: Profile Info + Work Experience */}
           <div className="lg:col-span-5 flex flex-col gap-4">
-            <PublicFreelancerProfileCard profile={profile} freelancerId={freelancerId} />
+            <PublicFreelancerProfileCard
+              profile={profile}
+              freelancerId={freelancerId}
+              onViewSamples={() => setActiveView('samples')}
+              samplesCount={profile.sampleWorks?.length || 0}
+            />
 
             <div className="flex-1">
               <FreelancerExperienceAndClients profile={profile} clients={clients} loading={clientsLoading} />
             </div>
           </div>
 
-          {/* Right Side: Onboarding Form Card */}
+          {/* Right Side: Intake Form or Video Library */}
           <div className="lg:col-span-7 flex flex-col">
-            <PublicOnboardingForm
-              profile={profile}
-              clientName={clientName}
-              setClientName={setClientName}
-              contactName={contactName}
-              setContactName={setContactName}
-              contactPhone={contactPhone}
-              setContactPhone={setContactPhone}
-              contactEmail={contactEmail}
-              setContactEmail={setContactEmail}
-              instagram={instagram}
-              setInstagram={setInstagram}
-              proposedRate={proposedRate}
-              setProposedRate={setProposedRate}
-              projectDetails={projectDetails}
-              setProjectDetails={setProjectDetails}
-              isSubmitting={isSubmitting}
-              onSubmit={handleSubmit}
-              onClear={handleClearForm}
+            <OnboardingViewTabs
+              activeView={activeView}
+              samplesCount={profile.sampleWorks?.length || 0}
+              onSelectView={setActiveView}
             />
+
+            {activeView === 'samples' ? (
+              <SampleVideoLibrary
+                samples={profile.sampleWorks || []}
+                freelancerName={profile.name}
+                onOpenIntake={() => setActiveView('intake')}
+              />
+            ) : (
+              <PublicOnboardingForm
+                profile={profile}
+                clientName={clientName}
+                setClientName={setClientName}
+                contactName={contactName}
+                setContactName={setContactName}
+                contactPhone={contactPhone}
+                setContactPhone={setContactPhone}
+                contactEmail={contactEmail}
+                setContactEmail={setContactEmail}
+                instagram={instagram}
+                setInstagram={setInstagram}
+                proposedRate={proposedRate}
+                setProposedRate={setProposedRate}
+                projectDetails={projectDetails}
+                setProjectDetails={setProjectDetails}
+                isSubmitting={isSubmitting}
+                onSubmit={handleSubmit}
+                onClear={handleClearForm}
+              />
+            )}
           </div>
         </div>
       </main>

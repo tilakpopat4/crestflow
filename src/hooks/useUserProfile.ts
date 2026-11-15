@@ -21,38 +21,24 @@ export function useUserProfile(user: User | null) {
 
   // Initialize cached public profile from localStorage
   const [cachedProfile, setCachedProfile] = useState<UserProfile | null>(() => {
-    if (user?.uid) {
-      try {
-        const saved = localStorage.getItem(`crestflow_profile_${user.uid}`);
-        return saved ? JSON.parse(saved) : null;
-      } catch {
-        return null;
-      }
-    }
-    // Pre-hydrate from any saved profile in localStorage during initial load before auth resolves
+    if (!user?.uid) return null;
     try {
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (k && k.startsWith('crestflow_profile_') && !k.includes('completed')) {
-          const saved = localStorage.getItem(k);
-          if (saved) return JSON.parse(saved);
-        }
-      }
-    } catch {}
-    return null;
+      const saved = localStorage.getItem(`crestflow_profile_${user.uid}`);
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
   });
 
   // Initialize cached private settings (API keys, bank details) from localStorage
   const [privateSettings, setPrivateSettings] = useState<UserProfilePrivate | null>(() => {
-    if (user?.uid) {
-      try {
-        const saved = localStorage.getItem(`crestflow_private_${user.uid}`);
-        return saved ? JSON.parse(saved) : null;
-      } catch {
-        return null;
-      }
+    if (!user?.uid) return null;
+    try {
+      const saved = localStorage.getItem(`crestflow_private_${user.uid}`);
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
     }
-    return null;
   });
 
   // Listen directly to doc(db, 'profiles', user.uid) for real-time public profile updates
@@ -224,6 +210,10 @@ export function useUserProfile(user: User | null) {
       profileDocData.freelanceStartDate = deleteField();
     }
 
+    if (profileWithMeta.sampleWorks !== undefined) {
+      profileDocData.sampleWorks = profileWithMeta.sampleWorks;
+    }
+
     await setDoc(profileRef, profileDocData, { merge: true });
 
     // 2b. Sync sanitized public fields to public_profiles collection for client onboarding intake
@@ -237,6 +227,9 @@ export function useUserProfile(user: User | null) {
       phone: profileWithMeta.phone || '',
       updatedAt: Date.now(),
     };
+    if (profileWithMeta.sampleWorks) {
+      publicProfileDoc.sampleWorks = profileWithMeta.sampleWorks;
+    }
     if (profileWithMeta.freelanceStartDate) {
       publicProfileDoc.freelanceStartDate = profileWithMeta.freelanceStartDate;
     }
@@ -277,28 +270,15 @@ export function useUserProfile(user: User | null) {
       updatedAt: Date.now(),
     };
 
-    if (geminiApiKey && geminiApiKey.trim()) {
-      privateDocData.geminiApiKey = geminiApiKey.trim();
-    } else if (privateSettings?.geminiApiKey) {
-      privateDocData.geminiApiKey = deleteField();
-    }
-
-    if (accountNumber && accountNumber.trim()) {
-      privateDocData.accountNumber = accountNumber.trim();
-    } else if (privateSettings?.accountNumber) {
-      privateDocData.accountNumber = deleteField();
-    }
-
-    if (ifscCode && ifscCode.trim()) {
-      privateDocData.ifscCode = ifscCode.trim();
-    } else if (privateSettings?.ifscCode) {
-      privateDocData.ifscCode = deleteField();
-    }
-
-    if (bankName && bankName.trim()) {
-      privateDocData.bankName = bankName.trim();
-    } else if (privateSettings?.bankName) {
-      privateDocData.bankName = deleteField();
+    const privateFields: [string, string | undefined, string | undefined][] = [
+      ['geminiApiKey', geminiApiKey, privateSettings?.geminiApiKey],
+      ['accountNumber', accountNumber, privateSettings?.accountNumber],
+      ['ifscCode', ifscCode, privateSettings?.ifscCode],
+      ['bankName', bankName, privateSettings?.bankName],
+    ];
+    for (const [key, val, prev] of privateFields) {
+      if (val && val.trim()) privateDocData[key] = val.trim();
+      else if (prev) privateDocData[key] = deleteField();
     }
 
     await setDoc(privateSettingsRef, privateDocData, { merge: true });

@@ -61,6 +61,7 @@ export async function handleGetPublicProfile(request: Request, env: Env): Promis
             photoURL: raw.photoURL || '',
             freelanceStartDate: raw.freelanceStartDate || null,
             phone: raw.phone || '',
+            sampleWorks: raw.sampleWorks || [],
           };
           return jsonResponse({ success: true, profile: sanitized }, 200);
         }

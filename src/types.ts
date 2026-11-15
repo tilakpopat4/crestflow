@@ -164,6 +164,17 @@ export interface SubscriptionPayment {
   createdAt: number;
   updatedAt?: number;
 }
+export interface SampleWorkItem {
+  id: string;
+  title: string;
+  videoUrl: string; // Google Drive link or video embed link
+  description?: string;
+  category?: string; // e.g. "Reels", "Commercial", "Short Film", "Long Form"
+  clientName?: string;
+  thumbnailUrl?: string;
+  createdAt: number;
+}
+
 export interface UserProfile {
   id: string;
   userId?: string;
@@ -184,6 +195,7 @@ export interface UserProfile {
   geminiApiKey?: string;
   freelanceStartDate?: string; // Freelancer's career start date in YYYY-MM-DD format
   workExperienceBio?: string; // Optional career overview / work experience bio
+  sampleWorks?: SampleWorkItem[]; // Manually curated video library connected to Google Drive
   createdAt: number;
   updatedAt?: number;
   // SaaS Subscription fields (49/- per month)
