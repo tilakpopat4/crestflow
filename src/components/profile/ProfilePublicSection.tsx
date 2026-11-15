@@ -2,6 +2,7 @@ import React from 'react';
 import { User as FirebaseUser } from 'firebase/auth';
 import { Check, Sparkles } from 'lucide-react';
 import { cleanUsername, isValidUsername, getOnboardingUrl } from '../../lib/userHandle';
+import { SITE_URL } from '../../lib/siteConfig';
 import ProfilePublicLinksCard from './ProfilePublicLinksCard';
 import ProfileAvatarUploader from './ProfileAvatarUploader';
 
@@ -158,7 +159,7 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
             </div>
             <div className="flex h-10 w-full overflow-hidden rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 focus-within:border-indigo-600 dark:focus-within:border-indigo-400 transition-colors">
               <span className="flex shrink-0 items-center pl-3 text-xs text-slate-500 dark:text-slate-400 select-none font-mono">
-                {typeof window !== 'undefined' ? `${window.location.host}/` : 'crestflow.app/'}
+                {SITE_URL.replace(/^https?:\/\//, '')}/
               </span>
               <input
                 id="profile-username"

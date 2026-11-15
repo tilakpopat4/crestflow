@@ -100,13 +100,11 @@ export function getUserHandle(
 
 /**
  * Resolves the active base origin, prioritizing explicit customOrigin,
- * then window.location.origin in browsers, and falling back to SITE_URL.
+ * and falling back to canonical SITE_URL (https://crestflow.space).
+ * Client links and onboarding URLs always use the official branded domain.
  */
 export function resolveOrigin(customOrigin?: string): string {
   if (customOrigin) return customOrigin.replace(/\/+$/, '');
-  if (typeof window !== 'undefined' && window.location && window.location.origin) {
-    return window.location.origin.replace(/\/+$/, '');
-  }
   return SITE_URL.replace(/\/+$/, '');
 }
 
