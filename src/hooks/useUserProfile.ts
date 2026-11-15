@@ -226,6 +226,33 @@ export function useUserProfile(user: User | null) {
 
     await setDoc(profileRef, profileDocData, { merge: true });
 
+    // 2b. Sync sanitized public fields to public_profiles collection for client onboarding intake
+    const publicProfileDoc: Record<string, any> = {
+      userId: user.uid,
+      name: profileWithMeta.name || user.displayName || 'Freelancer',
+      professionalTitle: profileWithMeta.professionalTitle || '',
+      servicesDescription: profileWithMeta.servicesDescription || '',
+      workExperienceBio: profileWithMeta.workExperienceBio || '',
+      photoURL: profileWithMeta.photoURL || user.photoURL || '',
+      phone: profileWithMeta.phone || '',
+      updatedAt: Date.now(),
+    };
+    if (profileWithMeta.freelanceStartDate) {
+      publicProfileDoc.freelanceStartDate = profileWithMeta.freelanceStartDate;
+    }
+    if (profileWithMeta.username) {
+      publicProfileDoc.username = profileWithMeta.username.toLowerCase().trim();
+    }
+
+    try {
+      await setDoc(doc(db, 'public_profiles', user.uid), publicProfileDoc, { merge: true });
+      if (profileWithMeta.username) {
+        await setDoc(doc(db, 'public_profiles', profileWithMeta.username.toLowerCase().trim()), publicProfileDoc, { merge: true });
+      }
+    } catch (pubErr) {
+      console.warn('[useUserProfile] public_profiles sync warning:', pubErr);
+    }
+
     // 3. Update private settings in-memory & cache
     const newPrivateSettings: UserProfilePrivate = {
       ...(privateSettings || {}),

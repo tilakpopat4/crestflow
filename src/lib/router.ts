@@ -69,8 +69,8 @@ export function resolveRoute(pathname: string, search: string = ''): RouteMatch 
     return { route: 'dashboard', path: '/portal', params, isSpecialMode: 'client_portal' };
   }
 
-  // 1. Professional Onboarding URL: /:username/onboarding
-  const userOnboardingMatch = rawPath.match(/^\/([a-zA-Z0-9_-]+)\/onboarding\/?$/i);
+  // 1. Professional Onboarding URL: /:username/onboarding (and /:username/publicprofile alias)
+  const userOnboardingMatch = rawPath.match(/^\/([a-zA-Z0-9_-]+)\/(?:onboarding|publicprofile|public-profile)\/?$/i);
   if (userOnboardingMatch) {
     const targetUsername = userOnboardingMatch[1];
     return {
@@ -81,38 +81,14 @@ export function resolveRoute(pathname: string, search: string = ''): RouteMatch 
     };
   }
 
-  // 2. Professional Public Profile URL: /:username/publicprofile or /:username/public-profile
-  const userPublicProfileMatch = rawPath.match(/^\/([a-zA-Z0-9_-]+)\/(?:publicprofile|public-profile)\/?$/i);
-  if (userPublicProfileMatch) {
-    const targetUsername = userPublicProfileMatch[1];
-    return {
-      route: 'dashboard',
-      path: `/${targetUsername}/publicprofile`,
-      params: { ...params, freelancerId: targetUsername, username: targetUsername, mode: 'profile' },
-      isSpecialMode: 'freelancer_profile',
-    };
-  }
-
-  // 3. Legacy Onboarding route: /onboarding/:freelancerId or /client-onboarding/:freelancerId
-  const legacyOnboardingMatch = rawPath.match(/^\/(?:onboarding|client-onboarding)\/([a-zA-Z0-9_-]+)\/?$/i);
+  // 2. Legacy Onboarding & Public Profile route: /onboarding/:id or /publicprofile/:id
+  const legacyOnboardingMatch = rawPath.match(/^\/(?:onboarding|client-onboarding|publicprofile|public-profile)\/([a-zA-Z0-9_-]+)\/?$/i);
   if (legacyOnboardingMatch) {
     const targetFreelancerId = legacyOnboardingMatch[1];
     return {
       route: 'dashboard',
       path: `/onboarding/${targetFreelancerId}`,
       params: { ...params, freelancerId: targetFreelancerId, username: targetFreelancerId, mode: 'onboarding' },
-      isSpecialMode: 'freelancer_profile',
-    };
-  }
-
-  // 4. Legacy Public Profile route: /publicprofile/:freelancerId or /public-profile/:freelancerId
-  const legacyProfileMatch = rawPath.match(/^\/(?:publicprofile|public-profile)\/([a-zA-Z0-9_-]+)\/?$/i);
-  if (legacyProfileMatch) {
-    const targetFreelancerId = legacyProfileMatch[1];
-    return {
-      route: 'dashboard',
-      path: `/publicprofile/${targetFreelancerId}`,
-      params: { ...params, freelancerId: targetFreelancerId, username: targetFreelancerId, mode: 'profile' },
       isSpecialMode: 'freelancer_profile',
     };
   }

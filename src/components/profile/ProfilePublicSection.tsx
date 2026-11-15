@@ -1,7 +1,7 @@
 import React from 'react';
 import { User as FirebaseUser } from 'firebase/auth';
 import { Check, Sparkles } from 'lucide-react';
-import { cleanUsername, isValidUsername, getOnboardingUrl, getPublicProfileUrl } from '../../lib/userHandle';
+import { cleanUsername, isValidUsername, getOnboardingUrl } from '../../lib/userHandle';
 import ProfilePublicLinksCard from './ProfilePublicLinksCard';
 
 interface ProfilePublicSectionProps {
@@ -51,7 +51,6 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
 
   const cleanHandle = cleanUsername(username) || 'creator';
   const onboardingUrl = getOnboardingUrl(cleanHandle);
-  const publicProfileUrl = getPublicProfileUrl(cleanHandle);
   const isHandleValid = isValidUsername(cleanHandle);
 
   const getActiveDaysLabel = () => {
@@ -71,7 +70,7 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
           Public profile
         </h2>
         <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-          Configure your professional username handle, branded intake links, and public creator portfolio.
+          Configure your professional username handle and branded client onboarding link.
         </p>
       </div>
 
@@ -186,11 +185,10 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
             </p>
           </div>
 
-          {/* Live Link Cards */}
+          {/* Live Link Card */}
           <ProfilePublicLinksCard
             cleanHandle={cleanHandle}
             onboardingUrl={onboardingUrl}
-            publicProfileUrl={publicProfileUrl}
           />
 
           {/* Career Start Date */}

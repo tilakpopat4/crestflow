@@ -13,7 +13,6 @@ Allow: /privacy
 Allow: /terms
 Allow: /refund
 Allow: /*/onboarding
-Allow: /*/publicprofile
 Allow: /onboarding/
 
 Disallow: /admin

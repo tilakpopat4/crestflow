@@ -138,6 +138,17 @@ service cloud.firestore {
       }
     }
 
+    // 4b. Public Profiles (Sanitized public portfolio for client onboarding intake)
+    match /public_profiles/{profileId} {
+      allow read: if true;
+      allow write: if isSignedIn() && (
+        request.auth.uid == profileId ||
+        (resource != null && 'userId' in resource.data && resource.data.userId == request.auth.uid) ||
+        (request.resource != null && 'userId' in request.resource.data && request.resource.data.userId == request.auth.uid) ||
+        isAdmin()
+      );
+    }
+
     // 5. Notes
     match /notes/{noteId} {
       allow read, delete: if isOwner(resource.data.userId);

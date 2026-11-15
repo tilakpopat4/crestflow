@@ -109,13 +109,11 @@ export function getOnboardingUrl(handle: string, customOrigin?: string): string 
 }
 
 /**
- * Returns the canonical public freelancer profile showcase URL for a given handle.
- * Format: https://<domain>/<username>/publicprofile
+ * Returns the canonical public onboarding URL (unified with public profile).
+ * Format: https://<domain>/<username>/onboarding
  */
 export function getPublicProfileUrl(handle: string, customOrigin?: string): string {
-  const origin = (customOrigin || SITE_URL).replace(/\/+$/, '');
-  const clean = cleanUsername(handle) || handle;
-  return `${origin}/${encodeURIComponent(clean)}/publicprofile`;
+  return getOnboardingUrl(handle, customOrigin);
 }
 
 /**

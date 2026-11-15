@@ -15,10 +15,9 @@ import { PublicProfileSkeleton } from './skeletons';
 
 interface PublicFreelancerProfileProps {
   freelancerId: string;
-  mode?: 'onboarding' | 'profile';
 }
 
-export default function PublicFreelancerProfile({ freelancerId, mode = 'onboarding' }: PublicFreelancerProfileProps) {
+export default function PublicFreelancerProfile({ freelancerId }: PublicFreelancerProfileProps) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -42,17 +41,14 @@ export default function PublicFreelancerProfile({ freelancerId, mode = 'onboardi
   useEffect(() => {
     const prevTitle = document.title;
     if (profile?.name) {
-      document.title =
-        mode === 'profile'
-          ? `${profile.name} - Freelancer Portfolio | CrestFlow`
-          : `${profile.name} - Client Onboarding | CrestFlow`;
+      document.title = `${profile.name} - Client Onboarding | CrestFlow`;
     } else {
-      document.title = mode === 'profile' ? 'Freelancer Portfolio | CrestFlow' : 'Client Onboarding | CrestFlow';
+      document.title = 'Client Onboarding | CrestFlow';
     }
     return () => {
       document.title = prevTitle;
     };
-  }, [profile?.name, mode]);
+  }, [profile?.name]);
 
   const handleClearForm = () => {
     setClientName('');
@@ -219,7 +215,7 @@ export default function PublicFreelancerProfile({ freelancerId, mode = 'onboardi
             <span className="text-base font-bold text-slate-900 dark:text-white tracking-tight">CrestFlow</span>
           </div>
           <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-            {mode === 'profile' ? 'Public Portfolio' : 'Client Onboarding Portal'}
+            Client Onboarding Portal
           </span>
         </div>
 

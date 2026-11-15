@@ -87,21 +87,11 @@ export const SITEMAP_PAGES: SitemapPageItem[] = [
   // 2. Public Freelancer & Client Portals
   {
     id: 'user_onboarding',
-    name: 'Client Onboarding Brief Intake',
+    name: 'Client Onboarding & Portfolio Intake',
     path: '/:username/onboarding',
     samplePath: '/tilakpopat2007/onboarding',
     category: 'client',
-    description: 'Clean branded intake form for prospective clients to submit briefs and WhatsApp alerts without random IDs.',
-    accessLevel: 'Public',
-    inXmlSitemap: true,
-  },
-  {
-    id: 'user_public_profile',
-    name: 'Public Freelancer Portfolio',
-    path: '/:username/publicprofile',
-    samplePath: '/tilakpopat2007/publicprofile',
-    category: 'client',
-    description: 'Public showcase displaying deliverables, past clients, work bio, and project intake form.',
+    description: 'Clean branded intake form and portfolio for prospective clients to submit briefs and view services.',
     accessLevel: 'Public',
     inXmlSitemap: true,
   },

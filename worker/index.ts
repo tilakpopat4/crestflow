@@ -21,6 +21,7 @@ import { processDueEmailJobs } from './emailDispatcher';
 import { handleStaticAsset } from './staticHandler';
 import { handleCreateClient, handleCreateInvoice } from './routes/limits';
 import { handleAdminSettings } from './routes/adminSettings';
+import { handleGetPublicProfile } from './routes/publicProfile';
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -79,6 +80,11 @@ export default {
       // 2. GET /api/me
       if (url.pathname === '/api/me' && request.method === 'GET') {
         return await handleGetMe(request, env);
+      }
+
+      // 2b. GET /api/public-profile
+      if (url.pathname === '/api/public-profile' && request.method === 'GET') {
+        return await handleGetPublicProfile(request, env);
       }
 
       // 3. POST /api/cancel-subscription

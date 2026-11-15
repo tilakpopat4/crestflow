@@ -72,18 +72,19 @@ describe('CrestFlow Multi-Page Routing Architecture', () => {
     assert.strictEqual(match.params.mode, 'onboarding');
   });
 
-  it('resolves professional /:username/publicprofile routes without random IDs', () => {
+  it('resolves professional /:username/publicprofile routes alias to /onboarding', () => {
     const match = resolveRoute('/tilakpopat2007/publicprofile');
     assert.strictEqual(match.route, 'dashboard');
-    assert.strictEqual(match.path, '/tilakpopat2007/publicprofile');
+    assert.strictEqual(match.path, '/tilakpopat2007/onboarding');
     assert.strictEqual(match.isSpecialMode, 'freelancer_profile');
     assert.strictEqual(match.params.username, 'tilakpopat2007');
     assert.strictEqual(match.params.freelancerId, 'tilakpopat2007');
-    assert.strictEqual(match.params.mode, 'profile');
+    assert.strictEqual(match.params.mode, 'onboarding');
 
     const hyphenMatch = resolveRoute('/maya-editor/public-profile');
+    assert.strictEqual(hyphenMatch.path, '/maya-editor/onboarding');
     assert.strictEqual(hyphenMatch.params.username, 'maya-editor');
-    assert.strictEqual(hyphenMatch.params.mode, 'profile');
+    assert.strictEqual(hyphenMatch.params.mode, 'onboarding');
   });
 
   it('identifies special mode routes and legacy formats accurately', () => {
@@ -128,7 +129,7 @@ describe('CrestFlow Multi-Page Routing Architecture', () => {
     );
     assert.strictEqual(
       getPublicProfileUrl('tilakpopat2007'),
-      'https://crestflow.nonum.online/tilakpopat2007/publicprofile'
+      'https://crestflow.nonum.online/tilakpopat2007/onboarding'
     );
     assert.strictEqual(
       getPortalUrl('tilakpopat2007'),
@@ -140,7 +141,7 @@ describe('CrestFlow Multi-Page Routing Architecture', () => {
     );
     assert.strictEqual(
       getPublicProfileUrl('tilakpopat2007', 'https://crestflow.tilakpopat2007.workers.dev'),
-      'https://crestflow.tilakpopat2007.workers.dev/tilakpopat2007/publicprofile'
+      'https://crestflow.tilakpopat2007.workers.dev/tilakpopat2007/onboarding'
     );
 
     // 5. Validation and cleaning

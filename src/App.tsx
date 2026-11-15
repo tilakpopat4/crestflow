@@ -83,10 +83,9 @@ export default function App() {
 
   if (isSpecialMode === 'freelancer_profile' && (params.freelancerId || params.username)) {
     const targetHandle = params.username || params.freelancerId;
-    const targetMode = params.mode === 'profile' ? 'profile' : 'onboarding';
     return (
       <Suspense fallback={<ViewLoadingFallback />}>
-        <PublicFreelancerProfile freelancerId={targetHandle} mode={targetMode} />
+        <PublicFreelancerProfile freelancerId={targetHandle} />
       </Suspense>
     );
   }
