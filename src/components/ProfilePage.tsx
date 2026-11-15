@@ -42,12 +42,13 @@ export default function ProfilePage({
   const [servicesDescription, setServicesDescription] = useState('Freelance Services');
   const [geminiApiKey, setGeminiApiKey] = useState(''); const [freelanceStartDate, setFreelanceStartDate] = useState('');
   const [workExperienceBio, setWorkExperienceBio] = useState('');
+  const [photoURL, setPhotoURL] = useState('');
 
   // Saved snapshot for dirty checking and discarding
   const [savedSnapshot, setSavedSnapshot] = useState({
     name: '', username: '', phone: '', upiId: '',
     professionalTitle: 'Freelancer', servicesDescription: 'Freelance Services',
-    geminiApiKey: '', freelanceStartDate: '', workExperienceBio: '',
+    geminiApiKey: '', freelanceStartDate: '', workExperienceBio: '', photoURL: '',
   });
 
   const [activeSection, setActiveSection] = useState<SettingsSectionId>('profile');
@@ -72,11 +73,12 @@ export default function ProfilePage({
           geminiApiKey: profile.geminiApiKey || '',
           freelanceStartDate: profile.freelanceStartDate || '',
           workExperienceBio: profile.workExperienceBio || '',
+          photoURL: profile.photoURL || '',
         };
         setName(initial.name); setUsername(initial.username); setPhone(initial.phone); setUpiId(initial.upiId);
         setProfessionalTitle(initial.professionalTitle); setServicesDescription(initial.servicesDescription);
         setGeminiApiKey(initial.geminiApiKey); setFreelanceStartDate(initial.freelanceStartDate);
-        setWorkExperienceBio(initial.workExperienceBio); setSavedSnapshot(initial);
+        setWorkExperienceBio(initial.workExperienceBio); setPhotoURL(initial.photoURL); setSavedSnapshot(initial);
         isInitializedRef.current = true;
         if (profile.geminiApiKey) hasLoadedInitialKeyRef.current = true;
       } else if (user) {
@@ -104,14 +106,14 @@ export default function ProfilePage({
   }, [profile, user]);
 
   // Dirty state checks per section
-  const isProfileDirty = name !== savedSnapshot.name || username !== savedSnapshot.username || professionalTitle !== savedSnapshot.professionalTitle || freelanceStartDate !== savedSnapshot.freelanceStartDate || workExperienceBio !== savedSnapshot.workExperienceBio;
+  const isProfileDirty = name !== savedSnapshot.name || username !== savedSnapshot.username || professionalTitle !== savedSnapshot.professionalTitle || freelanceStartDate !== savedSnapshot.freelanceStartDate || workExperienceBio !== savedSnapshot.workExperienceBio || photoURL !== savedSnapshot.photoURL;
   const isInvoicingDirty = upiId !== savedSnapshot.upiId || phone !== savedSnapshot.phone || servicesDescription !== savedSnapshot.servicesDescription;
   const isAiDirty = geminiApiKey !== savedSnapshot.geminiApiKey;
 
   // Discard handlers
   const handleDiscardProfile = () => {
     setName(savedSnapshot.name); setUsername(savedSnapshot.username); setProfessionalTitle(savedSnapshot.professionalTitle);
-    setFreelanceStartDate(savedSnapshot.freelanceStartDate); setWorkExperienceBio(savedSnapshot.workExperienceBio);
+    setFreelanceStartDate(savedSnapshot.freelanceStartDate); setWorkExperienceBio(savedSnapshot.workExperienceBio); setPhotoURL(savedSnapshot.photoURL);
     if (error) setError('');
   };
 
@@ -151,24 +153,19 @@ export default function ProfilePage({
     try {
       const cleanHandle = cleanUsername(username) || getUserHandle(profile, user);
       const snapshotData = {
-        name: trimmedName,
-        username: cleanHandle,
-        phone: phone.trim(),
-        upiId: trimmedUpi,
+        name: trimmedName, username: cleanHandle, phone: phone.trim(), upiId: trimmedUpi,
         professionalTitle: professionalTitle.trim() || 'Freelancer',
         servicesDescription: servicesDescription.trim() || 'Freelance Services',
-        geminiApiKey: geminiApiKey.trim(),
-        freelanceStartDate: freelanceStartDate.trim(),
-        workExperienceBio: workExperienceBio.trim(),
+        geminiApiKey: geminiApiKey.trim(), freelanceStartDate: freelanceStartDate.trim(),
+        workExperienceBio: workExperienceBio.trim(), photoURL: photoURL.trim(),
       };
       await onSave({
-        ...snapshotData,
-        id: user.uid,
+        ...snapshotData, id: user.uid,
+        photoURL: photoURL.trim() || undefined,
         geminiApiKey: geminiApiKey.trim() || undefined,
         freelanceStartDate: freelanceStartDate.trim() || undefined,
         workExperienceBio: workExperienceBio.trim() || undefined,
-        isPublicProfile: true,
-        createdAt: profile?.createdAt || Date.now(),
+        isPublicProfile: true, createdAt: profile?.createdAt || Date.now(),
       });
       setSavedSnapshot(snapshotData);
 
@@ -247,6 +244,8 @@ export default function ProfilePage({
             freelanceStartDate={freelanceStartDate}
             setFreelanceStartDate={setFreelanceStartDate}
             onAutoSaveDate={handleAutoSaveStartDate}
+            photoURL={photoURL}
+            onPhotoChange={(url) => setPhotoURL(url)}
             isSaving={isSaving}
             isSaved={savedSection === 'profile'}
             isDirty={isProfileDirty}

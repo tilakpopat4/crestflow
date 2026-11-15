@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../firebase';
-import { doc, collection, setDoc, query, where, getDocs } from 'firebase/firestore';
-import { UserProfile, ServiceRequest, Client } from '../types';
+import { db, auth, googleProvider } from '../firebase';
+import { signInWithPopup } from 'firebase/auth';
+import { query, where, getDocs, collection } from 'firebase/firestore';
+import { UserProfile, Client } from '../types';
 import Logo from './Logo';
 import Footer from './Footer';
 import SupportingInfoModal, { SupportingRoute } from './SupportingInfoModal';
@@ -12,7 +13,7 @@ import PublicFreelancerProfileSubmitted from './PublicFreelancerProfileSubmitted
 import SampleVideoLibrary from './onboarding/SampleVideoLibrary';
 import OnboardingViewTabs from './onboarding/OnboardingViewTabs';
 import { lookupPublicProfile } from '../lib/profileLookup';
-import { buildWhatsAppLeadUrl } from '../lib/onboardingLead';
+import { submitOnboardingServiceRequest } from '../lib/onboardingLead';
 import PublicProfileNotFound from './onboarding/PublicProfileNotFound';
 import { PublicProfileSkeleton } from './skeletons';
 
@@ -129,58 +130,44 @@ export default function PublicFreelancerProfile({ freelancerId }: PublicFreelanc
     e.preventDefault();
     if (!profile) return;
 
+    let currentUser = auth.currentUser;
+    if (!currentUser) {
+      try {
+        const cred = await signInWithPopup(auth, googleProvider);
+        currentUser = cred.user;
+        if (!contactEmail && currentUser.email) {
+          setContactEmail(currentUser.email);
+        }
+        if (!contactName && currentUser.displayName) {
+          setContactName(currentUser.displayName);
+        }
+      } catch (authErr: any) {
+        if (authErr?.code !== 'auth/popup-closed-by-user') {
+          alert('Sign in with Google is required to submit an onboarding request.');
+        }
+        return;
+      }
+    }
+
+    if (!currentUser) return;
+
     setIsSubmitting(true);
     try {
-      const targetUid = profile.userId || profile.id;
-      const reqRef = doc(collection(db, 'serviceRequests'));
-
-      const newRequest: ServiceRequest = {
-        id: reqRef.id,
-        userId: targetUid,
-        clientName: clientName.trim(),
-        contactName: contactName.trim(),
-        contactPhone: contactPhone.trim(),
-        contactEmail: contactEmail.trim(),
-        projectDetails: projectDetails.trim(),
-        status: 'pending',
-        createdAt: Date.now(),
-      };
-
-      if (instagram.trim()) newRequest.instagram = instagram.trim();
-      if (proposedRate && !isNaN(Number(proposedRate))) {
-        newRequest.proposedRate = Number(proposedRate);
-      }
-
-      await setDoc(reqRef, newRequest);
-
-      // Automated lead email notification to the freelancer
-      fetch('/api/notify/new-client-request', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          freelancerId: targetUid,
-          requestId: reqRef.id,
-          clientName: clientName.trim(),
-          contactName: contactName.trim(),
-          contactEmail: contactEmail.trim(),
-          contactPhone: contactPhone.trim(),
-          instagram: instagram.trim() || undefined,
-          proposedRate: proposedRate && !isNaN(Number(proposedRate)) ? Number(proposedRate) : undefined,
-          projectDetails: projectDetails.trim(),
-        }),
-      }).catch((notifyErr) => console.warn('Automated lead email notification failed:', notifyErr));
-
-      const waUrl = buildWhatsAppLeadUrl(profile, {
+      const result = await submitOnboardingServiceRequest({
+        profile,
         clientName,
         contactName,
         contactPhone,
-        contactEmail,
+        contactEmail: contactEmail.trim() || currentUser.email || '',
+        instagram,
         proposedRate,
         projectDetails,
+        currentUser: { uid: currentUser.uid, email: currentUser.email },
       });
-      if (waUrl) {
-        setSubmittedWhatsAppUrl(waUrl);
-        window.open(waUrl, '_blank', 'noopener,noreferrer');
+
+      if (result.waUrl) {
+        setSubmittedWhatsAppUrl(result.waUrl);
+        window.open(result.waUrl, '_blank', 'noopener,noreferrer');
       }
 
       setIsSubmitted(true);

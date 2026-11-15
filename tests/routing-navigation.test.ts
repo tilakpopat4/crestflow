@@ -122,18 +122,18 @@ describe('CrestFlow Multi-Page Routing Architecture', () => {
     assert.strictEqual(getUserHandle({ name: 'Tilak Popat' }, null), 'tilak-popat');
 
     // 4. URL builders with centralized SITE_URL and custom origins
-    assert.strictEqual(SITE_URL, 'https://crestflow.nonum.online');
+    assert.strictEqual(SITE_URL, 'https://crestflow.tilakpopat2007.workers.dev');
     assert.strictEqual(
       getOnboardingUrl('tilakpopat2007'),
-      'https://crestflow.nonum.online/tilakpopat2007/onboarding'
+      'https://crestflow.tilakpopat2007.workers.dev/tilakpopat2007/onboarding'
     );
     assert.strictEqual(
       getPublicProfileUrl('tilakpopat2007'),
-      'https://crestflow.nonum.online/tilakpopat2007/onboarding'
+      'https://crestflow.tilakpopat2007.workers.dev/tilakpopat2007/onboarding'
     );
     assert.strictEqual(
       getPortalUrl('tilakpopat2007'),
-      'https://crestflow.nonum.online/portal?freelancerId=tilakpopat2007'
+      'https://crestflow.tilakpopat2007.workers.dev/portal?freelancerId=tilakpopat2007'
     );
     assert.strictEqual(
       getOnboardingUrl('tilakpopat2007', 'https://crestflow.tilakpopat2007.workers.dev'),

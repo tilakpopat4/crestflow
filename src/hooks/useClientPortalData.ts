@@ -154,19 +154,31 @@ export function useClientPortalData(user: User | null) {
       return;
     }
     setCheckingReview(true);
-    const q = query(collection(db, 'reviews'), where('clientId', '==', currentClient.id));
-    getDocs(q)
+    const freelancerUid = (currentClient as any).userId || '';
+    const reviewerUid = user?.uid || currentClient.id;
+    const reviewDocId = `${reviewerUid}_${freelancerUid}`;
+
+    getDoc(doc(db, 'reviews', reviewDocId))
       .then((snap) => {
-        if (!snap.empty) {
-          const data = snap.docs[0].data();
+        if (snap.exists()) {
+          const data = snap.data();
           setExistingReview({ rating: data.rating, feedbackText: data.feedbackText, createdAt: data.createdAt });
         } else {
-          setExistingReview(null);
+          // Fallback to query by clientId
+          const q = query(collection(db, 'reviews'), where('clientId', '==', currentClient.id));
+          return getDocs(q).then((cSnap) => {
+            if (!cSnap.empty) {
+              const data = cSnap.docs[0].data();
+              setExistingReview({ rating: data.rating, feedbackText: data.feedbackText, createdAt: data.createdAt });
+            } else {
+              setExistingReview(null);
+            }
+          });
         }
       })
       .catch(console.error)
       .finally(() => setCheckingReview(false));
-  }, [currentClient?.id]);
+  }, [currentClient?.id, user?.uid]);
 
   // Submit Review Handler
   const handleReviewSubmit = async (e: React.FormEvent) => {
@@ -175,19 +187,30 @@ export function useClientPortalData(user: User | null) {
 
     setIsSubmittingReview(true);
     try {
-      const reviewRef = doc(collection(db, 'reviews'));
+      const freelancerUid = (currentClient as any).userId || '';
+      const reviewerUid = user?.uid || currentClient.id;
+      const reviewDocId = `${reviewerUid}_${freelancerUid}`;
+      const reviewRef = doc(db, 'reviews', reviewDocId);
+
       const reviewData = {
-        id: reviewRef.id,
-        userId: (currentClient as any).userId || '',
+        id: reviewDocId,
+        userId: freelancerUid,
         clientId: currentClient.id,
         clientName: currentClient.name,
         rating: reviewRating,
         feedbackText: reviewText.trim(),
         createdAt: Date.now(),
+        isApproved: false,
+        ...(user?.uid ? { reviewerUid: user.uid, reviewerEmail: user.email || '' } : {}),
       };
 
       await setDoc(reviewRef, reviewData);
       setReviewSuccess(true);
+      setExistingReview({
+        rating: reviewRating,
+        feedbackText: reviewText.trim(),
+        createdAt: Date.now(),
+      });
       setReviewText('');
     } catch (err: any) {
       console.error(err);

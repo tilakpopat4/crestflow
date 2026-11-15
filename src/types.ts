@@ -233,6 +233,8 @@ export interface ClientReview {
   feedbackText: string;
   projectName?: string; // Optional project title
   userId: string; // Freelancer's user ID (owner)
+  reviewerUid?: string; // Signed-in client's UID for 1-review-per-account guarantee
+  reviewerEmail?: string;
   isApproved?: boolean;
   isPublic?: boolean;
   createdAt: number;
@@ -250,6 +252,9 @@ export interface ServiceRequest {
   proposedRate?: number;
   status: 'pending' | 'accepted' | 'declined';
   createdAt: number;
+  submittedByUid?: string; // Authenticated user UID who submitted request
+  submittedByEmail?: string;
+}
   updatedAt?: number;
 }
 

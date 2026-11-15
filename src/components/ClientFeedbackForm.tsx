@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../firebase';
-import { doc, setDoc } from 'firebase/firestore';
-import { generateUUID } from '../lib/utils';
-import { Star, CheckCircle2, MessageSquare, AlertCircle, Loader2 } from 'lucide-react';
+import { db, auth, googleProvider } from '../firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { onAuthStateChanged, signInWithPopup, User } from 'firebase/auth';
+import { AlertCircle, Loader2 } from 'lucide-react';
 import Logo from './Logo';
-import Footer from './Footer';
+import FeedbackSuccessCard from './feedback/FeedbackSuccessCard';
+import FeedbackAuthPrompt from './feedback/FeedbackAuthPrompt';
+import FeedbackRatingSelector from './feedback/FeedbackRatingSelector';
+import FeedbackFormFields from './feedback/FeedbackFormFields';
 
 export default function ClientFeedbackForm() {
+  const [currentUser, setCurrentUser] = useState<User | null>(auth.currentUser);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+
   const [freelancerUid, setFreelancerUid] = useState('');
   const [freelancerName, setFreelancerName] = useState('your Freelancer');
   const [clientName, setClientName] = useState('');
@@ -15,12 +22,30 @@ export default function ClientFeedbackForm() {
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [feedbackText, setFeedbackText] = useState('');
-  
+
+  const [existingReview, setExistingReview] = useState<{
+    rating: number;
+    feedbackText: string;
+    projectName?: string;
+  } | null>(null);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState('');
 
-  // Parse URL query parameters
+  // 1. Listen for Firebase Auth state
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+      setAuthLoading(false);
+      if (user && !clientName) {
+        setClientName(user.displayName || user.email || '');
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  // 2. Parse URL query parameters
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const uid = params.get('uid') || '';
@@ -38,9 +63,60 @@ export default function ClientFeedbackForm() {
     }
   }, []);
 
+  // 3. Check for existing review by this signed-in user for this freelancer
+  useEffect(() => {
+    if (!currentUser || !freelancerUid) {
+      setExistingReview(null);
+      return;
+    }
+
+    if (currentUser.uid === freelancerUid) {
+      setError('You cannot review your own creator profile.');
+      return;
+    }
+
+    const reviewDocId = `${currentUser.uid}_${freelancerUid}`;
+    getDoc(doc(db, 'reviews', reviewDocId))
+      .then((snap) => {
+        if (snap.exists()) {
+          const data = snap.data();
+          setExistingReview({
+            rating: data.rating,
+            feedbackText: data.feedbackText,
+            projectName: data.projectName,
+          });
+        } else {
+          setExistingReview(null);
+        }
+      })
+      .catch((err) => console.warn('Could not check existing review:', err));
+  }, [currentUser?.uid, freelancerUid]);
+
+  const handleSignIn = async () => {
+    setIsAuthenticating(true);
+    try {
+      const res = await signInWithPopup(auth, googleProvider);
+      setCurrentUser(res.user);
+    } catch (err: any) {
+      if (err?.code !== 'auth/popup-closed-by-user') {
+        setError('Failed to sign in with Google. Please try again.');
+      }
+    } finally {
+      setIsAuthenticating(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    if (!currentUser) {
+      setError('You must sign in with Google to leave a review.');
+      return;
+    }
+    if (currentUser.uid === freelancerUid) {
+      setError('You cannot review your own creator profile.');
+      return;
+    }
     if (!freelancerUid) {
       setError('Cannot submit feedback: Missing freelancer ID.');
       return;
@@ -62,19 +138,24 @@ export default function ClientFeedbackForm() {
     setError('');
 
     try {
-      const reviewId = generateUUID();
+      // Deterministic document ID guarantees 1 review per account per freelancer
+      const reviewDocId = `${currentUser.uid}_${freelancerUid}`;
+
       const reviewData = {
-        id: reviewId,
+        id: reviewDocId,
         userId: freelancerUid,
         clientId: clientId || '',
         clientName: clientName.trim(),
         projectName: projectName.trim() || 'Video Production Project',
-        rating: rating,
+        rating,
         feedbackText: feedbackText.trim(),
         createdAt: Date.now(),
+        isApproved: false,
+        reviewerUid: currentUser.uid,
+        reviewerEmail: currentUser.email || '',
       };
 
-      await setDoc(doc(db, 'reviews', reviewId), reviewData);
+      await setDoc(doc(db, 'reviews', reviewDocId), reviewData);
       setIsSuccess(true);
     } catch (err: any) {
       console.error('Error saving feedback:', err);
@@ -84,54 +165,47 @@ export default function ClientFeedbackForm() {
     }
   };
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4">
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return (
+      <FeedbackAuthPrompt
+        freelancerName={freelancerName}
+        onSignIn={handleSignIn}
+        isAuthenticating={isAuthenticating}
+      />
+    );
+  }
+
+  if (existingReview) {
+    return (
+      <FeedbackSuccessCard
+        freelancerName={freelancerName}
+        clientName={clientName}
+        projectName={existingReview.projectName}
+        rating={existingReview.rating}
+        feedbackText={existingReview.feedbackText}
+        isExisting={true}
+      />
+    );
+  }
+
   if (isSuccess) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4 font-sans text-slate-800 dark:text-slate-200 transition-colors duration-150">
-        <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-800 p-8 text-center space-y-6 relative overflow-hidden animate-in fade-in zoom-in-95 duration-300">
-          <div className="w-14 h-14 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/50 rounded-xl flex items-center justify-center mx-auto shadow-xs">
-            <CheckCircle2 className="w-9 h-9" />
-          </div>
-
-          <div className="space-y-2">
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight flex items-center justify-center gap-1.5">
-              Thank You!
-            </h1>
-            <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
-              Your review for <span className="font-semibold text-slate-800 dark:text-slate-200">{freelancerName}</span> has been submitted successfully. Your feedback is highly appreciated!
-            </p>
-          </div>
-
-          <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60 rounded-xl p-5 text-left space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Your Review</span>
-              <div className="flex gap-0.5">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star 
-                    key={star} 
-                    className={`w-4 h-4 ${star <= rating ? 'text-amber-500 fill-amber-400' : 'text-slate-200 dark:text-slate-700'}`} 
-                  />
-                ))}
-              </div>
-            </div>
-            
-            <div className="space-y-1">
-              {projectName && (
-                <div className="text-xs font-bold text-slate-700 dark:text-slate-300">Project: {projectName}</div>
-              )}
-              <p className="text-slate-600 dark:text-slate-300 text-sm italic leading-relaxed">"{feedbackText}"</p>
-            </div>
-            <div className="text-[10px] text-slate-400 dark:text-slate-500 text-right font-medium">Submitted by {clientName}</div>
-          </div>
-
-          <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex flex-col items-center gap-1.5">
-            <div className="flex items-center gap-1.5">
-              <Logo className="w-5 h-5" />
-              <span className="text-xs font-bold text-slate-400 dark:text-slate-500 tracking-wider uppercase">CrestFlow Portal</span>
-            </div>
-            <p className="text-[10px] text-slate-400 dark:text-slate-500">Professional client workflow manager for freelancers &amp; creators</p>
-          </div>
-        </div>
-      </div>
+      <FeedbackSuccessCard
+        freelancerName={freelancerName}
+        clientName={clientName}
+        projectName={projectName}
+        rating={rating}
+        feedbackText={feedbackText}
+        isExisting={false}
+      />
     );
   }
 
@@ -157,6 +231,9 @@ export default function ClientFeedbackForm() {
             <p className="text-slate-500 dark:text-slate-400 text-xs md:text-sm leading-relaxed">
               Hi there! Please take a moment to leave a review for <span className="font-semibold text-indigo-600 dark:text-indigo-400">{freelancerName}</span>. Your review helps build trust and improve future collaborations.
             </p>
+            <p className="text-[11px] text-slate-400 font-mono">
+              Signed in as {currentUser.email} • 1 review permitted per account
+            </p>
           </div>
 
           {error && (
@@ -167,116 +244,43 @@ export default function ClientFeedbackForm() {
           )}
 
           {/* Star Selector */}
-          <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60 rounded-xl p-5 text-center space-y-3">
-            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Rate Your Experience *
-            </label>
-            <div className="flex justify-center gap-2">
-              {[1, 2, 3, 4, 5].map((star) => {
-                const isLit = star <= (hoveredRating || rating);
-                return (
-                  <button
-                    type="button"
-                    key={star}
-                    onClick={() => {
-                      setRating(star);
-                      setError('');
-                    }}
-                    onMouseEnter={() => setHoveredRating(star)}
-                    onMouseLeave={() => setHoveredRating(0)}
-                    className="p-1 transition-colors cursor-pointer outline-none"
-                    title={`Rate ${star} Stars`}
-                  >
-                    <Star 
-                      className={`w-9 h-9 transition-colors ${
-                        isLit 
-                          ? 'text-amber-500 fill-amber-400' 
-                          : 'text-slate-300 dark:text-slate-600 fill-none hover:text-amber-400'
-                      }`} 
-                    />
-                  </button>
-                );
-              })}
-            </div>
-            {rating > 0 && (
-              <span className="text-xs font-medium text-slate-600 dark:text-slate-400 transition-all">
-                {rating === 1 && 'Poor'}
-                {rating === 2 && 'Fair'}
-                {rating === 3 && 'Good'}
-                {rating === 4 && 'Very Good'}
-                {rating === 5 && 'Excellent'}
-              </span>
-            )}
-          </div>
+          <FeedbackRatingSelector
+            rating={rating}
+            hoveredRating={hoveredRating}
+            onRatingChange={(star) => {
+              setRating(star);
+              setError('');
+            }}
+            onHoverChange={setHoveredRating}
+          />
 
-          {/* Input details */}
-          <div className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
-                Your Name / Company *
-              </label>
-              <input
-                type="text"
-                value={clientName}
-                onChange={(e) => setClientName(e.target.value)}
-                placeholder="e.g. John Doe / Pixel Studios"
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none transition-all focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-800 font-medium"
-                required
-              />
-            </div>
+          <FeedbackFormFields
+            clientName={clientName}
+            setClientName={setClientName}
+            projectName={projectName}
+            setProjectName={setProjectName}
+            feedbackText={feedbackText}
+            setFeedbackText={setFeedbackText}
+          />
 
-            <div>
-              <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
-                Project Name (Optional)
-              </label>
-              <input
-                type="text"
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-                placeholder="e.g. August Commercial Reel / YouTube Video Edit"
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none transition-all focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-800 font-medium"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
-                Your Detailed Review *
-              </label>
-              <textarea
-                value={feedbackText}
-                onChange={(e) => setFeedbackText(e.target.value)}
-                placeholder="Write about the quality of editing, communication, delivery speed, or overall experience..."
-                rows={4}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none transition-all focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-800 leading-relaxed font-medium"
-                required
-              ></textarea>
-            </div>
-          </div>
-
-          {/* Submit Button */}
-          <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end">
+          <div className="pt-2">
             <button
               type="submit"
-              disabled={isSubmitting || !freelancerUid}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-xl text-sm transition-colors shadow-xs disabled:opacity-50 cursor-pointer"
+              disabled={isSubmitting || rating === 0 || !feedbackText.trim() || !clientName.trim()}
+              className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-colors duration-120 shadow-xs disabled:opacity-50 cursor-pointer border-0"
             >
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Submitting Review...
+                  <span>Submitting Review...</span>
                 </>
               ) : (
-                <>
-                  Submit Feedback
-                </>
+                <span>Submit Verified Review</span>
               )}
             </button>
           </div>
         </form>
       </div>
-
-      {/* Footer */}
-      <Footer variant="minimal" className="mt-6 border-none bg-transparent" />
     </div>
   );
 }

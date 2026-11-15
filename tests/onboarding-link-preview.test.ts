@@ -43,7 +43,7 @@ describe('Personalized Onboarding Link Preview Suite', () => {
       freelanceStartDate: '2026-02-14',
     };
 
-    const targetUrl = 'https://crestflow.nonum.online/tilakpopat2007/onboarding';
+    const targetUrl = 'https://crestflow.tilakpopat2007.workers.dev/tilakpopat2007/onboarding';
     const resultHtml = injectPersonalizedOnboardingMeta(rawHtml, mockProfile, targetUrl);
 
     // Title tag

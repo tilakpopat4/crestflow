@@ -99,11 +99,23 @@ export function getUserHandle(
 }
 
 /**
+ * Resolves the active base origin, prioritizing explicit customOrigin,
+ * then window.location.origin in browsers, and falling back to SITE_URL.
+ */
+export function resolveOrigin(customOrigin?: string): string {
+  if (customOrigin) return customOrigin.replace(/\/+$/, '');
+  if (typeof window !== 'undefined' && window.location && window.location.origin) {
+    return window.location.origin.replace(/\/+$/, '');
+  }
+  return SITE_URL.replace(/\/+$/, '');
+}
+
+/**
  * Returns the canonical public client onboarding URL for a given handle.
  * Format: https://<domain>/<username>/onboarding
  */
 export function getOnboardingUrl(handle: string, customOrigin?: string): string {
-  const origin = (customOrigin || SITE_URL).replace(/\/+$/, '');
+  const origin = resolveOrigin(customOrigin);
   const clean = cleanUsername(handle) || handle;
   return `${origin}/${encodeURIComponent(clean)}/onboarding`;
 }
@@ -121,7 +133,7 @@ export function getPublicProfileUrl(handle: string, customOrigin?: string): stri
  * Format: https://<domain>/portal?freelancerId=<username>
  */
 export function getPortalUrl(handle?: string, customOrigin?: string): string {
-  const origin = (customOrigin || SITE_URL).replace(/\/+$/, '');
+  const origin = resolveOrigin(customOrigin);
   if (!handle) return `${origin}/portal`;
   const clean = cleanUsername(handle) || handle;
   return `${origin}/portal?freelancerId=${encodeURIComponent(clean)}`;

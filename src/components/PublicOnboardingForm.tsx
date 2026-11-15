@@ -1,5 +1,6 @@
 import React from 'react';
 import { UserProfile } from '../types';
+import { auth } from '../firebase';
 import { 
   Briefcase, 
   User, 
@@ -181,23 +182,30 @@ export default function PublicOnboardingForm({
             Clear Form
           </button>
           
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium transition-colors duration-120 shadow-xs disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer border-0"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                Submitting Onboarding...
-              </>
-            ) : (
-              <>
-                Submit Onboarding Request
-                <ArrowRight className="w-3.5 h-3.5" />
-              </>
+          <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
+            {!auth.currentUser && (
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                Google sign-in required to submit
+              </span>
             )}
-          </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium transition-colors duration-120 shadow-xs disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer border-0"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  Submitting Onboarding...
+                </>
+              ) : (
+                <>
+                  {auth.currentUser ? 'Submit Onboarding Request' : 'Sign in & Submit'}
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </form>
     </div>

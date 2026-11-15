@@ -29,7 +29,7 @@ describe('Public Onboarding & Unified Profile Route Suite', () => {
     const onboardingUrl = getOnboardingUrl(handle);
     const publicProfileUrl = getPublicProfileUrl(handle);
 
-    assert.strictEqual(onboardingUrl, 'https://crestflow.nonum.online/tilakpopat2007/onboarding');
+    assert.strictEqual(onboardingUrl, 'https://crestflow.tilakpopat2007.workers.dev/tilakpopat2007/onboarding');
     assert.strictEqual(publicProfileUrl, onboardingUrl);
   });
 

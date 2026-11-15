@@ -3,6 +3,7 @@ import { User as FirebaseUser } from 'firebase/auth';
 import { Check, Sparkles } from 'lucide-react';
 import { cleanUsername, isValidUsername, getOnboardingUrl } from '../../lib/userHandle';
 import ProfilePublicLinksCard from './ProfilePublicLinksCard';
+import ProfileAvatarUploader from './ProfileAvatarUploader';
 
 interface ProfilePublicSectionProps {
   user: FirebaseUser;
@@ -17,6 +18,8 @@ interface ProfilePublicSectionProps {
   freelanceStartDate: string;
   setFreelanceStartDate: (val: string) => void;
   onAutoSaveDate?: (val: string) => void;
+  photoURL?: string;
+  onPhotoChange?: (val: string) => void;
   isSaving: boolean;
   isSaved: boolean;
   isDirty: boolean;
@@ -41,6 +44,8 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
   freelanceStartDate,
   setFreelanceStartDate,
   onAutoSaveDate,
+  photoURL,
+  onPhotoChange,
   isSaving,
   isSaved,
   isDirty,
@@ -76,23 +81,15 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
 
       <div className="rounded-xl bg-white dark:bg-slate-900 shadow-xs ring-1 ring-slate-200 dark:ring-slate-800 overflow-hidden">
         <div className="grid grid-cols-1 gap-x-4 gap-y-5 p-5 sm:grid-cols-2 sm:p-6">
-          {/* Avatar and Account info */}
+          {/* Avatar with Direct Photo Upload */}
           <div className="flex flex-col gap-4 sm:col-span-2 sm:flex-row sm:items-center">
-            <span className="relative size-16 shrink-0">
-              {user.photoURL ? (
-                <img
-                  src={user.photoURL}
-                  alt={name || 'Profile Photo'}
-                  className="size-16 rounded-full bg-slate-100 dark:bg-slate-800 object-cover outline-1 -outline-offset-1 outline-black/5"
-                  referrerPolicy="no-referrer"
-                  decoding="async"
-                />
-              ) : (
-                <span className="flex size-16 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-xl font-semibold text-slate-900 dark:text-slate-100 select-none">
-                  {(name || user.displayName || 'U').charAt(0).toUpperCase()}
-                </span>
-              )}
-            </span>
+            <ProfileAvatarUploader
+              currentPhotoUrl={photoURL || user.photoURL}
+              fallbackInitial={(name || user.displayName || 'U').charAt(0).toUpperCase()}
+              onPhotoUploaded={(url) => onPhotoChange && onPhotoChange(url)}
+              onPhotoRemoved={() => onPhotoChange && onPhotoChange('')}
+              disabled={isSaving}
+            />
 
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">

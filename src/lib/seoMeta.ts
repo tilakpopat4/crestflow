@@ -1,3 +1,5 @@
+import { SITE_URL } from './siteConfig';
+
 /**
  * Manages document head metadata dynamically across SPA routes.
  */
@@ -67,7 +69,7 @@ export function updatePageMeta(route: string): void {
 
   let canonicalEl = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
   if (canonicalEl) {
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://crestflow.nonum.online';
+    const origin = typeof window !== 'undefined' ? window.location.origin : SITE_URL;
     canonicalEl.href = `${origin}${meta.canonicalPath}`;
   }
 }
