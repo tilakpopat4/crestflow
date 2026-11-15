@@ -122,26 +122,26 @@ describe('CrestFlow Multi-Page Routing Architecture', () => {
     assert.strictEqual(getUserHandle({ name: 'Tilak Popat' }, null), 'tilak-popat');
 
     // 4. URL builders with centralized SITE_URL and custom origins
-    assert.strictEqual(SITE_URL, 'https://crestflow.tilakpopat2007.workers.dev');
+    assert.strictEqual(SITE_URL, 'https://crestflow.space');
     assert.strictEqual(
       getOnboardingUrl('tilakpopat2007'),
-      'https://crestflow.tilakpopat2007.workers.dev/tilakpopat2007/onboarding'
+      'https://crestflow.space/tilakpopat2007/onboarding'
     );
     assert.strictEqual(
       getPublicProfileUrl('tilakpopat2007'),
-      'https://crestflow.tilakpopat2007.workers.dev/tilakpopat2007/onboarding'
+      'https://crestflow.space/tilakpopat2007/onboarding'
     );
     assert.strictEqual(
       getPortalUrl('tilakpopat2007'),
-      'https://crestflow.tilakpopat2007.workers.dev/portal?freelancerId=tilakpopat2007'
+      'https://crestflow.space/portal?freelancerId=tilakpopat2007'
     );
     assert.strictEqual(
-      getOnboardingUrl('tilakpopat2007', 'https://crestflow.tilakpopat2007.workers.dev'),
-      'https://crestflow.tilakpopat2007.workers.dev/tilakpopat2007/onboarding'
+      getOnboardingUrl('tilakpopat2007', 'https://crestflow.space'),
+      'https://crestflow.space/tilakpopat2007/onboarding'
     );
     assert.strictEqual(
-      getPublicProfileUrl('tilakpopat2007', 'https://crestflow.tilakpopat2007.workers.dev'),
-      'https://crestflow.tilakpopat2007.workers.dev/tilakpopat2007/onboarding'
+      getPublicProfileUrl('tilakpopat2007', 'https://crestflow.space'),
+      'https://crestflow.space/tilakpopat2007/onboarding'
     );
 
     // 5. Validation and cleaning

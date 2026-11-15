@@ -1,5 +1,5 @@
 /**
  * Centralized site configuration.
- * Points to the official CrestFlow workers.dev domain until a custom domain is explicitly attached.
+ * Points to the official CrestFlow custom domain.
  */
-export const SITE_URL = 'https://crestflow.tilakpopat2007.workers.dev';
+export const SITE_URL = 'https://crestflow.space';

@@ -9,7 +9,7 @@
     "binding": "ASSETS"
   },
   "vars": {
-    "BASE_URL": "https://crestflow.tilakpopat2007.workers.dev",
+    "BASE_URL": "https://crestflow.space",
     "RESEND_FROM_EMAIL": "CrestFlow <onboarding@resend.dev>",
     "EMAILJS_SERVICE_ID": "service_u6nm96l",
     "EMAILJS_TEMPLATE_ID": "template_g3ojhpa",

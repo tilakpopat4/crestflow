@@ -5,16 +5,16 @@ import { SITE_URL } from '../src/lib/siteConfig';
 import { getOnboardingUrl, getPortalUrl, resolveOrigin } from '../src/lib/userHandle';
 
 describe('User Experience, Domain, and Review Limits Suite', () => {
-  it('1. Domain Verification: SITE_URL points strictly to workers.dev and nonum.online is eradicated', () => {
-    assert.strictEqual(SITE_URL, 'https://crestflow.tilakpopat2007.workers.dev');
+  it('1. Domain Verification: SITE_URL points strictly to crestflow.space and nonum.online is eradicated', () => {
+    assert.strictEqual(SITE_URL, 'https://crestflow.space');
     const resolved = resolveOrigin();
-    assert.strictEqual(resolved, 'https://crestflow.tilakpopat2007.workers.dev');
+    assert.strictEqual(resolved, 'https://crestflow.space');
 
     const onboardingUrl = getOnboardingUrl('tilakpopat');
-    assert.strictEqual(onboardingUrl, 'https://crestflow.tilakpopat2007.workers.dev/tilakpopat/onboarding');
+    assert.strictEqual(onboardingUrl, 'https://crestflow.space/tilakpopat/onboarding');
 
     const portalUrl = getPortalUrl('tilakpopat');
-    assert.strictEqual(portalUrl, 'https://crestflow.tilakpopat2007.workers.dev/portal?freelancerId=tilakpopat');
+    assert.strictEqual(portalUrl, 'https://crestflow.space/portal?freelancerId=tilakpopat');
   });
 
   it('2. Onboarding View Tabs: Enforces dark contrast tokens and eliminates white-on-white text', () => {

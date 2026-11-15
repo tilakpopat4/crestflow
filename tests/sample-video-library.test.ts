@@ -77,8 +77,8 @@ describe('Sample Video Library Connected to Google Drive Suite', () => {
     assert.ok(!cardContent.includes('<iframe'), 'SampleVideoCard must not render an iframe in the thumbnail preview');
     // Uses solid black background for pure pillarboxing without white translucent bleed
     assert.ok(cardContent.includes('bg-black'), 'Card viewport must use solid bg-black');
-    // Uses single play button
-    assert.ok(cardContent.includes('Exactly One Single Play Button'), 'Card must have exactly one play button');
+    // Does not overlay duplicate play button when thumbnail is active
+    assert.ok(cardContent.includes('!showThumbnail'), 'Card must only show fallback play indicator when no thumbnail is present');
   });
 
   it('6. File size compliance: All sample video components remain <= 300 lines max per AGENTS.md', () => {

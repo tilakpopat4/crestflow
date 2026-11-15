@@ -44,14 +44,16 @@ export const SampleVideoCard: React.FC<SampleVideoCardProps> = ({ item, onSelect
         )}
 
         {/* Subtle Dark Vignette on Hover (Zero White Washout) */}
-        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors pointer-events-none" />
+        <div className="absolute inset-0 bg-black/10 group-hover:bg-black/25 transition-colors pointer-events-none" />
 
-        {/* Exactly One Single Play Button */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="w-11 h-11 rounded-full bg-[#1e1e1e]/90 text-white border border-[#333333] flex items-center justify-center shadow-lg group-hover:scale-108 group-hover:bg-[#4870aa] group-hover:border-[#4870aa] transition-all duration-150">
-            <Play size={18} className="ml-0.5 fill-current text-white" />
+        {/* Fallback Play Indicator only when no thumbnail image is present */}
+        {!showThumbnail && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="w-11 h-11 rounded-full bg-[#1e1e1e]/90 text-white border border-[#333333] flex items-center justify-center shadow-lg">
+              <Play size={18} className="ml-0.5 fill-current text-white" />
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Card Body */}
