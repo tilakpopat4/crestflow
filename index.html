@@ -8,10 +8,11 @@
     <!-- Primary SEO Meta Tags -->
     <meta name="title" content="CrestFlow | UPI invoicing and client management for freelancers" />
     <meta name="description" content="Manage clients, log deliverables, automate 6:00 AM invoice generation, and collect direct UPI payments with zero fees. Built for Indian freelancers, video editors, and agencies." />
-    <meta name="keywords" content="freelance client manager, freelance invoicing app, upi qr invoice generator, video editor client manager, automated invoice billing, freelancer portfolio, freelance billing software india, invoice generator with upi qr code" />
+    <meta name="keywords" content="freelance client manager, freelance invoicing app, upi qr invoice generator, video editor client manager, automated invoice billing, upi invoice software india, video editing work tracker, freelancer portfolio portal, zero fee upi payment, freelance billing software india, direct upi invoice, freelance deliverables tracker" />
     <meta name="author" content="Tilak Popat Films" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-    <meta name="googlebot" content="index, follow" />
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large" />
     <meta name="geo.region" content="IN" />
     <meta name="geo.position" content="20.5937;78.9629" />
     <meta name="ICBM" content="20.5937, 78.9629" />
@@ -25,9 +26,11 @@
     <meta property="og:title" content="CrestFlow | UPI invoicing and client management for freelancers" />
     <meta property="og:description" content="Manage clients, track deliverables, automate morning invoices, and collect zero-fee direct UPI QR payments. Built for freelancers and video editors." />
     <meta property="og:image" content="https://crestflow.space/app_logo_icon.png" />
+    <meta property="og:image:secure_url" content="https://crestflow.space/app_logo_icon.png" />
+    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="512" />
     <meta property="og:image:height" content="512" />
-    <meta property="og:image:alt" content="CrestFlow - Freelancing Client Manager" />
+    <meta property="og:image:alt" content="CrestFlow - Freelancing Client Manager &amp; Instant UPI Invoicing" />
     <meta property="og:locale" content="en_IN" />
     <meta property="og:locale:alternate" content="en_US" />
 
@@ -37,6 +40,7 @@
     <meta name="twitter:title" content="CrestFlow | Freelance Client Manager &amp; Direct UPI Invoicing" />
     <meta name="twitter:description" content="Stop juggling spreadsheets and WhatsApp chats. CrestFlow manages clients, logs edits, automates invoice generation, and collects direct UPI QR payments." />
     <meta name="twitter:image" content="https://crestflow.space/app_logo_icon.png" />
+    <meta name="twitter:image:alt" content="CrestFlow App" />
 
     <!-- App Icons & Theme -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -62,11 +66,23 @@
     <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin />
     <link rel="dns-prefetch" href="https://apis.google.com" />
 
-    <!-- Schema.org JSON-LD Structured Data: SoftwareApplication & WebApplication -->
+    <!-- Schema.org JSON-LD Structured Data: WebSite, SoftwareApplication, Organization, BreadcrumbList, FAQPage -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://crestflow.space/#website",
+          "url": "https://crestflow.space/",
+          "name": "CrestFlow",
+          "alternateName": "CrestFlow Space",
+          "description": "Freelancing client manager, automated morning invoicing, deliverable tracking, and zero-fee direct UPI QR payments.",
+          "inLanguage": "en-IN",
+          "publisher": {
+            "@id": "https://crestflow.space/#organization"
+          }
+        },
         {
           "@type": "SoftwareApplication",
           "@id": "https://crestflow.space/#software",
@@ -75,13 +91,21 @@
           "operatingSystem": "Web, All",
           "url": "https://crestflow.space/",
           "description": "Fast & modern freelancing client manager, automated morning invoicing, work logging, and real-time client portal with direct UPI payments.",
+          "featureList": [
+            "Direct UPI QR Code Invoicing with 0% platform commission",
+            "Automated 6:00 AM Scheduled Invoice Generation & Gmail Delivery",
+            "Freelance Video Deliverable Logging with Google Drive integration",
+            "Interactive Branded Client Portal for Work Approvals and Invoices",
+            "Public Creator Portfolio and Onboarding Intake Link",
+            "Verified Client Testimonials and Review Gathering"
+          ],
           "offers": [
             {
               "@type": "Offer",
               "name": "Free Tier",
               "price": "0",
               "priceCurrency": "INR",
-              "description": "Up to 2 active clients and 3 invoices per month"
+              "description": "Up to 2 active clients and 3 invoices per month with direct UPI QR code generation"
             },
             {
               "@type": "Offer",
@@ -108,17 +132,64 @@
             "worstRating": "1"
           },
           "author": {
-            "@type": "Organization",
-            "name": "Tilak Popat Films",
-            "url": "https://crestflow.space/"
+            "@id": "https://crestflow.space/#organization"
           }
         },
         {
           "@type": "Organization",
           "@id": "https://crestflow.space/#organization",
-          "name": "CrestFlow",
+          "name": "Tilak Popat Films",
+          "legalName": "Tilak Popat Films",
           "url": "https://crestflow.space/",
-          "logo": "https://crestflow.space/app_logo_icon.png"
+          "logo": "https://crestflow.space/app_logo_icon.png",
+          "email": "support.crestflow@gmail.com",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Uvarsad",
+            "addressLocality": "Gandhinagar",
+            "addressRegion": "Gujarat",
+            "addressCountry": "IN"
+          },
+          "founder": {
+            "@type": "Person",
+            "name": "Tilak Popat"
+          }
+        },
+        {
+          "@type": "BreadcrumbList",
+          "@id": "https://crestflow.space/#breadcrumbs",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://crestflow.space/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Pricing",
+              "item": "https://crestflow.space/pricing"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Features",
+              "item": "https://crestflow.space/work"
+            },
+            {
+              "@type": "ListItem",
+              "position": 4,
+              "name": "Reviews",
+              "item": "https://crestflow.space/reviews"
+            },
+            {
+              "@type": "ListItem",
+              "position": 5,
+              "name": "Contact",
+              "item": "https://crestflow.space/contact"
+            }
+          ]
         },
         {
           "@type": "FAQPage",
@@ -142,7 +213,7 @@
             },
             {
               "@type": "Question",
-              "name": "Is CrestFlow free to use?",
+              "name": "Is CrestFlow free to use for freelancers?",
               "acceptedAnswer": {
                 "@type": "Answer",
                 "text": "Yes, CrestFlow provides a free tier with up to 2 clients and 3 invoices every month. Freelancers who need unlimited clients and automated 6:00 AM scheduled invoicing can upgrade to CrestFlow Pro for ₹79/month, ₹199/quarter, ₹449/6-month, or ₹899/year."
@@ -155,6 +226,22 @@
                 "@type": "Answer",
                 "text": "Yes, CrestFlow features seamless 1-click Gmail and Google Drive integration to auto-attach generated PDF invoices and deliver them straight from your authenticated email."
               }
+            },
+            {
+              "@type": "Question",
+              "name": "How do video editors use CrestFlow for client approvals?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Video editors log daily deliverables with Google Drive preview links. Clients can review sample videos, approve edits, request revisions, and view outstanding invoices inside a branded client portal."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Does CrestFlow hold client payments or charge transaction fees?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No. Unlike traditional freelance platforms that take 10% to 20% cut and hold payments for weeks, CrestFlow uses direct UPI QR codes. Payments go directly from the client's bank account to your UPI ID with 0% platform fee and immediate settlement."
+              }
             }
           ]
         }
@@ -163,7 +250,69 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Semantic Pre-Render Fallback for Search Engines and Spiders -->
+      <header style="padding: 1rem 2rem; border-bottom: 1px solid #222; background: #121212; color: #fff;">
+        <nav style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto;">
+          <a href="/" style="font-weight: 700; font-size: 1.25rem; color: #fff; text-decoration: none;">CrestFlow</a>
+          <div style="display: flex; gap: 1.5rem; font-size: 0.875rem;">
+            <a href="/work" style="color: #aaa; text-decoration: none;">Features</a>
+            <a href="/pricing" style="color: #aaa; text-decoration: none;">Pricing</a>
+            <a href="/reviews" style="color: #aaa; text-decoration: none;">Reviews</a>
+            <a href="/contact" style="color: #aaa; text-decoration: none;">Contact</a>
+          </div>
+        </nav>
+      </header>
+      <main style="max-width: 1200px; margin: 0 auto; padding: 3rem 1.5rem; font-family: system-ui, -apple-system, sans-serif; color: #f1f1f1;">
+        <section style="text-align: center; margin-bottom: 4rem;">
+          <h1 style="font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 1rem;">
+            Freelance Client Manager &amp; Instant UPI Invoicing
+          </h1>
+          <p style="font-size: 1.125rem; color: #aaa; max-width: 760px; margin: 0 auto 2rem; line-height: 1.6;">
+            The purpose-built workspace for creative freelancers, video editors, and agencies. Log deliverables with Google Drive links, automate morning 6:00 AM invoice delivery, and receive direct UPI payments with zero platform commission.
+          </p>
+        </section>
+
+        <section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 4rem;">
+          <article style="background: #212121; padding: 1.5rem; border-radius: 0.75rem; border: 1px solid #333;">
+            <h2 style="font-size: 1.25rem; margin-bottom: 0.5rem; color: #fff;">0% Fee Direct UPI Invoicing</h2>
+            <p style="color: #aaa; font-size: 0.875rem; line-height: 1.5;">
+              Generate professional PDF invoices with dynamic UPI QR codes. Clients scan with Google Pay, PhonePe, Paytm, or BHIM and pay straight into your bank account.
+            </p>
+          </article>
+          <article style="background: #212121; padding: 1.5rem; border-radius: 0.75rem; border: 1px solid #333;">
+            <h2 style="font-size: 1.25rem; margin-bottom: 0.5rem; color: #fff;">Automated Morning Invoicing</h2>
+            <p style="color: #aaa; font-size: 0.875rem; line-height: 1.5;">
+              Never chase payments again. Schedule automated 6:00 AM invoice generation sent straight from your authenticated Gmail with itemized work details.
+            </p>
+          </article>
+          <article style="background: #212121; padding: 1.5rem; border-radius: 0.75rem; border: 1px solid #333;">
+            <h2 style="font-size: 1.25rem; margin-bottom: 0.5rem; color: #fff;">Video Editor Deliverable Tracking</h2>
+            <p style="color: #aaa; font-size: 0.875rem; line-height: 1.5;">
+              Log daily reels, commercials, and YouTube edits connected to Google Drive. Keep complete project histories and cycle counts for each active client.
+            </p>
+          </article>
+          <article style="background: #212121; padding: 1.5rem; border-radius: 0.75rem; border: 1px solid #333;">
+            <h2 style="font-size: 1.25rem; margin-bottom: 0.5rem; color: #fff;">Branded Client Review Portal</h2>
+            <p style="color: #aaa; font-size: 0.875rem; line-height: 1.5;">
+              Give clients a clean link to inspect video deliverables, approve work, view cycle invoices, and submit verified feedback and ratings.
+            </p>
+          </article>
+        </section>
+      </main>
+      <noscript>
+        <div style="background: #111; color: #eee; padding: 2rem; text-align: center;">
+          <p>CrestFlow is optimized for modern web browsers. Explore our public pages:</p>
+          <nav style="display: flex; justify-content: center; gap: 1rem; margin-top: 1rem;">
+            <a href="/pricing" style="color: #6366f1;">Pricing Plans</a>
+            <a href="/contact" style="color: #6366f1;">Contact Us</a>
+            <a href="/privacy" style="color: #6366f1;">Privacy Policy</a>
+            <a href="/terms" style="color: #6366f1;">Terms of Service</a>
+            <a href="/refund" style="color: #6366f1;">Refund Policy</a>
+          </nav>
+        </div>
+      </noscript>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

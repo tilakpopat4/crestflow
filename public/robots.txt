@@ -1,14 +1,20 @@
 # CrestFlow robots.txt
+# Controls search engine indexing for crestflow.space
 User-agent: *
 Allow: /
+Allow: /pricing
+Allow: /work
+Allow: /reviews
+Allow: /contact
 Allow: /privacy
 Allow: /terms
 Allow: /refund
-Allow: /contact
+Allow: /portal
 Allow: /onboarding/
 
-# Disallow authenticated/admin areas from public crawl
+# Disallow internal authenticated and admin interfaces from public crawl
 Disallow: /admin
 Disallow: /api/
+Disallow: /dashboard
 
 Sitemap: https://crestflow.space/sitemap.xml
