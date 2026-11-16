@@ -23,15 +23,16 @@ export const WorkLogVideoPicker: React.FC<WorkLogVideoPickerProps> = ({
       return;
     }
 
-    onSelect({
+    const sampleItem: SampleWorkItem = {
       id: generateUUID(),
       title: workItem.description || 'Edited Deliverable',
       videoUrl: workItem.videoUrl,
       category: workItem.subClientName || 'Reels',
       description: `Client deliverable • ${new Date(workItem.date).toLocaleDateString()}`,
-      clientName: workItem.clientEmail || undefined,
       createdAt: Date.now(),
-    });
+    };
+    if (workItem.clientEmail) sampleItem.clientName = workItem.clientEmail;
+    onSelect(sampleItem);
   };
 
   return (

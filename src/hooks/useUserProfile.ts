@@ -211,13 +211,13 @@ export function useUserProfile(user: User | null) {
     }
 
     if (profileWithMeta.sampleWorks !== undefined) {
-      profileDocData.sampleWorks = profileWithMeta.sampleWorks;
+      profileDocData.sampleWorks = sanitizePayload(profileWithMeta.sampleWorks);
     }
 
-    await setDoc(profileRef, profileDocData, { merge: true });
+    await setDoc(profileRef, sanitizePayload(profileDocData), { merge: true });
 
     // 2b. Sync sanitized public fields to public_profiles collection for client onboarding intake
-    const publicProfileDoc: Record<string, any> = {
+    const publicProfileDoc: Record<string, any> = sanitizePayload({
       userId: user.uid,
       name: profileWithMeta.name || user.displayName || 'Freelancer',
       professionalTitle: profileWithMeta.professionalTitle || '',
@@ -225,17 +225,11 @@ export function useUserProfile(user: User | null) {
       workExperienceBio: profileWithMeta.workExperienceBio || '',
       photoURL: profileWithMeta.photoURL || user.photoURL || '',
       phone: profileWithMeta.phone || '',
+      sampleWorks: profileWithMeta.sampleWorks,
+      freelanceStartDate: profileWithMeta.freelanceStartDate,
+      username: profileWithMeta.username ? profileWithMeta.username.toLowerCase().trim() : undefined,
       updatedAt: Date.now(),
-    };
-    if (profileWithMeta.sampleWorks) {
-      publicProfileDoc.sampleWorks = profileWithMeta.sampleWorks;
-    }
-    if (profileWithMeta.freelanceStartDate) {
-      publicProfileDoc.freelanceStartDate = profileWithMeta.freelanceStartDate;
-    }
-    if (profileWithMeta.username) {
-      publicProfileDoc.username = profileWithMeta.username.toLowerCase().trim();
-    }
+    });
 
     try {
       await setDoc(doc(db, 'public_profiles', user.uid), publicProfileDoc, { merge: true });
@@ -281,7 +275,7 @@ export function useUserProfile(user: User | null) {
       else if (prev) privateDocData[key] = deleteField();
     }
 
-    await setDoc(privateSettingsRef, privateDocData, { merge: true });
+    await setDoc(privateSettingsRef, sanitizePayload(privateDocData), { merge: true });
   };
 
   return {

@@ -35,14 +35,15 @@ export const AddSampleVideoForm: React.FC<AddSampleVideoFormProps> = ({ onAdd, o
       return;
     }
 
-    onAdd({
+    const sampleItem: SampleWorkItem = {
       id: generateUUID(),
       title: cleanTitle,
       videoUrl: cleanUrl,
-      category: category.trim() || undefined,
-      description: description.trim() || undefined,
       createdAt: Date.now(),
-    });
+    };
+    if (category.trim()) sampleItem.category = category.trim();
+    if (description.trim()) sampleItem.description = description.trim();
+    onAdd(sampleItem);
   };
 
   return (

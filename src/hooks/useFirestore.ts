@@ -95,6 +95,14 @@ export function sanitizePayload(val: any): any {
   if (val instanceof Date) {
     return val;
   }
+  // Preserve Firestore FieldValue instances (e.g. deleteField(), serverTimestamp())
+  if (
+    val.constructor?.name === 'FieldValue' ||
+    '_methodName' in val ||
+    (typeof (val as any).isEqual === 'function' && '_delegate' in val)
+  ) {
+    return val;
+  }
   if (Array.isArray(val)) {
     return val
       .filter((item) => item !== undefined)

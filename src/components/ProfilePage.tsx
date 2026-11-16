@@ -159,14 +159,13 @@ export default function ProfilePage({
         geminiApiKey: geminiApiKey.trim(), freelanceStartDate: freelanceStartDate.trim(),
         workExperienceBio: workExperienceBio.trim(), photoURL: photoURL.trim(),
       };
-      await onSave({
-        ...snapshotData, id: user.uid,
-        photoURL: photoURL.trim() || undefined,
-        geminiApiKey: geminiApiKey.trim() || undefined,
-        freelanceStartDate: freelanceStartDate.trim() || undefined,
-        workExperienceBio: workExperienceBio.trim() || undefined,
-        isPublicProfile: true, createdAt: profile?.createdAt || Date.now(),
-      });
+      const profilePayload: Record<string, any> = {
+        ...snapshotData, id: user.uid, isPublicProfile: true, createdAt: profile?.createdAt || Date.now(),
+      };
+      for (const k of ['photoURL', 'geminiApiKey', 'freelanceStartDate', 'workExperienceBio']) {
+        if (!profilePayload[k]) delete profilePayload[k];
+      }
+      await onSave(profilePayload as UserProfile);
       setSavedSnapshot(snapshotData);
 
       setSavedSection(section);
@@ -184,14 +183,18 @@ export default function ProfilePage({
     setFreelanceStartDate(trimmed);
     try {
       const cleanHandle = cleanUsername(username) || getUserHandle(profile, user);
-      await onSave({
+      const autoSavePayload: Record<string, any> = {
         ...(profile || {}), id: user.uid, name: name.trim() || user.displayName || 'Creator',
         username: cleanHandle, phone: phone.trim(), upiId: upiId.trim(),
         professionalTitle: professionalTitle.trim() || 'Freelancer',
         servicesDescription: servicesDescription.trim() || 'Freelance Services',
-        geminiApiKey: geminiApiKey.trim() || undefined, freelanceStartDate: trimmed || undefined,
-        workExperienceBio: workExperienceBio.trim() || undefined, isPublicProfile: true, createdAt: profile?.createdAt || Date.now(),
-      } as UserProfile);
+        isPublicProfile: true, createdAt: profile?.createdAt || Date.now(),
+        freelanceStartDate: trimmed, geminiApiKey: geminiApiKey.trim(), workExperienceBio: workExperienceBio.trim(),
+      };
+      for (const k of ['freelanceStartDate', 'geminiApiKey', 'workExperienceBio']) {
+        if (!autoSavePayload[k]) delete autoSavePayload[k];
+      }
+      await onSave(autoSavePayload as UserProfile);
       setSavedSnapshot((prev) => ({ ...prev, freelanceStartDate: trimmed }));
       setSavedSection('profile');
       setTimeout(() => setSavedSection(null), 3000);
