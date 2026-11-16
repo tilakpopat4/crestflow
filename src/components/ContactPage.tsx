@@ -207,11 +207,19 @@ export default function ContactPage() {
           <div className="pt-6 border-t border-slate-200 dark:border-slate-800 space-y-4 text-xs text-slate-600 dark:text-slate-400">
             <div>
               <span className="font-semibold text-slate-700 dark:text-slate-300 block mb-0.5">
-                Support Email
+                Product &amp; Company
+              </span>
+              <p className="text-slate-900 dark:text-slate-100 font-medium">CrestFlow</p>
+              <p className="text-slate-600 dark:text-slate-400">Operated by Tilak Popat Films</p>
+            </div>
+
+            <div>
+              <span className="font-semibold text-slate-700 dark:text-slate-300 block mb-0.5">
+                Contact &amp; Support Email
               </span>
               <a
                 href="mailto:support.crestflow@gmail.com"
-                className="text-slate-900 dark:text-slate-100 hover:underline"
+                className="text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
               >
                 support.crestflow@gmail.com
               </a>
@@ -221,15 +229,23 @@ export default function ContactPage() {
               <span className="font-semibold text-slate-700 dark:text-slate-300 block mb-0.5">
                 Response Time
               </span>
-              <p className="text-slate-900 dark:text-slate-100">We reply within 2 business days</p>
+              <p className="text-slate-900 dark:text-slate-100">24-48 working hours</p>
             </div>
 
             <div>
               <span className="font-semibold text-slate-700 dark:text-slate-300 block mb-0.5">
-                Business Details
+                Address
               </span>
-              <p className="text-slate-900 dark:text-slate-100">Tilak Popat Films</p>
-              <p className="text-slate-500 dark:text-slate-400 mt-0.5">Gandhinagar, Gujarat, 382421</p>
+              <p className="text-slate-900 dark:text-slate-100">Uvarsad, Gandhinagar, Gujarat, INDIA.</p>
+            </div>
+
+            <div>
+              <span className="font-semibold text-slate-700 dark:text-slate-300 block mb-0.5">
+                Grievance Redressal
+              </span>
+              <p className="text-slate-600 dark:text-slate-400">
+                There is no separate Grievance Officer; all inquiries and grievances are handled directly by the Founder: <strong className="text-slate-800 dark:text-slate-200">Tilak Popat</strong>.
+              </p>
             </div>
           </div>
         </div>

@@ -34,7 +34,7 @@ export default function TermsOfServicePage({ onNavigate }: TermsOfServicePagePro
               1. Acceptance of Terms
             </h2>
             <p>
-              By accessing, registering for, or using the CrestFlow application (&quot;Service&quot;), operated by <strong className="text-slate-900 dark:text-slate-100">{`{{LEGAL_ENTITY_NAME}}`}</strong> (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;), you agree to be bound by these Terms of Service (&quot;Terms&quot;). If you do not agree to these Terms, you may not access or use the Service.
+              By accessing, registering for, or using the CrestFlow application (&quot;Service&quot;), operated by <strong className="text-slate-900 dark:text-slate-100">Tilak Popat Films</strong> (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;), you agree to be bound by these Terms of Service (&quot;Terms&quot;). If you do not agree to these Terms, you may not access or use the Service.
             </p>
           </section>
 
@@ -86,7 +86,7 @@ export default function TermsOfServicePage({ onNavigate }: TermsOfServicePagePro
             </p>
             <ul className="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-300">
               <li>All subscription fees are stated and charged in Indian Rupees (INR) inclusive of applicable taxes.</li>
-              <li>Subscriptions renew automatically according to the selected billing cycle ({`{{SUBSCRIPTION_BILLING_CYCLES}}`}) unless cancelled prior to renewal.</li>
+              <li>Subscriptions renew automatically according to the selected billing cycle (monthly, quarterly, 6-month, or yearly) unless cancelled prior to renewal.</li>
               <li>Cancellation and refund terms are subject to our dedicated <a href="/refund" onClick={(e) => { e.preventDefault(); onNavigate?.('refund'); }} className="text-indigo-600 dark:text-indigo-400 hover:underline">Cancellation &amp; Refund Policy</a>.</li>
             </ul>
           </section>
@@ -105,7 +105,7 @@ export default function TermsOfServicePage({ onNavigate }: TermsOfServicePagePro
               7. Governing Law and Jurisdiction (India)
             </h2>
             <p>
-              These Terms shall be governed by and construed in accordance with the laws of India. Any legal dispute, claim, or proceeding arising out of or related to these Terms shall be instituted exclusively in the competent courts located in <strong className="text-slate-900 dark:text-slate-100">{`{{GOVERNING_STATE_AND_CITY}}`}</strong>, India.
+              These Terms shall be governed by and construed in accordance with the laws of India. Any legal dispute, claim, or proceeding arising out of or related to these Terms shall be instituted exclusively in the competent courts located in <strong className="text-slate-900 dark:text-slate-100">Gandhinagar, Gujarat</strong>, India.
             </p>
           </section>
 
@@ -116,13 +116,17 @@ export default function TermsOfServicePage({ onNavigate }: TermsOfServicePagePro
             <p>
               If you have any questions about these Terms of Service or require support, please contact:
             </p>
-            <div className="mt-3 space-y-1 text-slate-700 dark:text-slate-300">
-              <p><strong className="text-slate-900 dark:text-slate-100">{`{{LEGAL_ENTITY_NAME}}`}</strong></p>
-              <p>Support Email: <a href={`mailto:{{SUPPORT_EMAIL}}`} className="text-indigo-600 dark:text-indigo-400 hover:underline">{`{{SUPPORT_EMAIL}}`}</a></p>
-              <p>Registered Address: {`{{COMPANY_ADDRESS}}`}</p>
-              <p>Grievance Officer: {`{{GRIEVANCE_OFFICER_NAME}}`} (<a href={`mailto:{{GRIEVANCE_OFFICER_EMAIL}}`} className="text-indigo-600 dark:text-indigo-400 hover:underline">{`{{GRIEVANCE_OFFICER_EMAIL}}`}</a>)</p>
-              <p className="mt-2">
-                Response SLA: Inquiries are addressed {`{{SUPPORT_RESPONSE_TIME}}`}. You may also submit inquiries through our{' '}
+            <div className="mt-3 space-y-1.5 text-slate-700 dark:text-slate-300">
+              <p><strong className="text-slate-900 dark:text-slate-100">Product:</strong> CrestFlow</p>
+              <p><strong className="text-slate-900 dark:text-slate-100">Company:</strong> Tilak Popat Films</p>
+              <p><strong className="text-slate-900 dark:text-slate-100">Support Email:</strong> <a href="mailto:support.crestflow@gmail.com" className="text-indigo-600 dark:text-indigo-400 hover:underline">support.crestflow@gmail.com</a></p>
+              <p><strong className="text-slate-900 dark:text-slate-100">Registered Address:</strong> Uvarsad, Gandhinagar, Gujarat, INDIA.</p>
+              <p><strong className="text-slate-900 dark:text-slate-100">Response Time:</strong> 24-48 working hours.</p>
+              <p className="pt-1 text-xs text-slate-500 dark:text-slate-400">
+                <strong>Grievance Officer:</strong> There is no separate Grievance Officer; all matters and legal concerns are handled directly by the Founder: <strong className="text-slate-700 dark:text-slate-300">Tilak Popat</strong>.
+              </p>
+              <p className="mt-2 text-xs">
+                You may also submit inquiries through our{' '}
                 <a href="/contact" onClick={handleContactLink} className="text-indigo-600 dark:text-indigo-400 hover:underline font-medium">
                   Contact Us page
                 </a>.

@@ -34,7 +34,7 @@ export default function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps
               1. Overview
             </h2>
             <p>
-              This Privacy Policy explains how <strong className="text-slate-900 dark:text-slate-100">{`{{LEGAL_ENTITY_NAME}}`}</strong> (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) collects, uses, and safeguards information when you use the CrestFlow platform (&quot;Service&quot;).
+              This Privacy Policy explains how <strong className="text-slate-900 dark:text-slate-100">Tilak Popat Films</strong> (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) collects, uses, and safeguards information when you use our product, the <strong className="text-slate-900 dark:text-slate-100">CrestFlow</strong> platform (&quot;Service&quot;).
             </p>
           </section>
 
@@ -82,7 +82,7 @@ export default function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps
               5. Data Retention and Deletion
             </h2>
             <p>
-              Your account data and workspace records are retained as long as your account remains active. Upon written request for account deletion, your profile and workspace records are purged from active databases {`{{DATA_RETENTION_PERIOD}}`}, except where retention is legally mandated under Indian accounting and financial compliance laws.
+              Your account data and workspace records are retained as long as your account remains active. Upon written request for account deletion, your profile and workspace records are purged from active databases within 30 business days, except where retention is legally mandated under Indian accounting and financial compliance laws.
             </p>
           </section>
 
@@ -105,21 +105,25 @@ export default function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps
               7. Governing Law (India)
             </h2>
             <p>
-              This Privacy Policy is governed by the laws of India, including the Information Technology Act, 2000 and the Digital Personal Data Protection Act, 2023. Disputes shall be subject to the exclusive jurisdiction of courts located in <strong className="text-slate-900 dark:text-slate-100">{`{{GOVERNING_STATE_AND_CITY}}`}</strong>, India.
+              This Privacy Policy is governed by the laws of India, including the Information Technology Act, 2000 and the Digital Personal Data Protection Act, 2023. Disputes shall be subject to the exclusive jurisdiction of courts located in <strong className="text-slate-900 dark:text-slate-100">Gandhinagar, Gujarat</strong>, India.
             </p>
           </section>
 
           <section className="pt-4 border-t border-slate-200 dark:border-slate-800">
             <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
-              8. Contact &amp; Grievance Officer
+              8. Contact &amp; Grievance Redressal
             </h2>
-            <div className="space-y-1 text-slate-700 dark:text-slate-300">
-              <p><strong className="text-slate-900 dark:text-slate-100">{`{{LEGAL_ENTITY_NAME}}`}</strong></p>
-              <p>Support Email: <a href={`mailto:{{SUPPORT_EMAIL}}`} className="text-indigo-600 dark:text-indigo-400 hover:underline">{`{{SUPPORT_EMAIL}}`}</a></p>
-              <p>Address: {`{{COMPANY_ADDRESS}}`}</p>
-              <p>Grievance Officer: {`{{GRIEVANCE_OFFICER_NAME}}`} (<a href={`mailto:{{GRIEVANCE_OFFICER_EMAIL}}`} className="text-indigo-600 dark:text-indigo-400 hover:underline">{`{{GRIEVANCE_OFFICER_EMAIL}}`}</a>)</p>
-              <p className="mt-2">
-                Response SLA: Support requests are acknowledged {`{{SUPPORT_RESPONSE_TIME}}`}. You can also reach us via the{' '}
+            <div className="space-y-1.5 text-slate-700 dark:text-slate-300">
+              <p><strong className="text-slate-900 dark:text-slate-100">Product:</strong> CrestFlow</p>
+              <p><strong className="text-slate-900 dark:text-slate-100">Company:</strong> Tilak Popat Films</p>
+              <p><strong className="text-slate-900 dark:text-slate-100">Contact:</strong> <a href="mailto:support.crestflow@gmail.com" className="text-indigo-600 dark:text-indigo-400 hover:underline">support.crestflow@gmail.com</a></p>
+              <p><strong className="text-slate-900 dark:text-slate-100">Address:</strong> Uvarsad, Gandhinagar, Gujarat, INDIA.</p>
+              <p><strong className="text-slate-900 dark:text-slate-100">Response Time:</strong> 24-48 working hours.</p>
+              <p className="pt-1 text-xs text-slate-500 dark:text-slate-400">
+                <strong>Grievance Handling:</strong> There is no separate Grievance Officer; all inquiries and grievances are handled directly by the Founder: <strong className="text-slate-700 dark:text-slate-300">Tilak Popat</strong>.
+              </p>
+              <p className="mt-2 text-xs">
+                You can also reach us directly via the{' '}
                 <a href="/contact" onClick={handleContactLink} className="text-indigo-600 dark:text-indigo-400 hover:underline font-medium">
                   Contact Us form
                 </a>.
