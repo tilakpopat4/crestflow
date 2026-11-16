@@ -317,8 +317,8 @@ body, main, .bg-white, [class*="bg-white"], .bg-slate-50,
 .text-neutral-950, .text-neutral-900, .text-neutral-800, .text-neutral-700,
 .text-gray-950, .text-gray-900, .text-gray-800, .text-gray-700,
 .text-zinc-950, .text-zinc-900, .text-zinc-800, .text-zinc-700,
-.text-indigo-600, .text-indigo-500, .text-indigo-400,
-.text-blue-600, .text-blue-500, .text-blue-400, .text-black {
+.text-indigo-900, .text-indigo-800, .text-indigo-700, .text-indigo-600, .text-indigo-500, .text-indigo-400,
+.text-blue-900, .text-blue-800, .text-blue-700, .text-blue-600, .text-blue-500, .text-blue-400, .text-black {
   color: #f1f1f1 !important;
 }
 
