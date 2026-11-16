@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Client, Reel, Invoice, WorkItem, UserProfile, InvoiceDeliverable } from '../types';
-import { Plus, Trash2, Download, Receipt, FileCheck, Mail, Send, Copy, X, Check, MailCheck, CheckCircle2, AlertCircle, Loader2, FileText, Search, Calculator, Divide, Coins, History, Pencil, Printer, ListChecks, IndianRupee, Archive, Clock, Sparkles, Calendar, Users } from 'lucide-react';
+import { Plus, Trash2, Download, Receipt, FileCheck, Mail, Send, Copy, X, Check, MailCheck, CheckCircle2, AlertCircle, Loader2, FileText, Search, Divide, Coins, History, Pencil, Printer, ListChecks, IndianRupee, Archive, Clock, Sparkles, Calendar, Users } from 'lucide-react';
 import { useFirestore } from '../hooks/useFirestore';
 import { User } from 'firebase/auth';
 import { generateUUID } from '../lib/utils';
@@ -941,8 +941,7 @@ export default function InvoiceTab({
       <div className="max-w-4xl mx-auto space-y-6">
           <div className="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-xl shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                <Receipt size={18} className="text-indigo-500" />
+              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                 Invoice Details
               </h3>
               {editingInvoiceId && (
@@ -1172,8 +1171,7 @@ export default function InvoiceTab({
                 <div className="mb-5 p-3.5 bg-[#212121] border border-[#333333] rounded-xl">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
-                      <span className="text-xs font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
-                        <Calculator size={15} className="text-slate-400" />
+                      <span className="text-xs font-semibold text-slate-200 uppercase tracking-wider">
                         Direct Grand Total Split
                       </span>
                       <p className="text-xs text-slate-400 mt-0.5">
@@ -1444,8 +1442,7 @@ export default function InvoiceTab({
       <div className="mt-12 bg-[#212121] border border-[#333333] rounded-xl shadow-xs p-6 space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#333333] pb-4">
           <div>
-            <h3 className="text-lg font-bold text-white tracking-tight flex items-center gap-2">
-              <Receipt size={20} className="text-slate-400" />
+            <h3 className="text-lg font-bold text-white tracking-tight">
               Invoice History & Email Dispatch
             </h3>
             <p className="text-xs text-slate-400">

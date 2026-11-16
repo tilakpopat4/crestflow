@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Film, Video, ExternalLink } from 'lucide-react';
+import { Video, ExternalLink } from 'lucide-react';
 import { UserProfile, SampleWorkItem, WorkItem } from '../../types';
 import ManageSampleVideosModal from './ManageSampleVideosModal';
 
@@ -31,12 +31,9 @@ export const OnboardingSampleVideoBanner: React.FC<OnboardingSampleVideoBannerPr
     <>
       <div className="bg-white dark:bg-[#212121] border border-slate-200 dark:border-[#333333] rounded-xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <Film className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-            <h2 className="text-sm font-bold text-slate-900 dark:text-white">
-              Public Sample Video Library
-            </h2>
-          </div>
+          <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+            Public Sample Video Library
+          </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400">
             {samples.length > 0
               ? `${samples.length} sample video${samples.length > 1 ? 's' : ''} connected to Google Drive for prospective clients.`
