@@ -223,9 +223,9 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
           <div className="flex items-center gap-1 shrink-0 min-w-max">
             <button
               onClick={() => setRatingFilter('all')}
-              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 border border-transparent ${
                 ratingFilter === 'all'
-                  ? 'bg-white text-slate-900'
+                  ? 'bg-[#404040] text-white border-[#555555]'
                   : 'bg-[#1e1e1e] text-slate-300 hover:bg-[#2e2e2e]'
               }`}
             >
@@ -235,13 +235,13 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
               <button
                 key={r}
                 onClick={() => setRatingFilter(r)}
-                className={`flex items-center gap-0.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                className={`flex items-center gap-0.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 border border-transparent ${
                   ratingFilter === r
-                    ? 'bg-white text-slate-900'
+                    ? 'bg-[#404040] text-white border-[#555555]'
                     : 'bg-[#1e1e1e] text-slate-300 hover:bg-[#2e2e2e]'
                 }`}
               >
-                {r} <Star className="w-3 h-3 fill-current shrink-0" />
+                {r} <Star className="w-3 h-3 fill-current shrink-0 text-amber-400" />
               </button>
             ))}
           </div>
@@ -261,7 +261,7 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
               {/* Delete button (always visible on mobile touch, hover on desktop) */}
               <button
                 onClick={() => setReviewToDelete(review.id)}
-                className="absolute right-4 top-4 text-slate-300 dark:text-slate-600 hover:text-red-600 dark:hover:text-red-400 p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 cursor-pointer"
+                className="absolute right-4 top-4 text-slate-400 hover:text-red-500 hover:bg-[#333333] p-1.5 rounded-lg transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 cursor-pointer"
                 title="Delete testimonial"
               >
                 <Trash2 className="w-4 h-4" />

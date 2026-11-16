@@ -264,6 +264,17 @@ span.admin-toggle-knob {
   background-color: #242424 !important;
 }
 
+/* Ensure buttons NEVER render with white backgrounds or wash out icons per user rule & GEMINI.md */
+button.bg-white,
+[role="button"].bg-white,
+button.hover\:bg-red-50:hover,
+[role="button"].hover\:bg-red-50:hover,
+button.hover\:bg-white:hover,
+[role="button"].hover\:bg-white:hover {
+  background-color: #383838 !important;
+  color: #f1f1f1 !important;
+}
+
 /* Universal Button & Interactive Element Hover & Active Feedback per GEMINI.md & /animate */
 button:not(:disabled),
 [role="button"]:not([aria-disabled="true"]) {
