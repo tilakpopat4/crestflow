@@ -50,23 +50,24 @@ export type Tab = 'dashboard' | 'clients' | 'work' | 'invoice' | 'reviews' | 'on
 
 export default function App() {
   const { currentRoute, params, isSpecialMode, navigate } = useAppRouter();
-  const { user, loading, isSigningIn, isBlocked, handleLogin, handleLogout } = useAuthSession();
+  const { user, loading, isSigningIn, isBlocked, handleLogin, handleEmailSignUp, handleEmailSignIn, handleLogout } = useAuthSession();
 
   const [isClientPortalMode, setIsClientPortalMode] = useState(isSpecialMode === 'client_portal');
   const [globalSearchQuery, setGlobalSearchQuery] = useState('');
   const [selectedClientIdFromSearch, setSelectedClientIdFromSearch] = useState<string | null>(null);
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
   const [isOnboardingCompleted, setIsOnboardingCompleted] = useState(false);
-  const [authTimeout, setAuthTimeout] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setAuthTimeout(true), 3500);
-    return () => clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
     updatePageMeta(currentRoute);
   }, [currentRoute]);
+
+  // Safe redirect authenticated users away from explicit /login and /signup routes
+  useEffect(() => {
+    if (user && isSpecialMode === 'auth') {
+      navigate('dashboard');
+    }
+  }, [user, isSpecialMode, navigate]);
 
   const { isCollapsed: isSidebarCollapsed, toggleSidebar, collapseSidebar, expandSidebar } = useSidebarCollapse();
   const { profile, profilesLoading, handleSaveProfile } = useUserProfile(user);
@@ -98,17 +99,13 @@ export default function App() {
     );
   }
 
-  if (!authTimeout && (loading || (user && (profilesLoading || subscriptionState.loading)))) {
+  // Consistent initialization without flash: keep skeleton active until user state is fully known
+  if (loading || (user && (profilesLoading || subscriptionState.loading))) {
     return <WorkspaceShellSkeleton />;
   }
 
   if (user && isBlocked === true) {
     return <BlockedUserScreen user={user} onLogout={handleLogout} />;
-  }
-
-  // Redirect authenticated users away from explicit /login and /signup routes
-  if (user && isSpecialMode === 'auth') {
-    navigate('dashboard');
   }
 
   // Public supporting pages accessible to all visitors without login
@@ -130,6 +127,8 @@ export default function App() {
         isAdminRoute={currentRoute === 'admin'}
         isSigningIn={isSigningIn}
         onLogin={handleLogin}
+        onEmailSignUp={handleEmailSignUp}
+        onEmailSignIn={handleEmailSignIn}
         onSupportingNavigate={(r) => navigate(r)}
       />
     );
@@ -158,13 +157,11 @@ export default function App() {
 
   const isSupportingRoute = ['privacy', 'terms', 'contact', 'refund', 'pricing'].includes(currentRoute);
   const hasCompletedProfile = Boolean(
-    isOnboardingCompleted ||
-    (user && localStorage.getItem(`crestflow_onboarded_${user.uid}`)) ||
-    profile?.upiId ||
-    (profile?.name && profile?.professionalTitle)
+    isOnboardingCompleted || (user && localStorage.getItem(`crestflow_onboarded_${user.uid}`)) ||
+    profile?.upiId || (profile?.name && profile?.professionalTitle)
   );
 
-  // 1. Mandatory subscription wall: without paying (at least 7-day trial), no one can access the tool
+  // Mandatory subscription wall
   if (user && subscriptionState.isSubscriptionFeatureEnabled && !subscriptionState.hasAccess && !isSupportingRoute) {
     return (
       <div className="h-screen w-full bg-slate-50 dark:bg-slate-950 overflow-y-auto flex flex-col">
@@ -178,7 +175,7 @@ export default function App() {
     );
   }
 
-  // 2. Once subscribed / trial active, user completes first-time onboarding
+  // First-time workspace onboarding
   if (user && !profilesLoading && !hasCompletedProfile && !isSupportingRoute) {
     return (
       <div className="h-screen w-full bg-slate-50 dark:bg-slate-950 overflow-y-auto flex flex-col justify-between">

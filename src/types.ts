@@ -254,7 +254,6 @@ export interface ServiceRequest {
   createdAt: number;
   submittedByUid?: string; // Authenticated user UID who submitted request
   submittedByEmail?: string;
-}
   updatedAt?: number;
 }
 

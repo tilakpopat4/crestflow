@@ -52,7 +52,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
         <div className="mb-4 pb-4 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-baseline gap-1">
             <span className="text-2xl font-bold text-slate-900 dark:text-white">
-              ₹{plan.price.toLocaleString('en-IN')}
+              {plan.price === 0 ? '₹0' : `₹${plan.price.toLocaleString('en-IN')}`}
             </span>
             <span className="text-xs text-slate-500 dark:text-slate-400">
               {plan.periodLabel}
@@ -100,7 +100,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
           {isLoading && isSelected
             ? 'Initializing...'
             : plan.isTrial
-            ? 'Start 7-Day Trial (₹1)'
+            ? 'Start 7-Day Free Trial'
             : `Pay ₹${plan.price.toLocaleString('en-IN')} & Subscribe`}
         </button>
       </div>

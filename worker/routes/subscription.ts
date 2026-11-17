@@ -267,6 +267,13 @@ export async function handleGetMe(request: Request, env: Env): Promise<Response>
   const accessUntilMs = existing?.accessUntil ? new Date(existing.accessUntil).getTime() : 0;
   const hasAccess = accessUntilMs > nowMs;
 
+  const trialClaimed = Boolean(
+    existing?.trialClaimed ||
+    existing?.hasHadTrial ||
+    existing?.trialEndsAt ||
+    existing?.status === 'trialing'
+  );
+
   return jsonResponse({
     serverNow: new Date(nowMs).toISOString(),
     status: existing?.status || 'none',
@@ -274,6 +281,7 @@ export async function handleGetMe(request: Request, env: Env): Promise<Response>
     billingCycle: existing?.billingCycle || 'monthly',
     accessUntil: existing?.accessUntil || null,
     trialEndsAt: existing?.trialEndsAt || null,
+    trialClaimed,
     hasAccess,
   });
 }

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { PRO_PLANS, getTrialDisclosureText } from '../src/lib/subscriptionPlans';
+import { PRO_PLANS, TRIAL_PLAN, getTrialDisclosureText } from '../src/lib/subscriptionPlans';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -31,23 +31,25 @@ describe('Pricing Page, Plans Disclosure & Server-Governed Access Suite', () => 
     assert.equal(yearly.durationDays, 365);
   });
 
-  it('2. Mandatory Disclosure Text: matches regulatory format with dynamic future date and non-refundable ₹1', () => {
-    const fixedBaseDate = new Date('2026-10-22T10:00:00Z');
-    const monthlyPlan = PRO_PLANS.find((p) => p.id === 'monthly')!;
-
-    const disclosure = getTrialDisclosureText(monthlyPlan, fixedBaseDate);
-
-    // Charge date is base + 7 days = Oct 29, 2026
+  it('2. Mandatory Disclosure Text: free trial requires ₹0 and no auto-deduction, paid plans bill immediately', () => {
+    const trialDisclosure = getTrialDisclosureText(TRIAL_PLAN);
     assert.match(
-      disclosure,
-      /₹1 today for a 7-day trial, then ₹79 on 29 October 2026; the ₹1 is non-refundable/i
+      trialDisclosure,
+      /7 days\. No payment method required\. One free trial per account\. No automatic payment deduction/i
+    );
+
+    const monthlyPlan = PRO_PLANS.find((p) => p.id === 'monthly')!;
+    const monthlyDisclosure = getTrialDisclosureText(monthlyPlan);
+    assert.match(
+      monthlyDisclosure,
+      /Billed at ₹79 immediately upon payment\. Renews every month until cancelled\./i
     );
 
     const yearlyPlan = PRO_PLANS.find((p) => p.id === 'yearly')!;
-    const yearlyDisclosure = getTrialDisclosureText(yearlyPlan, fixedBaseDate);
+    const yearlyDisclosure = getTrialDisclosureText(yearlyPlan);
     assert.match(
       yearlyDisclosure,
-      /₹1 today for a 7-day trial, then ₹899 on 29 October 2026; the ₹1 is non-refundable/i
+      /Billed at ₹899 immediately upon payment\. Renews every year until cancelled\./i
     );
   });
 

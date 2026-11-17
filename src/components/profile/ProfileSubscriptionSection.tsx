@@ -68,18 +68,32 @@ export const ProfileSubscriptionSection: React.FC<ProfileSubscriptionSectionProp
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                  {isPro ? `CrestFlow Pro (${cycleLabel})` : 'Free Starter Tier'}
+                  {subscriptionState.status === 'trialing'
+                    ? 'CrestFlow Pro (7-Day Free Trial)'
+                    : isPro
+                    ? `CrestFlow Pro (${cycleLabel})`
+                    : subscriptionState.status === 'expired'
+                    ? 'Pro Subscription Expired'
+                    : 'CrestFlow Account'}
                 </span>
                 <span className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400">
-                  &bull; {isPro ? (isCancelled ? 'Cancelling at period end' : 'Active') : 'Free'}
+                  &bull; {subscriptionState.status === 'trialing'
+                    ? 'Trial Active'
+                    : isPro
+                    ? (isCancelled ? 'Cancelling at period end' : 'Active')
+                    : subscriptionState.status === 'expired'
+                    ? 'Expired'
+                    : 'Inactive'}
                 </span>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                {isPro
+                {subscriptionState.status === 'trialing'
+                  ? `Trial active until ${subscriptionState.accessUntil ? new Date(subscriptionState.accessUntil).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '7 days'}`
+                  : isPro
                   ? subscriptionState.currentPeriodEnd
                     ? `Current period renews on ${new Date(subscriptionState.currentPeriodEnd).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`
-                    : 'Active monthly recurring billing'
-                  : 'Upgrade to unlock unlimited invoices, automated reminders, and client portals.'}
+                    : 'Active recurring membership'
+                  : 'Upgrade to CrestFlow Pro for unlimited invoices, automated reminders, and client portals.'}
               </p>
             </div>
 

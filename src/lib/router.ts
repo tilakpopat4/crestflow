@@ -23,7 +23,7 @@ export interface RouteMatch {
   route: AppRoute;
   path: string;
   params: Record<string, string>;
-  isSpecialMode?: 'client_portal' | 'freelancer_profile' | 'feedback';
+  isSpecialMode?: 'client_portal' | 'freelancer_profile' | 'feedback' | 'auth';
 }
 
 export const ROUTE_PATHS: Record<AppRoute, string> = {

@@ -4,34 +4,38 @@ import { db, auth } from '../firebase';
 import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { useSubscriptionConfig } from '../lib/subscriptionConfig';
 import { FREE_TIER_LIMITS } from '../lib/subscriptionPlans';
+import { checkIsWhitelisted, computeSubscriptionAccess } from '../lib/subscriptionStateUtils';
 
 export interface SubscriptionDoc {
   userId: string; plan: string; billingCycle?: string;
   status: 'active' | 'trialing' | 'pending' | 'past_due' | 'cancelled' | 'halted' | 'expired';
   currentPeriodStart?: number; currentPeriodEnd?: number; accessUntil?: string; trialEndsAt?: string | null;
+  trialClaimed?: boolean; trialClaimedAt?: number; trialStartedAt?: number;
   razorpaySubscriptionId?: string; cancelAtPeriodEnd?: boolean; updatedAt?: number;
 }
 
+export type SubscriptionStateMachine =
+  | 'FREE'
+  | 'TRIAL_ELIGIBLE'
+  | 'TRIAL_ACTIVE'
+  | 'TRIAL_EXPIRED'
+  | 'PAYMENT_PENDING'
+  | 'ACTIVE'
+  | 'EXPIRED'
+  | 'CANCELLED'
+  | 'PAYMENT_FAILED';
+
 export interface SubscriptionState {
   status: 'active' | 'trialing' | 'pending' | 'past_due' | 'cancelled' | 'halted' | 'expired' | 'none';
+  stateMachine: SubscriptionStateMachine;
   plan: string; isPro: boolean; hasAccess: boolean; isTrialing: boolean; isPastDue: boolean;
   isExpired: boolean; isCancelled: boolean; isPaidActive: boolean; isWhitelisted: boolean; loading: boolean;
+  trialClaimed: boolean; isTrialEligible: boolean;
   cancelAtPeriodEnd: boolean; billingCycle?: string; accessUntil?: string | null; trialEndsAt?: string | null;
   daysRemaining: number; serverNow?: string; currentPeriodEnd?: number; isSubscriptionFeatureEnabled: boolean;
   limits: typeof FREE_TIER_LIMITS; canCreateClient: (count: number) => boolean; canCreateInvoice: (count: number) => boolean;
-  refreshSubscription: () => Promise<void>; cancelSubscription: () => Promise<void>; checkAccess: () => boolean;
-}
-
-async function checkIsWhitelisted(email?: string): Promise<boolean> {
-  if (!email || !email.trim()) return false;
-  const normalized = email.trim().toLowerCase();
-  if (normalized === 'tilakpopat2007@gmail.com') return true;
-  try {
-    const snap = await getDoc(doc(db, 'subscription_whitelist', normalized));
-    return snap.exists();
-  } catch {
-    return false;
-  }
+  refreshSubscription: () => Promise<void>; cancelSubscription: () => Promise<void>;
+  activateFreeTrial: () => Promise<{ success: boolean; error?: string }>; checkAccess: () => boolean;
 }
 
 /**
@@ -68,6 +72,7 @@ export function useSubscription(
     status: string;
     accessUntil: string | null;
     trialEndsAt: string | null;
+    trialClaimed?: boolean;
   } | null>(null);
 
   // 1. Check VIP email whitelist
@@ -92,45 +97,12 @@ export function useSubscription(
 
   // 2. Compute access strictly from server accessUntil
   const computedState = useMemo(() => {
-    if (!isSubscriptionFeatureEnabled || isWhitelisted) {
-      return {
-        status: 'active' as const, plan: 'pro_yearly', isPro: true, hasAccess: true,
-        isTrialing: false, isPastDue: false, isExpired: false, isCancelled: false,
-        isPaidActive: true, cancelAtPeriodEnd: false, billingCycle: 'yearly',
-        accessUntil: undefined, trialEndsAt: undefined, daysRemaining: 999,
-        serverNow: serverMe?.serverNow, currentPeriodEnd: undefined,
-      };
-    }
-
-    const serverNowMs = serverMe?.serverNow ? new Date(serverMe.serverNow).getTime() : Date.now();
-    const accessUntilStr = subscriptionDoc?.accessUntil || serverMe?.accessUntil;
-    const trialEndsAtStr = subscriptionDoc?.trialEndsAt || serverMe?.trialEndsAt;
-    const accessUntilMs = accessUntilStr ? new Date(accessUntilStr).getTime() : 0;
-    const trialEndsAtMs = trialEndsAtStr ? new Date(trialEndsAtStr).getTime() : 0;
-
-    const rawStatus = (subscriptionDoc?.status || serverMe?.status || 'none') as SubscriptionState['status'];
-    const isCancelled = Boolean(subscriptionDoc?.cancelAtPeriodEnd);
-
-    // Access entitlement is strictly governed by whether server accessUntil > serverNow
-    const hasAccess = accessUntilMs > serverNowMs;
-    const isTrialing = rawStatus === 'trialing' && hasAccess;
-    const isPastDue = rawStatus === 'past_due' && hasAccess;
-    const isPaidActive = (rawStatus === 'active' || rawStatus === 'cancelled') && hasAccess;
-    const isExpired = !hasAccess && rawStatus !== 'none';
-
-    let targetEndMs = accessUntilMs;
-    if (isTrialing && trialEndsAtMs > 0) targetEndMs = trialEndsAtMs;
-    const daysRemaining = targetEndMs > serverNowMs
-      ? Math.max(0, Math.ceil((targetEndMs - serverNowMs) / (24 * 60 * 60 * 1000)))
-      : 0;
-
-    return {
-      status: rawStatus, plan: subscriptionDoc?.plan || 'pro_monthly',
-      isPro: hasAccess, hasAccess, isTrialing, isPastDue, isExpired, isCancelled, isPaidActive,
-      cancelAtPeriodEnd: isCancelled, billingCycle: subscriptionDoc?.billingCycle || 'monthly',
-      accessUntil: accessUntilStr, trialEndsAt: trialEndsAtStr, daysRemaining,
-      serverNow: serverMe?.serverNow, currentPeriodEnd: subscriptionDoc?.currentPeriodEnd,
-    };
+    return computeSubscriptionAccess({
+      isSubscriptionFeatureEnabled,
+      isWhitelisted,
+      subscriptionDoc,
+      serverMe,
+    });
   }, [subscriptionDoc, serverMe, isWhitelisted, isSubscriptionFeatureEnabled]);
 
   // 3. Fetch authoritative state from GET /api/me with immediate access propagation
@@ -254,6 +226,42 @@ export function useSubscription(
     await refreshSubscription();
   }, [refreshSubscription]);
 
+  const activateFreeTrial = useCallback(async (): Promise<{ success: boolean; error?: string }> => {
+    if (!auth.currentUser) return { success: false, error: 'Not authenticated' };
+    try {
+      const token = await auth.currentUser.getIdToken();
+      const res = await fetch('/api/activate-trial', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        return { success: false, error: data.error || 'Failed to activate free trial.' };
+      }
+      if (data.accessUntil) {
+        const updated: SubscriptionDoc = {
+          userId: auth.currentUser.uid,
+          plan: 'pro',
+          billingCycle: 'trial',
+          status: 'trialing',
+          accessUntil: data.accessUntil,
+          trialEndsAt: data.trialEndsAt,
+          trialClaimed: true,
+          trialStartedAt: data.trialStartedAt,
+          updatedAt: Date.now(),
+        };
+        setSubscriptionDoc(updated);
+        try {
+          localStorage.setItem(`crestflow_sub_${auth.currentUser.uid}`, JSON.stringify(updated));
+        } catch {}
+      }
+      await refreshSubscription();
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Trial activation network error.' };
+    }
+  }, [refreshSubscription]);
+
   const canCreateClient = useCallback(
     (count: number) => {
       if (computedState.hasAccess || !isSubscriptionFeatureEnabled) return true;
@@ -282,6 +290,7 @@ export function useSubscription(
     canCreateInvoice,
     refreshSubscription,
     cancelSubscription,
+    activateFreeTrial,
     checkAccess,
   };
 }

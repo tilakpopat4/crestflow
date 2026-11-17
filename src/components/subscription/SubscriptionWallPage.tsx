@@ -31,26 +31,17 @@ export default function SubscriptionWallPage({
       if (snap.exists()) {
         const data = snap.data();
         setSubData(data);
-        if (data.accessUntil && new Date(data.accessUntil).getTime() > Date.now()) {
-          subscriptionState.refreshSubscription();
-        }
+        if (data.accessUntil && new Date(data.accessUntil).getTime() > Date.now()) subscriptionState.refreshSubscription();
       }
     });
   }, [user?.uid, subscriptionState]);
 
-  // Live polling: continuously fetch subscription status while on the wall
   useEffect(() => {
-    if (subscriptionState.hasAccess) {
-      if (onNavigate) onNavigate('dashboard');
-      return;
-    }
-    const timer = setInterval(() => {
-      subscriptionState.refreshSubscription();
-    }, 2500);
+    if (subscriptionState.hasAccess) { onNavigate?.('dashboard'); return; }
+    const timer = setInterval(() => subscriptionState.refreshSubscription(), 2500);
     return () => clearInterval(timer);
   }, [subscriptionState.hasAccess, subscriptionState.refreshSubscription, onNavigate]);
 
-  // Fast auto-resolution during verification phase so the user never gets stuck
   useEffect(() => {
     if (!isVerifying) return;
     const interval = setInterval(async () => {
@@ -62,9 +53,8 @@ export default function SubscriptionWallPage({
   }, [isVerifying, subscriptionState, onNavigate]);
 
   const isTrialUsed = Boolean(
-    subData?.status === 'trialing' ||
-    Boolean(subData?.trialEndsAt) ||
-    (subData?.hasHadTrial && subData?.status !== 'pending' && Boolean(subData?.trialEndsAt || subData?.currentPeriodEnd))
+    subData?.status === 'trialing' || subData?.trialEndsAt ||
+    (subData?.hasHadTrial && subData?.status !== 'pending' && (subData?.trialEndsAt || subData?.currentPeriodEnd))
   );
 
   useEffect(() => {
@@ -75,17 +65,32 @@ export default function SubscriptionWallPage({
   const isTrial = selectedCycle === 'trial';
 
   const handleStartPayment = async () => {
+    if (isTrial) {
+      setLoading(true); setError(null);
+      try {
+        const result = await subscriptionState.activateFreeTrial();
+        if (!result.success) throw new Error(result.error || 'Failed to activate free trial');
+        await subscriptionState.refreshSubscription();
+        setLoading(false);
+        onNavigate?.('dashboard');
+      } catch (err: any) {
+        setError(err.message || 'Trial activation failed.');
+        setLoading(false);
+      }
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
       if (!await loadRazorpayScript()) throw new Error('Unable to connect to Razorpay. Please check your connection.');
       const idToken = await user.getIdToken();
-      const amountPaise = isTrial ? 100 : activePlan.price * 100;
+      const amountPaise = activePlan.price * 100;
 
       const res = await fetch('/api/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
-        body: JSON.stringify({ amount: amountPaise, currency: 'INR', planKey: isTrial ? 'trial' : selectedCycle }),
+        body: JSON.stringify({ amount: amountPaise, currency: 'INR', planKey: selectedCycle }),
       });
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
@@ -99,7 +104,7 @@ export default function SubscriptionWallPage({
       const options: any = {
         key: rzpKey, order_id: effectiveOrderId, amount: resAmount || amountPaise, currency: 'INR',
         name: 'CrestFlow Pro',
-        description: isTrial ? 'CrestFlow Pro 7-Day Trial (₹1)' : `CrestFlow Pro ${activePlan.name} (₹${activePlan.price.toLocaleString('en-IN')})`,
+        description: `CrestFlow Pro ${activePlan.name} (₹${activePlan.price.toLocaleString('en-IN')})`,
         image: '/app_logo_icon.png',
         prefill: { name: profile?.name || user.displayName || '', email: user.email || '', contact: profile?.phone || '' },
         theme: { color: '#282828' },
@@ -113,7 +118,7 @@ export default function SubscriptionWallPage({
               body: JSON.stringify({
                 paymentId: response.razorpay_payment_id, orderId: resOrder, signature: response.razorpay_signature,
                 razorpay_payment_id: response.razorpay_payment_id, razorpay_order_id: resOrder, razorpay_signature: response.razorpay_signature,
-                planKey: isTrial ? 'trial' : selectedCycle,
+                planKey: selectedCycle,
               }),
             });
             if (verifyRes.ok) {
@@ -128,7 +133,7 @@ export default function SubscriptionWallPage({
               }
               await subscriptionState.refreshSubscription();
               setIsVerifying(false); setLoading(false);
-              if (onNavigate) onNavigate('dashboard');
+              onNavigate?.('dashboard');
               return;
             }
             const errJson = await verifyRes.json().catch(() => ({}));
@@ -167,9 +172,9 @@ export default function SubscriptionWallPage({
         </div>
         <div className="flex items-center gap-3">
           <span className="text-xs text-slate-500 dark:text-slate-400 hidden sm:inline">Signed in as <strong className="text-slate-700 dark:text-slate-200">{user.email}</strong></span>
-          <motion.button type="button" onClick={onLogout} whileHover={shouldReduceMotion ? undefined : { scale: 1.03 }} whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }} className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded border-none bg-slate-100 dark:bg-slate-800/80 cursor-pointer transition-colors">
+          <button type="button" onClick={onLogout} className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded border-none bg-slate-100 dark:bg-slate-800/80 cursor-pointer transition-colors">
             <LogOut size={13} /><span>Sign Out</span>
-          </motion.button>
+          </button>
         </div>
       </div>
 
@@ -199,11 +204,7 @@ export default function SubscriptionWallPage({
             <div className="pt-1">
               <button
                 type="button"
-                onClick={async () => {
-                  await subscriptionState.refreshSubscription();
-                  setIsVerifying(false);
-                  if (onNavigate) onNavigate('dashboard');
-                }}
+                onClick={async () => { await subscriptionState.refreshSubscription(); setIsVerifying(false); onNavigate?.('dashboard'); }}
                 className="px-5 py-2.5 bg-[#282828] hover:bg-[#383838] text-white text-xs font-semibold rounded-lg border border-[#3a3a3a] cursor-pointer transition-colors"
               >
                 Enter Workspace Now
@@ -231,7 +232,9 @@ export default function SubscriptionWallPage({
                       <span>{p.name.replace('Pro ', '')}</span>
                       {p.id === 'trial' && isTrialUsed && <span className="text-[9px] px-1 py-0.2 rounded bg-slate-200 dark:bg-slate-700 text-slate-500 font-normal">Used</span>}
                     </div>
-                    <div className={`text-[11px] font-normal ${isSelected ? 'text-slate-700 dark:text-slate-200 font-medium' : 'text-slate-400'}`}>₹{p.price.toLocaleString('en-IN')}</div>
+                    <div className={`text-[11px] font-normal ${isSelected ? 'text-slate-700 dark:text-slate-200 font-medium' : 'text-slate-400'}`}>
+                      {p.price === 0 ? 'Free' : `₹${p.price.toLocaleString('en-IN')}`}
+                    </div>
                   </motion.button>
                 );
               })}
@@ -275,7 +278,13 @@ export default function SubscriptionWallPage({
                 whileTap={shouldReduceMotion || loading || (isTrial && isTrialUsed) ? undefined : { scale: 0.98 }}
                 className="w-full sm:w-auto px-6 py-2.5 bg-[#282828] hover:bg-[#383838] text-white rounded-lg text-xs font-semibold cursor-pointer border border-[#3a3a3a] disabled:opacity-50 shadow-sm flex items-center justify-center gap-2"
               >
-                {loading ? <><RefreshCw size={13} className="animate-spin" /><span>Connecting to Razorpay...</span></> : isTrial ? (isTrialUsed ? 'Trial Already Claimed' : 'Start 7-Day Trial (₹1)') : `Pay ₹${activePlan.price.toLocaleString('en-IN')} & Unlock Workspace`}
+                {loading ? (
+                  <><RefreshCw size={13} className="animate-spin" /><span>{isTrial ? 'Activating Free Trial...' : 'Connecting to Razorpay...'}</span></>
+                ) : isTrial ? (
+                  isTrialUsed ? 'Trial Already Claimed' : 'Start 7-Day Free Trial'
+                ) : (
+                  `Pay ₹${activePlan.price.toLocaleString('en-IN')} & Unlock Workspace`
+                )}
               </motion.button>
             </div>
           </div>

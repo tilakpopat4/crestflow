@@ -12,13 +12,8 @@ import { PlanIntervalKey, ALL_DISPLAY_PLANS, TRIAL_PLAN } from '../lib/subscript
 import { loadRazorpayScript } from '../lib/razorpay';
 
 export interface SubscriptionModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  user: User;
-  profile?: UserProfile | null;
-  onSubscriptionUpdated?: () => void;
-  isMandatory?: boolean;
-  onLogout?: () => void;
+  isOpen: boolean; onClose: () => void; user: User; profile?: UserProfile | null;
+  onSubscriptionUpdated?: () => void; isMandatory?: boolean; onLogout?: () => void;
 }
 
 export default function SubscriptionModal({
@@ -39,19 +34,14 @@ export default function SubscriptionModal({
   // Listen to Firestore for user subscription history to know if trial has been claimed
   useEffect(() => {
     if (!user?.uid) return;
-    const unsub = onSnapshot(doc(db, 'subscriptions', user.uid), (snap) => {
-      if (snap.exists()) {
-        const data = snap.data();
-        setSubData(data);
-      }
+    return onSnapshot(doc(db, 'subscriptions', user.uid), (snap) => {
+      if (snap.exists()) setSubData(snap.data());
     });
-    return () => unsub();
   }, [user?.uid]);
 
   const isTrialUsed = Boolean(
-    subData?.status === 'trialing' ||
-    Boolean(subData?.trialEndsAt) ||
-    (subData?.hasHadTrial && subData?.status !== 'pending' && Boolean(subData?.trialEndsAt || subData?.currentPeriodEnd))
+    subData?.status === 'trialing' || subData?.trialEndsAt ||
+    (subData?.hasHadTrial && subData?.status !== 'pending' && (subData?.trialEndsAt || subData?.currentPeriodEnd))
   );
 
   // Reset state when modal opens
@@ -94,29 +84,43 @@ export default function SubscriptionModal({
     const isTrial = selectedCycle === 'trial';
     const activePlan = ALL_DISPLAY_PLANS.find((p) => p.id === selectedCycle) || TRIAL_PLAN;
 
-    try {
-      // 1. Ensure Razorpay Checkout script is loaded
-      const isLoaded = await loadRazorpayScript();
-      if (!isLoaded) {
-        throw new Error('Unable to connect to Razorpay payment gateway. Please check your internet connection.');
+    // Free Trial path: activate directly without payment
+    if (isTrial) {
+      try {
+        const idToken = await user.getIdToken();
+        const res = await fetch('/api/activate-trial', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${idToken}`,
+          },
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to activate 7-day free trial.');
+        }
+        setStep('success');
+        if (onSubscriptionUpdated) {
+          onSubscriptionUpdated();
+        }
+      } catch (err: any) {
+        setError(err.message || 'Trial activation failed.');
+      } finally {
+        setLoading(false);
       }
+      return;
+    }
 
-      // 2. Fetch Firebase ID token
+    try {
+      const isLoaded = await loadRazorpayScript();
+      if (!isLoaded) throw new Error('Unable to connect to Razorpay payment gateway.');
+
       const idToken = await user.getIdToken();
-
-      // 3. Request order creation from Cloudflare Worker
-      const amountPaise = isTrial ? 100 : activePlan.price * 100;
+      const amountPaise = activePlan.price * 100;
       const res = await fetch('/api/create-order', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${idToken}`,
-        },
-        body: JSON.stringify({
-          amount: amountPaise,
-          currency: 'INR',
-          planKey: isTrial ? 'trial' : selectedCycle,
-        }),
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+        body: JSON.stringify({ amount: amountPaise, currency: 'INR', planKey: selectedCycle }),
       });
 
       if (!res.ok) {
@@ -127,21 +131,15 @@ export default function SubscriptionModal({
       const { order_id, orderId, key_id, keyId, amount: resAmount } = await res.json();
       const effectiveOrderId = order_id || orderId;
       const rzpKey = (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || key_id || keyId;
+      if (!rzpKey) throw new Error('Razorpay public key is missing.');
 
-      if (!rzpKey) {
-        throw new Error('Razorpay public key is missing.');
-      }
-
-      // 4. Open Razorpay Checkout modal
       const options: any = {
         key: rzpKey,
         order_id: effectiveOrderId,
         amount: resAmount || amountPaise,
         currency: 'INR',
         name: 'CrestFlow Pro',
-        description: isTrial
-          ? 'CrestFlow Pro 7-Day Trial (₹1)'
-          : `CrestFlow Pro ${activePlan.name} (₹${activePlan.price.toLocaleString('en-IN')})`,
+        description: `CrestFlow Pro ${activePlan.name} (₹${activePlan.price.toLocaleString('en-IN')})`,
         image: '/app_logo_icon.png',
         prefill: { name: profile?.name || user.displayName || '', email: user.email || '', contact: profile?.phone || '' },
         theme: { color: '#282828' },
@@ -155,7 +153,7 @@ export default function SubscriptionModal({
               body: JSON.stringify({
                 paymentId: response.razorpay_payment_id, orderId: resOrder, signature: response.razorpay_signature,
                 razorpay_payment_id: response.razorpay_payment_id, razorpay_order_id: resOrder, razorpay_signature: response.razorpay_signature,
-                planKey: isTrial ? 'trial' : selectedCycle,
+                planKey: selectedCycle,
               }),
             });
 

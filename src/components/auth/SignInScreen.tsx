@@ -8,20 +8,24 @@ interface SignInScreenProps {
   isAdminRoute: boolean;
   isSigningIn: boolean;
   onLogin: () => void;
+  onEmailSignUp?: (email: string, pass: string, name?: string) => Promise<{ success: boolean; error?: string }>;
+  onEmailSignIn?: (email: string, pass: string) => Promise<{ success: boolean; error?: string }>;
   onSupportingNavigate: (route: 'privacy' | 'terms' | 'contact' | 'refund' | 'pricing' | 'dashboard' | 'work' | 'reviews' | any) => void;
 }
 
 /**
  * SignInScreen renders the editorial landing and sign-in view for CrestFlow:
- * - Solid studio grey background across entire main content screen (#333333), eliminating side highlighting/darkening
- * - Desktop: Left column (Headline, subtitle, workflow diagram) + Right column (SignInCard)
- * - Mobile (/adapt): Clean stacked hierarchy (Headline -> SignInCard -> Workflow illustration)
- * - Website standard Footer: Kept distinct as before with its own footer styling (#282828)
+ * - Solid studio grey background across entire main content screen (#333333)
+ * - Desktop: Left column (Headline, 3 key benefits, workflow diagram) + Right column (SignInCard)
+ * - Mobile (/adapt): Clean stacked hierarchy
+ * - Website standard Footer: (#282828)
  */
 export const SignInScreen: React.FC<SignInScreenProps> = ({
   isAdminRoute,
   isSigningIn,
   onLogin,
+  onEmailSignUp,
+  onEmailSignIn,
   onSupportingNavigate,
 }) => {
   const shouldReduceMotion = useReducedMotion();
@@ -35,6 +39,8 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
             isAdminRoute={isAdminRoute}
             isSigningIn={isSigningIn}
             onLogin={onLogin}
+            onEmailSignUp={onEmailSignUp}
+            onEmailSignIn={onEmailSignIn}
             onSupportingNavigate={onSupportingNavigate}
           />
         </main>
@@ -53,19 +59,35 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
           transition={{ duration: shouldReduceMotion ? 0 : 0.3 }}
           className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16 items-center w-full"
         >
-          {/* Left Column: Heading, Subtitle & Workflow Illustration */}
+          {/* Left Column: Heading, 3 Key Benefits & Workflow Illustration */}
           <div className="lg:col-span-7 flex flex-col justify-center space-y-4 sm:space-y-6">
             <div>
               <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-[62px] font-black italic tracking-tight text-white leading-[1.08]">
                 Invoice. Scan. <span className="text-[#6366f1]">Get Paid.</span>
               </h1>
               <p className="text-xs sm:text-sm lg:text-base text-slate-300 sm:text-slate-400 mt-3 sm:mt-4 leading-relaxed max-w-xl">
-                Clients, deliverables, invoices and reminders for Indian freelancers. Invoices carry a UPI QR, and money goes straight to your bank with zero fees.
+                The all-in-one client CRM, deliverable tracker, and automated invoicing workspace built specifically for Indian freelancers and digital studios.
               </p>
             </div>
 
-            {/* Desktop Workflow Diagram Illustration (placed directly beneath subtitle) */}
-            <div className="hidden lg:block pt-3 xl:pt-6">
+            {/* 3 Core Benefits */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+              <div className="bg-[#282828] border border-[#383838] p-3 rounded-lg">
+                <p className="text-xs font-semibold text-white">Direct UPI Payments</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">Zero gateway commissions. 100% money goes directly to your bank.</p>
+              </div>
+              <div className="bg-[#282828] border border-[#383838] p-3 rounded-lg">
+                <p className="text-xs font-semibold text-white">Deliverable Tracking</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">Log edits, revisions, and status updates seamlessly for every client.</p>
+              </div>
+              <div className="bg-[#282828] border border-[#383838] p-3 rounded-lg">
+                <p className="text-xs font-semibold text-white">Automated Delivery</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">Scheduled WhatsApp-ready and email invoices at 6:00 AM sharp.</p>
+              </div>
+            </div>
+
+            {/* Desktop Workflow Diagram Illustration */}
+            <div className="hidden lg:block pt-3 xl:pt-4">
               <WorkflowIllustration className="w-full max-w-xl xl:max-w-2xl" />
             </div>
           </div>
@@ -76,6 +98,8 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
               isAdminRoute={isAdminRoute}
               isSigningIn={isSigningIn}
               onLogin={onLogin}
+              onEmailSignUp={onEmailSignUp}
+              onEmailSignIn={onEmailSignIn}
               onSupportingNavigate={onSupportingNavigate}
             />
 

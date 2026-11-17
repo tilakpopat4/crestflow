@@ -80,7 +80,7 @@ export const PlanSelectionStep: React.FC<PlanSelectionStepProps> = ({
                 )}
               </div>
               <div className="relative z-10 text-[11px] text-slate-500 dark:text-slate-400">
-                ₹{p.price.toLocaleString('en-IN')}
+                {p.price === 0 ? 'Free' : `₹${p.price.toLocaleString('en-IN')}`}
               </div>
             </button>
           );
@@ -186,7 +186,7 @@ export const PlanSelectionStep: React.FC<PlanSelectionStepProps> = ({
           {loading
             ? 'Initializing Checkout...'
             : isSelectedTrial
-            ? (isTrialUsed ? 'Trial Already Claimed' : 'Start 7-Day Trial (₹1)')
+            ? (isTrialUsed ? 'Trial Already Claimed' : 'Start 7-Day Free Trial')
             : `Pay ₹${activePlan.price.toLocaleString('en-IN')} & Subscribe`}
         </motion.button>
       </div>

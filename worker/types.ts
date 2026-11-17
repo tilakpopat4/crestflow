@@ -98,6 +98,9 @@ export interface SubscriptionRecord {
   currentPeriodEnd?: number;
   accessUntil?: string | Date;
   trialEndsAt?: string | Date | null;
+  trialClaimed?: boolean;
+  trialClaimedAt?: number;
+  trialStartedAt?: number;
   graceUntil?: string | null;
   hasHadTrial?: boolean;
   hasHadSubscription?: boolean;

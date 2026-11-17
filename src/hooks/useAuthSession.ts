@@ -1,5 +1,13 @@
 import { useState, useEffect } from 'react';
-import { User, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
+import {
+  User,
+  onAuthStateChanged,
+  signInWithPopup,
+  signOut,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from 'firebase/auth';
 import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { auth, googleProvider, db } from '../firebase';
 
@@ -89,6 +97,65 @@ export function useAuthSession() {
     }
   };
 
+  const handleEmailSignUp = async (email: string, pass: string, name?: string): Promise<{ success: boolean; error?: string }> => {
+    if (isSigningIn) return { success: false, error: 'Auth in progress' };
+    setIsSigningIn(true);
+    try {
+      const res = await createUserWithEmailAndPassword(auth, email.trim(), pass);
+      if (res.user) {
+        if (name && name.trim()) {
+          try {
+            await updateProfile(res.user, { displayName: name.trim() });
+          } catch {}
+        }
+        const profileRef = doc(db, 'profiles', res.user.uid);
+        const initialData = {
+          id: res.user.uid,
+          userId: res.user.uid,
+          name: name?.trim() || email.split('@')[0],
+          email: email.trim().toLowerCase(),
+          photoURL: '',
+          isPublicProfile: true,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        };
+        await setDoc(profileRef, initialData, { merge: true });
+      }
+      return { success: true };
+    } catch (err: any) {
+      let msg = err.message || 'Registration failed';
+      if (err.code === 'auth/email-already-in-use') {
+        msg = 'An account with this email already exists. Please sign in instead.';
+      } else if (err.code === 'auth/weak-password') {
+        msg = 'Password should be at least 6 characters.';
+      } else if (err.code === 'auth/invalid-email') {
+        msg = 'Please enter a valid email address.';
+      }
+      return { success: false, error: msg };
+    } finally {
+      setIsSigningIn(false);
+    }
+  };
+
+  const handleEmailSignIn = async (email: string, pass: string): Promise<{ success: boolean; error?: string }> => {
+    if (isSigningIn) return { success: false, error: 'Auth in progress' };
+    setIsSigningIn(true);
+    try {
+      await signInWithEmailAndPassword(auth, email.trim(), pass);
+      return { success: true };
+    } catch (err: any) {
+      let msg = err.message || 'Sign in failed';
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+        msg = 'Invalid email or password. Please verify your credentials.';
+      } else if (err.code === 'auth/too-many-requests') {
+        msg = 'Too many failed login attempts. Please try again later or reset password.';
+      }
+      return { success: false, error: msg };
+    } finally {
+      setIsSigningIn(false);
+    }
+  };
+
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -103,6 +170,8 @@ export function useAuthSession() {
     isSigningIn,
     isBlocked,
     handleLogin,
+    handleEmailSignUp,
+    handleEmailSignIn,
     handleLogout,
   };
 }

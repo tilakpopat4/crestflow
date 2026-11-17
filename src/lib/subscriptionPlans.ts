@@ -28,15 +28,15 @@ export const FREE_TIER_LIMITS = {
 export const TRIAL_PLAN: PlanPricing = {
   id: 'trial',
   planCode: 'pro_trial',
-  name: '7-Day Trial',
-  price: 1,
+  name: '7-Day Free Trial',
+  price: 0,
   currency: 'INR',
   interval: '7 days',
   durationDays: 7,
   periodLabel: 'for 7 days',
-  monthlyEquivalent: 1,
-  savingsBadge: 'Single-Use',
-  description: 'Full Pro access for 7 days. One-time trial per account.',
+  monthlyEquivalent: 0,
+  savingsBadge: '100% Free',
+  description: 'Enjoy complete CrestFlow Pro access for 7 days. No payment method required. One free trial per account.',
   isTrial: true,
   features: [
     '7 days full access to all Pro features',
@@ -129,15 +129,11 @@ export const ALL_DISPLAY_PLANS: PlanPricing[] = [
 ];
 
 /**
- * Returns the exact mandatory disclosure string required by billing regulations:
- * "₹1 today for a 7-day trial, then ₹X on [date]; the ₹1 is non-refundable"
+ * Returns the plain disclosure text for the selected plan.
  */
 export function getTrialDisclosureText(plan: PlanPricing, baseDate = new Date()): string {
-  const chargeDate = new Date(baseDate.getTime() + 7 * 24 * 60 * 60 * 1000);
-  const formattedDate = chargeDate.toLocaleDateString('en-IN', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
-  return `₹1 today for a 7-day trial, then ₹${plan.price.toLocaleString('en-IN')} on ${formattedDate}; the ₹1 is non-refundable`;
+  if (plan.isTrial || plan.id === 'trial') {
+    return 'Enjoy complete CrestFlow Pro access for 7 days. No payment method required. One free trial per account. No automatic payment deduction when the trial expires.';
+  }
+  return `Billed at ₹${plan.price.toLocaleString('en-IN')} immediately upon payment. Renews every ${plan.interval} until cancelled.`;
 }

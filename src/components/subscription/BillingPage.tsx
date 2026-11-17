@@ -55,9 +55,14 @@ export default function BillingPage({
 
   const handleCancel = async () => {
     const isTrial = isTrialing;
-    const confirmText = isTrial
-      ? 'Are you sure you want to cancel your trial auto-renewal? You will not be charged, and you will retain full access until the end of your 7-day trial.'
-      : 'Are you sure you want to cancel your subscription auto-renewal? Your account will remain active until the end of your current paid billing period.';
+    if (isTrial) {
+      setFeedbackMessage({
+        type: 'success',
+        text: 'Your 7-day free trial has no automatic billing or payment deduction. You retain full access until the end of your trial.',
+      });
+      return;
+    }
+    const confirmText = 'Are you sure you want to cancel your subscription auto-renewal? Your account will remain active until the end of your current paid billing period.';
 
     if (!window.confirm(confirmText)) return;
 
@@ -67,9 +72,7 @@ export default function BillingPage({
       await cancelSubscription();
       setFeedbackMessage({
         type: 'success',
-        text: isTrial
-          ? 'Trial auto-renewal cancelled. You keep access until your trial ends.'
-          : 'Subscription cancelled. Access remains active until the end of your billing cycle.',
+        text: 'Subscription cancelled. Access remains active until the end of your billing cycle.',
       });
     } catch (err: any) {
       setFeedbackMessage({ type: 'error', text: err.message || 'Failed to cancel subscription.' });

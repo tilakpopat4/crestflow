@@ -4,6 +4,7 @@ import {
   handleCancelSubscription, handleChangePlan, handleVerifyPayment,
 } from './routes/subscription';
 import { handleCreateOrder } from './routes/order';
+import { handleActivateTrial } from './routes/trial';
 import { handleRazorpayWebhook } from './routes/webhook';
 import { handleCronReconciliation } from './reconcile';
 import { constantTimeCompare } from './razorpay';
@@ -75,6 +76,11 @@ export default {
       // 1c. POST /api/verify-payment
       if (url.pathname === '/api/verify-payment' && request.method === 'POST') {
         return await handleVerifyPayment(request, env);
+      }
+
+      // 1d. POST /api/activate-trial (100% Free 7-Day Trial, ₹0, no payment gateway)
+      if (url.pathname === '/api/activate-trial' && request.method === 'POST') {
+        return await handleActivateTrial(request, env);
       }
 
       // 2. GET /api/me

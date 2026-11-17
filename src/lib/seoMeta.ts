@@ -18,7 +18,7 @@ export const ROUTE_METADATA: Record<string, PageMeta> = {
   },
   pricing: {
     title: 'Pricing Plans | CrestFlow',
-    description: 'Transparent, zero-commission pricing for freelancers. Free starter limits and CrestFlow Pro memberships with automated invoicing.',
+    description: 'Transparent, zero-commission pricing for freelancers. Start with a 7-day free trial, then choose CrestFlow Pro with automated invoicing and UPI QR codes.',
     canonicalPath: '/pricing',
   },
   terms: {
