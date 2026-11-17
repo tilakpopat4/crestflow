@@ -55,7 +55,7 @@ CrestFlow uses a serverless, decoupled email architecture built for high deliver
 | :--- | :--- | :--- | :--- |
 | `contact_submission` | `POST /api/notify/contact` (Contact Form) | `support.crestflow@gmail.com` | Renders sanitized sender name, email, subject, and pre-formatted message. Rate limited to 5 requests/min per IP. |
 | `welcome_freelancer` | `POST /api/notify/welcome` (First sign-in) | Freelancer's Google email | Warm onboarding greeting guiding through UPI QR setup, client onboarding portfolio, and first project logging. Idempotent per UID. |
-| `payment_charged` | Razorpay webhook `subscription.charged` | Freelancer's Google email | Official payment receipt displaying plan name, amount (e.g. ₹49), coverage period, next renewal date, and transaction ID. |
+| `payment_charged` | Razorpay webhook `subscription.charged` | Freelancer's Google email | Official payment receipt displaying plan name, amount (e.g. ₹79), coverage period, next renewal date, and transaction ID. |
 | `work_milestone` | `POST /api/notify/milestone` / Cron | Freelancer's Google email | Milestone celebration (30 days, 60 days, 100 days, 180 days, 240 days streak, 1 year) celebrating career dedication with personalized stats. |
 | `new_client_request` | `POST /api/notify/new-client-request` | Freelancer's verified email | Immediate lead notification containing prospective client name, contact person, phone, email, Instagram, proposed rate, and project details. |
 | `scheduled_reminder` | `POST /api/email/schedule` | Specified recipient | Scheduled announcement or reminder with optional action CTA button. |

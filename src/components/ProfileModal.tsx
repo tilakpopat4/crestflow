@@ -295,8 +295,8 @@ export default function ProfileModal({
                     />
                     <span className="text-xs font-semibold text-slate-900 dark:text-white">
                       {subscriptionState.isPaidActive
-                        ? `CrestFlow Pro (₹49/month • ${subscriptionState.daysRemaining} days remaining)`
-                        : 'Subscription Required (₹49/month)'}
+                        ? `CrestFlow Pro (₹79/month • ${subscriptionState.daysRemaining} days remaining)`
+                        : 'Subscription Required (₹79/month)'}
                     </span>
                   </div>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
@@ -310,7 +310,7 @@ export default function ProfileModal({
                   onClick={onOpenSubscriptionModal}
                   className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium transition-colors cursor-pointer shrink-0"
                 >
-                  {subscriptionState.isPaidActive ? 'Extend Plan' : 'Subscribe ₹49/mo'}
+                  {subscriptionState.isPaidActive ? 'Extend Plan' : 'Subscribe ₹79/mo'}
                 </button>
               </div>
             </div>

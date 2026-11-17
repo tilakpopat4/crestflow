@@ -547,7 +547,7 @@ export default function GlobalHeader({
             title={
               subscriptionState.isPaidActive
                 ? `CrestFlow Pro Active (${subscriptionState.daysRemaining} days remaining)`
-                : 'Subscription required (₹49/month). Click to activate.'
+                : 'Subscription required (₹79/month). Click to activate.'
             }
           >
             <span
@@ -566,7 +566,7 @@ export default function GlobalHeader({
             >
               {subscriptionState.isPaidActive
                 ? `Pro • ${subscriptionState.daysRemaining}d`
-                : 'Subscribe • ₹49/mo'}
+                : 'Subscribe • ₹79/mo'}
             </span>
           </button>
         )}

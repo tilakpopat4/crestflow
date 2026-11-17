@@ -198,7 +198,7 @@ export interface UserProfile {
   sampleWorks?: SampleWorkItem[]; // Manually curated video library connected to Google Drive
   createdAt: number;
   updatedAt?: number;
-  // SaaS Subscription fields (49/- per month)
+  // SaaS Subscription fields (79/- per month)
   subscriptionStatus?: SubscriptionStatus;
   subscriptionPlan?: SubscriptionPlan;
   currentPeriodStart?: number;

@@ -19,7 +19,7 @@ export const SITEMAP_PAGES: SitemapPageItem[] = [
     path: '/pricing',
     samplePath: '/pricing',
     category: 'public',
-    description: 'Membership tiers, ₹49/mo freelance workspace features, and platform FAQ.',
+    description: 'Membership tiers, ₹79/mo freelance workspace features, and platform FAQ.',
     accessLevel: 'Public',
     inXmlSitemap: true,
   },

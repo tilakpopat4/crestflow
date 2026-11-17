@@ -21,7 +21,7 @@ export default function AdminPlanForm({
 }: AdminPlanFormProps) {
   const [name, setName] = useState('');
   const [planCode, setPlanCode] = useState('');
-  const [price, setPrice] = useState('49');
+  const [price, setPrice] = useState('79');
   const [durationDays, setDurationDays] = useState('30');
   const [periodLabel, setPeriodLabel] = useState('/ month');
   const [badge, setBadge] = useState('');
@@ -54,7 +54,7 @@ export default function AdminPlanForm({
     onSave({
       planCode: planCode.trim(),
       name: name.trim(),
-      price: parseFloat(price) || 49,
+      price: parseFloat(price) || 79,
       currency: 'INR',
       durationDays: parseInt(durationDays, 10) || 30,
       periodLabel: periodLabel.trim() || '/ month',
@@ -106,7 +106,7 @@ export default function AdminPlanForm({
             type="number"
             step="0.01"
             min="0"
-            placeholder="49.00"
+            placeholder="79.00"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             required

@@ -144,7 +144,7 @@ describe('Production-Ready Automated Email System Suite', () => {
 
       const templates = [
         renderEmailTemplate('welcome_freelancer', { name: 'Dev', workspaceUrl: 'https://crestflow.app' }),
-        renderEmailTemplate('payment_charged', { planName: 'Pro', amountFormatted: '₹49', periodStart: 'Oct 1', periodEnd: 'Nov 1' }),
+        renderEmailTemplate('payment_charged', { planName: 'Pro', amountFormatted: '₹79', periodStart: 'Oct 1', periodEnd: 'Nov 1' }),
         renderEmailTemplate('work_milestone', { milestoneTitle: '30 Days Worked', daysWorked: 30, durationFormatted: '1 month' }),
         renderEmailTemplate('new_client_request', { clientName: 'Brand X', contactName: 'John', contactEmail: 'j@x.com', contactPhone: '9876543210', projectDetails: 'Reels editing' }),
         renderEmailTemplate('contact_submission', { senderName: 'User', senderEmail: 'u@test.com', subject: 'Inquiry', message: 'Hi' }),
@@ -489,7 +489,7 @@ describe('Production-Ready Automated Email System Suite', () => {
         created_at: Math.floor(Date.now() / 1000),
         payload: {
           subscription: { entity: { id: subId } },
-          payment: { entity: { amount: 4900, email: userEmail } },
+          payment: { entity: { amount: 7900, email: userEmail } },
         },
       };
 
@@ -519,7 +519,7 @@ describe('Production-Ready Automated Email System Suite', () => {
       const sent = mockState.sentEmails[mockState.sentEmails.length - 1];
       assert.deepEqual(sent.to, [userEmail]);
       assert.match(sent.subject, /Payment Confirmation/i);
-      assert.match(sent.text, /₹49/);
+      assert.match(sent.text, /₹79/);
     });
   });
 
