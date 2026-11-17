@@ -33,8 +33,18 @@ export const SignInCard: React.FC<SignInCardProps> = ({
     e.preventDefault();
     setFormError(null);
 
-    if (!email.trim() || !password) {
-      setFormError('Please enter both email and password.');
+    if (authMode === 'signup' && !name.trim()) {
+      setFormError('Please enter your name.');
+      return;
+    }
+
+    if (!email.trim()) {
+      setFormError('Please enter your email address.');
+      return;
+    }
+
+    if (!password) {
+      setFormError('Please enter your password.');
       return;
     }
 
@@ -122,7 +132,7 @@ export const SignInCard: React.FC<SignInCardProps> = ({
           type="button"
           onClick={onLogin}
           disabled={isSigningIn || isSubmitting}
-          className="w-full min-h-[42px] flex items-center justify-center gap-2.5 bg-[#282828] hover:bg-[#333333] active:bg-[#3d3d3d] border border-[#3a3a3a] disabled:opacity-50 text-white py-2.5 px-4 rounded-lg font-medium text-xs transition-colors cursor-pointer"
+          className="w-full min-h-[42px] flex items-center justify-center gap-2.5 bg-[#282828] hover:bg-[#333333] active:bg-[#3d3d3d] border-none disabled:opacity-50 text-white py-2.5 px-4 rounded-lg font-medium text-xs transition-colors cursor-pointer"
         >
           {isSigningIn ? (
             <div className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-white border-t-transparent" />
@@ -149,31 +159,38 @@ export const SignInCard: React.FC<SignInCardProps> = ({
             <form onSubmit={handleSubmit} className="space-y-3">
               {authMode === 'signup' && (
                 <div>
-                  <label className="block text-[11px] font-medium text-slate-300 mb-1">Your Name</label>
+                  <label className="block text-[11px] font-medium text-slate-300 mb-1">
+                    Your Name <span className="text-red-400">*</span>
+                  </label>
                   <input
                     type="text"
+                    required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Tilak Popat"
-                    className="w-full bg-[#121212] border border-[#2e2e2e] rounded-lg px-3 py-2 text-xs text-white placeholder:text-slate-600 outline-none focus:border-indigo-500"
+                    className="w-full bg-[#121212] border-none rounded-lg px-3 py-2 text-xs text-white placeholder:text-slate-600 outline-none focus:outline-none focus:ring-0"
                   />
                 </div>
               )}
 
               <div>
-                <label className="block text-[11px] font-medium text-slate-300 mb-1">Email Address</label>
+                <label className="block text-[11px] font-medium text-slate-300 mb-1">
+                  Email Address <span className="text-red-400">*</span>
+                </label>
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@creativestudio.com"
-                  className="w-full bg-[#121212] border border-[#2e2e2e] rounded-lg px-3 py-2 text-xs text-white placeholder:text-slate-600 outline-none focus:border-indigo-500"
+                  className="w-full bg-[#121212] border-none rounded-lg px-3 py-2 text-xs text-white placeholder:text-slate-600 outline-none focus:outline-none focus:ring-0"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-slate-300 mb-1">Password</label>
+                <label className="block text-[11px] font-medium text-slate-300 mb-1">
+                  Password <span className="text-red-400">*</span>
+                </label>
                 <div className="relative">
                   <input
                     type={showPassword ? 'text' : 'password'}
@@ -181,7 +198,7 @@ export const SignInCard: React.FC<SignInCardProps> = ({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full bg-[#121212] border border-[#2e2e2e] rounded-lg pl-3 pr-9 py-2 text-xs text-white placeholder:text-slate-600 outline-none focus:border-indigo-500"
+                    className="w-full bg-[#121212] border-none rounded-lg pl-3 pr-9 py-2 text-xs text-white placeholder:text-slate-600 outline-none focus:outline-none focus:ring-0"
                   />
                   <button
                     type="button"
