@@ -37,7 +37,13 @@ if (typeof window !== 'undefined') {
           };
         })
         .catch((err) => {
-          console.warn('[PWA] Service worker registration failed:', err);
+          // Gracefully handle browser security restrictions, private browsing, or security extension blocks (e.g., wrsParams, Brave Shields, antivirus)
+          const msg = String(err?.message || err);
+          if (msg.includes('Rejected') || msg.includes('SecurityError') || msg.includes('disallowed')) {
+            console.debug?.('[PWA] Service worker disabled by browser policy or privacy extension');
+          } else {
+            console.warn('[PWA] Service worker registration failed:', err);
+          }
         });
     });
   }
