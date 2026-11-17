@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { User } from 'firebase/auth';
 import { UserProfile } from '../../types';
-import { PRO_PLANS, FREE_TIER_LIMITS, PlanPricing } from '../../lib/subscriptionPlans';
+import { PRO_PLANS, TRIAL_PLAN, PlanPricing } from '../../lib/subscriptionPlans';
 import { loadRazorpayScript } from '../../lib/razorpay';
 import { PricingCard } from './PricingCard';
 import { ActivatingPaymentModal } from './ActivatingPaymentModal';
@@ -149,34 +149,28 @@ export default function PricingPage({
             Simple, Transparent Pricing
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Start free with up to {FREE_TIER_LIMITS.maxClients} clients, or upgrade to CrestFlow Pro for automated deliveries, client portals, and unlimited clients.
+            Get full access with our 7-day trial for just ₹1, or select an annual or monthly plan for uninterrupted workflow.
           </p>
         </div>
 
-        {/* Free Plan Card */}
+        {/* 7-Day Trial Card */}
         <div className="max-w-2xl mx-auto mb-8 p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-bold text-slate-900 dark:text-slate-100 text-sm">Free Starter Plan</span>
-              <span className="text-[11px] font-semibold text-slate-500 px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800">Perpetual Free</span>
+              <span className="font-bold text-slate-900 dark:text-slate-100 text-sm">7-Day Full Access Trial</span>
+              <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800">₹1 Only</span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              {FREE_TIER_LIMITS.maxClients} clients total &bull; Up to {FREE_TIER_LIMITS.maxInvoicesPerMonth} invoices per calendar month &bull; Personal UPI QR invoices
+              Unlimited clients &bull; Automated 6:00 AM delivery &bull; Branded client portal &bull; Zero commission UPI invoicing
             </p>
           </div>
           <button
             type="button"
-            onClick={() => {
-              if (user && onNavigateToDashboard) onNavigateToDashboard();
-              else if (onNavigateToAuth) onNavigateToAuth();
-              else {
-                window.history.pushState({}, '', user ? '/dashboard' : '/login');
-                window.dispatchEvent(new PopStateEvent('popstate'));
-              }
-            }}
-            className="w-full sm:w-auto px-4 py-2 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+            onClick={() => handleStartPlanCheckout(TRIAL_PLAN)}
+            disabled={loading}
+            className="w-full sm:w-auto px-4 py-2 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition-colors cursor-pointer border-none disabled:opacity-50"
           >
-            {user ? 'Current Free Limits' : 'Get Started Free'}
+            {loading && selectedPlanId === 'trial' ? 'Initializing...' : 'Start 7-Day Trial for ₹1'}
           </button>
         </div>
 
