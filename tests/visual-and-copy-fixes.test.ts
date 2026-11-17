@@ -76,6 +76,6 @@ describe('Visual & Copy Fixes Verification Suite', () => {
 
     assert.ok(!indexHtml.includes('#1 Freelance'));
     assert.ok(!indexHtml.includes('#1 Freelancer'));
-    assert.ok(indexHtml.includes('CrestFlow | UPI invoicing and client management for freelancers'));
+    assert.ok(indexHtml.includes('CrestFlow | End-to-End CRM for Freelancers &amp; UPI Invoicing'));
   });
 });

@@ -12,8 +12,8 @@ export interface PageMeta {
 
 export const ROUTE_METADATA: Record<string, PageMeta> = {
   dashboard: {
-    title: 'CrestFlow | UPI invoicing and client management for freelancers',
-    description: 'Manage clients, track deliverables, automate invoice delivery, and receive zero-fee direct UPI payments. Built for freelancers and video editors.',
+    title: 'CrestFlow | End-to-End CRM for Freelancers & UPI Invoicing',
+    description: 'The complete end-to-end CRM for freelancers and creators. Manage clients, track deliverables, automate 6:00 AM invoice delivery, and receive zero-fee direct UPI payments.',
     canonicalPath: '/',
   },
   pricing: {
