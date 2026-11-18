@@ -23,6 +23,7 @@ import { handleStaticAsset } from './staticHandler';
 import { handleCreateClient, handleCreateInvoice } from './routes/limits';
 import { handleAdminSettings, handleGetPricingConfig } from './routes/adminSettings';
 import { handleGetPublicProfile } from './routes/publicProfile';
+import { handleDeleteAccount } from './routes/account';
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -219,6 +220,11 @@ export default {
       }
       if (url.pathname === '/api/pricing-config' && request.method === 'GET') {
         return await handleGetPricingConfig(env);
+      }
+
+      // 20. POST /api/delete-account (Authenticated complete account & workspace deletion)
+      if (url.pathname === '/api/delete-account' && request.method === 'POST') {
+        return await handleDeleteAccount(request, env);
       }
 
       return jsonResponse({ error: 'Endpoint not found' }, 404);

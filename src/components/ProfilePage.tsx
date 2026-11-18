@@ -7,6 +7,7 @@ import ProfilePublicSection from './profile/ProfilePublicSection';
 import ProfileInvoicingSection from './profile/ProfileInvoicingSection';
 import ProfilePreferencesCard from './profile/ProfilePreferencesCard';
 import ProfileSubscriptionSection from './profile/ProfileSubscriptionSection';
+import ProfileDangerSection from './profile/ProfileDangerSection';
 import { getUserHandle, cleanUsername } from '../lib/userHandle';
 import { isValidUpiId } from '../lib/upiQr';
 import { ProfileSkeleton } from './skeletons';
@@ -110,22 +111,16 @@ export default function ProfilePage({
   const isInvoicingDirty = upiId !== savedSnapshot.upiId || phone !== savedSnapshot.phone || servicesDescription !== savedSnapshot.servicesDescription;
   const isAiDirty = geminiApiKey !== savedSnapshot.geminiApiKey;
 
-  // Discard handlers
   const handleDiscardProfile = () => {
     setName(savedSnapshot.name); setUsername(savedSnapshot.username); setProfessionalTitle(savedSnapshot.professionalTitle);
     setFreelanceStartDate(savedSnapshot.freelanceStartDate); setWorkExperienceBio(savedSnapshot.workExperienceBio); setPhotoURL(savedSnapshot.photoURL);
     if (error) setError('');
   };
-
   const handleDiscardInvoicing = () => {
     setUpiId(savedSnapshot.upiId); setPhone(savedSnapshot.phone); setServicesDescription(savedSnapshot.servicesDescription);
     setUpiError(''); if (error) setError('');
   };
-
-  const handleDiscardAi = () => {
-    setGeminiApiKey(savedSnapshot.geminiApiKey);
-    if (error) setError('');
-  };
+  const handleDiscardAi = () => { setGeminiApiKey(savedSnapshot.geminiApiKey); if (error) setError(''); };
 
   // Save handler
   const handleSaveSection = async (section: SettingsSectionId) => {
@@ -291,6 +286,8 @@ export default function ProfilePage({
               onOpenSubscriptionModal={onOpenSubscriptionModal}
             />
           )}
+
+          <ProfileDangerSection user={user} />
         </div>
       </div>
     </div>

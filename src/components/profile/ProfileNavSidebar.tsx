@@ -1,8 +1,8 @@
 import React from 'react';
-import { User, QrCode, KeyRound, ShieldCheck } from 'lucide-react';
+import { User, QrCode, KeyRound, ShieldCheck, Trash2 } from 'lucide-react';
 import { useAiSummarizerConfig } from '../../lib/aiConfig';
 
-export type SettingsSectionId = 'profile' | 'invoicing' | 'ai' | 'billing';
+export type SettingsSectionId = 'profile' | 'invoicing' | 'ai' | 'billing' | 'danger';
 
 interface ProfileNavSidebarProps {
   activeSection: SettingsSectionId;
@@ -25,6 +25,7 @@ export const ProfileNavSidebar: React.FC<ProfileNavSidebarProps> = ({
   const accountLinks = [
     { id: 'profile' as const, label: 'Public Profile', icon: User },
     { id: 'invoicing' as const, label: 'Invoicing & Payouts', icon: QrCode },
+    { id: 'danger' as const, label: 'Delete Account', icon: Trash2 },
   ];
 
   const systemLinks = [
