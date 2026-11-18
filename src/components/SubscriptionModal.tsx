@@ -8,7 +8,8 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import { PlanSelectionStep } from './subscription/PlanSelectionStep';
 import { SubscriptionSuccessStep } from './subscription/SubscriptionSuccessStep';
 
-import { PlanIntervalKey, ALL_DISPLAY_PLANS, TRIAL_PLAN } from '../lib/subscriptionPlans';
+import { PlanIntervalKey } from '../lib/subscriptionPlans';
+import { usePricingConfig } from '../lib/pricingConfig';
 import { loadRazorpayScript } from '../lib/razorpay';
 
 export interface SubscriptionModalProps {
@@ -25,6 +26,7 @@ export default function SubscriptionModal({
   isMandatory = false,
   onLogout,
 }: SubscriptionModalProps) {
+  const { plans, trialPlan } = usePricingConfig();
   const [step, setStep] = useState<'select' | 'activating' | 'success'>('select');
   const [selectedCycle, setSelectedCycle] = useState<PlanIntervalKey>('trial');
   const [loading, setLoading] = useState(false);
@@ -82,7 +84,7 @@ export default function SubscriptionModal({
     setError(null);
 
     const isTrial = selectedCycle === 'trial';
-    const activePlan = ALL_DISPLAY_PLANS.find((p) => p.id === selectedCycle) || TRIAL_PLAN;
+    const activePlan = plans.find((p) => p.id === selectedCycle) || trialPlan;
 
     // Free Trial path: activate directly without payment
     if (isTrial) {

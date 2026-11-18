@@ -8,6 +8,7 @@ export interface PlanPricing {
   id: PlanIntervalKey;
   planCode: string;
   name: string;
+  tabLabel?: string;
   price: number;
   currency: string;
   interval: string;
@@ -17,6 +18,9 @@ export interface PlanPricing {
   savingsBadge?: string;
   description: string;
   features: string[];
+  disclosureText?: string;
+  ctaLabel?: string;
+  extraInfo?: string;
   isTrial?: boolean;
 }
 
@@ -132,6 +136,9 @@ export const ALL_DISPLAY_PLANS: PlanPricing[] = [
  * Returns the plain disclosure text for the selected plan.
  */
 export function getTrialDisclosureText(plan: PlanPricing, baseDate = new Date()): string {
+  if (plan.disclosureText && plan.disclosureText.trim()) {
+    return plan.disclosureText.trim();
+  }
   if (plan.isTrial || plan.id === 'trial') {
     return 'Enjoy complete CrestFlow Pro access for 7 days. No payment method required. One free trial per account. No automatic payment deduction when the trial expires.';
   }

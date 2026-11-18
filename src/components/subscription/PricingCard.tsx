@@ -77,9 +77,17 @@ export const PricingCard: React.FC<PricingCardProps> = ({
       </div>
 
       <div>
+        {plan.extraInfo && (
+          <div className="mb-3 p-2.5 rounded bg-slate-100 dark:bg-slate-800 text-[11px] leading-relaxed text-slate-700 dark:text-slate-200">
+            {plan.extraInfo}
+          </div>
+        )}
+
         {/* Regulatory Disclosure */}
         <div className="mb-4 p-2.5 rounded bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 text-[11px] leading-relaxed text-slate-600 dark:text-slate-400">
-          {plan.isTrial ? (
+          {plan.disclosureText ? (
+            <span>{plan.disclosureText}</span>
+          ) : plan.isTrial ? (
             <span>{disclosureText}</span>
           ) : (
             <span>₹{plan.price.toLocaleString('en-IN')} charged today; renews every {plan.interval}. Cancel anytime.</span>
@@ -99,6 +107,8 @@ export const PricingCard: React.FC<PricingCardProps> = ({
         >
           {isLoading && isSelected
             ? 'Initializing...'
+            : plan.ctaLabel
+            ? plan.ctaLabel
             : plan.isTrial
             ? 'Start 7-Day Free Trial'
             : `Pay ₹${plan.price.toLocaleString('en-IN')} & Subscribe`}

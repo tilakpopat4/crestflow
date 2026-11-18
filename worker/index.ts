@@ -21,7 +21,7 @@ import { handleSeoRoutes } from './routes/seo';
 import { processDueEmailJobs } from './emailDispatcher';
 import { handleStaticAsset } from './staticHandler';
 import { handleCreateClient, handleCreateInvoice } from './routes/limits';
-import { handleAdminSettings } from './routes/adminSettings';
+import { handleAdminSettings, handleGetPricingConfig } from './routes/adminSettings';
 import { handleGetPublicProfile } from './routes/publicProfile';
 
 export default {
@@ -213,9 +213,12 @@ export default {
         return await handleCreateInvoice(request, env);
       }
 
-      // 19. POST /api/admin/settings (Trusted server path for system_settings & footer_config)
+      // 19. POST /api/admin/settings & GET /api/pricing-config
       if (url.pathname === '/api/admin/settings' && request.method === 'POST') {
         return await handleAdminSettings(request, env);
+      }
+      if (url.pathname === '/api/pricing-config' && request.method === 'GET') {
+        return await handleGetPricingConfig(env);
       }
 
       return jsonResponse({ error: 'Endpoint not found' }, 404);

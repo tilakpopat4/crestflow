@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { User } from 'firebase/auth';
 import { UserProfile } from '../../types';
-import { PRO_PLANS, TRIAL_PLAN, PlanPricing } from '../../lib/subscriptionPlans';
+import { PlanPricing } from '../../lib/subscriptionPlans';
+import { usePricingConfig } from '../../lib/pricingConfig';
 import { loadRazorpayScript } from '../../lib/razorpay';
 import { PricingCard } from './PricingCard';
 import { ActivatingPaymentModal } from './ActivatingPaymentModal';
-import { Check } from 'lucide-react';
 
 interface PricingPageProps {
   user?: User | null;
@@ -23,6 +23,7 @@ export default function PricingPage({
   onSubscriptionActivated,
   onNavigateToAuth,
 }: PricingPageProps) {
+  const { config: pricingConfig, trialPlan, proPlans } = usePricingConfig();
   const [selectedPlanId, setSelectedPlanId] = useState<string>('monthly');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -171,10 +172,10 @@ export default function PricingPage({
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-8">
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-2">
-            Simple, Transparent Pricing
+            {pricingConfig.pricingTitle}
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Start with our 100% free 7-day trial, or select an annual or monthly plan for uninterrupted workflow.
+            {pricingConfig.pricingSubtitle}
           </p>
         </div>
 
@@ -182,20 +183,31 @@ export default function PricingPage({
         <div className="max-w-2xl mx-auto mb-8 p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-bold text-slate-900 dark:text-slate-100 text-sm">Start 7-Day Free Trial</span>
-              <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800">100% Free</span>
+              <span className="font-bold text-slate-900 dark:text-slate-100 text-sm">{trialPlan.name}</span>
+              {trialPlan.savingsBadge && (
+                <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800">
+                  {trialPlan.savingsBadge}
+                </span>
+              )}
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Enjoy complete CrestFlow Pro access for 7 days. No payment method required. One free trial per account.
+              {trialPlan.description}
             </p>
+            {trialPlan.extraInfo && (
+              <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-1.5">
+                {trialPlan.extraInfo}
+              </p>
+            )}
           </div>
           <button
             type="button"
-            onClick={() => handleStartPlanCheckout(TRIAL_PLAN)}
+            onClick={() => handleStartPlanCheckout(trialPlan)}
             disabled={loading}
-            className="w-full sm:w-auto px-4 py-2 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition-colors cursor-pointer border-none disabled:opacity-50"
+            className="w-full sm:w-auto px-4 py-2 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition-colors cursor-pointer border-none disabled:opacity-50 shrink-0"
           >
-            {loading && selectedPlanId === 'trial' ? 'Activating...' : 'Start 7-Day Free Trial'}
+            {loading && selectedPlanId === 'trial'
+              ? 'Activating...'
+              : trialPlan.ctaLabel || 'Start 7-Day Free Trial'}
           </button>
         </div>
 
@@ -207,7 +219,7 @@ export default function PricingPage({
 
         {/* Pro Plans Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-          {PRO_PLANS.map((plan) => (
+          {proPlans.map((plan) => (
             <PricingCard
               key={plan.id}
               plan={plan}
@@ -222,10 +234,10 @@ export default function PricingPage({
         {/* Policy & Disclosure Note */}
         <div className="max-w-2xl mx-auto p-4 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 leading-relaxed text-center space-y-1">
           <p className="font-medium text-slate-700 dark:text-slate-300">
-            Subscription &amp; Trial Terms
+            {pricingConfig.termsTitle}
           </p>
           <p>
-            Enjoy a 7-day free trial with zero payment required. No automatic charge occurs upon trial expiration. Paid plans renew automatically per chosen billing cycle and can be cancelled anytime in your billing settings without losing remaining active days.
+            {pricingConfig.termsBody}
           </p>
         </div>
       </div>

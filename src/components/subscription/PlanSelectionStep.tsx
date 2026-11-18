@@ -2,7 +2,8 @@ import React from 'react';
 import { LogOut, Check } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import NumberFlow from '@number-flow/react';
-import { ALL_DISPLAY_PLANS, PlanIntervalKey, getTrialDisclosureText } from '../../lib/subscriptionPlans';
+import { PlanIntervalKey, getTrialDisclosureText } from '../../lib/subscriptionPlans';
+import { usePricingConfig } from '../../lib/pricingConfig';
 
 interface PlanSelectionStepProps {
   selectedCycle: PlanIntervalKey;
@@ -24,12 +25,11 @@ export const PlanSelectionStep: React.FC<PlanSelectionStepProps> = ({
   isTrialUsed = false,
 }) => {
   const shouldReduceMotion = useReducedMotion();
-  const activePlan = ALL_DISPLAY_PLANS.find((p) => p.id === selectedCycle) || ALL_DISPLAY_PLANS[0];
+  const { plans } = usePricingConfig();
+  const activePlan = plans.find((p) => p.id === selectedCycle) || plans[0];
   const isSelectedTrial = activePlan.id === 'trial';
 
-  const disclosureText = isSelectedTrial
-    ? getTrialDisclosureText(activePlan)
-    : `Billed at ₹${activePlan.price.toLocaleString('en-IN')} immediately upon payment. Renews automatically every ${activePlan.interval} until cancelled. Cancel anytime.`;
+  const disclosureText = getTrialDisclosureText(activePlan);
 
   return (
     <div className="space-y-4">
@@ -39,7 +39,7 @@ export const PlanSelectionStep: React.FC<PlanSelectionStepProps> = ({
         role="tablist"
         aria-label="Pro plan billing frequency"
       >
-        {ALL_DISPLAY_PLANS.map((p) => {
+        {plans.map((p) => {
           const isSelected = selectedCycle === p.id;
           const isTrial = p.id === 'trial';
           const isTrialDisabled = isTrial && isTrialUsed;
@@ -72,7 +72,7 @@ export const PlanSelectionStep: React.FC<PlanSelectionStepProps> = ({
                 />
               )}
               <div className="relative z-10 flex items-center justify-center gap-1">
-                <span>{p.name.replace('Pro ', '')}</span>
+                <span>{p.tabLabel || p.name.replace('Pro ', '')}</span>
                 {isTrial && isTrialUsed && (
                   <span className="text-[9px] px-1 py-0.2 rounded bg-slate-200 dark:bg-slate-700 text-slate-500 font-normal">
                     Used
@@ -145,6 +145,12 @@ export const PlanSelectionStep: React.FC<PlanSelectionStepProps> = ({
           </ul>
         </div>
 
+        {activePlan.extraInfo && (
+          <div className="p-2.5 rounded bg-slate-100 dark:bg-slate-800 text-[11px] leading-relaxed text-slate-700 dark:text-slate-200">
+            {activePlan.extraInfo}
+          </div>
+        )}
+
         {/* Mandatory Disclosure / Billing Terms */}
         <AnimatePresence mode="wait">
           <motion.div
@@ -186,8 +192,8 @@ export const PlanSelectionStep: React.FC<PlanSelectionStepProps> = ({
           {loading
             ? 'Initializing Checkout...'
             : isSelectedTrial
-            ? (isTrialUsed ? 'Trial Already Claimed' : 'Start 7-Day Free Trial')
-            : `Pay ₹${activePlan.price.toLocaleString('en-IN')} & Subscribe`}
+            ? (isTrialUsed ? 'Trial Already Claimed' : (activePlan.ctaLabel || 'Start 7-Day Free Trial'))
+            : (activePlan.ctaLabel || `Pay ₹${activePlan.price.toLocaleString('en-IN')} & Subscribe`)}
         </motion.button>
       </div>
     </div>
