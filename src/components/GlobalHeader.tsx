@@ -543,28 +543,36 @@ export default function GlobalHeader({
           <button
             type="button"
             onClick={onOpenSubscriptionModal}
-            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-colors duration-120 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer border-none bg-transparent shrink-0"
             title={
-              subscriptionState.isPaidActive
+              subscriptionState.isTrialing
+                ? `7-Day Free Trial active (${subscriptionState.daysRemaining} ${subscriptionState.daysRemaining === 1 ? 'day' : 'days'} remaining). Click to upgrade to Pro.`
+                : subscriptionState.isPaidActive
                 ? `CrestFlow Pro Active (${subscriptionState.daysRemaining} days remaining)`
                 : 'Subscription required (₹79/month). Click to activate.'
             }
           >
             <span
-              className={`w-1.5 h-1.5 rounded-full ${
-                subscriptionState.isPaidActive
+              className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                subscriptionState.isTrialing
+                  ? 'bg-indigo-500'
+                  : subscriptionState.isPaidActive
                   ? 'bg-slate-300'
                   : 'bg-red-500'
               }`}
             />
             <span
               className={
-                subscriptionState.isPaidActive
-                  ? 'text-slate-200 font-medium text-[13px]'
-                  : 'text-red-400 font-medium text-[13px]'
+                subscriptionState.isTrialing
+                  ? 'text-indigo-600 dark:text-indigo-400 font-medium text-[13px] whitespace-nowrap'
+                  : subscriptionState.isPaidActive
+                  ? 'text-slate-200 font-medium text-[13px] whitespace-nowrap'
+                  : 'text-red-400 font-medium text-[13px] whitespace-nowrap'
               }
             >
-              {subscriptionState.isPaidActive
+              {subscriptionState.isTrialing
+                ? `Trial • ${subscriptionState.daysRemaining} ${subscriptionState.daysRemaining === 1 ? 'day' : 'days'} left`
+                : subscriptionState.isPaidActive
                 ? `Pro • ${subscriptionState.daysRemaining}d`
                 : 'Subscribe • ₹79/mo'}
             </span>

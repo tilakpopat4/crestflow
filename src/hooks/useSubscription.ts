@@ -74,36 +74,36 @@ export function useSubscription(
     trialEndsAt: string | null;
     trialClaimed?: boolean;
   } | null>(null);
+  const [nowTick, setNowTick] = useState<number>(() => Date.now());
 
   // 1. Check VIP email whitelist
   useEffect(() => {
-    if (!userEmail) {
-      setIsWhitelisted(false);
-      return;
-    }
-    const normalized = userEmail.trim().toLowerCase();
-    if (normalized === 'tilakpopat2007@gmail.com') {
-      setIsWhitelisted(true);
-      return;
-    }
+    if (!userEmail) { setIsWhitelisted(false); return; }
+    if (userEmail.trim().toLowerCase() === 'tilakpopat2007@gmail.com') { setIsWhitelisted(true); return; }
     let isMounted = true;
-    checkIsWhitelisted(userEmail).then((whitelisted) => {
-      if (isMounted) setIsWhitelisted(whitelisted);
-    });
-    return () => {
-      isMounted = false;
-    };
+    checkIsWhitelisted(userEmail).then((whitelisted) => { if (isMounted) setIsWhitelisted(whitelisted); });
+    return () => { isMounted = false; };
   }, [userEmail]);
 
-  // 2. Compute access strictly from server accessUntil
+  // 2. Compute access strictly from server accessUntil (with live forward clock check)
   const computedState = useMemo(() => {
     return computeSubscriptionAccess({
       isSubscriptionFeatureEnabled,
       isWhitelisted,
       subscriptionDoc,
       serverMe,
+      clientNowMs: nowTick,
     });
-  }, [subscriptionDoc, serverMe, isWhitelisted, isSubscriptionFeatureEnabled]);
+  }, [subscriptionDoc, serverMe, isWhitelisted, isSubscriptionFeatureEnabled, nowTick]);
+
+  // Live expiration timer: locks workspace immediately when 7-day trial or subscription expires
+  useEffect(() => {
+    if (!computedState.hasAccess || !computedState.accessUntil || isWhitelisted) return;
+    const msLeft = new Date(computedState.accessUntil).getTime() - Date.now();
+    const delay = msLeft <= 0 ? 500 : Math.min(msLeft + 500, 60000);
+    const id = setTimeout(() => setNowTick(Date.now()), delay);
+    return () => clearTimeout(id);
+  }, [computedState.hasAccess, computedState.accessUntil, isWhitelisted, nowTick]);
 
   // 3. Fetch authoritative state from GET /api/me with immediate access propagation
   const fetchMe = useCallback(async () => {

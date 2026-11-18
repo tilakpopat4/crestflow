@@ -1,9 +1,16 @@
 import { describe, it, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { handleActivateTrial } from '../worker/routes/trial';
+import { computeSubscriptionAccess } from '../src/lib/subscriptionStateUtils';
 import { Env } from '../worker/types';
 import { createMockFetch, MockWebhookState, createMockIdToken } from './mockWebhookFetch';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const state: MockWebhookState = {
   processedEvents: new Set<string>(),
@@ -202,5 +209,53 @@ describe('POST /api/activate-trial Master Verification Suite', () => {
     assert.equal(res.status, 409);
     const data = await res.json() as any;
     assert.match(data.error, /already has an active subscription/i);
+  });
+
+  it('6. Trial countdown computes remaining days accurately and locks workspace immediately at 168h expiry', () => {
+    const startMs = Date.parse('2026-11-18T10:00:00Z');
+    const endIso = new Date(startMs + 7 * 24 * 60 * 60 * 1000).toISOString();
+    const trialDoc = {
+      userId: 'usr_trial_countdown',
+      plan: 'pro' as any,
+      billingCycle: 'trial' as any,
+      status: 'trialing' as const,
+      trialClaimed: true,
+      trialEndsAt: endIso,
+      accessUntil: endIso,
+      updatedAt: startMs,
+    };
+
+    // Day 0 -> 7 days remaining
+    const day0 = computeSubscriptionAccess({
+      isSubscriptionFeatureEnabled: true,
+      isWhitelisted: false,
+      subscriptionDoc: trialDoc,
+      serverMe: { serverNow: new Date(startMs).toISOString(), status: 'trialing', accessUntil: endIso, trialEndsAt: endIso, trialClaimed: true },
+      clientNowMs: startMs,
+    });
+    assert.equal(day0.isTrialing, true);
+    assert.equal(day0.hasAccess, true);
+    assert.equal(day0.daysRemaining, 7);
+
+    // After 7 days (168h + 1s) -> immediately locks workspace into TRIAL_EXPIRED
+    const after7DaysMs = startMs + 7 * 24 * 60 * 60 * 1000 + 1000;
+    const expired = computeSubscriptionAccess({
+      isSubscriptionFeatureEnabled: true,
+      isWhitelisted: false,
+      subscriptionDoc: trialDoc,
+      serverMe: { serverNow: new Date(startMs).toISOString(), status: 'trialing', accessUntil: endIso, trialEndsAt: endIso, trialClaimed: true },
+      clientNowMs: after7DaysMs,
+    });
+    assert.equal(expired.hasAccess, false);
+    assert.equal(expired.isTrialing, false);
+    assert.equal(expired.daysRemaining, 0);
+    assert.equal(expired.stateMachine, 'TRIAL_EXPIRED');
+    assert.equal(expired.isTrialEligible, false);
+  });
+
+  it('7. GlobalHeader renders remaining trial days when on 7-day free trial', () => {
+    const headerSrc = fs.readFileSync(path.resolve(__dirname, '../src/components/GlobalHeader.tsx'), 'utf8');
+    assert.match(headerSrc, /subscriptionState\.isTrialing/);
+    assert.match(headerSrc, /Trial • \$\{subscriptionState\.daysRemaining\}/);
   });
 });

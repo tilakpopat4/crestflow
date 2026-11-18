@@ -50,14 +50,16 @@ export default function SubscriptionWallPage({
       await subscriptionState.refreshSubscription();
       if (subscriptionState.hasAccess) { setIsVerifying(false); onNavigate?.('dashboard'); }
     }, 1200);
-    const timeout = setTimeout(() => { setIsVerifying(false); onNavigate?.('dashboard'); }, 4000);
+    const timeout = setTimeout(() => { setIsVerifying(false); }, 4500);
     return () => { clearInterval(interval); clearTimeout(timeout); };
   }, [isVerifying, subscriptionState, onNavigate]);
 
   const isTrialUsed = Boolean(
+    subscriptionState.trialClaimed || subData?.trialClaimed ||
     subData?.status === 'trialing' || subData?.trialEndsAt ||
     (subData?.hasHadTrial && subData?.status !== 'pending' && (subData?.trialEndsAt || subData?.currentPeriodEnd))
   );
+  const isTrialExpired = subscriptionState.stateMachine === 'TRIAL_EXPIRED' || (isTrialUsed && !subscriptionState.hasAccess);
 
   useEffect(() => {
     if (isTrialUsed && selectedCycle === 'trial') setSelectedCycle('monthly');
@@ -182,8 +184,10 @@ export default function SubscriptionWallPage({
 
       <div className="w-full max-w-3xl mx-auto py-8 sm:py-10 space-y-5">
         <div className="text-center space-y-2">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{pricingConfig.wallTitle}</h1>
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-xl mx-auto leading-relaxed">{pricingConfig.wallSubtitle}</p>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{isTrialExpired ? 'Your 7-Day Free Trial Has Ended' : pricingConfig.wallTitle}</h1>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-xl mx-auto leading-relaxed">
+            {isTrialExpired ? 'Your clients, deliverables, and invoices are safely preserved. Select a paid plan below to unlock your workspace.' : pricingConfig.wallSubtitle}
+          </p>
         </div>
 
         {error && <div className="p-3.5 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-xs text-red-600 dark:text-red-400 text-center">{error}</div>}
@@ -193,15 +197,13 @@ export default function SubscriptionWallPage({
             <RefreshCw className="w-8 h-8 text-indigo-400 animate-spin mx-auto" />
             <div className="space-y-1">
               <h3 className="text-base font-semibold text-slate-900 dark:text-white">{subscriptionState.hasAccess ? 'Subscription Active' : 'Activating Your Workspace...'}</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                {subscriptionState.hasAccess ? 'Access granted. Redirecting to your workspace dashboard...' : 'Verifying payment authorization and preparing your dashboard.'}
-              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{subscriptionState.hasAccess ? 'Access granted. Redirecting to your workspace dashboard...' : 'Verifying payment authorization and preparing your dashboard.'}</p>
             </div>
-            <div className="pt-1">
-              <button type="button" onClick={async () => { await subscriptionState.refreshSubscription(); setIsVerifying(false); onNavigate?.('dashboard'); }} className="px-5 py-2.5 bg-[#282828] hover:bg-[#383838] text-white text-xs font-semibold rounded-lg border-none cursor-pointer transition-colors">
+            {subscriptionState.hasAccess && (
+              <button type="button" onClick={() => onNavigate?.('dashboard')} className="px-5 py-2.5 bg-[#282828] hover:bg-[#383838] text-white text-xs font-semibold rounded-lg border-none cursor-pointer transition-colors">
                 Enter Workspace Now
               </button>
-            </div>
+            )}
           </div>
         ) : (
           <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 space-y-5 shadow-xs">

@@ -18,6 +18,7 @@ export interface ComputeStateParams {
   isSubscriptionFeatureEnabled: boolean;
   isWhitelisted: boolean;
   subscriptionDoc: SubscriptionDoc | null;
+  clientNowMs?: number;
   serverMe: {
     serverNow: string;
     status: string;
@@ -33,7 +34,7 @@ export function computeSubscriptionAccess(params: ComputeStateParams): Omit<
   'canCreateClient' | 'canCreateInvoice' | 'refreshSubscription' | 'cancelSubscription' |
   'activateFreeTrial' | 'checkAccess'
 > {
-  const { isSubscriptionFeatureEnabled, isWhitelisted, subscriptionDoc, serverMe } = params;
+  const { isSubscriptionFeatureEnabled, isWhitelisted, subscriptionDoc, serverMe, clientNowMs } = params;
 
   if (!isSubscriptionFeatureEnabled || isWhitelisted) {
     return {
@@ -59,7 +60,8 @@ export function computeSubscriptionAccess(params: ComputeStateParams): Omit<
     };
   }
 
-  const serverNowMs = serverMe?.serverNow ? new Date(serverMe.serverNow).getTime() : Date.now();
+  const rawServerNowMs = serverMe?.serverNow ? new Date(serverMe.serverNow).getTime() : Date.now();
+  const serverNowMs = Math.max(rawServerNowMs, clientNowMs || 0);
   const accessUntilStr = subscriptionDoc?.accessUntil || serverMe?.accessUntil;
   const trialEndsAtStr = subscriptionDoc?.trialEndsAt || serverMe?.trialEndsAt;
   const accessUntilMs = accessUntilStr ? new Date(accessUntilStr).getTime() : 0;
