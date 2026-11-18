@@ -426,16 +426,16 @@ export default function GoogleDriveUploadModal({
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                      <Loader2 size={14} className="animate-spin text-indigo-600" /> Uploading to Google Drive...
+                      <Loader2 size={14} className="animate-spin text-white" /> Uploading to Google Drive...
                     </span>
-                    <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                    <span className="font-mono font-bold text-white">
                       {uploadProgress}%
                     </span>
                   </div>
                   <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden">
                     <div
-                      className="bg-indigo-600 h-full rounded-full transition-all duration-300"
-                      style={{ width: `${uploadProgress}%` }}
+                      className="h-full rounded-full transition-all duration-300"
+                      style={{ width: `${uploadProgress}%`, backgroundColor: '#ffffff' }}
                     />
                   </div>
                 </div>
