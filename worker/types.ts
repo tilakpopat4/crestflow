@@ -49,6 +49,10 @@ export interface Env {
   GMAIL_CLIENT_SECRET?: string;
   GMAIL_REFRESH_TOKEN?: string;
   GMAIL_USER_EMAIL?: string;
+
+  // Optional dedicated Google Drive OAuth Client (falls back to GMAIL_CLIENT_ID/SECRET)
+  GOOGLE_DRIVE_CLIENT_ID?: string;
+  GOOGLE_DRIVE_CLIENT_SECRET?: string;
 }
 
 export interface TrialLedgerEntry {

@@ -1,6 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, UploadCloud, CheckCircle2, AlertCircle, Loader2, Video, File, ExternalLink, Copy, Check, Play, FolderPlus, KeyRound, Globe } from 'lucide-react';
-import { uploadFileToGoogleDrive, GoogleDriveUploadResult, getDriveAccessToken, acquireDriveAccessToken } from '../lib/driveService';
+import {
+  uploadFileToGoogleDrive,
+  GoogleDriveUploadResult,
+  hasPersistedDriveConnection,
+  checkDriveConnectionStatus,
+  fetchServerDriveToken,
+  acquireDriveAccessToken,
+  disconnectGoogleDrive,
+} from '../lib/driveService';
 import { Client, WorkItem } from '../types';
 import { generateUUID } from '../lib/utils';
 
@@ -33,11 +41,35 @@ export default function GoogleDriveUploadModal({
   const [copiedLink, setCopiedLink] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isAuthorizing, setIsAuthorizing] = useState(false);
-  const [hasConnectedDrive, setHasConnectedDrive] = useState(() => !!getDriveAccessToken());
+  const [isDisconnecting, setIsDisconnecting] = useState(false);
+  const [isCheckingConnection, setIsCheckingConnection] = useState(false);
+  const [hasConnectedDrive, setHasConnectedDrive] = useState(() => hasPersistedDriveConnection());
+  const [connectedEmail, setConnectedEmail] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setHasConnectedDrive(!!getDriveAccessToken());
+    if (!isOpen) return;
+    let cancelled = false;
+    const localConnected = hasPersistedDriveConnection();
+    setHasConnectedDrive(localConnected);
+    setIsCheckingConnection(!localConnected);
+
+    checkDriveConnectionStatus()
+      .then((status) => {
+        if (cancelled) return;
+        setHasConnectedDrive(status.connected);
+        setConnectedEmail(status.email);
+        if (status.connected) {
+          void fetchServerDriveToken(false);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setIsCheckingConnection(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -60,12 +92,26 @@ export default function GoogleDriveUploadModal({
     try {
       await acquireDriveAccessToken(true);
       setHasConnectedDrive(true);
+      const status = await checkDriveConnectionStatus();
+      setConnectedEmail(status.email);
       setError(null);
     } catch (err: any) {
       console.error(err);
       setError(err?.message || 'Failed to authorize Google Drive.');
     } finally {
       setIsAuthorizing(false);
+    }
+  };
+
+  const handleDisconnectDrive = async () => {
+    setIsDisconnecting(true);
+    setError(null);
+    try {
+      await disconnectGoogleDrive();
+      setHasConnectedDrive(false);
+      setConnectedEmail(null);
+    } finally {
+      setIsDisconnecting(false);
     }
   };
 
@@ -287,25 +333,45 @@ export default function GoogleDriveUploadModal({
           ) : null}
 
           {/* Connect Drive prompt if not connected */}
-          {!hasConnectedDrive && !uploadResult && !isPopupBlockedError && (
-            <div className="bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 p-3.5 rounded-2xl flex items-center justify-between gap-3">
+          {!isCheckingConnection && !hasConnectedDrive && !uploadResult && !isPopupBlockedError && (
+            <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 p-3.5 rounded-xl flex items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-blue-600/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                <div className="w-7 h-7 rounded-lg bg-slate-200/70 dark:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center shrink-0">
                   <KeyRound size={15} />
                 </div>
                 <div>
                   <div className="text-xs font-bold text-slate-800 dark:text-slate-200">Google Drive Permission</div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400">1-click authorization to upload deliverables directly</div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400">Connect once — stays linked across reloads and sessions</div>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={handleConnectDrive}
                 disabled={isAuthorizing}
-                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shrink-0 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium shrink-0 transition-colors duration-120 border-none flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 {isAuthorizing ? <Loader2 size={12} className="animate-spin" /> : <UploadCloud size={12} />}
                 <span>Connect</span>
+              </button>
+            </div>
+          )}
+
+          {/* Connected status strip with Disconnect option */}
+          {hasConnectedDrive && !uploadResult && !isPopupBlockedError && (
+            <div className="flex items-center justify-between gap-2 px-1 text-xs text-slate-600 dark:text-slate-400">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400 shrink-0" />
+                <span className="truncate">
+                  Google Drive connected{connectedEmail ? ` (${connectedEmail})` : ''}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleDisconnectDrive}
+                disabled={isDisconnecting || isUploading}
+                className="text-xs font-medium text-slate-500 hover:text-red-500 dark:text-slate-400 dark:hover:text-red-400 transition-colors duration-120 border-none bg-transparent shrink-0 cursor-pointer disabled:opacity-50"
+              >
+                {isDisconnecting ? 'Disconnecting...' : 'Disconnect'}
               </button>
             </div>
           )}

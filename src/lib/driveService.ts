@@ -1,27 +1,24 @@
-import { auth, googleProvider } from '../firebase';
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import {
+  setDriveAccessToken,
+  getDriveAccessToken,
+  hasPersistedDriveConnection,
+  checkDriveConnectionStatus,
+  fetchServerDriveToken,
+  acquireDriveAccessToken,
+  disconnectGoogleDrive,
+  DriveConnectionStatus,
+} from './driveAuth';
 
-const DRIVE_TOKEN_STORAGE_KEY = 'crestflow_drive_token';
-
-let cachedDriveAccessToken: string | null = (typeof window !== 'undefined' ? sessionStorage.getItem(DRIVE_TOKEN_STORAGE_KEY) : null);
-
-export function setDriveAccessToken(token: string | null) {
-  cachedDriveAccessToken = token;
-  if (typeof window !== 'undefined') {
-    if (token) {
-      sessionStorage.setItem(DRIVE_TOKEN_STORAGE_KEY, token);
-    } else {
-      sessionStorage.removeItem(DRIVE_TOKEN_STORAGE_KEY);
-    }
-  }
-}
-
-export function getDriveAccessToken(): string | null {
-  if (!cachedDriveAccessToken && typeof window !== 'undefined') {
-    cachedDriveAccessToken = sessionStorage.getItem(DRIVE_TOKEN_STORAGE_KEY);
-  }
-  return cachedDriveAccessToken;
-}
+export {
+  setDriveAccessToken,
+  getDriveAccessToken,
+  hasPersistedDriveConnection,
+  checkDriveConnectionStatus,
+  fetchServerDriveToken,
+  acquireDriveAccessToken,
+  disconnectGoogleDrive,
+};
+export type { DriveConnectionStatus };
 
 export interface GoogleDriveUploadResult {
   fileId: string;
@@ -40,15 +37,12 @@ export function extractDriveFileId(url: string | undefined | null): string | nul
   if (!url || typeof url !== 'string') return null;
   const trimmed = url.trim();
 
-  // Format 1: /file/d/FILE_ID/view or /preview or trailing slash
   const dMatch = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
   if (dMatch && dMatch[1]) return dMatch[1];
 
-  // Format 2: ?id=FILE_ID or &id=FILE_ID
   const idMatch = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
   if (idMatch && idMatch[1]) return idMatch[1];
 
-  // Format 3: /open?id=FILE_ID
   const openMatch = trimmed.match(/\/open\?id=([a-zA-Z0-9_-]+)/);
   if (openMatch && openMatch[1]) return openMatch[1];
 
@@ -68,117 +62,58 @@ export function isGoogleDriveUrl(url: string | undefined | null): boolean {
  */
 export function getDriveEmbedUrl(url: string | undefined | null): string | null {
   const fileId = extractDriveFileId(url);
-  if (fileId) {
-    return `https://drive.google.com/file/d/${fileId}/preview`;
-  }
-  return null;
+  return fileId ? `https://drive.google.com/file/d/${fileId}/preview` : null;
 }
 
 /**
  * Returns a high-resolution thumbnail image URL for a Google Drive file.
- * Defaults to 800px width for sharp playback previews.
  */
 export function getDriveThumbnailUrl(url: string | undefined | null, width = 800): string | null {
   const fileId = extractDriveFileId(url);
-  if (fileId) {
-    return `https://lh3.googleusercontent.com/d/${fileId}=w${width}`;
-  }
-  return null;
+  return fileId ? `https://lh3.googleusercontent.com/d/${fileId}=w${width}` : null;
 }
 
 /**
- * Ensures a valid Google Access Token with Drive file scopes is available.
- * Scope: https://www.googleapis.com/auth/drive.file (allows uploading & managing files created by this app)
+ * Initiates a Google Drive Resumable Upload session.
  */
-export async function acquireDriveAccessToken(forcePrompt = false): Promise<string> {
-  const existingToken = getDriveAccessToken();
-  if (existingToken && !forcePrompt) {
-    return existingToken;
-  }
+async function initiateResumableUpload(file: File, token: string): Promise<Response> {
+  const metadata = {
+    name: file.name,
+    mimeType: file.type || 'application/octet-stream',
+    description: 'Uploaded via CrestFlow Freelancer Portal',
+  };
 
-  try {
-    const driveProvider = new GoogleAuthProvider();
-    driveProvider.addScope('https://www.googleapis.com/auth/drive.file');
-    driveProvider.addScope('https://www.googleapis.com/auth/gmail.send');
-    driveProvider.addScope('https://www.googleapis.com/auth/gmail.compose');
-
-    const result = await signInWithPopup(auth, driveProvider);
-    const credential = GoogleAuthProvider.credentialFromResult(result);
-    const token = credential?.accessToken;
-
-    if (!token) {
-      throw new Error('Google OAuth sign-in did not return an access token for Google Drive. Please try again.');
+  return fetch(
+    'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id,name,mimeType,webViewLink',
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json; charset=UTF-8',
+        'X-Upload-Content-Type': file.type || 'application/octet-stream',
+        'X-Upload-Content-Length': String(file.size),
+      },
+      body: JSON.stringify(metadata),
     }
-
-    setDriveAccessToken(token);
-    return token;
-  } catch (err: any) {
-    console.error('Failed to acquire Drive token via OAuth popup:', err);
-    if (err?.code === 'auth/popup-blocked' || err?.message?.includes('popup')) {
-      const isIframe = typeof window !== 'undefined' && window.self !== window.top;
-      if (isIframe) {
-        throw new Error('Google OAuth popup was blocked because this app is running in an embedded preview iframe. Please open the app in a new browser tab to connect Google Drive.');
-      }
-      throw new Error('Google OAuth popup was blocked by your browser. Please allow popups for this site (look for the popup-blocked icon in your browser address bar) and try again.');
-    }
-    if (err?.code === 'auth/popup-closed-by-user' || err?.code === 'auth/cancelled-popup-request') {
-      throw new Error('Google sign-in popup was closed before completion. Please try again.');
-    }
-    throw err;
-  }
+  );
 }
 
 /**
  * Uploads a file directly to Google Drive using the Resumable Upload API.
- * Automatically makes the file readable by anyone with the link so clients can view the embedded preview.
+ * Silently refreshes expired tokens on 401 before falling back to interactive authorization.
  */
 export async function uploadFileToGoogleDrive(
   file: File,
   onProgress?: (percent: number) => void
 ): Promise<GoogleDriveUploadResult> {
-  let token = cachedDriveAccessToken;
-  if (!token) {
-    token = await acquireDriveAccessToken();
-  }
+  let token = await acquireDriveAccessToken();
+  let initResponse = await initiateResumableUpload(file, token);
 
-  // 1. Initiate Resumable Upload Session
-  const metadata = {
-    name: file.name,
-    mimeType: file.type || 'application/octet-stream',
-    description: 'Uploaded via CrestFlow Freelancer Portal'
-  };
-
-  let initResponse = await fetch(
-    'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id,name,mimeType,webViewLink',
-    {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json; charset=UTF-8',
-        'X-Upload-Content-Type': file.type || 'application/octet-stream',
-        'X-Upload-Content-Length': String(file.size)
-      },
-      body: JSON.stringify(metadata)
-    }
-  );
-
-  // If token expired (401 Unauthorized), re-authenticate and retry once
   if (initResponse.status === 401) {
-    console.warn('Google Drive token expired. Re-authorizing...');
-    token = await acquireDriveAccessToken(true);
-    initResponse = await fetch(
-      'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id,name,mimeType,webViewLink',
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json; charset=UTF-8',
-          'X-Upload-Content-Type': file.type || 'application/octet-stream',
-          'X-Upload-Content-Length': String(file.size)
-        },
-        body: JSON.stringify(metadata)
-      }
-    );
+    console.warn('Google Drive token expired. Refreshing silently...');
+    const silentRefreshed = await fetchServerDriveToken(true);
+    token = silentRefreshed || (await acquireDriveAccessToken(true));
+    initResponse = await initiateResumableUpload(file, token);
   }
 
   if (!initResponse.ok) {
@@ -200,7 +135,6 @@ export async function uploadFileToGoogleDrive(
     throw new Error('Google Drive API did not return an upload Location URL.');
   }
 
-  // 2. Upload file binary data with XMLHttpRequest for real-time progress tracking
   const uploadedFile = await new Promise<{ id: string; name: string; mimeType: string }>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open('PUT', uploadUrl);
@@ -219,7 +153,7 @@ export async function uploadFileToGoogleDrive(
           const res = JSON.parse(xhr.responseText);
           if (onProgress) onProgress(100);
           resolve(res);
-        } catch (e) {
+        } catch {
           reject(new Error('Failed to parse Google Drive upload response'));
         }
       } else {
@@ -236,18 +170,14 @@ export async function uploadFileToGoogleDrive(
 
   const fileId = uploadedFile.id;
 
-  // 3. Set file permission to 'anyoneWithLink' so clients can view the embedded link
   try {
     await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}/permissions`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        role: 'reader',
-        type: 'anyone'
-      })
+      body: JSON.stringify({ role: 'reader', type: 'anyone' }),
     });
   } catch (permErr) {
     console.warn('Could not set public permissions on uploaded Drive file:', permErr);
@@ -260,6 +190,6 @@ export async function uploadFileToGoogleDrive(
     webViewLink: `https://drive.google.com/file/d/${fileId}/view?usp=sharing`,
     embedUrl: `https://drive.google.com/file/d/${fileId}/preview`,
     directDownloadUrl: `https://drive.google.com/uc?export=download&id=${fileId}`,
-    thumbnailUrl: `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`
+    thumbnailUrl: `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`,
   };
 }

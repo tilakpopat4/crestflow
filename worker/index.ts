@@ -24,6 +24,7 @@ import { handleCreateClient, handleCreateInvoice } from './routes/limits';
 import { handleAdminSettings, handleGetPricingConfig } from './routes/adminSettings';
 import { handleGetPublicProfile } from './routes/publicProfile';
 import { handleDeleteAccount } from './routes/account';
+import { handleDriveRoutes } from './routes/drive';
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -225,6 +226,12 @@ export default {
       // 20. POST /api/delete-account (Authenticated complete account & workspace deletion)
       if (url.pathname === '/api/delete-account' && request.method === 'POST') {
         return await handleDeleteAccount(request, env);
+      }
+
+      // 21. /api/drive/* (Persistent Google Drive OAuth connection & silent token refresh)
+      if (url.pathname.startsWith('/api/drive/')) {
+        const driveRes = await handleDriveRoutes(request, url, env);
+        if (driveRes) return driveRes;
       }
 
       return jsonResponse({ error: 'Endpoint not found' }, 404);
