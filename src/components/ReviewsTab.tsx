@@ -11,8 +11,8 @@ interface ReviewsTabProps {
 }
 
 export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
-  const { data: clients, loading: clientsLoading } = useFirestore<Client>('clients', user.uid);
-  const { data: reviews, loading: reviewsLoading, removeItem: deleteReview } = useFirestore<ClientReview>('reviews', user.uid);
+  const { data: clients, loading: clientsLoading } = useFirestore<Client>('clients', user?.uid);
+  const { data: reviews, loading: reviewsLoading, removeItem: deleteReview } = useFirestore<ClientReview>('reviews', user?.uid);
 
   const [selectedClientId, setSelectedClientId] = useState('');
   const [copiedClientId, setCopiedClientId] = useState<string | null>(null);

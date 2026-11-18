@@ -35,7 +35,8 @@ export const ProfileDangerSection: React.FC<ProfileDangerSectionProps> = ({ user
 
   const handleConfirmDelete = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isConfirmed || isDeleting) return;
+    const uid = user?.uid;
+    if (!isConfirmed || isDeleting || !uid) return;
 
     setIsDeleting(true);
     setError(null);
@@ -58,8 +59,8 @@ export const ProfileDangerSection: React.FC<ProfileDangerSectionProps> = ({ user
 
       // Clear local user caches before signing out
       try {
-        localStorage.removeItem(`crestflow_sub_${user.uid}`);
-        localStorage.removeItem(`crestflow_onboarded_${user.uid}`);
+        localStorage.removeItem(`crestflow_sub_${uid}`);
+        localStorage.removeItem(`crestflow_onboarded_${uid}`);
         localStorage.removeItem('crestflow_is_blocked');
       } catch {}
 

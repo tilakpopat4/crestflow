@@ -4,6 +4,7 @@ import { AlertTriangle, RefreshCw } from 'lucide-react';
 interface Props {
   children: ReactNode;
   fallbackTitle?: string;
+  resetKey?: string | null;
   onReset?: () => void;
 }
 
@@ -46,6 +47,12 @@ export default class ErrorBoundary extends Component<Props, State> {
         sessionStorage.setItem(reloadKey, now.toString());
         window.location.reload();
       }
+    }
+  }
+
+  public componentDidUpdate(prevProps: Props) {
+    if (this.state.hasError && prevProps.resetKey !== this.props.resetKey) {
+      this.setState({ hasError: false, error: null });
     }
   }
 
@@ -94,30 +101,23 @@ export default class ErrorBoundary extends Component<Props, State> {
 
       return (
         <div className="min-h-[320px] flex items-center justify-center p-6 text-slate-900 dark:text-slate-100">
-          <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm text-center space-y-4">
-            <div className="w-12 h-12 bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 rounded-xl flex items-center justify-center mx-auto">
-              <AlertTriangle size={22} />
+          <div className="max-w-md w-full bg-white dark:bg-[#181818] border border-slate-200 dark:border-[#2b2b2b] rounded-xl p-6 shadow-sm text-center space-y-4">
+            <div className="w-11 h-11 bg-slate-100 dark:bg-[#282828] text-red-600 dark:text-red-400 rounded-lg flex items-center justify-center mx-auto">
+              <AlertTriangle size={20} />
             </div>
             <div className="space-y-1">
               <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                {this.props.fallbackTitle || 'Something went wrong rendering this view'}
+                {this.props.fallbackTitle || 'Something went wrong'}
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                An unexpected display error occurred. Your saved data is secure in the database.
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                We ran into a temporary display issue. Your workspace data is safe and unaffected.
               </p>
             </div>
-            {this.state.error?.message && (
-              <div className="bg-slate-50 dark:bg-slate-800/60 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 text-left">
-                <p className="text-[11px] font-mono text-slate-600 dark:text-slate-400 break-words">
-                  {this.state.error.message}
-                </p>
-              </div>
-            )}
             <div className="flex items-center justify-center gap-2 pt-2">
               <button
                 type="button"
                 onClick={this.handleReset}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium transition-colors duration-120 cursor-pointer border-none"
               >
                 <RefreshCw size={13} />
                 Try Again
@@ -125,7 +125,7 @@ export default class ErrorBoundary extends Component<Props, State> {
               <button
                 type="button"
                 onClick={() => window.location.reload()}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-[#282828] dark:hover:bg-[#333333] text-slate-700 dark:text-slate-200 rounded-lg text-xs font-medium transition-colors duration-120 cursor-pointer border-none"
               >
                 Reload App
               </button>

@@ -81,7 +81,10 @@ export const AppRouterView: React.FC<AppRouterViewProps> = ({
   return (
     <div className="flex-1 overflow-y-auto overflow-x-hidden relative flex flex-col">
       <div className="flex-1 flex flex-col">
-        <ErrorBoundary fallbackTitle="Unable to display this view">
+        <ErrorBoundary
+          fallbackTitle="Unable to display this view"
+          resetKey={`${currentRoute}-${user?.uid || 'guest'}`}
+        >
           <Suspense fallback={getRouteSkeleton(currentRoute)}>
             <AnimatePresence mode="wait" initial={false}>
               <motion.div

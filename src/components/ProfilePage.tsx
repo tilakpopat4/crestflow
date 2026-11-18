@@ -203,6 +203,7 @@ export default function ProfilePage({
     document.getElementById(`section-${id}`)?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  if (!user?.uid) return null;
   if (!profile && !user.displayName) return <ProfileSkeleton />;
 
   return (

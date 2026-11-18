@@ -23,7 +23,7 @@ export const BlockedUserScreen: React.FC<BlockedUserScreenProps> = ({ user, onLo
         </div>
         <div className="bg-slate-900/50 rounded-xl p-4 text-xs text-slate-500 leading-relaxed text-left border border-slate-700/50">
           <span className="font-semibold text-slate-400">Account details:</span>
-          <div className="mt-1 font-mono break-all text-slate-400">UID: {user.uid}</div>
+          <div className="mt-1 font-mono break-all text-slate-400">UID: {user?.uid || 'Unknown'}</div>
           <div className="font-mono mt-0.5 text-slate-400">Email: {user.email}</div>
         </div>
         <div className="pt-2">

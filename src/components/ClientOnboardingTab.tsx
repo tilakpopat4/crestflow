@@ -37,11 +37,11 @@ export default function ClientOnboardingTab({
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('pending');
 
   const { data: serviceRequests, loading, addOrUpdateItem: updateServiceRequest } =
-    useFirestore<ServiceRequest>('serviceRequests', user.uid);
+    useFirestore<ServiceRequest>('serviceRequests', user?.uid);
   const { addOrUpdateItem: saveClient } =
-    useFirestore<Client>('clients', user.uid);
+    useFirestore<Client>('clients', user?.uid);
   const { data: workItems } =
-    useFirestore<WorkItem>('workItems', user.uid);
+    useFirestore<WorkItem>('workItems', user?.uid);
 
   const hasUsername = useMemo(() => hasConfiguredUsername(profile), [profile]);
   const handle = useMemo(() => (hasUsername ? profile!.username! : getUserHandle(profile, user)), [hasUsername, profile, user]);

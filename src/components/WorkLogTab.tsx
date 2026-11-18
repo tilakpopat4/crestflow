@@ -22,9 +22,9 @@ interface WorkLogTabProps {
 }
 
 export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients }: WorkLogTabProps) {
-  const { data: clients, loading: clientsLoading } = useFirestore<Client>('clients', user.uid);
-  const { data: workItems, loading: workLoading, addOrUpdateItem, removeItem } = useFirestore<WorkItem>('workItems', user.uid);
-  const { data: invoices, loading: invoicesLoading, addOrUpdateItem: addOrUpdateInvoice, removeItem: removeInvoice } = useFirestore<any>('invoices', user.uid);
+  const { data: clients, loading: clientsLoading } = useFirestore<Client>('clients', user?.uid);
+  const { data: workItems, loading: workLoading, addOrUpdateItem, removeItem } = useFirestore<WorkItem>('workItems', user?.uid);
+  const { data: invoices, loading: invoicesLoading, addOrUpdateItem: addOrUpdateInvoice, removeItem: removeInvoice } = useFirestore<any>('invoices', user?.uid);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDriveModalOpen, setIsDriveModalOpen] = useState(false);

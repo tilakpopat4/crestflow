@@ -107,33 +107,35 @@ export function useSubscription(
 
   // 3. Fetch authoritative state from GET /api/me with immediate access propagation
   const fetchMe = useCallback(async () => {
-    if (!auth.currentUser) return;
+    const currentUser = auth.currentUser;
+    const uid = currentUser?.uid;
+    if (!currentUser || !uid) return;
     try {
-      const token = await auth.currentUser.getIdToken();
+      const token = await currentUser.getIdToken();
       const res = await fetch('/api/me', {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (res.ok) {
-        const data = await res.json();
-        setServerMe(data);
-        if (data.accessUntil && new Date(data.accessUntil).getTime() > Date.now()) {
-          setSubscriptionDoc((prev) => {
-            if (prev && prev.accessUntil === data.accessUntil && prev.status === data.status) return prev;
-            const updated: SubscriptionDoc = {
-              userId: auth.currentUser!.uid,
-              plan: data.plan || 'pro',
-              billingCycle: data.billingCycle || 'monthly',
-              status: (data.status as any) || 'active',
-              accessUntil: data.accessUntil,
-              trialEndsAt: data.trialEndsAt,
-              updatedAt: Date.now(),
-            };
-            try {
-              localStorage.setItem(`crestflow_sub_${auth.currentUser!.uid}`, JSON.stringify(updated));
-            } catch {}
-            return updated;
-          });
-        }
+      if (!res.ok || auth.currentUser?.uid !== uid) return;
+      const data = await res.json();
+      if (auth.currentUser?.uid !== uid) return;
+      setServerMe(data);
+      if (data.accessUntil && new Date(data.accessUntil).getTime() > Date.now()) {
+        setSubscriptionDoc((prev) => {
+          if (prev && prev.accessUntil === data.accessUntil && prev.status === data.status) return prev;
+          const updated: SubscriptionDoc = {
+            userId: uid,
+            plan: data.plan || 'pro',
+            billingCycle: data.billingCycle || 'monthly',
+            status: (data.status as any) || 'active',
+            accessUntil: data.accessUntil,
+            trialEndsAt: data.trialEndsAt,
+            updatedAt: Date.now(),
+          };
+          try {
+            localStorage.setItem(`crestflow_sub_${uid}`, JSON.stringify(updated));
+          } catch {}
+          return updated;
+        });
       }
     } catch (err) {
       console.warn('[useSubscription] Failed to fetch /api/me:', err);
@@ -163,6 +165,7 @@ export function useSubscription(
   useEffect(() => {
     if (!userId) {
       setSubscriptionDoc(null);
+      setServerMe(null);
       setLoading(false);
       return;
     }
@@ -227,20 +230,20 @@ export function useSubscription(
   }, [refreshSubscription]);
 
   const activateFreeTrial = useCallback(async (): Promise<{ success: boolean; error?: string }> => {
-    if (!auth.currentUser) return { success: false, error: 'Not authenticated' };
+    const currentUser = auth.currentUser;
+    const uid = currentUser?.uid;
+    if (!currentUser || !uid) return { success: false, error: 'Not authenticated' };
     try {
-      const token = await auth.currentUser.getIdToken();
+      const token = await currentUser.getIdToken();
       const res = await fetch('/api/activate-trial', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        return { success: false, error: data.error || 'Failed to activate free trial.' };
-      }
+      if (!res.ok) return { success: false, error: data.error || 'Failed to activate free trial.' };
       if (data.accessUntil) {
         const updated: SubscriptionDoc = {
-          userId: auth.currentUser.uid,
+          userId: uid,
           plan: 'pro',
           billingCycle: 'trial',
           status: 'trialing',
@@ -251,9 +254,7 @@ export function useSubscription(
           updatedAt: Date.now(),
         };
         setSubscriptionDoc(updated);
-        try {
-          localStorage.setItem(`crestflow_sub_${auth.currentUser.uid}`, JSON.stringify(updated));
-        } catch {}
+        try { localStorage.setItem(`crestflow_sub_${uid}`, JSON.stringify(updated)); } catch {}
       }
       await refreshSubscription();
       return { success: true };
