@@ -340,14 +340,14 @@ export default function GoogleDriveUploadModal({
                   href={uploadResult.webViewLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold text-center transition-colors flex items-center justify-center gap-1.5"
+                  className="flex-1 py-2 bg-[#282828] hover:bg-[#333333] text-slate-200 hover:text-white rounded-lg text-xs font-medium text-center transition-colors duration-120 border-none flex items-center justify-center gap-1.5"
                 >
                   <ExternalLink size={13} /> Open in Drive
                 </a>
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+                  className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium transition-colors duration-120 border-none cursor-pointer"
                 >
                   Done
                 </button>
