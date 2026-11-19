@@ -86,7 +86,7 @@ export const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
                     aria-selected={a.selected}
                     data-range={a.range}
                     data-edge={a.edge}
-                    className="group p-0 first:rounded-l-lg last:rounded-r-lg aria-selected:bg-slate-100 data-[range=end]:rounded-r-lg data-[range=preview]:bg-slate-100 data-[range=single]:rounded-lg data-[range=start]:rounded-l-lg dark:aria-selected:bg-slate-800 dark:data-[range=preview]:bg-slate-800"
+                    className="group p-0 first:rounded-l-lg last:rounded-r-lg aria-selected:bg-[#282828] data-[range=end]:rounded-r-lg data-[range=preview]:bg-[#282828] data-[range=single]:rounded-lg data-[range=start]:rounded-l-lg"
                   >
                     <button
                       type="button"
@@ -97,7 +97,7 @@ export const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
                       onClick={() => !a.disabled && onPickDay(c.day)}
                       onFocus={() => onFocusDay(c.day)}
                       onPointerEnter={(e) => onHoverDay(e, c.day, a.disabled)}
-                      className="relative flex h-9 sm:h-10 w-full cursor-pointer items-center justify-center rounded-lg text-xs sm:text-sm text-slate-900 tabular-nums transition-[background-color] duration-120 group-data-edge:bg-slate-900 group-data-edge:text-white hover:bg-slate-100 group-data-edge:hover:bg-slate-800 group-data-[range=middle]:hover:bg-slate-200 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-950 aria-disabled:cursor-not-allowed aria-disabled:text-slate-400 aria-disabled:hover:bg-transparent aria-[current=date]:font-semibold aria-[current=date]:after:absolute aria-[current=date]:after:bottom-1.5 aria-[current=date]:after:left-1/2 aria-[current=date]:after:size-1 aria-[current=date]:after:-translate-x-1/2 aria-[current=date]:after:rounded-full aria-[current=date]:after:bg-current motion-reduce:transition-none dark:text-slate-100 dark:group-data-edge:bg-slate-100 dark:group-data-edge:text-slate-950 dark:hover:bg-slate-800 dark:group-data-edge:hover:bg-slate-200 dark:group-data-[range=middle]:hover:bg-slate-700 dark:focus-visible:outline-slate-100 dark:aria-disabled:text-slate-600 dark:aria-disabled:hover:bg-transparent"
+                      className="relative flex h-9 sm:h-10 w-full cursor-pointer items-center justify-center rounded-lg text-xs sm:text-sm text-[#f1f1f1] tabular-nums transition-[background-color] duration-120 group-data-edge:bg-[#4870aa] group-data-edge:text-white hover:bg-[#383838] group-data-edge:hover:bg-[#3b5e90] group-data-[range=middle]:hover:bg-[#404040] focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4870aa] aria-disabled:cursor-not-allowed aria-disabled:text-[#717171] aria-disabled:hover:bg-transparent aria-[current=date]:font-semibold aria-[current=date]:after:absolute aria-[current=date]:after:bottom-1.5 aria-[current=date]:after:left-1/2 aria-[current=date]:after:size-1 aria-[current=date]:after:-translate-x-1/2 aria-[current=date]:after:rounded-full aria-[current=date]:after:bg-current motion-reduce:transition-none"
                     >
                       {a.text}
                     </button>

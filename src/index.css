@@ -275,6 +275,25 @@ button.hover\:bg-white:hover,
   color: #f1f1f1 !important;
 }
 
+/* Ensure calendar selected dates, edge dates, and slate-900 buttons never render with white backgrounds */
+button.bg-slate-900,
+[role="button"].bg-slate-900,
+button.bg-slate-950,
+[role="button"].bg-slate-950,
+td[data-edge] button,
+[data-edge] > button,
+.group[data-edge] button {
+  background-color: #4870aa !important;
+  color: #ffffff !important;
+}
+
+td[data-edge] button:hover,
+[data-edge] > button:hover,
+.group[data-edge] button:hover {
+  background-color: #3b5e90 !important;
+  color: #ffffff !important;
+}
+
 /* Universal Button & Interactive Element Hover & Active Feedback per GEMINI.md & /animate */
 button:not(:disabled),
 [role="button"]:not([aria-disabled="true"]) {
