@@ -87,7 +87,7 @@ d:\crestflow\
 │   │   ├── DashboardTab.tsx       # Main executive analytics & KPIs
 │   │   ├── GlobalHeader.tsx       # Top search, worked days badge & theme toggle
 │   │   ├── InvoiceTab.tsx         # Invoicing engine, PDF renderer & revenue bar
-│   │   ├── ProfileModal.tsx       # Freelancer settings & career start date
+│   │   ├── ProfilePage.tsx        # Freelancer settings & career start date
 │   │   ├── PublicFreelancerProfile.tsx # Shareable portfolio
 │   │   ├── ReviewsTab.tsx         # Client reviews & ratings
 │   │   ├── Sidebar.tsx            # Navigation rail
