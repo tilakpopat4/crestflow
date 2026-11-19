@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { X, Upload, FileType, CheckCircle2, AlertTriangle, Loader2 } from 'lucide-react';
 import { Client, Invoice, WorkItem } from '../types';
@@ -34,7 +35,7 @@ export default function CsvImportModal({ isOpen, onClose, userId, onImportSucces
       complete: async (results) => {
         try {
           const data = results.data as string[][];
-          
+
           let client: Client | null = null;
           const workItems: WorkItem[] = [];
           const invoices: Invoice[] = [];
@@ -71,7 +72,7 @@ export default function CsvImportModal({ isOpen, onClose, userId, onImportSucces
               const phone = row[2];
               const email = row[3] !== 'N/A' ? row[3] : '';
               const defaultRate = parseInt(row[4], 10) || 0;
-              
+
               if (name) {
                 client = {
                   id,
@@ -86,7 +87,7 @@ export default function CsvImportModal({ isOpen, onClose, userId, onImportSucces
               // Format: Log ID | Date | Sub-Client | Description | Quantity | Rate (₹) | Total | Status | Video Link
               const logId = row[0] || generateUUID();
               const dateParts = (row[1] || '').split('-');
-              const dateTimestamp = dateParts.length === 3 
+              const dateTimestamp = dateParts.length === 3
                 ? new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`).getTime()
                 : Date.now();
 
@@ -95,7 +96,7 @@ export default function CsvImportModal({ isOpen, onClose, userId, onImportSucces
               const rate = parseInt(row[5], 10) || 0;
               const status = row[7] === 'Invoiced' ? 'Invoiced' : 'Uninvoiced';
               const videoUrl = row[8] || '';
-              
+
               if (description) {
                 workItems.push({
                   id: logId,
@@ -113,7 +114,7 @@ export default function CsvImportModal({ isOpen, onClose, userId, onImportSucces
               // Format: Invoice ID | Date | Status | Items/Reels Count | Total Amount (₹)
               const invId = row[0] || generateUUID();
               const dateParts = (row[1] || '').split('-');
-              const dateTimestamp = dateParts.length === 3 
+              const dateTimestamp = dateParts.length === 3
                 ? new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`).getTime()
                 : Date.now();
               const status = row[2] === 'Paid' ? 'Paid' : 'Pending';
@@ -139,7 +140,7 @@ export default function CsvImportModal({ isOpen, onClose, userId, onImportSucces
 
           // Batch Write to Firestore
           const batch = writeBatch(db);
-          
+
           const clientRef = doc(db, 'clients', client.id);
           batch.set(clientRef, sanitizePayload({ ...client, userId }));
 
@@ -176,60 +177,60 @@ export default function CsvImportModal({ isOpen, onClose, userId, onImportSucces
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-[9999] p-4">
-      <div className="bg-white dark:bg-slate-800 rounded-xl max-w-md w-full shadow-xl overflow-hidden border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-200">
-        <div className="flex justify-between items-center p-5 border-b border-slate-100 dark:border-slate-700">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <FileType size={20} className="text-indigo-600 dark:text-indigo-400" />
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center z-[9999] p-4 select-none">
+      <div className="bg-surface-700 rounded-xl max-w-md w-full shadow-2xl overflow-hidden border border-surface-400 text-text-primary animate-in fade-in zoom-in-95 duration-150">
+        <div className="flex justify-between items-center p-5 border-b border-surface-400/80">
+          <h3 className="text-base sm:text-lg font-bold text-text-primary flex items-center gap-2">
+            <FileType size={18} className="text-accent" />
             Import Client Report
           </h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer" disabled={isImporting}>
-            <X size={20} />
+          <button onClick={onClose} className="text-text-muted hover:text-text-primary transition-colors cursor-pointer border-0 bg-transparent" disabled={isImporting}>
+            <X size={18} />
           </button>
         </div>
 
         <div className="p-6 space-y-4">
-          <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+          <p className="text-xs text-text-secondary leading-relaxed">
             Upload a CSV report generated from this app to restore the client, their work history, and invoice records.
           </p>
 
           {error && (
-            <div className="p-3 bg-[#181818] text-red-400 border border-red-600/40 text-xs font-medium rounded-xl flex items-start gap-2">
+            <div className="p-3 bg-surface-800 text-accent border border-accent/40 text-xs font-medium rounded-lg flex items-start gap-2">
               <AlertTriangle size={16} className="shrink-0 mt-0.5" />
               {error}
             </div>
           )}
 
           {successMsg && (
-            <div className="p-3 bg-slate-50 dark:bg-slate-900/60 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-800 text-xs font-medium rounded-xl flex items-start gap-2">
-              <CheckCircle2 size={16} className="text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
+            <div className="p-3 bg-surface-800 text-text-primary border border-surface-400 text-xs font-medium rounded-lg flex items-start gap-2">
+              <CheckCircle2 size={16} className="text-accent shrink-0 mt-0.5" />
               {successMsg}
             </div>
           )}
 
           <label className="block">
-            <div className={`border-2 border-dashed rounded-2xl p-8 text-center transition-colors cursor-pointer
-              ${isImporting ? 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 opacity-75 cursor-not-allowed' : 'border-indigo-200 dark:border-indigo-800/80 bg-indigo-50/50 dark:bg-indigo-950/30 hover:bg-indigo-50 dark:hover:bg-indigo-950/50'}`}
+            <div className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer
+              ${isImporting ? 'border-surface-400 bg-surface-800 opacity-75 cursor-not-allowed' : 'border-surface-400 bg-surface-800 hover:border-surface-300'}`}
             >
               {isImporting ? (
                 <div className="flex flex-col items-center gap-3">
-                  <Loader2 size={32} className="text-indigo-600 dark:text-indigo-400 animate-spin" />
-                  <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Processing file...</span>
+                  <Loader2 size={28} className="text-accent animate-spin" />
+                  <span className="text-xs font-semibold text-text-secondary">Processing file...</span>
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-3">
-                  <div className="w-12 h-12 bg-white dark:bg-slate-700 rounded-full shadow-sm flex items-center justify-center">
-                    <Upload size={20} className="text-indigo-600 dark:text-indigo-400" />
+                  <div className="w-11 h-11 bg-surface-700 border border-surface-400 rounded-xl shadow-xs flex items-center justify-center">
+                    <Upload size={18} className="text-accent" />
                   </div>
                   <div>
-                    <span className="text-sm font-bold text-slate-900 dark:text-slate-100 block">Click to upload CSV</span>
-                    <span className="text-xs text-slate-500 dark:text-slate-400">Must be a Client Work History export</span>
+                    <span className="text-xs font-bold text-text-primary block">Click to upload CSV</span>
+                    <span className="text-[11px] text-text-muted">Must be a Client Work History export</span>
                   </div>
                 </div>
               )}
             </div>
-            <input 
-              type="file" 
+            <input
+              type="file"
               accept=".csv"
               className="hidden"
               onChange={handleFileUpload}

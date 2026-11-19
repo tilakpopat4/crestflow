@@ -158,17 +158,17 @@ export default function RevenueComparisonChart({
               fill="none"
               strokeDasharray="3 4"
               vectorEffect="non-scaling-stroke"
-              className="stroke-slate-100 dark:stroke-slate-700/60"
+              className="stroke-surface-500"
             />
             <path
               d="M0 200H600"
               fill="none"
               vectorEffect="non-scaling-stroke"
-              className="stroke-slate-200 dark:stroke-slate-700"
+              className="stroke-surface-400"
             />
             <path
               d={`${line('now')} L${x(months.length - 1)} 200 L${x(0)} 200 Z`}
-              className="fill-white/10 group-data-off-now/plot:hidden"
+              className="fill-text-primary/10 group-data-off-now/plot:hidden"
             />
             <path
               d={line('prev')}
@@ -176,7 +176,7 @@ export default function RevenueComparisonChart({
               strokeWidth="1.5"
               strokeDasharray="4 4"
               vectorEffect="non-scaling-stroke"
-              className="stroke-white/70 group-data-off-prev/plot:hidden"
+              className="stroke-text-secondary group-data-off-prev/plot:hidden"
             />
             <path
               d={line('now')}
@@ -185,7 +185,7 @@ export default function RevenueComparisonChart({
               strokeLinecap="round"
               strokeLinejoin="round"
               vectorEffect="non-scaling-stroke"
-              className="stroke-white group-data-off-now/plot:hidden"
+              className="stroke-text-primary group-data-off-now/plot:hidden"
             />
           </svg>
 
@@ -199,7 +199,7 @@ export default function RevenueComparisonChart({
               cy={yAt(last.now)}
               r="4.5"
               strokeWidth="2"
-              className="fill-white stroke-[#282828]"
+              className="fill-text-primary stroke-[#282828]"
             />
             <text
               x={left(months.length - 1)}
@@ -207,7 +207,7 @@ export default function RevenueComparisonChart({
               dx="-10"
               dy="-10"
               textAnchor="end"
-              className="fill-slate-900 text-xs font-semibold tabular-nums group-has-[[data-active]]/plot:opacity-0 dark:fill-slate-100"
+              className="fill-text-primary text-xs font-semibold font-mono tabular-nums group-has-[[data-active]]/plot:opacity-0"
             >
               {formatCompact(last.now)}
             </text>
@@ -245,7 +245,7 @@ export default function RevenueComparisonChart({
         {/* X-Axis Month Abbreviations dynamically distributed */}
         <div
           aria-hidden="true"
-          className="mt-2.5 flex text-[11px] font-medium text-slate-400 dark:text-slate-500 tabular-nums"
+          className="mt-2.5 flex text-[11px] font-medium text-text-muted font-mono tabular-nums"
         >
           {months.map((p, i) => (
             <span
@@ -261,8 +261,8 @@ export default function RevenueComparisonChart({
       </div>
 
       {/* Footer & Toggle Table Button */}
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-slate-100 dark:border-slate-700/60 pt-3">
-        <p className="text-xs text-slate-400 dark:text-slate-500">
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-surface-500 pt-3">
+        <p className="text-xs text-text-muted">
           CrestFlow &middot; Paid invoices, net of refunds &middot; Updated {new Date().toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}
         </p>
 
@@ -270,9 +270,9 @@ export default function RevenueComparisonChart({
           type="button"
           aria-expanded={tableOpen}
           onClick={() => setTableOpen(!tableOpen)}
-          className="inline-flex h-7 items-center gap-1.5 rounded-lg px-2 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60 border-0 cursor-pointer transition-colors duration-120"
+          className="inline-flex h-7 items-center gap-1.5 rounded-lg px-2 text-xs font-medium text-text-secondary hover:text-text-primary hover:bg-surface-600 border border-transparent hover:border-surface-400 cursor-pointer transition-colors duration-150"
         >
-          <svg className="size-3.5 text-slate-500 dark:text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+          <svg className="size-3.5 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
             <path d="M3 9h18" />
             <path d="M9 3v18" />
             <rect x="3" y="3" width="18" height="18" rx="2" />

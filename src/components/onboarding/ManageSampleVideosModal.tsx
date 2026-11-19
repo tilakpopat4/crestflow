@@ -3,6 +3,7 @@ import { X, Plus, Trash2, Video, ListPlus } from 'lucide-react';
 import { SampleWorkItem, WorkItem } from '../../types';
 import AddSampleVideoForm from './AddSampleVideoForm';
 import WorkLogVideoPicker from './WorkLogVideoPicker';
+import { Button } from '../ui/Button';
 
 interface ManageSampleVideosModalProps {
   isOpen: boolean;
@@ -12,6 +13,11 @@ interface ManageSampleVideosModalProps {
   onSaveSamples: (newSamples: SampleWorkItem[]) => Promise<void>;
 }
 
+/**
+ * ManageSampleVideosModal Component
+ * Modal dialog for curating public sample video deliverables from Drive.
+ * Designed with blurred backdrop and surface-700 container (no white background).
+ */
 export default function ManageSampleVideosModal({
   isOpen,
   onClose,
@@ -57,23 +63,23 @@ export default function ManageSampleVideosModal({
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-6 cursor-pointer"
+      className="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-6 cursor-pointer select-none"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 rounded-xl shadow-xl max-w-2xl w-full overflow-hidden cursor-default flex flex-col max-h-[90vh]"
+        className="bg-surface-700 border border-surface-400 text-text-primary rounded-xl shadow-2xl max-w-2xl w-full overflow-hidden cursor-default flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-150"
       >
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3">
+        <div className="p-4 sm:p-5 border-b border-surface-400/80 flex items-center justify-between gap-3 bg-surface-700">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-surface-800 border border-surface-400 text-accent flex items-center justify-center shrink-0">
               <Video size={18} />
             </div>
             <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-white">
+              <h2 className="text-base font-bold text-text-primary">
                 Manage Sample Videos Library
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-text-secondary">
                 Connected to Google Drive for your public onboarding page.
               </p>
             </div>
@@ -81,7 +87,7 @@ export default function ManageSampleVideosModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-md cursor-pointer border-0"
+            className="p-1.5 text-text-secondary hover:text-text-primary hover:bg-surface-600 rounded-md cursor-pointer border-0 transition-colors"
           >
             <X size={18} />
           </button>
@@ -90,35 +96,39 @@ export default function ManageSampleVideosModal({
         {/* Content Body */}
         <div className="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1">
           {error && (
-            <div className="p-3 text-xs bg-[#181818] text-red-400 border border-red-600/40 rounded-lg">
+            <div className="p-3 text-xs bg-surface-800 text-accent border border-accent/40 rounded-lg">
               {error}
             </div>
           )}
 
           {/* Action Row */}
           <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <span className="text-xs font-semibold text-text-secondary">
               Selected Samples ({items.length})
             </span>
             <div className="flex items-center gap-2">
               {candidateWorkItems.length > 0 && (
-                <button
+                <Button
                   type="button"
+                  variant="secondary"
+                  size="sm"
                   onClick={() => setShowWorkLogPicker(!showWorkLogPicker)}
-                  className="px-2.5 py-1 text-xs text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-md border-0 cursor-pointer inline-flex items-center gap-1.5"
+                  className="text-xs h-8"
                 >
                   <ListPlus size={13} />
                   {showWorkLogPicker ? 'Hide Work Log' : 'Pick from Work Log'}
-                </button>
+                </Button>
               )}
-              <button
+              <Button
                 type="button"
+                variant="secondary"
+                size="sm"
                 onClick={() => setIsAdding(!isAdding)}
-                className="px-2.5 py-1 text-xs text-white bg-[#282828] hover:bg-[#1a1a1a] rounded-md border-0 cursor-pointer inline-flex items-center gap-1.5"
+                className="text-xs h-8"
               >
                 <Plus size={13} />
                 Add Google Drive Link
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -140,27 +150,27 @@ export default function ManageSampleVideosModal({
           {/* Current Samples List */}
           <div className="space-y-2">
             {items.length === 0 ? (
-              <p className="text-xs text-slate-400 italic text-center py-4">
+              <p className="text-xs text-text-muted italic text-center py-4">
                 No sample videos added yet. Click &quot;Add Google Drive Link&quot; or pick from completed work items.
               </p>
             ) : (
               items.map((sample) => (
                 <div
                   key={sample.id}
-                  className="flex items-center justify-between gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30"
+                  className="flex items-center justify-between gap-3 p-3 rounded-lg border border-surface-400 bg-surface-800"
                 >
                   <div className="min-w-0 flex-1 space-y-0.5">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+                      <span className="text-xs font-bold text-text-primary truncate">
                         {sample.title}
                       </span>
                       {sample.category && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-700 border border-surface-400 text-text-secondary">
                           {sample.category}
                         </span>
                       )}
                     </div>
-                    <p className="text-[11px] text-slate-400 font-mono truncate">
+                    <p className="text-[11px] text-text-muted font-mono truncate">
                       {sample.videoUrl}
                     </p>
                   </div>
@@ -168,7 +178,7 @@ export default function ManageSampleVideosModal({
                   <button
                     type="button"
                     onClick={() => handleRemove(sample.id)}
-                    className="p-1.5 text-slate-400 hover:text-red-500 rounded cursor-pointer border-0"
+                    className="p-1.5 text-text-muted hover:text-accent rounded cursor-pointer border-0 transition-colors"
                     title="Remove sample"
                   >
                     <Trash2 size={14} />
@@ -180,22 +190,26 @@ export default function ManageSampleVideosModal({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2 bg-slate-50/50 dark:bg-slate-800/30">
-          <button
+        <div className="p-4 border-t border-surface-400/80 flex items-center justify-end gap-2 bg-surface-700">
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
             onClick={onClose}
-            className="px-3.5 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg border-0 cursor-pointer"
+            className="text-xs"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="primary"
+            size="sm"
             disabled={isSaving}
             onClick={handleSave}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg border-0 cursor-pointer"
+            className="text-xs font-semibold"
           >
             {isSaving ? 'Saving...' : 'Save Sample Library'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

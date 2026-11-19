@@ -2,12 +2,17 @@ import React, { useState } from 'react';
 import { isGoogleDriveUrl, extractDriveFileId } from '../../lib/driveService';
 import { generateUUID } from '../../lib/utils';
 import { SampleWorkItem } from '../../types';
+import { Button } from '../ui/Button';
 
 interface AddSampleVideoFormProps {
   onAdd: (item: SampleWorkItem) => void;
   onCancel: () => void;
 }
 
+/**
+ * AddSampleVideoForm Component
+ * Form to input Google Drive video URL and metadata for public showcase.
+ */
 export const AddSampleVideoForm: React.FC<AddSampleVideoFormProps> = ({ onAdd, onCancel }) => {
   const [title, setTitle] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
@@ -47,42 +52,42 @@ export const AddSampleVideoForm: React.FC<AddSampleVideoFormProps> = ({ onAdd, o
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-3.5 bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 rounded-lg space-y-3 text-xs">
+    <form onSubmit={handleSubmit} className="p-3.5 bg-surface-800 border border-surface-400 rounded-lg space-y-3 text-xs">
       {formError && (
-        <p className="text-red-500 font-medium">{formError}</p>
+        <p className="text-accent font-medium">{formError}</p>
       )}
 
       <div>
-        <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Video Title</label>
+        <label className="block font-semibold text-text-secondary mb-1">Video Title</label>
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="e.g. Nike Brand Campaign Edit"
-          className="w-full px-2.5 py-1.5 border border-slate-300 dark:border-slate-700 rounded bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
+          className="w-full px-2.5 py-1.5 border border-surface-400 rounded bg-surface-700 text-text-primary placeholder:text-text-muted focus:border-surface-300 outline-none"
           required
         />
       </div>
 
       <div>
-        <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Google Drive Video URL</label>
+        <label className="block font-semibold text-text-secondary mb-1">Google Drive Video URL</label>
         <input
           type="url"
           value={videoUrl}
           onChange={(e) => setVideoUrl(e.target.value)}
           placeholder="https://drive.google.com/file/d/.../view"
-          className="w-full px-2.5 py-1.5 border border-slate-300 dark:border-slate-700 rounded bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-mono text-[11px]"
+          className="w-full px-2.5 py-1.5 border border-surface-400 rounded bg-surface-700 text-text-primary placeholder:text-text-muted font-mono text-[11px] focus:border-surface-300 outline-none"
           required
         />
       </div>
 
       <div className="grid grid-cols-2 gap-2">
         <div>
-          <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Category / Tag</label>
+          <label className="block font-semibold text-text-secondary mb-1">Category / Tag</label>
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="w-full px-2.5 py-1.5 border border-slate-300 dark:border-slate-700 rounded bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
+            className="w-full px-2.5 py-1.5 border border-surface-400 rounded bg-surface-700 text-text-primary focus:border-surface-300 outline-none cursor-pointer"
           >
             <option value="Reels">Reels / Shorts</option>
             <option value="Commercial">Commercial / Ad</option>
@@ -93,31 +98,35 @@ export const AddSampleVideoForm: React.FC<AddSampleVideoFormProps> = ({ onAdd, o
           </select>
         </div>
         <div>
-          <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Description (Optional)</label>
+          <label className="block font-semibold text-text-secondary mb-1">Description (Optional)</label>
           <input
             type="text"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Short highlight note"
-            className="w-full px-2.5 py-1.5 border border-slate-300 dark:border-slate-700 rounded bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
+            className="w-full px-2.5 py-1.5 border border-surface-400 rounded bg-surface-700 text-text-primary placeholder:text-text-muted focus:border-surface-300 outline-none"
           />
         </div>
       </div>
 
       <div className="flex justify-end gap-2 pt-1">
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="sm"
           onClick={onCancel}
-          className="px-3 py-1.5 bg-transparent text-slate-600 dark:text-slate-400 hover:underline border-0 cursor-pointer"
+          className="text-xs"
         >
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
-          className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded border-0 cursor-pointer"
+          variant="primary"
+          size="sm"
+          className="text-xs"
         >
           Add Video
-        </button>
+        </Button>
       </div>
     </form>
   );

@@ -2,14 +2,21 @@ import React, { useState } from 'react';
 import { User } from 'firebase/auth';
 import { Client, ClientReview, UserProfile } from '../types';
 import { useFirestore } from '../hooks/useFirestore';
-import { Star, MessageSquare, Copy, Check, Mail, Trash2, Search, ArrowUpRight, Share2, Sparkles, Filter } from 'lucide-react';
 import { ReviewsSkeleton } from './skeletons';
+import { ReviewsStatsCard } from './reviews/ReviewsStatsCard';
+import { ReviewRequestCard } from './reviews/ReviewRequestCard';
+import { ReviewsToolbar } from './reviews/ReviewsToolbar';
+import { ReviewsGrid } from './reviews/ReviewsGrid';
 
 interface ReviewsTabProps {
   user: User;
   profile: UserProfile | null;
 }
 
+/**
+ * ReviewsTab Component
+ * Client reviews and testimonials management view.
+ */
 export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
   const { data: clients, loading: clientsLoading } = useFirestore<Client>('clients', user?.uid);
   const { data: reviews, loading: reviewsLoading, removeItem: deleteReview } = useFirestore<ClientReview>('reviews', user?.uid);
@@ -18,16 +25,15 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
   const [copiedClientId, setCopiedClientId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [ratingFilter, setRatingFilter] = useState<number | 'all'>('all');
-  const [reviewToDelete, setReviewToDelete] = useState<string | null>(null);
 
-  // Calculate statistics
+  // Calculate statistics with tabular numbers
   const totalReviews = reviews.length;
   const averageRating = totalReviews > 0
     ? Number((reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews).toFixed(1))
     : 0;
 
   const ratingCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-  reviews.forEach(r => {
+  reviews.forEach((r) => {
     const rating = Math.min(5, Math.max(1, r.rating)) as 5 | 4 | 3 | 2 | 1;
     ratingCounts[rating] = (ratingCounts[rating] || 0) + 1;
   });
@@ -58,19 +64,17 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
 
   // Filter reviews
   const filteredReviews = reviews
-    .filter(r => {
-      const matchQuery = 
+    .filter((r) => {
+      const matchQuery =
         r.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (r.projectName && r.projectName.toLowerCase().includes(searchQuery.toLowerCase())) ||
         r.feedbackText.toLowerCase().includes(searchQuery.toLowerCase());
-      
+
       const matchRating = ratingFilter === 'all' || r.rating === ratingFilter;
-      
+
       return matchQuery && matchRating;
     })
     .sort((a, b) => b.createdAt - a.createdAt);
-
-  const selectedClient = clients.find(c => c.id === selectedClientId);
 
   if (clientsLoading && reviewsLoading && reviews.length === 0) {
     return <ReviewsSkeleton />;
@@ -78,302 +82,50 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 w-full min-w-0 pb-24 md:pb-8">
-      
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
+      {/* Workspace Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-surface-400 pb-5">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Client Reviews</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">Gather testimonials, view ratings, and build client trust.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">
+            Client Reviews
+          </h1>
+          <p className="text-text-secondary mt-1 text-sm">
+            Gather testimonials, view ratings, and build client trust.
+          </p>
         </div>
       </div>
 
-      {/* Stats and Generator Row */}
+      {/* Stats and Request Generator Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Left/Middle: Testimonials Stats Card */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xs p-6 flex flex-col md:flex-row lg:col-span-2 items-stretch gap-6 md:gap-8">
-          
-          {/* Average Rating Widget */}
-          <div className="flex flex-col items-center justify-center text-center p-4 md:border-r border-slate-100 dark:border-slate-700 md:pr-8 min-w-[150px]">
-            <span className="text-6xl font-extrabold text-white leading-none">{averageRating || '0.0'}</span>
-            
-            {/* Stars */}
-            <div className="flex gap-0.5 mt-3 mb-1">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Star
-                  key={star}
-                  className={`w-5 h-5 ${
-                    star <= Math.round(averageRating) 
-                      ? 'text-amber-500 fill-amber-400' 
-                      : 'text-slate-600 fill-none'
-                  }`}
-                />
-              ))}
-            </div>
-            
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider mt-1">
-              {totalReviews} {totalReviews === 1 ? 'Review' : 'Reviews'}
-            </span>
-          </div>
-
-          {/* Rating Breakdown Progress Bars */}
-          <div className="flex-1 flex flex-col justify-center space-y-2">
-            {[5, 4, 3, 2, 1].map((rating) => {
-              const count = ratingCounts[rating as 5|4|3|2|1] || 0;
-              const percent = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
-              return (
-                <div key={rating} className="flex items-center text-xs gap-3">
-                  <span className="w-3 font-semibold text-slate-300">{rating}</span>
-                  <Star className="w-3 h-3 text-amber-500 fill-amber-400 flex-shrink-0" />
-                  <div className="flex-1 bg-[#3a3a3a] h-2 rounded-full overflow-hidden">
-                    <div 
-                      className="bg-amber-400 h-full rounded-full transition-all duration-500" 
-                      style={{ width: `${percent}%` }}
-                    ></div>
-                  </div>
-                  <span className="w-8 text-right text-slate-400 font-medium">{count}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Right: Review Request Link Generator */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xs p-6 flex flex-col justify-between">
-          <div className="space-y-4">
-            <h3 className="font-bold text-slate-800 dark:text-slate-100 text-sm flex items-center gap-1.5">
-              <Share2 className="w-4 h-4 text-indigo-500" /> Request a Review
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              Generate a personalized review submission link to send directly to your clients.
-            </p>
-            
-            <div className="space-y-2">
-              <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Select Client</label>
-              <select
-                value={selectedClientId}
-                onChange={(e) => setSelectedClientId(e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 outline-none transition-all focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 font-medium"
-              >
-                <option value="">-- Choose an active client --</option>
-                {clients.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="pt-5 flex items-center gap-3">
-            {selectedClient ? (
-              <>
-                <button
-                  onClick={() => handleCopyLink(selectedClient)}
-                  className="flex-1 flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
-                >
-                  {copiedClientId === selectedClient.id ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 text-slate-200" />
-                      <span className="text-slate-200 font-medium">Link Copied</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3.5 h-3.5" />
-                      <span>Copy Link</span>
-                    </>
-                  )}
-                </button>
-                <button
-                  onClick={() => handleEmailRequest(selectedClient)}
-                  className="flex-1 flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer shadow-xs"
-                >
-                  <Mail className="w-3.5 h-3.5" />
-                  <span>Email Client</span>
-                </button>
-              </>
-            ) : (
-              <div className="w-full text-center text-[11px] text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-900/50 border border-dashed border-slate-200 dark:border-slate-700 py-3.5 rounded-xl font-medium">
-                Select a client to generate invite link
-              </div>
-            )}
-          </div>
-        </div>
-
+        <ReviewsStatsCard
+          averageRating={averageRating}
+          totalReviews={totalReviews}
+          ratingCounts={ratingCounts}
+        />
+        <ReviewRequestCard
+          clients={clients}
+          selectedClientId={selectedClientId}
+          onSelectClient={setSelectedClientId}
+          copiedClientId={copiedClientId}
+          onCopyLink={handleCopyLink}
+          onEmailClient={handleEmailRequest}
+        />
       </div>
 
       {/* Review List Filter & Search Toolbar */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xs p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        
-        {/* Search Input */}
-        <div className="relative flex-1 max-w-lg">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by client, project, or review content..."
-            className="w-full border border-slate-200 dark:border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none transition-all focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900"
-          />
-        </div>
-
-        {/* Star Rating Filter */}
-        <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto pb-1 sm:pb-0 scrollbar-none w-full md:w-auto shrink-0">
-          <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-sm font-semibold shrink-0">
-            <Filter className="w-3.5 h-3.5 shrink-0" /> Filter:
-          </div>
-          <div className="flex items-center gap-1 shrink-0 min-w-max">
-            <button
-              onClick={() => setRatingFilter('all')}
-              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 border border-transparent ${
-                ratingFilter === 'all'
-                  ? 'bg-[#404040] text-white border-[#555555]'
-                  : 'bg-[#1e1e1e] text-slate-300 hover:bg-[#2e2e2e]'
-              }`}
-            >
-              All Ratings
-            </button>
-            {[5, 4, 3, 2, 1].map((r) => (
-              <button
-                key={r}
-                onClick={() => setRatingFilter(r)}
-                className={`flex items-center gap-0.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 border border-transparent ${
-                  ratingFilter === r
-                    ? 'bg-[#404040] text-white border-[#555555]'
-                    : 'bg-[#1e1e1e] text-slate-300 hover:bg-[#2e2e2e]'
-                }`}
-              >
-                {r} <Star className="w-3 h-3 fill-current shrink-0 text-amber-400" />
-              </button>
-            ))}
-          </div>
-        </div>
-
-      </div>
+      <ReviewsToolbar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        ratingFilter={ratingFilter}
+        onRatingFilterChange={setRatingFilter}
+      />
 
       {/* Reviews Content Grid */}
-      {filteredReviews.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {filteredReviews.map((review) => (
-            <div 
-              key={review.id} 
-              className="bg-white dark:bg-slate-800 rounded-xl shadow-xs p-6 flex flex-col justify-between hover:shadow-md transition-all duration-200 relative group animate-in fade-in"
-            >
-              
-              {/* Delete button (always visible on mobile touch, hover on desktop) */}
-              <button
-                onClick={() => setReviewToDelete(review.id)}
-                className="absolute right-4 top-4 text-slate-400 hover:text-red-500 hover:bg-[#333333] p-1.5 rounded-lg transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 cursor-pointer"
-                title="Delete testimonial"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-
-              <div className="space-y-4">
-                {/* Stars and Project Title */}
-                <div className="flex items-start justify-between">
-                  <div className="flex gap-0.5">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        className={`w-4 h-4 ${
-                          star <= review.rating 
-                            ? 'text-amber-500 fill-amber-400' 
-                            : 'text-slate-200 dark:text-slate-700'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-xs text-slate-400 dark:text-slate-500 font-medium font-mono">
-                    {new Date(review.createdAt).toLocaleDateString('en-IN', {
-                      day: '2-digit',
-                      month: 'short',
-                      year: 'numeric'
-                    })}
-                  </span>
-                </div>
-
-                {/* Review Text */}
-                <div className="space-y-2">
-                  <p className="text-white text-sm sm:text-base leading-relaxed italic font-medium">
-                    "{review.feedbackText}"
-                  </p>
-                  
-                  {review.projectName && (
-                    <p className="text-xs text-slate-400 font-medium">
-                      Project: {review.projectName}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Client Info Footer */}
-              <div className="pt-4 border-t border-slate-700 mt-4 flex items-center justify-between">
-                <div className="flex flex-col">
-                  <span className="text-base font-bold text-white leading-snug">{review.clientName}</span>
-                  <span className="text-xs text-slate-400 font-medium">Verified Testimonial</span>
-                </div>
-                <div className="w-8 h-8 rounded-full bg-[#383838] flex items-center justify-center text-xs font-bold text-slate-200">
-                  {review.clientName.charAt(0)}
-                </div>
-              </div>
-
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xs py-16 px-6 text-center space-y-4 max-w-lg mx-auto">
-          <div className="w-12 h-12 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-700 text-slate-400 dark:text-slate-500 flex items-center justify-center mx-auto shadow-xs">
-            <MessageSquare className="w-6 h-6" />
-          </div>
-          <div className="space-y-1">
-            <h3 className="font-bold text-slate-800 dark:text-slate-100 text-base">No Testimonials Found</h3>
-            <p className="text-slate-500 dark:text-slate-400 text-xs md:text-sm leading-relaxed">
-              {searchQuery || ratingFilter !== 'all'
-                ? "Try adjusting your search queries or filters."
-                : "You haven't received any client feedback yet. Use the share button above to request reviews from active clients!"}
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      {reviewToDelete && (
-        <div 
-          onClick={() => setReviewToDelete(null)}
-          className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 cursor-pointer"
-        >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl max-w-sm w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200 cursor-default"
-          >
-            <div className="space-y-2">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Delete Review?</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                Are you sure you want to delete this testimonial? This action cannot be undone.
-              </p>
-            </div>
-            <div className="flex items-center justify-end gap-3 pt-2">
-              <button
-                onClick={() => setReviewToDelete(null)}
-                className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  if (reviewToDelete) {
-                    deleteReview(reviewToDelete);
-                    setReviewToDelete(null);
-                  }
-                }}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold transition-colors shadow-xs cursor-pointer"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
+      <ReviewsGrid
+        reviews={filteredReviews}
+        searchQuery={searchQuery}
+        ratingFilter={ratingFilter}
+        onDeleteReview={deleteReview}
+      />
     </div>
   );
 }

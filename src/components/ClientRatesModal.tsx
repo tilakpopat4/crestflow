@@ -119,26 +119,26 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto cursor-pointer"
+      className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto cursor-pointer select-none"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xl max-w-lg w-full p-5 sm:p-6 space-y-5 cursor-default max-h-[90vh] overflow-y-auto"
+        className="bg-surface-700 rounded-xl border border-surface-400 text-text-primary shadow-2xl max-w-lg w-full p-5 sm:p-6 space-y-5 cursor-default max-h-[90vh] overflow-y-auto"
       >
         {/* Header - Clean typography without decorative icons */}
-        <div className="flex justify-between items-start border-b border-slate-100 dark:border-slate-800 pb-3.5">
+        <div className="flex justify-between items-start border-b border-surface-400/80 pb-3.5">
           <div>
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight">
+            <h3 className="text-base sm:text-lg font-bold text-text-primary tracking-tight">
               Edit Rates &amp; Pricing
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Update billing rates for <strong className="text-slate-700 dark:text-slate-200">{client.name}</strong>
+            <p className="text-xs text-text-secondary mt-0.5">
+              Update billing rates for <strong className="text-text-primary">{client.name}</strong>
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-lg border-0 bg-transparent cursor-pointer transition-colors duration-120"
+            className="text-text-muted hover:text-text-primary p-1.5 rounded-lg border-0 bg-transparent cursor-pointer transition-colors"
             title="Close"
           >
             <X size={18} />
@@ -271,7 +271,7 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
 
           {/* Revisions Included */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <label className="block text-xs font-semibold text-text-secondary">
               Revisions Included per Deliverable (Optional)
             </label>
             <input
@@ -280,25 +280,25 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
               step="1"
               value={revisionsIncluded}
               onChange={(e) => setRevisionsIncluded(e.target.value)}
-              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-3.5 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 outline-none transition-colors focus:border-indigo-600"
+              className="w-full bg-surface-800 border border-surface-400 rounded-lg px-3.5 py-2 text-xs text-text-primary placeholder:text-text-muted outline-none transition-colors focus:border-surface-300"
               placeholder="e.g. 2 (leave blank for unlimited)"
             />
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-end gap-2.5 pt-3.5 border-t border-[#333333]">
+          <div className="flex justify-end gap-2.5 pt-3.5 border-t border-surface-400/80">
             <button
               type="button"
               onClick={onClose}
               disabled={isSaving}
-              className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white bg-[#242424] hover:bg-[#1f1f1f] rounded-lg cursor-pointer border-0 transition-colors duration-120"
+              className="px-4 py-2 text-xs font-semibold text-text-secondary hover:text-text-primary hover:bg-surface-600 rounded-lg cursor-pointer border-0 transition-colors bg-transparent"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSaving}
-              className="bg-[#1f1f1f] hover:bg-[#181818] disabled:opacity-50 text-white px-5 py-2 rounded-lg text-xs font-semibold transition-colors duration-120 border-0 cursor-pointer shadow-xs"
+              className="bg-accent hover:bg-accent-hover disabled:opacity-50 text-white px-5 py-2 rounded-lg text-xs font-semibold transition-colors border-0 cursor-pointer shadow-xs"
             >
               <span>{isSaving ? 'Saving…' : 'Save Rates'}</span>
             </button>

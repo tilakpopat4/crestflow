@@ -36,25 +36,50 @@ export const RevenueChartHeader: React.FC<RevenueChartHeaderProps> = ({
   const seriesButtonLabel =
     monthsCount === 12 ? 'Last 12 months' : `Last ${monthsCount} month${monthsCount === 1 ? '' : 's'}`;
 
+  // Formulate natural headline across all possible states
+  let headline = '';
+  if (totalNow === 0 && totalPrev === 0) {
+    headline = 'No revenue or invoices recorded yet';
+  } else if (totalPrev === 0) {
+    headline = `Collected ${formatCurrency(totalNow)}`;
+  } else if (totalNow === 0) {
+    headline = `Collected ₹0 of ${formatCurrency(totalPrev)} ${comparisonLabel} (0% collected)`;
+  } else if (overallChange === 0) {
+    headline = `Collected ${formatCurrency(totalNow)} of ${formatCurrency(totalPrev)} ${comparisonLabel} (100% matched)`;
+  } else if (overallChange > 0) {
+    headline = `Collected ${formatCurrency(totalNow)} of ${formatCurrency(totalPrev)} ${comparisonLabel} (+${overallChange.toFixed(0)}% ahead)`;
+  } else {
+    headline = `Collected ${formatCurrency(totalNow)} of ${formatCurrency(totalPrev)} ${comparisonLabel} (${Math.abs(overallChange).toFixed(0)}% behind)`;
+  }
+
   return (
     <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3 mb-6">
       <div className="max-w-xl min-w-0">
-        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+        <p className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider">
           Net revenue by month, INR
         </p>
         <h3
           id={`chart-title-${chartId}`}
-          className="mt-1 text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100"
+          className="mt-1 text-base sm:text-lg font-semibold text-text-primary tracking-tight"
         >
-          {overallChange >= 0
-            ? `Revenue is ${overallChange.toFixed(0)}% ahead of ${comparisonLabel}`
-            : `Revenue is ${Math.abs(overallChange).toFixed(0)}% behind ${comparisonLabel}`}
+          {headline}
         </h3>
-        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-          <span className="font-semibold text-slate-900 dark:text-slate-100 tabular-nums">
+        <p className="mt-1 text-xs text-text-secondary leading-relaxed">
+          <span className="font-semibold font-mono tabular-nums text-text-primary">
             {formatCurrency(totalNow)}
           </span>{' '}
-          {periodDescription} against {formatCurrency(totalPrev)} in {comparisonLabel}.
+          {periodDescription}
+          {totalPrev > 0 ? (
+            <>
+              {' '}against{' '}
+              <span className="font-semibold font-mono tabular-nums text-text-primary">
+                {formatCurrency(totalPrev)}
+              </span>{' '}
+              in {comparisonLabel}.
+            </>
+          ) : (
+            '.'
+          )}
         </p>
       </div>
 
@@ -64,13 +89,13 @@ export const RevenueChartHeader: React.FC<RevenueChartHeaderProps> = ({
           type="button"
           aria-pressed={shown.now}
           onClick={() => toggle('now')}
-          className="group/key inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-md px-2 text-xs font-medium whitespace-nowrap text-slate-700 dark:text-slate-300 transition-colors duration-120 hover:bg-slate-100 dark:hover:bg-slate-700/60 border-0 aria-[pressed=false]:text-slate-400 dark:aria-[pressed=false]:text-slate-500 aria-[pressed=false]:line-through"
+          className="group/key inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-lg px-2.5 text-xs font-medium whitespace-nowrap text-text-primary bg-surface-600 hover:bg-surface-500 border border-surface-400 transition-colors duration-150 aria-[pressed=false]:text-text-muted aria-[pressed=false]:border-transparent aria-[pressed=false]:bg-transparent aria-[pressed=false]:line-through"
         >
           <span
             aria-hidden="true"
             className="flex size-3.5 shrink-0 items-center justify-center group-aria-[pressed=false]/key:opacity-30"
           >
-            <span className="h-0.5 w-3.5 shrink-0 rounded-full bg-white" />
+            <span className="h-0.5 w-3.5 shrink-0 rounded-full bg-text-primary" />
           </span>
           <span>{seriesButtonLabel}</span>
         </button>
@@ -79,13 +104,13 @@ export const RevenueChartHeader: React.FC<RevenueChartHeaderProps> = ({
           type="button"
           aria-pressed={shown.prev}
           onClick={() => toggle('prev')}
-          className="group/key inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-md px-2 text-xs font-medium whitespace-nowrap text-slate-700 dark:text-slate-300 transition-colors duration-120 hover:bg-slate-100 dark:hover:bg-slate-700/60 border-0 aria-[pressed=false]:text-slate-400 dark:aria-[pressed=false]:text-slate-500 aria-[pressed=false]:line-through"
+          className="group/key inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-lg px-2.5 text-xs font-medium whitespace-nowrap text-text-primary bg-surface-600 hover:bg-surface-500 border border-surface-400 transition-colors duration-150 aria-[pressed=false]:text-text-muted aria-[pressed=false]:border-transparent aria-[pressed=false]:bg-transparent aria-[pressed=false]:line-through"
         >
           <span
             aria-hidden="true"
             className="flex size-3.5 shrink-0 items-center justify-center group-aria-[pressed=false]/key:opacity-30"
           >
-            <span className="w-3.5 shrink-0 border-t-2 border-dashed border-white/70" />
+            <span className="w-3.5 shrink-0 border-t-2 border-dashed border-text-secondary" />
           </span>
           <span>{hasPrevYearData ? 'Year before' : 'Total Invoiced'}</span>
         </button>

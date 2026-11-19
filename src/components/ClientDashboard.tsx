@@ -1,31 +1,22 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
-import { Client, Invoice, WorkItem, SubClient, UserProfile } from '../types';
-import { 
-  ArrowLeft, Calendar, Phone, Mail, Edit3, CheckCircle2, Clock, 
-  IndianRupee, Plus, AlertTriangle, Send, FileText, ClipboardList,
-  Sparkles, ShieldAlert, DollarSign, Copy, ExternalLink, Play, Download,
-  Users, Tag, Trash2, Edit2, Filter, MessageSquare, Archive, UploadCloud, X
-} from 'lucide-react';
+import { ArrowLeft, Calendar, Edit3, CheckCircle2, Clock, DollarSign, MessageSquare, Users, Archive, ClipboardList, FileText } from 'lucide-react';
 import { User } from 'firebase/auth';
-import { useFirestore } from '../hooks/useFirestore';
-import { formatInvoiceNumber } from '../lib/invoiceUtils';
-import { exportClientCSV } from '../lib/csvExport';
-import { 
-  getPaymentStatusInfo, 
-  calculateClientFinancials, 
-  generateWhatsAppReminder,
-  generateEmailReminder,
-  generateInvoiceEmailDetails
-} from '../lib/paymentUtils';
-import { generateUUID, extractVideoUrl, getDriveDirectImageUrl } from '../lib/utils';
+import { Client } from '../types';
+import { formatCurrencyAmount } from '../lib/currencyUtils';
+import { Button } from '@/components/ui/button';
+import { StatCard } from '@/components/ui/StatCard';
+import { useClientDashboard } from '../hooks/useClientDashboard';
 import GoogleDriveUploadModal from './GoogleDriveUploadModal';
 import MediaEmbedModal from './MediaEmbedModal';
-import { DateInput } from './DateInput';
-import { formatLocalDateToYMD, parseYMDToTimestamp } from '../lib/dateUtils';
-import StatusBadge from './StatusBadge';
 import ClientRatesModal from './ClientRatesModal';
-import { getCurrencySymbol, formatCurrencyAmount } from '../lib/currencyUtils';
+import ClientRecordPaymentModal from './client-dashboard/ClientRecordPaymentModal';
+import SubClientsModal from './client-dashboard/SubClientsModal';
+import ClientWorkFormModal from './client-dashboard/ClientWorkFormModal';
+import ClientHeaderCard from './client-dashboard/ClientHeaderCard';
+import ClientWorkLogsTab from './client-dashboard/ClientWorkLogsTab';
+import ClientInvoicesTab from './client-dashboard/ClientInvoicesTab';
+import ClientRatesInfoTab from './client-dashboard/ClientRatesInfoTab';
 
 interface ClientDashboardProps {
   client: Client;
@@ -34,434 +25,90 @@ interface ClientDashboardProps {
   onEditClient: (client: Client) => void;
 }
 
+/**
+ * Client Dashboard tab view.
+ * Detail overview for an individual client with financials, deliverables, invoices, and rates.
+ */
 export default function ClientDashboard({ client, user, onBack, onEditClient }: ClientDashboardProps) {
-  const { data: invoices, addOrUpdateItem: updateInvoice } = useFirestore<Invoice>('invoices', user?.uid);
-  const { data: workItems, addOrUpdateItem: updateWorkItem, removeItem: removeWorkItem } = useFirestore<WorkItem>('workItems', user?.uid);
-  const { addOrUpdateItem: updateClient } = useFirestore<Client>('clients', user?.uid);
-  const { data: profiles } = useFirestore<UserProfile>('profiles', user?.uid);
-
-  const profile = profiles[0] || null;
-  const currencySymbol = getCurrencySymbol(client.currency);
-  const [copiedReviewLink, setCopiedReviewLink] = useState(false);
-  const [isDriveModalOpen, setIsDriveModalOpen] = useState(false);
-  const [isRatesModalOpen, setIsRatesModalOpen] = useState(false);
-  const [embedModalData, setEmbedModalData] = useState<{ isOpen: boolean; url: string; title: string; clientName?: string } | null>(null);
-
-  const handleCopyReviewLink = () => {
-    if (!user) return;
-    const baseUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
-    const nameParam = encodeURIComponent(profile?.name || user.displayName || 'Freelancer');
-    const clientNameParam = encodeURIComponent(client.name);
-    const link = `${baseUrl}?feedback=true&uid=${user.uid}&name=${nameParam}&clientId=${client.id}&clientName=${clientNameParam}`;
-    
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(link).then(() => {
-        setCopiedReviewLink(true);
-        setTimeout(() => setCopiedReviewLink(false), 2000);
-      }).catch(() => {
-        prompt('Copy review link:', link);
-      });
-    } else {
-      prompt('Copy review link:', link);
-    }
-  };
-
-  const handleSaveRates = async (rates: {
-    currency?: string;
-    paymentBasis: 'per_reel' | 'monthly_retainer';
-    defaultRate: number;
-    monthlyRetainerAmount?: number;
-    onSiteShootRate?: number;
-    websiteMakingRate?: number;
-    revisionsIncluded?: number;
-  }) => {
-    const updatedClient: Client = {
-      ...client,
-      currency: rates.currency || client.currency || 'INR',
-      paymentBasis: rates.paymentBasis,
-      defaultRate: rates.defaultRate,
-      monthlyRetainerAmount: rates.monthlyRetainerAmount,
-      onSiteShootRate: rates.onSiteShootRate,
-      websiteMakingRate: rates.websiteMakingRate,
-      revisionsIncluded: rates.revisionsIncluded,
-    };
-    if (!rates.onSiteShootRate) delete updatedClient.onSiteShootRate;
-    if (!rates.websiteMakingRate) delete updatedClient.websiteMakingRate;
-    if (rates.revisionsIncluded === undefined) delete updatedClient.revisionsIncluded;
-    if (rates.paymentBasis !== 'monthly_retainer') delete updatedClient.monthlyRetainerAmount;
-
-    await updateClient(updatedClient);
-  };
-
-  const [activeTab, setActiveTab] = useState<'work' | 'invoices' | 'settings'>('work');
   const shouldReduceMotion = useReducedMotion();
-  
-  // Payment Date update state
-  const [isUpdatingPaymentDate, setIsUpdatingPaymentDate] = useState(false);
-  const [newPaymentDate, setNewPaymentDate] = useState<string>(
-    formatLocalDateToYMD(new Date())
-  );
-  const [markPendingAsPaid, setMarkPendingAsPaid] = useState(true);
-
-  const openPaymentModal = () => {
-    setNewPaymentDate(formatLocalDateToYMD(new Date()));
-    setIsUpdatingPaymentDate(true);
-  };
-
-  // Sub-Client management state
-  const [isSubClientsModalOpen, setIsSubClientsModalOpen] = useState(false);
-  const [editingSubClientId, setEditingSubClientId] = useState<string | null>(null);
-  const [subClientForm, setSubClientForm] = useState({ name: '', code: '', notes: '', logoUrl: '', instagram: '', email: '', phone: '', clientFrom: '', workExperience: '' });
-  const [subClientFilter, setSubClientFilter] = useState<'all' | 'direct' | string>('all');
-
-  const handleSaveSubClient = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!subClientForm.name.trim()) return alert("Please enter a sub-client name.");
-
-    const existingSubs = client.subClients || [];
-    let updatedSubs: SubClient[];
-
-    if (editingSubClientId) {
-      updatedSubs = existingSubs.map(sc => 
-        sc.id === editingSubClientId 
-          ? { 
-              ...sc, 
-              name: subClientForm.name.trim(), 
-              code: subClientForm.code.trim() || undefined, 
-              notes: subClientForm.notes.trim() || undefined,
-              logoUrl: subClientForm.logoUrl.trim() || undefined,
-              instagram: subClientForm.instagram.trim() || undefined,
-              email: subClientForm.email.trim() || undefined,
-              phone: subClientForm.phone.trim() || undefined,
-              clientFrom: subClientForm.clientFrom.trim() || undefined,
-              workExperience: subClientForm.workExperience.trim() || undefined
-            }
-          : sc
-      );
-    } else {
-      const newSub: SubClient = {
-        id: generateUUID(),
-        name: subClientForm.name.trim(),
-        code: subClientForm.code.trim() || undefined,
-        notes: subClientForm.notes.trim() || undefined,
-        logoUrl: subClientForm.logoUrl.trim() || undefined,
-        instagram: subClientForm.instagram.trim() || undefined,
-        email: subClientForm.email.trim() || undefined,
-        phone: subClientForm.phone.trim() || undefined,
-        clientFrom: subClientForm.clientFrom.trim() || undefined,
-        workExperience: subClientForm.workExperience.trim() || undefined,
-        createdAt: Date.now()
-      };
-      updatedSubs = [...existingSubs, newSub];
-    }
-
-    try {
-      await updateClient({ ...client, subClients: updatedSubs });
-      setSubClientForm({ name: '', code: '', notes: '', logoUrl: '', instagram: '', email: '', phone: '', clientFrom: '', workExperience: '' });
-      setEditingSubClientId(null);
-    } catch (err: any) {
-      console.error(err);
-      alert("Error saving sub-client: " + (err?.message || String(err)));
-    }
-  };
-
-  const handleEditSubClientClick = (sc: SubClient) => {
-    setEditingSubClientId(sc.id);
-    setSubClientForm({
-      name: sc.name,
-      code: sc.code || '',
-      notes: sc.notes || '',
-      logoUrl: sc.logoUrl || '',
-      instagram: sc.instagram || '',
-      email: sc.email || '',
-      phone: sc.phone || '',
-      clientFrom: sc.clientFrom || '',
-      workExperience: sc.workExperience || ''
-    });
-  };
-
-  const handleDeleteSubClientClick = async (subId: string, subName: string) => {
-    if (confirm(`Are you sure you want to delete sub-client "${subName}"? Work items assigned to this sub-client will remain recorded.`)) {
-      const updatedSubs = (client.subClients || []).filter(sc => sc.id !== subId);
-      await updateClient({ ...client, subClients: updatedSubs });
-      if (editingSubClientId === subId) {
-        setEditingSubClientId(null);
-        setSubClientForm({ name: '', code: '', notes: '', logoUrl: '', instagram: '', email: '', phone: '', clientFrom: '', workExperience: '' });
-      }
-    }
-  };
-
-  // New Work Log modal state inside client dashboard
-  const [isWorkFormOpen, setIsWorkFormOpen] = useState(false);
-  const [editingWorkId, setEditingWorkId] = useState<string | null>(null);
-  const [workFormData, setWorkFormData] = useState({
-    subClientId: '',
-    description: '',
-    videoUrl: '',
-    quantity: '1',
-    rate: String(client.defaultRate),
-    date: formatLocalDateToYMD(new Date())
-  });
-
-  // Calculate financials & payment status
-  const clientInvoices = invoices.filter(inv => inv.clientId === client.id);
-  const clientWorkItems = workItems.filter(item => item.clientId === client.id);
-  
-  const financials = calculateClientFinancials(client.id, invoices, workItems);
-  const statusInfo = getPaymentStatusInfo(client, invoices, workItems);
-
-  // Filter work items based on selected subclient tab/filter
-  const filteredClientWorkItems = clientWorkItems.filter(item => {
-    if (subClientFilter === 'all') return true;
-    if (subClientFilter === 'direct') return !item.subClientId;
-    return item.subClientId === subClientFilter;
-  });
-
-  // Save new payment date
-  const handleSavePaymentDate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const selectedTimestamp = parseYMDToTimestamp(newPaymentDate);
-      const updatedClient: Client = {
-        ...client,
-        lastPaymentDate: selectedTimestamp
-      };
-
-      await updateClient(updatedClient);
-
-      // Optionally mark pending invoices for this client as Paid
-      if (markPendingAsPaid) {
-        for (const inv of financials.pendingInvoices) {
-          await updateInvoice({ ...inv, status: 'Paid' });
-        }
-      }
-
-      setIsUpdatingPaymentDate(false);
-      alert("Payment date updated successfully!");
-    } catch (err: any) {
-      console.error(err);
-      alert("Failed to update payment date: " + (err?.message || String(err)));
-    }
-  };
-
-  const handleStartEditWork = (item: WorkItem) => {
-    setEditingWorkId(item.id);
-    setWorkFormData({
-      subClientId: item.subClientId || '',
-      description: item.description,
-      videoUrl: item.videoUrl || '',
-      quantity: String(item.quantity),
-      rate: String(item.rate),
-      date: formatLocalDateToYMD(item.date)
-    });
-    setIsWorkFormOpen(true);
-  };
-
-  const handleCancelWorkForm = () => {
-    setEditingWorkId(null);
-    setWorkFormData({
-      subClientId: '',
-      description: '',
-      videoUrl: '',
-      quantity: '1',
-      rate: String(client.defaultRate),
-      date: formatLocalDateToYMD(new Date())
-    });
-    setIsWorkFormOpen(false);
-  };
-
-  // Add or update work log for this specific client
-  const handleSaveWorkLog = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const isMonthlyClient = client.paymentBasis === 'monthly_retainer';
-      const selectedRate = isMonthlyClient ? 0 : (Number(workFormData.rate) || client.defaultRate);
-      const selectedQty = Number(workFormData.quantity);
-      const selectedDate = parseYMDToTimestamp(workFormData.date);
-      const trimmedVideoUrl = workFormData.videoUrl.trim() || undefined;
-
-      // Find subclient details if selected
-      const selectedSub = (client.subClients || []).find(sc => sc.id === workFormData.subClientId);
-      const subClientId = selectedSub ? selectedSub.id : undefined;
-      const subClientName = selectedSub ? selectedSub.name : undefined;
-
-      if (editingWorkId) {
-        const existing = workItems.find(w => w.id === editingWorkId);
-        if (existing) {
-          const updatedWork: WorkItem = {
-            ...existing,
-            subClientId,
-            subClientName,
-            description: workFormData.description,
-            videoUrl: trimmedVideoUrl,
-            quantity: selectedQty,
-            rate: selectedRate,
-            date: selectedDate
-          };
-
-          // If item is invoiced, update the corresponding invoice reel details as well
-          if (existing.status === 'Invoiced' && existing.invoiceId) {
-            const invoice = invoices.find(inv => inv.id === existing.invoiceId);
-            if (invoice) {
-              if (invoice.invoiceType === 'monthly_retainer') {
-                if (invoice.deliverables && invoice.deliverables.length > 0) {
-                  const updatedDeliverables = invoice.deliverables.map((deliv: any) => {
-                    const isMatch = deliv.id === existing.id || deliv.workItemId === existing.id;
-                    if (isMatch) {
-                      return {
-                        ...deliv,
-                        title: workFormData.description,
-                        quantity: selectedQty,
-                        subClientId,
-                        subClientName,
-                        videoUrl: trimmedVideoUrl
-                      };
-                    }
-                    return deliv;
-                  });
-                  await updateInvoice({
-                    ...invoice,
-                    deliverables: updatedDeliverables
-                  });
-                }
-              } else if (invoice.reels) {
-                let replaced = false;
-                const updatedReels = invoice.reels.map((reel: any) => {
-                  if (!replaced && reel.title === existing.description && reel.quantity === existing.quantity && reel.rate === existing.rate) {
-                    replaced = true;
-                    return {
-                      ...reel,
-                      title: workFormData.description,
-                      quantity: selectedQty,
-                      rate: selectedRate,
-                      subClientId,
-                      subClientName,
-                      videoUrl: trimmedVideoUrl
-                    };
-                  }
-                  return reel;
-                });
-
-                const newSubtotal = updatedReels.reduce((sum: number, r: any) => sum + (r.quantity * r.rate), 0);
-                const discount = invoice.discountAmount || 0;
-                const newTotal = Math.max(0, newSubtotal - discount);
-
-                await updateInvoice({
-                  ...invoice,
-                  reels: updatedReels,
-                  totalAmount: newTotal
-                });
-              }
-            }
-          }
-
-          await updateWorkItem(updatedWork);
-        }
-      } else {
-        const newWork: WorkItem = {
-          id: generateUUID(),
-          clientId: client.id,
-          subClientId,
-          subClientName,
-          description: workFormData.description,
-          videoUrl: trimmedVideoUrl,
-          quantity: selectedQty,
-          rate: selectedRate,
-          date: selectedDate,
-          status: 'Uninvoiced',
-          createdAt: Date.now()
-        };
-
-        await updateWorkItem(newWork);
-      }
-
-      handleCancelWorkForm();
-    } catch (err: any) {
-      console.error(err);
-      alert("Error saving work item: " + (err?.message || String(err)));
-    }
-  };
-
-  const handleDeleteWork = async (id: string) => {
-    if (confirm("Are you sure you want to delete this work item?")) {
-      await removeWorkItem(id);
-    }
-  };
-
-  const formattedLastPaymentDate = client.lastPaymentDate && !isNaN(new Date(client.lastPaymentDate).getTime())
-    ? new Date(client.lastPaymentDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
-    : 'Not Recorded';
-
-  const nextDueTime = new Date(statusInfo.nextDueDate).getTime();
-  const formattedNextDueDate = !isNaN(nextDueTime)
-    ? new Date(statusInfo.nextDueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
-    : '—';
+  const {
+    invoices,
+    clientInvoices,
+    clientWorkItems,
+    financials,
+    statusInfo,
+    currencySymbol,
+    copiedReviewLink,
+    handleCopyReviewLink,
+    isDriveModalOpen,
+    setIsDriveModalOpen,
+    isRatesModalOpen,
+    setIsRatesModalOpen,
+    isPaymentModalOpen,
+    setIsPaymentModalOpen,
+    isSubClientsModalOpen,
+    setIsSubClientsModalOpen,
+    isWorkFormOpen,
+    setIsWorkFormOpen,
+    editingWorkId,
+    setEditingWorkId,
+    workFormData,
+    setWorkFormData,
+    embedModalData,
+    setEmbedModalData,
+    subClientFilter,
+    setSubClientFilter,
+    activeTab,
+    setActiveTab,
+    handleSavePaymentDate,
+    handleSaveRates,
+    handleOpenAddWork,
+    handleStartEditWork,
+    handleSaveWorkLog,
+    handleDeleteWork,
+    formattedLastPaymentDate,
+    formattedNextDueDate,
+    updateInvoice,
+    updateClient,
+    updateWorkItem,
+  } = useClientDashboard(client, user);
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 text-slate-900 dark:text-slate-100 w-full min-w-0">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 text-text-primary w-full min-w-0">
       {/* Top Action Bar with Back button and Quick Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 w-full min-w-0">
-        <button
-          onClick={onBack}
-          className="inline-flex items-center gap-1.5 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition-all w-fit cursor-pointer shrink-0"
-        >
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full min-w-0">
+        <Button variant="secondary" size="sm" onClick={onBack} className="gap-1.5 w-fit">
           <ArrowLeft size={14} />
           <span>Back</span>
-        </button>
+        </Button>
 
-        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap w-full sm:w-auto">
-          <button
-            onClick={handleCopyReviewLink}
-            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-2xs cursor-pointer border-0 ${
-              copiedReviewLink 
-                ? 'bg-[#242424] text-slate-200' 
-                : 'bg-[#212121] text-slate-300 hover:text-white hover:bg-[#1a1a1a]'
-            }`}
-            title="Copy feedback request link for this client"
-          >
-            {copiedReviewLink ? (
-              <>
-                <CheckCircle2 size={13} className="text-slate-200" /> Link Copied!
-              </>
-            ) : (
-              <>
-                <MessageSquare size={13} /> Request Review
-              </>
-            )}
-          </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button variant="secondary" size="sm" onClick={handleCopyReviewLink} className="gap-1.5" title="Copy feedback request link for this client">
+            {copiedReviewLink ? <><CheckCircle2 size={13} /> Link Copied!</> : <><MessageSquare size={13} /> Request Review</>}
+          </Button>
 
-          <button
-            onClick={() => setIsSubClientsModalOpen(true)}
-            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold transition-all shadow-2xs cursor-pointer"
-            title="Add or edit sub-clients for this client"
-          >
-            <Users size={13} /> Sub-Clients {client.subClients && client.subClients.length > 0 ? `(${client.subClients.length})` : ''}
-          </button>
+          <Button variant="secondary" size="sm" onClick={() => setIsSubClientsModalOpen(true)} className="gap-1.5" title="Add or edit sub-clients for this client">
+            <Users size={13} /> Sub-Clients {client.subClients?.length ? `(${client.subClients.length})` : ''}
+          </Button>
 
-          <button
-            onClick={() => onEditClient(client)}
-            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-all shadow-2xs cursor-pointer"
-          >
+          <Button variant="secondary" size="sm" onClick={() => onEditClient(client)} className="gap-1.5">
             <Edit3 size={13} /> Edit
-          </button>
-          
-          <button
-            onClick={openPaymentModal}
-            className="flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-all shadow-2xs cursor-pointer"
-          >
+          </Button>
+
+          <Button variant="primary" size="sm" onClick={() => setIsPaymentModalOpen(true)} className="gap-1.5">
             <Calendar size={13} /> Record Payment
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Closed Client Banner */}
       {client.isClosed && (
-        <div className="flex items-center gap-3 bg-slate-100 dark:bg-slate-800/80 rounded-2xl px-4 sm:px-5 py-3 sm:py-3.5 w-full min-w-0">
-          <Archive size={18} className="text-slate-500 dark:text-slate-400 shrink-0" />
+        <div className="flex items-center gap-3 bg-surface-700 border border-surface-400 rounded-xl px-4 py-3 w-full min-w-0">
+          <Archive size={18} className="text-text-muted shrink-0" />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-slate-700 dark:text-slate-200 truncate">This client is closed</p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Work is no longer active. All history, invoices, and data are preserved in read-only view.
+            <p className="text-sm font-semibold text-text-primary truncate">This client is closed</p>
+            <p className="text-xs text-text-muted">
+              Work is no longer active. All history, invoices, and data are preserved.
               {client.closedAt && ` Closed on ${new Date(client.closedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}.`}
             </p>
           </div>
@@ -469,230 +116,90 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
       )}
 
       {/* Main Client Profile Header Card */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-xs relative overflow-hidden w-full min-w-0">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6 w-full min-w-0">
-          <div className="flex items-start gap-3 sm:gap-4 min-w-0">
-            {client.logoUrl ? (
-              <img 
-                src={getDriveDirectImageUrl(client.logoUrl)} 
-                alt={client.name} 
-                loading="lazy"
-                decoding="async"
-                referrerPolicy="no-referrer"
-                className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl object-cover shadow-xs shrink-0 bg-indigo-50 dark:bg-indigo-950" 
-                onError={(e) => {
-                  e.currentTarget.onerror = null;
-                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(client.name)}&background=6366f1&color=ffffff&size=128&rounded=true&bold=true`;
-                }}
-              />
-            ) : (
-              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-xl sm:text-2xl shadow-xs shrink-0">
-                {client.name.charAt(0).toUpperCase()}
-              </div>
-            )}
-
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 sm:gap-3 flex-wrap min-w-0">
-                <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight truncate">{client.name}</h1>
-                {client.isClosed && (
-                  <StatusBadge 
-                    status="Closed" 
-                    label="Closed" 
-                  />
-                )}
-              </div>
-
-              <div className="mt-1.5 sm:mt-2 flex flex-wrap items-center gap-x-4 sm:gap-x-6 gap-y-1 sm:gap-y-2 text-xs text-slate-500 dark:text-slate-400 min-w-0">
-                <span className="flex items-center gap-1.5 truncate">
-                  <Phone size={13} className="text-slate-400 dark:text-slate-500 shrink-0" /> <span>{client.phone}</span>
-                </span>
-                {client.email && (
-                  <span className="flex items-center gap-1.5 truncate">
-                    <Mail size={13} className="text-slate-400 dark:text-slate-500 shrink-0" /> <span>{client.email}</span>
-                  </span>
-                )}
-                <span className="text-slate-400 dark:text-slate-500 truncate">
-                  Since: {client.clientFrom ? new Date(client.clientFrom + '-01').toLocaleDateString('en-IN', { month: 'short', year: 'numeric' }) : new Date(client.createdAt).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}
-                </span>
-                <span className="text-slate-500 dark:text-slate-400 font-medium truncate">
-                  Currency: <span className="text-slate-700 dark:text-slate-200">{client.currency || 'INR'} ({currencySymbol})</span>
-                </span>
-                {client.instagram && (
-                  <a href={client.instagram.startsWith('http') ? client.instagram : `https://instagram.com/${client.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[#4870aa] hover:underline">
-                    Instagram
-                  </a>
-                )}
-              </div>
-              {client.workExperience && (
-                <div className="mt-2 text-xs text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-900/60 p-2 rounded-lg max-w-lg">
-                  <span className="font-semibold text-slate-700 dark:text-slate-200">Experience/Notes:</span> {client.workExperience}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-2 lg:pt-0">
-            <button
-              onClick={async () => {
-                try {
-                  const updated = { ...client, emailRemindersEnabled: client.emailRemindersEnabled === false ? true : false };
-                  await updateClient(updated);
-                } catch (err) {
-                  console.error(err);
-                }
-              }}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border-0 text-xs font-semibold transition-all cursor-pointer ${
-                client.emailRemindersEnabled !== false 
-                  ? 'bg-[#212121] text-white' 
-                  : 'bg-[#242424] text-slate-400 hover:text-white hover:bg-[#1f1f1f]'
-              }`}
-              title="Toggle email reminders for overdue payments"
-            >
-              <Mail size={13} className={client.emailRemindersEnabled !== false ? 'text-white' : 'text-slate-400'} />
-              <span>Email: {client.emailRemindersEnabled !== false ? 'ON' : 'OFF'}</span>
-            </button>
-
-            <button
-              onClick={() => exportClientCSV(client, clientWorkItems, clientInvoices)}
-              className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-2xs cursor-pointer"
-              title="Export client history as CSV"
-            >
-              <Download size={13} className="text-slate-500" /> <span>CSV</span>
-            </button>
-
-            <a
-              href={generateWhatsAppReminder(client, statusInfo)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-2xs"
-            >
-              <Send size={13} /> <span>WhatsApp</span>
-            </a>
-          </div>
-        </div>
-      </div>
+      <ClientHeaderCard
+        client={client}
+        currencySymbol={currencySymbol}
+        clientWorkItems={clientWorkItems}
+        clientInvoices={clientInvoices}
+        statusInfo={statusInfo}
+        onUpdateClient={updateClient}
+      />
 
       {/* Dashboard Metrics Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 w-full min-w-0">
-        {/* Previous Payment Date */}
-        <div className="bg-white dark:bg-slate-800 p-3 sm:p-5 rounded-xl shadow-xs space-y-1 min-w-0">
-          <div className="flex justify-between items-center text-[10px] sm:text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-            <span className="truncate">Prev Paid</span>
-            <Calendar size={14} className="text-indigo-500 dark:text-indigo-400 shrink-0" />
-          </div>
-          <div className="text-base sm:text-xl font-bold text-slate-900 dark:text-slate-100 truncate">{formattedLastPaymentDate}</div>
-          <button 
-            onClick={openPaymentModal}
-            className="text-[11px] sm:text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline cursor-pointer block truncate"
-          >
-            Change date
-          </button>
-        </div>
-
-        {/* Next Payment Due Date */}
-        <div className="bg-white dark:bg-slate-800 p-3 sm:p-5 rounded-xl shadow-xs space-y-1 min-w-0">
-          <div className="flex justify-between items-center text-[10px] sm:text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-            <span className="truncate">Next Due</span>
-            <Clock size={14} className="text-slate-400 dark:text-slate-500 shrink-0" />
-          </div>
-          <div className="text-base sm:text-xl font-bold text-slate-900 dark:text-slate-100 truncate">{formattedNextDueDate}</div>
-          <div className="text-[11px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 truncate">
-            {statusInfo.daysRemaining === 0 ? 'Due Today!' : statusInfo.daysRemaining > 0 ? `In ${statusInfo.daysRemaining}d` : `${Math.abs(statusInfo.daysRemaining)}d overdue`}
-          </div>
-        </div>
-
-        {/* Pending Due Balance */}
-        <div className="bg-white dark:bg-slate-800 p-3 sm:p-5 rounded-xl shadow-xs space-y-1 min-w-0">
-          <div className="flex justify-between items-center text-[10px] sm:text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-            <span className="truncate">Pending</span>
-            <DollarSign size={14} className="text-rose-500 dark:text-rose-400 shrink-0" />
-          </div>
-          <div className="text-base sm:text-xl font-bold text-rose-600 dark:text-rose-400 truncate">{formatCurrencyAmount(financials.totalPendingAmount, client.currency)}</div>
-          <div className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">
-            {financials.pendingInvoices.length} inv, {financials.uninvoicedWork.length} un-invoiced
-          </div>
-        </div>
-
-        {/* Lifetime Paid Billed */}
-        <div className="bg-white dark:bg-slate-800 p-3 sm:p-5 rounded-xl shadow-xs space-y-1 min-w-0">
-          <div className="flex justify-between items-center text-[10px] sm:text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-            <span className="truncate">Total Billed</span>
-            <CheckCircle2 size={14} className="text-indigo-500 dark:text-indigo-400 shrink-0" />
-          </div>
-          <div className="text-base sm:text-xl font-bold text-indigo-600 dark:text-indigo-400 truncate">{formatCurrencyAmount(financials.paidTotal, client.currency)}</div>
-          <div className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">From paid invoices</div>
-        </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full min-w-0">
+        <StatCard
+          label="Prev Paid"
+          value={formattedLastPaymentDate}
+          icon={Calendar}
+          subtext={
+            <button
+              onClick={() => setIsPaymentModalOpen(true)}
+              className="text-xs text-text-secondary hover:text-text-primary hover:underline cursor-pointer bg-transparent border-0 p-0"
+            >
+              Change date
+            </button>
+          }
+        />
+        <StatCard
+          label="Next Due"
+          value={formattedNextDueDate}
+          icon={Clock}
+          subtext={statusInfo.daysRemaining === 0 ? 'Due Today!' : statusInfo.daysRemaining > 0 ? `In ${statusInfo.daysRemaining}d` : `${Math.abs(statusInfo.daysRemaining)}d overdue`}
+        />
+        <StatCard
+          label="Pending Balance"
+          value={formatCurrencyAmount(financials.totalPendingAmount, client.currency)}
+          icon={DollarSign}
+          alert={financials.totalPendingAmount > 0}
+          subtext={`${financials.pendingInvoices.length} inv, ${financials.uninvoicedWork.length} un-invoiced`}
+        />
+        <StatCard
+          label="Total Billed"
+          value={formatCurrencyAmount(financials.paidTotal, client.currency)}
+          icon={CheckCircle2}
+          subtext="From paid invoices"
+        />
       </div>
 
       {/* Tabs Navigation */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xs overflow-hidden">
-        <div className="px-4 md:px-6 pt-4 flex gap-4 md:gap-6 overflow-x-auto scrollbar-none">
+      <div className="bg-surface-700 border border-surface-400 rounded-xl overflow-hidden">
+        <div className="px-4 md:px-6 pt-3 flex gap-4 md:gap-6 overflow-x-auto scrollbar-none">
           <motion.button
             onClick={() => setActiveTab('work')}
             whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
-            className={`relative pb-4 text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2 outline-none cursor-pointer select-none ${
-              activeTab === 'work'
-                ? 'text-white'
-                : 'text-slate-400 hover:text-white'
+            className={`relative pb-3 text-xs font-semibold uppercase tracking-wider transition-colors flex items-center gap-2 outline-none cursor-pointer border-0 bg-transparent ${
+              activeTab === 'work' ? 'text-text-primary' : 'text-text-muted hover:text-text-primary'
             }`}
           >
-            <ClipboardList size={16} /> Work Logs ({clientWorkItems.length})
+            <ClipboardList size={15} /> Work Logs ({clientWorkItems.length})
             {activeTab === 'work' && (
-              <motion.div
-                layoutId="clientDashboardTabIndicator"
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-white rounded-full"
-                transition={
-                  shouldReduceMotion
-                    ? { duration: 0 }
-                    : { type: 'spring', stiffness: 450, damping: 35 }
-                }
-              />
+              <motion.div layoutId="clientDashboardTabIndicator" className="absolute bottom-0 left-0 right-0 h-0.5 bg-text-primary rounded-full" transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 450, damping: 35 }} />
             )}
           </motion.button>
 
           <motion.button
             onClick={() => setActiveTab('invoices')}
             whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
-            className={`relative pb-4 text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2 outline-none cursor-pointer select-none ${
-              activeTab === 'invoices'
-                ? 'text-white'
-                : 'text-slate-400 hover:text-white'
+            className={`relative pb-3 text-xs font-semibold uppercase tracking-wider transition-colors flex items-center gap-2 outline-none cursor-pointer border-0 bg-transparent ${
+              activeTab === 'invoices' ? 'text-text-primary' : 'text-text-muted hover:text-text-primary'
             }`}
           >
-            <FileText size={16} /> Invoices ({clientInvoices.length})
+            <FileText size={15} /> Invoices ({clientInvoices.length})
             {activeTab === 'invoices' && (
-              <motion.div
-                layoutId="clientDashboardTabIndicator"
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-white rounded-full"
-                transition={
-                  shouldReduceMotion
-                    ? { duration: 0 }
-                    : { type: 'spring', stiffness: 450, damping: 35 }
-                }
-              />
+              <motion.div layoutId="clientDashboardTabIndicator" className="absolute bottom-0 left-0 right-0 h-0.5 bg-text-primary rounded-full" transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 450, damping: 35 }} />
             )}
           </motion.button>
 
           <motion.button
             onClick={() => setActiveTab('settings')}
             whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
-            className={`relative pb-4 text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2 outline-none cursor-pointer select-none ${
-              activeTab === 'settings'
-                ? 'text-white'
-                : 'text-slate-400 hover:text-white'
+            className={`relative pb-3 text-xs font-semibold uppercase tracking-wider transition-colors flex items-center gap-2 outline-none cursor-pointer border-0 bg-transparent ${
+              activeTab === 'settings' ? 'text-text-primary' : 'text-text-muted hover:text-text-primary'
             }`}
           >
-            <DollarSign size={16} /> Client Rates & Info
+            <DollarSign size={15} /> Client Rates &amp; Info
             {activeTab === 'settings' && (
-              <motion.div
-                layoutId="clientDashboardTabIndicator"
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-white rounded-full"
-                transition={
-                  shouldReduceMotion
-                    ? { duration: 0 }
-                    : { type: 'spring', stiffness: 450, damping: 35 }
-                }
-              />
+              <motion.div layoutId="clientDashboardTabIndicator" className="absolute bottom-0 left-0 right-0 h-0.5 bg-text-primary rounded-full" transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 450, damping: 35 }} />
             )}
           </motion.button>
         </div>
@@ -700,923 +207,73 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={activeTab}
-            initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 6 }}
+            initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
-            transition={{
-              duration: shouldReduceMotion ? 0.01 : 0.18,
-              ease: [0.22, 1, 0.36, 1],
-            }}
+            transition={{ duration: shouldReduceMotion ? 0.01 : 0.15 }}
             className="w-full"
           >
-            {/* Tab 1: Work Logs */}
             {activeTab === 'work' && (
-          <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-6 w-full min-w-0">
-            <div className="flex justify-between items-center gap-2">
-              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">Work Logs</h3>
-
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <button
-                  onClick={() => setIsDriveModalOpen(true)}
-                  className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
-                  title="Directly upload video to Google Drive with embeddable link"
-                >
-                  <UploadCloud size={13} /> <span className="hidden min-[380px]:inline">Upload</span> Drive
-                </button>
-                <button
-                  onClick={() => setIsWorkFormOpen(true)}
-                  className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-2xs cursor-pointer"
-                >
-                  <Plus size={13} /> Log Work
-                </button>
-              </div>
-            </div>
-
-            {/* Quick Add / Edit Work Modal inside Client Dashboard */}
-            {isWorkFormOpen && (
-              <div className="bg-slate-50 dark:bg-slate-900/80 p-5 rounded-xl border border-indigo-200 dark:border-indigo-900/60 space-y-4 animate-in fade-in">
-                <div className="flex justify-between items-center">
-                  <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">{editingWorkId ? 'Edit Work Entry' : 'Add New Work Entry'}</h4>
-                  <button onClick={handleCancelWorkForm} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-                    <X size={16} />
-                  </button>
-                </div>
-
-                <form onSubmit={handleSaveWorkLog} className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  {client.subClients && client.subClients.length > 0 && (
-                    <div className="md:col-span-4 bg-slate-50 dark:bg-slate-900/60 p-3 rounded-xl">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
-                          <Users size={14} className="text-slate-500 dark:text-slate-400" /> Issued Sub-Client (Optional)
-                        </label>
-                        <button
-                          type="button"
-                          onClick={() => setIsSubClientsModalOpen(true)}
-                          className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 w-fit cursor-pointer"
-                        >
-                          + Manage Sub-Clients
-                        </button>
-                      </div>
-                      <select
-                        value={workFormData.subClientId}
-                        onChange={e => setWorkFormData({ ...workFormData, subClientId: e.target.value })}
-                        className="mt-1.5 w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs font-semibold text-slate-800 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500"
-                      >
-                        <option value="">-- Direct Parent Client ({client.name}) --</option>
-                        {client.subClients.map(sc => (
-                          <option key={sc.id} value={sc.id}>
-                            Sub-Client: {sc.name} {sc.code ? `(${sc.code})` : ''}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-
-                  <div className="md:col-span-2 space-y-1">
-                    <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Work Description *</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Wedding Highlight Reel Edit"
-                      value={workFormData.description}
-                      onChange={e => setWorkFormData({ ...workFormData, description: e.target.value })}
-                      className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-indigo-500"
-                    />
-                  </div>
-
-                  <div className="md:col-span-2 space-y-1">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Video / Post Link (Optional)</label>
-                      <button
-                        type="button"
-                        onClick={() => setIsDriveModalOpen(true)}
-                        className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 cursor-pointer"
-                      >
-                        <UploadCloud size={12} /> Upload to Drive
-                      </button>
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="https://instagram.com/reel/... or YouTube / Drive link"
-                      value={workFormData.videoUrl}
-                      onChange={e => setWorkFormData({ ...workFormData, videoUrl: e.target.value })}
-                      className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-indigo-500 font-mono"
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Quantity *</label>
-                    <input
-                      type="number"
-                      required
-                      min="1"
-                      value={workFormData.quantity}
-                      onChange={e => setWorkFormData({ ...workFormData, quantity: e.target.value })}
-                      className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-indigo-500"
-                    />
-                  </div>
-
-                  {client.paymentBasis === 'monthly_retainer' ? (
-                    <div className="space-y-1">
-                      <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Billing Basis</label>
-                      <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center h-[38px]">
-                        <span>Monthly Retainer</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-1">
-                      <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Rate ({currencySymbol}) *</label>
-                      <input
-                        type="number"
-                        required
-                        min="0"
-                        value={workFormData.rate}
-                        onChange={e => setWorkFormData({ ...workFormData, rate: e.target.value })}
-                        className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-indigo-500"
-                      />
-                    </div>
-                  )}
-
-                  <div className="md:col-span-2 space-y-1">
-                    <label className="text-xs font-medium text-slate-600 dark:text-slate-300">Completion Date *</label>
-                    <DateInput
-                      required
-                      value={workFormData.date}
-                      onChange={val => setWorkFormData({ ...workFormData, date: val })}
-                      className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-500"
-                    />
-                  </div>
-
-                  <div className="md:col-span-2 flex items-end justify-end gap-2">
-                    <button
-                      type="button"
-                      onClick={handleCancelWorkForm}
-                      className="px-3 py-2 text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded cursor-pointer"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs font-semibold transition-all shadow-sm cursor-pointer"
-                    >
-                      {editingWorkId ? 'Save Changes' : 'Save Work Log'}
-                    </button>
-                  </div>
-                </form>
-              </div>
+              <ClientWorkLogsTab
+                client={client}
+                clientWorkItems={clientWorkItems}
+                subClientFilter={subClientFilter}
+                setSubClientFilter={setSubClientFilter}
+                onOpenDrive={() => setIsDriveModalOpen(true)}
+                onOpenLogWork={handleOpenAddWork}
+                onStartEditWork={handleStartEditWork}
+                onDeleteWork={handleDeleteWork}
+                onWatchPreview={(url, title) => setEmbedModalData({ isOpen: true, url, title, clientName: client.name })}
+              />
             )}
-
-            {/* Sub-Client Filter Tabs if sub-clients exist */}
-            {client.subClients && client.subClients.length > 0 && (
-              <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1 shrink-0">
-                  <Filter size={12} /> Filter Work:
-                </span>
-                <button
-                  onClick={() => setSubClientFilter('all')}
-                  className={`px-3 py-1 rounded text-xs font-medium transition-colors shrink-0 cursor-pointer ${
-                    subClientFilter === 'all'
-                      ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-                  }`}
-                >
-                  All ({clientWorkItems.length})
-                </button>
-                <button
-                  onClick={() => setSubClientFilter('direct')}
-                  className={`px-3 py-1 rounded text-xs font-medium transition-colors shrink-0 cursor-pointer ${
-                    subClientFilter === 'direct'
-                      ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-                  }`}
-                >
-                  Direct / Parent ({clientWorkItems.filter(i => !i.subClientId).length})
-                </button>
-                {client.subClients.map(sc => {
-                  const count = clientWorkItems.filter(i => i.subClientId === sc.id).length;
-                  return (
-                    <button
-                      key={sc.id}
-                      onClick={() => setSubClientFilter(subClientFilter === sc.id ? 'all' : sc.id)}
-                      className={`px-3 py-1 rounded text-xs font-medium transition-colors shrink-0 cursor-pointer ${
-                        subClientFilter === sc.id
-                          ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-                      }`}
-                    >
-                      {sc.name} ({count})
-                    </button>
-                  );
-                })}
-              </div>
+            {activeTab === 'invoices' && (
+              <ClientInvoicesTab client={client} clientInvoices={clientInvoices} invoices={invoices} onUpdateInvoice={updateInvoice} onUpdateClient={updateClient} />
             )}
-
-            {/* Work Items Table */}
-            <div className="overflow-x-auto w-full max-w-full">
-              <table className="w-full min-w-[560px] sm:min-w-[640px] text-left border-collapse">
-                <thead>
-                  <tr className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 text-[11px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    <th className="p-2.5 sm:p-3.5">Date</th>
-                    <th className="p-2.5 sm:p-3.5">Description / Sub-Client / Link</th>
-                    <th className="p-2.5 sm:p-3.5 text-right">{client.paymentBasis === 'monthly_retainer' ? 'Quantity' : 'Qty & Rate'}</th>
-                    <th className="p-2.5 sm:p-3.5 text-right">{client.paymentBasis === 'monthly_retainer' ? 'Billing' : 'Total'}</th>
-                    <th className="p-2.5 sm:p-3.5 text-center">Status</th>
-                    <th className="p-2.5 sm:p-3.5 text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm">
-                  {filteredClientWorkItems.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="p-8 text-center text-slate-400 dark:text-slate-500">
-                        {subClientFilter !== 'all' 
-                          ? 'No work items logged under this selected filter.' 
-                          : 'No work items logged for this client yet.'}
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredClientWorkItems.map(item => {
-                      const videoUrl = extractVideoUrl(item);
-                      return (
-                        <tr key={item.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/30">
-                          <td className="py-3 px-3.5 text-slate-600 dark:text-slate-300 whitespace-nowrap min-w-[130px]">
-                            {new Date(item.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
-                          </td>
-                          <td className="p-3.5">
-                            <div className="flex flex-col gap-1">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <span className="font-medium text-slate-900 dark:text-slate-100">{item.description}</span>
-                                {item.subClientName && (
-                                  <span className="text-[12px] text-slate-500 dark:text-slate-400 font-normal">
-                                    {item.subClientName}
-                                  </span>
-                                )}
-                              </div>
-                              {videoUrl && (
-                                <div className="flex items-center gap-2 mt-1">
-                                  <button
-                                    type="button"
-                                    onClick={() => setEmbedModalData({
-                                      isOpen: true,
-                                      url: videoUrl,
-                                      title: item.description,
-                                      clientName: client.name
-                                    })}
-                                    className="text-xs font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 inline-flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
-                                    title="Watch embedded video preview"
-                                  >
-                                    <Play size={14} /> Watch Preview
-                                  </button>
-                                  <a
-                                    href={videoUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="text-[11px] text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 inline-flex items-center gap-0.5"
-                                    title={`Open external link: ${videoUrl}`}
-                                  >
-                                    <ExternalLink size={10} /> Link
-                                  </a>
-                                </div>
-                              )}
-                            </div>
-                          </td>
-                          <td className="p-3.5 text-right text-slate-600 dark:text-slate-300">
-                            {client.paymentBasis === 'monthly_retainer' 
-                              ? `${item.quantity} item${item.quantity === 1 ? '' : 's'}`
-                              : `${item.quantity} × ${formatCurrencyAmount(item.rate, client.currency)}`}
-                          </td>
-                          <td className="py-3 px-3.5 text-right font-bold text-slate-900 dark:text-slate-100 whitespace-nowrap min-w-[100px]">
-                            {client.paymentBasis === 'monthly_retainer' ? (
-                              <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
-                                Covered in Retainer
-                              </span>
-                            ) : (
-                              formatCurrencyAmount(item.quantity * item.rate, client.currency)
-                            )}
-                          </td>
-                          <td className="py-3 px-3.5 text-center whitespace-nowrap min-w-[80px]">
-                            <StatusBadge 
-                              status={item.status === 'Invoiced' ? 'Invoiced' : 'Pending'} 
-                              label={item.status === 'Invoiced' ? 'Invoiced' : 'Uninvoiced'} 
-                            />
-                            <div className="flex items-center justify-center gap-1 mt-1 text-[11px]">
-                              <span className={`w-1.5 h-1.5 rounded-full ${
-                                item.approvalStatus === 'approved'
-                                  ? 'bg-[#4870aa]'
-                                  : item.approvalStatus === 'changes_requested'
-                                  ? 'bg-red-500'
-                                  : 'bg-slate-500'
-                              }`} />
-                              <span className={`font-medium ${
-                                item.approvalStatus === 'approved'
-                                  ? 'text-indigo-400'
-                                  : item.approvalStatus === 'changes_requested'
-                                  ? 'text-red-400'
-                                  : 'text-slate-400'
-                              }`}>
-                                {item.approvalStatus === 'approved'
-                                  ? 'Approved'
-                                  : item.approvalStatus === 'changes_requested'
-                                  ? `Changes (${item.revisionCount || 1})`
-                                  : 'Pending'}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="p-3.5 text-right space-x-2">
-                            {videoUrl && (
-                              <a
-                                href={videoUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-semibold inline-flex items-center gap-0.5 mr-2"
-                                title="Open video/post in new tab"
-                              >
-                                <ExternalLink size={12} /> Open
-                              </a>
-                            )}
-                            <button
-                              onClick={() => handleStartEditWork(item)}
-                              className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-semibold cursor-pointer"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => handleDeleteWork(item.id)}
-                              className="text-xs text-rose-500 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 font-semibold cursor-pointer"
-                            >
-                              Delete
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* Tab 2: Invoices */}
-        {activeTab === 'invoices' && (
-          <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-6 w-full min-w-0">
-            <div className="flex justify-between items-center flex-wrap gap-2 sm:gap-3">
-              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">Invoices</h3>
-            </div>
-
-            <div className="overflow-x-auto w-full max-w-full">
-              <table className="w-full min-w-[540px] sm:min-w-[620px] text-left border-collapse">
-                <thead>
-                  <tr className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 text-[11px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    <th className="p-2.5 sm:p-3.5">Invoice Date</th>
-                    <th className="p-2.5 sm:p-3.5">Reels / Line Items</th>
-                    <th className="p-2.5 sm:p-3.5 text-right">Total Amount</th>
-                    <th className="p-2.5 sm:p-3.5 text-center">Status</th>
-                    <th className="p-2.5 sm:p-3.5 text-right">Email Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm">
-                  {clientInvoices.length === 0 ? (
-                    <tr>
-                      <td colSpan={5} className="p-8 text-center text-slate-400 dark:text-slate-500">
-                        No invoices generated for this client yet.
-                      </td>
-                    </tr>
-                  ) : (
-                    clientInvoices.map(inv => {
-                      const emailData = generateInvoiceEmailDetails(client, inv, null);
-
-                      return (
-                        <tr key={inv.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/30">
-                          <td className="py-3 px-3.5 text-slate-600 dark:text-slate-300 whitespace-nowrap min-w-[130px]">
-                            <div className="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5 whitespace-nowrap">
-                              <span className="whitespace-nowrap font-mono">{formatInvoiceNumber(inv, invoices)}</span>
-                            </div>
-                            <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 whitespace-nowrap">{new Date(inv.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
-                          </td>
-                          <td className="py-3 px-3.5 text-slate-900 dark:text-slate-100 min-w-[180px] max-w-[240px]">
-                            <div className="flex items-center gap-1.5 whitespace-nowrap">
-                              <span className="font-medium">
-                                {inv.invoiceType === 'monthly_retainer' ? '1 Retainer' : `${inv.reels.length} item(s)`}
-                              </span>
-                              {inv.invoiceType === 'monthly_retainer' && (
-                                <span className="text-[12px] font-medium text-slate-600 dark:text-slate-400">
-                                  Monthly Retainer
-                                </span>
-                              )}
-                            </div>
-                            <div className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[220px] mt-0.5" title={inv.reels.map(r => r.title).join(', ')}>
-                              {inv.reels.map(r => r.title).join(', ')}
-                            </div>
-                          </td>
-                          <td className="py-3 px-3.5 text-right font-bold text-slate-900 dark:text-slate-100 whitespace-nowrap min-w-[100px]">
-                            {formatCurrencyAmount(inv.totalAmount, client.currency)}
-                          </td>
-                          <td className="py-3 px-3.5 text-center whitespace-nowrap min-w-[80px]">
-                            <StatusBadge
-                              status={inv.status}
-                              onClick={async () => {
-                                const newStatus = inv.status === 'Paid' ? 'Pending' : 'Paid';
-                                await updateInvoice({ ...inv, status: newStatus });
-                                if (newStatus === 'Paid') {
-                                  const pDate = inv.date || Date.now();
-                                  await updateClient({ ...client, lastPaymentDate: pDate });
-                                }
-                              }}
-                              title={`Click to mark as ${inv.status === 'Paid' ? 'Pending' : 'Paid & update last payment date'}`}
-                            />
-                          </td>
-                          <td className="py-3 px-3.5 text-right whitespace-nowrap min-w-[180px]">
-                            <div className="flex items-center justify-end gap-1.5 whitespace-nowrap shrink-0">
-                              <a
-                                href={emailData.mailtoLink}
-                                className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors shadow-xs whitespace-nowrap shrink-0"
-                                title="Send Email for this Invoice"
-                              >
-                                <Mail size={13} /> Send Email
-                              </a>
-
-                              <button
-                                onClick={() => {
-                                  navigator.clipboard.writeText(`Subject: ${emailData.subject}\n\n${emailData.body}`);
-                                  alert(`Invoice email details for ${client.name} copied to clipboard!`);
-                                }}
-                                className="p-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
-                                title="Copy Email Text to Clipboard"
-                              >
-                                <Copy size={13} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* Tab 3: Client Settings & Rates */}
-        {activeTab === 'settings' && (
-          <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-6 w-full min-w-0">
-            <div className="flex justify-between items-center gap-2">
-              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">Rates &amp; Pricing</h3>
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsRatesModalOpen(true)}
-                  className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer shadow-xs"
-                >
-                  <Edit3 size={13} /> <span>Modify Rates</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onEditClient(client)}
-                  className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-3 py-1.5 sm:py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer"
-                  title="Edit Full Client Profile"
-                >
-                  <Edit2 size={13} /> <span>Full Profile</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div
-                onClick={() => setIsRatesModalOpen(true)}
-                className="p-4 bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100/80 dark:hover:bg-slate-900 rounded-xl space-y-1 cursor-pointer transition-all border border-transparent hover:border-slate-300 dark:hover:border-slate-700 group"
-                title="Click to modify billing basis"
-              >
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">
-                    Payment Basis
-                  </span>
-                  <Edit3 size={12} className="text-slate-400 group-hover:text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-                <div className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-                  {client.paymentBasis === 'monthly_retainer' ? 'Monthly Retainer' : 'Per Reel'}
-                </div>
-                <span className="text-xs text-slate-500 dark:text-slate-400 block">
-                  {client.paymentBasis === 'monthly_retainer'
-                    ? `Fixed ${formatCurrencyAmount(client.monthlyRetainerAmount || client.defaultRate || 0, client.currency)}/mo`
-                    : 'Billed per deliverable'}
-                </span>
-              </div>
-
-              <div
-                onClick={() => setIsRatesModalOpen(true)}
-                className="p-4 bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100/80 dark:hover:bg-slate-900 rounded-xl space-y-1 cursor-pointer transition-all border border-transparent hover:border-slate-300 dark:hover:border-slate-700 group"
-                title="Click to modify default reel rate"
-              >
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Default Reel Rate</span>
-                  <Edit3 size={12} className="text-slate-400 group-hover:text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-                <div className="text-xl font-bold text-indigo-600 dark:text-indigo-400">{formatCurrencyAmount(client.defaultRate, client.currency)}</div>
-                <span className="text-xs text-slate-400 dark:text-slate-500">Per video edit</span>
-              </div>
-
-              <div
-                onClick={() => setIsRatesModalOpen(true)}
-                className="p-4 bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100/80 dark:hover:bg-slate-900 rounded-xl space-y-1 cursor-pointer transition-all border border-transparent hover:border-slate-300 dark:hover:border-slate-700 group"
-                title="Click to modify on-site shoot rate"
-              >
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">On Site Shoot Rate</span>
-                  <Edit3 size={12} className="text-slate-400 group-hover:text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-                <div className="text-xl font-bold text-indigo-600 dark:text-indigo-400">
-                  {client.onSiteShootRate ? formatCurrencyAmount(client.onSiteShootRate, client.currency) : 'Not Set'}
-                </div>
-                <span className="text-xs text-slate-400 dark:text-slate-500">Per shoot day</span>
-              </div>
-
-              <div
-                onClick={() => setIsRatesModalOpen(true)}
-                className="p-4 bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100/80 dark:hover:bg-slate-900 rounded-xl space-y-1 cursor-pointer transition-all border border-transparent hover:border-slate-300 dark:hover:border-slate-700 group"
-                title="Click to modify website making rate"
-              >
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Website Making Rate</span>
-                  <Edit3 size={12} className="text-slate-400 group-hover:text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-                <div className="text-xl font-bold text-indigo-600 dark:text-indigo-400">
-                  {client.websiteMakingRate ? formatCurrencyAmount(client.websiteMakingRate, client.currency) : 'Not Set'}
-                </div>
-                <span className="text-xs text-slate-400 dark:text-slate-500">Per website project</span>
-              </div>
-            </div>
-          </div>
-        )}
+            {activeTab === 'settings' && (
+              <ClientRatesInfoTab client={client} onOpenRatesModal={() => setIsRatesModalOpen(true)} onEditClient={onEditClient} />
+            )}
           </motion.div>
         </AnimatePresence>
       </div>
 
-      {/* Update Payment Date Modal */}
-      {isUpdatingPaymentDate && (
-        <div 
-          onClick={() => setIsUpdatingPaymentDate(false)}
-          className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 cursor-pointer"
-        >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl max-w-md w-full p-6 space-y-5 animate-in fade-in zoom-in-95 cursor-default"
-          >
-            <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-700 pb-3">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Update Previous Payment Date</h3>
-              <button 
-                onClick={() => setIsUpdatingPaymentDate(false)}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold cursor-pointer"
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              Recording the date when this client last paid updates the 30-day payment cycle. The next due date will automatically shift 30 days after this date.
-            </p>
-
-            <form onSubmit={handleSavePaymentDate} className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Payment Received Date *</label>
-                <DateInput
-                  required
-                  value={newPaymentDate}
-                  onChange={val => setNewPaymentDate(val)}
-                  className="border border-slate-200 dark:border-slate-600 rounded-xl p-3 text-sm bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-600 font-medium"
-                />
-              </div>
-
-              {financials.pendingInvoices.length > 0 && (
-                <div className="p-3 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-200 dark:border-slate-800 flex items-start gap-2 text-xs text-slate-700 dark:text-slate-300">
-                  <input
-                    type="checkbox"
-                    id="markPaidCheckbox"
-                    checked={markPendingAsPaid}
-                    onChange={e => setMarkPendingAsPaid(e.target.checked)}
-                    className="mt-0.5 rounded text-indigo-600"
-                  />
-                  <label htmlFor="markPaidCheckbox" className="cursor-pointer font-medium">
-                    Also mark all {financials.pendingInvoices.length} pending invoice(s) ({formatCurrencyAmount(financials.pendingInvoiceTotal, client.currency)}) as Paid
-                  </label>
-                </div>
-              )}
-
-              <div className="flex justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsUpdatingPaymentDate(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl cursor-pointer"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="submit"
-                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold transition-all shadow-sm cursor-pointer"
-                >
-                  Save & Update Cycle
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-      {/* Manage Sub-Clients Modal */}
-      {isSubClientsModalOpen && (
-        <div 
-          onClick={() => {
-            setIsSubClientsModalOpen(false);
-            setEditingSubClientId(null);
-            setSubClientForm({ name: '', code: '', notes: '' });
-          }}
-          className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 cursor-pointer"
-        >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl max-w-xl w-full p-6 space-y-6 animate-in fade-in zoom-in-95 cursor-default max-h-[90vh] overflow-y-auto"
-          >
-            <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-700 pb-3">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <Users className="w-5 h-5 text-slate-700 dark:text-slate-300" /> Manage Sub-Clients
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Assign sub-clients or branches to <strong className="text-slate-700 dark:text-slate-200">{client.name}</strong>.
-                </p>
-              </div>
-              <button 
-                onClick={() => {
-                  setIsSubClientsModalOpen(false);
-                  setEditingSubClientId(null);
-                  setSubClientForm({ name: '', code: '', notes: '' });
-                }}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold p-1 rounded-lg cursor-pointer"
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            {/* Form to Add / Edit Sub-Client */}
-            <form onSubmit={handleSaveSubClient} className="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                {editingSubClientId ? 'Edit Sub-Client' : '+ Create New Sub-Client'}
-              </h4>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Sub-Client Name *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Branch Alpha, Brand X, Project B"
-                    value={subClientForm.name}
-                    onChange={e => setSubClientForm({ ...subClientForm, name: e.target.value })}
-                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Code / Tag (Optional)</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. BR-01, NYC, DEPT-A"
-                    value={subClientForm.code}
-                    onChange={e => setSubClientForm({ ...subClientForm, code: e.target.value })}
-                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-indigo-500 font-mono"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Phone Number (Optional)</label>
-                  <input
-                    type="tel"
-                    placeholder="e.g. +91 98765 43210"
-                    value={subClientForm.phone}
-                    onChange={e => setSubClientForm({ ...subClientForm, phone: e.target.value })}
-                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Email Address (Optional)</label>
-                  <input
-                    type="email"
-                    placeholder="subclient@example.com"
-                    value={subClientForm.email}
-                    onChange={e => setSubClientForm({ ...subClientForm, email: e.target.value })}
-                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Logo URL (Optional)</label>
-                  <input
-                    type="url"
-                    placeholder="https://example.com/logo.png"
-                    value={subClientForm.logoUrl}
-                    onChange={e => setSubClientForm({ ...subClientForm, logoUrl: e.target.value })}
-                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Instagram (Optional)</label>
-                  <input
-                    type="text"
-                    placeholder="@username or link"
-                    value={subClientForm.instagram}
-                    onChange={e => setSubClientForm({ ...subClientForm, instagram: e.target.value })}
-                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-                
-                <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Client From (Optional)</label>
-                  <input
-                    type="month"
-                    value={subClientForm.clientFrom}
-                    onChange={e => setSubClientForm({ ...subClientForm, clientFrom: e.target.value })}
-                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-                
-                <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Work Experience / Notes (Optional)</label>
-                  <textarea
-                    placeholder="Details about past projects, years of experience, etc."
-                    value={subClientForm.workExperience}
-                    onChange={e => setSubClientForm({ ...subClientForm, workExperience: e.target.value })}
-                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-indigo-500 resize-none h-16"
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-1">
-                {editingSubClientId && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditingSubClientId(null);
-                      setSubClientForm({ name: '', code: '', notes: '' });
-                    }}
-                    className="px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg cursor-pointer"
-                  >
-                    Cancel Edit
-                  </button>
-                )}
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-all shadow-sm flex items-center gap-1 cursor-pointer"
-                >
-                  <Plus size={14} /> {editingSubClientId ? 'Update Sub-Client' : 'Add Sub-Client'}
-                </button>
-              </div>
-            </form>
-
-            {/* List of Sub-Clients */}
-            <div className="space-y-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Registered Sub-Clients ({client.subClients?.length || 0})
-              </h4>
-
-              {(!client.subClients || client.subClients.length === 0) ? (
-                <div className="p-6 text-center bg-slate-50 dark:bg-slate-900/50 rounded-xl text-xs text-slate-400 dark:text-slate-500">
-                  No sub-clients added yet for {client.name}. Add sub-clients above to issue work logs specifically for them.
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {client.subClients.map(sc => {
-                    const scWorkLogs = clientWorkItems.filter(item => item.subClientId === sc.id);
-                    const totalVal = scWorkLogs.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
-                    const uninvoicedVal = scWorkLogs.filter(item => item.status !== 'Invoiced').reduce((sum, item) => sum + (item.quantity * item.rate), 0);
-
-                    return (
-                      <div 
-                        key={sc.id}
-                        className="p-3.5 bg-slate-50 dark:bg-slate-900/50 rounded-xl flex items-center justify-between gap-3 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors"
-                      >
-                        <div className="flex gap-3 min-w-0">
-                          {sc.logoUrl ? (
-                            <img 
-                              src={getDriveDirectImageUrl(sc.logoUrl)} 
-                              alt={sc.name} 
-                              loading="lazy"
-                              decoding="async"
-                              referrerPolicy="no-referrer"
-                              className="w-10 h-10 rounded-lg object-cover shadow-sm shrink-0 bg-slate-100 dark:bg-slate-800" 
-                              onError={(e) => {
-                                e.currentTarget.onerror = null;
-                                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(sc.name)}&background=f1f5f9&color=475569&size=128&rounded=true&bold=true`;
-                              }}
-                            />
-                          ) : (
-                            <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center font-bold shadow-sm shrink-0">
-                              {sc.name.charAt(0).toUpperCase()}
-                            </div>
-                          )}
-                          <div className="space-y-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-slate-900 dark:text-slate-100 text-sm">{sc.name}</span>
-                              {sc.code && (
-                                <span className="px-2 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded font-mono text-[11px] font-semibold">
-                                  {sc.code}
-                                </span>
-                              )}
-                              {sc.instagram && (
-                                <a href={sc.instagram.startsWith('http') ? sc.instagram : `https://instagram.com/${sc.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="text-slate-600 dark:text-slate-400 hover:underline text-[10px] ml-1">
-                                  IG
-                                </a>
-                              )}
-                            </div>
-                            {(sc.phone || sc.email) && (
-                              <div className="flex items-center gap-2 text-[10px] text-slate-500 dark:text-slate-400">
-                                {sc.phone && <span>{sc.phone}</span>}
-                                {sc.phone && sc.email && <span>•</span>}
-                                {sc.email && <span>{sc.email}</span>}
-                              </div>
-                            )}
-                            {sc.workExperience && (
-                              <div className="text-[10px] text-slate-600 dark:text-slate-400 truncate max-w-xs">
-                                <span className="font-semibold text-slate-700 dark:text-slate-300">Exp:</span> {sc.workExperience}
-                              </div>
-                            )}
-                          <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
-                            <span>{scWorkLogs.length} work log(s)</span>
-                            <span>•</span>
-                            <span className="font-semibold text-slate-700 dark:text-slate-300">Total: {formatCurrencyAmount(totalVal, client.currency)}</span>
-                            {uninvoicedVal > 0 && (
-                              <span className="text-slate-600 dark:text-slate-400 text-[11px] font-medium">
-                                {formatCurrencyAmount(uninvoicedVal, client.currency)} pending invoice
-                              </span>
-                            )}
-                          </div>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-1 shrink-0">
-                          <button
-                            onClick={() => handleEditSubClientClick(sc)}
-                            className="p-1.5 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 rounded-lg transition-colors cursor-pointer"
-                            title="Edit Sub-Client"
-                          >
-                            <Edit2 size={14} />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteSubClientClick(sc.id, sc.name)}
-                            className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-[#333333] rounded-lg transition-colors cursor-pointer"
-                            title="Delete Sub-Client"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            <div className="flex justify-end border-t border-slate-100 dark:border-slate-700 pt-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsSubClientsModalOpen(false);
-                  setEditingSubClientId(null);
-                  setSubClientForm({ name: '', code: '', notes: '' });
-                }}
-                className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-xs cursor-pointer"
-              >
-                Done
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Google Drive Direct Upload Modal */}
+      <ClientRecordPaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        client={client}
+        pendingInvoicesCount={financials.pendingInvoices.length}
+        pendingInvoiceTotal={financials.pendingInvoiceTotal}
+        onSave={handleSavePaymentDate}
+      />
+      <SubClientsModal
+        isOpen={isSubClientsModalOpen}
+        onClose={() => setIsSubClientsModalOpen(false)}
+        client={client}
+        clientWorkItems={clientWorkItems}
+        onUpdateClient={updateClient}
+      />
+      <ClientWorkFormModal
+        isOpen={isWorkFormOpen}
+        onClose={() => { setEditingWorkId(null); setIsWorkFormOpen(false); }}
+        editingWorkId={editingWorkId}
+        workFormData={workFormData}
+        setWorkFormData={setWorkFormData}
+        client={client}
+        currencySymbol={currencySymbol}
+        onSave={handleSaveWorkLog}
+        onOpenDrive={() => setIsDriveModalOpen(true)}
+        onOpenSubClients={() => setIsSubClientsModalOpen(true)}
+      />
       <GoogleDriveUploadModal
         isOpen={isDriveModalOpen}
         onClose={() => setIsDriveModalOpen(false)}
         clients={[client]}
         defaultClientId={client.id}
-        onWorkItemCreated={async (newWork) => {
-          await updateWorkItem(newWork);
-          setIsDriveModalOpen(false);
-        }}
+        onWorkItemCreated={async (newWork) => { await updateWorkItem(newWork); setIsDriveModalOpen(false); }}
         onLinkGenerated={(result) => {
-          setWorkFormData(prev => ({
-            ...prev,
-            videoUrl: result.webViewLink,
-            description: prev.description.trim() ? prev.description : result.name
-          }));
+          setWorkFormData((prev) => ({ ...prev, videoUrl: result.webViewLink, description: prev.description.trim() ? prev.description : result.name }));
           setIsWorkFormOpen(true);
         }}
       />
-
-      {/* Embedded Media Player Modal */}
       <MediaEmbedModal
         isOpen={!!embedModalData?.isOpen}
         onClose={() => setEmbedModalData(null)}
@@ -1624,8 +281,6 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
         title={embedModalData?.title || 'Video Deliverable'}
         clientName={embedModalData?.clientName}
       />
-
-      {/* Dedicated Rates & Pricing Editor Modal */}
       <ClientRatesModal
         isOpen={isRatesModalOpen}
         onClose={() => setIsRatesModalOpen(false)}

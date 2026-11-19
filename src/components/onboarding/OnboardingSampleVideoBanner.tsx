@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Video, ExternalLink } from 'lucide-react';
 import { UserProfile, SampleWorkItem, WorkItem } from '../../types';
 import ManageSampleVideosModal from './ManageSampleVideosModal';
+import { Card } from '../ui/Card';
+import { Button } from '../ui/Button';
 
 interface OnboardingSampleVideoBannerProps {
   profile: UserProfile | null;
@@ -10,6 +12,10 @@ interface OnboardingSampleVideoBannerProps {
   onSaveProfile?: (profile: UserProfile) => Promise<void>;
 }
 
+/**
+ * OnboardingSampleVideoBanner Component
+ * Workspace banner linking to the Drive-connected public sample video manager.
+ */
 export const OnboardingSampleVideoBanner: React.FC<OnboardingSampleVideoBannerProps> = ({
   profile,
   workItems = [],
@@ -29,12 +35,12 @@ export const OnboardingSampleVideoBanner: React.FC<OnboardingSampleVideoBannerPr
 
   return (
     <>
-      <div className="bg-white dark:bg-[#212121] border border-slate-200 dark:border-[#333333] rounded-xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <Card className="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface-700 border-surface-400">
         <div className="space-y-1">
-          <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+          <h2 className="text-sm font-bold text-text-primary">
             Public Sample Video Library
           </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          <p className="text-xs text-text-secondary">
             {samples.length > 0
               ? `${samples.length} sample video${samples.length > 1 ? 's' : ''} connected to Google Drive for prospective clients.`
               : 'Manually select sample edited videos connected to Google Drive to showcase on your onboarding link.'}
@@ -47,22 +53,24 @@ export const OnboardingSampleVideoBanner: React.FC<OnboardingSampleVideoBannerPr
               href={`${onboardingUrl}?view=samples`}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-lg inline-flex items-center gap-1.5 no-underline transition-colors"
+              className="px-3 h-8 bg-surface-600 hover:bg-surface-500 text-text-primary text-xs font-medium rounded-lg inline-flex items-center gap-1.5 no-underline transition-colors"
             >
               <ExternalLink size={13} />
               Preview Public Library
             </a>
           )}
-          <button
+          <Button
             type="button"
+            variant="secondary"
+            size="sm"
             onClick={() => setIsModalOpen(true)}
-            className="px-3.5 py-2 bg-[#282828] hover:bg-[#1a1a1a] text-white text-xs font-semibold rounded-lg cursor-pointer border-0 inline-flex items-center gap-1.5 transition-colors"
+            className="text-xs h-8 inline-flex items-center gap-1.5"
           >
             <Video size={14} />
             Manage Sample Videos ({samples.length})
-          </button>
+          </Button>
         </div>
-      </div>
+      </Card>
 
       <ManageSampleVideosModal
         isOpen={isModalOpen}

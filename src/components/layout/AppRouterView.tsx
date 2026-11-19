@@ -193,7 +193,7 @@ export const AppRouterView: React.FC<AppRouterViewProps> = ({
           </Suspense>
         </ErrorBoundary>
       </div>
-      <Footer onNavigate={(r) => onNavigate(r)} />
+      <Footer variant="minimal" onNavigate={(r) => onNavigate(r)} />
     </div>
   );
 };

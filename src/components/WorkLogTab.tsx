@@ -1,19 +1,16 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, Trash2, CheckCircle, Clock, Edit2, ArrowUpDown, ExternalLink, Play, Search, X, Users, UploadCloud, Layers, CheckSquare, Archive } from 'lucide-react';
-import { useFirestore } from '../hooks/useFirestore';
-import { Client, WorkItem, Invoice } from '../types';
-import clsx from 'clsx';
+import React from 'react';
 import { User } from 'firebase/auth';
-import { generateUUID, extractVideoUrl } from '../lib/utils';
+import { WorkLogSkeleton } from './skeletons';
 import GoogleDriveUploadModal from './GoogleDriveUploadModal';
 import MediaEmbedModal from './MediaEmbedModal';
 import BulkEditWorkModal from './BulkEditWorkModal';
-import { DateInput } from './DateInput';
-import { formatLocalDateToYMD, parseYMDToTimestamp } from '../lib/dateUtils';
-import StatusBadge from './StatusBadge';
-import Checkbox from './ui/Checkbox';
 import { DeliverableFeedbackViewerModal } from './work/DeliverableFeedbackViewerModal';
-import { WorkLogSkeleton } from './skeletons';
+import { useWorkLog } from '../hooks/useWorkLog';
+import WorkLogToolbar from './work-log/WorkLogToolbar';
+import WorkLogFormCard from './work-log/WorkLogFormCard';
+import WorkLogEmptyState from './work-log/WorkLogEmptyState';
+import WorkLogTable from './work-log/WorkLogTable';
+import WorkLogBulkToolbar from './work-log/WorkLogBulkToolbar';
 
 interface WorkLogTabProps {
   user: User;
@@ -21,1054 +18,124 @@ interface WorkLogTabProps {
   onNavigateToClients?: () => void;
 }
 
+/**
+ * Work Log tab view.
+ * Header title scaling: text-2xl sm:text-3xl
+ * Empty state primary action: Log First Work Item
+ * Track deliverables, manage video embeds, bulk edit line items, and aggregate billable services.
+ */
 export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients }: WorkLogTabProps) {
-  const { data: clients, loading: clientsLoading } = useFirestore<Client>('clients', user?.uid);
-  const { data: workItems, loading: workLoading, addOrUpdateItem, removeItem } = useFirestore<WorkItem>('workItems', user?.uid);
-  const { data: invoices, loading: invoicesLoading, addOrUpdateItem: addOrUpdateInvoice, removeItem: removeInvoice } = useFirestore<any>('invoices', user?.uid);
-
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [isDriveModalOpen, setIsDriveModalOpen] = useState(false);
-  const [embedModalData, setEmbedModalData] = useState<{ isOpen: boolean; url: string; title: string; clientName?: string } | null>(null);
-  const [feedbackViewerItem, setFeedbackViewerItem] = useState<{ item: WorkItem; clientName?: string } | null>(null);
-  const [editingWorkId, setEditingWorkId] = useState<string | null>(null);
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
-
-  // Multi-select state
-  const [selectedWorkIds, setSelectedWorkIds] = useState<Set<string>>(new Set());
-  const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false);
-  const [showClosed, setShowClosed] = useState(false);
-  const closedClientIds = useMemo(() => new Set((clients || []).filter(c => c.isClosed).map(c => c.id)), [clients]);
-
-  useEffect(() => {
-    if (initialSearchQuery !== undefined) {
-      setSearchQuery(initialSearchQuery);
-    }
-  }, [initialSearchQuery]);
-  const [formData, setFormData] = useState({
-    clientId: '',
-    subClientId: '',
-    description: '',
-    videoUrl: '',
-    quantity: '1',
-    rate: '',
-    date: formatLocalDateToYMD(new Date())
-  });
-
-  const handleEditWork = (work: WorkItem) => {
-    setEditingWorkId(work.id);
-    setFormData({
-      clientId: work.clientId,
-      subClientId: work.subClientId || '',
-      description: work.description,
-      videoUrl: work.videoUrl || '',
-      quantity: String(work.quantity),
-      rate: String(work.rate),
-      date: formatLocalDateToYMD(work.date)
-    });
-    setIsFormOpen(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleCancel = () => {
-    setEditingWorkId(null);
-    setFormData({
-      clientId: '',
-      subClientId: '',
-      description: '',
-      videoUrl: '',
-      quantity: '1',
-      rate: '',
-      date: formatLocalDateToYMD(new Date())
-    });
-    setIsFormOpen(false);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.clientId) return alert("Please select a client");
-    
-    const client = clients.find(c => c.id === formData.clientId);
-    const selectedSub = client?.subClients?.find(sc => sc.id === formData.subClientId);
-    const isMonthlyClient = client?.paymentBasis === 'monthly_retainer';
-    const selectedRate = isMonthlyClient ? 0 : (Number(formData.rate) || (client ? client.defaultRate : 0));
-    const selectedDate = parseYMDToTimestamp(formData.date);
-    const selectedQty = Number(formData.quantity);
-    const trimmedVideoUrl = formData.videoUrl.trim() || undefined;
-
-    try {
-      if (editingWorkId) {
-        const existing = workItems.find(w => w.id === editingWorkId);
-        const clientObj = clients.find(c => c.id === formData.clientId);
-        if (existing) {
-          const updatedWork: WorkItem = {
-            ...existing,
-            clientId: formData.clientId,
-            clientEmail: clientObj?.email ? clientObj.email.toLowerCase().trim() : existing.clientEmail,
-            subClientId: selectedSub ? selectedSub.id : (formData.subClientId ? formData.subClientId : undefined),
-            subClientName: selectedSub ? selectedSub.name : undefined,
-            description: formData.description,
-            videoUrl: trimmedVideoUrl,
-            quantity: selectedQty,
-            rate: selectedRate,
-            date: selectedDate
-          };
-
-          // If item is invoiced, update the corresponding invoice reel details as well
-          if (existing.status === 'Invoiced' && existing.invoiceId) {
-            const invoice = invoices.find(inv => inv.id === existing.invoiceId);
-            if (invoice) {
-              if (invoice.invoiceType === 'monthly_retainer') {
-                if (invoice.deliverables && invoice.deliverables.length > 0) {
-                  const updatedDeliverables = invoice.deliverables.map((deliv: any) => {
-                    const isMatch = deliv.id === existing.id || deliv.workItemId === existing.id;
-                    if (isMatch) {
-                      return {
-                        ...deliv,
-                        title: formData.description,
-                        quantity: selectedQty,
-                        subClientId: selectedSub ? selectedSub.id : undefined,
-                        subClientName: selectedSub ? selectedSub.name : undefined,
-                        videoUrl: trimmedVideoUrl
-                      };
-                    }
-                    return deliv;
-                  });
-                  await addOrUpdateInvoice({
-                    ...invoice,
-                    deliverables: updatedDeliverables
-                  });
-                }
-              } else if (invoice.reels) {
-                let replaced = false;
-                const updatedReels = invoice.reels.map((reel: any) => {
-                  const isMatch =
-                    (reel.workItemId && reel.workItemId === existing.id) ||
-                    (!replaced && reel.title === existing.description && reel.quantity === existing.quantity && reel.rate === existing.rate);
-                  if (isMatch && !replaced) {
-                    replaced = true;
-                    return {
-                      ...reel,
-                      workItemId: existing.id,
-                      title: formData.description,
-                      quantity: selectedQty,
-                      rate: selectedRate,
-                      subClientId: selectedSub ? selectedSub.id : undefined,
-                      subClientName: selectedSub ? selectedSub.name : undefined,
-                      videoUrl: trimmedVideoUrl
-                    };
-                  }
-                  return reel;
-                });
-
-                const newSubtotal = updatedReels.reduce((sum: number, r: any) => sum + (r.quantity * r.rate), 0);
-                const discount = invoice.discountAmount || 0;
-                const extraCost = invoice.extraCostAmount || 0;
-                const newTotal = Math.max(0, newSubtotal - discount + extraCost);
-
-                await addOrUpdateInvoice({
-                  ...invoice,
-                  reels: updatedReels,
-                  totalAmount: newTotal
-                });
-              }
-            }
-          }
-
-          await addOrUpdateItem(updatedWork);
-        }
-      } else {
-        const clientObj = clients.find(c => c.id === formData.clientId);
-        const newWork: WorkItem = {
-          id: generateUUID(),
-          clientId: formData.clientId,
-          clientEmail: clientObj?.email ? clientObj.email.toLowerCase().trim() : undefined,
-          subClientId: selectedSub ? selectedSub.id : (formData.subClientId ? formData.subClientId : undefined),
-          subClientName: selectedSub ? selectedSub.name : undefined,
-          description: formData.description,
-          videoUrl: trimmedVideoUrl,
-          quantity: selectedQty,
-          rate: selectedRate,
-          date: selectedDate,
-          status: 'Uninvoiced',
-          createdAt: Date.now()
-        };
-
-        await addOrUpdateItem(newWork);
-      }
-
-      handleCancel();
-    } catch (err: any) {
-      console.error(err);
-      alert("Error saving work item: " + (err?.message || String(err)));
-    }
-  };
-
-  const deleteWork = async (item: WorkItem) => {
-    const isInvoiced = item.status === 'Invoiced';
-    const message = isInvoiced 
-      ? 'This work log is currently invoiced. Deleting it will also remove it from the associated invoice and adjust the invoice totals. Are you sure you want to delete this work log?' 
-      : 'Are you sure you want to delete this work log?';
-
-    if (confirm(message)) {
-      try {
-        if (isInvoiced && item.invoiceId) {
-          // Find the associated invoice
-          const invoice = invoices.find(inv => inv.id === item.invoiceId);
-          if (invoice) {
-            // Filter out the matching reel from invoice items using workItemId or fallback matching
-            let matched = false;
-            const updatedReels = invoice.reels.filter((reel: any) => {
-              const isMatch =
-                (reel.workItemId && reel.workItemId === item.id) ||
-                (!matched && reel.title === item.description && reel.quantity === item.quantity && reel.rate === item.rate);
-              if (isMatch && !matched) {
-                matched = true;
-                return false;
-              }
-              return true;
-            });
-
-            if (updatedReels.length === 0) {
-              // If no reels are left, delete the invoice
-              await removeInvoice(invoice.id);
-            } else {
-              const newSubtotal = updatedReels.reduce((sum: number, r: any) => sum + (r.quantity * r.rate), 0);
-              const discount = invoice.discountAmount || 0;
-              const extraCost = invoice.extraCostAmount || 0;
-              const newTotal = Math.max(0, newSubtotal - discount + extraCost);
-              await addOrUpdateInvoice({
-                ...invoice,
-                reels: updatedReels,
-                totalAmount: newTotal
-              });
-            }
-          }
-        }
-        await removeItem(item.id);
-      } catch (err: any) {
-        console.error("Error deleting work log:", err);
-        alert("Failed to delete work log: " + (err?.message || String(err)));
-      }
-    }
-  };
-
-  // ---- Bulk select helpers ----
-  const toggleSelectItem = (id: string) => {
-    setSelectedWorkIds(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
-  };
-
-  const handleBulkDelete = async () => {
-    if (selectedWorkIds.size === 0) return;
-    const itemsToDelete = workItems.filter(w => selectedWorkIds.has(w.id));
-    const invoicedCount = itemsToDelete.filter(w => w.status === 'Invoiced').length;
-    const msg = invoicedCount > 0
-      ? `You are about to delete ${itemsToDelete.length} work log(s), of which ${invoicedCount} are already invoiced. Their line items will also be removed from the associated invoices. Continue?`
-      : `Delete ${itemsToDelete.length} selected work log(s)? This cannot be undone.`;
-    if (!confirm(msg)) return;
-
-    try {
-      // Group invoiced items by invoiceId
-      const invoiceUpdates = new Map<string, any>();
-      for (const item of itemsToDelete) {
-        if (item.status === 'Invoiced' && item.invoiceId) {
-          const invoice = invoices.find(inv => inv.id === item.invoiceId);
-          if (invoice) {
-            const base = invoiceUpdates.get(item.invoiceId) || JSON.parse(JSON.stringify(invoice));
-            let matched = false;
-            base.reels = base.reels.filter((reel: any) => {
-              const isMatch =
-                (reel.workItemId && reel.workItemId === item.id) ||
-                (!matched && reel.title === item.description && reel.quantity === item.quantity && reel.rate === item.rate);
-              if (isMatch && !matched) { matched = true; return false; }
-              return true;
-            });
-            invoiceUpdates.set(item.invoiceId, base);
-          }
-        }
-      }
-
-      // Apply invoice updates or deletions
-      for (const [, inv] of invoiceUpdates) {
-        if (inv.reels.length === 0) {
-          await removeInvoice(inv.id);
-        } else {
-          const subtotal = inv.reels.reduce((s: number, r: any) => s + r.quantity * r.rate, 0);
-          const discount = inv.discountAmount || 0;
-          const extraCost = inv.extraCostAmount || 0;
-          await addOrUpdateInvoice({ ...inv, totalAmount: Math.max(0, subtotal - discount + extraCost) });
-        }
-      }
-
-      for (const item of itemsToDelete) {
-        await removeItem(item.id);
-      }
-      setSelectedWorkIds(new Set());
-    } catch (err: any) {
-      alert('Error deleting work logs: ' + (err?.message || String(err)));
-    }
-  };
-
-  const handleBulkSave = async (updatedWorkItems: WorkItem[], updatedInvoices: Invoice[]) => {
-    for (const inv of updatedInvoices) {
-      await addOrUpdateInvoice(inv);
-    }
-    for (const wi of updatedWorkItems) {
-      await addOrUpdateItem(wi);
-    }
-    setSelectedWorkIds(new Set());
-  };
+  const {
+    clients,
+    workItems,
+    invoices,
+    clientsLoading,
+    workLoading,
+    invoicesLoading,
+    isFormOpen,
+    setIsFormOpen,
+    isDriveModalOpen,
+    setIsDriveModalOpen,
+    embedModalData,
+    setEmbedModalData,
+    feedbackViewerItem,
+    setFeedbackViewerItem,
+    editingWorkId,
+    sortOrder,
+    setSortOrder,
+    searchQuery,
+    setSearchQuery,
+    selectedWorkIds,
+    setSelectedWorkIds,
+    isBulkEditModalOpen,
+    setIsBulkEditModalOpen,
+    showClosed,
+    setShowClosed,
+    formData,
+    setFormData,
+    closedClientIds,
+    handleEditWork,
+    handleCancel,
+    handleSubmit,
+    deleteWork,
+    toggleSelectItem,
+    handleSelectAll,
+    handleBulkDelete,
+    handleBulkSave,
+    sortedWork,
+    allVisibleSelected,
+    someVisibleSelected,
+    selectedCount,
+    selectedItems,
+    selectedInvoicedCount,
+    addOrUpdateItem,
+  } = useWorkLog(user, initialSearchQuery);
 
   if (clientsLoading || workLoading || invoicesLoading) {
     return <WorkLogSkeleton />;
   }
 
-  const filteredWork = workItems.filter(w => {
-    const isClosedClient = closedClientIds.has(w.clientId);
-    if (!showClosed && isClosedClient) return false;
-
-    if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase().trim();
-    const client = clients.find(c => c.id === w.clientId);
-    const clientName = client ? client.name.toLowerCase() : '';
-    return w.description.toLowerCase().includes(q) ||
-      clientName.includes(q) ||
-      (w.videoUrl && w.videoUrl.toLowerCase().includes(q));
-  });
-
-  const sortedWork = [...filteredWork].sort((a, b) => 
-    sortOrder === 'asc' 
-      ? (a.date - b.date || a.createdAt - b.createdAt) 
-      : (b.date - a.date || b.createdAt - a.createdAt)
-  );
-
-  const visibleIds = sortedWork.map(w => w.id);
-  const allVisibleSelected = visibleIds.length > 0 && visibleIds.every(id => selectedWorkIds.has(id));
-  const someVisibleSelected = visibleIds.some(id => selectedWorkIds.has(id)) && !allVisibleSelected;
-  const selectedCount = selectedWorkIds.size;
-  const selectedItems = workItems.filter(w => selectedWorkIds.has(w.id));
-  const selectedInvoicedCount = selectedItems.filter(w => w.status === 'Invoiced').length;
-
-  const handleSelectAll = () => {
-    if (allVisibleSelected) {
-      setSelectedWorkIds(prev => {
-        const next = new Set(prev);
-        visibleIds.forEach(id => next.delete(id));
-        return next;
-      });
-    } else {
-      setSelectedWorkIds(prev => {
-        const next = new Set(prev);
-        visibleIds.forEach(id => next.add(id));
-        return next;
-      });
-    }
-  };
-
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 w-full min-w-0">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Work Log</h2>
-          <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">Track deliverables and services.</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
-          {/* Work Log Filter Search Bar */}
-          <div className="relative flex-1 min-w-[180px] w-full sm:w-auto">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search work or client..."
-              className="w-full bg-white dark:bg-slate-800 text-sm pl-9 pr-7 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500 outline-none text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-              >
-                <X size={13} />
-              </button>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
-            <button
-              onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
-              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-transparent dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
-              title="Toggle sort order"
-            >
-              <ArrowUpDown size={14} className="shrink-0" />
-              <span className="truncate">Sort: {sortOrder === 'asc' ? 'Oldest First' : 'Newest First'}</span>
-            </button>
-
-            {closedClientIds.size > 0 && (
-              <button
-                type="button"
-                onClick={() => setShowClosed(prev => !prev)}
-                className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-colors cursor-pointer ${
-                  showClosed
-                    ? 'bg-[#383838] text-white shadow-xs'
-                    : 'bg-[#242424] text-slate-300 hover:bg-[#303030] hover:text-white active:bg-[#383838]'
-                }`}
-                title={showClosed ? "Hide work logs of closed clients" : "Show work logs of closed clients"}
-              >
-                <Archive size={13} className="shrink-0" />
-                <span className="truncate">{showClosed ? 'Hide Closed' : `Show Closed (${closedClientIds.size})`}</span>
-              </button>
-            )}
-
-            {!isFormOpen && (
-              <div className="grid grid-cols-2 gap-2 w-full sm:flex sm:items-center sm:w-auto">
-                <button 
-                  type="button"
-                  onClick={() => setIsDriveModalOpen(true)}
-                  className="w-full sm:w-auto flex items-center justify-center gap-1.5 bg-[#282828] hover:bg-[#383838] text-white border border-[#3a3a3a] px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-colors duration-120 shadow-xs cursor-pointer truncate"
-                  title="Directly upload video/file to Google Drive and log as work deliverable"
-                >
-                  <UploadCloud size={14} className="shrink-0" />
-                  <span className="truncate">Upload to Drive</span>
-                </button>
-
-                <button 
-                  onClick={() => setIsFormOpen(true)}
-                  className="w-full sm:w-auto flex items-center justify-center gap-1.5 bg-[#282828] hover:bg-[#383838] text-white border border-[#3a3a3a] px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-colors duration-120 shadow-xs cursor-pointer truncate"
-                >
-                  <Plus size={15} className="shrink-0" />
-                  <span className="truncate">Log Work</span>
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+      <WorkLogToolbar
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        sortOrder={sortOrder}
+        setSortOrder={setSortOrder}
+        closedCount={closedClientIds.size}
+        showClosed={showClosed}
+        setShowClosed={setShowClosed}
+        isFormOpen={isFormOpen}
+        onOpenDrive={() => setIsDriveModalOpen(true)}
+        onOpenForm={() => setIsFormOpen(true)}
+      />
 
       {isFormOpen && (
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm mb-8">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">{editingWorkId ? 'Edit Work Log Entry' : 'Log Completed Work'}</h3>
-            <button onClick={handleCancel} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">×</button>
-          </div>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Client</label>
-                <select 
-                  required
-                  className="w-full p-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-                  value={formData.clientId}
-                  onChange={(e) => {
-                    const clientId = e.target.value;
-                    const client = clients.find(c => c.id === clientId);
-                    const isMonthly = client?.paymentBasis === 'monthly_retainer';
-                    setFormData({
-                      ...formData,
-                      clientId,
-                      subClientId: '',
-                      rate: isMonthly ? '0' : (client ? String(client.defaultRate) : '')
-                    });
-                  }}
-                >
-                  <option value="">Select Client</option>
-                  {clients.filter(c => !c.isClosed).map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
-
-                {(() => {
-                  const selClient = clients.find(c => c.id === formData.clientId);
-                  if (selClient?.subClients && selClient.subClients.length > 0) {
-                    return (
-                      <div className="mt-2.5 bg-slate-50 dark:bg-slate-900/60 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700">
-                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
-                          <Users size={12} className="text-slate-500 dark:text-slate-400" /> Assign Sub-Client (Optional)
-                        </label>
-                        <select
-                          className="w-full p-2 border border-slate-300 dark:border-slate-700 rounded-md text-xs bg-white dark:bg-slate-800 font-medium text-slate-800 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500"
-                          value={formData.subClientId}
-                          onChange={(e) => setFormData({ ...formData, subClientId: e.target.value })}
-                        >
-                          <option value="">Direct Parent Client ({selClient.name})</option>
-                          {selClient.subClients.map(sc => (
-                            <option key={sc.id} value={sc.id}>Sub-Client: {sc.name} {sc.code ? `(${sc.code})` : ''}</option>
-                          ))}
-                        </select>
-                      </div>
-                    );
-                  }
-                  return null;
-                })()}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Date Completed</label>
-                <DateInput 
-                  required
-                  className="p-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-                  value={formData.date}
-                  onChange={(val) => setFormData({...formData, date: val})}
-                />
-              </div>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Description (e.g., Real Estate Reel, VLOG Edit)</label>
-              <input 
-                type="text"
-                required
-                className="w-full p-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-                value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
-                placeholder="Description of work"
-              />
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Video / Post Link (Optional)</label>
-                <button
-                  type="button"
-                  onClick={() => setIsDriveModalOpen(true)}
-                  className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center gap-1 cursor-pointer"
-                >
-                  <UploadCloud size={13} /> Upload to Google Drive
-                </button>
-              </div>
-              <input 
-                type="text"
-                className="w-full p-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm font-mono"
-                value={formData.videoUrl}
-                onChange={(e) => setFormData({...formData, videoUrl: e.target.value})}
-                placeholder="https://drive.google.com/file/d/... or YouTube / Instagram link"
-              />
-            </div>
-            
-            {(() => {
-              const selClient = clients.find(c => c.id === formData.clientId);
-              const isMonthly = selClient?.paymentBasis === 'monthly_retainer';
-
-              if (isMonthly) {
-                return (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Quantity</label>
-                      <input 
-                        type="number"
-                        min="1"
-                        required
-                        className="w-full p-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-                        value={formData.quantity}
-                        onChange={(e) => setFormData({...formData, quantity: e.target.value})}
-                      />
-                    </div>
-                    <div className="flex items-center">
-                      <div className="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                        <div>
-                          <strong className="block font-semibold">Monthly Basis Client</strong>
-                          <span className="text-slate-600 dark:text-slate-400">Covered by monthly retainer (₹{(selClient?.monthlyRetainerAmount || 0).toLocaleString('en-IN')}/mo). No per-reel rate is needed.</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              }
-
-              return (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Quantity</label>
-                    <input 
-                      type="number"
-                      min="1"
-                      required
-                      className="w-full p-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-                      value={formData.quantity}
-                      onChange={(e) => setFormData({...formData, quantity: e.target.value})}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Rate (₹)</label>
-                    <input 
-                      type="number"
-                      required
-                      className="w-full p-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-                      value={formData.rate}
-                      onChange={(e) => setFormData({...formData, rate: e.target.value})}
-                    />
-                  </div>
-                </div>
-              );
-            })()}
-            
-            <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-700">
-              <button 
-                type="button" 
-                onClick={handleCancel}
-                className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded font-medium mr-2 cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button 
-                type="submit" 
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-medium transition-colors cursor-pointer"
-              >
-                {editingWorkId ? 'Save Changes' : 'Log Work'}
-              </button>
-            </div>
-          </form>
-        </div>
+        <WorkLogFormCard
+          editingWorkId={editingWorkId}
+          formData={formData}
+          setFormData={setFormData}
+          clients={clients}
+          onSubmit={handleSubmit}
+          onCancel={handleCancel}
+          onOpenDrive={() => setIsDriveModalOpen(true)}
+        />
       )}
 
       {sortedWork.length === 0 ? (
-        <div className="text-center py-16 px-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-4 max-w-xl mx-auto my-4 shadow-xs">
-          {clients.length === 0 ? (
-            <>
-              <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-400 flex items-center justify-center mx-auto">
-                <Users size={24} />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">Add a client before logging work</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Every deliverable is linked to a client so rates, retainers, and invoice statements calculate automatically.
-                </p>
-              </div>
-              {onNavigateToClients && (
-                <button
-                  type="button"
-                  onClick={onNavigateToClients}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
-                >
-                  <Users size={14} /> Add First Client
-                </button>
-              )}
-            </>
-          ) : workItems.length === 0 ? (
-            <>
-              <div className="w-12 h-12 rounded-xl bg-[#333333] text-slate-300 flex items-center justify-center mx-auto">
-                <Clock size={24} />
-              </div>
-              <div className="space-y-1.5">
-                <h3 className="text-base font-bold text-white">No work logged yet</h3>
-                <p className="text-xs text-slate-400 leading-relaxed max-w-md mx-auto">
-                  Record video deliverables, reels, or editing tasks to automatically aggregate them into invoices with UPI payment QR codes.
-                </p>
-              </div>
-              <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsFormOpen(true)}
-                  className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
-                >
-                  <Plus size={14} /> Log First Work Item
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-400 flex items-center justify-center mx-auto">
-                <Search size={24} />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">No matching work items</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  No deliverables match your search query "{searchQuery}".
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                className="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
-              >
-                Clear Search
-              </button>
-            </>
-          )}
-        </div>
+        <WorkLogEmptyState
+          hasClients={clients.length > 0}
+          hasWorkItems={workItems.length > 0}
+          searchQuery={searchQuery}
+          onClearSearch={() => setSearchQuery('')}
+          onOpenForm={() => setIsFormOpen(true)}
+          onNavigateToClients={onNavigateToClients}
+        />
       ) : (
-        <div className="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm contain-paint">
-          {/* Mobile Header Bar */}
-          <div className="md:hidden flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-400">
-            <label className="flex items-center gap-2.5 cursor-pointer select-none">
-              <Checkbox
-                checked={allVisibleSelected}
-                indeterminate={someVisibleSelected}
-                onChange={handleSelectAll}
-                aria-label={`Select all visible ${sortedWork.length} deliverables`}
-              />
-              <span>Select All ({sortedWork.length})</span>
-            </label>
-            <span className="text-[11px] font-normal text-slate-500">
-              {selectedCount > 0 ? `${selectedCount} selected` : 'Deliverables'}
-            </span>
-          </div>
-
-          {/* Mobile Work Cards View */}
-          <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-700/60">
-            {sortedWork.map(work => {
-              const client = clients.find(c => c.id === work.clientId);
-              const videoUrl = extractVideoUrl(work);
-              const isSelected = selectedWorkIds.has(work.id);
-              const formattedDate = new Date(work.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-              const isMonthly = client?.paymentBasis === 'monthly_retainer';
-              const amountText = isMonthly ? 'Monthly Retainer' : `₹${(work.quantity * work.rate).toLocaleString('en-IN')}`;
-
-              return (
-                <div
-                  key={work.id}
-                  className={clsx(
-                    'p-4 space-y-3 transition-colors',
-                    isSelected && 'bg-indigo-50/50 dark:bg-indigo-950/20'
-                  )}
-                >
-                  <div className="flex items-start justify-between gap-2.5">
-                    <div className="flex items-start gap-2.5 min-w-0 flex-1">
-                      <Checkbox
-                        checked={isSelected}
-                        onChange={() => toggleSelectItem(work.id)}
-                        aria-label={`Select ${work.description || 'work log'}`}
-                      />
-                      <div className="min-w-0">
-                        <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate">
-                          {client?.name || 'Unknown Client'}
-                        </h4>
-                        {work.subClientName && (
-                          <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                            {work.subClientName}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col items-end gap-1">
-                      <StatusBadge status={work.status === 'Invoiced' ? 'Invoiced' : 'Pending'} />
-                      <div className="flex items-center gap-1 text-[11px]">
-                        <span className={`w-1.5 h-1.5 rounded-full ${
-                          work.approvalStatus === 'approved'
-                            ? 'bg-[#4870aa]'
-                            : work.approvalStatus === 'changes_requested'
-                            ? 'bg-red-500'
-                            : 'bg-slate-500'
-                        }`} />
-                        <span className={`font-medium ${
-                          work.approvalStatus === 'approved'
-                            ? 'text-indigo-400'
-                            : work.approvalStatus === 'changes_requested'
-                            ? 'text-red-400'
-                            : 'text-slate-400'
-                        }`}>
-                          {work.approvalStatus === 'approved'
-                            ? 'Approved'
-                            : work.approvalStatus === 'changes_requested'
-                            ? `Changes (${work.revisionCount || 1})`
-                            : 'Pending'}
-                        </span>
-                        {work.comments && work.comments.length > 0 && (
-                          <button
-                            type="button"
-                            onClick={() => setFeedbackViewerItem({ item: work, clientName: client?.name })}
-                            className="text-slate-400 hover:text-white underline cursor-pointer"
-                          >
-                            ({work.comments.length})
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-3 border border-slate-100 dark:border-slate-800 space-y-1.5">
-                    <div className="flex items-center justify-between gap-2 text-xs">
-                      <span className="font-medium text-slate-900 dark:text-slate-100 break-words flex-1">
-                        {work.description} <span className="text-slate-400 dark:text-slate-500 font-normal">({work.quantity}x)</span>
-                      </span>
-                      <span className="font-semibold text-slate-900 dark:text-slate-100 shrink-0">
-                        {amountText}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 pt-1">
-                      <span>{formattedDate}</span>
-                      {videoUrl && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEmbedModalData({
-                              isOpen: true,
-                              url: videoUrl,
-                              title: work.description,
-                              clientName: client?.name
-                            });
-                          }}
-                          className="text-xs font-semibold text-slate-300 hover:text-white hover:underline inline-flex items-center gap-1 cursor-pointer"
-                        >
-                          <Play size={12} /> Watch Preview
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-1">
-                    <span className="text-[11px] text-slate-400 font-mono">
-                      #{work.id.substring(0, 6)}
-                    </span>
-                    <div className="flex items-center gap-1">
-                      {videoUrl && (
-                        <a
-                          href={videoUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-1.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-colors"
-                          title="Open external link"
-                        >
-                          <ExternalLink size={15} />
-                        </a>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => handleEditWork(work)}
-                        className="p-1.5 text-slate-600 dark:text-slate-400 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-colors cursor-pointer"
-                        title="Edit Work Log"
-                      >
-                        <Edit2 size={15} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => deleteWork(work)}
-                        className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40 rounded transition-colors cursor-pointer"
-                        title="Delete Work Log"
-                      >
-                        <Trash2 size={15} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Desktop Table View */}
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[700px]">
-              <thead>
-                <tr className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700">
-                  <th className="py-3 pl-4 pr-2 w-10">
-                    <Checkbox
-                      checked={allVisibleSelected}
-                      indeterminate={someVisibleSelected}
-                      onChange={handleSelectAll}
-                      title="Select all visible"
-                      aria-label="Select all visible deliverables"
-                    />
-                  </th>
-                  <th className="py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Date</th>
-                  <th className="py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Client</th>
-                  <th className="py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Description / Video Link</th>
-                  <th className="py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Amount</th>
-                  <th className="py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
-                  <th className="py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Approval</th>
-                  <th className="py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
-                {sortedWork.map(work => {
-                  const client = clients.find(c => c.id === work.clientId);
-                  const videoUrl = extractVideoUrl(work);
-                  const isSelected = selectedWorkIds.has(work.id);
-                  return (
-                    <tr
-                      key={work.id}
-                      className={clsx(
-                        'hover:bg-[#282828] transition-colors duration-120',
-                        isSelected && 'bg-[#2a2a2a]'
-                      )}
-                    >
-                      <td className="py-4 pl-4 pr-2">
-                        <Checkbox
-                          checked={isSelected}
-                          onChange={() => toggleSelectItem(work.id)}
-                          aria-label={`Select ${work.description || 'work log'}`}
-                        />
-                      </td>
-                      <td className="py-4 px-4 text-sm text-slate-600 dark:text-slate-400">
-                        {new Date(work.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
-                      </td>
-                      <td className="py-4 px-4 text-sm font-medium text-slate-900 dark:text-slate-100">
-                        <div>{client?.name || 'Unknown Client'}</div>
-                        {work.subClientName && (
-                          <div className="text-[12px] text-slate-500 dark:text-slate-400 font-normal mt-0.5">
-                            {work.subClientName}
-                          </div>
-                        )}
-                      </td>
-                      <td className="py-4 px-4 text-sm text-slate-600 dark:text-slate-300">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-1.5">
-                          <span className="font-medium text-slate-900 dark:text-slate-100">{work.description}</span>
-                          <span className="text-xs text-slate-400 dark:text-slate-500">({work.quantity}x)</span>
-                          {videoUrl && (
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const client = clients.find(c => c.id === work.clientId);
-                                setEmbedModalData({
-                                  isOpen: true,
-                                  url: videoUrl,
-                                  title: work.description,
-                                  clientName: client?.name
-                                });
-                              }}
-                              className="text-xs font-medium text-slate-300 hover:text-white inline-flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
-                              title={`Watch embedded preview: ${videoUrl}`}
-                            >
-                              <Play size={14} /> Watch Preview
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                      <td className="py-4 px-4 text-sm font-medium text-slate-900 dark:text-slate-100">
-                        {client?.paymentBasis === 'monthly_retainer' ? (
-                          <span className="text-sm font-normal text-slate-600 dark:text-slate-400">
-                            Monthly Retainer
-                          </span>
-                        ) : (
-                          `₹${(work.quantity * work.rate).toLocaleString('en-IN')}`
-                        )}
-                      </td>
-                      <td className="py-4 px-4 text-sm font-medium">
-                        <StatusBadge status={work.status === 'Invoiced' ? 'Invoiced' : 'Pending'} />
-                      </td>
-                      <td className="py-4 px-4 text-sm whitespace-nowrap">
-                        <div className="flex items-center gap-1.5">
-                          <span className={`w-1.5 h-1.5 rounded-full ${
-                            work.approvalStatus === 'approved'
-                              ? 'bg-[#4870aa]'
-                              : work.approvalStatus === 'changes_requested'
-                              ? 'bg-red-500'
-                              : 'bg-slate-500'
-                          }`} />
-                          <span className={`font-medium text-xs ${
-                            work.approvalStatus === 'approved'
-                              ? 'text-indigo-400'
-                              : work.approvalStatus === 'changes_requested'
-                              ? 'text-red-400'
-                              : 'text-slate-400'
-                          }`}>
-                            {work.approvalStatus === 'approved'
-                              ? 'Approved'
-                              : work.approvalStatus === 'changes_requested'
-                              ? `Changes (${work.revisionCount || 1})`
-                              : 'Pending Review'}
-                          </span>
-                          {work.comments && work.comments.length > 0 && (
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setFeedbackViewerItem({ item: work, clientName: client?.name });
-                              }}
-                              className="ml-1 text-[11px] text-slate-400 hover:text-white underline inline-flex items-center gap-0.5 cursor-pointer"
-                              title="View client comments"
-                            >
-                              ({work.comments.length} note{work.comments.length === 1 ? '' : 's'})
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                      <td className="py-4 px-4 text-sm text-right flex justify-end items-center gap-1">
-                        {videoUrl && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const client = clients.find(c => c.id === work.clientId);
-                              setEmbedModalData({
-                                isOpen: true,
-                                url: videoUrl,
-                                title: work.description,
-                                clientName: client?.name
-                              });
-                            }}
-                            className="p-1.5 text-slate-400 hover:text-white hover:bg-[#333333] rounded transition-colors cursor-pointer"
-                            title="Play embedded preview"
-                          >
-                            <Play size={15} />
-                          </button>
-                        )}
-                        {videoUrl && (
-                          <a
-                            href={videoUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-1.5 text-slate-400 hover:text-white hover:bg-[#383838] rounded transition-colors duration-120 cursor-pointer"
-                            title="Open link in Google Drive / external tab"
-                          >
-                            <ExternalLink size={15} />
-                          </a>
-                        )}
-                        <button 
-                          onClick={() => handleEditWork(work)}
-                          className="text-slate-400 hover:text-white p-1.5 rounded hover:bg-[#383838] active:bg-[#444444] transition-colors duration-120 cursor-pointer"
-                          title="Edit Work Log"
-                        >
-                          <Edit2 size={16} />
-                        </button>
-                        <button 
-                          onClick={() => deleteWork(work)}
-                          className="text-[#e1002d] hover:text-[#ff3b5c] p-1.5 rounded hover:bg-[#383838] active:bg-[#444444] transition-colors duration-120 cursor-pointer"
-                          title="Delete Work Log"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <WorkLogTable
+          sortedWork={sortedWork}
+          clients={clients}
+          selectedWorkIds={selectedWorkIds}
+          allVisibleSelected={allVisibleSelected}
+          someVisibleSelected={someVisibleSelected}
+          selectedCount={selectedCount}
+          onSelectAll={handleSelectAll}
+          onToggleSelect={toggleSelectItem}
+          onEditWork={handleEditWork}
+          onDeleteWork={deleteWork}
+          onOpenEmbed={setEmbedModalData}
+          onOpenFeedbackViewer={setFeedbackViewerItem}
+        />
       )}
 
-      {/* Bulk Actions Floating Toolbar */}
-      {selectedCount > 0 && (
-        <div className="fixed bottom-20 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 sm:gap-3 px-3.5 sm:px-5 py-2.5 sm:py-3 bg-slate-900 dark:bg-slate-950 text-white rounded-2xl shadow-2xl border border-slate-700 animate-fadeIn max-w-[calc(100vw-2rem)]">
-          <div className="flex items-center gap-2">
-            <CheckSquare size={16} className="text-indigo-400" />
-            <span className="text-sm font-semibold">{selectedCount} selected</span>
-            {selectedInvoicedCount > 0 && (
-              <span className="text-xs text-slate-400 font-normal">
-                ({selectedInvoicedCount} invoiced)
-              </span>
-            )}
-          </div>
-          <div className="w-px h-5 bg-slate-600" />
-          <button
-            onClick={() => setIsBulkEditModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-colors cursor-pointer"
-          >
-            <Layers size={13} />
-            Bulk Edit
-          </button>
-          <button
-            onClick={handleBulkDelete}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-red-600/80 hover:bg-red-500 text-white rounded-lg transition-colors cursor-pointer"
-          >
-            <Trash2 size={13} />
-            Delete All
-          </button>
-          <button
-            onClick={() => setSelectedWorkIds(new Set())}
-            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors cursor-pointer"
-            title="Deselect all"
-          >
-            <X size={14} />
-          </button>
-        </div>
-      )}
+      <WorkLogBulkToolbar
+        selectedCount={selectedCount}
+        selectedInvoicedCount={selectedInvoicedCount}
+        onOpenBulkEdit={() => setIsBulkEditModalOpen(true)}
+        onBulkDelete={handleBulkDelete}
+        onDeselectAll={() => setSelectedWorkIds(new Set())}
+      />
 
-      {/* Bulk Edit Modal */}
       {isBulkEditModalOpen && (
         <BulkEditWorkModal
           isOpen={isBulkEditModalOpen}
@@ -1080,7 +147,6 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
         />
       )}
 
-      {/* Google Drive Upload Modal */}
       <GoogleDriveUploadModal
         isOpen={isDriveModalOpen}
         onClose={() => setIsDriveModalOpen(false)}
@@ -1091,15 +157,14 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
           setIsDriveModalOpen(false);
         }}
         onLinkGenerated={(result) => {
-          setFormData(prev => ({
+          setFormData((prev) => ({
             ...prev,
             videoUrl: result.webViewLink,
-            description: prev.description.trim() ? prev.description : result.name
+            description: prev.description.trim() ? prev.description : result.name,
           }));
         }}
       />
 
-      {/* Media Embed Player Modal */}
       {embedModalData && (
         <MediaEmbedModal
           isOpen={embedModalData.isOpen}
@@ -1110,7 +175,6 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
         />
       )}
 
-      {/* Deliverable Feedback & Revision History Viewer */}
       {feedbackViewerItem && (
         <DeliverableFeedbackViewerModal
           isOpen={!!feedbackViewerItem}
@@ -1122,3 +186,5 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
     </div>
   );
 }
+
+export default WorkLogTab;

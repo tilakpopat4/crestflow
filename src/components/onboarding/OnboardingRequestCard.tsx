@@ -1,7 +1,8 @@
 import React from 'react';
 import { Phone, Mail, Instagram, Clock } from 'lucide-react';
-import { motion, useReducedMotion } from 'motion/react';
 import { ServiceRequest } from '../../types';
+import { Card } from '../ui/Card';
+import { Button } from '../ui/Button';
 
 interface OnboardingRequestCardProps {
   request: ServiceRequest;
@@ -12,8 +13,8 @@ interface OnboardingRequestCardProps {
 }
 
 /**
- * OnboardingRequestCard renders an incoming client onboarding lead or request,
- * displaying contact details, project scope, proposed rates, and workflow actions.
+ * OnboardingRequestCard Component
+ * Displays an incoming client onboarding lead or project request with actions to convert or decline.
  */
 export const OnboardingRequestCard: React.FC<OnboardingRequestCardProps> = ({
   request,
@@ -22,7 +23,6 @@ export const OnboardingRequestCard: React.FC<OnboardingRequestCardProps> = ({
   onRestore,
   onNavigateToClients,
 }) => {
-  const shouldReduceMotion = useReducedMotion();
   const formattedDate = new Date(request.createdAt).toLocaleDateString('en-IN', {
     day: 'numeric',
     month: 'short',
@@ -33,23 +33,23 @@ export const OnboardingRequestCard: React.FC<OnboardingRequestCardProps> = ({
     switch (request.status) {
       case 'accepted':
         return (
-          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-600 dark:text-indigo-400">
-            <span className="w-2 h-2 rounded-full bg-indigo-600 dark:bg-indigo-400" />
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-primary">
+            <span className="w-2 h-2 rounded-full bg-accent" />
             Accepted
           </span>
         );
       case 'declined':
         return (
-          <span className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-400 dark:text-slate-500">
-            <span className="w-2 h-2 rounded-full bg-slate-400" />
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-text-muted">
+            <span className="w-2 h-2 rounded-full bg-surface-400" />
             Declined
           </span>
         );
       case 'pending':
       default:
         return (
-          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-800 dark:text-slate-200">
-            <span className="w-2 h-2 rounded-full bg-indigo-600 dark:bg-indigo-400" />
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-secondary">
+            <span className="w-2 h-2 rounded-full bg-amber-400" />
             Pending Review
           </span>
         );
@@ -57,22 +57,22 @@ export const OnboardingRequestCard: React.FC<OnboardingRequestCardProps> = ({
   };
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl p-5 sm:p-6 shadow-xs flex flex-col justify-between gap-4">
+    <Card className="p-5 sm:p-6 flex flex-col justify-between gap-4 bg-surface-700 border-surface-400">
       <div className="space-y-3">
         {/* Header: Client & Status */}
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 tracking-tight">
+            <h3 className="text-base font-bold text-text-primary tracking-tight">
               {request.clientName}
             </h3>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-              Contact: <span className="font-semibold text-slate-800 dark:text-slate-200">{request.contactName}</span>
+            <p className="text-xs text-text-secondary mt-0.5">
+              Contact: <span className="font-semibold text-text-primary">{request.contactName}</span>
             </p>
           </div>
 
           <div className="flex flex-col items-end gap-1 shrink-0">
             {getStatusBadge()}
-            <span className="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1">
+            <span className="text-xs text-text-muted flex items-center gap-1 font-mono tabular-nums">
               <Clock size={12} />
               {formattedDate}
             </span>
@@ -81,34 +81,37 @@ export const OnboardingRequestCard: React.FC<OnboardingRequestCardProps> = ({
 
         {/* Proposed Rate */}
         {request.proposedRate && (
-          <div className="text-sm font-bold text-slate-700 dark:text-slate-300">
-            Proposed Rate: <span className="text-indigo-600 dark:text-indigo-400">₹{request.proposedRate} / reel</span>
+          <div className="text-xs font-semibold text-text-secondary">
+            Proposed Rate:{' '}
+            <span className="text-text-primary font-mono tabular-nums font-bold">
+              ₹{request.proposedRate} / reel
+            </span>
           </div>
         )}
 
         {/* Project Scope / Description */}
-        <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700 rounded-xl p-3.5 text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line">
+        <div className="bg-surface-800 border border-surface-400 rounded-lg p-3.5 text-xs text-text-secondary leading-relaxed whitespace-pre-line">
           {request.projectDetails}
         </div>
 
         {/* Contact Links */}
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-500 dark:text-slate-400 pt-1">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-text-muted pt-1">
           {request.contactPhone && (
             <a
               href={`tel:${request.contactPhone}`}
-              className="inline-flex items-center gap-1.5 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
+              className="inline-flex items-center gap-1.5 hover:text-text-primary transition-colors"
             >
-              <Phone size={14} className="text-slate-400" />
-              <span>{request.contactPhone}</span>
+              <Phone size={13} className="text-text-muted" />
+              <span className="font-mono tabular-nums">{request.contactPhone}</span>
             </a>
           )}
 
           {request.contactEmail && (
             <a
               href={`mailto:${request.contactEmail}`}
-              className="inline-flex items-center gap-1.5 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
+              className="inline-flex items-center gap-1.5 hover:text-text-primary transition-colors"
             >
-              <Mail size={14} className="text-slate-400" />
+              <Mail size={13} className="text-text-muted" />
               <span>{request.contactEmail}</span>
             </a>
           )}
@@ -118,9 +121,9 @@ export const OnboardingRequestCard: React.FC<OnboardingRequestCardProps> = ({
               href={request.instagram}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 hover:underline"
+              className="inline-flex items-center gap-1.5 text-text-secondary hover:text-text-primary transition-colors"
             >
-              <Instagram size={14} />
+              <Instagram size={13} />
               <span>Instagram</span>
             </a>
           )}
@@ -128,55 +131,57 @@ export const OnboardingRequestCard: React.FC<OnboardingRequestCardProps> = ({
       </div>
 
       {/* Action Footer */}
-      <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-700">
+      <div className="flex items-center justify-end gap-2 pt-3 border-t border-surface-400/80">
         {request.status === 'pending' && (
           <>
-            <motion.button
+            <Button
               type="button"
+              variant="secondary"
+              size="sm"
               onClick={() => onDecline(request)}
-              whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
-              className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-xl text-xs sm:text-sm font-semibold transition-colors cursor-pointer border-0"
+              className="text-xs"
             >
               Decline
-            </motion.button>
-            <motion.button
+            </Button>
+            <Button
               type="button"
+              variant="primary"
+              size="sm"
               onClick={() => onAccept(request)}
-              whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs sm:text-sm font-semibold transition-colors cursor-pointer border-0 shadow-2xs"
+              className="text-xs font-semibold"
             >
               Accept &amp; Add Client
-            </motion.button>
+            </Button>
           </>
         )}
 
         {request.status === 'accepted' && (
           <div className="flex items-center gap-3">
-            <span className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold">Client Added</span>
+            <span className="text-xs text-text-secondary font-semibold">Client Added</span>
             {onNavigateToClients && (
-              <motion.button
+              <button
                 type="button"
                 onClick={onNavigateToClients}
-                whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
-                className="text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 underline cursor-pointer border-0 bg-transparent"
+                className="text-xs font-semibold text-text-primary hover:underline cursor-pointer border-0 bg-transparent"
               >
                 View in Clients
-              </motion.button>
+              </button>
             )}
           </div>
         )}
 
         {request.status === 'declined' && onRestore && (
-          <motion.button
+          <button
             type="button"
             onClick={() => onRestore(request)}
-            whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
-            className="text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 underline cursor-pointer border-0 bg-transparent"
+            className="text-xs font-semibold text-text-muted hover:text-text-primary underline cursor-pointer border-0 bg-transparent"
           >
             Restore Request
-          </motion.button>
+          </button>
         )}
       </div>
-    </div>
+    </Card>
   );
 };
+
+export default OnboardingRequestCard;

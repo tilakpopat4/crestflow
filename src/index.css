@@ -42,6 +42,18 @@
   --color-red-600: #e1002d;
   --color-red-700: #bf0026;
   --color-red-800: #9e0020;
+
+  --color-surface-900: #1a1a1a;
+  --color-surface-800: #1e1e1e;
+  --color-surface-700: #212121;
+  --color-surface-600: #242424;
+  --color-surface-500: #282828;
+  --color-surface-400: #333333;
+  --color-text-primary: #f1f1f1;
+  --color-text-secondary: #aaaaaa;
+  --color-text-muted: #666666;
+  --color-accent: #e1002d;
+  --color-accent-hover: #c70027;
 }
 
 @layer base {
@@ -181,33 +193,17 @@ footer {
   background-color: #282828 !important;
 }
 
-/* Primary Action Buttons: Steel blue (#4870aa) per user instruction & GEMINI.md */
-button.bg-indigo-600,
-button.bg-blue-600,
-button.bg-indigo-700,
-button.bg-blue-700,
-a.bg-indigo-600,
-a.bg-blue-600,
-a.bg-indigo-700,
-a.bg-blue-700,
-[role="button"].bg-indigo-600,
-[role="button"].bg-blue-600 {
-  background-color: #4870aa !important;
-  color: #ffffff !important;
+/* Primary Action Buttons: Restrained palette per project-rules.md */
+button.btn-primary,
+.btn-primary {
+  background-color: #e1002d !important;
+  color: #f1f1f1 !important;
   border: none !important;
 }
 
-button.bg-indigo-600:hover,
-button.bg-blue-600:hover,
-button.bg-indigo-700:hover,
-button.bg-blue-700:hover,
-a.bg-indigo-600:hover,
-a.bg-blue-600:hover,
-a.bg-indigo-700:hover,
-a.bg-blue-700:hover,
-[role="button"].bg-indigo-600:hover,
-[role="button"].bg-blue-600:hover {
-  background-color: #3b5e90 !important;
+button.btn-primary:hover,
+.btn-primary:hover {
+  background-color: #c70027 !important;
   color: #ffffff !important;
 }
 
@@ -289,7 +285,7 @@ td[data-edge] button,
 td[data-edge] button:hover,
 [data-edge] > button:hover,
 .group[data-edge] button:hover {
-  background-color: #3b5e90 !important;
+  background-color: var(--color-accent-hover, #c70028) !important;
   color: #ffffff !important;
 }
 

@@ -269,12 +269,12 @@ export const CalendarPopover: React.FC<CalendarPopoverProps> = ({
                 }
               }}
               placeholder="DD/MM/YYYY"
-              className="w-full text-xs px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-600"
+              className="w-full text-xs px-2.5 py-1.5 rounded-lg border border-surface-400 bg-surface-800 text-text-primary outline-none focus:border-surface-300 font-mono"
             />
             <button
               type="button"
               onClick={handleManualSubmit}
-              className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white shrink-0 cursor-pointer transition-colors"
+              className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-accent hover:bg-accent-hover text-white shrink-0 cursor-pointer transition-colors border-0 shadow-xs"
             >
               Apply
             </button>

@@ -35,52 +35,52 @@ export const RevenueScrubberColumns: React.FC<RevenueScrubberColumnsProps> = ({
                 x2="50%"
                 y1="0"
                 y2="100%"
-                className="stroke-slate-300 dark:stroke-slate-600"
+                className="stroke-surface-400"
               />
               <circle
                 cx="50%"
                 cy={yAt(p.prev)}
                 r="3.5"
                 strokeWidth="2"
-                className="fill-slate-400 stroke-white group-data-off-prev/plot:hidden dark:stroke-slate-800"
+                className="fill-text-secondary stroke-surface-700 group-data-off-prev/plot:hidden"
               />
               <circle
                 cx="50%"
                 cy={yAt(p.now)}
                 r="4.5"
                 strokeWidth="2"
-                className="fill-white stroke-[#282828] group-data-off-now/plot:hidden"
+                className="fill-text-primary stroke-surface-700 group-data-off-now/plot:hidden"
               />
             </svg>
 
             <span
               aria-hidden="true"
-              className={`pointer-events-none absolute top-0 z-20 hidden w-44 rounded-lg bg-[#282828] p-3 text-left text-xs shadow-md border border-[#444444] group-data-active/pt:block sm:w-48 ${
+              className={`pointer-events-none absolute top-0 z-20 hidden w-44 rounded-lg bg-surface-700 p-3 text-left text-xs shadow-lg border border-surface-400 group-data-active/pt:block sm:w-48 ${
                 i < months.length / 2 ? 'left-[calc(50%+12px)]' : 'right-[calc(50%+12px)]'
               }`}
             >
-              <span className="block font-semibold text-white">
+              <span className="block font-semibold text-text-primary">
                 {p.month} {p.year}
               </span>
-              <span className="mt-1.5 flex items-center gap-1.5 whitespace-nowrap text-slate-300 group-data-off-now/plot:hidden">
-                <span className="h-0.5 w-3 shrink-0 rounded-full bg-white" />
+              <span className="mt-1.5 flex items-center gap-1.5 whitespace-nowrap text-text-secondary group-data-off-now/plot:hidden">
+                <span className="h-0.5 w-3 shrink-0 rounded-full bg-text-primary" />
                 Paid
-                <span className="ml-auto pl-2 font-semibold text-white tabular-nums">
+                <span className="ml-auto pl-2 font-semibold font-mono text-text-primary tabular-nums">
                   {formatCurrency(p.now)}
                 </span>
               </span>
-              <span className="mt-1.5 flex items-center gap-1.5 whitespace-nowrap text-slate-300 group-data-off-prev/plot:hidden">
-                <span className="w-3 shrink-0 border-t-2 border-dashed border-white/70" />
+              <span className="mt-1.5 flex items-center gap-1.5 whitespace-nowrap text-text-secondary group-data-off-prev/plot:hidden">
+                <span className="w-3 shrink-0 border-t-2 border-dashed border-text-secondary" />
                 {hasPrevYearData ? `${p.year - 1}` : 'Invoiced'}
-                <span className="ml-auto pl-2 font-semibold text-slate-900 tabular-nums dark:text-slate-100">
+                <span className="ml-auto pl-2 font-semibold font-mono text-text-primary tabular-nums">
                   {formatCurrency(p.prev)}
                 </span>
               </span>
               <span
-                className={`mt-2 block border-t border-slate-100 dark:border-slate-700 pt-1.5 font-medium group-data-off-now/plot:hidden group-data-off-prev/plot:hidden ${
+                className={`mt-2 block border-t border-surface-500 pt-1.5 font-medium group-data-off-now/plot:hidden group-data-off-prev/plot:hidden ${
                   ch < 0
-                    ? 'text-red-600 dark:text-red-400'
-                    : 'text-indigo-600 dark:text-indigo-400'
+                    ? 'text-accent'
+                    : 'text-text-primary'
                 }`}
               >
                 {`${ch < 0 ? '↓' : '↑'} ${Math.abs(ch).toFixed(1)}% vs ${comparisonLabel}`}

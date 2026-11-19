@@ -149,11 +149,10 @@ export default function BillingPage({
 
         {feedbackMessage && (
           <div
-            className={`mb-6 p-4 rounded text-xs ${
-              feedbackMessage.type === 'success'
-                ? 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700'
-                : 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-900'
-            }`}
+            className={`mb-6 p-4 rounded text-xs ${feedbackMessage.type === 'success'
+              ? 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700'
+              : 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-900'
+              }`}
           >
             {feedbackMessage.text}
           </div>
@@ -186,8 +185,8 @@ export default function BillingPage({
                 {cancelAtPeriodEnd
                   ? 'None (Cancelling)'
                   : isTrialing
-                  ? `₹${currentPlanObj.price.toLocaleString('en-IN')} on ${formatDate(trialEndsAt || accessUntil)}`
-                  : `₹${currentPlanObj.price.toLocaleString('en-IN')} on ${formatDate(accessUntil)}`}
+                    ? `₹${currentPlanObj.price.toLocaleString('en-IN')} on ${formatDate(trialEndsAt || accessUntil)}`
+                    : `₹${currentPlanObj.price.toLocaleString('en-IN')} on ${formatDate(accessUntil)}`}
               </strong>
             </div>
           </div>
@@ -242,11 +241,10 @@ export default function BillingPage({
                 {PRO_PLANS.map((p) => (
                   <label
                     key={p.id}
-                    className={`flex items-center justify-between p-3 rounded border cursor-pointer text-xs ${
-                      selectedNewPlan === p.id
-                        ? 'border-indigo-600 bg-indigo-50/20 dark:bg-indigo-950/20'
-                        : 'border-slate-200 dark:border-slate-800'
-                    }`}
+                    className={`flex items-center justify-between p-3 rounded border cursor-pointer text-xs ${selectedNewPlan === p.id
+                      ? 'border-indigo-600 bg-indigo-50/20 dark:bg-indigo-950/20'
+                      : 'border-slate-200 dark:border-slate-800'
+                      }`}
                   >
                     <div className="flex items-center gap-2">
                       <input

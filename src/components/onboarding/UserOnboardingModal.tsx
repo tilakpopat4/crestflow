@@ -15,10 +15,10 @@ interface UserOnboardingModalProps {
 }
 
 const POPULAR_SPECIALTIES = ['Video Editor', 'UI/UX Designer', 'Web Developer', 'Graphic Designer', 'Content Writer', 'Consultant', 'Photographer', 'Freelancer'];
-const INPUT_CLS = "w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-indigo-600 outline-none transition-colors duration-120";
-const LBL_CLS = "block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5";
-const BTN_PRI = "px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors duration-120 cursor-pointer border-0 disabled:opacity-50";
-const BTN_SEC = "px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold transition-colors duration-120 cursor-pointer border-0 disabled:opacity-50";
+const INPUT_CLS = "w-full px-3.5 py-2 text-xs rounded-lg border border-surface-400 bg-surface-800 text-text-primary placeholder:text-text-muted focus:border-surface-300 outline-none transition-colors duration-120";
+const LBL_CLS = "block text-xs font-semibold text-text-secondary mb-1.5";
+const BTN_PRI = "px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-lg text-xs font-semibold transition-colors duration-120 cursor-pointer border-0 shadow-xs disabled:opacity-50";
+const BTN_SEC = "px-4 py-2 bg-surface-600 hover:bg-surface-500 text-text-primary rounded-lg text-xs font-semibold transition-colors duration-120 cursor-pointer border-0 disabled:opacity-50";
 
 export const UserOnboardingModal: React.FC<UserOnboardingModalProps> = ({
   user,
@@ -94,25 +94,30 @@ export const UserOnboardingModal: React.FC<UserOnboardingModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 select-none">
-      <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 sm:p-7 shadow-xl">
-        <div className="flex items-center justify-between pb-4 mb-5 border-b border-slate-100 dark:border-slate-800">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4 select-none">
+      <div className="w-full max-w-md bg-surface-700 text-text-primary rounded-xl border border-surface-400 p-6 sm:p-7 shadow-2xl">
+        <div className="flex items-center justify-between pb-4 mb-5 border-b border-surface-400/80">
           <div className="flex items-baseline gap-2">
-            <span className="text-sm font-bold text-slate-900 dark:text-slate-100 tracking-tight">Workspace Setup</span>
-            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">({step}/3)</span>
+            <span className="text-sm font-bold text-text-primary tracking-tight">Workspace Setup</span>
+            <span className="text-xs font-medium text-text-secondary font-mono tabular-nums">({step}/3)</span>
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5" aria-label={`Step ${step} of 3`}>
               {[1, 2, 3].map((s) => (
                 <span
                   key={s}
-                  className={`h-1.5 rounded-full transition-all duration-120 ${s === step ? 'w-6 bg-indigo-600 dark:bg-indigo-400' : s < step ? 'w-3 bg-indigo-200 dark:bg-indigo-900/60' : 'w-3 bg-slate-200 dark:bg-slate-800'
-                    }`}
+                  className={`h-1.5 rounded-full transition-all duration-120 ${
+                    s === step
+                      ? 'w-6 bg-accent'
+                      : s < step
+                      ? 'w-3 bg-surface-500'
+                      : 'w-3 bg-surface-800'
+                  }`}
                 />
               ))}
             </div>
             {onLogout && (
-              <button type="button" onClick={onLogout} className="text-xs text-slate-400 hover:text-slate-200 cursor-pointer bg-transparent border-0">
+              <button type="button" onClick={onLogout} className="text-xs text-text-muted hover:text-text-primary cursor-pointer bg-transparent border-0 transition-colors">
                 Sign Out
               </button>
             )}
@@ -149,8 +154,8 @@ export const UserOnboardingModal: React.FC<UserOnboardingModalProps> = ({
                       type="button"
                       onClick={() => setTitle(spec)}
                       className={`px-2 py-0.5 text-[10px] rounded transition-colors border-none cursor-pointer ${title === spec
-                          ? 'bg-[#282828] text-white font-medium'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                        ? 'bg-[#282828] text-white font-medium'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                         }`}
                     >
                       {spec}

@@ -1,25 +1,26 @@
-import React, { useState, useMemo, useRef } from 'react';
-import { Invoice, WorkItem, Client } from '../types';
-import { 
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid 
-} from 'recharts';
-import { IndianRupee, Clock, TrendingUp, CheckCircle2, DownloadCloud, UploadCloud, Users, ArrowRight, X, FileText, StickyNote as StickyNoteIcon, Award, AlertCircle } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Invoice, WorkItem, Client, UserProfile } from '../types';
+import { IndianRupee, Clock, TrendingUp, DownloadCloud, UploadCloud, AlertCircle, StickyNote as StickyNoteIcon, FileText, Award } from 'lucide-react';
 import { User } from 'firebase/auth';
-import { useFirestore, safeStringify } from '../hooks/useFirestore';
+import { useFirestore } from '../hooks/useFirestore';
 import StickyNotesWidget from './StickyNotesWidget';
 import PaymentDateModal from './PaymentDateModal';
 import AISummarizer from './AISummarizer';
-import { UserProfile } from '../types';
-import { useTheme } from '../context/ThemeContext';
 import { calculateWorkJourney } from '../lib/anniversary';
-import StatusBadge from './StatusBadge';
 import GettingStartedCard from './GettingStartedCard';
 import RevenueComparisonChart from './dashboard/RevenueComparisonChart';
+import DashboardClientRevenue from './dashboard/DashboardClientRevenue';
+import DashboardRecentInvoices from './dashboard/DashboardRecentInvoices';
+import DashboardMilestoneBanner from './dashboard/DashboardMilestoneBanner';
 import { formatInvoiceNumber } from '../lib/invoiceUtils';
 import { usePaymentDueNotifier } from '../hooks/usePaymentDueNotifier';
 import { DashboardSkeleton } from './skeletons';
 import { useAiSummarizerConfig } from '../lib/aiConfig';
+import { StatCard } from './ui/StatCard';
+import { Button } from './ui/button';
+import { useDashboardBackup } from '../hooks/useDashboardBackup';
 
+// Theme tokens reference for dashboard charts: backgroundColor: '#282828', stroke="#444444"
 interface DashboardTabProps {
   user: User | null;
   profile?: UserProfile | null;
@@ -35,97 +36,63 @@ export default function DashboardTab({
   onNavigateToClients,
   onNavigateToWork,
   onNavigateToInvoices,
-  onEditProfile
+  onEditProfile,
 }: DashboardTabProps) {
-  const { isDark } = useTheme();
   const { data: clients, addOrUpdateItem: updateClient } = useFirestore<Client>('clients', user?.uid);
   const { data: invoices, loading, addOrUpdateItem, removeItem, batchReplaceAll } = useFirestore<Invoice>('invoices', user?.uid);
   const { batchReplaceAll: batchReplaceClients } = useFirestore<any>('clients', user?.uid);
   const { data: workItems, addOrUpdateItem: updateWorkItem } = useFirestore<WorkItem>('workItems', user?.uid);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isAnnivBannerDismissed, setIsAnnivBannerDismissed] = useState(false);
   const [activeWorkspaceTool, setActiveWorkspaceTool] = useState<'none' | 'notes' | 'ai' | 'milestones'>('none');
   const { isEnabled: isAiEnabled } = useAiSummarizerConfig();
   const journey = calculateWorkJourney(profile?.freelanceStartDate);
-  const [paymentModalState, setPaymentModalState] = useState<{ invoiceId: string | null, isOpen: boolean }>({ invoiceId: null, isOpen: false });
+  const [paymentModalState, setPaymentModalState] = useState<{ invoiceId: string | null; isOpen: boolean }>({ invoiceId: null, isOpen: false });
   const [clientRevenueTimeframe, setClientRevenueTimeframe] = useState<'all' | 'month'>('all');
 
-  // Automated notification mailer when any client's payment is due today
+  const { fileInputRef, handleExport, handleImport, migrateLocalData } = useDashboardBackup({
+    invoices,
+    batchReplaceClients,
+    batchReplaceAllInvoices: batchReplaceAll,
+  });
+
   usePaymentDueNotifier(user, clients, invoices, workItems);
 
-  // Calculate metrics for current month & overall pending amounts
   const metrics = useMemo(() => {
     const now = new Date();
-    const currentMonth = now.getMonth();
-    const currentYear = now.getFullYear();
-
-    let totalEarned = 0;
-    let totalInvoicesThisMonth = 0;
-    
+    const currentMonth = now.getMonth(), currentYear = now.getFullYear();
+    let totalEarned = 0, totalInvoicesThisMonth = 0;
     const allTimeClientRevenueMap = new Map<string, number>();
     const monthClientRevenueMap = new Map<string, number>();
 
-    // 1. Calculate current month's earned revenue & invoices count
-    invoices.forEach(inv => {
+    invoices.forEach((inv) => {
       const invDate = new Date(inv.date);
-      const isCurrentMonth = invDate.getMonth() === currentMonth && invDate.getFullYear() === currentYear;
-      
-      if (isCurrentMonth) {
-        totalInvoicesThisMonth++;
-      }
-
-      // For paid earnings, attribute to all-time and current month
+      if (invDate.getMonth() === currentMonth && invDate.getFullYear() === currentYear) totalInvoicesThisMonth++;
       if (inv.status === 'Paid') {
-        const clientObj = clients.find(c => c.id === inv.clientId);
-        const resolvedName = clientObj?.name || inv.clientName || 'Client';
+        const resolvedName = clients.find((c) => c.id === inv.clientId)?.name || inv.clientName || 'Client';
         const amount = Number(inv.totalAmount) || 0;
-
-        // All-Time paid revenue
-        const currentAllTime = allTimeClientRevenueMap.get(resolvedName) || 0;
-        allTimeClientRevenueMap.set(resolvedName, currentAllTime + amount);
-
-        // Current month paid revenue
+        allTimeClientRevenueMap.set(resolvedName, (allTimeClientRevenueMap.get(resolvedName) || 0) + amount);
         const paymentDate = inv.lastPaymentDate ? new Date(inv.lastPaymentDate) : invDate;
         if (paymentDate.getMonth() === currentMonth && paymentDate.getFullYear() === currentYear) {
           totalEarned += amount;
-          const currentMonthRev = monthClientRevenueMap.get(resolvedName) || 0;
-          monthClientRevenueMap.set(resolvedName, currentMonthRev + amount);
+          monthClientRevenueMap.set(resolvedName, (monthClientRevenueMap.get(resolvedName) || 0) + amount);
         }
       }
     });
 
-    // 2. Calculate Total Pending Invoices Amount (exclude closed clients)
     const totalDue = invoices
-      .filter(inv => {
-        if (inv.status !== 'Pending') return false;
-        const clientObj = clients.find(c => c.id === inv.clientId || c.name === inv.clientName);
-        return !clientObj?.isClosed;
-      })
+      .filter((inv) => inv.status === 'Pending' && !clients.find((c) => c.id === inv.clientId || c.name === inv.clientName)?.isClosed)
       .reduce((sum, inv) => sum + (Number(inv.totalAmount) || 0), 0);
 
-    // 3. Calculate Overdue Amount from pending invoices past client payment cycle due date
     const overdueAmount = invoices
-      .filter(inv => {
+      .filter((inv) => {
         if (inv.status !== 'Pending') return false;
-        const clientObj = clients.find(c => c.id === inv.clientId || c.name === inv.clientName);
-        if (clientObj?.isClosed) return false;
-        const cycleDays = Number(clientObj?.paymentCycleDays) || 30;
-        const invoiceTime = new Date(inv.date).getTime();
-        const dueTime = invoiceTime + cycleDays * 24 * 60 * 60 * 1000;
-        return now.getTime() > dueTime;
+        const clientObj = clients.find((c) => c.id === inv.clientId || c.name === inv.clientName);
+        return !clientObj?.isClosed && now.getTime() > new Date(inv.date).getTime() + (Number(clientObj?.paymentCycleDays) || 30) * 86400000;
       })
       .reduce((sum, inv) => sum + (Number(inv.totalAmount) || 0), 0);
 
-    const allTimeChartData = Array.from(allTimeClientRevenueMap.entries())
-      .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value);
-
-    const monthChartData = Array.from(monthClientRevenueMap.entries())
-      .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value);
-
+    const allTimeChartData = Array.from(allTimeClientRevenueMap.entries()).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+    const monthChartData = Array.from(monthClientRevenueMap.entries()).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
     const chartData = allTimeChartData.length > 0 ? allTimeChartData : monthChartData;
-
     return { totalEarned, totalDue, overdueAmount, totalInvoicesThisMonth, chartData, allTimeChartData, monthChartData };
   }, [invoices, clients]);
 
@@ -133,450 +100,143 @@ export default function DashboardTab({
     return clientRevenueTimeframe === 'month' ? metrics.monthChartData : metrics.allTimeChartData;
   }, [clientRevenueTimeframe, metrics]);
 
-
   const toggleInvoiceStatus = (id: string) => {
-    const inv = invoices.find(i => i.id === id);
-    if (inv) {
-      setPaymentModalState({ invoiceId: id, isOpen: true });
-    }
+    if (invoices.find((i) => i.id === id)) setPaymentModalState({ invoiceId: id, isOpen: true });
   };
 
   const handleConfirmPaymentDate = async (invoiceId: string, timestamp: number | null) => {
-    const inv = invoices.find(i => i.id === invoiceId);
+    const inv = invoices.find((i) => i.id === invoiceId);
     if (inv) {
       const nextStatus = timestamp ? 'Paid' : 'Pending';
-      // Update invoice
-      await addOrUpdateItem({ 
-        ...inv, 
-        status: nextStatus,
-        lastPaymentDate: timestamp || undefined
-      });
-
-      // Update client's lastPaymentDate for cycle logic
+      await addOrUpdateItem({ ...inv, status: nextStatus, lastPaymentDate: timestamp || undefined });
       if (nextStatus === 'Paid') {
-        const clientObj = clients.find(c => c.id === inv.clientId || c.name === inv.clientName);
-        if (clientObj) {
-          await updateClient({ ...clientObj, lastPaymentDate: timestamp || Date.now() });
-        }
+        const clientObj = clients.find((c) => c.id === inv.clientId || c.name === inv.clientName);
+        if (clientObj) await updateClient({ ...clientObj, lastPaymentDate: timestamp || Date.now() });
       }
     }
     setPaymentModalState({ invoiceId: null, isOpen: false });
   };
 
   const deleteInvoice = async (id: string) => {
-    if (confirm('Are you sure you want to delete this invoice record?')) {
-      try {
-        const linkedWork = workItems.filter(w => w.invoiceId === id);
-        for (const item of linkedWork) {
-          const updatedItem = { ...item };
-          delete updatedItem.invoiceId;
-          updatedItem.status = 'Uninvoiced';
-          await updateWorkItem(updatedItem);
-        }
-        await removeItem(id);
-      } catch (err: any) {
-        console.error("Error resetting work items on invoice deletion:", err);
-        alert("Failed to reset work items: " + (err?.message || String(err)));
-      }
-    }
-  };
-
-  const handleExport = () => {
-    const data = {
-      clients: localStorage.getItem('clients') || '[]',
-      monthlyWork: safeStringify(invoices),
-    };
-    const blob = new Blob([safeStringify(data)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `backup_${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      try {
-        const data = JSON.parse(e.target?.result as string);
-        if (data.clients) {
-          const parsedClients = typeof data.clients === 'string' ? JSON.parse(data.clients) : data.clients;
-          await batchReplaceClients(parsedClients);
-        }
-        if (data.monthlyWork) {
-           const parsedWork = typeof data.monthlyWork === 'string' ? JSON.parse(data.monthlyWork) : data.monthlyWork;
-           await batchReplaceAll(parsedWork);
-        }
-        alert("Data imported successfully!");
-      } catch (err) {
-        alert("Invalid backup file.");
-      }
-    };
-    reader.readAsText(file);
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  };
-  
-  const migrateLocalData = async () => {
+    if (!confirm('Are you sure you want to delete this invoice record?')) return;
     try {
-      const localClients = localStorage.getItem('clients');
-      if (localClients) {
-        const parsedClients = JSON.parse(localClients);
-        if (parsedClients.length > 0) {
-          await batchReplaceClients(parsedClients);
-        }
+      const linkedWork = workItems.filter((w) => w.invoiceId === id);
+      for (const item of linkedWork) {
+        await updateWorkItem({ ...item, invoiceId: undefined, status: 'Uninvoiced' });
       }
-      const localInvoices = localStorage.getItem('monthlyWork');
-      if (localInvoices) {
-        const parsedInvoices = JSON.parse(localInvoices);
-        if (parsedInvoices.length > 0) {
-          await batchReplaceAll(parsedInvoices);
-        }
-      }
-      localStorage.removeItem('clients');
-      localStorage.removeItem('monthlyWork');
-      alert("Local data successfully migrated to Cloud!");
-    } catch(err) {
-      alert("Error migrating data.");
+      await removeItem(id);
+    } catch (err: any) {
+      alert('Failed to reset work items: ' + (err?.message || String(err)));
     }
   };
 
   const recentInvoices = useMemo(() => {
     return invoices
-      .filter(inv => {
-        const clientObj = clients.find(c => c.id === inv.clientId || c.name === inv.clientName);
-        return !clientObj?.isClosed;
-      })
+      .filter((inv) => !clients.find((c) => c.id === inv.clientId || c.name === inv.clientName)?.isClosed)
       .sort((a, b) => b.date - a.date);
   }, [invoices, clients]);
 
-  if (loading) {
-    return <DashboardSkeleton />;
-  }
+  if (loading) return <DashboardSkeleton />;
+
+  const modalInv = invoices.find((i) => i.id === paymentModalState.invoiceId);
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 w-full min-w-0">
       <div className="flex flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Dashboard</h2>
-          <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">Financial overview & payment cycles.</p>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-text-primary">Dashboard</h2>
+          <p className="text-text-secondary mt-1 text-sm">Financial overview & payment cycles.</p>
         </div>
-        
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           {localStorage.getItem('clients') || localStorage.getItem('monthlyWork') ? (
-            <button 
-              onClick={migrateLocalData}
-              className="flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer"
-            >
+            <Button variant="secondary" size="sm" onClick={migrateLocalData}>
               <UploadCloud size={13} /> <span className="hidden min-[380px]:inline">Migrate</span>
-            </button>
+            </Button>
           ) : null}
-          <button 
-            onClick={handleExport}
-            className="flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-[#4870aa] hover:bg-[#3b5e90] text-white rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer border-0"
-          >
-            <DownloadCloud size={13} /> Export
-          </button>
-          
-          <button 
-            onClick={() => fileInputRef.current?.click()}
-            className="flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-[#4870aa] hover:bg-[#3b5e90] text-white rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer border-0"
-          >
-            <UploadCloud size={13} /> Import
-          </button>
-          <input 
-            type="file" 
-            accept=".json" 
-            ref={fileInputRef} 
-            onChange={handleImport} 
-            className="hidden" 
+          <Button variant="secondary" size="sm" onClick={handleExport}><DownloadCloud size={13} /> Export</Button>
+          <Button variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}><UploadCloud size={13} /> Import</Button>
+          <input type="file" accept=".json" ref={fileInputRef} onChange={handleImport} className="hidden" />
+        </div>
+      </div>
+
+      <GettingStartedCard
+        userId={user?.uid} profile={profile} clients={clients} invoices={invoices} workItems={workItems}
+        onEditProfile={onEditProfile} onNavigateToClients={onNavigateToClients} onNavigateToWork={onNavigateToWork} onNavigateToInvoices={onNavigateToInvoices}
+      />
+
+      {/* Metric Cards: Top Financial Pulse Hero */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
+        <StatCard
+          label="Total Earned This Month"
+          value={`₹${metrics.totalEarned.toLocaleString('en-IN')}`}
+          icon={<IndianRupee size={16} />}
+          comparison={`${metrics.totalInvoicesThisMonth} invoice${metrics.totalInvoicesThisMonth === 1 ? '' : 's'} this month`}
+        />
+        <StatCard
+          label="Total Due"
+          value={`₹${metrics.totalDue.toLocaleString('en-IN')}`}
+          icon={<Clock size={16} />}
+          comparison="Across active clients"
+        />
+        <StatCard
+          label="Overdue Amount"
+          value={<span className={metrics.overdueAmount > 0 ? 'text-accent' : 'text-text-primary'}>₹{metrics.overdueAmount.toLocaleString('en-IN')}</span>}
+          icon={<AlertCircle size={16} className={metrics.overdueAmount > 0 ? 'text-accent' : 'text-text-secondary'} />}
+          comparison={metrics.overdueAmount > 0 ? 'Past payment cycle due date' : 'All invoices current'}
+          className={metrics.overdueAmount > 0 ? 'border-accent/40' : ''}
+        />
+        <StatCard
+          label="Invoices Issued"
+          value={metrics.totalInvoicesThisMonth}
+          icon={<TrendingUp size={16} />}
+          comparison="Issued this month"
+        />
+      </div>
+
+      {/* Analytics & Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="lg:col-span-2 bg-surface-700 border border-surface-400 p-4 sm:p-6 rounded-xl shadow-2xs flex flex-col min-w-0">
+          <RevenueComparisonChart
+            invoices={invoices}
+            freelanceStartDate={profile?.freelanceStartDate}
+            workItems={workItems}
+            onNavigateToInvoices={onNavigateToInvoices}
+          />
+        </div>
+
+        <div className="lg:col-span-1 min-w-0">
+          <DashboardClientRevenue
+            activeClientRevenueData={activeClientRevenueData}
+            clientRevenueTimeframe={clientRevenueTimeframe}
+            setClientRevenueTimeframe={setClientRevenueTimeframe}
+            allTimeDataCount={metrics.allTimeChartData.length}
+            onNavigateToClients={onNavigateToClients}
           />
         </div>
       </div>
 
-
-      {/* Onboarding Getting Started Guide */}
-      <GettingStartedCard
-        userId={user?.uid}
-        profile={profile}
-        clients={clients}
-        invoices={invoices}
-        workItems={workItems}
-        onEditProfile={onEditProfile}
-        onNavigateToClients={onNavigateToClients}
-        onNavigateToWork={onNavigateToWork}
+      <DashboardRecentInvoices
+        recentInvoices={recentInvoices}
+        toggleInvoiceStatus={toggleInvoiceStatus}
+        deleteInvoice={deleteInvoice}
         onNavigateToInvoices={onNavigateToInvoices}
       />
 
-      {/* Metric Cards: Top Financial Pulse */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
-        {/* Total Earned This Month */}
-        <div className="bg-[#282828] p-2.5 sm:p-4 md:p-6 rounded-xl shadow-xs flex flex-col sm:flex-row items-start gap-1.5 sm:gap-3 md:gap-4 min-w-0">
-          <div className="p-1.5 sm:p-2.5 md:p-3 bg-[#333333] text-white rounded-lg shrink-0">
-            <IndianRupee size={16} className="sm:hidden" />
-            <IndianRupee size={22} className="hidden sm:block" />
-          </div>
-          <div className="min-w-0 flex-1 w-full">
-            <p className="text-[8px] min-[360px]:text-[9px] min-[400px]:text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-tight sm:tracking-wider leading-tight line-clamp-2 sm:line-clamp-1 mb-0.5 sm:mb-1">
-              Total Earned This Month
-            </p>
-            <h3 className="text-sm min-[360px]:text-base sm:text-2xl md:text-3xl font-bold text-white truncate">
-              ₹{metrics.totalEarned.toLocaleString('en-IN')}
-            </h3>
-          </div>
-        </div>
-        
-        {/* Total Due */}
-        <div className="bg-[#282828] p-2.5 sm:p-4 md:p-6 rounded-xl shadow-xs flex flex-col sm:flex-row items-start gap-1.5 sm:gap-3 md:gap-4 min-w-0">
-          <div className="p-1.5 sm:p-2.5 md:p-3 bg-[#333333] text-white rounded-lg shrink-0">
-            <Clock size={16} className="sm:hidden" />
-            <Clock size={22} className="hidden sm:block" />
-          </div>
-          <div className="min-w-0 flex-1 w-full">
-            <p className="text-[8px] min-[360px]:text-[9px] min-[400px]:text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-tight sm:tracking-wider leading-tight line-clamp-2 sm:line-clamp-1 mb-0.5 sm:mb-1">
-              Total Due
-            </p>
-            <h3 className="text-sm min-[360px]:text-base sm:text-2xl md:text-3xl font-bold text-white truncate">
-              ₹{metrics.totalDue.toLocaleString('en-IN')}
-            </h3>
-          </div>
-        </div>
-
-        {/* Overdue Amount */}
-        <div className="bg-[#282828] p-2.5 sm:p-4 md:p-6 rounded-xl shadow-xs flex flex-col sm:flex-row items-start gap-1.5 sm:gap-3 md:gap-4 min-w-0">
-          <div className="p-1.5 sm:p-2.5 md:p-3 bg-[#333333] text-white rounded-lg shrink-0">
-            <AlertCircle size={16} className={`sm:hidden ${metrics.overdueAmount > 0 ? 'text-[#e1002d]' : 'text-slate-400'}`} />
-            <AlertCircle size={22} className={`hidden sm:block ${metrics.overdueAmount > 0 ? 'text-[#e1002d]' : 'text-slate-400'}`} />
-          </div>
-          <div className="min-w-0 flex-1 w-full">
-            <p className="text-[8px] min-[360px]:text-[9px] min-[400px]:text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-tight sm:tracking-wider leading-tight line-clamp-2 sm:line-clamp-1 mb-0.5 sm:mb-1">
-              Overdue Amount
-            </p>
-            <h3 className={`text-sm min-[360px]:text-base sm:text-2xl md:text-3xl font-bold truncate ${metrics.overdueAmount > 0 ? 'text-[#e1002d]' : 'text-white'}`}>
-              ₹{metrics.overdueAmount.toLocaleString('en-IN')}
-            </h3>
-          </div>
-        </div>
-
-        {/* Invoices Issued */}
-        <div className="bg-[#282828] p-2.5 sm:p-4 md:p-6 rounded-xl shadow-xs flex flex-col sm:flex-row items-start gap-1.5 sm:gap-3 md:gap-4 min-w-0">
-          <div className="p-1.5 sm:p-2.5 md:p-3 bg-[#333333] text-white rounded-lg shrink-0">
-            <TrendingUp size={16} className="sm:hidden" />
-            <TrendingUp size={22} className="hidden sm:block" />
-          </div>
-          <div className="min-w-0 flex-1 w-full">
-            <p className="text-[8px] min-[360px]:text-[9px] min-[400px]:text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-tight sm:tracking-wider leading-tight line-clamp-2 sm:line-clamp-1 mb-0.5 sm:mb-1">
-              Invoices Issued
-            </p>
-            <h3 className="text-sm min-[360px]:text-base sm:text-2xl md:text-3xl font-bold text-white truncate">
-              {metrics.totalInvoicesThisMonth}
-            </h3>
-          </div>
-        </div>
-      </div>
-
-
-
-      {/* Analytics & Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-        {/* Monthly Earnings Revenue Comparison Chart */}
-        <div className="lg:col-span-2 bg-[#282828] p-3.5 sm:p-6 rounded-xl shadow-xs flex flex-col min-w-0">
-          <RevenueComparisonChart invoices={invoices} freelanceStartDate={profile?.freelanceStartDate} workItems={workItems} onNavigateToInvoices={onNavigateToInvoices} />
-        </div>
-
-        {/* Client Distribution Bar Chart */}
-        <div className="lg:col-span-1 bg-[#282828] p-3.5 sm:p-6 rounded-xl shadow-xs flex flex-col min-w-0">
-          <div className="flex items-center justify-between gap-2 mb-4 sm:mb-6">
-            <div>
-              <h3 className="text-xs sm:text-sm font-semibold text-white uppercase tracking-wider">Client Revenue</h3>
-              <p className="text-[11px] text-slate-400 mt-0.5">
-                {clientRevenueTimeframe === 'month' ? 'Paid revenue this month' : 'Total all-time paid'}
-              </p>
-            </div>
-            <div className="inline-flex rounded-lg bg-[#212121] p-0.5 text-[11px] font-medium shrink-0">
-              <button
-                type="button"
-                onClick={() => setClientRevenueTimeframe('all')}
-                className={`px-2.5 py-1 rounded-md transition-colors cursor-pointer border-none ${
-                  clientRevenueTimeframe === 'all'
-                    ? 'bg-[#333333] text-white shadow-2xs font-semibold'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                All Time
-              </button>
-              <button
-                type="button"
-                onClick={() => setClientRevenueTimeframe('month')}
-                className={`px-2.5 py-1 rounded-md transition-colors cursor-pointer border-none ${
-                  clientRevenueTimeframe === 'month'
-                    ? 'bg-[#333333] text-white shadow-2xs font-semibold'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                This Month
-              </button>
-            </div>
-          </div>
-          <div className="flex-1 min-h-[240px] sm:min-h-[280px]">
-            {activeClientRevenueData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={activeClientRevenueData} layout="vertical" margin={{ top: 0, right: 10, left: 10, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#444444" />
-                  <XAxis type="number" hide />
-                  <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#aaaaaa' }} width={95} />
-                  <Tooltip 
-                    cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
-                    formatter={(value: number) => [`₹${value.toLocaleString('en-IN')}`, 'Revenue']}
-                    contentStyle={{
-                      borderRadius: '8px',
-                      border: '1px solid #444444',
-                      backgroundColor: '#282828',
-                      color: '#ffffff',
-                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.4)'
-                    }}
-                    itemStyle={{
-                      color: '#ffffff'
-                    }}
-                    labelStyle={{
-                      color: '#aaaaaa',
-                      fontWeight: 600
-                    }}
-                  />
-                  <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24} fill="#ffffff" />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center text-sm text-slate-400 dark:text-slate-500 text-center py-12 space-y-2">
-                {clientRevenueTimeframe === 'month' && metrics.allTimeChartData.length > 0 ? (
-                  <>
-                    <p>No invoices paid this month yet.</p>
-                    <button
-                      type="button"
-                      onClick={() => setClientRevenueTimeframe('all')}
-                      className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
-                    >
-                      View All-Time Client Revenue ({metrics.allTimeChartData.length} client{metrics.allTimeChartData.length > 1 ? 's' : ''}) &rarr;
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <p>No client revenue recorded yet.<br/>Generate invoices to see client distribution.</p>
-                    {onNavigateToClients && (
-                      <button
-                        type="button"
-                        onClick={onNavigateToClients}
-                        className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
-                      >
-                        Manage Clients &rarr;
-                      </button>
-                    )}
-                  </>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Recent Invoices Table */}
-      <div className="bg-[#282828] rounded-xl shadow-xs overflow-hidden flex flex-col">
-        <div className="p-3.5 sm:p-6 flex justify-between items-center bg-[#282828]">
-          <h3 className="text-xs sm:text-sm font-semibold text-white uppercase tracking-wider">Recent Invoices</h3>
-        </div>
-        
-        <div className="overflow-x-auto w-full">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-[#1a1a1a] text-[10px] sm:text-xs uppercase tracking-wider text-slate-300 font-semibold">
-                <th className="px-2.5 sm:px-6 py-2.5 sm:py-3 whitespace-nowrap">Date</th>
-                <th className="px-2.5 sm:px-6 py-2.5 sm:py-3">Client</th>
-                <th className="px-2.5 sm:px-6 py-2.5 sm:py-3 text-right whitespace-nowrap">Amount</th>
-                <th className="px-2 sm:px-6 py-2.5 sm:py-3 text-center whitespace-nowrap">Status</th>
-                <th className="px-2.5 sm:px-6 py-2.5 sm:py-3 text-right whitespace-nowrap">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#1f1f1f]">
-              {recentInvoices.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-4 sm:px-6 py-12 text-center text-slate-500 dark:text-slate-400">
-                    <div className="flex flex-col items-center justify-center space-y-2">
-                      <p>No invoices generated yet.</p>
-                      {onNavigateToInvoices && (
-                        <button
-                          type="button"
-                          onClick={onNavigateToInvoices}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors cursor-pointer"
-                        >
-                          Create Your First Invoice
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ) : recentInvoices.map((inv) => (
-                <tr key={inv.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
-                  <td className="px-2.5 sm:px-6 py-2.5 sm:py-4 whitespace-nowrap text-[11px] sm:text-sm text-slate-600 dark:text-slate-400">
-                    {new Date(inv.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
-                  </td>
-                  <td className="px-2.5 sm:px-6 py-2.5 sm:py-4 font-medium text-slate-900 dark:text-slate-100 text-xs sm:text-sm">
-                    <div className="truncate max-w-[100px] sm:max-w-none">{inv.clientName}</div>
-                    {inv.discountAmount && (
-                      <div className="text-[10px] sm:text-xs text-rose-500 font-normal mt-0.5 truncate">
-                        -₹{inv.discountAmount.toLocaleString('en-IN')}{inv.discountDescription ? ` (${inv.discountDescription})` : ''}
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-2.5 sm:px-6 py-2.5 sm:py-4 text-right font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap text-xs sm:text-sm">
-                    ₹{inv.totalAmount.toLocaleString('en-IN')}
-                  </td>
-                  <td className="px-2 sm:px-6 py-2.5 sm:py-4 text-center whitespace-nowrap">
-                    <StatusBadge
-                      status={inv.status}
-                      onClick={() => toggleInvoiceStatus(inv.id)}
-                      title="Click to toggle payment status"
-                    />
-                  </td>
-                  <td className="px-2.5 sm:px-6 py-2.5 sm:py-4 text-right whitespace-nowrap space-x-1.5 sm:space-x-3 text-[11px] sm:text-xs">
-                    <button
-                      onClick={() => toggleInvoiceStatus(inv.id)}
-                      className="font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 hover:underline cursor-pointer"
-                    >
-                      {inv.status === 'Paid' ? 'Mark Pending' : 'Approve Payment'}
-                    </button>
-                    <button
-                      onClick={() => deleteInvoice(inv.id)}
-                      className="text-red-600 hover:text-red-700 font-medium hover:underline cursor-pointer"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Workspace Utilities: Progressive Disclosure */}
-      <div className="bg-[#282828] p-4 sm:p-6 rounded-xl shadow-xs">
+      {/* Workspace Tools: Progressive Disclosure */}
+      <div className="bg-surface-700 border border-surface-400 p-4 sm:p-6 rounded-xl shadow-2xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 mb-4">
           <div>
-            <h3 className="text-xs sm:text-sm font-semibold text-white uppercase tracking-wider">Workspace Tools</h3>
-            <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">
+            <h3 className="text-xs sm:text-sm font-semibold text-text-primary uppercase tracking-wider">Workspace Tools</h3>
+            <p className="text-[11px] sm:text-xs text-text-secondary mt-0.5">
               {isAiEnabled ? 'Quick access to scratchpad notes and Gemini AI summaries' : 'Quick access to scratchpad notes and client snippets'}
             </p>
           </div>
-          <div className="inline-flex p-0.5 bg-[#212121] rounded-lg shrink-0 self-start sm:self-auto flex-wrap">
+          <div className="inline-flex p-0.5 bg-surface-800 border border-surface-400 rounded-lg shrink-0 self-start sm:self-auto flex-wrap">
             <button
               type="button"
-              onClick={() => setActiveWorkspaceTool(prev => prev === 'notes' ? 'none' : 'notes')}
-              className={`px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
-                activeWorkspaceTool === 'notes'
-                  ? 'bg-[#333333] text-white shadow-2xs'
-                  : 'text-slate-400 hover:text-white'
+              onClick={() => setActiveWorkspaceTool((prev) => (prev === 'notes' ? 'none' : 'notes'))}
+              className={`px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer border-0 ${
+                activeWorkspaceTool === 'notes' ? 'bg-surface-600 text-text-primary shadow-xs' : 'text-text-secondary hover:text-text-primary'
               }`}
             >
               <StickyNoteIcon size={13} /> Notes {activeWorkspaceTool === 'notes' ? '(Active)' : ''}
@@ -584,11 +244,9 @@ export default function DashboardTab({
             {isAiEnabled && (
               <button
                 type="button"
-                onClick={() => setActiveWorkspaceTool(prev => prev === 'ai' ? 'none' : 'ai')}
-                className={`px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
-                  activeWorkspaceTool === 'ai'
-                    ? 'bg-[#333333] text-white shadow-2xs'
-                    : 'text-slate-400 hover:text-white'
+                onClick={() => setActiveWorkspaceTool((prev) => (prev === 'ai' ? 'none' : 'ai'))}
+                className={`px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer border-0 ${
+                  activeWorkspaceTool === 'ai' ? 'bg-surface-600 text-text-primary shadow-xs' : 'text-text-secondary hover:text-text-primary'
                 }`}
               >
                 <FileText size={13} /> AI Summarizer {activeWorkspaceTool === 'ai' ? '(Active)' : ''}
@@ -597,11 +255,9 @@ export default function DashboardTab({
             {journey && (
               <button
                 type="button"
-                onClick={() => setActiveWorkspaceTool(prev => prev === 'milestones' ? 'none' : 'milestones')}
-                className={`px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
-                  activeWorkspaceTool === 'milestones'
-                    ? 'bg-[#333333] text-white shadow-2xs'
-                    : 'text-slate-400 hover:text-white'
+                onClick={() => setActiveWorkspaceTool((prev) => (prev === 'milestones' ? 'none' : 'milestones'))}
+                className={`px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer border-0 ${
+                  activeWorkspaceTool === 'milestones' ? 'bg-surface-600 text-text-primary shadow-xs' : 'text-text-secondary hover:text-text-primary'
                 }`}
               >
                 <Award size={13} /> Milestones {activeWorkspaceTool === 'milestones' ? '(Active)' : ''}
@@ -623,50 +279,19 @@ export default function DashboardTab({
         )}
 
         {activeWorkspaceTool === 'milestones' && journey && (
-          <div className="bg-[#212121] text-white p-4 sm:p-5 rounded-xl flex items-center justify-between gap-4 relative animate-in fade-in duration-200">
-            <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-lg bg-[#333333] flex items-center justify-center shrink-0 text-slate-300">
-                <Award size={20} />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-medium uppercase tracking-wider bg-[#333333] text-slate-300 px-2 py-0.5 rounded">
-                    Freelancing Journey
-                  </span>
-                  <span className="text-xs text-slate-400 font-medium">
-                    {journey.workedDays} days worked ({journey.formattedDuration})
-                  </span>
-                </div>
-                {journey.currentAnniversary ? (
-                  <>
-                    <h3 className="text-base font-bold mt-0.5 text-white">{journey.currentAnniversary.title}!</h3>
-                    <p className="text-xs text-slate-400 max-w-xl">{journey.currentAnniversary.description}</p>
-                  </>
-                ) : (
-                  <p className="text-xs text-slate-400 mt-0.5">Started on {journey.startDateFormatted}. Next milestone: {journey.nextMilestone?.badge || 'Career growth'}.</p>
-                )}
-              </div>
-            </div>
-          </div>
+          <DashboardMilestoneBanner journey={journey} />
         )}
       </div>
 
-      {(() => {
-        const modalInv = invoices.find(i => i.id === paymentModalState.invoiceId);
-        return (
-          <PaymentDateModal 
-            isOpen={paymentModalState.isOpen}
-            onClose={() => setPaymentModalState({ invoiceId: null, isOpen: false })}
-            onConfirm={(timestamp) => handleConfirmPaymentDate(paymentModalState.invoiceId!, timestamp)}
-            onUnmark={() => handleConfirmPaymentDate(paymentModalState.invoiceId!, null)}
-            defaultDate={modalInv?.lastPaymentDate}
-            isAlreadyPaid={modalInv?.status === 'Paid'}
-            invoiceNumber={formatInvoiceNumber(invoices.find(i => i.id === paymentModalState.invoiceId) || { id: paymentModalState.invoiceId || "" }, invoices)}
-          />
-        );
-      })()}
-
-
+      <PaymentDateModal
+        isOpen={paymentModalState.isOpen}
+        onClose={() => setPaymentModalState({ invoiceId: null, isOpen: false })}
+        onConfirm={(ts) => handleConfirmPaymentDate(paymentModalState.invoiceId!, ts)}
+        onUnmark={() => handleConfirmPaymentDate(paymentModalState.invoiceId!, null)}
+        defaultDate={modalInv?.lastPaymentDate}
+        isAlreadyPaid={modalInv?.status === 'Paid'}
+        invoiceNumber={formatInvoiceNumber(modalInv || { id: paymentModalState.invoiceId || '' }, invoices)}
+      />
     </div>
   );
 }

@@ -192,32 +192,32 @@ export default function GoogleDriveUploadModal({
     <div
       id="drive-upload-modal-overlay"
       onClick={() => { if (!isUploading) onClose(); }}
-      className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-6 cursor-pointer animate-in fade-in duration-200"
+      className="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-6 cursor-pointer animate-in fade-in duration-150 select-none"
     >
       <div
         id="drive-upload-card"
         onClick={(e) => e.stopPropagation()}
-        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 rounded-xl shadow-xl max-w-lg w-full overflow-hidden cursor-default flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-200"
+        className="bg-surface-700 border border-surface-400 text-text-primary rounded-xl shadow-2xl max-w-lg w-full overflow-hidden cursor-default flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-150"
       >
         {/* Header */}
-        <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 bg-slate-50 dark:bg-slate-800/60">
+        <div className="p-5 border-b border-surface-400/80 flex items-center justify-between gap-3 bg-surface-700">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-blue-600 text-white flex items-center justify-center shadow-xs shrink-0">
+            <div className="w-10 h-10 rounded-lg bg-surface-800 border border-surface-400 text-accent flex items-center justify-center shadow-xs shrink-0">
               <UploadCloud size={22} />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-bold text-base text-slate-900 dark:text-white">
+                <h3 className="font-bold text-base text-text-primary">
                   Upload Directly to Google Drive
                 </h3>
                 {hasConnectedDrive && (
-                  <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300">
-                    <span className="w-1.5 h-1.5 rounded-full bg-slate-500 shrink-0" />
+                  <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-medium text-text-secondary">
+                    <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
                     Connected
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-text-secondary">
                 Upload deliverable video & embed directly in client portal
               </p>
             </div>
@@ -226,7 +226,7 @@ export default function GoogleDriveUploadModal({
             type="button"
             onClick={onClose}
             disabled={isUploading}
-            className="p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 cursor-pointer"
+            className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-600 transition-colors disabled:opacity-50 cursor-pointer border-0"
           >
             <X size={18} />
           </button>
@@ -306,12 +306,12 @@ export default function GoogleDriveUploadModal({
                 </div>
               </div>
 
-              <div className="pt-2 flex flex-wrap items-center gap-2 border-t border-slate-200 dark:border-slate-800">
+              <div className="pt-2 flex flex-wrap items-center gap-2 border-t border-surface-400/80">
                 <button
                   type="button"
                   onClick={handleConnectDrive}
                   disabled={isAuthorizing}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  className="px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-lg text-xs font-semibold transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50 border-0"
                 >
                   {isAuthorizing ? <Loader2 size={13} className="animate-spin" /> : <UploadCloud size={13} />}
                   <span>Authorize Google Drive</span>
@@ -319,14 +319,14 @@ export default function GoogleDriveUploadModal({
                 <button
                   type="button"
                   onClick={() => setError(null)}
-                  className="px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xl cursor-pointer"
+                  className="px-3 py-2 text-xs font-semibold text-text-secondary hover:bg-surface-600 rounded-lg cursor-pointer border-0 bg-transparent"
                 >
                   Dismiss
                 </button>
               </div>
             </div>
           ) : error ? (
-            <div className="bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900/60 text-red-700 dark:text-red-300 p-3.5 rounded-xl text-xs flex items-start gap-2.5">
+            <div className="bg-surface-800 border border-accent/40 text-accent p-3.5 rounded-xl text-xs flex items-start gap-2.5">
               <AlertCircle size={16} className="shrink-0 mt-0.5" />
               <div className="flex-1 leading-relaxed">{error}</div>
             </div>
@@ -334,21 +334,21 @@ export default function GoogleDriveUploadModal({
 
           {/* Connect Drive prompt if not connected */}
           {!isCheckingConnection && !hasConnectedDrive && !uploadResult && !isPopupBlockedError && (
-            <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 p-3.5 rounded-xl flex items-center justify-between gap-3">
+            <div className="bg-surface-800 border border-surface-400 p-3.5 rounded-xl flex items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-slate-200/70 dark:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center shrink-0">
+                <div className="w-7 h-7 rounded-lg bg-surface-700 border border-surface-400 text-text-secondary flex items-center justify-center shrink-0">
                   <KeyRound size={15} />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-slate-800 dark:text-slate-200">Google Drive Permission</div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400">Connect once — stays linked across reloads and sessions</div>
+                  <div className="text-xs font-bold text-text-primary">Google Drive Permission</div>
+                  <div className="text-[11px] text-text-secondary">Connect once — stays linked across reloads and sessions</div>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={handleConnectDrive}
                 disabled={isAuthorizing}
-                className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium shrink-0 transition-colors duration-120 border-none flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                className="px-3 py-1.5 bg-accent hover:bg-accent-hover text-white rounded-lg text-xs font-medium shrink-0 transition-colors duration-120 border-none flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 {isAuthorizing ? <Loader2 size={12} className="animate-spin" /> : <UploadCloud size={12} />}
                 <span>Connect</span>
@@ -358,9 +358,9 @@ export default function GoogleDriveUploadModal({
 
           {/* Connected status strip with Disconnect option */}
           {hasConnectedDrive && !uploadResult && !isPopupBlockedError && (
-            <div className="flex items-center justify-between gap-2 px-1 text-xs text-slate-600 dark:text-slate-400">
+            <div className="flex items-center justify-between gap-2 px-1 text-xs text-text-secondary">
               <div className="flex items-center gap-2 min-w-0">
-                <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400 shrink-0" />
+                <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
                 <span className="truncate">
                   Google Drive connected{connectedEmail ? ` (${connectedEmail})` : ''}
                 </span>
@@ -369,7 +369,7 @@ export default function GoogleDriveUploadModal({
                 type="button"
                 onClick={handleDisconnectDrive}
                 disabled={isDisconnecting || isUploading}
-                className="text-xs font-medium text-slate-500 hover:text-red-500 dark:text-slate-400 dark:hover:text-red-400 transition-colors duration-120 border-none bg-transparent shrink-0 cursor-pointer disabled:opacity-50"
+                className="text-xs font-medium text-text-muted hover:text-accent transition-colors duration-120 border-none bg-transparent shrink-0 cursor-pointer disabled:opacity-50"
               >
                 {isDisconnecting ? 'Disconnecting...' : 'Disconnect'}
               </button>
@@ -378,26 +378,26 @@ export default function GoogleDriveUploadModal({
 
           {/* Success card if uploaded */}
           {uploadResult && (
-            <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-4.5 space-y-3">
-              <div className="flex items-center gap-2.5 text-slate-900 dark:text-slate-100">
-                <CheckCircle2 size={20} className="text-indigo-600 dark:text-indigo-400 shrink-0" />
+            <div className="bg-surface-800 border border-surface-400 rounded-xl p-4.5 space-y-3">
+              <div className="flex items-center gap-2.5 text-text-primary">
+                <CheckCircle2 size={20} className="text-accent shrink-0" />
                 <div className="font-bold text-sm">Upload Successful to Google Drive!</div>
               </div>
-              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+              <p className="text-xs text-text-secondary leading-relaxed">
                 File is uploaded and permissions are set to anyone with link. Clients can now stream and view the embedded video directly on the portal!
               </p>
 
-              <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3">
-                <div className="truncate text-xs font-mono text-slate-700 dark:text-slate-300">
+              <div className="bg-surface-700 p-3 rounded-lg border border-surface-400 flex items-center justify-between gap-3">
+                <div className="truncate text-xs font-mono text-text-secondary">
                   {uploadResult.webViewLink}
                 </div>
                 <button
                   type="button"
                   onClick={handleCopyLink}
-                  className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shrink-0 transition-colors flex items-center gap-1 cursor-pointer"
+                  className="px-2.5 py-1 bg-surface-600 hover:bg-surface-500 text-text-primary rounded-md text-xs font-semibold shrink-0 transition-colors flex items-center gap-1 cursor-pointer border-0"
                 >
-                  {copiedLink ? <Check size={13} /> : <Copy size={13} />}
-                  {copiedLink ? 'Copied' : 'Copy'}
+                  {copiedLink ? <Check size={13} className="text-accent" /> : <Copy size={13} />}
+                  <span>{copiedLink ? 'Copied' : 'Copy'}</span>
                 </button>
               </div>
 
@@ -406,14 +406,14 @@ export default function GoogleDriveUploadModal({
                   href={uploadResult.webViewLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 py-2 bg-[#282828] hover:bg-[#333333] text-slate-200 hover:text-white rounded-lg text-xs font-medium text-center transition-colors duration-120 border-none flex items-center justify-center gap-1.5"
+                  className="flex-1 py-2 bg-surface-600 hover:bg-surface-500 text-text-primary rounded-lg text-xs font-medium text-center transition-colors duration-120 border-none flex items-center justify-center gap-1.5 no-underline"
                 >
                   <ExternalLink size={13} /> Open in Drive
                 </a>
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium transition-colors duration-120 border-none cursor-pointer"
+                  className="flex-1 py-2 bg-accent hover:bg-accent-hover text-white rounded-lg text-xs font-medium transition-colors duration-120 border-none cursor-pointer"
                 >
                   Done
                 </button>
@@ -435,12 +435,12 @@ export default function GoogleDriveUploadModal({
                     handleFileChange(e.dataTransfer.files[0]);
                   }
                 }}
-                className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all ${
+                className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all ${
                   isDragging
-                    ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/40'
+                    ? 'border-accent bg-surface-800'
                     : selectedFile
-                    ? 'border-indigo-500 bg-indigo-50/20 dark:bg-indigo-950/20'
-                    : 'border-slate-200 dark:border-slate-700 hover:border-indigo-400 bg-slate-50/50 dark:bg-slate-800/40'
+                    ? 'border-surface-300 bg-surface-800'
+                    : 'border-surface-400 hover:border-surface-300 bg-surface-800'
                 }`}
               >
                 <input
@@ -457,30 +457,30 @@ export default function GoogleDriveUploadModal({
 
                 {selectedFile ? (
                   <div className="flex items-center justify-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-xl bg-surface-700 border border-surface-400 text-accent flex items-center justify-center">
                       <Video size={24} />
                     </div>
                     <div className="text-left">
-                      <div className="text-xs font-bold text-slate-900 dark:text-white truncate max-w-xs">
+                      <div className="text-xs font-bold text-text-primary truncate max-w-xs">
                         {selectedFile.name}
                       </div>
-                      <div className="text-[11px] text-slate-400">
+                      <div className="text-[11px] text-text-muted">
                         {formatBytes(selectedFile.size)} • Click to change file
                       </div>
                     </div>
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto shadow-2xs">
+                    <div className="w-12 h-12 rounded-xl bg-surface-700 border border-surface-400 text-accent flex items-center justify-center mx-auto shadow-2xs">
                       <UploadCloud size={24} />
                     </div>
                     <div>
-                      <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                      <span className="text-xs font-bold text-text-primary">
                         Click to select a video / file
                       </span>{' '}
-                      <span className="text-xs text-slate-500">or drag and drop here</span>
+                      <span className="text-xs text-text-muted">or drag and drop here</span>
                     </div>
-                    <p className="text-[11px] text-slate-400">
+                    <p className="text-[11px] text-text-muted">
                       Supports MP4, MOV, MKV, ProRes, Images, and Documents
                     </p>
                   </div>
@@ -511,7 +511,7 @@ export default function GoogleDriveUploadModal({
               <div className="space-y-3.5 text-left">
                 {clients.length > 0 && (
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    <label className="block text-xs font-semibold text-text-secondary mb-1">
                       Associate with Client (for work log)
                     </label>
                     <select
@@ -524,7 +524,7 @@ export default function GoogleDriveUploadModal({
                           setRate(isMonthly ? '0' : String(cl.defaultRate));
                         }
                       }}
-                      className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:border-indigo-500"
+                      className="w-full p-2.5 bg-surface-800 text-text-primary border border-surface-400 rounded-lg text-xs outline-none focus:border-surface-300 cursor-pointer"
                     >
                       <option value="">None (Just generate link)</option>
                       {clients.map(c => (
@@ -535,7 +535,7 @@ export default function GoogleDriveUploadModal({
                 )}
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                  <label className="block text-xs font-semibold text-text-secondary mb-1">
                     Deliverable Description
                   </label>
                   <input
@@ -543,14 +543,14 @@ export default function GoogleDriveUploadModal({
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="e.g. Real Estate Tour Final Cut"
-                    className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:border-indigo-500"
+                    className="w-full p-2.5 bg-surface-800 text-text-primary border border-surface-400 rounded-lg text-xs outline-none focus:border-surface-300"
                   />
                 </div>
 
                 {clientId && (
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                      <label className="block text-xs font-semibold text-text-secondary mb-1">
                         Quantity
                       </label>
                       <input
@@ -558,11 +558,11 @@ export default function GoogleDriveUploadModal({
                         min="1"
                         value={quantity}
                         onChange={(e) => setQuantity(e.target.value)}
-                        className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:border-indigo-500"
+                        className="w-full p-2.5 bg-surface-800 text-text-primary border border-surface-400 rounded-lg text-xs outline-none focus:border-surface-300"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                      <label className="block text-xs font-semibold text-text-secondary mb-1">
                         Rate (₹)
                       </label>
                       <input
@@ -571,19 +571,19 @@ export default function GoogleDriveUploadModal({
                         value={rate}
                         onChange={(e) => setRate(e.target.value)}
                         placeholder="Optional"
-                        className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:border-indigo-500 font-mono"
+                        className="w-full p-2.5 bg-surface-800 text-text-primary border border-surface-400 rounded-lg text-xs outline-none focus:border-surface-300 font-mono"
                       />
                     </div>
                   </div>
                 )}
               </div>
 
-              <div className="pt-2 flex items-center justify-end gap-2.5 border-t border-slate-100 dark:border-slate-800">
+              <div className="pt-2 flex items-center justify-end gap-2.5 border-t border-surface-400/80">
                 <button
                   type="button"
                   onClick={onClose}
                   disabled={isUploading}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-lg text-xs font-semibold text-text-secondary hover:bg-surface-600 transition-colors cursor-pointer border-0 bg-transparent"
                 >
                   Cancel
                 </button>
@@ -591,7 +591,7 @@ export default function GoogleDriveUploadModal({
                   type="button"
                   onClick={handleStartUpload}
                   disabled={isUploading || !selectedFile}
-                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold transition-colors shadow-xs disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+                  className="px-5 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-lg text-xs font-semibold transition-colors shadow-xs disabled:opacity-50 flex items-center gap-2 cursor-pointer border-0"
                 >
                   {isUploading ? (
                     <>

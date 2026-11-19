@@ -213,7 +213,7 @@ export default function SubscriptionModal({
           onClick={() => {
             if (!isMandatory && step !== 'activating') onClose();
           }}
-          className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto"
+          className="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto select-none"
         >
           <motion.div
             id="subscription-modal-container"
@@ -222,12 +222,12 @@ export default function SubscriptionModal({
             exit={shouldReduceMotion ? undefined : { opacity: 0, scale: 0.98, y: 6 }}
             transition={{ duration: 0.18, ease: [0.25, 1, 0.5, 1] }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl w-full max-w-lg max-h-[92vh] overflow-y-auto flex flex-col shadow-xl"
+            className="bg-surface-700 border border-surface-400 text-text-primary rounded-xl w-full max-w-lg max-h-[92vh] overflow-y-auto flex flex-col shadow-2xl"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between p-5 border-b border-surface-400/80">
               <div>
-                <h2 className="text-base font-semibold text-slate-900 dark:text-white">
+                <h2 className="text-base font-semibold text-text-primary">
                   {step === 'success' ? 'Subscription Active' : 'Upgrade to CrestFlow Pro'}
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">

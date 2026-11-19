@@ -528,10 +528,10 @@ export default function GlobalHeader({
             <button
               type="button"
               onClick={onEditProfile}
-              className="py-1.5 px-2.5 md:px-3 md:py-2 rounded-xl text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-300 bg-slate-100/70 dark:bg-slate-800/60 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 border border-dashed border-slate-300 dark:border-slate-700 hover:border-indigo-300 transition-all flex items-center gap-1.5 cursor-pointer"
+              className="py-1.5 px-2.5 md:px-3 md:py-2 rounded-lg text-xs font-medium text-text-secondary hover:text-text-primary bg-surface-700 hover:bg-surface-600 border border-dashed border-surface-400 hover:border-surface-300 transition-colors flex items-center gap-1.5 cursor-pointer"
               title="Set your freelancing start date to track worked days"
             >
-              <Calendar size={14} className="text-slate-400" />
+              <Calendar size={14} className="text-text-muted" />
               <span className="hidden sm:inline">+ Start Date</span>
               <span className="sm:hidden">+ Date</span>
             </button>

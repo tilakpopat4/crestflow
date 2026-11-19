@@ -252,30 +252,30 @@ export default function BulkEditWorkModal({
   const selectedClientObj = clients.find(c => c.id === selectedClientId);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs overflow-y-auto animate-fadeIn">
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 w-full max-w-2xl my-8 overflow-hidden transition-all">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs overflow-y-auto animate-fadeIn select-none">
+      <div className="bg-surface-700 text-text-primary rounded-xl shadow-2xl border border-surface-400 w-full max-w-2xl my-8 overflow-hidden transition-all">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50">
+        <div className="px-6 py-5 border-b border-surface-400/80 flex items-center justify-between bg-surface-700">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-[#212121] text-white rounded-xl">
+            <div className="p-2.5 bg-surface-800 border border-surface-400 text-accent rounded-xl">
               <Layers size={20} />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <h3 className="text-base sm:text-lg font-bold text-text-primary flex items-center gap-2">
                 Bulk Edit Work Logs
-                <span className="text-xs font-normal text-slate-500 dark:text-slate-400">
+                <span className="text-xs font-normal text-text-secondary font-mono tabular-nums">
                   ({selectedItems.length} selected)
                 </span>
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              <p className="text-xs text-text-secondary mt-0.5">
                 Enable only the fields you wish to modify. Unchecked fields will remain untouched.
               </p>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            disabled={isSubmitting}
-            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+            className="p-1 text-text-muted hover:text-text-primary transition-colors border-0 bg-transparent cursor-pointer"
           >
             <X size={18} />
           </button>
@@ -577,10 +577,10 @@ export default function BulkEditWorkModal({
         </form>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="text-xs text-slate-500 dark:text-slate-400 text-center sm:text-left">
+        <div className="px-6 py-4 border-t border-surface-400/80 bg-surface-700 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="text-xs text-text-secondary text-center sm:text-left">
             {anyFieldEnabled ? (
-              <span className="text-indigo-600 dark:text-indigo-400 font-medium">
+              <span className="text-accent font-medium">
                 Ready to apply changes to {selectedItems.length} work log(s)
                 {hasInvoiced ? ` & sync ${affectedInvoices.length} invoice(s)` : ''}
               </span>
@@ -594,7 +594,7 @@ export default function BulkEditWorkModal({
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer"
+              className="px-4 py-2 text-xs font-semibold text-text-secondary hover:text-text-primary hover:bg-surface-600 rounded-lg transition-colors cursor-pointer border-0 bg-transparent"
             >
               Cancel
             </button>
@@ -602,7 +602,7 @@ export default function BulkEditWorkModal({
               type="button"
               onClick={handleSubmit}
               disabled={isSubmitting || !anyFieldEnabled}
-              className="px-4 py-2 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+              className="px-4 py-2 text-xs font-semibold bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-all shadow-xs flex items-center gap-1.5 cursor-pointer border-0"
             >
               {isSubmitting ? (
                 <>
