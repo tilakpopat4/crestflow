@@ -26,7 +26,7 @@ export default function AnniversaryModal({
     <div
       id="anniversary-modal-overlay"
       onClick={onClose}
-      className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 cursor-pointer animate-in fade-in duration-200 select-none overflow-hidden"
+      className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 cursor-pointer animate-in fade-in duration-200 select-none overflow-hidden"
     >
       {/* Background festive celebration crackers animation */}
       <MilestoneCelebrationParticles />

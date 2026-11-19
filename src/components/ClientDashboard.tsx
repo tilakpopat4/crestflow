@@ -1258,7 +1258,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
       {isUpdatingPaymentDate && (
         <div 
           onClick={() => setIsUpdatingPaymentDate(false)}
-          className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 cursor-pointer"
+          className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 cursor-pointer"
         >
           <div 
             onClick={(e) => e.stopPropagation()}
@@ -1332,7 +1332,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
             setEditingSubClientId(null);
             setSubClientForm({ name: '', code: '', notes: '' });
           }}
-          className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 cursor-pointer"
+          className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 cursor-pointer"
         >
           <div 
             onClick={(e) => e.stopPropagation()}

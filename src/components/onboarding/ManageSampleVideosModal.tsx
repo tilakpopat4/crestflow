@@ -57,7 +57,7 @@ export default function ManageSampleVideosModal({
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-3 sm:p-6 cursor-pointer"
+      className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-6 cursor-pointer"
     >
       <div
         onClick={(e) => e.stopPropagation()}

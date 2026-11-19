@@ -97,7 +97,7 @@ export default function ProfileModal({
     <div
       id="profile-modal-overlay"
       onClick={() => { if (!isMandatory && onClose) onClose(); }}
-      className={`fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 ${!isMandatory ? 'cursor-pointer' : ''}`}
+      className={`fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 ${!isMandatory ? 'cursor-pointer' : ''}`}
     >
       <div
         id="profile-modal-container"

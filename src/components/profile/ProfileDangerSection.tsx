@@ -111,7 +111,7 @@ export const ProfileDangerSection: React.FC<ProfileDangerSectionProps> = ({ user
       {/* Explicit Confirmation Modal */}
       {isModalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4"
           role="dialog"
           aria-modal="true"
           aria-labelledby="delete-account-modal-title"

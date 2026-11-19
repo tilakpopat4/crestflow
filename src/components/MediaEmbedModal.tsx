@@ -44,7 +44,7 @@ export default function MediaEmbedModal({
     <div
       id="media-embed-modal-overlay"
       onClick={onClose}
-      className="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-3 sm:p-6 cursor-pointer animate-in fade-in duration-200"
+      className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-6 cursor-pointer animate-in fade-in duration-200"
     >
       <div
         id="media-embed-card"

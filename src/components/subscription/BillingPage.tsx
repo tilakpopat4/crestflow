@@ -229,7 +229,7 @@ export default function BillingPage({
 
         {/* Change Plan Modal */}
         {changePlanOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
             <div className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
               <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">
                 Select a New Plan

@@ -339,7 +339,7 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
       {reviewToDelete && (
         <div 
           onClick={() => setReviewToDelete(null)}
-          className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 cursor-pointer"
+          className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 cursor-pointer"
         >
           <div 
             onClick={(e) => e.stopPropagation()}

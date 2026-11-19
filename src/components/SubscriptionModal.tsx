@@ -213,7 +213,7 @@ export default function SubscriptionModal({
           onClick={() => {
             if (!isMandatory && step !== 'activating') onClose();
           }}
-          className="fixed inset-0 bg-slate-900/70 z-50 flex items-center justify-center p-4 overflow-y-auto"
+          className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto"
         >
           <motion.div
             id="subscription-modal-container"

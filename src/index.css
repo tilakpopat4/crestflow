@@ -294,6 +294,18 @@ td[data-edge] button:hover,
   color: #ffffff !important;
 }
 
+/* Universal Dialog & Modal Scrim / Backdrop: transparent dark tint with slight blur per user request */
+.fixed.inset-0[class*="bg-slate-900"],
+.fixed.inset-0[class*="bg-slate-950"],
+.fixed.inset-0[class*="bg-black"],
+div.fixed.inset-0:has(> [role="dialog"]),
+div.fixed.inset-0:has(> [id*="modal"]),
+div.fixed.inset-0:has(> [id*="card"]) {
+  background-color: rgba(0, 0, 0, 0.45) !important;
+  backdrop-filter: blur(3px) !important;
+  -webkit-backdrop-filter: blur(3px) !important;
+}
+
 /* Universal Button & Interactive Element Hover & Active Feedback per GEMINI.md & /animate */
 button:not(:disabled),
 [role="button"]:not([aria-disabled="true"]) {

@@ -188,7 +188,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
         <>
           <div
             onClick={() => setOpen(false)}
-            className="fixed inset-0 z-40 bg-slate-900/40 sm:hidden"
+            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-xs sm:hidden"
           />
 
           <div

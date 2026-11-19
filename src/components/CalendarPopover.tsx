@@ -167,7 +167,7 @@ export const CalendarPopover: React.FC<CalendarPopoverProps> = ({
       {/* Mobile scrim */}
       <div
         onClick={onClose}
-        className="fixed inset-0 z-50 bg-slate-900/40 sm:hidden transition-opacity duration-120"
+        className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs sm:hidden transition-opacity duration-120"
       />
 
       <div

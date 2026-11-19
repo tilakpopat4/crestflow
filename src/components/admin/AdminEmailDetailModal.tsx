@@ -16,7 +16,7 @@ export default function AdminEmailDetailModal({ email, onClose, formatDate }: Ad
   if (!email) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
       <div className="bg-white dark:bg-slate-900 rounded-xl p-6 max-w-lg w-full space-y-4 border border-slate-200 dark:border-slate-800 shadow-xl">
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
           <h4 className="font-semibold text-sm text-slate-900 dark:text-slate-100">

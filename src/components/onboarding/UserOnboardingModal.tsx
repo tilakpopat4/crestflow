@@ -94,7 +94,7 @@ export const UserOnboardingModal: React.FC<UserOnboardingModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 select-none">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 select-none">
       <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 sm:p-7 shadow-xl">
         <div className="flex items-center justify-between pb-4 mb-5 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-baseline gap-2">

@@ -48,7 +48,7 @@ export const ClientPortalInvoiceModal: React.FC<ClientPortalInvoiceModalProps> =
       role="dialog"
       aria-modal="true"
       aria-labelledby="invoice-modal-title"
-      className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto"
+      className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}

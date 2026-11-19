@@ -1785,7 +1785,7 @@ export default function InvoiceTab({
       {emailModalData && emailModalData.isOpen && (
         <div
           onClick={() => setEmailModalData(null)}
-          className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 animate-in fade-in cursor-pointer"
+          className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in cursor-pointer"
         >
           <div
             onClick={(e) => e.stopPropagation()}
