@@ -396,7 +396,7 @@ export default function ClientsTab({
             </button>
             <button
               onClick={handleOpenAddClient}
-              className="flex items-center justify-center gap-1.5 sm:gap-2 bg-[#282828] hover:bg-[#383838] text-white border border-[#3a3a3a] px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-semibold transition-all shadow-xs flex-1 md:flex-none cursor-pointer"
+              className="flex items-center justify-center gap-1.5 sm:gap-2 bg-[#4870aa] hover:bg-[#3b5e90] text-white border-0 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-semibold transition-all shadow-xs flex-1 md:flex-none cursor-pointer"
             >
               <Plus size={15} />
               <span>Add New Client</span>
@@ -770,15 +770,15 @@ export default function ClientsTab({
                       e.stopPropagation();
                       handleEditClient(client);
                     }}
-                    className="p-2 sm:p-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center cursor-pointer shrink-0"
+                    className="p-2 sm:p-2.5 bg-[#4870aa] hover:bg-[#3b5e90] text-white rounded-xl text-xs font-semibold transition-colors flex items-center justify-center cursor-pointer shrink-0"
                     title="Edit Client Profile"
                   >
-                    <Edit2 size={14} />
+                    <Edit2 size={14} className="text-white" />
                   </button>
                   {client.isClosed ? (
                     <button
                       onClick={(e) => { e.stopPropagation(); handleReopenClient(client); }}
-                      className="px-2.5 sm:px-3.5 py-2 sm:py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1 cursor-pointer shrink-0"
+                      className="px-2.5 sm:px-3.5 py-2 sm:py-2.5 bg-[#4870aa] hover:bg-[#3b5e90] text-white rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1 cursor-pointer shrink-0"
                       title="Reopen Client"
                     >
                       <ArchiveRestore size={14} /> <span className="hidden min-[380px]:inline">Reopen</span>
@@ -791,10 +791,10 @@ export default function ClientsTab({
                         const cInvoices = invoices.filter(inv => inv.clientId === client.id);
                         exportClientCSV(client, cWorkItems, cInvoices);
                       }}
-                      className="px-2.5 sm:px-3.5 py-2 sm:py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1 cursor-pointer shrink-0"
+                      className="px-2.5 sm:px-3.5 py-2 sm:py-2.5 bg-[#4870aa] hover:bg-[#3b5e90] text-white rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1 cursor-pointer shrink-0"
                       title="Export Work History & Invoice Summary to CSV"
                     >
-                      <Download size={14} className="text-slate-500 dark:text-slate-400 shrink-0" /> <span>CSV</span>
+                      <Download size={14} className="text-white shrink-0" /> <span>CSV</span>
                     </button>
                   )}
                 </div>

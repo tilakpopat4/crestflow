@@ -129,10 +129,10 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
           </button>
           <button
             onClick={handleSignOut}
-            className="bg-[#282828] hover:bg-[#383838] text-white px-3.5 py-2 rounded-lg text-sm font-medium transition-colors duration-120 cursor-pointer border border-[#3a3a3a] inline-flex items-center gap-1.5"
+            className="bg-[#4870aa] hover:bg-[#3b5e90] text-white px-3.5 py-2 rounded-lg text-sm font-medium transition-colors duration-120 cursor-pointer border-0 inline-flex items-center gap-1.5"
             title="Sign out of admin account"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-4 h-4 text-white" />
             <span>Sign Out</span>
           </button>
         </div>

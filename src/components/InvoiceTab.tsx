@@ -1889,10 +1889,10 @@ export default function InvoiceTab({
                                 URL.revokeObjectURL(url);
                               }
                             }}
-                            className="px-2 py-0.5 bg-[#282828] hover:bg-[#333333] border border-[#383838] text-[#f1f1f1] font-sans text-[11px] font-semibold rounded transition-colors flex items-center gap-1 cursor-pointer"
+                            className="px-2 py-0.5 bg-[#4870aa] hover:bg-[#3b5e90] text-white font-sans text-[11px] font-semibold rounded transition-colors flex items-center gap-1 cursor-pointer border-0"
                             title="Download Invoice PDF file"
                           >
-                            <Download size={12} className="text-[#4870aa]" /> Save PDF
+                            <Download size={12} className="text-white" /> Save PDF
                           </button>
                         )}
                         <span className="text-[10px] px-1.5 py-0.5 bg-[#212121] border border-[#383838] text-slate-300 font-semibold rounded">

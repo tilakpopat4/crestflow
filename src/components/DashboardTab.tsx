@@ -275,14 +275,14 @@ export default function DashboardTab({
           ) : null}
           <button 
             onClick={handleExport}
-            className="flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-[#282828] hover:bg-[#1f1f1f] text-white rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer border-0"
+            className="flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-[#4870aa] hover:bg-[#3b5e90] text-white rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer border-0"
           >
             <DownloadCloud size={13} /> Export
           </button>
           
           <button 
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-[#282828] hover:bg-[#1f1f1f] text-white rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer border-0"
+            className="flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-[#4870aa] hover:bg-[#3b5e90] text-white rounded-lg text-xs font-semibold transition-colors shadow-2xs cursor-pointer border-0"
           >
             <UploadCloud size={13} /> Import
           </button>

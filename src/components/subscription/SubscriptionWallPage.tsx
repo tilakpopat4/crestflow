@@ -200,7 +200,7 @@ export default function SubscriptionWallPage({
               <p className="text-xs text-slate-500 dark:text-slate-400">{subscriptionState.hasAccess ? 'Access granted. Redirecting to your workspace dashboard...' : 'Verifying payment authorization and preparing your dashboard.'}</p>
             </div>
             {subscriptionState.hasAccess && (
-              <button type="button" onClick={() => onNavigate?.('dashboard')} className="px-5 py-2.5 bg-[#282828] hover:bg-[#383838] text-white text-xs font-semibold rounded-lg border-none cursor-pointer transition-colors">
+              <button type="button" onClick={() => onNavigate?.('dashboard')} className="px-5 py-2.5 bg-[#4870aa] hover:bg-[#3b5e90] text-white text-xs font-semibold rounded-lg border-none cursor-pointer transition-colors">
                 Enter Workspace Now
               </button>
             )}
@@ -276,7 +276,7 @@ export default function SubscriptionWallPage({
                 type="button" onClick={handleStartPayment} disabled={loading || (isTrial && isTrialUsed)}
                 whileHover={shouldReduceMotion || loading || (isTrial && isTrialUsed) ? undefined : { scale: 1.02 }}
                 whileTap={shouldReduceMotion || loading || (isTrial && isTrialUsed) ? undefined : { scale: 0.98 }}
-                className="w-full sm:w-auto px-6 py-2.5 bg-[#282828] hover:bg-[#383838] text-white rounded-lg text-xs font-semibold cursor-pointer border-none disabled:opacity-50 shadow-sm flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-6 py-2.5 bg-[#4870aa] hover:bg-[#3b5e90] text-white rounded-lg text-xs font-semibold cursor-pointer border-none disabled:opacity-50 shadow-sm flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <><RefreshCw size={13} className="animate-spin" /><span>{isTrial ? 'Activating Free Trial...' : 'Connecting to Razorpay...'}</span></>

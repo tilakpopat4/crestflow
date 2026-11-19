@@ -47,7 +47,7 @@ export default function SampleVideoLibrary({
           <button
             type="button"
             onClick={onOpenIntake}
-            className="self-start sm:self-auto px-3.5 py-1.5 bg-[#282828] hover:bg-[#1a1a1a] text-white text-xs font-medium rounded-lg transition-colors cursor-pointer border-0"
+            className="self-start sm:self-auto px-3.5 py-1.5 bg-[#4870aa] hover:bg-[#3b5e90] text-white text-xs font-medium rounded-lg transition-colors cursor-pointer border-0"
           >
             Submit Project Brief
           </button>
