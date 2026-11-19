@@ -2,7 +2,9 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import NumberFlow from "@number-flow/react";
 import { AnimatePresence, motion } from "motion/react";
-import Link from "next/link";
+const Link = ({ href, children, ...props }: { href: string; children: React.ReactNode; [key: string]: any }) => (
+  <a href={href} {...props}>{children}</a>
+);
 import { CheckCircle, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {

@@ -15,7 +15,7 @@ import { RevenueChartHeader } from './RevenueChartHeader';
 interface RevenueComparisonChartProps {
   invoices?: Invoice[];
   freelanceStartDate?: string | null;
-  workItems?: { date?: string; createdAt?: number | string }[];
+  workItems?: { date?: string | number; createdAt?: number | string; [key: string]: any }[];
   onNavigateToInvoices?: () => void;
 }
 

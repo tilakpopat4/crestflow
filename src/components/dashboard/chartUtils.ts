@@ -36,7 +36,7 @@ export function calculateChange(now: number, prev: number): number {
 export function buildMonthlyDataFromInvoices(
   invoices: Invoice[] = [],
   freelanceStartDate?: string | null,
-  workItems?: { date?: string; createdAt?: number | string }[]
+  workItems?: { date?: string | number; createdAt?: number | string; [key: string]: any }[]
 ): {
   data: MonthDataPoint[];
   hasData: boolean;

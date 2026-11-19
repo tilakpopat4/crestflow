@@ -104,7 +104,7 @@ export interface Invoice {
   extraCostAmount?: number;
   extraCostDescription?: string;
   lastPaymentDate?: number;
-  invoiceType?: 'per_item' | 'monthly_retainer'; // 'per_item' (default) or 'monthly_retainer' (fixed monthly payment)
+  invoiceType?: 'per_item' | 'per_reel' | 'monthly_retainer'; // 'per_item' (default) or 'monthly_retainer' (fixed monthly payment)
   billingMonth?: string; // e.g. "October 2026"
   linkedWorkItemIds?: string[];
   deliverables?: InvoiceDeliverable[]; // Snapshot of completed deliverables without rates for monthly retainer invoices

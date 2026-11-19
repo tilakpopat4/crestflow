@@ -170,8 +170,8 @@ export const parseDate = (text: string, today: number): number | null => {
   const m = MONTHS.findIndex(
     (name) => name.toLowerCase().startsWith(word[0].slice(0, 3))
   );
-  const d = numbers.find((n) => n.length <= 2);
-  const y = numbers.find((n) => n !== d);
+  const d = numbers.find((n: string) => n.length <= 2);
+  const y = numbers.find((n: string) => n !== d);
   if (m < 0 || !d) return null;
   return valid(y ? year(y) : fromDay(today).y, m, Number(d));
 };

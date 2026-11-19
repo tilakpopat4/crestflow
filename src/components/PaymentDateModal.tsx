@@ -6,7 +6,9 @@ import { formatLocalDateToYMD, parseYMDToTimestamp } from '../lib/dateUtils';
 interface PaymentDateModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (date: number) => void;
+  onConfirm?: (date: number) => void;
+  onConfirmPayment?: (invoiceId: string, timestamp: number) => Promise<void> | void;
+  invoiceId?: string;
   onUnmark?: () => void;
   defaultDate?: number;
   invoiceNumber?: string;
@@ -17,6 +19,8 @@ export default function PaymentDateModal({
   isOpen,
   onClose,
   onConfirm,
+  onConfirmPayment,
+  invoiceId,
   onUnmark,
   defaultDate,
   invoiceNumber,
@@ -35,7 +39,12 @@ export default function PaymentDateModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (dateStr) {
-      onConfirm(parseYMDToTimestamp(dateStr));
+      const ts = parseYMDToTimestamp(dateStr);
+      if (onConfirmPayment && invoiceId) {
+        onConfirmPayment(invoiceId, ts);
+      } else if (onConfirm) {
+        onConfirm(ts);
+      }
     }
   };
 

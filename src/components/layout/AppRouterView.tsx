@@ -11,7 +11,7 @@ import { lazyWithRetry } from '../../lib/lazyWithRetry';
 const DashboardTab = lazyWithRetry(() => import('../DashboardTab'));
 const ClientsTab = lazyWithRetry(() => import('../ClientsTab'));
 const InvoiceTab = lazyWithRetry(() => import('../InvoiceTab'));
-const WorkLogTab = lazyWithRetry(() => import('../WorkLogTab'), m => ({ default: m.WorkLogTab }));
+const WorkLogTab: React.ComponentType<any> = lazyWithRetry(() => import('../WorkLogTab'), m => ({ default: m.WorkLogTab }));
 const ReviewsTab = lazyWithRetry(() => import('../ReviewsTab'));
 const ClientOnboardingTab = lazyWithRetry(() => import('../ClientOnboardingTab'));
 const AdminTab = lazyWithRetry(() => import('../AdminTab'));

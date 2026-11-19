@@ -1,7 +1,7 @@
 import React from 'react';
 import { Client, Invoice, WorkItem } from '../../types';
 import { Edit2, Trash2, Download, Archive, ArchiveRestore, Users, ChevronRight } from 'lucide-react';
-import { getDriveDirectImageUrl } from '../../lib/utils';
+import { cn, getDriveDirectImageUrl } from '../../lib/utils';
 import { exportClientCSV } from '../../lib/csvExport';
 import { formatCurrencyAmount } from '../../lib/currencyUtils';
 import StatusBadge from '../StatusBadge';
@@ -9,8 +9,8 @@ import { Button } from '../ui/button';
 
 interface ClientCardProps {
   client: Client;
-  statusInfo: { nextDueDate: string; isOverdue?: boolean; daysRemaining?: number };
-  financials: { totalPendingAmount: number; totalEarned: number };
+  statusInfo: { nextDueDate: string | number; isOverdue?: boolean; daysRemaining?: number; [key: string]: any };
+  financials: { totalPendingAmount?: number; totalEarned?: number; paidTotal?: number; [key: string]: any };
   invoices: Invoice[];
   workItems: WorkItem[];
   onSelect: (clientId: string) => void;
@@ -37,9 +37,11 @@ export const ClientCard: React.FC<ClientCardProps> = ({
       ? new Date(client.lastPaymentDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })
       : 'Not set';
 
-  const nextDueTime = new Date(statusInfo.nextDueDate).getTime();
+  const nextDueTime = typeof statusInfo.nextDueDate === 'number'
+    ? statusInfo.nextDueDate
+    : new Date(statusInfo.nextDueDate).getTime();
   const formattedNextDate = !isNaN(nextDueTime)
-    ? new Date(statusInfo.nextDueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })
+    ? new Date(nextDueTime).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })
     : '—';
 
   return (
@@ -210,10 +212,10 @@ export const ClientCard: React.FC<ClientCardProps> = ({
             <span className="text-text-muted block text-[11px] truncate">Pending</span>
             <span
               className={`font-semibold font-mono tabular-nums text-xs sm:text-sm truncate block mt-0.5 ${
-                financials.totalPendingAmount > 0 ? 'text-accent' : 'text-text-secondary'
+                (financials.totalPendingAmount ?? 0) > 0 ? 'text-accent' : 'text-text-secondary'
               }`}
             >
-              {formatCurrencyAmount(financials.totalPendingAmount, client.currency)}
+              {formatCurrencyAmount(financials.totalPendingAmount ?? 0, client.currency)}
             </span>
           </div>
         </div>

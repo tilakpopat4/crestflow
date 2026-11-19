@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { Client, Invoice, Reel, WorkItem } from '../types';
 import { DateInput } from './DateInput';
+import Checkbox from './ui/Checkbox';
 import { formatLocalDateToYMD, parseYMDToTimestamp } from '../lib/dateUtils';
 
 interface BulkEditWorkModalProps {

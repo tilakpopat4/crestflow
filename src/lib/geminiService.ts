@@ -144,9 +144,9 @@ Do not mention specific dates or specific earnings unless provided. Focus on hig
 
   // Last-resort fallback: attempt dynamic discovery of any models supported by this key
   try {
-    const listRes = await ai.models.list();
+    const listRes: any = await ai.models.list();
     if (listRes && Array.isArray(listRes.models) && listRes.models.length > 0) {
-      const discovered = listRes.models
+      const discovered = (listRes.models as any[])
         .map(m => m.name ? m.name.replace(/^models\//, '') : '')
         .filter(name => Boolean(name) && !triedModels.includes(name));
 

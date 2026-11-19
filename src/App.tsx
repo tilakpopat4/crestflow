@@ -34,7 +34,7 @@ const SubscriptionModal = lazyWithRetry(() => import('./components/SubscriptionM
 const AnniversaryModal = lazyWithRetry(() => import('./components/AnniversaryModal'));
 const NotFoundScreen = lazyWithRetry(() => import('./components/NotFoundScreen'));
 const SubscriptionWallPage = lazyWithRetry(() => import('./components/subscription/SubscriptionWallPage'));
-const UserOnboardingModal = lazyWithRetry(() => import('./components/onboarding/UserOnboardingModal'), m => ({ default: m.default || m.UserOnboardingModal }));
+const UserOnboardingModal: React.ComponentType<any> = lazyWithRetry(() => import('./components/onboarding/UserOnboardingModal'), m => ({ default: m.default || m.UserOnboardingModal }));
 
 const ViewLoadingFallback = () => (
   <div className="flex-1 flex flex-col items-center justify-center p-12 min-h-[360px] animate-in fade-in duration-150 select-none">

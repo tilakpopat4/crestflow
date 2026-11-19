@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import Button from './button';
 
 export interface EmptyStateProps {
-  icon?: React.ReactNode;
+  icon?: React.ReactNode | React.ElementType;
   title: string;
   description: string;
   actionLabel?: string;
@@ -24,6 +24,16 @@ export function EmptyState({
   onAction,
   className,
 }: EmptyStateProps) {
+  const renderIcon = () => {
+    if (!icon) return null;
+    if (React.isValidElement(icon)) return icon;
+    if (typeof icon === 'function' || (typeof icon === 'object' && icon !== null)) {
+      const IconComp = icon as React.ComponentType<{ size?: number; className?: string }>;
+      return <IconComp size={24} />;
+    }
+    return <>{icon}</>;
+  };
+
   return (
     <div
       className={cn(
@@ -33,7 +43,7 @@ export function EmptyState({
     >
       {icon && (
         <div className="w-12 h-12 rounded-xl bg-surface-600 border border-surface-400 flex items-center justify-center text-text-secondary mb-1">
-          {icon}
+          {renderIcon()}
         </div>
       )}
       <div className="space-y-1">

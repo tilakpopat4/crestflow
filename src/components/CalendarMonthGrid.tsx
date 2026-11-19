@@ -83,7 +83,7 @@ export const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
                 return (
                   <td
                     key={c.day}
-                    aria-selected={a.selected}
+                    aria-selected={a.selected === 'true' ? true : a.selected === 'false' ? false : Boolean(a.selected)}
                     data-range={a.range}
                     data-edge={a.edge}
                     className="group p-0 first:rounded-l-lg last:rounded-r-lg aria-selected:bg-[#282828] data-[range=end]:rounded-r-lg data-[range=preview]:bg-[#282828] data-[range=single]:rounded-lg data-[range=start]:rounded-l-lg"
@@ -93,7 +93,7 @@ export const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
                       tabIndex={Number(a.tab)}
                       aria-label={a.label}
                       aria-current={a.current as any}
-                      aria-disabled={a.disabled}
+                      aria-disabled={a.disabled === 'true' ? true : a.disabled === 'false' ? false : Boolean(a.disabled)}
                       onClick={() => !a.disabled && onPickDay(c.day)}
                       onFocus={() => onFocusDay(c.day)}
                       onPointerEnter={(e) => onHoverDay(e, c.day, a.disabled)}

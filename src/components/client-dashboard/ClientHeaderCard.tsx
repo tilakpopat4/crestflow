@@ -12,7 +12,7 @@ interface ClientHeaderCardProps {
   currencySymbol: string;
   clientWorkItems: WorkItem[];
   clientInvoices: Invoice[];
-  statusInfo: { daysRemaining: number; nextDueDate: number; isOverdue: boolean };
+  statusInfo: { daysRemaining?: number; nextDueDate?: number; isOverdue?: boolean; [key: string]: any };
   onUpdateClient: (updatedClient: Client) => Promise<void>;
 }
 
