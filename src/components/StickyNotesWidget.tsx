@@ -315,20 +315,20 @@ export default function StickyNotesWidget({ user, clients }: StickyNotesWidgetPr
       {isModalOpen && (
         <div 
           onClick={handleCloseModal}
-          className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in cursor-pointer"
+          className="fixed inset-0 bg-black/25 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in cursor-pointer select-none"
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="bg-white dark:bg-slate-800 rounded-xl max-w-lg w-full p-6 shadow-xl border border-slate-200 dark:border-slate-700 space-y-5 cursor-default"
+            className="bg-surface-700 rounded-xl max-w-lg w-full p-6 shadow-xl border border-surface-400 text-text-primary space-y-5 cursor-default"
           >
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-4">
-              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <Pin size={18} className="text-indigo-600 dark:text-indigo-400" />
+            <div className="flex items-center justify-between border-b border-surface-400/80 pb-4">
+              <h3 className="text-base font-bold text-text-primary flex items-center gap-2">
+                <Pin size={18} className="text-[#4870aa]" />
                 {editingNoteId ? 'Edit Sticky Note' : 'Create New Sticky Note'}
               </h3>
               <button
                 onClick={handleCloseModal}
-                className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                className="p-1 text-text-secondary hover:text-text-primary rounded-lg hover:bg-surface-600 transition-colors cursor-pointer border-0 bg-transparent"
               >
                 <X size={18} />
               </button>
@@ -336,11 +336,11 @@ export default function StickyNotesWidget({ user, clients }: StickyNotesWidgetPr
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Client Association</label>
+                <label className="text-xs font-semibold text-text-secondary">Client Association</label>
                 <select
                   value={formData.clientId}
                   onChange={(e) => setFormData({ ...formData, clientId: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-900"
+                  className="w-full px-3 py-2 bg-surface-800 text-text-primary border border-surface-400 rounded-lg text-xs font-medium focus:border-[#4870aa] outline-none"
                 >
                   <option value="general">General / Quick Snippet (No Client)</option>
                   {clients.map(c => (
@@ -350,19 +350,19 @@ export default function StickyNotesWidget({ user, clients }: StickyNotesWidgetPr
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Note Content *</label>
+                <label className="text-xs font-semibold text-text-secondary">Note Content *</label>
                 <textarea
                   rows={4}
                   value={formData.content}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                   placeholder="e.g., Client prefers energetic transition effects, 9:16 aspect ratio, and background music at -18dB..."
-                  className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-normal focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-900 resize-y"
+                  className="w-full px-3 py-2.5 bg-surface-800 text-text-primary placeholder:text-text-muted border border-surface-400 rounded-lg text-xs font-normal focus:border-[#4870aa] outline-none resize-y"
                   required
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Color Palette</label>
+                <label className="text-xs font-semibold text-text-secondary">Color Palette</label>
                 <div className="flex items-center gap-2">
                   {(['yellow', 'blue', 'green', 'pink', 'purple'] as StickyNote['color'][]).map((color) => {
                     const style = COLOR_MAP[color];
@@ -374,28 +374,28 @@ export default function StickyNotesWidget({ user, clients }: StickyNotesWidgetPr
                         type="button"
                         onClick={() => setFormData({ ...formData, color })}
                         className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-colors ${style.bg} ${
-                          isSelected ? 'border-slate-900 dark:border-slate-100 ring-2 ring-slate-400' : 'border-slate-200 dark:border-slate-700'
+                          isSelected ? 'border-text-primary ring-2 ring-surface-400' : 'border-surface-400'
                         } cursor-pointer`}
                         title={color}
                       >
-                        {isSelected && <Check size={14} className="text-slate-800 dark:text-slate-200" />}
+                        {isSelected && <Check size={14} className="text-white" />}
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-4 border-t border-slate-100 dark:border-slate-700">
+              <div className="flex items-center justify-end gap-2 pt-4 border-t border-surface-400/80">
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold text-text-secondary hover:text-text-primary hover:bg-surface-600 rounded-lg transition-colors cursor-pointer border-0 bg-transparent"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors shadow-xs cursor-pointer"
+                  className="px-4 py-2 bg-[#4870aa] hover:bg-[#3b5e90] text-white rounded-lg text-xs font-semibold transition-colors shadow-xs cursor-pointer border-0"
                 >
                   {editingNoteId ? 'Update Note' : 'Save Sticky Note'}
                 </button>

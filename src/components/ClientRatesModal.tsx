@@ -119,7 +119,7 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto cursor-pointer select-none"
+      className="fixed inset-0 z-50 bg-black/25 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto cursor-pointer select-none"
     >
       <div
         onClick={(e) => e.stopPropagation()}
@@ -188,11 +188,11 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
                       setMonthlyRetainerAmount(e.target.value);
                       setDefaultRate(e.target.value);
                     }}
-                    className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg pl-8 pr-3.5 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 outline-none transition-colors focus:border-indigo-600"
+                    className="w-full bg-surface-800 border border-surface-400 rounded-lg pl-8 pr-3.5 py-2 text-xs text-text-primary placeholder:text-text-muted outline-none transition-colors focus:border-[#4870aa]"
                     placeholder="e.g. 25000"
                   />
                 </div>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                <p className="text-[11px] text-text-secondary mt-1">
                   Invoices for this client will automatically bill this exact fixed amount each month.
                 </p>
               </motion.div>
@@ -205,11 +205,11 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
                 transition={{ duration: 0.14 }}
                 className="space-y-1.5"
               >
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <label className="block text-xs font-semibold text-text-secondary">
                   Default Rate per Reel / Deliverable ({currencySymbol}) *
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-text-muted">
                     {currencySymbol}
                   </span>
                   <input
@@ -219,7 +219,7 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
                     step="1"
                     value={defaultRate}
                     onChange={(e) => setDefaultRate(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg pl-8 pr-3.5 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 outline-none transition-colors focus:border-indigo-600"
+                    className="w-full bg-surface-800 border border-surface-400 rounded-lg pl-8 pr-3.5 py-2 text-xs text-text-primary placeholder:text-text-muted outline-none transition-colors focus:border-[#4870aa]"
                     placeholder="e.g. 1500"
                   />
                 </div>
@@ -229,11 +229,11 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
 
           {/* On Site Shoot Rate */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <label className="block text-xs font-semibold text-text-secondary">
               On Site Shoot Rate ({currencySymbol}) (Optional)
             </label>
             <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-text-muted">
                 {currencySymbol}
               </span>
               <input
@@ -242,7 +242,7 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
                 step="1"
                 value={onSiteShootRate}
                 onChange={(e) => setOnSiteShootRate(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg pl-8 pr-3.5 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 outline-none transition-colors focus:border-indigo-600"
+                className="w-full bg-surface-800 border border-surface-400 rounded-lg pl-8 pr-3.5 py-2 text-xs text-text-primary placeholder:text-text-muted outline-none transition-colors focus:border-[#4870aa]"
                 placeholder="e.g. 5000"
               />
             </div>
@@ -250,11 +250,11 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
 
           {/* Website Making Rate */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <label className="block text-xs font-semibold text-text-secondary">
               Website Making Rate ({currencySymbol}) (Optional)
             </label>
             <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-text-muted">
                 {currencySymbol}
               </span>
               <input
@@ -263,7 +263,7 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
                 step="1"
                 value={websiteMakingRate}
                 onChange={(e) => setWebsiteMakingRate(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg pl-8 pr-3.5 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 outline-none transition-colors focus:border-indigo-600"
+                className="w-full bg-surface-800 border border-surface-400 rounded-lg pl-8 pr-3.5 py-2 text-xs text-text-primary placeholder:text-text-muted outline-none transition-colors focus:border-[#4870aa]"
                 placeholder="e.g. 15000"
               />
             </div>
@@ -298,7 +298,7 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
             <button
               type="submit"
               disabled={isSaving}
-              className="bg-accent hover:bg-accent-hover disabled:opacity-50 text-white px-5 py-2 rounded-lg text-xs font-semibold transition-colors border-0 cursor-pointer shadow-xs"
+              className="bg-[#4870aa] hover:bg-[#3b5e90] disabled:opacity-50 text-white px-5 py-2 rounded-lg text-xs font-semibold transition-colors border-0 cursor-pointer shadow-xs"
             >
               <span>{isSaving ? 'Saving…' : 'Save Rates'}</span>
             </button>

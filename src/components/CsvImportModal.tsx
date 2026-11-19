@@ -177,7 +177,7 @@ export default function CsvImportModal({ isOpen, onClose, userId, onImportSucces
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center z-[9999] p-4 select-none">
+    <div className="fixed inset-0 bg-black/25 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 select-none">
       <div className="bg-surface-700 rounded-xl max-w-md w-full shadow-2xl overflow-hidden border border-surface-400 text-text-primary animate-in fade-in zoom-in-95 duration-150">
         <div className="flex justify-between items-center p-5 border-b border-surface-400/80">
           <h3 className="text-base sm:text-lg font-bold text-text-primary flex items-center gap-2">

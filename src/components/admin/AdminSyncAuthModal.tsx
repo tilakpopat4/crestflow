@@ -177,23 +177,23 @@ export default function AdminSyncAuthModal({ isOpen, onClose, onSynced }: AdminS
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/25 backdrop-blur-sm select-none"
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden text-slate-900 dark:text-slate-100"
+        className="bg-surface-700 border border-surface-400 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden text-text-primary"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div className="p-5 border-b border-surface-400/80 flex items-center justify-between">
           <div>
-            <h3 className="text-base font-bold">Sync Firebase Authentication Users</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            <h3 className="text-base font-bold text-text-primary">Sync Firebase Authentication Users</h3>
+            <p className="text-xs text-text-secondary mt-0.5">
               Sync Google accounts from Firebase Auth directory into Cloud Firestore profiles.
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 border-0 cursor-pointer"
+            className="p-1.5 text-text-secondary hover:text-text-primary rounded-lg hover:bg-surface-600 border-0 cursor-pointer bg-transparent transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -269,20 +269,20 @@ export default function AdminSyncAuthModal({ isOpen, onClose, onSynced }: AdminS
                 placeholder="Display Name"
                 value={singleName}
                 onChange={(e) => setSingleName(e.target.value)}
-                className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-500"
+                className="bg-surface-800 border border-surface-400 rounded-lg px-3 py-1.5 text-xs text-text-primary outline-none focus:border-[#4870aa]"
               />
               <input
                 type="text"
                 placeholder="Firebase UID (optional)"
                 value={singleUid}
                 onChange={(e) => setSingleUid(e.target.value)}
-                className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-500"
+                className="bg-surface-800 border border-surface-400 rounded-lg px-3 py-1.5 text-xs text-text-primary outline-none focus:border-[#4870aa]"
               />
             </div>
             <button
               type="submit"
               disabled={isProcessing || !singleEmail.trim()}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors duration-120 border-0 cursor-pointer disabled:opacity-50 inline-flex items-center gap-1.5"
+              className="bg-[#4870aa] hover:bg-[#3b5e90] text-white font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors duration-120 border-0 cursor-pointer disabled:opacity-50 inline-flex items-center gap-1.5"
             >
               <UserPlus className="w-3.5 h-3.5" />
               <span>Add to Directory</span>

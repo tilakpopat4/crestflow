@@ -73,15 +73,15 @@ export default function AdminUserHistoryModal({ user, isOpen, onClose }: AdminUs
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/25 backdrop-blur-sm select-none"
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden text-slate-900 dark:text-slate-100"
+        className="bg-surface-700 border border-surface-400 rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden text-text-primary"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex items-start justify-between gap-4">
+        <div className="p-5 border-b border-surface-400/80 flex items-start justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             {displayUser.photoURL ? (
               <img
@@ -153,7 +153,7 @@ export default function AdminUserHistoryModal({ user, isOpen, onClose }: AdminUs
         </div>
 
         {/* Tab Selection */}
-        <div className="flex border-b border-slate-200 dark:border-slate-800 px-5 gap-2 pt-2 bg-white dark:bg-slate-900 overflow-x-auto">
+        <div className="flex border-b border-surface-400/80 px-5 gap-2 pt-2 bg-surface-700 overflow-x-auto">
           {[
             { id: 'payments' as const, label: 'Payment Details', icon: CreditCard },
             { id: 'invoices' as const, label: `Invoices (${loading ? '…' : invoicesCount})`, icon: FileText },

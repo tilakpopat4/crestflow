@@ -192,7 +192,7 @@ export default function GoogleDriveUploadModal({
     <div
       id="drive-upload-modal-overlay"
       onClick={() => { if (!isUploading) onClose(); }}
-      className="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-6 cursor-pointer animate-in fade-in duration-150 select-none"
+      className="fixed inset-0 bg-black/25 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6 cursor-pointer animate-in fade-in duration-150 select-none"
     >
       <div
         id="drive-upload-card"

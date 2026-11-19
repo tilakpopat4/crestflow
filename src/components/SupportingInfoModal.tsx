@@ -48,7 +48,7 @@ export default function SupportingInfoModal({
       aria-modal="true"
       aria-label={titleMap[route]}
       onClick={onClose}
-      className="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 cursor-pointer select-none"
+      className="fixed inset-0 bg-black/25 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 cursor-pointer select-none"
     >
       <div
         onClick={(e) => e.stopPropagation()}

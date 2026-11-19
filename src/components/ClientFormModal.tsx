@@ -55,7 +55,7 @@ export const ClientFormModal: React.FC<ClientFormModalProps> = ({
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto cursor-pointer select-none"
+      className="fixed inset-0 z-50 bg-black/25 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto cursor-pointer select-none"
     >
       <div
         onClick={(e) => e.stopPropagation()}

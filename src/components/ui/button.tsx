@@ -21,6 +21,8 @@ const buttonVariants = cva(
           "bg-accent hover:bg-[#c70027] text-white border-0 shadow-xs",
         secondary:
           "bg-surface-500 hover:bg-surface-400 text-text-primary border border-surface-400 shadow-2xs",
+        blue:
+          "bg-[#4870aa] hover:bg-[#3b5e90] text-white border-0 shadow-xs",
         outline:
           "border border-surface-400 bg-surface-700 hover:bg-surface-600 text-text-primary",
         ghost:

@@ -228,12 +228,12 @@ export default function BillingPage({
 
         {/* Change Plan Modal */}
         {changePlanOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
-            <div className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/25 backdrop-blur-sm p-4 select-none">
+            <div className="w-full max-w-lg bg-surface-700 rounded-xl border border-surface-400 p-6 shadow-xl text-text-primary">
+              <h3 className="text-base font-bold text-text-primary mb-2">
                 Select a New Plan
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+              <p className="text-xs text-text-secondary mb-4">
                 Your new plan will activate automatically at the conclusion of your current billing period ({formatDate(accessUntil)}).
               </p>
 

@@ -48,17 +48,17 @@ export const ClientPortalInvoiceModal: React.FC<ClientPortalInvoiceModalProps> =
       role="dialog"
       aria-modal="true"
       aria-labelledby="invoice-modal-title"
-      className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto"
+      className="fixed inset-0 bg-black/25 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto select-none"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="bg-white dark:bg-slate-900 rounded-lg max-w-xl w-full border border-slate-200 dark:border-slate-800 flex flex-col max-h-[92vh] my-auto">
+      <div className="bg-surface-700 text-text-primary rounded-lg max-w-xl w-full border border-surface-400 flex flex-col max-h-[92vh] my-auto shadow-sm">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 p-4 sm:px-6">
+        <div className="flex items-center justify-between border-b border-surface-400/80 p-4 sm:px-6">
           <div className="flex items-center gap-2">
             <Logo className="w-6 h-6 rounded-md" />
-            <span id="invoice-modal-title" className="font-bold text-slate-900 dark:text-white text-sm sm:text-base">
+            <span id="invoice-modal-title" className="font-bold text-text-primary text-sm sm:text-base">
               Invoice Details
             </span>
           </div>
@@ -66,7 +66,7 @@ export const ClientPortalInvoiceModal: React.FC<ClientPortalInvoiceModalProps> =
             type="button"
             onClick={onClose}
             aria-label="Close invoice details"
-            className="min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg cursor-pointer"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center text-text-secondary hover:text-text-primary rounded-lg cursor-pointer bg-transparent border-0"
           >
             <X size={18} />
           </button>
@@ -171,7 +171,7 @@ export const ClientPortalInvoiceModal: React.FC<ClientPortalInvoiceModalProps> =
                 </div>
                 <a
                   href={upiLink}
-                  className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium transition-colors min-h-[44px] w-full sm:w-auto"
+                  className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-[#4870aa] hover:bg-[#3b5e90] text-white rounded-lg text-xs font-medium transition-colors min-h-[44px] w-full sm:w-auto border-0"
                 >
                   <QrCode size={14} />
                   <span>Pay with UPI App</span>
@@ -182,11 +182,11 @@ export const ClientPortalInvoiceModal: React.FC<ClientPortalInvoiceModalProps> =
         </div>
 
         {/* Footer Actions */}
-        <div className="border-t border-slate-200 dark:border-slate-800 p-3 sm:p-4 flex items-center justify-end gap-2 bg-slate-50/50 dark:bg-slate-900">
+        <div className="border-t border-surface-400/80 p-3 sm:p-4 flex items-center justify-end gap-2 bg-surface-700">
           <button
             type="button"
             onClick={() => window.print()}
-            className="min-h-[44px] px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer"
+            className="min-h-[44px] px-3.5 py-2 bg-surface-800 hover:bg-surface-600 text-text-primary rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer border border-surface-400"
           >
             <Printer size={14} />
             <span>Print Invoice</span>

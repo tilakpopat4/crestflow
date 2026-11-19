@@ -252,7 +252,7 @@ export default function BulkEditWorkModal({
   const selectedClientObj = clients.find(c => c.id === selectedClientId);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs overflow-y-auto animate-fadeIn select-none">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/25 backdrop-blur-sm overflow-y-auto animate-fadeIn select-none">
       <div className="bg-surface-700 text-text-primary rounded-xl shadow-2xl border border-surface-400 w-full max-w-2xl my-8 overflow-hidden transition-all">
         {/* Header */}
         <div className="px-6 py-5 border-b border-surface-400/80 flex items-center justify-between bg-surface-700">
@@ -353,7 +353,7 @@ export default function BulkEditWorkModal({
                       placeholder="e.g. 2500"
                       value={rateValue}
                       onChange={(e) => setRateValue(e.target.value)}
-                      className="w-full pl-8 pr-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none"
+                      className="w-full pl-8 pr-3 py-2 text-xs rounded-lg border border-surface-400 bg-surface-800 text-text-primary placeholder:text-text-muted focus:border-[#4870aa] outline-none"
                     />
                   </div>
                 )}
@@ -378,7 +378,7 @@ export default function BulkEditWorkModal({
                 <DateInput
                   value={dateValue}
                   onChange={(val) => setDateValue(val)}
-                  className="px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="px-3 py-2 text-xs rounded-lg border border-surface-400 bg-surface-800 text-text-primary focus:border-[#4870aa] outline-none"
                 />
               </div>
             )}
@@ -404,7 +404,7 @@ export default function BulkEditWorkModal({
                   step="1"
                   value={quantityValue}
                   onChange={(e) => setQuantityValue(e.target.value)}
-                  className="w-32 px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-32 px-3 py-2 text-xs rounded-lg border border-surface-400 bg-surface-800 text-text-primary focus:border-[#4870aa] outline-none"
                 />
               </div>
             )}
@@ -462,7 +462,7 @@ export default function BulkEditWorkModal({
                   placeholder={descriptionMode === 'replace' ? 'New description text...' : 'Text to append/prefix...'}
                   value={descriptionText}
                   onChange={(e) => setDescriptionText(e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-3 py-2 text-xs rounded-lg border border-surface-400 bg-surface-800 text-text-primary placeholder:text-text-muted focus:border-[#4870aa] outline-none"
                 />
               </div>
             )}
@@ -491,7 +491,7 @@ export default function BulkEditWorkModal({
                         setSelectedClientId(e.target.value);
                         setSelectedSubClientId('');
                       }}
-                      className="w-full p-2 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none"
+                      className="w-full p-2 text-xs rounded-lg border border-surface-400 bg-surface-800 text-text-primary focus:border-[#4870aa] outline-none"
                     >
                       <option value="">-- Choose Client --</option>
                       {clients.map(c => (
@@ -508,7 +508,7 @@ export default function BulkEditWorkModal({
                       <select
                         value={selectedSubClientId}
                         onChange={(e) => setSelectedSubClientId(e.target.value)}
-                        className="w-full p-2 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none"
+                        className="w-full p-2 text-xs rounded-lg border border-surface-400 bg-surface-800 text-text-primary focus:border-[#4870aa] outline-none"
                       >
                         <option value="">Direct Parent ({selectedClientObj.name})</option>
                         {selectedClientObj.subClients.map(sc => (
@@ -568,7 +568,7 @@ export default function BulkEditWorkModal({
                     placeholder="https://drive.google.com/... or post link"
                     value={videoUrlText}
                     onChange={(e) => setVideoUrlText(e.target.value)}
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-xs"
+                    className="w-full px-3 py-2 text-xs rounded-lg border border-surface-400 bg-surface-800 text-text-primary placeholder:text-text-muted focus:border-[#4870aa] outline-none font-mono"
                   />
                 )}
               </div>
@@ -602,7 +602,7 @@ export default function BulkEditWorkModal({
               type="button"
               onClick={handleSubmit}
               disabled={isSubmitting || !anyFieldEnabled}
-              className="px-4 py-2 text-xs font-semibold bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-all shadow-xs flex items-center gap-1.5 cursor-pointer border-0"
+              className="px-4 py-2 text-xs font-semibold bg-[#4870aa] hover:bg-[#3b5e90] disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-all shadow-xs flex items-center gap-1.5 cursor-pointer border-0"
             >
               {isSubmitting ? (
                 <>

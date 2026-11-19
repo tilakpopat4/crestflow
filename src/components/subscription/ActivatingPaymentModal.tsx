@@ -61,36 +61,36 @@ export const ActivatingPaymentModal: React.FC<ActivatingPaymentModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
-      <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 shadow-sm text-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/25 backdrop-blur-sm p-4 select-none">
+      <div className="w-full max-w-md bg-surface-700 rounded-xl border border-surface-400 p-6 shadow-xl text-center text-text-primary">
         {!isConfirmed ? (
           <div>
-            <div className="w-8 h-8 mx-auto mb-4 border-2 border-indigo-600 dark:border-indigo-400 border-t-transparent rounded-full animate-spin" />
-            <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-2">
+            <div className="w-8 h-8 mx-auto mb-4 border-2 border-[#4870aa] border-t-transparent rounded-full animate-spin" />
+            <h3 className="text-base font-semibold text-text-primary mb-2">
               Activating your membership…
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
+            <p className="text-xs text-text-secondary leading-relaxed mb-4">
               We received your payment verification and are syncing your workspace access with the payment gateway.
             </p>
-            <div className="text-[11px] text-slate-400 dark:text-slate-500">
+            <div className="text-[11px] text-text-muted">
               Waiting for webhook confirmation ({elapsedSeconds}s)…
             </div>
           </div>
         ) : (
           <div>
-            <div className="w-8 h-8 mx-auto mb-4 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center font-bold text-sm">
+            <div className="w-8 h-8 mx-auto mb-4 bg-surface-800 border border-surface-400 text-[#4870aa] rounded-full flex items-center justify-center font-bold text-sm">
               ✓
             </div>
-            <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-2">
+            <h3 className="text-base font-semibold text-text-primary mb-2">
               Membership Activated
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-6">
+            <p className="text-xs text-text-secondary leading-relaxed mb-6">
               Your access has been confirmed. Full write access to client management, automated invoicing, and UPI payment tracking is now unlocked.
             </p>
             <button
               type="button"
               onClick={onActivated}
-              className="w-full py-2.5 px-4 rounded bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium transition-colors cursor-pointer border-none"
+              className="w-full py-2.5 px-4 rounded-lg bg-[#4870aa] hover:bg-[#3b5e90] text-white text-xs font-semibold transition-colors cursor-pointer border-0"
             >
               Continue to Workspace
             </button>

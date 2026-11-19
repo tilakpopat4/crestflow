@@ -87,7 +87,7 @@ export const DeliverableFeedbackModal: React.FC<DeliverableFeedbackModalProps> =
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-6 cursor-pointer animate-fadeIn"
+      className="fixed inset-0 bg-black/25 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6 cursor-pointer animate-fadeIn select-none"
     >
       <div
         onClick={(e) => e.stopPropagation()}

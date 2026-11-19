@@ -156,7 +156,7 @@ export default function AdminCampaignPlannerModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/50 backdrop-blur-xs overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/25 backdrop-blur-sm overflow-y-auto select-none">
       <div className="bg-[#212121] rounded-xl max-w-2xl w-full border border-[#333333] shadow-xl overflow-hidden my-auto text-white">
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-[#333333] flex items-center justify-between">

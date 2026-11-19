@@ -110,7 +110,7 @@ export const ReviewsGrid: React.FC<ReviewsGridProps> = ({
       {reviewToDelete && (
         <div
           onClick={() => setReviewToDelete(null)}
-          className="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 flex items-center justify-center p-4 cursor-pointer"
+          className="fixed inset-0 bg-black/25 backdrop-blur-sm z-50 flex items-center justify-center p-4 cursor-pointer select-none"
         >
           <div
             onClick={(e) => e.stopPropagation()}

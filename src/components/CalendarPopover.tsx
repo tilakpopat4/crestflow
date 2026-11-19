@@ -167,7 +167,7 @@ export const CalendarPopover: React.FC<CalendarPopoverProps> = ({
       {/* Mobile scrim */}
       <div
         onClick={onClose}
-        className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs sm:hidden transition-opacity duration-120"
+        className="fixed inset-0 z-50 bg-black/25 backdrop-blur-sm sm:hidden transition-opacity duration-120 select-none"
       />
 
       <div
@@ -274,7 +274,7 @@ export const CalendarPopover: React.FC<CalendarPopoverProps> = ({
             <button
               type="button"
               onClick={handleManualSubmit}
-              className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-accent hover:bg-accent-hover text-white shrink-0 cursor-pointer transition-colors border-0 shadow-xs"
+              className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#4870aa] hover:bg-[#3b5e90] text-white shrink-0 cursor-pointer transition-colors border-0 shadow-xs"
             >
               Apply
             </button>

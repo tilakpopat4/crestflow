@@ -111,14 +111,14 @@ export const ProfileDangerSection: React.FC<ProfileDangerSectionProps> = ({ user
       {/* Explicit Confirmation Modal */}
       {isModalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/25 backdrop-blur-sm p-4"
           role="dialog"
           aria-modal="true"
           aria-labelledby="delete-account-modal-title"
           onClick={handleCloseModal}
         >
           <div
-            className="w-full max-w-md rounded-xl bg-white dark:bg-[#181818] border border-slate-200 dark:border-[#2b2b2b] p-6 space-y-5 shadow-xl"
+            className="w-full max-w-md rounded-xl bg-surface-700 border border-surface-400 text-text-primary p-6 space-y-5 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-3">
