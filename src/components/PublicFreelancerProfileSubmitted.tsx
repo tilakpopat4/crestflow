@@ -61,7 +61,7 @@ export const PublicFreelancerProfileSubmitted: React.FC<PublicFreelancerProfileS
               href={submittedWhatsAppUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-medium transition-colors shadow-xs flex items-center justify-center gap-2"
+              className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium transition-colors shadow-xs flex items-center justify-center gap-2"
             >
               <MessageCircle className="w-4 h-4" />
               Open WhatsApp Chat

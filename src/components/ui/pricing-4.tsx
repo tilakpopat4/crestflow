@@ -178,7 +178,7 @@ export function PricingCard({
               plan.price.monthly > plan.price.yearly && (
                 <motion.div
                   animate={{ opacity: 1 }}
-                  className="flex items-center gap-1 rounded-md border border-slate-900 bg-slate-900 text-white px-2 py-0.5 text-xs font-medium"
+                  className="flex items-center gap-1 rounded-md border border-[#383838] bg-[#282828] text-white px-2 py-0.5 text-xs font-medium"
                   exit={{ opacity: 0 }}
                   initial={{ opacity: 0 }}
                   key="discount-badge"
@@ -241,8 +241,8 @@ export function PricingCard({
           className={cn(
             "w-full cursor-pointer font-medium rounded-xl transition-all",
             plan.highlighted
-              ? "bg-slate-900 text-white hover:bg-slate-800"
-              : "bg-white text-slate-800 border border-slate-200 hover:bg-slate-50"
+              ? "bg-indigo-600 text-white hover:bg-indigo-700 border-0"
+              : "bg-[#282828] text-white border border-[#3a3a3a] hover:bg-[#333333]"
           )}
           variant={plan.highlighted ? "default" : "outline"}
           onClick={() => onSelectPlan?.(plan, frequency)}

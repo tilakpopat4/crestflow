@@ -11,39 +11,39 @@ interface StickyNotesWidgetProps {
 
 const COLOR_MAP: Record<StickyNote['color'], { bg: string; border: string; text: string; pin: string; dot: string }> = {
   yellow: {
-    bg: 'bg-amber-50 dark:bg-amber-950/40',
-    border: 'border-amber-200 dark:border-amber-800/60 hover:border-amber-300 dark:hover:border-amber-700',
-    text: 'text-amber-950 dark:text-amber-100',
-    pin: 'text-amber-500 dark:text-amber-400',
-    dot: 'bg-amber-400'
+    bg: 'bg-[#212121]',
+    border: 'border-[#383838] hover:border-[#4870aa]',
+    text: 'text-[#f1f1f1]',
+    pin: 'text-[#aaaaaa]',
+    dot: 'bg-[#aaaaaa]'
   },
   blue: {
-    bg: 'bg-sky-50 dark:bg-sky-950/40',
-    border: 'border-sky-200 dark:border-sky-800/60 hover:border-sky-300 dark:hover:border-sky-700',
-    text: 'text-sky-950 dark:text-sky-100',
-    pin: 'text-sky-500 dark:text-sky-400',
-    dot: 'bg-sky-400'
+    bg: 'bg-[#1e1e1e]',
+    border: 'border-[#383838] hover:border-[#4870aa]',
+    text: 'text-[#f1f1f1]',
+    pin: 'text-[#4870aa]',
+    dot: 'bg-[#4870aa]'
   },
   green: {
-    bg: 'bg-emerald-50 dark:bg-emerald-950/40',
-    border: 'border-emerald-200 dark:border-emerald-800/60 hover:border-emerald-300 dark:hover:border-emerald-700',
-    text: 'text-emerald-950 dark:text-emerald-100',
-    pin: 'text-emerald-500 dark:text-emerald-400',
-    dot: 'bg-emerald-400'
+    bg: 'bg-[#242424]',
+    border: 'border-[#383838] hover:border-[#4870aa]',
+    text: 'text-[#f1f1f1]',
+    pin: 'text-slate-400',
+    dot: 'bg-slate-400'
   },
   pink: {
-    bg: 'bg-pink-50 dark:bg-pink-950/40',
-    border: 'border-pink-200 dark:border-pink-800/60 hover:border-pink-300 dark:hover:border-pink-700',
-    text: 'text-pink-950 dark:text-pink-100',
-    pin: 'text-pink-500 dark:text-pink-400',
-    dot: 'bg-pink-400'
+    bg: 'bg-[#212121]',
+    border: 'border-[#383838] hover:border-[#4870aa]',
+    text: 'text-[#f1f1f1]',
+    pin: 'text-[#aaaaaa]',
+    dot: 'bg-[#aaaaaa]'
   },
   purple: {
-    bg: 'bg-purple-50 dark:bg-purple-950/40',
-    border: 'border-purple-200 dark:border-purple-800/60 hover:border-purple-300 dark:hover:border-purple-700',
-    text: 'text-purple-950 dark:text-purple-100',
-    pin: 'text-purple-500 dark:text-purple-400',
-    dot: 'bg-purple-400'
+    bg: 'bg-[#1a1a1a]',
+    border: 'border-[#383838] hover:border-[#4870aa]',
+    text: 'text-[#f1f1f1]',
+    pin: 'text-[#4870aa]',
+    dot: 'bg-[#4870aa]'
   }
 };
 
@@ -239,7 +239,7 @@ export default function StickyNotesWidget({ user, clients }: StickyNotesWidgetPr
           </p>
           <button
             onClick={handleOpenAdd}
-            className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-medium rounded hover:bg-slate-800 dark:hover:bg-white transition-colors cursor-pointer"
+            className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-lg transition-colors cursor-pointer"
           >
             <Plus size={14} /> Create First Note
           </button>

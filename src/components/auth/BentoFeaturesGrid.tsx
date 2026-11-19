@@ -29,7 +29,7 @@ export const BentoFeaturesGrid: React.FC = () => {
           </div>
           <div className="flex items-center justify-between text-[11px] text-slate-200">
             <span className="font-medium truncate pr-2">Brand Identity System</span>
-            <span className="text-[10px] font-medium text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-800/60">
+            <span className="text-[10px] font-medium text-[#4870aa] bg-[#212121] px-1.5 py-0.5 rounded border border-[#383838]">
               Paid
             </span>
           </div>

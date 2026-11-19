@@ -106,7 +106,7 @@ export const HeroProductMock: React.FC = () => {
         </p>
         <div className="mt-2.5">
           <div className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-[#1f2937] border border-slate-700 hover:bg-[#2b3544] transition-colors cursor-default">
-            <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
+            <MessageSquare className="w-3.5 h-3.5 text-slate-300" />
             <span>Send WhatsApp reminder</span>
           </div>
         </div>

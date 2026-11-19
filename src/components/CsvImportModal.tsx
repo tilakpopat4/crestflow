@@ -194,7 +194,7 @@ export default function CsvImportModal({ isOpen, onClose, userId, onImportSucces
           </p>
 
           {error && (
-            <div className="p-3 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-xs font-medium rounded-xl flex items-start gap-2">
+            <div className="p-3 bg-[#181818] text-red-400 border border-red-600/40 text-xs font-medium rounded-xl flex items-start gap-2">
               <AlertTriangle size={16} className="shrink-0 mt-0.5" />
               {error}
             </div>

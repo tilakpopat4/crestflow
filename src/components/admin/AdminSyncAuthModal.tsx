@@ -282,7 +282,7 @@ export default function AdminSyncAuthModal({ isOpen, onClose, onSynced }: AdminS
             <button
               type="submit"
               disabled={isProcessing || !singleEmail.trim()}
-              className="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors duration-120 border-0 cursor-pointer disabled:opacity-50 inline-flex items-center gap-1.5"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors duration-120 border-0 cursor-pointer disabled:opacity-50 inline-flex items-center gap-1.5"
             >
               <UserPlus className="w-3.5 h-3.5" />
               <span>Add to Directory</span>

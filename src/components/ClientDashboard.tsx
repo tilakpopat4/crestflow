@@ -518,7 +518,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                   Currency: <span className="text-slate-700 dark:text-slate-200">{client.currency || 'INR'} ({currencySymbol})</span>
                 </span>
                 {client.instagram && (
-                  <a href={client.instagram.startsWith('http') ? client.instagram : `https://instagram.com/${client.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-pink-600 dark:text-pink-400 hover:underline">
+                  <a href={client.instagram.startsWith('http') ? client.instagram : `https://instagram.com/${client.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[#4870aa] hover:underline">
                     Instagram
                   </a>
                 )}
@@ -1566,7 +1566,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                           </button>
                           <button
                             onClick={() => handleDeleteSubClientClick(sc.id, sc.name)}
-                            className="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg transition-colors cursor-pointer"
+                            className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-[#333333] rounded-lg transition-colors cursor-pointer"
                             title="Delete Sub-Client"
                           >
                             <Trash2 size={14} />
@@ -1587,7 +1587,7 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
                   setEditingSubClientId(null);
                   setSubClientForm({ name: '', code: '', notes: '' });
                 }}
-                className="px-5 py-2 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white rounded-xl text-xs font-semibold shadow-xs cursor-pointer"
+                className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-xs cursor-pointer"
               >
                 Done
               </button>

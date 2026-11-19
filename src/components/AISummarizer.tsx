@@ -85,15 +85,15 @@ export default function AISummarizer({ clients, workItems, profile }: AISummariz
         </div>
       </div>
       
-      <div className="p-6 bg-white dark:bg-slate-900">
+      <div className="p-6 bg-[#212121]">
         {error && (
-          <div className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 rounded-lg text-sm mb-4">
+          <div className="p-3.5 bg-[#181818] border border-red-600/40 text-red-400 rounded-lg text-sm mb-4">
             {error}
           </div>
         )}
 
         {!summary && !isGenerating && !error && (
-          <div className="text-center py-8 text-slate-400 dark:text-slate-500 text-sm italic">
+          <div className="text-center py-8 text-slate-400 text-sm italic">
             Select a date and click "Generate" to create your AI summary.
           </div>
         )}
@@ -101,7 +101,7 @@ export default function AISummarizer({ clients, workItems, profile }: AISummariz
         {isGenerating && (
           <div className="py-6 flex flex-col items-center justify-center gap-2 select-none">
             <div className="w-5 h-5 rounded-full border-2 border-indigo-600 dark:border-indigo-400 border-t-transparent animate-spin" />
-            <span className="text-xs text-slate-400 dark:text-slate-500">Generating summary...</span>
+            <span className="text-xs text-slate-400">Generating summary...</span>
           </div>
         )}
 
@@ -110,13 +110,13 @@ export default function AISummarizer({ clients, workItems, profile }: AISummariz
             <div className="absolute -top-3 -right-3">
               <button
                 onClick={handleCopy}
-                className="p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full shadow-sm text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-slate-700 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 cursor-pointer"
+                className="p-2 bg-[#282828] hover:bg-[#333333] border border-[#383838] rounded-lg shadow-sm text-slate-300 hover:text-white transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 cursor-pointer"
                 title="Copy to clipboard"
               >
-                {copied ? <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 px-1">Copied!</span> : <Copy size={16} />}
+                {copied ? <span className="text-xs font-semibold text-[#4870aa] px-1">Copied!</span> : <Copy size={16} />}
               </button>
             </div>
-            <p className="text-slate-700 dark:text-slate-200 text-sm sm:text-base leading-relaxed bg-white dark:bg-slate-800/90 p-5 rounded-xl border border-indigo-100 dark:border-indigo-900/60 shadow-inner">
+            <p className="text-[#f1f1f1] text-sm sm:text-base leading-relaxed bg-[#1e1e1e] p-5 rounded-xl border border-[#333333]">
               {summary}
             </p>
           </div>

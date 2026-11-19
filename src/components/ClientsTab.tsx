@@ -690,7 +690,7 @@ export default function ClientsTab({
                       )}
                       <button
                         onClick={(e) => { e.stopPropagation(); handleDeleteClient(client.id, client.name); }}
-                        className="p-1 sm:p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg transition-colors cursor-pointer"
+                        className="p-1 sm:p-1.5 text-slate-400 hover:text-red-500 hover:bg-[#333333] rounded-lg transition-colors cursor-pointer"
                         title="Delete Client"
                       >
                         <Trash2 size={14} />

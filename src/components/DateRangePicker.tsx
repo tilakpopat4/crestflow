@@ -1,4 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Calendar } from 'lucide-react';
 import {
   CalendarCell,
   YearMonth,
@@ -175,9 +176,9 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
         type="button"
         onClick={() => setOpen(!isOpen)}
         aria-expanded={isOpen}
-        className="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 text-xs sm:text-sm font-medium text-slate-800 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer shadow-2xs"
+        className="inline-flex h-9 items-center gap-2 rounded-lg border border-[#383838] bg-[#282828] px-3 text-xs sm:text-sm font-medium text-[#f1f1f1] hover:bg-[#333333] transition-colors cursor-pointer shadow-2xs"
       >
-        <span className="text-slate-500">📅</span>
+        <Calendar size={14} className="text-slate-400 shrink-0" />
         <span>{rangeText(applied.start, applied.end)}</span>
         <span className="text-xs text-slate-400">▾</span>
       </button>

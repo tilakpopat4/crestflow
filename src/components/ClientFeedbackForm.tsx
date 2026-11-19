@@ -237,8 +237,8 @@ export default function ClientFeedbackForm() {
           </div>
 
           {error && (
-            <div className="bg-red-50 dark:bg-rose-950/40 border border-red-100 dark:border-rose-900/50 text-red-700 dark:text-rose-300 p-4 rounded-xl text-xs font-semibold flex items-start gap-2.5">
-              <AlertCircle className="w-4 h-4 text-red-500 dark:text-rose-400 flex-shrink-0 mt-0.5" />
+            <div className="bg-[#181818] border border-red-600/40 text-red-400 p-4 rounded-xl text-xs font-semibold flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}

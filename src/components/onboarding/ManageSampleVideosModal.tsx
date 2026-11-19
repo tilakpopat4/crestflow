@@ -90,7 +90,7 @@ export default function ManageSampleVideosModal({
         {/* Content Body */}
         <div className="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1">
           {error && (
-            <div className="p-3 text-xs bg-red-50 dark:bg-rose-950/40 text-red-600 dark:text-rose-400 border border-red-200 dark:border-rose-900/50 rounded-lg">
+            <div className="p-3 text-xs bg-[#181818] text-red-400 border border-red-600/40 rounded-lg">
               {error}
             </div>
           )}

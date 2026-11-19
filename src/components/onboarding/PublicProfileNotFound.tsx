@@ -8,7 +8,7 @@ interface PublicProfileNotFoundProps {
 export const PublicProfileNotFound: React.FC<PublicProfileNotFoundProps> = ({ error }) => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 p-4 text-center text-slate-800 dark:text-slate-200 transition-colors duration-150">
-      <div className="w-16 h-16 bg-red-50 dark:bg-rose-950/40 text-red-500 dark:text-rose-400 border border-red-100 dark:border-rose-900/50 rounded-full flex items-center justify-center mb-4">
+      <div className="w-16 h-16 bg-[#212121] text-red-500 border border-red-600/40 rounded-full flex items-center justify-center mb-4">
         <AlertCircle className="w-8 h-8" />
       </div>
       <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">Profile Not Found</h1>

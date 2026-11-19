@@ -1226,7 +1226,7 @@ export default function InvoiceTab({
                       {reels.length > 1 && (
                         <button
                           onClick={() => removeReel(reel.id)}
-                          className="absolute -top-2 -right-2 p-1.5 bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900 text-red-500 hover:bg-red-50 hover:text-red-600 rounded-full shadow-sm opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity cursor-pointer"
+                          className="absolute -top-2 -right-2 p-1.5 bg-[#282828] hover:bg-[#333333] border border-[#383838] text-red-400 hover:text-red-300 rounded-lg shadow-sm opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity cursor-pointer"
                         >
                           <Trash2 size={14} />
                         </button>
@@ -1889,13 +1889,13 @@ export default function InvoiceTab({
                                 URL.revokeObjectURL(url);
                               }
                             }}
-                            className="px-2 py-0.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-sans text-[11px] font-semibold rounded transition-colors flex items-center gap-1 cursor-pointer"
+                            className="px-2 py-0.5 bg-[#282828] hover:bg-[#333333] border border-[#383838] text-[#f1f1f1] font-sans text-[11px] font-semibold rounded transition-colors flex items-center gap-1 cursor-pointer"
                             title="Download Invoice PDF file"
                           >
-                            <Download size={12} className="text-indigo-600" /> Save PDF
+                            <Download size={12} className="text-[#4870aa]" /> Save PDF
                           </button>
                         )}
-                        <span className="text-[10px] px-1.5 py-0.5 bg-rose-50 text-rose-700 font-semibold rounded">
+                        <span className="text-[10px] px-1.5 py-0.5 bg-[#212121] border border-[#383838] text-slate-300 font-semibold rounded">
                           PDF
                         </span>
                       </div>
