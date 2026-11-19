@@ -3,7 +3,7 @@ import { X, Plus, Trash2, Video, ListPlus } from 'lucide-react';
 import { SampleWorkItem, WorkItem } from '../../types';
 import AddSampleVideoForm from './AddSampleVideoForm';
 import WorkLogVideoPicker from './WorkLogVideoPicker';
-import { Button } from '../ui/Button';
+import { Button } from '../ui/button';
 
 interface ManageSampleVideosModalProps {
   isOpen: boolean;

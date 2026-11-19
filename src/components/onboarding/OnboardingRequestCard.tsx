@@ -2,7 +2,7 @@ import React from 'react';
 import { Phone, Mail, Instagram, Clock } from 'lucide-react';
 import { ServiceRequest } from '../../types';
 import { Card } from '../ui/Card';
-import { Button } from '../ui/Button';
+import { Button } from '../ui/button';
 
 interface OnboardingRequestCardProps {
   request: ServiceRequest;

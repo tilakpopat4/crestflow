@@ -4,7 +4,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { UserProfile } from '../../types';
 import { Card } from '../ui/Card';
-import { Button } from '../ui/Button';
+import { Button } from '../ui/button';
 
 interface OnboardingLinkCardProps {
   onboardingUrl: string;

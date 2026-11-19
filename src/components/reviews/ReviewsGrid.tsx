@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Star, Trash2, MessageSquare } from 'lucide-react';
 import { ClientReview } from '../../types';
 import { Card } from '../ui/Card';
-import { Button } from '../ui/Button';
+import { Button } from '../ui/button';
 import { EmptyState } from '../ui/EmptyState';
 
 interface ReviewsGridProps {
@@ -49,11 +49,10 @@ export const ReviewsGrid: React.FC<ReviewsGridProps> = ({
                     {[1, 2, 3, 4, 5].map((star) => (
                       <Star
                         key={star}
-                        className={`w-4 h-4 ${
-                          star <= review.rating
+                        className={`w-4 h-4 ${star <= review.rating
                             ? 'text-amber-400 fill-amber-400'
                             : 'text-surface-400 fill-none'
-                        }`}
+                          }`}
                       />
                     ))}
                   </div>

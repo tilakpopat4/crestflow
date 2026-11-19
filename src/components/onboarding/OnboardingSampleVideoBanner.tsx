@@ -3,7 +3,7 @@ import { Video, ExternalLink } from 'lucide-react';
 import { UserProfile, SampleWorkItem, WorkItem } from '../../types';
 import ManageSampleVideosModal from './ManageSampleVideosModal';
 import { Card } from '../ui/Card';
-import { Button } from '../ui/Button';
+import { Button } from '../ui/button';
 
 interface OnboardingSampleVideoBannerProps {
   profile: UserProfile | null;

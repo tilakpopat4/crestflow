@@ -2,7 +2,7 @@ import React from 'react';
 import { Share2, Copy, Check, Mail } from 'lucide-react';
 import { Client } from '../../types';
 import { Card } from '../ui/Card';
-import { Button } from '../ui/Button';
+import { Button } from '../ui/button';
 
 interface ReviewRequestCardProps {
   clients: Client[];

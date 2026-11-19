@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { isGoogleDriveUrl, extractDriveFileId } from '../../lib/driveService';
 import { generateUUID } from '../../lib/utils';
 import { SampleWorkItem } from '../../types';
-import { Button } from '../ui/Button';
+import { Button } from '../ui/button';
 
 interface AddSampleVideoFormProps {
   onAdd: (item: SampleWorkItem) => void;

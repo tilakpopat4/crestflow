@@ -1,7 +1,7 @@
 import React from 'react';
 import { WorkItem, SampleWorkItem } from '../../types';
 import { generateUUID } from '../../lib/utils';
-import { Button } from '../ui/Button';
+import { Button } from '../ui/button';
 
 interface WorkLogVideoPickerProps {
   workItems: WorkItem[];
