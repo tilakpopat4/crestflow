@@ -144,7 +144,7 @@ export default function AdminUserSubscriptions({
           <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={() => setIsSyncModalOpen(true)}
-              className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors duration-120 border-0 cursor-pointer inline-flex items-center gap-1.5 shrink-0"
+              className="px-3 py-2 bg-accent hover:bg-accent-hover text-white rounded-lg text-xs font-semibold transition-colors duration-120 border-0 cursor-pointer inline-flex items-center gap-1.5 shrink-0"
               title="Sync accounts from Firebase Authentication"
             >
               <Users className="w-3.5 h-3.5" />

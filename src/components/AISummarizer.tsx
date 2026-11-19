@@ -54,7 +54,7 @@ export default function AISummarizer({ clients, workItems, profile }: AISummariz
       <div className="p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-800/80">
         <div>
           <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-            <Sparkles className="text-indigo-600 dark:text-indigo-400" size={20} />
+            <Sparkles className="text-text-primary" size={20} />
             AI Work Summarizer
           </h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
@@ -71,13 +71,13 @@ export default function AISummarizer({ clients, workItems, profile }: AISummariz
               value={targetDate}
               onChange={(e) => setTargetDate(e.target.value)}
               max={new Date().toISOString().split('T')[0]}
-              className="pl-9 w-full rounded-lg border-slate-200 dark:border-slate-700 text-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 py-2 shadow-xs transition-colors"
+              className="pl-9 w-full rounded-lg border-slate-200 dark:border-slate-700 text-sm focus:border-surface-400 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 py-2 shadow-xs transition-colors"
             />
           </div>
           <button
             onClick={handleGenerate}
             disabled={isGenerating}
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-70 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-xs whitespace-nowrap cursor-pointer"
+            className="flex items-center gap-2 bg-accent hover:bg-accent-hover disabled:opacity-70 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-xs whitespace-nowrap cursor-pointer"
           >
             {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
             {isGenerating ? 'Generating...' : 'Generate'}
@@ -100,7 +100,7 @@ export default function AISummarizer({ clients, workItems, profile }: AISummariz
 
         {isGenerating && (
           <div className="py-6 flex flex-col items-center justify-center gap-2 select-none">
-            <div className="w-5 h-5 rounded-full border-2 border-indigo-600 dark:border-indigo-400 border-t-transparent animate-spin" />
+            <div className="w-5 h-5 rounded-full border-2 border-accent border-t-transparent animate-spin" />
             <span className="text-xs text-slate-400">Generating summary...</span>
           </div>
         )}

@@ -21,7 +21,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ isSaving, isSaved,
 
       <div className="flex items-center gap-3">
         {isSaved && (
-          <span className="inline-flex items-center gap-1.5 text-sm text-indigo-600 dark:text-indigo-400 font-medium">
+          <span className="inline-flex items-center gap-1.5 text-sm text-text-primary font-medium">
             <Check size={14} />
             <span>Changes saved</span>
           </span>
@@ -30,7 +30,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ isSaving, isSaved,
           type="button"
           onClick={onSave}
           disabled={isSaving}
-          className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors disabled:opacity-50 cursor-pointer shadow-xs border-none"
+          className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-accent hover:bg-accent-hover transition-colors disabled:opacity-50 cursor-pointer shadow-xs border-none"
         >
           <Save size={14} />
           <span>{isSaving ? 'Saving...' : 'Save Changes'}</span>

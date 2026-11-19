@@ -194,7 +194,7 @@ export const ClientPortalInvoiceModal: React.FC<ClientPortalInvoiceModalProps> =
           <button
             type="button"
             onClick={onClose}
-            className="min-h-[44px] px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium transition-colors cursor-pointer"
+            className="min-h-[44px] px-5 py-2 bg-surface-500 hover:bg-surface-400 text-text-primary border border-surface-400 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
           >
             Close
           </button>

@@ -213,7 +213,7 @@ export const SignInCard: React.FC<SignInCardProps> = ({
               <button
                 type="submit"
                 disabled={isSubmitting || isSigningIn}
-                className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg font-medium text-xs transition-colors cursor-pointer border-none mt-1"
+                className="w-full py-2.5 px-4 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white rounded-lg font-medium text-xs transition-colors cursor-pointer border-none mt-1"
               >
                 {isSubmitting ? 'Please wait...' : authMode === 'signup' ? 'Create Account & Start Free Trial' : 'Sign In'}
               </button>

@@ -36,6 +36,7 @@ export interface SubscriptionState {
   limits: typeof FREE_TIER_LIMITS; canCreateClient: (count: number) => boolean; canCreateInvoice: (count: number) => boolean;
   refreshSubscription: () => Promise<void>; cancelSubscription: () => Promise<void>;
   activateFreeTrial: () => Promise<{ success: boolean; error?: string }>; checkAccess: () => boolean;
+  applyActiveSubscription?: (doc: Partial<SubscriptionDoc>) => void;
 }
 
 /**
@@ -216,18 +217,37 @@ export function useSubscription(
   const cancelSubscription = useCallback(async () => {
     if (!auth.currentUser) throw new Error('Not authenticated');
     const token = await auth.currentUser.getIdToken();
-    const res = await fetch('/api/cancel-subscription', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
+    const res = await fetch('/api/cancel-subscription', { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.error || 'Failed to cancel subscription');
     }
-
     await refreshSubscription();
   }, [refreshSubscription]);
+
+  const applyActiveSubscription = useCallback((updated: Partial<SubscriptionDoc>) => {
+    if (!userId) return;
+    const fullDoc: SubscriptionDoc = {
+      userId,
+      plan: updated.plan || 'pro',
+      billingCycle: updated.billingCycle || 'monthly',
+      status: (updated.status as any) || 'active',
+      accessUntil: updated.accessUntil,
+      trialEndsAt: updated.trialEndsAt,
+      trialClaimed: updated.trialClaimed ?? true,
+      trialStartedAt: updated.trialStartedAt,
+      updatedAt: Date.now(),
+    };
+    setSubscriptionDoc(fullDoc);
+    setServerMe({
+      serverNow: new Date().toISOString(),
+      status: fullDoc.status,
+      accessUntil: fullDoc.accessUntil || null,
+      trialEndsAt: fullDoc.trialEndsAt || null,
+      trialClaimed: fullDoc.trialClaimed,
+    });
+    try { localStorage.setItem(`crestflow_sub_${userId}`, JSON.stringify(fullDoc)); } catch {}
+  }, [userId]);
 
   const activateFreeTrial = useCallback(async (): Promise<{ success: boolean; error?: string }> => {
     const currentUser = auth.currentUser;
@@ -235,14 +255,11 @@ export function useSubscription(
     if (!currentUser || !uid) return { success: false, error: 'Not authenticated' };
     try {
       const token = await currentUser.getIdToken();
-      const res = await fetch('/api/activate-trial', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch('/api/activate-trial', { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) return { success: false, error: data.error || 'Failed to activate free trial.' };
       if (data.accessUntil) {
-        const updated: SubscriptionDoc = {
+        applyActiveSubscription({
           userId: uid,
           plan: 'pro',
           billingCycle: 'trial',
@@ -251,47 +268,30 @@ export function useSubscription(
           trialEndsAt: data.trialEndsAt,
           trialClaimed: true,
           trialStartedAt: data.trialStartedAt,
-          updatedAt: Date.now(),
-        };
-        setSubscriptionDoc(updated);
-        try { localStorage.setItem(`crestflow_sub_${uid}`, JSON.stringify(updated)); } catch {}
+        });
       }
       await refreshSubscription();
       return { success: true };
     } catch (err: any) {
       return { success: false, error: err.message || 'Trial activation network error.' };
     }
-  }, [refreshSubscription]);
+  }, [applyActiveSubscription, refreshSubscription]);
 
   const canCreateClient = useCallback(
-    (count: number) => {
-      if (computedState.hasAccess || !isSubscriptionFeatureEnabled) return true;
-      return count < FREE_TIER_LIMITS.maxClients;
-    },
+    (count: number) => (computedState.hasAccess || !isSubscriptionFeatureEnabled) || count < FREE_TIER_LIMITS.maxClients,
     [computedState.hasAccess, isSubscriptionFeatureEnabled]
   );
 
   const canCreateInvoice = useCallback(
-    (count: number) => {
-      if (computedState.hasAccess || !isSubscriptionFeatureEnabled) return true;
-      return count < FREE_TIER_LIMITS.maxInvoicesPerMonth;
-    },
+    (count: number) => (computedState.hasAccess || !isSubscriptionFeatureEnabled) || count < FREE_TIER_LIMITS.maxInvoicesPerMonth,
     [computedState.hasAccess, isSubscriptionFeatureEnabled]
   );
 
   const checkAccess = useCallback(() => computedState.hasAccess, [computedState.hasAccess]);
 
   return {
-    ...computedState,
-    loading,
-    isWhitelisted,
-    isSubscriptionFeatureEnabled,
-    limits: FREE_TIER_LIMITS,
-    canCreateClient,
-    canCreateInvoice,
-    refreshSubscription,
-    cancelSubscription,
-    activateFreeTrial,
-    checkAccess,
+    ...computedState, loading, isWhitelisted, isSubscriptionFeatureEnabled, limits: FREE_TIER_LIMITS,
+    canCreateClient, canCreateInvoice, refreshSubscription, cancelSubscription, activateFreeTrial,
+    applyActiveSubscription, checkAccess,
   };
 }

@@ -81,7 +81,7 @@ export const ProfileInvoicingSection: React.FC<ProfileInvoicingSectionProps> = (
               onChange={(e) => setUpiId(e.target.value)}
               placeholder="e.g. yourname@bank"
               className={`block h-10 w-full rounded-lg bg-slate-50 dark:bg-slate-800/60 px-3 text-sm text-slate-900 dark:text-slate-100 border ${
-                upiError ? 'border-red-500 focus:border-red-600' : 'border-slate-200 dark:border-slate-700 focus:border-indigo-600 dark:focus:border-indigo-400'
+                upiError ? 'border-red-500 focus:border-red-600' : 'border-slate-200 dark:border-slate-700 focus:border-slate-400 dark:focus:border-slate-500'
               } placeholder:text-slate-400 outline-none transition-colors`}
             />
             {upiError ? (
@@ -107,7 +107,7 @@ export const ProfileInvoicingSection: React.FC<ProfileInvoicingSectionProps> = (
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="e.g. +91 98765 43210"
-              className="block h-10 w-full rounded-lg bg-slate-50 dark:bg-slate-800/60 px-3 text-sm text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 placeholder:text-slate-400 focus:border-indigo-600 dark:focus:border-indigo-400 outline-none transition-colors"
+              className="block h-10 w-full rounded-lg bg-slate-50 dark:bg-slate-800/60 px-3 text-sm text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 placeholder:text-slate-400 focus:border-slate-400 dark:focus:border-slate-500 outline-none transition-colors"
             />
             <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
               Printed on invoice headers for direct client communication.
@@ -125,7 +125,7 @@ export const ProfileInvoicingSection: React.FC<ProfileInvoicingSectionProps> = (
               value={servicesDescription}
               onChange={(e) => setServicesDescription(e.target.value)}
               placeholder="e.g. Video Editing Services"
-              className="block h-10 w-full rounded-lg bg-slate-50 dark:bg-slate-800/60 px-3 text-sm text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 placeholder:text-slate-400 focus:border-indigo-600 dark:focus:border-indigo-400 outline-none transition-colors"
+              className="block h-10 w-full rounded-lg bg-slate-50 dark:bg-slate-800/60 px-3 text-sm text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 placeholder:text-slate-400 focus:border-slate-400 dark:focus:border-slate-500 outline-none transition-colors"
             />
             <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
               Auto-fills invoice line items when generating deliverables bills.
@@ -191,7 +191,7 @@ export const ProfileInvoicingSection: React.FC<ProfileInvoicingSectionProps> = (
             type="button"
             disabled={isSaving || !isDirty}
             onClick={onSave}
-            className="inline-flex h-9 items-center justify-center rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-4 text-xs font-semibold cursor-pointer border-0 transition-colors duration-120"
+            className="inline-flex h-9 items-center justify-center rounded-lg bg-accent hover:bg-accent-hover disabled:opacity-50 text-white px-4 text-xs font-semibold cursor-pointer border-0 transition-colors duration-120"
           >
             {isSaving ? 'Saving...' : 'Save changes'}
           </button>

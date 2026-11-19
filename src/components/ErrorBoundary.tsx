@@ -73,7 +73,7 @@ export default class ErrorBoundary extends Component<Props, State> {
         return (
           <div className="min-h-[320px] flex items-center justify-center p-6 text-slate-900 dark:text-slate-100">
             <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm text-center space-y-4">
-              <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-xl flex items-center justify-center mx-auto">
+              <div className="w-10 h-10 bg-surface-600 border border-surface-400 text-text-primary rounded-xl flex items-center justify-center mx-auto">
                 <RefreshCw size={20} className="animate-spin" />
               </div>
               <div className="space-y-1">

@@ -76,7 +76,7 @@ export const ProfileSubscriptionSection: React.FC<ProfileSubscriptionSectionProp
                     ? 'Pro Subscription Expired'
                     : 'CrestFlow Account'}
                 </span>
-                <span className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400">
+                <span className="text-[11px] font-semibold text-text-primary">
                   &bull; {subscriptionState.status === 'trialing'
                     ? 'Trial Active'
                     : isPro
@@ -122,7 +122,7 @@ export const ProfileSubscriptionSection: React.FC<ProfileSubscriptionSectionProp
                 <button
                   type="button"
                   onClick={onOpenSubscriptionModal}
-                  className="h-8.5 px-4 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white border-0 cursor-pointer transition-colors duration-120 inline-flex items-center gap-1.5"
+                  className="h-8.5 px-4 rounded-lg text-xs font-semibold bg-accent hover:bg-accent-hover text-white border-0 cursor-pointer transition-colors duration-120 inline-flex items-center gap-1.5"
                 >
                   <Zap size={13} />
                   <span>Upgrade to Pro</span>

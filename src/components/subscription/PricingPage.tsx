@@ -203,7 +203,7 @@ export default function PricingPage({
             type="button"
             onClick={() => handleStartPlanCheckout(trialPlan)}
             disabled={loading}
-            className="w-full sm:w-auto px-4 py-2 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition-colors cursor-pointer border-none disabled:opacity-50 shrink-0"
+            className="w-full sm:w-auto px-4 py-2 text-xs font-semibold rounded-lg bg-accent hover:bg-accent-hover text-white transition-colors cursor-pointer border-none disabled:opacity-50 shrink-0"
           >
             {loading && selectedPlanId === 'trial'
               ? 'Activating...'

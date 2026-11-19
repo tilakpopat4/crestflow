@@ -121,7 +121,7 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Maya Ortiz"
-              className="block h-10 w-full rounded-lg bg-slate-50 dark:bg-slate-800/60 px-3 text-sm text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 placeholder:text-slate-400 focus:border-indigo-600 dark:focus:border-indigo-400 outline-none transition-colors"
+              className="block h-10 w-full rounded-lg bg-slate-50 dark:bg-slate-800/60 px-3 text-sm text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 placeholder:text-slate-400 focus:border-slate-400 dark:focus:border-slate-500 outline-none transition-colors"
             />
             <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
               Displayed on exported invoices and client communications.
@@ -142,7 +142,7 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
               value={professionalTitle}
               onChange={(e) => setProfessionalTitle(e.target.value)}
               placeholder="e.g. UI/UX Designer, Web Developer, Video Editor"
-              className="block h-10 w-full rounded-lg bg-slate-50 dark:bg-slate-800/60 px-3 text-sm text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 placeholder:text-slate-400 focus:border-indigo-600 dark:focus:border-indigo-400 outline-none transition-colors"
+              className="block h-10 w-full rounded-lg bg-slate-50 dark:bg-slate-800/60 px-3 text-sm text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 placeholder:text-slate-400 focus:border-slate-400 dark:focus:border-slate-500 outline-none transition-colors"
             />
             <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
               Shown under your name in client onboarding portals.
@@ -157,7 +157,7 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
               </label>
               <span className="text-[11px] text-slate-400 dark:text-slate-500">No random numbers</span>
             </div>
-            <div className="flex h-10 w-full overflow-hidden rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 focus-within:border-indigo-600 dark:focus-within:border-indigo-400 transition-colors">
+            <div className="flex h-10 w-full overflow-hidden rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 focus-within:border-slate-400 dark:focus-within:border-slate-500 transition-colors">
               <span className="flex shrink-0 items-center pl-3 text-xs text-slate-500 dark:text-slate-400 select-none font-mono">
                 {SITE_URL.replace(/^https?:\/\//, '')}/
               </span>
@@ -239,13 +239,13 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
         <div className="flex min-h-14 flex-wrap items-center justify-end gap-x-3 gap-y-2 border-t border-slate-100 dark:border-slate-800 px-5 py-3 sm:px-6">
           <p className="mr-auto flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
             {isSaved ? (
-              <span className="inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-medium">
+              <span className="inline-flex items-center gap-1 text-text-primary font-medium">
                 <Check size={13} />
                 <span>Saved just now</span>
               </span>
             ) : isDirty ? (
               <span className="inline-flex items-center gap-1.5 text-slate-700 dark:text-slate-300 font-medium">
-                <span className="size-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400" />
+                <span className="size-1.5 rounded-full bg-accent" />
                 <span>You have unsaved changes</span>
               </span>
             ) : (
@@ -268,7 +268,7 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
             type="button"
             disabled={isSaving || !isDirty}
             onClick={onSave}
-            className="inline-flex h-9 items-center justify-center rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-4 text-xs font-semibold cursor-pointer border-0 transition-colors duration-120"
+            className="inline-flex h-9 items-center justify-center rounded-lg bg-accent hover:bg-accent-hover disabled:opacity-50 text-white px-4 text-xs font-semibold cursor-pointer border-0 transition-colors duration-120"
           >
             {isSaving ? 'Saving...' : 'Save changes'}
           </button>

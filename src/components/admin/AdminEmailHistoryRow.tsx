@@ -80,7 +80,7 @@ export default function AdminEmailHistoryRow({
             type="button"
             onClick={() => onRetry(item.jobId)}
             disabled={isRetrying}
-            className="px-2 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs cursor-pointer transition-colors disabled:opacity-50"
+            className="px-2 py-1 bg-accent hover:bg-accent-hover text-white rounded text-xs cursor-pointer transition-colors disabled:opacity-50"
           >
             {isRetrying ? 'Retrying...' : 'Retry'}
           </button>

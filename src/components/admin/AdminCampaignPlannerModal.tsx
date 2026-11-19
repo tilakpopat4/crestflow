@@ -283,7 +283,7 @@ export default function AdminCampaignPlannerModal({
                   <button
                     type="submit"
                     disabled={isSubmitting || targetedRecipients.length === 0}
-                    className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold cursor-pointer transition-colors disabled:opacity-50 flex items-center gap-1.5 border-0"
+                    className="px-5 py-2 bg-accent hover:bg-accent-hover text-white rounded-lg font-semibold cursor-pointer transition-colors disabled:opacity-50 flex items-center gap-1.5 border-0"
                   >
                     {isSubmitting ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                     <span>{deliveryMode === 'schedule' ? 'Schedule Campaign' : `Broadcast to ${targetedRecipients.length} Users`}</span>

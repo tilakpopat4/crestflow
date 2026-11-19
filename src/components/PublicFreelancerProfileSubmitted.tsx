@@ -26,7 +26,7 @@ export const PublicFreelancerProfileSubmitted: React.FC<PublicFreelancerProfileS
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 p-4 text-center transition-colors duration-150">
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 md:p-8 max-w-md w-full shadow-xs space-y-5">
-        <div className="w-12 h-12 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center mx-auto shadow-xs">
+        <div className="w-12 h-12 bg-surface-600 border border-surface-400 text-text-primary rounded-full flex items-center justify-center mx-auto shadow-xs">
           <CheckCircle2 className="w-8 h-8" />
         </div>
         <div className="space-y-1.5">
@@ -61,7 +61,7 @@ export const PublicFreelancerProfileSubmitted: React.FC<PublicFreelancerProfileS
               href={submittedWhatsAppUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium transition-colors shadow-xs flex items-center justify-center gap-2"
+              className="w-full py-2.5 bg-accent hover:bg-accent-hover text-white rounded-lg text-xs font-semibold transition-colors shadow-xs flex items-center justify-center gap-2"
             >
               <MessageCircle className="w-4 h-4" />
               Open WhatsApp Chat

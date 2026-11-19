@@ -143,14 +143,14 @@ export const ClientPortalReview: React.FC<ClientPortalReviewProps> = ({
               placeholder="Share your thoughts on turnaround time, video quality, and communication..."
               value={reviewText}
               onChange={(e) => onReviewTextChange(e.target.value)}
-              className="w-full p-3.5 text-xs border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 resize-none"
+              className="w-full p-3.5 text-xs border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-slate-400 focus:bg-white dark:focus:bg-slate-900 resize-none"
             />
           </div>
 
           <button
             type="submit"
             disabled={isSubmittingReview || !reviewText.trim()}
-            className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2 min-h-[44px]"
+            className="w-full py-3 bg-accent hover:bg-accent-hover text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2 min-h-[44px]"
           >
             {isSubmittingReview ? (
               <span>Submitting Review...</span>

@@ -162,7 +162,7 @@ export default function AdminUsersManager({ currentUserEmail }: AdminUsersManage
             <button
               type="submit"
               disabled={isSubmitting || !newEmail.trim()}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-120 flex items-center justify-center gap-1.5 cursor-pointer border-0"
+              className="w-full bg-accent hover:bg-accent-hover disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-120 flex items-center justify-center gap-1.5 cursor-pointer border-0"
             >
               <ShieldPlus className="w-4 h-4" />
               <span>{isSubmitting ? 'Adding...' : 'Add Admin'}</span>

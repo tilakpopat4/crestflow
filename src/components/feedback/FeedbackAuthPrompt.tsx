@@ -30,7 +30,7 @@ export const FeedbackAuthPrompt: React.FC<FeedbackAuthPromptProps> = ({
         </div>
 
         <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-100 dark:border-slate-700/60 text-left flex items-start gap-3">
-          <ShieldCheck className="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
+          <ShieldCheck className="w-5 h-5 text-accent shrink-0 mt-0.5" />
           <div className="text-xs text-slate-600 dark:text-slate-300 space-y-1">
             <p className="font-semibold text-slate-900 dark:text-slate-100">Verified Client Guarantee</p>
             <p>1 account can rate and review this profile only once.</p>
@@ -41,7 +41,7 @@ export const FeedbackAuthPrompt: React.FC<FeedbackAuthPromptProps> = ({
           type="button"
           onClick={onSignIn}
           disabled={isAuthenticating}
-          className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer border-0 shadow-xs disabled:opacity-50"
+          className="w-full py-3 px-4 bg-accent hover:bg-accent-hover text-white rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer border-0 shadow-xs disabled:opacity-50"
         >
           <LogIn size={16} />
           <span>{isAuthenticating ? 'Signing in with Google...' : 'Sign In with Google to Continue'}</span>

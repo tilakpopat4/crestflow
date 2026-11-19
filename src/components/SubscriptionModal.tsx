@@ -102,9 +102,8 @@ export default function SubscriptionModal({
           throw new Error(data.error || 'Failed to activate 7-day free trial.');
         }
         setStep('success');
-        if (onSubscriptionUpdated) {
-          onSubscriptionUpdated();
-        }
+        if (onSubscriptionUpdated) onSubscriptionUpdated();
+        onClose();
       } catch (err: any) {
         setError(err.message || 'Trial activation failed.');
       } finally {
@@ -171,6 +170,7 @@ export default function SubscriptionModal({
               }
               setStep('success');
               if (onSubscriptionUpdated) await onSubscriptionUpdated();
+              onClose();
             } else {
               const errJson = await verifyRes.json().catch(() => ({}));
               setError(errJson.error || 'Payment verification failed');

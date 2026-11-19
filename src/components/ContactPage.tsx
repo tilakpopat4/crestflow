@@ -103,7 +103,7 @@ export default function ContactPage() {
                   if (errors.name) setErrors((prev) => ({ ...prev, name: '' }));
                 }}
                 placeholder="Your full name"
-                className="w-full p-3 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                className="w-full p-3 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-xl focus:border-slate-400 dark:focus:border-slate-500 outline-none text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
               {errors.name && (
                 <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.name}</p>
@@ -126,7 +126,7 @@ export default function ContactPage() {
                   if (errors.email) setErrors((prev) => ({ ...prev, email: '' }));
                 }}
                 placeholder="name@example.com"
-                className="w-full p-3 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                className="w-full p-3 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-xl focus:border-slate-400 dark:focus:border-slate-500 outline-none text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
               {errors.email && (
                 <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.email}</p>
@@ -149,7 +149,7 @@ export default function ContactPage() {
                   if (errors.subject) setErrors((prev) => ({ ...prev, subject: '' }));
                 }}
                 placeholder="How can we help?"
-                className="w-full p-3 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                className="w-full p-3 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-xl focus:border-slate-400 dark:focus:border-slate-500 outline-none text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
               {errors.subject && (
                 <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.subject}</p>
@@ -172,7 +172,7 @@ export default function ContactPage() {
                   if (errors.message) setErrors((prev) => ({ ...prev, message: '' }));
                 }}
                 placeholder="Describe your question or issue in detail..."
-                className="w-full p-3 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                className="w-full p-3 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-xl focus:border-slate-400 dark:focus:border-slate-500 outline-none text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
               {errors.message && (
                 <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.message}</p>
@@ -196,7 +196,7 @@ export default function ContactPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-medium px-5 py-2.5 rounded-lg text-sm transition-colors border-none cursor-pointer"
+                className="bg-accent hover:bg-accent-hover disabled:opacity-50 text-white font-medium px-5 py-2.5 rounded-lg text-sm transition-colors border-none cursor-pointer"
               >
                 {isSubmitting ? 'Sending...' : 'Send Message'}
               </button>
@@ -219,7 +219,7 @@ export default function ContactPage() {
               </span>
               <a
                 href="mailto:support.crestflow@gmail.com"
-                className="text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
+                className="text-text-primary underline font-medium"
               >
                 support.crestflow@gmail.com
               </a>

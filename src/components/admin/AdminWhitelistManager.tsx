@@ -125,12 +125,12 @@ export default function AdminWhitelistManager() {
             placeholder="Reason (e.g. VIP Partner / Beta tester)"
             value={newReason}
             onChange={(e) => setNewReason(e.target.value)}
-            className="sm:w-72 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-3.5 py-2.5 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 outline-none focus:border-indigo-500 transition-colors duration-120"
+            className="sm:w-72 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-3.5 py-2.5 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 outline-none focus:border-surface-400 transition-colors duration-120"
           />
           <button
             type="submit"
             disabled={isSubmitting}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm px-4 py-2.5 rounded-lg transition-colors duration-120 disabled:opacity-50 inline-flex items-center justify-center gap-2 border-0 cursor-pointer shrink-0"
+            className="bg-accent hover:bg-accent-hover text-white font-semibold text-sm px-4 py-2.5 rounded-lg transition-colors duration-120 disabled:opacity-50 inline-flex items-center justify-center gap-2 border-0 cursor-pointer shrink-0"
           >
             <UserPlus className="w-4 h-4" />
             <span>Add Whitelist</span>

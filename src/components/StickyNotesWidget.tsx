@@ -186,7 +186,7 @@ export default function StickyNotesWidget({ user, clients }: StickyNotesWidgetPr
 
         <button
           onClick={handleOpenAdd}
-          className="flex items-center justify-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+          className="flex items-center justify-center gap-1.5 px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
         >
           <Plus size={16} /> Add Note
         </button>
@@ -201,7 +201,7 @@ export default function StickyNotesWidget({ user, clients }: StickyNotesWidgetPr
             placeholder="Search notes or clients..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full pl-9 pr-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-slate-400"
           />
         </div>
 
@@ -209,7 +209,7 @@ export default function StickyNotesWidget({ user, clients }: StickyNotesWidgetPr
           <select
             value={selectedClientFilter}
             onChange={(e) => setSelectedClientFilter(e.target.value)}
-            className="w-full py-1.5 px-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full py-1.5 px-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:border-slate-400"
           >
             <option value="ALL">All Clients & Notes</option>
             <option value="GENERAL">General Snippets Only</option>
@@ -223,7 +223,7 @@ export default function StickyNotesWidget({ user, clients }: StickyNotesWidgetPr
       {/* Sticky Notes Grid */}
       {loading ? (
         <div className="py-12 flex flex-col items-center justify-center gap-2 select-none">
-          <div className="w-5 h-5 rounded-full border-2 border-indigo-600 dark:border-indigo-400 border-t-transparent animate-spin" />
+          <div className="w-5 h-5 rounded-full border-2 border-accent border-t-transparent animate-spin" />
           <span className="text-xs text-slate-400 dark:text-slate-500">Loading sticky notes...</span>
         </div>
       ) : filteredNotes.length === 0 ? (
@@ -239,7 +239,7 @@ export default function StickyNotesWidget({ user, clients }: StickyNotesWidgetPr
           </p>
           <button
             onClick={handleOpenAdd}
-            className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-lg transition-colors cursor-pointer"
+            className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 bg-accent hover:bg-accent-hover text-white text-xs font-medium rounded-lg transition-colors cursor-pointer"
           >
             <Plus size={14} /> Create First Note
           </button>

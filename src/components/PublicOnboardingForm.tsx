@@ -191,7 +191,7 @@ export default function PublicOnboardingForm({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium transition-colors duration-120 shadow-xs disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer border-0"
+              className="px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-lg text-xs font-semibold transition-colors duration-120 shadow-xs disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer border-0"
             >
               {isSubmitting ? (
                 <>

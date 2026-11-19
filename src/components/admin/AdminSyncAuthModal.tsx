@@ -219,7 +219,7 @@ export default function AdminSyncAuthModal({ isOpen, onClose, onSynced }: AdminS
             <button
               onClick={handleSyncKnownUsers}
               disabled={isProcessing}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-3.5 py-2 rounded-lg transition-colors duration-120 border-0 cursor-pointer inline-flex items-center gap-1.5 disabled:opacity-50"
+              className="bg-accent hover:bg-accent-hover text-white font-semibold px-3.5 py-2 rounded-lg transition-colors duration-120 border-0 cursor-pointer inline-flex items-center gap-1.5 disabled:opacity-50"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isProcessing ? 'animate-spin' : ''}`} />
               <span>Sync All Detected Auth Users</span>

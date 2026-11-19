@@ -252,7 +252,7 @@ export default function GlobalHeader({
                         {isSelected && (
                           <motion.div
                             layoutId="searchCategoryFilterIndicator"
-                            className="absolute inset-0 bg-indigo-600 rounded-lg shadow-2xs -z-0"
+                            className="absolute inset-0 bg-[#282828] rounded-lg shadow-2xs -z-0"
                             transition={
                               shouldReduceMotion
                                 ? { duration: 0 }
@@ -555,7 +555,7 @@ export default function GlobalHeader({
             <span
               className={`w-1.5 h-1.5 rounded-full shrink-0 ${
                 subscriptionState.isTrialing
-                  ? 'bg-indigo-500'
+                  ? 'bg-slate-300'
                   : subscriptionState.isPaidActive
                   ? 'bg-slate-300'
                   : 'bg-red-500'
@@ -564,7 +564,7 @@ export default function GlobalHeader({
             <span
               className={
                 subscriptionState.isTrialing
-                  ? 'text-indigo-600 dark:text-indigo-400 font-medium text-[13px] whitespace-nowrap'
+                  ? 'text-slate-200 font-medium text-[13px] whitespace-nowrap'
                   : subscriptionState.isPaidActive
                   ? 'text-slate-200 font-medium text-[13px] whitespace-nowrap'
                   : 'text-red-400 font-medium text-[13px] whitespace-nowrap'

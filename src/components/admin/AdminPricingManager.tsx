@@ -105,7 +105,7 @@ export default function AdminPricingManager() {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 rounded-lg cursor-pointer border-0 inline-flex items-center gap-1.5 transition-colors duration-120"
+            className="px-4 py-2 text-xs font-semibold text-white bg-accent hover:bg-accent-hover disabled:opacity-50 rounded-lg cursor-pointer border-0 inline-flex items-center gap-1.5 transition-colors duration-120"
           >
             <Check className="w-3.5 h-3.5" />
             <span>{saving ? 'Publishing...' : 'Save & Publish Live'}</span>

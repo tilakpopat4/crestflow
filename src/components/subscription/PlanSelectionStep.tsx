@@ -138,7 +138,7 @@ export const PlanSelectionStep: React.FC<PlanSelectionStepProps> = ({
           <ul className="space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
             {activePlan.features.map((feat, i) => (
               <li key={i} className="flex items-start gap-2">
-                <Check size={14} className="text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
+                <Check size={14} className="text-slate-900 dark:text-white shrink-0 mt-0.5" />
                 <span>{feat}</span>
               </li>
             ))}
@@ -187,7 +187,7 @@ export const PlanSelectionStep: React.FC<PlanSelectionStepProps> = ({
           disabled={loading || (isSelectedTrial && isTrialUsed)}
           whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
           transition={{ duration: 0.1 }}
-          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs font-medium transition-colors cursor-pointer border-none disabled:opacity-50"
+          className="px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer border-none disabled:opacity-50"
         >
           {loading
             ? 'Initializing Checkout...'

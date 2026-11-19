@@ -55,7 +55,7 @@ export const ProfilePreferencesCard: React.FC<ProfilePreferencesCardProps> = ({
             </label>
             {geminiApiKey && (
               <span className="inline-flex items-center gap-1 text-[11px] text-slate-600 dark:text-slate-400 font-medium">
-                <CheckCircle2 size={12} className="text-indigo-600 dark:text-indigo-400" />
+                <CheckCircle2 size={12} className="text-text-primary" />
                 <span>Key configured</span>
               </span>
             )}
@@ -70,7 +70,7 @@ export const ProfilePreferencesCard: React.FC<ProfilePreferencesCardProps> = ({
               onChange={(e) => setGeminiApiKey(e.target.value)}
               autoComplete="off"
               spellCheck={false}
-              className="w-full pl-3.5 pr-20 py-2.5 text-xs sm:text-sm font-mono rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-600 dark:focus:border-indigo-400 transition-colors min-h-[40px]"
+              className="w-full pl-3.5 pr-20 py-2.5 text-xs sm:text-sm font-mono rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-900 dark:text-slate-100 outline-none focus:border-slate-400 dark:focus:border-slate-500 transition-colors min-h-[40px]"
             />
             <div className="absolute right-2 flex items-center gap-1">
               {geminiApiKey && (
@@ -100,7 +100,7 @@ export const ProfilePreferencesCard: React.FC<ProfilePreferencesCardProps> = ({
               href="https://aistudio.google.com/app/apikey"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-indigo-600 dark:text-indigo-400 hover:underline inline-flex items-center gap-0.5 font-medium"
+              className="text-text-primary underline inline-flex items-center gap-0.5 font-medium"
             >
               <span>Google AI Studio</span>
               <ExternalLink size={10} />
@@ -113,13 +113,13 @@ export const ProfilePreferencesCard: React.FC<ProfilePreferencesCardProps> = ({
           <div className="flex min-h-14 flex-wrap items-center justify-end gap-x-3 gap-y-2 border-t border-slate-100 dark:border-slate-800 px-5 py-3 sm:px-6">
             <p className="mr-auto flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
               {isSaved ? (
-                <span className="inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-medium">
+                <span className="inline-flex items-center gap-1 text-text-primary font-medium">
                   <Check size={13} />
                   <span>Saved just now</span>
                 </span>
               ) : isDirty ? (
                 <span className="inline-flex items-center gap-1.5 text-slate-700 dark:text-slate-300 font-medium">
-                  <span className="size-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400" />
+                  <span className="size-1.5 rounded-full bg-accent" />
                   <span>You have unsaved changes</span>
                 </span>
               ) : (
@@ -142,7 +142,7 @@ export const ProfilePreferencesCard: React.FC<ProfilePreferencesCardProps> = ({
               type="button"
               disabled={isSaving || !isDirty}
               onClick={onSave}
-              className="inline-flex h-9 items-center justify-center rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-4 text-xs font-semibold cursor-pointer border-0 transition-colors duration-120"
+              className="inline-flex h-9 items-center justify-center rounded-lg bg-accent hover:bg-accent-hover disabled:opacity-50 text-white px-4 text-xs font-semibold cursor-pointer border-0 transition-colors duration-120"
             >
               {isSaving ? 'Saving...' : 'Save changes'}
             </button>

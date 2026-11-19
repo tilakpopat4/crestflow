@@ -168,7 +168,7 @@ export default function ClientFeedbackForm() {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+        <Loader2 className="w-8 h-8 animate-spin text-accent" />
       </div>
     );
   }
@@ -218,7 +218,7 @@ export default function ClientFeedbackForm() {
             <Logo className="w-9 h-9 shadow-sm" />
             <div className="flex flex-col">
               <h2 className="font-extrabold text-lg tracking-tight leading-none text-white">CrestFlow</h2>
-              <span className="text-[9px] text-indigo-400 font-bold uppercase tracking-wider mt-1">Client Feedback Portal</span>
+              <span className="text-[9px] text-accent font-bold uppercase tracking-wider mt-1">Client Feedback Portal</span>
             </div>
           </div>
           <span className="text-xs text-slate-400 font-medium">Leave Review</span>
@@ -229,7 +229,7 @@ export default function ClientFeedbackForm() {
           <div className="space-y-2">
             <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Share Your Experience</h1>
             <p className="text-slate-500 dark:text-slate-400 text-xs md:text-sm leading-relaxed">
-              Hi there! Please take a moment to leave a review for <span className="font-semibold text-indigo-600 dark:text-indigo-400">{freelancerName}</span>. Your review helps build trust and improve future collaborations.
+              Hi there! Please take a moment to leave a review for <span className="font-semibold text-text-primary">{freelancerName}</span>. Your review helps build trust and improve future collaborations.
             </p>
             <p className="text-[11px] text-slate-400 font-mono">
               Signed in as {currentUser.email} • 1 review permitted per account
@@ -267,7 +267,7 @@ export default function ClientFeedbackForm() {
             <button
               type="submit"
               disabled={isSubmitting || rating === 0 || !feedbackText.trim() || !clientName.trim()}
-              className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-colors duration-120 shadow-xs disabled:opacity-50 cursor-pointer border-0"
+              className="w-full py-3 px-4 bg-accent hover:bg-accent-hover text-white rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-colors duration-120 shadow-xs disabled:opacity-50 cursor-pointer border-0"
             >
               {isSubmitting ? (
                 <>

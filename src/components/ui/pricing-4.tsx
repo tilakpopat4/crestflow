@@ -243,7 +243,7 @@ export function PricingCard({
           className={cn(
             "w-full cursor-pointer font-medium rounded-xl transition-all",
             plan.highlighted
-              ? "bg-indigo-600 text-white hover:bg-indigo-700 border-0"
+              ? "bg-accent text-white hover:bg-accent-hover border-0"
               : "bg-[#282828] text-white border border-[#3a3a3a] hover:bg-[#333333]"
           )}
           variant={plan.highlighted ? "default" : "outline"}

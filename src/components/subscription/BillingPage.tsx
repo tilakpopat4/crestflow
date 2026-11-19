@@ -127,10 +127,10 @@ export default function BillingPage({
       return <span className="text-[13px] font-medium text-slate-700 dark:text-slate-300">Cancelled (Ends Period End)</span>;
     }
     if (isTrialing) {
-      return <span className="text-[13px] font-medium text-indigo-600 dark:text-indigo-400">Trialing</span>;
+      return <span className="text-[13px] font-medium text-text-primary">Trialing</span>;
     }
     if (status === 'active') {
-      return <span className="text-[13px] font-medium text-indigo-600 dark:text-indigo-400">Active</span>;
+      return <span className="text-[13px] font-medium text-text-primary">Active</span>;
     }
     return <span className="text-[13px] font-medium text-slate-500">None</span>;
   };
@@ -197,7 +197,7 @@ export default function BillingPage({
               <button
                 type="button"
                 onClick={onNavigateToPricing}
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs font-medium transition-colors cursor-pointer border-none"
+                className="px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer border-none"
               >
                 Reactivate Subscription
               </button>
@@ -241,9 +241,9 @@ export default function BillingPage({
                 {PRO_PLANS.map((p) => (
                   <label
                     key={p.id}
-                    className={`flex items-center justify-between p-3 rounded border cursor-pointer text-xs ${selectedNewPlan === p.id
-                      ? 'border-indigo-600 bg-indigo-50/20 dark:bg-indigo-950/20'
-                      : 'border-slate-200 dark:border-slate-800'
+                    className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer text-xs ${selectedNewPlan === p.id
+                      ? 'border-accent bg-surface-600'
+                      : 'border-surface-400 bg-surface-700'
                       }`}
                   >
                     <div className="flex items-center gap-2">
@@ -253,13 +253,13 @@ export default function BillingPage({
                         value={p.id}
                         checked={selectedNewPlan === p.id}
                         onChange={() => setSelectedNewPlan(p.id)}
-                        className="text-indigo-600"
+                        className="accent-[#e1002d]"
                       />
-                      <span className="font-semibold text-slate-900 dark:text-white">{p.name}</span>
+                      <span className="font-semibold text-text-primary">{p.name}</span>
                     </div>
                     <div className="text-right">
-                      <strong className="text-slate-900 dark:text-white">₹{p.price.toLocaleString('en-IN')}</strong>
-                      <span className="text-slate-500 ml-1">{p.periodLabel}</span>
+                      <strong className="text-text-primary">₹{p.price.toLocaleString('en-IN')}</strong>
+                      <span className="text-text-secondary ml-1">{p.periodLabel}</span>
                     </div>
                   </label>
                 ))}
@@ -269,7 +269,7 @@ export default function BillingPage({
                 <button
                   type="button"
                   onClick={() => setChangePlanOpen(false)}
-                  className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded text-xs cursor-pointer border-none"
+                  className="px-3 py-1.5 bg-surface-600 hover:bg-surface-500 text-text-primary rounded-lg text-xs cursor-pointer border-none"
                 >
                   Close
                 </button>
@@ -277,7 +277,7 @@ export default function BillingPage({
                   type="button"
                   onClick={handleChangePlan}
                   disabled={changingPlan}
-                  className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs font-medium cursor-pointer border-none disabled:opacity-50"
+                  className="px-4 py-1.5 bg-accent hover:bg-accent-hover text-white rounded-lg text-xs font-semibold cursor-pointer border-none disabled:opacity-50"
                 >
                   {changingPlan ? 'Scheduling...' : 'Confirm Plan Change'}
                 </button>

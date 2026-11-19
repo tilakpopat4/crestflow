@@ -126,7 +126,7 @@ export default function AdminEmailManager({ users = [] }: AdminEmailManagerProps
           <button
             type="button"
             onClick={() => setIsCampaignModalOpen(true)}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold cursor-pointer transition-colors duration-120 border-0 flex items-center justify-center gap-1.5 shrink-0"
+            className="px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-lg text-xs font-semibold cursor-pointer transition-colors duration-120 border-0 flex items-center justify-center gap-1.5 shrink-0"
           >
             <Send className="w-3.5 h-3.5" />
             <span>Plan & Send Bulk Mail</span>
@@ -159,7 +159,7 @@ export default function AdminEmailManager({ users = [] }: AdminEmailManagerProps
             </div>
             <div className="sm:col-span-3 flex items-center justify-between pt-2">
               <span className="text-xs text-slate-500">{configFeedback}</span>
-              <button type="submit" disabled={configSaving} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs font-semibold border-none cursor-pointer">{configSaving ? 'Saving...' : 'Save Gmail Connection'}</button>
+              <button type="submit" disabled={configSaving} className="px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded text-xs font-semibold border-none cursor-pointer">{configSaving ? 'Saving...' : 'Save Gmail Connection'}</button>
             </div>
           </form>
         </div>
@@ -237,9 +237,9 @@ export default function AdminEmailManager({ users = [] }: AdminEmailManagerProps
           <form onSubmit={handleSendTest} className="space-y-3">
             <div>
               <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Recipient Email</label>
-              <input type="email" placeholder="support.crestflow@gmail.com" value={testEmail} onChange={(e) => setTestEmail(e.target.value)} className="w-full text-xs p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-600" />
+              <input type="email" placeholder="support.crestflow@gmail.com" value={testEmail} onChange={(e) => setTestEmail(e.target.value)} className="w-full text-xs p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 outline-none focus:border-surface-400" />
             </div>
-            <button type="submit" disabled={isSendingTest} className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg text-xs font-semibold cursor-pointer transition-colors duration-120 border-0 flex items-center justify-center gap-1.5">
+            <button type="submit" disabled={isSendingTest} className="w-full py-2 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white rounded-lg text-xs font-semibold cursor-pointer transition-colors duration-120 border-0 flex items-center justify-center gap-1.5">
               {isSendingTest ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
               <span>{isSendingTest ? 'Sending...' : 'Dispatch Live Test'}</span>
             </button>

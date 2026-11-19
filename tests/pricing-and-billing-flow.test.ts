@@ -201,4 +201,24 @@ describe('Pricing Page, Plans Disclosure & Server-Governed Access Suite', () => 
     assert.ok(wallIndex < onboardingIndex, 'SubscriptionWallPage must be evaluated before UserOnboardingModal');
     assert.ok(wallIndex < dashboardIndex, 'SubscriptionWallPage must be evaluated before workspace dashboard');
   });
+
+  it('7. Subscription Wall Auto-Dismiss: plan activation immediately closes the paywall and modal', () => {
+    const wallPath = path.resolve(__dirname, '../src/components/subscription/SubscriptionWallPage.tsx');
+    const hookPath = path.resolve(__dirname, '../src/hooks/useSubscription.ts');
+    const modalPath = path.resolve(__dirname, '../src/components/SubscriptionModal.tsx');
+
+    const wallContent = fs.readFileSync(wallPath, 'utf8');
+    const hookContent = fs.readFileSync(hookPath, 'utf8');
+    const modalContent = fs.readFileSync(modalPath, 'utf8');
+
+    // 1. Hook must provide applyActiveSubscription to immediately grant entitlement in-memory
+    assert.ok(hookContent.includes('applyActiveSubscription'), 'useSubscription must provide applyActiveSubscription');
+
+    // 2. Wall must call applyActiveSubscription and onNavigate('dashboard') without lingering
+    assert.ok(wallContent.includes('applyActiveSubscription'), 'SubscriptionWallPage must synchronize active plan');
+    assert.ok(!wallContent.includes('Enter Workspace Now'), 'SubscriptionWallPage must not block user behind manual "Enter Workspace Now" button');
+
+    // 3. SubscriptionModal must call onClose() upon successful plan activation
+    assert.ok(modalContent.includes('onClose()'), 'SubscriptionModal must immediately close upon plan activation');
+  });
 });

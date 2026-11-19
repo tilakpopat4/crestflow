@@ -275,7 +275,7 @@ export default function GoogleDriveUploadModal({
                   type="button"
                   onClick={handleStartUpload}
                   disabled={isUploading}
-                  className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  className="px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
                   {isUploading ? <Loader2 size={13} className="animate-spin" /> : <UploadCloud size={13} />}
                   <span>Retry Upload</span>

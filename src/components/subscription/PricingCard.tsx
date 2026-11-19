@@ -27,7 +27,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
     <div
       className={`rounded-lg p-5 flex flex-col justify-between transition-colors duration-120 ${
         isSelected
-          ? 'bg-white dark:bg-slate-900 border-2 border-indigo-600 dark:border-indigo-500 shadow-xs'
+          ? 'bg-white dark:bg-slate-900 border-2 border-accent shadow-xs'
           : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800'
       }`}
     >
@@ -69,7 +69,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
         <ul className="space-y-2.5 mb-6 text-xs text-slate-600 dark:text-slate-300">
           {plan.features.map((feat, idx) => (
             <li key={idx} className="flex items-start gap-2">
-              <Check size={14} className="text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
+              <Check size={14} className="text-slate-900 dark:text-white shrink-0 mt-0.5" />
               <span>{feat}</span>
             </li>
           ))}
@@ -101,7 +101,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
           disabled={isLoading}
           className={`w-full py-2.5 px-4 rounded text-xs font-medium transition-colors duration-120 cursor-pointer border-none ${
             isSelected
-              ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
+              ? 'bg-accent hover:bg-accent-hover text-white'
               : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200'
           } disabled:opacity-50`}
         >

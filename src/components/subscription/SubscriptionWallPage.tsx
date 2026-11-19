@@ -128,6 +128,13 @@ export default function SubscriptionWallPage({
             if (verifyRes.ok) {
               const verifyData = await verifyRes.json().catch(() => ({}));
               if (verifyData.accessUntil) {
+                subscriptionState.applyActiveSubscription?.({
+                  userId: user.uid,
+                  status: verifyData.subscriptionStatus || 'active',
+                  plan: selectedCycle || 'pro',
+                  accessUntil: verifyData.accessUntil,
+                  trialEndsAt: verifyData.subscriptionStatus === 'trialing' ? verifyData.accessUntil : null,
+                });
                 try {
                   localStorage.setItem(`crestflow_sub_${user.uid}`, JSON.stringify({
                     userId: user.uid, status: verifyData.subscriptionStatus || 'active', plan: 'pro',
@@ -192,20 +199,15 @@ export default function SubscriptionWallPage({
 
         {error && <div className="p-3.5 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-xs text-red-600 dark:text-red-400 text-center">{error}</div>}
 
-        {isVerifying || subscriptionState.hasAccess ? (
+        {isVerifying ? (
           <div className="p-10 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center space-y-4 shadow-xs">
-            <RefreshCw className="w-8 h-8 text-indigo-400 animate-spin mx-auto" />
+            <RefreshCw className="w-8 h-8 text-accent animate-spin mx-auto" />
             <div className="space-y-1">
-              <h3 className="text-base font-semibold text-slate-900 dark:text-white">{subscriptionState.hasAccess ? 'Subscription Active' : 'Activating Your Workspace...'}</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">{subscriptionState.hasAccess ? 'Access granted. Redirecting to your workspace dashboard...' : 'Verifying payment authorization and preparing your dashboard.'}</p>
+              <h3 className="text-base font-semibold text-slate-900 dark:text-white">Activating Your Workspace...</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Verifying payment authorization and opening your dashboard.</p>
             </div>
-            {subscriptionState.hasAccess && (
-              <button type="button" onClick={() => onNavigate?.('dashboard')} className="px-5 py-2.5 bg-accent hover:bg-accent-hover text-white text-xs font-semibold rounded-lg border-none cursor-pointer transition-colors">
-                Enter Workspace Now
-              </button>
-            )}
           </div>
-        ) : (
+        ) : subscriptionState.hasAccess ? null : (
           <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 space-y-5 shadow-xs">
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/90 rounded-lg border border-slate-200 dark:border-slate-700/80 select-none">
               {plans.map((p) => {
@@ -254,7 +256,7 @@ export default function SubscriptionWallPage({
                   <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Included in this plan:</span>
                   <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600 dark:text-slate-300">
                     {activePlan.features.map((feat, i) => (
-                      <li key={i} className="flex items-start gap-2"><Check size={14} className="text-indigo-400 shrink-0 mt-0.5" /><span>{feat}</span></li>
+                      <li key={i} className="flex items-start gap-2"><Check size={14} className="text-slate-900 dark:text-white shrink-0 mt-0.5" /><span>{feat}</span></li>
                     ))}
                   </ul>
                 </div>
