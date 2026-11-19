@@ -32,7 +32,7 @@ export const DateRangePresets: React.FC<DateRangePresetsProps> = ({
             onClick={() => onSelectPreset(key)}
             className={`h-8 px-2.5 rounded-lg text-xs font-medium text-left whitespace-nowrap transition-colors cursor-pointer ${
               activePreset === key
-                ? 'bg-[#4870aa] text-white'
+                ? 'bg-surface-500 text-text-primary border border-surface-400'
                 : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
           >

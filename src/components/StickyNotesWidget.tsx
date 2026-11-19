@@ -12,38 +12,38 @@ interface StickyNotesWidgetProps {
 const COLOR_MAP: Record<StickyNote['color'], { bg: string; border: string; text: string; pin: string; dot: string }> = {
   yellow: {
     bg: 'bg-[#212121]',
-    border: 'border-[#383838] hover:border-[#4870aa]',
+    border: 'border-[#383838] hover:border-surface-300',
     text: 'text-[#f1f1f1]',
     pin: 'text-[#aaaaaa]',
     dot: 'bg-[#aaaaaa]'
   },
   blue: {
     bg: 'bg-[#1e1e1e]',
-    border: 'border-[#383838] hover:border-[#4870aa]',
+    border: 'border-[#383838] hover:border-surface-300',
     text: 'text-[#f1f1f1]',
-    pin: 'text-[#4870aa]',
-    dot: 'bg-[#4870aa]'
+    pin: 'text-text-primary',
+    dot: 'bg-surface-400'
   },
   green: {
     bg: 'bg-[#242424]',
-    border: 'border-[#383838] hover:border-[#4870aa]',
+    border: 'border-[#383838] hover:border-surface-300',
     text: 'text-[#f1f1f1]',
     pin: 'text-slate-400',
     dot: 'bg-slate-400'
   },
   pink: {
     bg: 'bg-[#212121]',
-    border: 'border-[#383838] hover:border-[#4870aa]',
+    border: 'border-[#383838] hover:border-surface-300',
     text: 'text-[#f1f1f1]',
     pin: 'text-[#aaaaaa]',
     dot: 'bg-[#aaaaaa]'
   },
   purple: {
     bg: 'bg-[#1a1a1a]',
-    border: 'border-[#383838] hover:border-[#4870aa]',
+    border: 'border-[#383838] hover:border-surface-300',
     text: 'text-[#f1f1f1]',
-    pin: 'text-[#4870aa]',
-    dot: 'bg-[#4870aa]'
+    pin: 'text-text-primary',
+    dot: 'bg-surface-400'
   }
 };
 
@@ -323,7 +323,7 @@ export default function StickyNotesWidget({ user, clients }: StickyNotesWidgetPr
           >
             <div className="flex items-center justify-between border-b border-surface-400/80 pb-4">
               <h3 className="text-base font-bold text-text-primary flex items-center gap-2">
-                <Pin size={18} className="text-[#4870aa]" />
+                <Pin size={18} className="text-accent" />
                 {editingNoteId ? 'Edit Sticky Note' : 'Create New Sticky Note'}
               </h3>
               <button
@@ -340,7 +340,7 @@ export default function StickyNotesWidget({ user, clients }: StickyNotesWidgetPr
                 <select
                   value={formData.clientId}
                   onChange={(e) => setFormData({ ...formData, clientId: e.target.value })}
-                  className="w-full px-3 py-2 bg-surface-800 text-text-primary border border-surface-400 rounded-lg text-xs font-medium focus:border-[#4870aa] outline-none"
+                  className="w-full px-3 py-2 bg-surface-800 text-text-primary border border-surface-400 rounded-lg text-xs font-medium focus:border-surface-300 outline-none"
                 >
                   <option value="general">General / Quick Snippet (No Client)</option>
                   {clients.map(c => (
@@ -356,7 +356,7 @@ export default function StickyNotesWidget({ user, clients }: StickyNotesWidgetPr
                   value={formData.content}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                   placeholder="e.g., Client prefers energetic transition effects, 9:16 aspect ratio, and background music at -18dB..."
-                  className="w-full px-3 py-2.5 bg-surface-800 text-text-primary placeholder:text-text-muted border border-surface-400 rounded-lg text-xs font-normal focus:border-[#4870aa] outline-none resize-y"
+                  className="w-full px-3 py-2.5 bg-surface-800 text-text-primary placeholder:text-text-muted border border-surface-400 rounded-lg text-xs font-normal focus:border-surface-300 outline-none resize-y"
                   required
                 />
               </div>
@@ -395,7 +395,7 @@ export default function StickyNotesWidget({ user, clients }: StickyNotesWidgetPr
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#4870aa] hover:bg-[#3b5e90] text-white rounded-lg text-xs font-semibold transition-colors shadow-xs cursor-pointer border-0"
+                  className="px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-lg text-xs font-semibold transition-colors shadow-xs cursor-pointer border-0"
                 >
                   {editingNoteId ? 'Update Note' : 'Save Sticky Note'}
                 </button>

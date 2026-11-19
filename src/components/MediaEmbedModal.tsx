@@ -90,7 +90,7 @@ export default function MediaEmbedModal({
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#4870aa] hover:bg-[#5880ba] text-white rounded-lg text-xs font-semibold transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-accent hover:bg-accent-hover text-white rounded-lg text-xs font-semibold transition-colors"
               title="Open link in Google Drive / new tab"
             >
               <ExternalLink size={13} />
@@ -131,7 +131,7 @@ export default function MediaEmbedModal({
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#4870aa] hover:bg-[#5880ba] text-white text-xs font-bold rounded-lg transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-accent hover:bg-accent-hover text-white text-xs font-bold rounded-lg transition-colors"
               >
                 <span>Open Video in New Tab</span>
                 <ExternalLink size={14} />

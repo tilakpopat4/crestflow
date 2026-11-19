@@ -269,20 +269,20 @@ export default function AdminSyncAuthModal({ isOpen, onClose, onSynced }: AdminS
                 placeholder="Display Name"
                 value={singleName}
                 onChange={(e) => setSingleName(e.target.value)}
-                className="bg-surface-800 border border-surface-400 rounded-lg px-3 py-1.5 text-xs text-text-primary outline-none focus:border-[#4870aa]"
+                className="bg-surface-800 border border-surface-400 rounded-lg px-3 py-1.5 text-xs text-text-primary outline-none focus:border-surface-300"
               />
               <input
                 type="text"
                 placeholder="Firebase UID (optional)"
                 value={singleUid}
                 onChange={(e) => setSingleUid(e.target.value)}
-                className="bg-surface-800 border border-surface-400 rounded-lg px-3 py-1.5 text-xs text-text-primary outline-none focus:border-[#4870aa]"
+                className="bg-surface-800 border border-surface-400 rounded-lg px-3 py-1.5 text-xs text-text-primary outline-none focus:border-surface-300"
               />
             </div>
             <button
               type="submit"
               disabled={isProcessing || !singleEmail.trim()}
-              className="bg-[#4870aa] hover:bg-[#3b5e90] text-white font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors duration-120 border-0 cursor-pointer disabled:opacity-50 inline-flex items-center gap-1.5"
+              className="bg-accent hover:bg-accent-hover text-white font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors duration-120 border-0 cursor-pointer disabled:opacity-50 inline-flex items-center gap-1.5"
             >
               <UserPlus className="w-3.5 h-3.5" />
               <span>Add to Directory</span>

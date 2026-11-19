@@ -65,7 +65,7 @@ export default function AdminFooterManager() {
         </div>
         <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
           {statusMessage && (
-            <span className="text-xs font-semibold text-[#4870aa] flex items-center gap-1">
+            <span className="text-xs font-semibold text-accent flex items-center gap-1">
               <Check className="w-3.5 h-3.5" />
               <span>{statusMessage}</span>
             </span>

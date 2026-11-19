@@ -65,7 +65,7 @@ export const ActivatingPaymentModal: React.FC<ActivatingPaymentModalProps> = ({
       <div className="w-full max-w-md bg-surface-700 rounded-xl border border-surface-400 p-6 shadow-xl text-center text-text-primary">
         {!isConfirmed ? (
           <div>
-            <div className="w-8 h-8 mx-auto mb-4 border-2 border-[#4870aa] border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 mx-auto mb-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
             <h3 className="text-base font-semibold text-text-primary mb-2">
               Activating your membership…
             </h3>
@@ -78,7 +78,7 @@ export const ActivatingPaymentModal: React.FC<ActivatingPaymentModalProps> = ({
           </div>
         ) : (
           <div>
-            <div className="w-8 h-8 mx-auto mb-4 bg-surface-800 border border-surface-400 text-[#4870aa] rounded-full flex items-center justify-center font-bold text-sm">
+            <div className="w-8 h-8 mx-auto mb-4 bg-surface-800 border border-surface-400 text-accent rounded-full flex items-center justify-center font-bold text-sm">
               ✓
             </div>
             <h3 className="text-base font-semibold text-text-primary mb-2">
@@ -90,7 +90,7 @@ export const ActivatingPaymentModal: React.FC<ActivatingPaymentModalProps> = ({
             <button
               type="button"
               onClick={onActivated}
-              className="w-full py-2.5 px-4 rounded-lg bg-[#4870aa] hover:bg-[#3b5e90] text-white text-xs font-semibold transition-colors cursor-pointer border-0"
+              className="w-full py-2.5 px-4 rounded-lg bg-accent hover:bg-accent-hover text-white text-xs font-semibold transition-colors cursor-pointer border-0"
             >
               Continue to Workspace
             </button>

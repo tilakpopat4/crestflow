@@ -281,7 +281,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   type="button"
                   onClick={handleApply}
                   disabled={s.end === null}
-                  className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#4870aa] hover:bg-[#3b5e90] text-white disabled:opacity-40 transition-colors cursor-pointer border-0 shadow-xs"
+                  className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-surface-500 hover:bg-surface-400 text-text-primary border border-surface-400 disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
                 >
                   Apply
                 </button>

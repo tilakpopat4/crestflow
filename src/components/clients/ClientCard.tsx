@@ -221,16 +221,16 @@ export const ClientCard: React.FC<ClientCardProps> = ({
         </div>
       </div>
 
-      {/* Bottom Action Row (Steel Blue button for Open Dashboard per Image 3) */}
+      {/* Bottom Action Row */}
       <div className="flex items-center gap-2 pt-1 w-full min-w-0">
         <Button
-          variant={client.isClosed ? "secondary" : "blue"}
+          variant="secondary"
           size="sm"
           onClick={() => onSelect(client.id)}
           className="flex-1 font-semibold justify-between h-9 px-3"
         >
           <span className="truncate">{client.isClosed ? 'View History' : 'Open Dashboard'}</span>
-          <ChevronRight size={14} className={cn("shrink-0", client.isClosed ? "text-text-secondary" : "text-white")} />
+          <ChevronRight size={14} className="shrink-0 text-text-secondary" />
         </Button>
 
         <Button

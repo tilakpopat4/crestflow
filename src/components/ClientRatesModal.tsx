@@ -188,7 +188,7 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
                       setMonthlyRetainerAmount(e.target.value);
                       setDefaultRate(e.target.value);
                     }}
-                    className="w-full bg-surface-800 border border-surface-400 rounded-lg pl-8 pr-3.5 py-2 text-xs text-text-primary placeholder:text-text-muted outline-none transition-colors focus:border-[#4870aa]"
+                    className="w-full bg-surface-800 border border-surface-400 rounded-lg pl-8 pr-3.5 py-2 text-xs text-text-primary placeholder:text-text-muted outline-none transition-colors focus:border-surface-300"
                     placeholder="e.g. 25000"
                   />
                 </div>
@@ -219,7 +219,7 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
                     step="1"
                     value={defaultRate}
                     onChange={(e) => setDefaultRate(e.target.value)}
-                    className="w-full bg-surface-800 border border-surface-400 rounded-lg pl-8 pr-3.5 py-2 text-xs text-text-primary placeholder:text-text-muted outline-none transition-colors focus:border-[#4870aa]"
+                    className="w-full bg-surface-800 border border-surface-400 rounded-lg pl-8 pr-3.5 py-2 text-xs text-text-primary placeholder:text-text-muted outline-none transition-colors focus:border-surface-300"
                     placeholder="e.g. 1500"
                   />
                 </div>
@@ -242,7 +242,7 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
                 step="1"
                 value={onSiteShootRate}
                 onChange={(e) => setOnSiteShootRate(e.target.value)}
-                className="w-full bg-surface-800 border border-surface-400 rounded-lg pl-8 pr-3.5 py-2 text-xs text-text-primary placeholder:text-text-muted outline-none transition-colors focus:border-[#4870aa]"
+                className="w-full bg-surface-800 border border-surface-400 rounded-lg pl-8 pr-3.5 py-2 text-xs text-text-primary placeholder:text-text-muted outline-none transition-colors focus:border-surface-300"
                 placeholder="e.g. 5000"
               />
             </div>
@@ -263,7 +263,7 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
                 step="1"
                 value={websiteMakingRate}
                 onChange={(e) => setWebsiteMakingRate(e.target.value)}
-                className="w-full bg-surface-800 border border-surface-400 rounded-lg pl-8 pr-3.5 py-2 text-xs text-text-primary placeholder:text-text-muted outline-none transition-colors focus:border-[#4870aa]"
+                className="w-full bg-surface-800 border border-surface-400 rounded-lg pl-8 pr-3.5 py-2 text-xs text-text-primary placeholder:text-text-muted outline-none transition-colors focus:border-surface-300"
                 placeholder="e.g. 15000"
               />
             </div>
@@ -298,7 +298,7 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
             <button
               type="submit"
               disabled={isSaving}
-              className="bg-[#4870aa] hover:bg-[#3b5e90] disabled:opacity-50 text-white px-5 py-2 rounded-lg text-xs font-semibold transition-colors border-0 cursor-pointer shadow-xs"
+              className="bg-accent hover:bg-accent-hover disabled:opacity-50 text-white px-5 py-2 rounded-lg text-xs font-semibold transition-colors border-0 cursor-pointer shadow-xs"
             >
               <span>{isSaving ? 'Saving…' : 'Save Rates'}</span>
             </button>

@@ -100,7 +100,7 @@ export const SampleVideoCard: React.FC<SampleVideoCardProps> = ({ item, onSelect
           <button
             type="button"
             onClick={() => onSelect(item)}
-            className="inline-flex items-center gap-1.5 text-[#4870aa] hover:text-[#6a90cc] font-medium cursor-pointer border-0 bg-transparent p-0 transition-colors"
+            className="inline-flex items-center gap-1.5 text-text-primary hover:text-white font-medium cursor-pointer border-0 bg-transparent p-0 transition-colors"
           >
             <Play size={14} className="fill-current" />
             <span>Watch Preview</span>

@@ -171,7 +171,7 @@ export const ClientPortalInvoiceModal: React.FC<ClientPortalInvoiceModalProps> =
                 </div>
                 <a
                   href={upiLink}
-                  className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-[#4870aa] hover:bg-[#3b5e90] text-white rounded-lg text-xs font-medium transition-colors min-h-[44px] w-full sm:w-auto border-0"
+                  className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-surface-500 hover:bg-surface-400 text-text-primary border border-surface-400 rounded-lg text-xs font-medium transition-colors min-h-[44px] w-full sm:w-auto"
                 >
                   <QrCode size={14} />
                   <span>Pay with UPI App</span>

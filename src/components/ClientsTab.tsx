@@ -205,7 +205,7 @@ export default function ClientsTab({
             <Button variant="secondary" onClick={() => setIsImportModalOpen(true)}>
               <UploadCloud size={14} /> Import CSV
             </Button>
-            <Button variant="blue" onClick={handleOpenAddClient}>
+            <Button variant="primary" onClick={handleOpenAddClient}>
               <Plus size={14} /> Add New Client
             </Button>
           </div>

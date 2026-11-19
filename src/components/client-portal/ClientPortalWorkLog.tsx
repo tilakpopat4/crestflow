@@ -142,7 +142,7 @@ export const ClientPortalWorkLog: React.FC<ClientPortalWorkLogProps> = ({
 
                     <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
                       <div className="flex items-center gap-1.5">
-                        <span className={`w-1.5 h-1.5 rounded-full ${item.approvalStatus === 'approved' ? 'bg-[#4870aa]' : item.approvalStatus === 'changes_requested' ? 'bg-red-500' : 'bg-slate-500'}`} />
+                        <span className={`w-1.5 h-1.5 rounded-full ${item.approvalStatus === 'approved' ? 'bg-slate-400' : item.approvalStatus === 'changes_requested' ? 'bg-red-500' : 'bg-slate-500'}`} />
                         <span className={`font-medium ${item.approvalStatus === 'approved' ? 'text-indigo-400' : item.approvalStatus === 'changes_requested' ? 'text-red-400' : 'text-slate-400'}`}>
                           {item.approvalStatus === 'approved' ? 'Approved' : item.approvalStatus === 'changes_requested' ? `Changes Requested (${item.revisionCount || 1})` : 'Pending Review'}
                         </span>
@@ -189,7 +189,7 @@ export const ClientPortalWorkLog: React.FC<ClientPortalWorkLogProps> = ({
                         <td className="py-3 px-4"><StatusBadge status={item.status === 'Invoiced' ? 'Invoiced' : 'Pending'} /></td>
                         <td className="py-3 px-4 whitespace-nowrap">
                           <div className="flex items-center gap-1.5">
-                            <span className={`w-1.5 h-1.5 rounded-full ${item.approvalStatus === 'approved' ? 'bg-[#4870aa]' : item.approvalStatus === 'changes_requested' ? 'bg-red-500' : 'bg-slate-500'}`} />
+                            <span className={`w-1.5 h-1.5 rounded-full ${item.approvalStatus === 'approved' ? 'bg-slate-400' : item.approvalStatus === 'changes_requested' ? 'bg-red-500' : 'bg-slate-500'}`} />
                             <span className={`font-medium text-xs ${item.approvalStatus === 'approved' ? 'text-indigo-400' : item.approvalStatus === 'changes_requested' ? 'text-red-400' : 'text-slate-400'}`}>
                               {item.approvalStatus === 'approved' ? 'Approved' : item.approvalStatus === 'changes_requested' ? `Changes (${item.revisionCount || 1})` : 'Pending'}
                             </span>

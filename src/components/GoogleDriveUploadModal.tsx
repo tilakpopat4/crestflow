@@ -266,7 +266,7 @@ export default function GoogleDriveUploadModal({
                   href={activationUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
                 >
                   <ExternalLink size={13} />
                   <span>Enable Google Drive API</span>

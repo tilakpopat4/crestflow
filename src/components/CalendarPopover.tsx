@@ -274,7 +274,7 @@ export const CalendarPopover: React.FC<CalendarPopoverProps> = ({
             <button
               type="button"
               onClick={handleManualSubmit}
-              className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#4870aa] hover:bg-[#3b5e90] text-white shrink-0 cursor-pointer transition-colors border-0 shadow-xs"
+              className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-surface-500 hover:bg-surface-400 text-text-primary border border-surface-400 shrink-0 cursor-pointer transition-colors shadow-2xs"
             >
               Apply
             </button>

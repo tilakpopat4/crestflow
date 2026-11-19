@@ -116,7 +116,7 @@ export default function UserSubscriptionRow({
           <button
             onClick={() => onGrantDays(profile.id, profile.name)}
             disabled={isProcessing}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-2.5 py-1.5 rounded-lg transition-colors duration-120 disabled:opacity-50 inline-flex items-center gap-1 border-0 cursor-pointer"
+            className="bg-surface-500 hover:bg-surface-400 text-text-primary border border-surface-400 font-semibold text-xs px-2.5 py-1.5 rounded-lg transition-colors duration-120 disabled:opacity-50 inline-flex items-center gap-1 cursor-pointer"
             title="Add 30 days to user's subscription"
           >
             <Plus className="w-3.5 h-3.5" />

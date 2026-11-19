@@ -26,7 +26,7 @@ const r = (n: number) => Math.round(n * 10) / 10;
  * Renders live monthly earnings and comparisons from user invoices starting from
  * when the freelancer started work up to the current date.
  * When an account is new with no invoice revenue, renders a clean empty state.
- * Strictly adheres to GEMINI.md design standards: steel blue (#4870aa), slate neutrals, no green.
+ * Strictly adheres to GEMINI.md design standards: slate neutrals, graphite surfaces, no green.
  */
 export default function RevenueComparisonChart({
   invoices = [],

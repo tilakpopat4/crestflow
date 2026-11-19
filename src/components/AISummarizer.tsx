@@ -113,7 +113,7 @@ export default function AISummarizer({ clients, workItems, profile }: AISummariz
                 className="p-2 bg-[#282828] hover:bg-[#333333] border border-[#383838] rounded-lg shadow-sm text-slate-300 hover:text-white transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 cursor-pointer"
                 title="Copy to clipboard"
               >
-                {copied ? <span className="text-xs font-semibold text-[#4870aa] px-1">Copied!</span> : <Copy size={16} />}
+                {copied ? <span className="text-xs font-semibold text-text-primary px-1">Copied!</span> : <Copy size={16} />}
               </button>
             </div>
             <p className="text-[#f1f1f1] text-sm sm:text-base leading-relaxed bg-[#1e1e1e] p-5 rounded-xl border border-[#333333]">

@@ -207,24 +207,6 @@ button.btn-primary:hover,
   color: #ffffff !important;
 }
 
-/* Steel Blue Action Buttons per user request (#4870aa / #3b5e90) */
-button.btn-blue,
-.btn-blue,
-button.bg-blue-600,
-button.bg-indigo-600 {
-  background-color: #4870aa !important;
-  color: #ffffff !important;
-  border: none !important;
-}
-
-button.btn-blue:hover,
-.btn-blue:hover,
-button.bg-blue-600:hover,
-button.bg-indigo-600:hover {
-  background-color: #3b5e90 !important;
-  color: #ffffff !important;
-}
-
 /* Toggle switches and indicator knobs (exempt from button graphite overrides) */
 button.admin-toggle-switch,
 .admin-toggle-switch {
@@ -237,8 +219,8 @@ button.admin-toggle-switch,
 
 button.admin-toggle-switch.admin-toggle-active,
 .admin-toggle-switch.admin-toggle-active {
-  background-color: #4870aa !important;
-  border: 1px solid #3b5e90 !important;
+  background-color: #e1002d !important;
+  border: 1px solid #c70027 !important;
 }
 
 button.admin-toggle-switch.admin-toggle-inactive,
@@ -255,7 +237,7 @@ span.admin-toggle-knob {
 }
 
 .admin-indicator-active {
-  background-color: #4870aa !important;
+  background-color: #e1002d !important;
 }
 
 .admin-indicator-inactive {
@@ -296,14 +278,14 @@ button.bg-slate-950,
 td[data-edge] button,
 [data-edge] > button,
 .group[data-edge] button {
-  background-color: #4870aa !important;
+  background-color: #e1002d !important;
   color: #ffffff !important;
 }
 
 td[data-edge] button:hover,
 [data-edge] > button:hover,
 .group[data-edge] button:hover {
-  background-color: #3b5e90 !important;
+  background-color: #c70027 !important;
   color: #ffffff !important;
 }
 

@@ -77,7 +77,7 @@ export default function AdminEmailDetailModal({ email, onClose, formatDate }: Ad
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-1.5 bg-[#4870aa] hover:bg-[#3b5e90] text-white rounded-lg text-xs font-semibold cursor-pointer transition-colors border-0"
+            className="px-4 py-1.5 bg-surface-500 hover:bg-surface-400 text-text-primary border border-surface-400 rounded-lg text-xs font-semibold cursor-pointer transition-colors"
           >
             Close
           </button>

@@ -354,7 +354,7 @@ export default function BulkEditWorkModal({
                       placeholder="e.g. 2500"
                       value={rateValue}
                       onChange={(e) => setRateValue(e.target.value)}
-                      className="w-full pl-8 pr-3 py-2 text-xs rounded-lg border border-surface-400 bg-surface-800 text-text-primary placeholder:text-text-muted focus:border-[#4870aa] outline-none"
+                      className="w-full pl-8 pr-3 py-2 text-xs rounded-lg border border-surface-400 bg-surface-800 text-text-primary placeholder:text-text-muted focus:border-surface-300 outline-none"
                     />
                   </div>
                 )}
@@ -379,7 +379,7 @@ export default function BulkEditWorkModal({
                 <DateInput
                   value={dateValue}
                   onChange={(val) => setDateValue(val)}
-                  className="px-3 py-2 text-xs rounded-lg border border-surface-400 bg-surface-800 text-text-primary focus:border-[#4870aa] outline-none"
+                  className="px-3 py-2 text-xs rounded-lg border border-surface-400 bg-surface-800 text-text-primary focus:border-surface-300 outline-none"
                 />
               </div>
             )}
@@ -405,7 +405,7 @@ export default function BulkEditWorkModal({
                   step="1"
                   value={quantityValue}
                   onChange={(e) => setQuantityValue(e.target.value)}
-                  className="w-32 px-3 py-2 text-xs rounded-lg border border-surface-400 bg-surface-800 text-text-primary focus:border-[#4870aa] outline-none"
+                  className="w-32 px-3 py-2 text-xs rounded-lg border border-surface-400 bg-surface-800 text-text-primary focus:border-surface-300 outline-none"
                 />
               </div>
             )}
@@ -463,7 +463,7 @@ export default function BulkEditWorkModal({
                   placeholder={descriptionMode === 'replace' ? 'New description text...' : 'Text to append/prefix...'}
                   value={descriptionText}
                   onChange={(e) => setDescriptionText(e.target.value)}
-                  className="w-full px-3 py-2 text-xs rounded-lg border border-surface-400 bg-surface-800 text-text-primary placeholder:text-text-muted focus:border-[#4870aa] outline-none"
+                  className="w-full px-3 py-2 text-xs rounded-lg border border-surface-400 bg-surface-800 text-text-primary placeholder:text-text-muted focus:border-surface-300 outline-none"
                 />
               </div>
             )}
@@ -492,7 +492,7 @@ export default function BulkEditWorkModal({
                         setSelectedClientId(e.target.value);
                         setSelectedSubClientId('');
                       }}
-                      className="w-full p-2 text-xs rounded-lg border border-surface-400 bg-surface-800 text-text-primary focus:border-[#4870aa] outline-none"
+                      className="w-full p-2 text-xs rounded-lg border border-surface-400 bg-surface-800 text-text-primary focus:border-surface-300 outline-none"
                     >
                       <option value="">-- Choose Client --</option>
                       {clients.map(c => (
@@ -509,7 +509,7 @@ export default function BulkEditWorkModal({
                       <select
                         value={selectedSubClientId}
                         onChange={(e) => setSelectedSubClientId(e.target.value)}
-                        className="w-full p-2 text-xs rounded-lg border border-surface-400 bg-surface-800 text-text-primary focus:border-[#4870aa] outline-none"
+                        className="w-full p-2 text-xs rounded-lg border border-surface-400 bg-surface-800 text-text-primary focus:border-surface-300 outline-none"
                       >
                         <option value="">Direct Parent ({selectedClientObj.name})</option>
                         {selectedClientObj.subClients.map(sc => (
@@ -569,7 +569,7 @@ export default function BulkEditWorkModal({
                     placeholder="https://drive.google.com/... or post link"
                     value={videoUrlText}
                     onChange={(e) => setVideoUrlText(e.target.value)}
-                    className="w-full px-3 py-2 text-xs rounded-lg border border-surface-400 bg-surface-800 text-text-primary placeholder:text-text-muted focus:border-[#4870aa] outline-none font-mono"
+                    className="w-full px-3 py-2 text-xs rounded-lg border border-surface-400 bg-surface-800 text-text-primary placeholder:text-text-muted focus:border-surface-300 outline-none font-mono"
                   />
                 )}
               </div>
@@ -603,7 +603,7 @@ export default function BulkEditWorkModal({
               type="button"
               onClick={handleSubmit}
               disabled={isSubmitting || !anyFieldEnabled}
-              className="px-4 py-2 text-xs font-semibold bg-[#4870aa] hover:bg-[#3b5e90] disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-all shadow-xs flex items-center gap-1.5 cursor-pointer border-0"
+              className="px-4 py-2 text-xs font-semibold bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-all shadow-xs flex items-center gap-1.5 cursor-pointer border-0"
             >
               {isSubmitting ? (
                 <>
