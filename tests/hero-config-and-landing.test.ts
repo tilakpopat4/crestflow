@@ -121,6 +121,14 @@ describe('Hero Section & Landing Page CMS Suite', () => {
     assert.strictEqual(directMp4.type, 'direct');
     assert.strictEqual(directMp4.directUrl, 'https://assets.example.com/video.mp4');
 
+    const ytWithParams = parseVideoSource('https://www.youtube.com/watch?feature=shared&v=dQw4w9WgXcQ');
+    assert.strictEqual(ytWithParams.type, 'youtube');
+    assert.ok(ytWithParams.embedUrl.includes('dQw4w9WgXcQ'));
+
+    const dropbox = parseVideoSource('https://www.dropbox.com/s/sample/video.mp4?dl=0');
+    assert.strictEqual(dropbox.type, 'direct');
+    assert.ok(dropbox.directUrl.includes('raw=1'));
+
     const empty = parseVideoSource('');
     assert.strictEqual(empty.type, 'none');
   });
@@ -139,6 +147,7 @@ describe('Hero Section & Landing Page CMS Suite', () => {
     );
     assert.ok(signInSource.includes('parseVideoSource'), 'Must parse video source');
     assert.ok(signInSource.includes('fixed inset-0'), 'Background must be fixed inset-0 for full-screen edge-to-edge');
+    assert.ok(signInSource.includes('z-0'), 'Background must use z-0 so it is not hidden behind body background');
     assert.ok(signInSource.includes('transparent={true}'), 'Footer must be transparent so video flows underneath');
   });
 

@@ -132,8 +132,11 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
     </div>
   );
 
+  const isVideo = config.backgroundType === 'video' && Boolean(config.backgroundVideoUrl?.trim());
+  const isImage = config.backgroundType === 'image' && Boolean(config.backgroundImageUrl?.trim());
+
   const containerBgStyle = {
-    backgroundColor: config.backgroundType === 'color' ? (config.backgroundColor || '#333333') : '#121212',
+    backgroundColor: isVideo || isImage ? 'transparent' : (config.backgroundColor || '#333333'),
   };
 
   return (
@@ -142,21 +145,21 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
       className="min-h-screen w-full flex flex-col justify-between font-sans relative overflow-x-hidden select-none text-slate-100"
     >
       {/* Edge-to-Edge Fullscreen Background Media */}
-      {config.backgroundType === 'image' && config.backgroundImageUrl && (
-        <>
+      {isImage && (
+        <div className="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0 select-none">
           <div
-            className="fixed inset-0 w-full h-full bg-cover bg-center pointer-events-none -z-10 select-none"
+            className="absolute inset-0 w-full h-full bg-cover bg-center"
             style={{ backgroundImage: `url("${config.backgroundImageUrl}")` }}
           />
           <div
-            className="fixed inset-0 bg-black pointer-events-none -z-10"
+            className="absolute inset-0 bg-black pointer-events-none"
             style={{ opacity: config.backgroundOverlayOpacity }}
           />
-        </>
+        </div>
       )}
 
-      {config.backgroundType === 'video' && config.backgroundVideoUrl && (
-        <div className="fixed inset-0 w-full h-full overflow-hidden pointer-events-none -z-10 select-none bg-black">
+      {isVideo && (
+        <div className="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0 select-none bg-black">
           {parsedVideo.type === 'direct' && (
             <video
               ref={videoRef}
@@ -172,7 +175,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
           {(parsedVideo.type === 'youtube' || parsedVideo.type === 'vimeo' || parsedVideo.type === 'drive') && (
             <iframe
               title="CrestFlow Hero Background Video"
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[115vw] h-[115vh] min-w-[100vw] min-h-[100vh] pointer-events-none border-0"
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[125vw] h-[125vh] min-w-[100vw] min-h-[100vh] pointer-events-none border-0"
               src={parsedVideo.embedUrl}
               allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
               tabIndex={-1}
@@ -180,7 +183,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
           )}
 
           <div
-            className="absolute inset-0 bg-black pointer-events-none z-0"
+            className="absolute inset-0 bg-black pointer-events-none"
             style={{ opacity: config.backgroundOverlayOpacity }}
           />
         </div>

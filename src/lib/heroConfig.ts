@@ -30,9 +30,9 @@ export function parseVideoSource(rawUrl?: string | null): ParsedVideoSource {
     return { type: 'none', embedUrl: '', directUrl: '' };
   }
 
-  // 1. YouTube matching (watch?v=, youtu.be, shorts/, embed/)
+  // 1. YouTube matching (watch?v=, watch?...v=, youtu.be/, shorts/, embed/, live/)
   const ytMatch = trimmed.match(
-    /(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i
+    /(?:youtube\.com\/(?:watch\?.*v=|embed\/|v\/|shorts\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i
   );
   if (ytMatch && ytMatch[1]) {
     const id = ytMatch[1];
@@ -55,7 +55,7 @@ export function parseVideoSource(rawUrl?: string | null): ParsedVideoSource {
   }
 
   // 3. Google Drive preview (drive.google.com/file/d/<id>/...)
-  const gdriveMatch = trimmed.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i);
+  const gdriveMatch = trimmed.match(/(?:drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?id=))([a-zA-Z0-9_-]+)/i);
   if (gdriveMatch && gdriveMatch[1]) {
     const id = gdriveMatch[1];
     return {
@@ -63,6 +63,12 @@ export function parseVideoSource(rawUrl?: string | null): ParsedVideoSource {
       embedUrl: `https://drive.google.com/file/d/${id}/preview`,
       directUrl: trimmed,
     };
+  }
+
+  // 4. Dropbox direct conversion
+  if (trimmed.includes('dropbox.com')) {
+    const directUrl = trimmed.replace(/[?&]dl=0/, '').concat(trimmed.includes('?') ? '&raw=1' : '?raw=1');
+    return { type: 'direct', embedUrl: '', directUrl };
   }
 
   // 4. Direct video file (.mp4, .webm, .mov, etc.)
@@ -151,13 +157,14 @@ export function mergeHeroConfig(raw?: Partial<HeroConfig> | null): HeroConfig {
     subtitle: typeof raw.subtitle === 'string' && raw.subtitle.trim() ? raw.subtitle.trim() : DEFAULT_HERO_CONFIG.subtitle,
     benefits: cleanBenefits.length > 0 ? cleanBenefits : DEFAULT_HERO_CONFIG.benefits.map((b) => ({ ...b })),
     showWorkflowIllustration: raw.showWorkflowIllustration !== false,
-    backgroundType: validTypes.includes(raw.backgroundType as any)
-      ? (raw.backgroundType as HeroBackgroundType)
-      : raw.backgroundVideoUrl && raw.backgroundVideoUrl.trim()
-      ? 'video'
-      : raw.backgroundImageUrl && raw.backgroundImageUrl.trim()
-      ? 'image'
-      : 'color',
+    backgroundType:
+      raw.backgroundType === 'video' || (Boolean(raw.backgroundVideoUrl?.trim()) && raw.backgroundType !== 'image')
+        ? 'video'
+        : raw.backgroundType === 'image' || (Boolean(raw.backgroundImageUrl?.trim()) && raw.backgroundType !== 'video')
+        ? 'image'
+        : validTypes.includes(raw.backgroundType as any)
+        ? (raw.backgroundType as HeroBackgroundType)
+        : 'color',
     backgroundColor: typeof raw.backgroundColor === 'string' && raw.backgroundColor.trim() ? raw.backgroundColor.trim() : '#333333',
     backgroundImageUrl: typeof raw.backgroundImageUrl === 'string' ? raw.backgroundImageUrl.trim() : '',
     backgroundVideoUrl: typeof raw.backgroundVideoUrl === 'string' ? raw.backgroundVideoUrl.trim() : '',
@@ -188,26 +195,6 @@ export function getHeroConfigSync(): HeroConfig {
  */
 export async function saveHeroConfig(config: HeroConfig): Promise<HeroConfig> {
   const normalized = mergeHeroConfig(config);
-  const currentUser = auth.currentUser;
-  if (!currentUser) throw new Error('You must be signed in as an administrator to save hero settings.');
-
-  const token = await currentUser.getIdToken(true);
-  const res = await fetch('/api/admin/settings', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      settingId: 'hero_config',
-      data: normalized,
-    }),
-  });
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error((err as any)?.error || `Failed to save hero config (${res.status})`);
-  }
 
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
@@ -215,6 +202,29 @@ export async function saveHeroConfig(config: HeroConfig): Promise<HeroConfig> {
 
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: { config: normalized } }));
+  }
+
+  const currentUser = auth.currentUser;
+  if (!currentUser) return normalized;
+
+  try {
+    const token = await currentUser.getIdToken(true);
+    const res = await fetch('/api/admin/settings', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        settingId: 'hero_config',
+        data: normalized,
+      }),
+    });
+    if (!res.ok) {
+      console.warn(`[heroConfig] Server save returned ${res.status}`);
+    }
+  } catch (err) {
+    console.warn('[heroConfig] Server save error:', err);
   }
 
   return normalized;
