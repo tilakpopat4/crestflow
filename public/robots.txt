@@ -3,8 +3,6 @@
 User-agent: *
 Allow: /
 Allow: /pricing
-Allow: /work
-Allow: /reviews
 Allow: /contact
 Allow: /privacy
 Allow: /terms
@@ -16,5 +14,11 @@ Allow: /onboarding/
 Disallow: /admin
 Disallow: /api/
 Disallow: /dashboard
+Disallow: /clients
+Disallow: /work
+Disallow: /invoices
+Disallow: /reviews
+Disallow: /profile
+Disallow: /billing
 
 Sitemap: https://crestflow.space/sitemap.xml

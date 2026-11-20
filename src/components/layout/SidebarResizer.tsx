@@ -62,8 +62,8 @@ export const SidebarResizer: React.FC<SidebarResizerProps> = ({
         className={clsx(
           "w-0.5 h-full mx-auto transition-colors duration-150",
           isResizing
-            ? "bg-indigo-500 w-1"
-            : "bg-transparent group-hover:bg-slate-300 group-focus-visible:bg-indigo-500"
+            ? "bg-[#282828] w-1"
+            : "bg-transparent group-hover:bg-slate-300 dark:group-hover:bg-slate-700 group-focus-visible:bg-[#282828]"
         )}
       />
     </div>

@@ -68,7 +68,7 @@ export const ClientPortalOverview: React.FC<ClientPortalOverviewProps> = ({
 
         {freelancerProfile && (
           <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3 rounded-lg">
-            <div className="w-9 h-9 bg-indigo-600 text-white font-bold rounded-lg flex items-center justify-center text-sm shrink-0">
+            <div className="w-9 h-9 bg-[#282828] text-white font-bold rounded-lg flex items-center justify-center text-sm shrink-0">
               {freelancerProfile.name.charAt(0)}
             </div>
             <div className="text-xs">

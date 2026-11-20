@@ -55,7 +55,7 @@ export default function AdminCampaignPreview({
 
         {actionLabel && (
           <div className="pt-2">
-            <span className="inline-block px-4 py-2 bg-indigo-600 text-white rounded text-xs font-semibold cursor-default">
+            <span className="inline-block px-4 py-2 bg-[#282828] text-white rounded-lg text-xs font-semibold cursor-default">
               {actionLabel}
             </span>
             {actionUrl && (

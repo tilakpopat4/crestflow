@@ -87,7 +87,7 @@ export default class ErrorBoundary extends Component<Props, State> {
               <button
                 type="button"
                 onClick={() => window.location.reload()}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-lg text-xs font-semibold transition-colors duration-120 cursor-pointer border-0"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#282828] hover:bg-[#383838] text-white rounded-lg text-xs font-semibold transition-colors duration-120 cursor-pointer border-0"
               >
                 <RefreshCw size={13} />
                 Refresh Now
@@ -115,7 +115,7 @@ export default class ErrorBoundary extends Component<Props, State> {
               <button
                 type="button"
                 onClick={this.handleReset}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-lg text-xs font-medium transition-colors duration-120 cursor-pointer border-none"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#282828] hover:bg-[#383838] text-white rounded-lg text-xs font-medium transition-colors duration-120 cursor-pointer border-none"
               >
                 <RefreshCw size={13} />
                 Try Again

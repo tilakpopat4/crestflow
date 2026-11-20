@@ -69,7 +69,7 @@ export const AdminSitemapManager: React.FC = () => {
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 sm:p-6 shadow-2xs space-y-2">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <span className="p-2 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400">
+            <span className="p-2 rounded-lg bg-surface-600 border border-surface-400 text-text-primary">
               <Compass size={20} />
             </span>
             <div>
@@ -151,7 +151,7 @@ export const AdminSitemapManager: React.FC = () => {
                 onClick={() => setSelectedCategory(cat.id as any)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer border-0 whitespace-nowrap ${
                   isActive
-                    ? 'bg-indigo-600 text-white'
+                    ? 'bg-[#282828] text-white'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 hover:bg-slate-200 dark:hover:bg-slate-700'
                 }`}
               >
@@ -183,7 +183,7 @@ export const AdminSitemapManager: React.FC = () => {
                         page.category === 'public'
                           ? 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                           : page.category === 'client'
-                          ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400'
+                          ? 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                           : page.category === 'workspace'
                           ? 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                           : 'bg-slate-900 text-white dark:bg-slate-700'

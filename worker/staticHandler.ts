@@ -132,6 +132,33 @@ export async function handleStaticAsset(request: Request, env: Env): Promise<Res
       }
     }
 
+    // SSR Canonical URL injection for public marketing & legal routes
+    const cleanPath = url.pathname.toLowerCase().replace(/\/+$/, '') || '/';
+    const publicSupportingRoutes = new Set(['/pricing', '/terms', '/privacy', '/refund', '/contact']);
+    if (publicSupportingRoutes.has(cleanPath)) {
+      try {
+        const rawHtml = await response.text();
+        const fullCanonical = `https://crestflow.space${cleanPath}`;
+        const updatedHtml = rawHtml
+          .replace(
+            '<link rel="canonical" href="https://crestflow.space/" />',
+            `<link rel="canonical" href="${fullCanonical}" />`
+          )
+          .replace(
+            '<meta property="og:url" content="https://crestflow.space/" />',
+            `<meta property="og:url" content="${fullCanonical}" />`
+          );
+        headers.set('Content-Type', 'text/html; charset=utf-8');
+        return new Response(updatedHtml, {
+          status: 200,
+          statusText: 'OK',
+          headers,
+        });
+      } catch (err) {
+        console.warn('[handleStaticAsset] Canonical injection failed:', err);
+      }
+    }
+
     return new Response(response.body, {
       status: 200,
       statusText: 'OK',

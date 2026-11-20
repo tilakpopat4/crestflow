@@ -78,7 +78,7 @@ export const ClientPortalWorkLog: React.FC<ClientPortalWorkLogProps> = ({
               onClick={() => onStatusFilterChange(status)}
               className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer flex-1 sm:flex-initial min-h-[44px] flex items-center justify-center ${
                 statusFilter === status
-                  ? 'bg-indigo-600 text-white'
+                  ? 'bg-[#282828] text-white'
                   : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300'
               }`}
             >
