@@ -157,10 +157,17 @@
 
 /* Eliminate white background anywhere across the application */
 body,
-main,
+main:not(.bg-transparent):not([class*="bg-transparent"]),
 header,
 .bg-slate-50 {
   background-color: #333333 !important;
+}
+
+main.bg-transparent,
+main.\!bg-transparent,
+footer.bg-transparent,
+footer.\!bg-transparent {
+  background-color: transparent !important;
 }
 
 /* Sidebar navigation panel: clean dark surface per GEMINI.md */
@@ -189,7 +196,7 @@ footer span {
   border-color: transparent !important;
 }
 
-footer {
+footer:not(.bg-transparent):not([class*="bg-transparent"]) {
   background-color: #282828 !important;
 }
 

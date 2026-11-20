@@ -163,7 +163,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
   return (
     <div
       style={containerBgStyle}
-      className="min-h-screen w-full flex flex-col justify-between font-sans relative overflow-x-hidden select-none text-slate-100"
+      className={`min-h-screen w-full flex flex-col justify-between font-sans relative overflow-x-hidden select-none text-slate-100 ${isVideo || isImage ? '!bg-transparent' : ''}`}
     >
       {/* Edge-to-Edge Fullscreen Background Media */}
       {isImage && (
@@ -226,7 +226,10 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
       )}
 
       {/* Main Hero & Placement Section (fullscreen-responsive) */}
-      <main className="flex-1 flex items-center justify-center px-4 py-8 sm:px-8 md:px-12 lg:px-16 xl:px-20 lg:py-16 relative z-10 max-w-7xl 2xl:max-w-[1440px] mx-auto w-full">
+      <main
+        style={{ backgroundColor: 'transparent' }}
+        className="!bg-transparent flex-1 flex items-center justify-center px-4 py-8 sm:px-8 md:px-12 lg:px-16 xl:px-20 lg:py-16 relative z-10 max-w-7xl 2xl:max-w-[1440px] mx-auto w-full"
+      >
         <motion.div
           initial={{ opacity: shouldReduceMotion ? 1 : 0, y: shouldReduceMotion ? 0 : 8 }}
           animate={{ opacity: 1, y: 0 }}
