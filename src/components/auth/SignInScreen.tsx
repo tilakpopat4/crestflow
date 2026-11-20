@@ -25,6 +25,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
   const shouldReduceMotion = useReducedMotion();
   const { config } = useHeroConfig();
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [videoFailed, setVideoFailed] = useState(false);
   const [isMobileScreen, setIsMobileScreen] = useState(false);
 
@@ -33,6 +34,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
   const parsedVideo = useMemo(() => parseVideoSource(config.backgroundVideoUrl), [config.backgroundVideoUrl]);
   const isVideoConfigured = config.backgroundType === 'video' && Boolean(config.backgroundVideoUrl?.trim());
   const canPlayVideo = isVideoConfigured && config.videoEnabled !== false && !isReducedMotion && !isDataSaver && (!isMobileScreen || config.showOnMobile === true) && !videoFailed;
+  const effectivePosterUrl = config.posterUrl || (parsedVideo.type === 'youtube' ? parsedVideo.posterUrl : '');
 
   useEffect(() => {
     const checkMobile = () => setIsMobileScreen(window.innerWidth < 768);
@@ -56,11 +58,16 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
 
   useEffect(() => {
     const handleVisibility = () => {
-      if (!videoRef.current) return;
       if (document.hidden) {
-        videoRef.current.pause();
+        if (videoRef.current) videoRef.current.pause();
+        if (iframeRef.current?.contentWindow) {
+          iframeRef.current.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+        }
       } else if (canPlayVideo) {
-        videoRef.current.play().catch(() => {});
+        if (videoRef.current) videoRef.current.play().catch(() => {});
+        if (iframeRef.current?.contentWindow) {
+          iframeRef.current.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+        }
       }
     };
     document.addEventListener('visibilitychange', handleVisibility);
@@ -182,12 +189,12 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
       {isVideo && (
         <div className="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0 select-none bg-[#1E1E1E]">
           {/* Poster or solid fallback displayed first / when video paused / mobile / reduced motion */}
-          {(!canPlayVideo || config.posterUrl) && (
+          {(!canPlayVideo || effectivePosterUrl) && (
             <div
               className={`absolute inset-0 w-full h-full bg-cover bg-center transition-opacity duration-300 ${canPlayVideo ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
               style={{
-                backgroundImage: config.posterUrl ? `url("${config.posterUrl}")` : undefined,
-                backgroundColor: !config.posterUrl ? (config.backgroundColor || '#1E1E1E') : undefined,
+                backgroundImage: effectivePosterUrl ? `url("${effectivePosterUrl}")` : undefined,
+                backgroundColor: !effectivePosterUrl ? (config.backgroundColor || '#1E1E1E') : undefined,
               }}
             />
           )}
@@ -201,7 +208,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
               muted
               playsInline
               preload="metadata"
-              poster={config.posterUrl || undefined}
+              poster={effectivePosterUrl || undefined}
               onError={() => setVideoFailed(true)}
               src={parsedVideo.directUrl}
             />
@@ -209,8 +216,16 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
 
           {canPlayVideo && (parsedVideo.type === 'youtube' || parsedVideo.type === 'vimeo' || parsedVideo.type === 'drive') && (
             <iframe
+              ref={iframeRef}
               title="CrestFlow Hero Background Video"
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[125vw] h-[125vh] min-w-[100vw] min-h-[100vh] pointer-events-none border-0"
+              className="absolute top-1/2 left-1/2 pointer-events-none border-0"
+              style={{
+                width: '100vw',
+                height: '56.25vw',
+                minHeight: '100vh',
+                minWidth: '177.78vh',
+                transform: 'translate(-50%, -50%) scale(1.35)',
+              }}
               src={parsedVideo.embedUrl}
               allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
               tabIndex={-1}

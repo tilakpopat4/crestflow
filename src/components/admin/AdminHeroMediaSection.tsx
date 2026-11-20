@@ -152,50 +152,9 @@ export const AdminHeroMediaSection: React.FC<AdminHeroMediaSectionProps> = ({
         </div>
       )}
 
-      {/* Custom Video Background Controls & Cloudflare R2 Upload */}
+      {/* Custom Video Background Controls & YouTube / R2 Management */}
       {draft.backgroundType === 'video' && (
-        <div className="space-y-4">
-          <AdminHeroVideoManager draft={draft} setDraft={setDraft} />
-
-          <div className="pt-2 border-t border-[#333333]">
-            <div className="flex justify-between text-xs text-slate-400 mb-1">
-              <span>Dark Scrim Contrast (#1A1A1A)</span>
-              <span className="font-mono">{Math.round(draft.backgroundOverlayOpacity * 100)}%</span>
-            </div>
-            <input
-              type="range"
-              min="0.1"
-              max="0.95"
-              step="0.05"
-              value={draft.backgroundOverlayOpacity}
-              onChange={(e) => setDraft((prev) => ({ ...prev, backgroundOverlayOpacity: parseFloat(e.target.value) }))}
-              className="w-full accent-accent cursor-pointer"
-            />
-            <p className="text-[11px] text-[#aaaaaa] mt-1">
-              Maintains $\ge 4.5:1$ WCAG contrast ratio for all text elements over video frames.
-            </p>
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">
-              Optional External Video / Stream URL
-            </label>
-            <input
-              type="url"
-              value={draft.backgroundVideoUrl}
-              onChange={(e) => {
-                const val = e.target.value;
-                setDraft((prev) => ({
-                  ...prev,
-                  backgroundVideoUrl: val,
-                  ...(val.trim() && prev.backgroundType !== 'video' ? { backgroundType: 'video' } : {}),
-                }));
-              }}
-              className="w-full bg-[#181818] border border-[#383838] rounded-lg px-3 py-2 text-xs text-white font-mono"
-              placeholder="/api/media/landing-video or YouTube/Vimeo URL"
-            />
-          </div>
-        </div>
+        <AdminHeroVideoManager draft={draft} setDraft={setDraft} />
       )}
     </div>
   );

@@ -94,8 +94,18 @@ describe('Hero Section & Landing Page CMS Suite', () => {
   test('6. parseVideoSource handles YouTube, Vimeo, Google Drive, and direct video files', () => {
     const ytWatch = parseVideoSource('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
     assert.strictEqual(ytWatch.type, 'youtube');
+    assert.strictEqual(ytWatch.videoId, 'dQw4w9WgXcQ');
     assert.ok(ytWatch.embedUrl.includes('dQw4w9WgXcQ'));
     assert.ok(ytWatch.embedUrl.includes('autoplay=1'));
+    assert.ok(ytWatch.posterUrl?.includes('dQw4w9WgXcQ'));
+
+    const ytShorts = parseVideoSource('https://www.youtube.com/shorts/dQw4w9WgXcQ');
+    assert.strictEqual(ytShorts.type, 'youtube');
+    assert.strictEqual(ytShorts.videoId, 'dQw4w9WgXcQ');
+
+    const ytDirectId = parseVideoSource('dQw4w9WgXcQ');
+    assert.strictEqual(ytDirectId.type, 'youtube');
+    assert.strictEqual(ytDirectId.videoId, 'dQw4w9WgXcQ');
 
     const directMp4 = parseVideoSource('https://assets.example.com/video.mp4');
     assert.strictEqual(directMp4.type, 'direct');

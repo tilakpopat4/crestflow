@@ -15,6 +15,8 @@ export interface ParsedVideoSource {
   type: ParsedVideoType;
   embedUrl: string;
   directUrl: string;
+  videoId?: string;
+  posterUrl?: string;
 }
 
 export function parseVideoSource(rawUrl?: string | null): ParsedVideoSource {
@@ -23,26 +25,27 @@ export function parseVideoSource(rawUrl?: string | null): ParsedVideoSource {
   if (!trimmed) return { type: 'none', embedUrl: '', directUrl: '' };
 
   const yt = trimmed.match(/(?:youtube\.com\/(?:watch\?.*v=|embed\/|v\/|shorts\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i);
-  if (yt?.[1]) {
+  const ytDirectId = /^[a-zA-Z0-9_-]{11}$/.test(trimmed) ? trimmed : null;
+  const ytId = yt?.[1] || ytDirectId;
+
+  if (ytId) {
     return {
       type: 'youtube',
-      embedUrl: `https://www.youtube-nocookie.com/embed/${yt[1]}?autoplay=1&mute=1&controls=0&loop=1&playlist=${yt[1]}&playsinline=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&modestbranding=1`,
-      directUrl: trimmed,
+      videoId: ytId,
+      embedUrl: `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&mute=1&muted=1&controls=0&loop=1&playlist=${ytId}&playsinline=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&modestbranding=1&enablejsapi=1`,
+      directUrl: `https://www.youtube.com/watch?v=${ytId}`,
+      posterUrl: `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`,
     };
   }
 
   const vimeo = trimmed.match(/(?:vimeo\.com\/(?:video\/)?)([0-9]+)/i);
   if (vimeo?.[1]) {
-    return {
-      type: 'vimeo',
-      embedUrl: `https://player.vimeo.com/video/${vimeo[1]}?background=1&autoplay=1&loop=1&muted=1&byline=0&title=0`,
-      directUrl: trimmed,
-    };
+    return { type: 'vimeo', videoId: vimeo[1], embedUrl: `https://player.vimeo.com/video/${vimeo[1]}?background=1&autoplay=1&loop=1&muted=1&byline=0&title=0`, directUrl: trimmed };
   }
 
   const gdrive = trimmed.match(/(?:drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?id=))([a-zA-Z0-9_-]+)/i);
   if (gdrive?.[1]) {
-    return { type: 'drive', embedUrl: `https://drive.google.com/file/d/${gdrive[1]}/preview`, directUrl: trimmed };
+    return { type: 'drive', videoId: gdrive[1], embedUrl: `https://drive.google.com/file/d/${gdrive[1]}/preview`, directUrl: trimmed };
   }
 
   if (trimmed.includes('dropbox.com')) {
