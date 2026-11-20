@@ -60,9 +60,6 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
     const handleVisibility = () => {
       if (document.hidden) {
         if (videoRef.current) videoRef.current.pause();
-        if (iframeRef.current?.contentWindow) {
-          iframeRef.current.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
-        }
       } else if (canPlayVideo) {
         if (videoRef.current) videoRef.current.play().catch(() => {});
         if (iframeRef.current?.contentWindow) {
@@ -78,14 +75,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
     return (
       <div className="min-h-screen w-full flex flex-col justify-between font-sans relative select-none text-slate-100 bg-[#333333]">
         <main className="flex-1 flex items-center justify-center p-4 sm:p-6 relative z-10 max-w-md mx-auto w-full">
-          <SignInCard
-            isAdminRoute={isAdminRoute}
-            isSigningIn={isSigningIn}
-            onLogin={onLogin}
-            onEmailSignUp={onEmailSignUp}
-            onEmailSignIn={onEmailSignIn}
-            onSupportingNavigate={onSupportingNavigate}
-          />
+          <SignInCard isAdminRoute={isAdminRoute} isSigningIn={isSigningIn} onLogin={onLogin} onEmailSignUp={onEmailSignUp} onEmailSignIn={onEmailSignIn} onSupportingNavigate={onSupportingNavigate} />
         </main>
         <Footer onNavigate={onSupportingNavigate} />
       </div>
@@ -93,19 +83,9 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
   }
 
   const renderHeadline = () => {
-    if (!config.headlineHighlight || !config.headline.includes(config.headlineHighlight)) {
-      return config.headline;
-    }
-    const idx = config.headline.indexOf(config.headlineHighlight);
-    const before = config.headline.slice(0, idx);
-    const after = config.headline.slice(idx + config.headlineHighlight.length);
-    return (
-      <>
-        {before}
-        <span className="text-accent">{config.headlineHighlight}</span>
-        {after}
-      </>
-    );
+    if (!config.headlineHighlight || !config.headline.includes(config.headlineHighlight)) return config.headline;
+    const [before, after] = config.headline.split(config.headlineHighlight);
+    return <>{before}<span className="text-accent">{config.headlineHighlight}</span>{after}</>;
   };
 
   const heroContent = (
@@ -187,7 +167,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
       )}
 
       {isVideo && (
-        <div className="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0 select-none bg-[#1E1E1E]">
+        <div className="fixed inset-0 w-full h-full overflow-hidden z-0 select-none bg-[#1E1E1E]">
           {/* Poster or solid fallback displayed first / when video paused / mobile / reduced motion */}
           {(!canPlayVideo || effectivePosterUrl) && (
             <div
@@ -202,7 +182,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
           {canPlayVideo && parsedVideo.type === 'direct' && (
             <video
               ref={videoRef}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 min-w-full min-h-full w-auto h-auto object-cover max-w-none"
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 min-w-full min-h-full w-auto h-auto object-cover max-w-none pointer-events-none"
               autoPlay
               loop
               muted
@@ -218,7 +198,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
             <iframe
               ref={iframeRef}
               title="CrestFlow Hero Background Video"
-              className="absolute top-1/2 left-1/2 pointer-events-none border-0"
+              className="absolute top-1/2 left-1/2 pointer-events-none border-0 select-none"
               style={{
                 width: '100vw',
                 height: '56.25vw',
@@ -229,13 +209,33 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
               src={parsedVideo.embedUrl}
               allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
               tabIndex={-1}
+              onLoad={() => {
+                if (iframeRef.current?.contentWindow) {
+                  iframeRef.current.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+                }
+              }}
             />
           )}
 
+          {/* Interaction blocker shield: prevents any mouse clicks or touch taps from reaching the video player */}
+          <div
+            className="absolute inset-0 z-10 pointer-events-auto select-none bg-transparent"
+            aria-hidden="true"
+            onContextMenu={(e) => e.preventDefault()}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+            onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+            onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); }}
+          />
+
           {/* Dark scrim between video and content using surface-900 (#1A1A1A) */}
           <div
-            className="absolute inset-0 bg-[#1A1A1A] pointer-events-none"
+            className="absolute inset-0 z-20 bg-[#1A1A1A] pointer-events-auto"
             style={{ opacity: config.backgroundOverlayOpacity || 0.65 }}
+            aria-hidden="true"
+            onContextMenu={(e) => e.preventDefault()}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+            onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+            onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); }}
           />
         </div>
       )}

@@ -32,7 +32,7 @@ export function parseVideoSource(rawUrl?: string | null): ParsedVideoSource {
     return {
       type: 'youtube',
       videoId: ytId,
-      embedUrl: `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&mute=1&muted=1&controls=0&loop=1&playlist=${ytId}&playsinline=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&modestbranding=1&enablejsapi=1`,
+      embedUrl: `https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&muted=1&controls=0&loop=1&playlist=${ytId}&playsinline=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&modestbranding=1&enablejsapi=1&fs=0&autohide=1`,
       directUrl: `https://www.youtube.com/watch?v=${ytId}`,
       posterUrl: `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`,
     };
