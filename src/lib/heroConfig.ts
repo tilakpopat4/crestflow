@@ -9,6 +9,69 @@ export interface HeroBenefit {
 
 export type HeroBackgroundType = 'color' | 'image' | 'video';
 export type HeroCardAlignment = 'right' | 'left' | 'center';
+export type ParsedVideoType = 'direct' | 'youtube' | 'vimeo' | 'drive' | 'none';
+
+export interface ParsedVideoSource {
+  type: ParsedVideoType;
+  embedUrl: string;
+  directUrl: string;
+}
+
+/**
+ * Parses user-provided video URLs (YouTube, Vimeo, Google Drive, direct MP4/WebM)
+ * into an optimized embed URL for iframe or direct streaming tag.
+ */
+export function parseVideoSource(rawUrl?: string | null): ParsedVideoSource {
+  if (!rawUrl || typeof rawUrl !== 'string') {
+    return { type: 'none', embedUrl: '', directUrl: '' };
+  }
+  const trimmed = rawUrl.trim();
+  if (!trimmed) {
+    return { type: 'none', embedUrl: '', directUrl: '' };
+  }
+
+  // 1. YouTube matching (watch?v=, youtu.be, shorts/, embed/)
+  const ytMatch = trimmed.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i
+  );
+  if (ytMatch && ytMatch[1]) {
+    const id = ytMatch[1];
+    return {
+      type: 'youtube',
+      embedUrl: `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=1&controls=0&loop=1&playlist=${id}&playsinline=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&modestbranding=1`,
+      directUrl: trimmed,
+    };
+  }
+
+  // 2. Vimeo matching (vimeo.com/<id> or player.vimeo.com/video/<id>)
+  const vimeoMatch = trimmed.match(/(?:vimeo\.com\/(?:video\/)?)([0-9]+)/i);
+  if (vimeoMatch && vimeoMatch[1]) {
+    const id = vimeoMatch[1];
+    return {
+      type: 'vimeo',
+      embedUrl: `https://player.vimeo.com/video/${id}?background=1&autoplay=1&loop=1&muted=1&byline=0&title=0`,
+      directUrl: trimmed,
+    };
+  }
+
+  // 3. Google Drive preview (drive.google.com/file/d/<id>/...)
+  const gdriveMatch = trimmed.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i);
+  if (gdriveMatch && gdriveMatch[1]) {
+    const id = gdriveMatch[1];
+    return {
+      type: 'drive',
+      embedUrl: `https://drive.google.com/file/d/${id}/preview`,
+      directUrl: trimmed,
+    };
+  }
+
+  // 4. Direct video file (.mp4, .webm, .mov, etc.)
+  return {
+    type: 'direct',
+    embedUrl: '',
+    directUrl: trimmed,
+  };
+}
 
 export interface HeroConfig {
   headline: string;
@@ -88,7 +151,13 @@ export function mergeHeroConfig(raw?: Partial<HeroConfig> | null): HeroConfig {
     subtitle: typeof raw.subtitle === 'string' && raw.subtitle.trim() ? raw.subtitle.trim() : DEFAULT_HERO_CONFIG.subtitle,
     benefits: cleanBenefits.length > 0 ? cleanBenefits : DEFAULT_HERO_CONFIG.benefits.map((b) => ({ ...b })),
     showWorkflowIllustration: raw.showWorkflowIllustration !== false,
-    backgroundType: validTypes.includes(raw.backgroundType as any) ? (raw.backgroundType as HeroBackgroundType) : 'color',
+    backgroundType: validTypes.includes(raw.backgroundType as any)
+      ? (raw.backgroundType as HeroBackgroundType)
+      : raw.backgroundVideoUrl && raw.backgroundVideoUrl.trim()
+      ? 'video'
+      : raw.backgroundImageUrl && raw.backgroundImageUrl.trim()
+      ? 'image'
+      : 'color',
     backgroundColor: typeof raw.backgroundColor === 'string' && raw.backgroundColor.trim() ? raw.backgroundColor.trim() : '#333333',
     backgroundImageUrl: typeof raw.backgroundImageUrl === 'string' ? raw.backgroundImageUrl.trim() : '',
     backgroundVideoUrl: typeof raw.backgroundVideoUrl === 'string' ? raw.backgroundVideoUrl.trim() : '',

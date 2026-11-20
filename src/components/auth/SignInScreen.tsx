@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { SignInCard } from './SignInCard';
 import { WorkflowIllustration } from './WorkflowIllustration';
 import Footer from '../Footer';
-import { useHeroConfig } from '../../lib/heroConfig';
+import { useHeroConfig, parseVideoSource } from '../../lib/heroConfig';
 
 interface SignInScreenProps {
   isAdminRoute: boolean;
@@ -29,6 +29,21 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
 }) => {
   const shouldReduceMotion = useReducedMotion();
   const { config } = useHeroConfig();
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const parsedVideo = useMemo(() => parseVideoSource(config.backgroundVideoUrl), [config.backgroundVideoUrl]);
+
+  useEffect(() => {
+    if (config.backgroundType === 'video' && parsedVideo.type === 'direct' && videoRef.current) {
+      const v = videoRef.current;
+      v.muted = true;
+      v.defaultMuted = true;
+      v.playsInline = true;
+      v.play().catch(() => {
+        v.muted = true;
+        v.play().catch(() => {});
+      });
+    }
+  }, [config.backgroundType, parsedVideo.type, parsedVideo.directUrl]);
 
   // If admin route, display the focused admin sign-in card
   if (isAdminRoute) {
@@ -126,35 +141,49 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
       style={containerBgStyle}
       className="min-h-screen w-full flex flex-col justify-between font-sans relative overflow-x-hidden select-none text-slate-100"
     >
-      {/* Background Media (Image or Video) with Dimmer Overlay */}
+      {/* Edge-to-Edge Fullscreen Background Media */}
       {config.backgroundType === 'image' && config.backgroundImageUrl && (
         <>
           <div
-            className="absolute inset-0 bg-cover bg-center pointer-events-none z-0"
+            className="fixed inset-0 w-full h-full bg-cover bg-center pointer-events-none -z-10 select-none"
             style={{ backgroundImage: `url("${config.backgroundImageUrl}")` }}
           />
           <div
-            className="absolute inset-0 bg-black pointer-events-none z-0"
+            className="fixed inset-0 bg-black pointer-events-none -z-10"
             style={{ opacity: config.backgroundOverlayOpacity }}
           />
         </>
       )}
 
       {config.backgroundType === 'video' && config.backgroundVideoUrl && (
-        <>
-          <video
-            className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
-            autoPlay
-            loop
-            muted
-            playsInline
-            src={config.backgroundVideoUrl}
-          />
+        <div className="fixed inset-0 w-full h-full overflow-hidden pointer-events-none -z-10 select-none bg-black">
+          {parsedVideo.type === 'direct' && (
+            <video
+              ref={videoRef}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 min-w-full min-h-full w-auto h-auto object-cover max-w-none"
+              autoPlay
+              loop
+              muted
+              playsInline
+              src={parsedVideo.directUrl}
+            />
+          )}
+
+          {(parsedVideo.type === 'youtube' || parsedVideo.type === 'vimeo' || parsedVideo.type === 'drive') && (
+            <iframe
+              title="CrestFlow Hero Background Video"
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[115vw] h-[115vh] min-w-[100vw] min-h-[100vh] pointer-events-none border-0"
+              src={parsedVideo.embedUrl}
+              allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+              tabIndex={-1}
+            />
+          )}
+
           <div
             className="absolute inset-0 bg-black pointer-events-none z-0"
             style={{ opacity: config.backgroundOverlayOpacity }}
           />
-        </>
+        </div>
       )}
 
       {/* Main Hero & Placement Section (fullscreen-responsive) */}
@@ -194,9 +223,14 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
         </motion.div>
       </main>
 
-      {/* Full Website Footer */}
-      <div className="relative z-10">
-        <Footer onNavigate={onSupportingNavigate} />
+      {/* Full Website Footer - Minimal transparent variant so background media flows under */}
+      <div className="relative z-10 w-full mt-auto">
+        <Footer
+          variant="minimal"
+          transparent={true}
+          onNavigate={onSupportingNavigate}
+          className="!bg-transparent border-t border-white/10"
+        />
       </div>
     </div>
   );

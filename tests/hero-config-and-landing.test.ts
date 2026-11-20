@@ -5,6 +5,7 @@ import path from 'node:path';
 import {
   DEFAULT_HERO_CONFIG,
   mergeHeroConfig,
+  parseVideoSource,
   HeroConfig,
 } from '../src/lib/heroConfig';
 
@@ -94,7 +95,54 @@ describe('Hero Section & Landing Page CMS Suite', () => {
     assert.ok(workerIndexSource.includes('/api/hero-config'), 'Worker index must route /api/hero-config');
   });
 
-  test('6. All modified and created files comply with AGENTS.md 300-line max limit', () => {
+  test('6. parseVideoSource handles YouTube, Vimeo, Google Drive, and direct video files', () => {
+    const ytWatch = parseVideoSource('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+    assert.strictEqual(ytWatch.type, 'youtube');
+    assert.ok(ytWatch.embedUrl.includes('dQw4w9WgXcQ'));
+    assert.ok(ytWatch.embedUrl.includes('autoplay=1'));
+
+    const ytShort = parseVideoSource('https://youtube.com/shorts/dQw4w9WgXcQ?feature=share');
+    assert.strictEqual(ytShort.type, 'youtube');
+    assert.ok(ytShort.embedUrl.includes('dQw4w9WgXcQ'));
+
+    const ytShortUrl = parseVideoSource('https://youtu.be/dQw4w9WgXcQ');
+    assert.strictEqual(ytShortUrl.type, 'youtube');
+    assert.ok(ytShortUrl.embedUrl.includes('dQw4w9WgXcQ'));
+
+    const vimeo = parseVideoSource('https://vimeo.com/76979871');
+    assert.strictEqual(vimeo.type, 'vimeo');
+    assert.ok(vimeo.embedUrl.includes('76979871'));
+
+    const gdrive = parseVideoSource('https://drive.google.com/file/d/1A2B3C4D5E/view?usp=sharing');
+    assert.strictEqual(gdrive.type, 'drive');
+    assert.strictEqual(gdrive.embedUrl, 'https://drive.google.com/file/d/1A2B3C4D5E/preview');
+
+    const directMp4 = parseVideoSource('https://assets.example.com/video.mp4');
+    assert.strictEqual(directMp4.type, 'direct');
+    assert.strictEqual(directMp4.directUrl, 'https://assets.example.com/video.mp4');
+
+    const empty = parseVideoSource('');
+    assert.strictEqual(empty.type, 'none');
+  });
+
+  test('7. mergeHeroConfig auto-infers video background when backgroundVideoUrl is provided', () => {
+    const inferred = mergeHeroConfig({
+      backgroundVideoUrl: 'https://youtube.com/watch?v=dQw4w9WgXcQ',
+    });
+    assert.strictEqual(inferred.backgroundType, 'video');
+  });
+
+  test('8. SignInScreen uses fixed edge-to-edge media container and transparent minimal footer', () => {
+    const signInSource = fs.readFileSync(
+      path.join(process.cwd(), 'src/components/auth/SignInScreen.tsx'),
+      'utf-8'
+    );
+    assert.ok(signInSource.includes('parseVideoSource'), 'Must parse video source');
+    assert.ok(signInSource.includes('fixed inset-0'), 'Background must be fixed inset-0 for full-screen edge-to-edge');
+    assert.ok(signInSource.includes('transparent={true}'), 'Footer must be transparent so video flows underneath');
+  });
+
+  test('9. All modified and created files comply with AGENTS.md 300-line max limit', () => {
     const filesToCheck = [
       'src/lib/heroConfig.ts',
       'src/components/auth/SignInScreen.tsx',

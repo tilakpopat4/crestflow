@@ -108,7 +108,14 @@ export const AdminHeroMediaSection: React.FC<AdminHeroMediaSectionProps> = ({
             <input
               type="url"
               value={draft.backgroundImageUrl}
-              onChange={(e) => setDraft((prev) => ({ ...prev, backgroundImageUrl: e.target.value }))}
+              onChange={(e) => {
+                const val = e.target.value;
+                setDraft((prev) => ({
+                  ...prev,
+                  backgroundImageUrl: val,
+                  ...(val.trim() && prev.backgroundType !== 'image' ? { backgroundType: 'image' } : {}),
+                }));
+              }}
               className="w-full bg-[#181818] border border-[#383838] rounded-lg px-3 py-2 text-xs text-white font-mono"
               placeholder="https://images.unsplash.com/photo-..."
             />
@@ -134,14 +141,26 @@ export const AdminHeroMediaSection: React.FC<AdminHeroMediaSectionProps> = ({
       {draft.backgroundType === 'video' && (
         <div className="space-y-3">
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Video URL (MP4 / WebM)</label>
+            <label className="block text-xs font-medium text-slate-400 mb-1">
+              Video URL (Direct MP4/WebM, YouTube, Vimeo, or Google Drive)
+            </label>
             <input
               type="url"
               value={draft.backgroundVideoUrl}
-              onChange={(e) => setDraft((prev) => ({ ...prev, backgroundVideoUrl: e.target.value }))}
+              onChange={(e) => {
+                const val = e.target.value;
+                setDraft((prev) => ({
+                  ...prev,
+                  backgroundVideoUrl: val,
+                  ...(val.trim() && prev.backgroundType !== 'video' ? { backgroundType: 'video' } : {}),
+                }));
+              }}
               className="w-full bg-[#181818] border border-[#383838] rounded-lg px-3 py-2 text-xs text-white font-mono"
-              placeholder="https://assets.mixkit.co/videos/preview/..."
+              placeholder="https://www.youtube.com/watch?v=... or direct .mp4 link"
             />
+            <p className="text-[11px] text-slate-400 mt-1.5 leading-relaxed">
+              Autoplays muted &amp; loops full screen. Supports YouTube (links, shorts), Vimeo, Google Drive share links, and direct .mp4/.webm videos.
+            </p>
           </div>
           <div>
             <div className="flex justify-between text-xs text-slate-400 mb-1">
