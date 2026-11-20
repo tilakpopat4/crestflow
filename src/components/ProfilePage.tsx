@@ -2,12 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { User as FirebaseUser } from 'firebase/auth';
 import { UserProfile } from '../types';
 import { SubscriptionState } from '../hooks/useSubscription';
+import { useAdminAuth } from '../hooks/useAdminAuth';
 import ProfileNavSidebar, { SettingsSectionId } from './profile/ProfileNavSidebar';
 import ProfilePublicSection from './profile/ProfilePublicSection';
 import ProfileInvoicingSection from './profile/ProfileInvoicingSection';
 import ProfilePreferencesCard from './profile/ProfilePreferencesCard';
 import ProfileSubscriptionSection from './profile/ProfileSubscriptionSection';
 import ProfileDangerSection from './profile/ProfileDangerSection';
+import AdminHeroManager from './admin/AdminHeroManager';
 import { getUserHandle, cleanUsername } from '../lib/userHandle';
 import { isValidUpiId } from '../lib/upiQr';
 import { ProfileSkeleton } from './skeletons';
@@ -35,15 +37,15 @@ export default function ProfilePage({
   onOpenSubscriptionModal,
 }: ProfilePageProps) {
   const { isEnabled: isAiEnabled } = useAiSummarizerConfig();
+  const { isAdmin } = useAdminAuth(user);
+
   // Live form state
-  const [name, setName] = useState('');
-  const [username, setUsername] = useState('');
+  const [name, setName] = useState(''); const [username, setUsername] = useState('');
   const [phone, setPhone] = useState(''); const [upiId, setUpiId] = useState('');
   const [professionalTitle, setProfessionalTitle] = useState('Freelancer');
   const [servicesDescription, setServicesDescription] = useState('Freelance Services');
   const [geminiApiKey, setGeminiApiKey] = useState(''); const [freelanceStartDate, setFreelanceStartDate] = useState('');
-  const [workExperienceBio, setWorkExperienceBio] = useState('');
-  const [photoURL, setPhotoURL] = useState('');
+  const [workExperienceBio, setWorkExperienceBio] = useState(''); const [photoURL, setPhotoURL] = useState('');
 
   // Saved snapshot for dirty checking and discarding
   const [savedSnapshot, setSavedSnapshot] = useState({
@@ -55,7 +57,8 @@ export default function ProfilePage({
   const [activeSection, setActiveSection] = useState<SettingsSectionId>('profile');
   const [isSaving, setIsSaving] = useState(false);
   const [savedSection, setSavedSection] = useState<SettingsSectionId | null>(null);
-  const [error, setError] = useState(''); const [upiError, setUpiError] = useState('');
+  const [error, setError] = useState('');
+  const [upiError, setUpiError] = useState('');
 
   const isInitializedRef = useRef(false);
   const hasLoadedInitialKeyRef = useRef(false);
@@ -63,10 +66,9 @@ export default function ProfilePage({
   useEffect(() => {
     if (!isInitializedRef.current) {
       if (profile) {
-        const initialHandle = profile.username || getUserHandle(profile, user);
         const initial = {
           name: profile.name || user.displayName || '',
-          username: initialHandle,
+          username: profile.username || getUserHandle(profile, user),
           phone: profile.phone || '',
           upiId: profile.upiId || '',
           professionalTitle: profile.professionalTitle || 'Freelancer',
@@ -89,12 +91,7 @@ export default function ProfilePage({
         setSavedSnapshot((prev) => ({ ...prev, name: defaultName, username: defaultHandle }));
       }
     } else {
-      // Sync incoming profile fields from Firestore if updated remotely and pristine locally
-      if (
-        profile?.freelanceStartDate !== undefined &&
-        freelanceStartDate === savedSnapshot.freelanceStartDate &&
-        profile.freelanceStartDate !== savedSnapshot.freelanceStartDate
-      ) {
+      if (profile?.freelanceStartDate !== undefined && freelanceStartDate === savedSnapshot.freelanceStartDate && profile.freelanceStartDate !== savedSnapshot.freelanceStartDate) {
         setFreelanceStartDate(profile.freelanceStartDate || '');
         setSavedSnapshot((prev) => ({ ...prev, freelanceStartDate: profile.freelanceStartDate || '' }));
       }
@@ -116,10 +113,7 @@ export default function ProfilePage({
     setFreelanceStartDate(savedSnapshot.freelanceStartDate); setWorkExperienceBio(savedSnapshot.workExperienceBio); setPhotoURL(savedSnapshot.photoURL);
     if (error) setError('');
   };
-  const handleDiscardInvoicing = () => {
-    setUpiId(savedSnapshot.upiId); setPhone(savedSnapshot.phone); setServicesDescription(savedSnapshot.servicesDescription);
-    setUpiError(''); if (error) setError('');
-  };
+  const handleDiscardInvoicing = () => { setUpiId(savedSnapshot.upiId); setPhone(savedSnapshot.phone); setServicesDescription(savedSnapshot.servicesDescription); setUpiError(''); if (error) setError(''); };
   const handleDiscardAi = () => { setGeminiApiKey(savedSnapshot.geminiApiKey); if (error) setError(''); };
 
   // Save handler
@@ -135,8 +129,7 @@ export default function ProfilePage({
         return;
       }
       if (trimmedUpi && trimmedUpi !== savedSnapshot.upiId) {
-        const confirmed = window.confirm(`Payments from your clients will go to this ID: ${trimmedUpi}. Is this correct?`);
-        if (!confirmed) return;
+        if (!window.confirm(`Payments from your clients will go to this ID: ${trimmedUpi}. Is this correct?`)) return;
       }
     }
 
@@ -162,7 +155,6 @@ export default function ProfilePage({
       }
       await onSave(profilePayload as UserProfile);
       setSavedSnapshot(snapshotData);
-
       setSavedSection(section);
       setTimeout(() => setSavedSection(null), 3000);
     } catch (err: any) {
@@ -227,6 +219,7 @@ export default function ProfilePage({
           activeSection={activeSection}
           onSelectSection={handleSelectNav}
           hasSubscription={Boolean(subscriptionState?.isSubscriptionFeatureEnabled)}
+          isAdmin={isAdmin}
         />
 
         <div className="min-w-0 divide-y divide-slate-200 dark:divide-slate-800 space-y-8">
@@ -286,6 +279,12 @@ export default function ProfilePage({
               subscriptionState={subscriptionState}
               onOpenSubscriptionModal={onOpenSubscriptionModal}
             />
+          )}
+
+          {isAdmin && (
+            <section id="section-landing" className="pt-8 space-y-4">
+              <AdminHeroManager />
+            </section>
           )}
 
           <ProfileDangerSection user={user} />

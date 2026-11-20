@@ -17,66 +17,39 @@ export interface ParsedVideoSource {
   directUrl: string;
 }
 
-/**
- * Parses user-provided video URLs (YouTube, Vimeo, Google Drive, direct MP4/WebM)
- * into an optimized embed URL for iframe or direct streaming tag.
- */
 export function parseVideoSource(rawUrl?: string | null): ParsedVideoSource {
-  if (!rawUrl || typeof rawUrl !== 'string') {
-    return { type: 'none', embedUrl: '', directUrl: '' };
-  }
+  if (!rawUrl || typeof rawUrl !== 'string') return { type: 'none', embedUrl: '', directUrl: '' };
   const trimmed = rawUrl.trim();
-  if (!trimmed) {
-    return { type: 'none', embedUrl: '', directUrl: '' };
-  }
+  if (!trimmed) return { type: 'none', embedUrl: '', directUrl: '' };
 
-  // 1. YouTube matching (watch?v=, watch?...v=, youtu.be/, shorts/, embed/, live/)
-  const ytMatch = trimmed.match(
-    /(?:youtube\.com\/(?:watch\?.*v=|embed\/|v\/|shorts\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i
-  );
-  if (ytMatch && ytMatch[1]) {
-    const id = ytMatch[1];
+  const yt = trimmed.match(/(?:youtube\.com\/(?:watch\?.*v=|embed\/|v\/|shorts\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i);
+  if (yt?.[1]) {
     return {
       type: 'youtube',
-      embedUrl: `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=1&controls=0&loop=1&playlist=${id}&playsinline=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&modestbranding=1`,
+      embedUrl: `https://www.youtube-nocookie.com/embed/${yt[1]}?autoplay=1&mute=1&controls=0&loop=1&playlist=${yt[1]}&playsinline=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&modestbranding=1`,
       directUrl: trimmed,
     };
   }
 
-  // 2. Vimeo matching (vimeo.com/<id> or player.vimeo.com/video/<id>)
-  const vimeoMatch = trimmed.match(/(?:vimeo\.com\/(?:video\/)?)([0-9]+)/i);
-  if (vimeoMatch && vimeoMatch[1]) {
-    const id = vimeoMatch[1];
+  const vimeo = trimmed.match(/(?:vimeo\.com\/(?:video\/)?)([0-9]+)/i);
+  if (vimeo?.[1]) {
     return {
       type: 'vimeo',
-      embedUrl: `https://player.vimeo.com/video/${id}?background=1&autoplay=1&loop=1&muted=1&byline=0&title=0`,
+      embedUrl: `https://player.vimeo.com/video/${vimeo[1]}?background=1&autoplay=1&loop=1&muted=1&byline=0&title=0`,
       directUrl: trimmed,
     };
   }
 
-  // 3. Google Drive preview (drive.google.com/file/d/<id>/...)
-  const gdriveMatch = trimmed.match(/(?:drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?id=))([a-zA-Z0-9_-]+)/i);
-  if (gdriveMatch && gdriveMatch[1]) {
-    const id = gdriveMatch[1];
-    return {
-      type: 'drive',
-      embedUrl: `https://drive.google.com/file/d/${id}/preview`,
-      directUrl: trimmed,
-    };
+  const gdrive = trimmed.match(/(?:drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?id=))([a-zA-Z0-9_-]+)/i);
+  if (gdrive?.[1]) {
+    return { type: 'drive', embedUrl: `https://drive.google.com/file/d/${gdrive[1]}/preview`, directUrl: trimmed };
   }
 
-  // 4. Dropbox direct conversion
   if (trimmed.includes('dropbox.com')) {
-    const directUrl = trimmed.replace(/[?&]dl=0/, '').concat(trimmed.includes('?') ? '&raw=1' : '?raw=1');
-    return { type: 'direct', embedUrl: '', directUrl };
+    return { type: 'direct', embedUrl: '', directUrl: trimmed.replace(/[?&]dl=0/, '').concat(trimmed.includes('?') ? '&raw=1' : '?raw=1') };
   }
 
-  // 4. Direct video file (.mp4, .webm, .mov, etc.)
-  return {
-    type: 'direct',
-    embedUrl: '',
-    directUrl: trimmed,
-  };
+  return { type: 'direct', embedUrl: '', directUrl: trimmed };
 }
 
 export interface HeroConfig {
@@ -89,6 +62,11 @@ export interface HeroConfig {
   backgroundColor: string;
   backgroundImageUrl: string;
   backgroundVideoUrl: string;
+  posterUrl: string;
+  videoEnabled: boolean;
+  showOnMobile: boolean;
+  fileSize?: number;
+  mimeType?: string;
   backgroundOverlayOpacity: number;
   cardAlignment: HeroCardAlignment;
 }
@@ -120,6 +98,10 @@ export const DEFAULT_HERO_CONFIG: HeroConfig = {
   backgroundColor: '#333333',
   backgroundImageUrl: '',
   backgroundVideoUrl: '',
+  posterUrl: '',
+  videoEnabled: true,
+  showOnMobile: false,
+  fileSize: 0,
   backgroundOverlayOpacity: 0.65,
   cardAlignment: 'right',
 };
@@ -160,7 +142,7 @@ export function mergeHeroConfig(raw?: Partial<HeroConfig> | null): HeroConfig {
     backgroundType:
       raw.backgroundType === 'video' || (Boolean(raw.backgroundVideoUrl?.trim()) && raw.backgroundType !== 'image')
         ? 'video'
-        : raw.backgroundType === 'image' || (Boolean(raw.backgroundImageUrl?.trim()) && raw.backgroundType !== 'video')
+        : raw.backgroundType === 'image' || (Boolean(raw.backgroundImageUrl?.trim()) && (raw.backgroundType as string) !== 'video')
         ? 'image'
         : validTypes.includes(raw.backgroundType as any)
         ? (raw.backgroundType as HeroBackgroundType)
@@ -168,6 +150,11 @@ export function mergeHeroConfig(raw?: Partial<HeroConfig> | null): HeroConfig {
     backgroundColor: typeof raw.backgroundColor === 'string' && raw.backgroundColor.trim() ? raw.backgroundColor.trim() : '#333333',
     backgroundImageUrl: typeof raw.backgroundImageUrl === 'string' ? raw.backgroundImageUrl.trim() : '',
     backgroundVideoUrl: typeof raw.backgroundVideoUrl === 'string' ? raw.backgroundVideoUrl.trim() : '',
+    posterUrl: typeof raw.posterUrl === 'string' ? raw.posterUrl.trim() : '',
+    videoEnabled: raw.videoEnabled !== false,
+    showOnMobile: raw.showOnMobile === true,
+    fileSize: typeof raw.fileSize === 'number' ? raw.fileSize : 0,
+    mimeType: typeof raw.mimeType === 'string' ? raw.mimeType : undefined,
     backgroundOverlayOpacity:
       typeof raw.backgroundOverlayOpacity === 'number' && !Number.isNaN(raw.backgroundOverlayOpacity)
         ? Math.max(0, Math.min(1, raw.backgroundOverlayOpacity))

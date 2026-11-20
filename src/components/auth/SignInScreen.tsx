@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useMemo } from 'react';
+import React, { useRef, useEffect, useMemo, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { SignInCard } from './SignInCard';
 import { WorkflowIllustration } from './WorkflowIllustration';
@@ -14,11 +14,6 @@ interface SignInScreenProps {
   onSupportingNavigate: (route: 'privacy' | 'terms' | 'contact' | 'refund' | 'pricing' | 'dashboard' | 'work' | 'reviews' | any) => void;
 }
 
-/**
- * SignInScreen renders the editorial landing and sign-in view for CrestFlow:
- * - Fully configurable text, benefits, custom photo/video background, and card alignment.
- * - Managed in real-time from the Admin Command Center.
- */
 export const SignInScreen: React.FC<SignInScreenProps> = ({
   isAdminRoute,
   isSigningIn,
@@ -30,22 +25,48 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
   const shouldReduceMotion = useReducedMotion();
   const { config } = useHeroConfig();
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [videoFailed, setVideoFailed] = useState(false);
+  const [isMobileScreen, setIsMobileScreen] = useState(false);
+
+  const isDataSaver = typeof navigator !== 'undefined' && Boolean((navigator as any).connection?.saveData);
+  const isReducedMotion = shouldReduceMotion || (typeof window !== 'undefined' && Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches));
   const parsedVideo = useMemo(() => parseVideoSource(config.backgroundVideoUrl), [config.backgroundVideoUrl]);
+  const isVideoConfigured = config.backgroundType === 'video' && Boolean(config.backgroundVideoUrl?.trim());
+  const canPlayVideo = isVideoConfigured && config.videoEnabled !== false && !isReducedMotion && !isDataSaver && (!isMobileScreen || config.showOnMobile === true) && !videoFailed;
 
   useEffect(() => {
-    if (config.backgroundType === 'video' && parsedVideo.type === 'direct' && videoRef.current) {
+    const checkMobile = () => setIsMobileScreen(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => {
+    if (canPlayVideo && parsedVideo.type === 'direct' && videoRef.current) {
       const v = videoRef.current;
       v.muted = true;
       v.defaultMuted = true;
       v.playsInline = true;
       v.play().catch(() => {
         v.muted = true;
-        v.play().catch(() => {});
+        v.play().catch(() => setVideoFailed(true));
       });
     }
-  }, [config.backgroundType, parsedVideo.type, parsedVideo.directUrl]);
+  }, [canPlayVideo, parsedVideo.type, parsedVideo.directUrl]);
 
-  // If admin route, display the focused admin sign-in card
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (!videoRef.current) return;
+      if (document.hidden) {
+        videoRef.current.pause();
+      } else if (canPlayVideo) {
+        videoRef.current.play().catch(() => {});
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [canPlayVideo]);
+
   if (isAdminRoute) {
     return (
       <div className="min-h-screen w-full flex flex-col justify-between font-sans relative select-none text-slate-100 bg-[#333333]">
@@ -74,7 +95,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
     return (
       <>
         {before}
-        <span className="text-[#6366f1]">{config.headlineHighlight}</span>
+        <span className="text-accent">{config.headlineHighlight}</span>
         {after}
       </>
     );
@@ -132,11 +153,11 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
     </div>
   );
 
-  const isVideo = config.backgroundType === 'video' && Boolean(config.backgroundVideoUrl?.trim());
+  const isVideo = isVideoConfigured && config.videoEnabled !== false;
   const isImage = config.backgroundType === 'image' && Boolean(config.backgroundImageUrl?.trim());
 
   const containerBgStyle = {
-    backgroundColor: isVideo || isImage ? 'transparent' : (config.backgroundColor || '#333333'),
+    backgroundColor: isVideo || isImage ? 'transparent' : (config.backgroundColor || '#1E1E1E'),
   };
 
   return (
@@ -152,15 +173,26 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
             style={{ backgroundImage: `url("${config.backgroundImageUrl}")` }}
           />
           <div
-            className="absolute inset-0 bg-black pointer-events-none"
+            className="absolute inset-0 bg-[#1A1A1A] pointer-events-none"
             style={{ opacity: config.backgroundOverlayOpacity }}
           />
         </div>
       )}
 
       {isVideo && (
-        <div className="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0 select-none bg-black">
-          {parsedVideo.type === 'direct' && (
+        <div className="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0 select-none bg-[#1E1E1E]">
+          {/* Poster or solid fallback displayed first / when video paused / mobile / reduced motion */}
+          {(!canPlayVideo || config.posterUrl) && (
+            <div
+              className={`absolute inset-0 w-full h-full bg-cover bg-center transition-opacity duration-300 ${canPlayVideo ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+              style={{
+                backgroundImage: config.posterUrl ? `url("${config.posterUrl}")` : undefined,
+                backgroundColor: !config.posterUrl ? (config.backgroundColor || '#1E1E1E') : undefined,
+              }}
+            />
+          )}
+
+          {canPlayVideo && parsedVideo.type === 'direct' && (
             <video
               ref={videoRef}
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 min-w-full min-h-full w-auto h-auto object-cover max-w-none"
@@ -168,11 +200,14 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
               loop
               muted
               playsInline
+              preload="metadata"
+              poster={config.posterUrl || undefined}
+              onError={() => setVideoFailed(true)}
               src={parsedVideo.directUrl}
             />
           )}
 
-          {(parsedVideo.type === 'youtube' || parsedVideo.type === 'vimeo' || parsedVideo.type === 'drive') && (
+          {canPlayVideo && (parsedVideo.type === 'youtube' || parsedVideo.type === 'vimeo' || parsedVideo.type === 'drive') && (
             <iframe
               title="CrestFlow Hero Background Video"
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[125vw] h-[125vh] min-w-[100vw] min-h-[100vh] pointer-events-none border-0"
@@ -182,9 +217,10 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
             />
           )}
 
+          {/* Dark scrim between video and content using surface-900 (#1A1A1A) */}
           <div
-            className="absolute inset-0 bg-black pointer-events-none"
-            style={{ opacity: config.backgroundOverlayOpacity }}
+            className="absolute inset-0 bg-[#1A1A1A] pointer-events-none"
+            style={{ opacity: config.backgroundOverlayOpacity || 0.65 }}
           />
         </div>
       )}

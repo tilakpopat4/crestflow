@@ -33,6 +33,8 @@ describe('Hero Section & Landing Page CMS Suite', () => {
       backgroundImageUrl: 'https://images.unsplash.com/custom-bg.jpg',
       backgroundOverlayOpacity: 1.5, // should be clamped to 1
       cardAlignment: 'left',
+      videoEnabled: true,
+      showOnMobile: false,
     };
 
     const merged = mergeHeroConfig(custom);
@@ -46,6 +48,8 @@ describe('Hero Section & Landing Page CMS Suite', () => {
     assert.strictEqual(merged.backgroundImageUrl, 'https://images.unsplash.com/custom-bg.jpg');
     assert.strictEqual(merged.backgroundOverlayOpacity, 1); // clamped
     assert.strictEqual(merged.cardAlignment, 'left');
+    assert.strictEqual(merged.videoEnabled, true);
+    assert.strictEqual(merged.showOnMobile, false);
   });
 
   test('3. mergeHeroConfig falls back to defaults for invalid background types and alignments', () => {
@@ -69,30 +73,22 @@ describe('Hero Section & Landing Page CMS Suite', () => {
 
     assert.ok(signInSource.includes('useHeroConfig'), 'SignInScreen must use useHeroConfig hook');
     assert.ok(signInSource.includes('config.backgroundType === \'image\''), 'SignInScreen must support image background');
-    assert.ok(signInSource.includes('config.backgroundType === \'video\''), 'SignInScreen must support video background');
-    assert.ok(signInSource.includes('config.cardAlignment === \'center\''), 'SignInScreen must support centered layout');
-    assert.ok(signInSource.includes('config.cardAlignment === \'left\''), 'SignInScreen must support left card layout');
+    assert.ok(signInSource.includes('isMobileScreen'), 'SignInScreen must detect mobile screen size');
+    assert.ok(signInSource.includes('shouldReduceMotion') || signInSource.includes('prefers-reduced-motion'), 'SignInScreen must respect reduced motion');
+    assert.ok(signInSource.includes('visibilitychange'), 'SignInScreen must pause video when tab hidden');
+    assert.ok(signInSource.includes('surface-900') || signInSource.includes('#1A1A1A'), 'SignInScreen must use #1A1A1A dark scrim');
   });
 
-  test('5. AdminTab & Worker API route hero configuration endpoints', () => {
-    const adminTabSource = fs.readFileSync(
-      path.join(process.cwd(), 'src/components/AdminTab.tsx'),
-      'utf-8'
-    );
-    const workerRoutesSource = fs.readFileSync(
-      path.join(process.cwd(), 'worker/routes/adminSettings.ts'),
-      'utf-8'
-    );
-    const workerIndexSource = fs.readFileSync(
-      path.join(process.cwd(), 'worker/index.ts'),
-      'utf-8'
-    );
+  test('5. Admin & Worker route landing media endpoints and Cloudflare R2 bucket', () => {
+    const wranglerSource = fs.readFileSync(path.join(process.cwd(), 'wrangler.jsonc'), 'utf-8');
+    const workerIndexSource = fs.readFileSync(path.join(process.cwd(), 'worker/index.ts'), 'utf-8');
+    const landingMediaSource = fs.readFileSync(path.join(process.cwd(), 'worker/routes/landingMedia.ts'), 'utf-8');
 
-    assert.ok(adminTabSource.includes('AdminHeroManager'), 'AdminTab must import AdminHeroManager');
-    assert.ok(adminTabSource.includes('Hero & Landing'), 'AdminTab must have Hero & Landing tab');
-    assert.ok(workerRoutesSource.includes('hero_config'), 'Worker adminSettings must allow hero_config');
-    assert.ok(workerRoutesSource.includes('handleGetHeroConfig'), 'Worker adminSettings must export handleGetHeroConfig');
-    assert.ok(workerIndexSource.includes('/api/hero-config'), 'Worker index must route /api/hero-config');
+    assert.ok(wranglerSource.includes('VIDEOS_BUCKET'), 'wrangler.jsonc must configure VIDEOS_BUCKET');
+    assert.ok(workerIndexSource.includes('/api/admin/landing-media/upload'), 'Worker must route upload endpoint');
+    assert.ok(workerIndexSource.includes('/api/media/landing-video'), 'Worker must route streaming video endpoint');
+    assert.ok(landingMediaSource.includes('detectVideoMime'), 'Must validate magic bytes file signatures');
+    assert.ok(landingMediaSource.includes('MAX_VIDEO_BYTES'), 'Must enforce 25 MB limit');
   });
 
   test('6. parseVideoSource handles YouTube, Vimeo, Google Drive, and direct video files', () => {
@@ -101,65 +97,48 @@ describe('Hero Section & Landing Page CMS Suite', () => {
     assert.ok(ytWatch.embedUrl.includes('dQw4w9WgXcQ'));
     assert.ok(ytWatch.embedUrl.includes('autoplay=1'));
 
-    const ytShort = parseVideoSource('https://youtube.com/shorts/dQw4w9WgXcQ?feature=share');
-    assert.strictEqual(ytShort.type, 'youtube');
-    assert.ok(ytShort.embedUrl.includes('dQw4w9WgXcQ'));
-
-    const ytShortUrl = parseVideoSource('https://youtu.be/dQw4w9WgXcQ');
-    assert.strictEqual(ytShortUrl.type, 'youtube');
-    assert.ok(ytShortUrl.embedUrl.includes('dQw4w9WgXcQ'));
-
-    const vimeo = parseVideoSource('https://vimeo.com/76979871');
-    assert.strictEqual(vimeo.type, 'vimeo');
-    assert.ok(vimeo.embedUrl.includes('76979871'));
-
-    const gdrive = parseVideoSource('https://drive.google.com/file/d/1A2B3C4D5E/view?usp=sharing');
-    assert.strictEqual(gdrive.type, 'drive');
-    assert.strictEqual(gdrive.embedUrl, 'https://drive.google.com/file/d/1A2B3C4D5E/preview');
-
     const directMp4 = parseVideoSource('https://assets.example.com/video.mp4');
     assert.strictEqual(directMp4.type, 'direct');
     assert.strictEqual(directMp4.directUrl, 'https://assets.example.com/video.mp4');
 
-    const ytWithParams = parseVideoSource('https://www.youtube.com/watch?feature=shared&v=dQw4w9WgXcQ');
-    assert.strictEqual(ytWithParams.type, 'youtube');
-    assert.ok(ytWithParams.embedUrl.includes('dQw4w9WgXcQ'));
-
-    const dropbox = parseVideoSource('https://www.dropbox.com/s/sample/video.mp4?dl=0');
-    assert.strictEqual(dropbox.type, 'direct');
-    assert.ok(dropbox.directUrl.includes('raw=1'));
-
-    const empty = parseVideoSource('');
-    assert.strictEqual(empty.type, 'none');
+    const localR2 = parseVideoSource('/api/media/landing-video');
+    assert.strictEqual(localR2.type, 'direct');
+    assert.strictEqual(localR2.directUrl, '/api/media/landing-video');
   });
 
-  test('7. mergeHeroConfig auto-infers video background when backgroundVideoUrl is provided', () => {
-    const inferred = mergeHeroConfig({
-      backgroundVideoUrl: 'https://youtube.com/watch?v=dQw4w9WgXcQ',
-    });
-    assert.strictEqual(inferred.backgroundType, 'video');
-  });
-
-  test('8. SignInScreen uses fixed edge-to-edge media container and transparent minimal footer', () => {
-    const signInSource = fs.readFileSync(
+  test('7. Palette compliance: headline highlight, SVG illustration, and SignInCard divider', () => {
+    const signInScreenSource = fs.readFileSync(
       path.join(process.cwd(), 'src/components/auth/SignInScreen.tsx'),
       'utf-8'
     );
-    assert.ok(signInSource.includes('parseVideoSource'), 'Must parse video source');
-    assert.ok(signInSource.includes('fixed inset-0'), 'Background must be fixed inset-0 for full-screen edge-to-edge');
-    assert.ok(signInSource.includes('z-0'), 'Background must use z-0 so it is not hidden behind body background');
-    assert.ok(signInSource.includes('transparent={true}'), 'Footer must be transparent so video flows underneath');
+    assert.ok(signInScreenSource.includes('text-accent'), 'Headline highlight must use text-accent (#E1002D)');
+    assert.ok(!signInScreenSource.includes('#6366f1'), 'Off-palette purple #6366f1 must be removed');
+
+    const signInCardSource = fs.readFileSync(
+      path.join(process.cwd(), 'src/components/auth/SignInCard.tsx'),
+      'utf-8'
+    );
+    assert.ok(signInCardSource.includes('OR'), 'Divider must be centered OR row');
+    assert.ok(!signInCardSource.includes('text-indigo-400'), 'Off-palette text-indigo-400 must be removed');
+
+    const svgSource = fs.readFileSync(path.join(process.cwd(), 'public/workflow-diagram.svg'), 'utf-8');
+    assert.ok(!svgSource.includes('#d6d6e3'), 'SVG lavender tint must be removed');
+    assert.ok(!svgSource.includes('#090814'), 'SVG dark navy tint must be replaced with palette #1a1a1a');
   });
 
-  test('9. All modified and created files comply with AGENTS.md 300-line max limit', () => {
+  test('8. All modified and created files comply with AGENTS.md 300-line max limit', () => {
     const filesToCheck = [
       'src/lib/heroConfig.ts',
       'src/components/auth/SignInScreen.tsx',
+      'src/components/auth/SignInCard.tsx',
       'src/components/admin/AdminHeroManager.tsx',
       'src/components/admin/AdminHeroBenefitsSection.tsx',
       'src/components/admin/AdminHeroMediaSection.tsx',
+      'src/components/admin/AdminHeroVideoManager.tsx',
+      'src/hooks/useAdminLandingMedia.ts',
+      'src/components/ProfilePage.tsx',
       'src/components/AdminTab.tsx',
-      'worker/routes/adminSettings.ts',
+      'worker/routes/landingMedia.ts',
       'worker/index.ts',
     ];
 

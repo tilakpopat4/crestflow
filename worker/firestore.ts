@@ -1,6 +1,7 @@
 import { ServiceAccountCredentials, SubscriptionRecord } from './types';
 import { parseServiceAccount, getGoogleAccessToken } from './firestoreAuth';
 export { parseServiceAccount, getGoogleAccessToken };
+export type { ServiceAccountCredentials };
 
 // Helpers to serialize JS values to Firestore Value objects
 export function toFirestoreValue(val: any): any {

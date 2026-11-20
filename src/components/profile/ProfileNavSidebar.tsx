@@ -1,13 +1,14 @@
 import React from 'react';
-import { User, QrCode, KeyRound, ShieldCheck, Trash2 } from 'lucide-react';
+import { User, QrCode, KeyRound, ShieldCheck, Trash2, LayoutTemplate } from 'lucide-react';
 import { useAiSummarizerConfig } from '../../lib/aiConfig';
 
-export type SettingsSectionId = 'profile' | 'invoicing' | 'ai' | 'billing' | 'danger';
+export type SettingsSectionId = 'profile' | 'invoicing' | 'ai' | 'billing' | 'danger' | 'landing';
 
 interface ProfileNavSidebarProps {
   activeSection: SettingsSectionId;
   onSelectSection: (id: SettingsSectionId) => void;
   hasSubscription: boolean;
+  isAdmin?: boolean;
 }
 
 /**
@@ -19,6 +20,7 @@ export const ProfileNavSidebar: React.FC<ProfileNavSidebarProps> = ({
   activeSection,
   onSelectSection,
   hasSubscription,
+  isAdmin,
 }) => {
   const { isEnabled: isAiEnabled } = useAiSummarizerConfig();
 
@@ -31,6 +33,10 @@ export const ProfileNavSidebar: React.FC<ProfileNavSidebarProps> = ({
   const systemLinks = [
     ...(isAiEnabled ? [{ id: 'ai' as const, label: 'AI & Automations', icon: KeyRound }] : []),
     ...(hasSubscription ? [{ id: 'billing' as const, label: 'Plan & Billing', icon: ShieldCheck }] : []),
+  ];
+
+  const adminLinks = [
+    ...(isAdmin ? [{ id: 'landing' as const, label: 'Landing Page', icon: LayoutTemplate }] : []),
   ];
 
   const renderLink = (item: { id: SettingsSectionId; label: string; icon: React.ElementType }) => {
@@ -78,10 +84,20 @@ export const ProfileNavSidebar: React.FC<ProfileNavSidebarProps> = ({
             </ul>
           </div>
         )}
+
+        {adminLinks.length > 0 && (
+          <div className="min-w-0 md:border-l md:border-slate-200 md:pl-4 lg:border-l-0 lg:pl-0 dark:md:border-slate-800">
+            <p className="px-2.5 pb-1.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              Admin
+            </p>
+            <ul className="flex flex-wrap gap-1 lg:flex-col lg:gap-1">
+              {adminLinks.map(renderLink)}
+            </ul>
+          </div>
+        )}
       </div>
     </nav>
   );
 };
 
 export default ProfileNavSidebar;
-

@@ -4,11 +4,39 @@
 
 export type PlanKey = 'trial' | 'monthly' | 'quarterly' | 'half' | 'yearly';
 
+export interface R2UploadedObject {
+  key: string;
+  size: number;
+  etag: string;
+  httpEtag?: string;
+  httpMetadata?: Record<string, string>;
+  customMetadata?: Record<string, string>;
+  writeHttpMetadata?: (headers: Headers) => void;
+}
+
+export interface R2ObjectBody extends R2UploadedObject {
+  body: ReadableStream;
+  arrayBuffer: () => Promise<ArrayBuffer>;
+  text: () => Promise<string>;
+  json: <T>() => Promise<T>;
+  blob: () => Promise<Blob>;
+}
+
+export interface R2Bucket {
+  get: (key: string, options?: any) => Promise<R2ObjectBody | null>;
+  put: (key: string, value: ReadableStream | ArrayBuffer | ArrayBufferView | string | null | Blob, options?: any) => Promise<R2UploadedObject>;
+  delete: (keys: string | string[]) => Promise<void>;
+  head: (key: string) => Promise<R2UploadedObject | null>;
+}
+
 export interface Env {
   // Cloudflare Static Assets Binding
   ASSETS: {
     fetch: (request: Request) => Promise<Response>;
   };
+
+  // Cloudflare R2 Bucket Binding for Videos & Media
+  VIDEOS_BUCKET?: R2Bucket;
 
   // Application Base URL (configurable origin)
   BASE_URL?: string;
@@ -119,6 +147,9 @@ export interface SubscriptionRecord {
   notifiedExpired?: boolean;
   pendingPlanChange?: PendingPlanChange;
   lastPaymentAt?: number;
+  lastPaymentAmount?: number;
+  lastPaymentMethod?: string;
+  lastPaymentVpa?: string;
   lastPaymentId?: string;
   welcomeEmailSent?: boolean;
   updatedAt: number;

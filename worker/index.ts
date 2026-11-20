@@ -25,6 +25,12 @@ import { handleAdminSettings, handleGetPricingConfig, handleGetHeroConfig } from
 import { handleGetPublicProfile } from './routes/publicProfile';
 import { handleDeleteAccount } from './routes/account';
 import { handleDriveRoutes } from './routes/drive';
+import {
+  handleLandingMediaUpload,
+  handleGetLandingVideo,
+  handleGetLandingPoster,
+  handleDeleteLandingMedia,
+} from './routes/landingMedia';
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -235,6 +241,20 @@ export default {
       if (url.pathname.startsWith('/api/drive/')) {
         const driveRes = await handleDriveRoutes(request, url, env);
         if (driveRes) return driveRes;
+      }
+
+      // 22. Landing Page Media (Upload, Stream Video/Poster, Delete)
+      if (url.pathname === '/api/admin/landing-media/upload' && request.method === 'POST') {
+        return await handleLandingMediaUpload(request, env);
+      }
+      if (url.pathname === '/api/media/landing-video' && (request.method === 'GET' || request.method === 'OPTIONS')) {
+        return await handleGetLandingVideo(request, env);
+      }
+      if (url.pathname === '/api/media/landing-poster' && (request.method === 'GET' || request.method === 'OPTIONS')) {
+        return await handleGetLandingPoster(request, env);
+      }
+      if (url.pathname === '/api/admin/landing-media' && request.method === 'DELETE') {
+        return await handleDeleteLandingMedia(request, env);
       }
 
       return jsonResponse({ error: 'Endpoint not found' }, 404);

@@ -149,11 +149,12 @@ export const SignInCard: React.FC<SignInCardProps> = ({
 
         {!isAdminRoute && (
           <>
-            <div className="relative my-4 flex items-center justify-center">
-              <div className="border-t border-[#2e2e2e] w-full" />
-              <span className="bg-[#181818] px-2 text-[10px] uppercase tracking-wider text-slate-500 font-medium">
-                or email
+            <div className="my-4 flex items-center gap-3">
+              <div className="h-px bg-[#333333] flex-1" />
+              <span className="text-[11px] uppercase tracking-wider text-[#aaaaaa] font-medium select-none">
+                OR
               </span>
+              <div className="h-px bg-[#333333] flex-1" />
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-3">
@@ -222,9 +223,9 @@ export const SignInCard: React.FC<SignInCardProps> = ({
         )}
 
         {/* Footer info & links */}
-        <div className="mt-5 pt-3 border-t border-[#242424] text-center space-y-1">
+        <div className="mt-5 pt-3 border-t border-[#333333] text-center space-y-1.5">
           {!isAdminRoute && (
-            <p className="text-[11px] text-slate-400">
+            <p className="text-xs text-[#aaaaaa]">
               {authMode === 'signup'
                 ? 'Already have an account? '
                 : "Don't have an account yet? "}
@@ -234,19 +235,19 @@ export const SignInCard: React.FC<SignInCardProps> = ({
                   setAuthMode(authMode === 'signup' ? 'signin' : 'signup');
                   setFormError(null);
                 }}
-                className="text-indigo-400 hover:text-indigo-300 font-medium underline border-none bg-transparent cursor-pointer p-0"
+                className="text-[#f1f1f1] hover:text-white font-medium underline border-none bg-transparent cursor-pointer p-0 text-xs ml-1"
               >
                 {authMode === 'signup' ? 'Sign in' : 'Create one free'}
               </button>
             </p>
           )}
 
-          <p className="text-[10px] text-slate-500 pt-1">
+          <p className="text-xs text-[#aaaaaa] pt-0.5 leading-relaxed">
             By continuing, you agree to our{' '}
             <a
               href="/terms"
               onClick={(e) => { e.preventDefault(); onSupportingNavigate('terms'); }}
-              className="text-slate-400 hover:text-white underline"
+              className="text-[#f1f1f1] hover:text-white underline"
             >
               Terms
             </a>{' '}
@@ -254,7 +255,7 @@ export const SignInCard: React.FC<SignInCardProps> = ({
             <a
               href="/privacy"
               onClick={(e) => { e.preventDefault(); onSupportingNavigate('privacy'); }}
-              className="text-slate-400 hover:text-white underline"
+              className="text-[#f1f1f1] hover:text-white underline"
             >
               Privacy Policy
             </a>.

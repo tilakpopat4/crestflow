@@ -24,7 +24,7 @@ export async function sendResendEmail(
 
   // 1. Primary Dispatcher: Direct Google Gmail API
   try {
-    let gmailConfig = {
+    let gmailConfig: any = {
       clientId: env.GMAIL_CLIENT_ID,
       clientSecret: env.GMAIL_CLIENT_SECRET,
       refreshToken: env.GMAIL_REFRESH_TOKEN,
