@@ -9,7 +9,6 @@ import AISummarizer from './AISummarizer';
 import { calculateWorkJourney } from '../lib/anniversary';
 import GettingStartedCard from './GettingStartedCard';
 import RevenueComparisonChart from './dashboard/RevenueComparisonChart';
-import DashboardClientRevenue from './dashboard/DashboardClientRevenue';
 import DashboardRecentInvoices from './dashboard/DashboardRecentInvoices';
 import DashboardMilestoneBanner from './dashboard/DashboardMilestoneBanner';
 import { formatInvoiceNumber } from '../lib/invoiceUtils';
@@ -46,7 +45,6 @@ export default function DashboardTab({
   const { isEnabled: isAiEnabled } = useAiSummarizerConfig();
   const journey = calculateWorkJourney(profile?.freelanceStartDate);
   const [paymentModalState, setPaymentModalState] = useState<{ invoiceId: string | null; isOpen: boolean }>({ invoiceId: null, isOpen: false });
-  const [clientRevenueTimeframe, setClientRevenueTimeframe] = useState<'all' | 'month'>('all');
 
   const { fileInputRef, handleExport, handleImport, migrateLocalData } = useDashboardBackup({
     invoices,
@@ -60,20 +58,15 @@ export default function DashboardTab({
     const now = new Date();
     const currentMonth = now.getMonth(), currentYear = now.getFullYear();
     let totalEarned = 0, totalInvoicesThisMonth = 0;
-    const allTimeClientRevenueMap = new Map<string, number>();
-    const monthClientRevenueMap = new Map<string, number>();
 
     invoices.forEach((inv) => {
       const invDate = new Date(inv.date);
       if (invDate.getMonth() === currentMonth && invDate.getFullYear() === currentYear) totalInvoicesThisMonth++;
       if (inv.status === 'Paid') {
-        const resolvedName = clients.find((c) => c.id === inv.clientId)?.name || inv.clientName || 'Client';
         const amount = Number(inv.totalAmount) || 0;
-        allTimeClientRevenueMap.set(resolvedName, (allTimeClientRevenueMap.get(resolvedName) || 0) + amount);
         const paymentDate = inv.lastPaymentDate ? new Date(inv.lastPaymentDate) : invDate;
         if (paymentDate.getMonth() === currentMonth && paymentDate.getFullYear() === currentYear) {
           totalEarned += amount;
-          monthClientRevenueMap.set(resolvedName, (monthClientRevenueMap.get(resolvedName) || 0) + amount);
         }
       }
     });
@@ -90,15 +83,8 @@ export default function DashboardTab({
       })
       .reduce((sum, inv) => sum + (Number(inv.totalAmount) || 0), 0);
 
-    const allTimeChartData = Array.from(allTimeClientRevenueMap.entries()).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
-    const monthChartData = Array.from(monthClientRevenueMap.entries()).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
-    const chartData = allTimeChartData.length > 0 ? allTimeChartData : monthChartData;
-    return { totalEarned, totalDue, overdueAmount, totalInvoicesThisMonth, chartData, allTimeChartData, monthChartData };
+    return { totalEarned, totalDue, overdueAmount, totalInvoicesThisMonth };
   }, [invoices, clients]);
-
-  const activeClientRevenueData = useMemo(() => {
-    return clientRevenueTimeframe === 'month' ? metrics.monthChartData : metrics.allTimeChartData;
-  }, [clientRevenueTimeframe, metrics]);
 
   const toggleInvoiceStatus = (id: string) => {
     if (invoices.find((i) => i.id === id)) setPaymentModalState({ invoiceId: id, isOpen: true });
@@ -194,25 +180,13 @@ export default function DashboardTab({
       </div>
 
       {/* Analytics & Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        <div className="lg:col-span-2 bg-surface-700 border border-surface-400 p-4 sm:p-6 rounded-xl shadow-2xs flex flex-col min-w-0">
-          <RevenueComparisonChart
-            invoices={invoices}
-            freelanceStartDate={profile?.freelanceStartDate}
-            workItems={workItems}
-            onNavigateToInvoices={onNavigateToInvoices}
-          />
-        </div>
-
-        <div className="lg:col-span-1 min-w-0">
-          <DashboardClientRevenue
-            activeClientRevenueData={activeClientRevenueData}
-            clientRevenueTimeframe={clientRevenueTimeframe}
-            setClientRevenueTimeframe={setClientRevenueTimeframe}
-            allTimeDataCount={metrics.allTimeChartData.length}
-            onNavigateToClients={onNavigateToClients}
-          />
-        </div>
+      <div className="bg-surface-700 border border-surface-400 p-4 sm:p-6 rounded-xl shadow-2xs flex flex-col min-w-0">
+        <RevenueComparisonChart
+          invoices={invoices}
+          freelanceStartDate={profile?.freelanceStartDate}
+          workItems={workItems}
+          onNavigateToInvoices={onNavigateToInvoices}
+        />
       </div>
 
       <DashboardRecentInvoices
