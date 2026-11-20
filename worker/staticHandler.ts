@@ -38,7 +38,6 @@ export function isKnownAppRoute(pathname: string): boolean {
     '/signin',
     '/signup',
     '/register',
-    '/portal',
     '/404',
   ]);
 

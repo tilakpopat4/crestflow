@@ -7,7 +7,6 @@ Allow: /contact
 Allow: /privacy
 Allow: /terms
 Allow: /refund
-Allow: /portal
 Allow: /onboarding/
 
 # Disallow internal authenticated and admin interfaces from public crawl

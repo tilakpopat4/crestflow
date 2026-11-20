@@ -26,7 +26,6 @@ import { WorkspaceShellSkeleton } from './components/skeletons';
 import PublicPageView from './components/layout/PublicPageView';
 import { updatePageMeta } from './lib/seoMeta';
 
-const ClientPortal = lazyWithRetry(() => import('./components/ClientPortal'));
 const AdminTab = lazyWithRetry(() => import('./components/AdminTab'));
 const PublicFreelancerProfile = lazyWithRetry(() => import('./components/PublicFreelancerProfile'));
 const ClientFeedbackForm = lazyWithRetry(() => import('./components/ClientFeedbackForm'));
@@ -52,7 +51,6 @@ export default function App() {
   const { currentRoute, params, isSpecialMode, navigate } = useAppRouter();
   const { user, loading, isSigningIn, isBlocked, handleLogin, handleEmailSignUp, handleEmailSignIn, handleLogout } = useAuthSession();
 
-  const [isClientPortalMode, setIsClientPortalMode] = useState(isSpecialMode === 'client_portal');
   const [globalSearchQuery, setGlobalSearchQuery] = useState('');
   const [selectedClientIdFromSearch, setSelectedClientIdFromSearch] = useState<string | null>(null);
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
@@ -134,14 +132,6 @@ export default function App() {
     );
   }
 
-  if (isClientPortalMode) {
-    return (
-      <Suspense fallback={<ViewLoadingFallback />}>
-        <ClientPortal user={user} onLogout={handleLogout} onSwitchToFreelancer={() => setIsClientPortalMode(false)} />
-      </Suspense>
-    );
-  }
-
   if (currentRoute === 'admin') {
     return (
       <div className="h-screen w-full bg-slate-50 dark:bg-slate-950 overflow-y-auto flex flex-col">
@@ -208,7 +198,6 @@ export default function App() {
         onLogout={handleLogout}
         profile={profile}
         onEditProfile={() => navigate('profile')}
-        onSwitchToClient={() => setIsClientPortalMode(true)}
         subscriptionState={subscriptionState}
         onOpenSubscriptionModal={() => setIsSubscriptionModalOpen(true)}
         isCollapsed={isSidebarCollapsed}

@@ -14,7 +14,6 @@ import {
   ReviewsSkeleton,
   ProfileSkeleton,
   BillingSkeleton,
-  ClientPortalSkeleton,
   PublicProfileSkeleton,
   WorkspaceShellSkeleton
 } from '../src/components/skeletons';
@@ -71,10 +70,7 @@ describe('Professional Skeleton Loaders & Latency Reduction Suite', () => {
       assert.ok(html.includes('Loading billing'));
     });
 
-    test('renders ClientPortalSkeleton and PublicProfileSkeleton seamlessly', () => {
-      const portalHtml = ReactDOMServer.renderToStaticMarkup(React.createElement(ClientPortalSkeleton));
-      assert.ok(portalHtml.includes('Loading client portal'));
-
+    test('renders PublicProfileSkeleton seamlessly', () => {
       const publicHtml = ReactDOMServer.renderToStaticMarkup(React.createElement(PublicProfileSkeleton));
       assert.ok(publicHtml.includes('Loading profile'));
     });

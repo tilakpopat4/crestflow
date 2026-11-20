@@ -96,16 +96,6 @@ export const SITEMAP_PAGES: SitemapPageItem[] = [
     inXmlSitemap: true,
   },
   {
-    id: 'client_portal',
-    name: 'Client Invoicing & Payment Portal',
-    path: '/portal',
-    samplePath: '/portal',
-    category: 'client',
-    description: 'Dedicated external client portal for invoice reviews, deliverables tracking, and direct UPI settlements.',
-    accessLevel: 'Client',
-    inXmlSitemap: false,
-  },
-  {
     id: 'client_feedback',
     name: 'Client Testimonial & Review Form',
     path: '/?feedback=true',

@@ -101,12 +101,6 @@ describe('CrestFlow Multi-Page Routing Architecture', () => {
     assert.strictEqual(mixedCaseUidMatch.isSpecialMode, 'freelancer_profile');
     assert.strictEqual(mixedCaseUidMatch.params.freelancerId, 'aB12CdEfGhIj34Kl');
 
-    const clientPortalMatch = resolveRoute('/', '?portal=client');
-    assert.strictEqual(clientPortalMatch.isSpecialMode, 'client_portal');
-
-    const dedicatedPortalMatch = resolveRoute('/portal');
-    assert.strictEqual(dedicatedPortalMatch.isSpecialMode, 'client_portal');
-
     const feedbackMatch = resolveRoute('/', '?feedback=true');
     assert.strictEqual(feedbackMatch.isSpecialMode, 'feedback');
   });

@@ -4,7 +4,6 @@ import { WorkLogSkeleton } from './skeletons';
 import GoogleDriveUploadModal from './GoogleDriveUploadModal';
 import MediaEmbedModal from './MediaEmbedModal';
 import BulkEditWorkModal from './BulkEditWorkModal';
-import { DeliverableFeedbackViewerModal } from './work/DeliverableFeedbackViewerModal';
 import { useWorkLog } from '../hooks/useWorkLog';
 import WorkLogToolbar from './work-log/WorkLogToolbar';
 import WorkLogFormCard from './work-log/WorkLogFormCard';
@@ -38,8 +37,6 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
     setIsDriveModalOpen,
     embedModalData,
     setEmbedModalData,
-    feedbackViewerItem,
-    setFeedbackViewerItem,
     editingWorkId,
     sortOrder,
     setSortOrder,
@@ -124,7 +121,6 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
           onEditWork={handleEditWork}
           onDeleteWork={deleteWork}
           onOpenEmbed={setEmbedModalData}
-          onOpenFeedbackViewer={setFeedbackViewerItem}
         />
       )}
 
@@ -172,15 +168,6 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
           url={embedModalData.url}
           title={embedModalData.title}
           clientName={embedModalData.clientName}
-        />
-      )}
-
-      {feedbackViewerItem && (
-        <DeliverableFeedbackViewerModal
-          isOpen={!!feedbackViewerItem}
-          onClose={() => setFeedbackViewerItem(null)}
-          item={feedbackViewerItem.item}
-          clientName={feedbackViewerItem.clientName}
         />
       )}
     </div>

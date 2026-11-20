@@ -18,7 +18,6 @@ interface SidebarProps {
   onLogout?: () => void;
   profile?: UserProfile | null;
   onEditProfile?: () => void;
-  onSwitchToClient?: () => void;
   subscriptionState?: SubscriptionState;
   onOpenSubscriptionModal?: () => void;
   isCollapsed?: boolean;
@@ -32,7 +31,6 @@ export default function Sidebar({
   onLogout,
   profile,
   onEditProfile,
-  onSwitchToClient,
   subscriptionState,
   onOpenSubscriptionModal,
   isCollapsed = false,

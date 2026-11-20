@@ -21,7 +21,6 @@ interface WorkLogTableProps {
   onEditWork: (work: WorkItem) => void;
   onDeleteWork: (work: WorkItem) => void;
   onOpenEmbed: (data: { isOpen: boolean; url: string; title: string; clientName?: string }) => void;
-  onOpenFeedbackViewer: (data: { item: WorkItem; clientName?: string }) => void;
 }
 
 /**
@@ -39,7 +38,6 @@ export function WorkLogTable({
   onEditWork,
   onDeleteWork,
   onOpenEmbed,
-  onOpenFeedbackViewer,
 }: WorkLogTableProps) {
   return (
     <div className="bg-surface-700 border border-surface-400 rounded-xl overflow-hidden shadow-xs">
@@ -56,7 +54,6 @@ export function WorkLogTable({
         onEditWork={onEditWork}
         onDeleteWork={onDeleteWork}
         onOpenEmbed={onOpenEmbed}
-        onOpenFeedbackViewer={onOpenFeedbackViewer}
       />
 
       {/* Desktop Table View */}
@@ -78,7 +75,6 @@ export function WorkLogTable({
               <th className="py-3 px-3">Description / Video Link</th>
               <th className="py-3 px-3 text-right">Amount</th>
               <th className="py-3 px-3 text-center">Status</th>
-              <th className="py-3 px-3">Approval</th>
               <th className="py-3 px-4 text-right">Actions</th>
             </tr>
           </thead>
@@ -142,36 +138,6 @@ export function WorkLogTable({
                   </td>
                   <td className="py-3 px-3 text-center whitespace-nowrap">
                     <StatusBadge status={work.status === 'Invoiced' ? 'Invoiced' : 'Pending'} />
-                  </td>
-                  <td className="py-3 px-3 whitespace-nowrap">
-                    <div className="flex items-center gap-1.5">
-                      <span
-                        className={`w-1.5 h-1.5 rounded-full ${
-                          work.approvalStatus === 'approved'
-                            ? 'bg-slate-400'
-                            : work.approvalStatus === 'changes_requested'
-                            ? 'bg-accent'
-                            : 'bg-surface-400'
-                        }`}
-                      />
-                      <span className="font-medium text-text-muted">
-                        {work.approvalStatus === 'approved'
-                          ? 'Approved'
-                          : work.approvalStatus === 'changes_requested'
-                          ? `Changes (${work.revisionCount || 1})`
-                          : 'Pending'}
-                      </span>
-                      {work.comments && work.comments.length > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => onOpenFeedbackViewer({ item: work, clientName: client?.name })}
-                          className="ml-1 text-[11px] text-text-muted hover:text-text-primary underline cursor-pointer bg-transparent border-0 p-0"
-                          title="View client comments"
-                        >
-                          ({work.comments.length})
-                        </button>
-                      )}
-                    </div>
                   </td>
                   <td className="py-3 px-4 text-right whitespace-nowrap">
                     <div className="flex items-center justify-end gap-1">

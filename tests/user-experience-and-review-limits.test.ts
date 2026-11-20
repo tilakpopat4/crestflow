@@ -92,7 +92,6 @@ describe('User Experience, Domain, and Review Limits Suite', () => {
       'src/components/profile/ProfileAvatarUploader.tsx',
       'src/components/profile/ProfilePublicSection.tsx',
       'src/components/ProfilePage.tsx',
-      'src/hooks/useClientPortalData.ts',
       'src/lib/onboardingLead.ts',
       'src/lib/imageUpload.ts',
     ];

@@ -20,7 +20,6 @@ interface WorkLogMobileCardsProps {
   onEditWork: (work: WorkItem) => void;
   onDeleteWork: (work: WorkItem) => void;
   onOpenEmbed: (data: { isOpen: boolean; url: string; title: string; clientName?: string }) => void;
-  onOpenFeedbackViewer: (data: { item: WorkItem; clientName?: string }) => void;
 }
 
 /**
@@ -38,7 +37,6 @@ export function WorkLogMobileCards({
   onEditWork,
   onDeleteWork,
   onOpenEmbed,
-  onOpenFeedbackViewer,
 }: WorkLogMobileCardsProps) {
   return (
     <div className="md:hidden">
@@ -103,33 +101,6 @@ export function WorkLogMobileCards({
 
                 <div className="flex flex-col items-end gap-1">
                   <StatusBadge status={work.status === 'Invoiced' ? 'Invoiced' : 'Pending'} />
-                  <div className="flex items-center gap-1.5 text-[11px]">
-                    <span
-                      className={`w-1.5 h-1.5 rounded-full ${
-                        work.approvalStatus === 'approved'
-                          ? 'bg-slate-400'
-                          : work.approvalStatus === 'changes_requested'
-                          ? 'bg-accent'
-                          : 'bg-surface-400'
-                      }`}
-                    />
-                    <span className="font-medium text-text-muted">
-                      {work.approvalStatus === 'approved'
-                        ? 'Approved'
-                        : work.approvalStatus === 'changes_requested'
-                        ? `Changes (${work.revisionCount || 1})`
-                        : 'Pending'}
-                    </span>
-                    {work.comments && work.comments.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => onOpenFeedbackViewer({ item: work, clientName: client?.name })}
-                        className="text-text-muted hover:text-text-primary underline cursor-pointer bg-transparent border-0 p-0"
-                      >
-                        ({work.comments.length})
-                      </button>
-                    )}
-                  </div>
                 </div>
               </div>
 

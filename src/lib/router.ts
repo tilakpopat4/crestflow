@@ -23,7 +23,7 @@ export interface RouteMatch {
   route: AppRoute;
   path: string;
   params: Record<string, string>;
-  isSpecialMode?: 'client_portal' | 'freelancer_profile' | 'feedback' | 'auth';
+  isSpecialMode?: 'freelancer_profile' | 'feedback' | 'auth';
 }
 
 export const ROUTE_PATHS: Record<AppRoute, string> = {
@@ -63,10 +63,6 @@ export function resolveRoute(pathname: string, search: string = ''): RouteMatch 
   if (searchParams.get('freelancerId')) {
     const fid = searchParams.get('freelancerId')!;
     return { route: 'dashboard', path: cleanPath, params: { ...params, freelancerId: fid, username: fid }, isSpecialMode: 'freelancer_profile' };
-  }
-  const isClientPortalHash = typeof window !== 'undefined' && window.location?.hash ? window.location.hash.includes('portal') : false;
-  if (searchParams.get('portal') === 'client' || isClientPortalHash || cleanPath === '/portal') {
-    return { route: 'dashboard', path: '/portal', params, isSpecialMode: 'client_portal' };
   }
 
   // 1. Professional Onboarding URL: /:username/onboarding (and /:username/publicprofile alias)

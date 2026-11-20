@@ -6,6 +6,5 @@ export { InvoicesSkeleton } from './InvoicesSkeleton';
 export { ReviewsSkeleton } from './ReviewsSkeleton';
 export { ProfileSkeleton } from './ProfileSkeleton';
 export { BillingSkeleton } from './BillingSkeleton';
-export { ClientPortalSkeleton } from './ClientPortalSkeleton';
 export { PublicProfileSkeleton } from './PublicProfileSkeleton';
 export { WorkspaceShellSkeleton } from './WorkspaceShellSkeleton';

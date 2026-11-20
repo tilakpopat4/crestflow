@@ -205,24 +205,6 @@ export function ClientWorkLogsTab({
                         status={item.status === 'Invoiced' ? 'Invoiced' : 'Pending'}
                         label={item.status === 'Invoiced' ? 'Invoiced' : 'Uninvoiced'}
                       />
-                      <div className="flex items-center justify-center gap-1.5 mt-1 text-[11px]">
-                        <span
-                          className={`w-1.5 h-1.5 rounded-full ${
-                            item.approvalStatus === 'approved'
-                              ? 'bg-slate-400'
-                              : item.approvalStatus === 'changes_requested'
-                              ? 'bg-accent'
-                              : 'bg-surface-400'
-                          }`}
-                        />
-                        <span className="font-medium text-text-muted">
-                          {item.approvalStatus === 'approved'
-                            ? 'Approved'
-                            : item.approvalStatus === 'changes_requested'
-                            ? `Changes (${item.revisionCount || 1})`
-                            : 'Pending'}
-                        </span>
-                      </div>
                     </td>
                     <td className="p-3 text-right space-x-1 whitespace-nowrap">
                       <Button

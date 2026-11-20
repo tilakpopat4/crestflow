@@ -37,7 +37,6 @@ export function useWorkLog(user: User, initialSearchQuery: string = '') {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDriveModalOpen, setIsDriveModalOpen] = useState(false);
   const [embedModalData, setEmbedModalData] = useState<{ isOpen: boolean; url: string; title: string; clientName?: string } | null>(null);
-  const [feedbackViewerItem, setFeedbackViewerItem] = useState<{ item: WorkItem; clientName?: string } | null>(null);
   const [editingWorkId, setEditingWorkId] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
@@ -264,8 +263,6 @@ export function useWorkLog(user: User, initialSearchQuery: string = '') {
     setIsDriveModalOpen,
     embedModalData,
     setEmbedModalData,
-    feedbackViewerItem,
-    setFeedbackViewerItem,
     editingWorkId,
     sortOrder,
     setSortOrder,
