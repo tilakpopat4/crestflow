@@ -8,12 +8,13 @@
     "not_found_handling": "single-page-application",
     "binding": "ASSETS"
   },
-  "r2_buckets": [
-    {
-      "binding": "VIDEOS_BUCKET",
-      "bucket_name": "crestflow-videos"
-    }
-  ],
+  // Cloudflare R2 bucket binding for custom videos (uncomment once bucket 'crestflow-videos' is created in Cloudflare Dashboard -> R2)
+  // "r2_buckets": [
+  //   {
+  //     "binding": "VIDEOS_BUCKET",
+  //     "bucket_name": "crestflow-videos"
+  //   }
+  // ],
   "vars": {
     "BASE_URL": "https://crestflow.space",
     "RESEND_FROM_EMAIL": "CrestFlow <onboarding@resend.dev>",
