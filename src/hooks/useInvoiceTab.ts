@@ -138,6 +138,10 @@ export function useInvoiceTab({
     setIsGenerating(true);
     try {
       const deliverablesSnapshot = formState.currentBillingDeliverables.map((d) => ({ id: d.id, title: d.title, quantity: d.quantity, videoUrl: d.videoUrl, date: d.date, subClientName: d.subClientName }));
+      const resolvedLinkedIds = formState.invoiceBillingMode === 'monthly_retainer' && formState.linkedWorkItemIds.length === 0
+        ? (deliverablesSnapshot.map((d) => d.id).filter(Boolean) as string[])
+        : [...formState.linkedWorkItemIds];
+
       const newInvoice: Invoice = {
         id: generateUUID(),
         invoiceNumber: getNextInvoiceNumber(invoices),
@@ -152,7 +156,7 @@ export function useInvoiceTab({
         status: 'Pending',
         invoiceType: formState.invoiceBillingMode,
         billingMonth: new Date(formState.dateFrom).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }),
-        linkedWorkItemIds: [...formState.linkedWorkItemIds],
+        linkedWorkItemIds: resolvedLinkedIds,
         deliverables: formState.invoiceBillingMode === 'monthly_retainer' ? deliverablesSnapshot : undefined,
         ...(formState.discount > 0 ? { discountAmount: formState.discount, discountDescription: formState.discountDescription.trim() || 'Discount' } : {}),
         ...(formState.extraCost > 0 ? { extraCostAmount: formState.extraCost, extraCostDescription: formState.extraCostDescription.trim() || 'Extra Expenses' } : {}),
@@ -169,7 +173,7 @@ export function useInvoiceTab({
       document.body.removeChild(link);
 
       await addInvoice(newInvoice);
-      for (const wId of formState.linkedWorkItemIds) {
+      for (const wId of resolvedLinkedIds) {
         const item = workItems.find((w) => w.id === wId);
         if (item) await updateWorkItem({ ...item, status: 'Invoiced', invoiceId: newInvoice.id });
       }

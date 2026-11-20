@@ -3,6 +3,7 @@ import assert from 'node:assert';
 import fs from 'node:fs';
 import path from 'node:path';
 import { buildUpiPaymentUri, isValidUpiId } from '../src/lib/upiQr';
+import { renderDocumentHtml } from '../src/lib/invoiceRenderer';
 
 describe('Invoice Printing & Offscreen PDF Generation Suite', () => {
   const invoiceRendererSource = fs.readFileSync(
@@ -110,5 +111,46 @@ describe('Invoice Printing & Offscreen PDF Generation Suite', () => {
     assert.strictEqual(isValidUpiId('not-a-vpa'), false);
     assert.strictEqual(isValidUpiId(''), false);
     assert.strictEqual(isValidUpiId(null), false);
+  });
+
+  test('5. monthly retainer invoice lists work log deliverables with fixed retainer total', () => {
+    const html = renderDocumentHtml({
+      invoice: {
+        id: 'inv-retainer-1',
+        invoiceNumber: 'INV-105',
+        date: Date.now(),
+        clientId: 'c-retainer',
+        clientName: 'Roots & Stories',
+        reels: [{ id: 'ret-1', title: 'Monthly Video Editing Retainer', quantity: 1, rate: 25000 }],
+        totalAmount: 25000,
+        status: 'Pending',
+        invoiceType: 'monthly_retainer',
+        deliverables: [
+          { id: 'deliv-1', title: 'Instagram Reel #1 - Brand Story', quantity: 1, date: Date.now() },
+          { id: 'deliv-2', title: 'YouTube Short #2 - Product Showcase', quantity: 1, date: Date.now() }
+        ]
+      },
+      client: {
+        id: 'c-retainer',
+        name: 'Roots & Stories',
+        currency: 'INR',
+        defaultRate: 25000,
+        paymentBasis: 'monthly_retainer',
+        isClosed: false
+      },
+      profile: null,
+      dateFrom: '2026-11-01',
+      dateTo: '2026-11-30'
+    });
+
+    // 1. Deliverables are listed in the table
+    assert.ok(html.includes('Instagram Reel #1 - Brand Story'), 'Work log deliverable 1 must be listed');
+    assert.ok(html.includes('YouTube Short #2 - Product Showcase'), 'Work log deliverable 2 must be listed');
+
+    // 2. Rate and Amount for deliverables are shown as Included
+    assert.ok(html.includes('Included'), 'Deliverables under monthly retainer must display Included');
+
+    // 3. Subtotal and Grand Total strictly equal the fixed monthly retainer amount (25,000)
+    assert.ok(html.includes('25,000.00'), 'Total must reflect fixed monthly retainer amount (25,000.00)');
   });
 });

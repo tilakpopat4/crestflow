@@ -65,6 +65,7 @@ export default function InvoiceTab({
     monthlyServiceDescription,
     setMonthlyServiceDescription,
     effectiveReels,
+    currentBillingDeliverables,
     addItem,
     updateReel,
     removeReel,
@@ -151,6 +152,7 @@ export default function InvoiceTab({
         monthlyRetainerInput={monthlyRetainerInput}
         monthlyServiceDescription={monthlyServiceDescription}
         effectiveReels={effectiveReels}
+        currentBillingDeliverables={currentBillingDeliverables}
         discountAmount={discountAmount}
         discountDescription={discountDescription}
         extraCostAmount={extraCostAmount}

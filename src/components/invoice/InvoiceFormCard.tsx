@@ -1,10 +1,11 @@
 import React from 'react';
 import { IndianRupee, Loader2 } from 'lucide-react';
-import { Client, Reel } from '../../types';
+import { Client, Reel, InvoiceDeliverable } from '../../types';
 import { Button } from '@/components/ui/button';
 import { DateInput } from '../DateInput';
 import { formatCurrencyAmount } from '../../lib/currencyUtils';
 import InvoiceLineItemsEditor from './InvoiceLineItemsEditor';
+import InvoiceRetainerDeliverablesList from './InvoiceRetainerDeliverablesList';
 
 interface InvoiceFormCardProps {
   clients: Client[];
@@ -15,6 +16,7 @@ interface InvoiceFormCardProps {
   monthlyRetainerInput: string;
   monthlyServiceDescription: string;
   effectiveReels: Reel[];
+  currentBillingDeliverables?: InvoiceDeliverable[];
   discountAmount: string;
   discountDescription: string;
   extraCostAmount: string;
@@ -60,6 +62,7 @@ export function InvoiceFormCard({
   monthlyRetainerInput,
   monthlyServiceDescription,
   effectiveReels,
+  currentBillingDeliverables,
   discountAmount,
   discountDescription,
   extraCostAmount,
@@ -167,31 +170,38 @@ export function InvoiceFormCard({
 
       {/* Retainer specific inputs or line items */}
       {invoiceBillingMode === 'monthly_retainer' ? (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 bg-surface-800 p-3.5 rounded-lg border border-surface-400">
-          <div className="sm:col-span-2">
-            <label className="block text-xs font-semibold text-text-secondary mb-1">
-              Retainer Service Description
-            </label>
-            <input
-              type="text"
-              value={monthlyServiceDescription}
-              onChange={(e) => setMonthlyServiceDescription(e.target.value)}
-              placeholder="e.g. Monthly Video Editing Retainer"
-              className="w-full p-2 bg-surface-900 border border-surface-400 rounded-md text-xs text-text-primary outline-none focus:border-surface-300"
-            />
+        <div className="space-y-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 bg-surface-800 p-3.5 rounded-lg border border-surface-400">
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-semibold text-text-secondary mb-1">
+                Retainer Service Description
+              </label>
+              <input
+                type="text"
+                value={monthlyServiceDescription}
+                onChange={(e) => setMonthlyServiceDescription(e.target.value)}
+                placeholder="e.g. Monthly Video Editing Retainer"
+                className="w-full p-2 bg-surface-900 border border-surface-400 rounded-md text-xs text-text-primary outline-none focus:border-surface-300"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-text-secondary mb-1">
+                Retainer Amount ({selectedClient?.currency || 'INR'}) *
+              </label>
+              <input
+                type="number"
+                value={monthlyRetainerInput}
+                onChange={(e) => setMonthlyRetainerInput(e.target.value)}
+                placeholder="e.g. 25000"
+                className="w-full p-2 bg-surface-900 border border-surface-400 rounded-md text-xs text-text-primary font-mono outline-none focus:border-surface-300"
+              />
+            </div>
           </div>
-          <div>
-            <label className="block text-xs font-semibold text-text-secondary mb-1">
-              Retainer Amount ({selectedClient?.currency || 'INR'}) *
-            </label>
-            <input
-              type="number"
-              value={monthlyRetainerInput}
-              onChange={(e) => setMonthlyRetainerInput(e.target.value)}
-              placeholder="e.g. 25000"
-              className="w-full p-2 bg-surface-900 border border-surface-400 rounded-md text-xs text-text-primary font-mono outline-none focus:border-surface-300"
-            />
-          </div>
+          <InvoiceRetainerDeliverablesList
+            deliverables={currentBillingDeliverables || []}
+            currency={selectedClient?.currency}
+            fixedTotal={grandTotal}
+          />
         </div>
       ) : (
         <InvoiceLineItemsEditor
