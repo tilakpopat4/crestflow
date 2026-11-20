@@ -100,7 +100,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
       </div>
 
       {/* Dynamic Benefits Chips */}
-      {config.benefits.length > 0 && (
+      {config.showBenefits !== false && config.benefits.length > 0 && (
         <div className={`grid gap-3 pt-2 w-full ${config.benefits.length === 1 ? 'grid-cols-1 max-w-md' : config.benefits.length === 2 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 sm:grid-cols-3'}`}>
           {config.benefits.map((b) => (
             <div key={b.id} className="bg-[#282828]/90 border border-[#383838] p-3 rounded-lg text-left backdrop-blur-xs">

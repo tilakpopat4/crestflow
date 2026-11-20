@@ -61,6 +61,7 @@ export default function AdminHeroManager() {
   const handleAddBenefit = () => {
     setDraft({
       ...draft,
+      showBenefits: true,
       benefits: [
         ...draft.benefits,
         { id: generateUUID(), title: 'New Feature Benefit', description: 'Describe what this feature offers to freelancers.' },
@@ -76,10 +77,26 @@ export default function AdminHeroManager() {
   };
 
   const handleRemoveBenefit = (id: string) => {
-    if (draft.benefits.length <= 1) return alert('At least one benefit chip is required.');
+    const remaining = draft.benefits.filter((b) => b.id !== id);
     setDraft({
       ...draft,
-      benefits: draft.benefits.filter((b) => b.id !== id),
+      benefits: remaining,
+      ...(remaining.length === 0 ? { showBenefits: false } : {}),
+    });
+  };
+
+  const handleRemoveAllBenefits = () => {
+    setDraft({
+      ...draft,
+      benefits: [],
+      showBenefits: false,
+    });
+  };
+
+  const handleToggleShowBenefits = (enabled: boolean) => {
+    setDraft({
+      ...draft,
+      showBenefits: enabled,
     });
   };
 
@@ -198,9 +215,12 @@ export default function AdminHeroManager() {
       {/* Feature Benefit Chips Section */}
       <AdminHeroBenefitsSection
         benefits={draft.benefits}
+        showBenefits={draft.showBenefits !== false}
+        onToggleShowBenefits={handleToggleShowBenefits}
         onAddBenefit={handleAddBenefit}
         onUpdateBenefit={handleUpdateBenefit}
         onRemoveBenefit={handleRemoveBenefit}
+        onRemoveAllBenefits={handleRemoveAllBenefits}
       />
     </div>
   );

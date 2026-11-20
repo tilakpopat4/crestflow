@@ -63,6 +63,10 @@ describe('Hero Section & Landing Page CMS Suite', () => {
     assert.strictEqual(merged.backgroundType, 'color');
     assert.strictEqual(merged.cardAlignment, 'right');
     assert.strictEqual(merged.benefits.length, 3);
+
+    const hiddenBenefits = mergeHeroConfig({ showBenefits: false, benefits: [] });
+    assert.strictEqual(hiddenBenefits.showBenefits, false);
+    assert.strictEqual(hiddenBenefits.benefits.length, 0);
   });
 
   test('4. SignInScreen renders dynamic hero config, background media, and card alignment', () => {

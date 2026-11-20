@@ -60,6 +60,7 @@ export interface HeroConfig {
   headlineHighlight: string;
   subtitle: string;
   benefits: HeroBenefit[];
+  showBenefits?: boolean;
   showWorkflowIllustration: boolean;
   backgroundType: HeroBackgroundType;
   backgroundColor: string;
@@ -96,6 +97,7 @@ export const DEFAULT_HERO_CONFIG: HeroConfig = {
       description: 'Scheduled WhatsApp-ready and email invoices at 6:00 AM sharp.',
     },
   ],
+  showBenefits: true,
   showWorkflowIllustration: true,
   backgroundType: 'color',
   backgroundColor: '#333333',
@@ -140,7 +142,13 @@ export function mergeHeroConfig(raw?: Partial<HeroConfig> | null): HeroConfig {
     headline: typeof raw.headline === 'string' && raw.headline.trim() ? raw.headline.trim() : DEFAULT_HERO_CONFIG.headline,
     headlineHighlight: typeof raw.headlineHighlight === 'string' ? raw.headlineHighlight.trim() : DEFAULT_HERO_CONFIG.headlineHighlight,
     subtitle: typeof raw.subtitle === 'string' && raw.subtitle.trim() ? raw.subtitle.trim() : DEFAULT_HERO_CONFIG.subtitle,
-    benefits: cleanBenefits.length > 0 ? cleanBenefits : DEFAULT_HERO_CONFIG.benefits.map((b) => ({ ...b })),
+    benefits:
+      raw.showBenefits === false && Array.isArray(raw.benefits)
+        ? cleanBenefits
+        : cleanBenefits.length > 0
+        ? cleanBenefits
+        : DEFAULT_HERO_CONFIG.benefits.map((b) => ({ ...b })),
+    showBenefits: raw.showBenefits !== false,
     showWorkflowIllustration: raw.showWorkflowIllustration !== false,
     backgroundType:
       raw.backgroundType === 'video' || (Boolean(raw.backgroundVideoUrl?.trim()) && raw.backgroundType !== 'image')
