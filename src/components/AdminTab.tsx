@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db, auth, googleProvider } from '../firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import { signInWithPopup, signOut, User } from 'firebase/auth';
-import { Users, UserCheck, ShieldCheck, RefreshCw, ArrowLeft, LogOut, Mail, History, Globe, Compass, CreditCard } from 'lucide-react';
+import { Users, UserCheck, ShieldCheck, RefreshCw, ArrowLeft, LogOut, Mail, History, Globe, Compass, CreditCard, LayoutTemplate } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import AdminWhitelistManager from './admin/AdminWhitelistManager';
 import AdminUserSubscriptions from './admin/AdminUserSubscriptions';
@@ -13,12 +13,13 @@ import AdminPlatformHistory from './admin/AdminPlatformHistory';
 import AdminFooterManager from './admin/AdminFooterManager';
 import AdminSitemapManager from './admin/AdminSitemapManager';
 import AdminPricingManager from './admin/AdminPricingManager';
+import AdminHeroManager from './admin/AdminHeroManager';
 import { useSubscriptionConfig } from '../lib/subscriptionConfig';
 import { useAiSummarizerConfig } from '../lib/aiConfig';
 import { useAdminAuth } from '../hooks/useAdminAuth';
 import { useAdminUsersAndHistory } from '../hooks/useAdminUsersAndHistory';
 
-type AdminSection = 'subscriptions' | 'plans' | 'history' | 'whitelist' | 'admins' | 'email' | 'footer' | 'sitemap';
+type AdminSection = 'subscriptions' | 'plans' | 'hero' | 'history' | 'whitelist' | 'admins' | 'email' | 'footer' | 'sitemap';
 
 interface AdminTabProps {
   user?: User | null;
@@ -90,6 +91,7 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
   const navItems = [
     { id: 'subscriptions' as const, label: 'User Subscriptions', icon: Users },
     { id: 'plans' as const, label: 'Plans & Wall', icon: CreditCard },
+    { id: 'hero' as const, label: 'Hero & Landing', icon: LayoutTemplate },
     { id: 'history' as const, label: 'Platform History', icon: History },
     { id: 'whitelist' as const, label: 'VIP Whitelist', icon: UserCheck },
     { id: 'admins' as const, label: 'Admin Accounts', icon: ShieldCheck },
@@ -275,6 +277,7 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
           >
             {activeSection === 'subscriptions' && <AdminUserSubscriptions users={users} loading={loadingUnified} onRefresh={refreshUnified} />}
             {activeSection === 'plans' && <AdminPricingManager />}
+            {activeSection === 'hero' && <AdminHeroManager />}
             {activeSection === 'history' && <AdminPlatformHistory users={users} stats={unifiedStats} loading={loadingUnified} onRefresh={refreshUnified} />}
             {activeSection === 'whitelist' && <AdminWhitelistManager />}
             {activeSection === 'admins' && <AdminUsersManager currentUserEmail={currentUser?.email} />}

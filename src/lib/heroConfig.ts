@@ -1,0 +1,217 @@
+import { useState, useEffect, useCallback } from 'react';
+import { auth } from '../firebase';
+
+export interface HeroBenefit {
+  id: string;
+  title: string;
+  description: string;
+}
+
+export type HeroBackgroundType = 'color' | 'image' | 'video';
+export type HeroCardAlignment = 'right' | 'left' | 'center';
+
+export interface HeroConfig {
+  headline: string;
+  headlineHighlight: string;
+  subtitle: string;
+  benefits: HeroBenefit[];
+  showWorkflowIllustration: boolean;
+  backgroundType: HeroBackgroundType;
+  backgroundColor: string;
+  backgroundImageUrl: string;
+  backgroundVideoUrl: string;
+  backgroundOverlayOpacity: number;
+  cardAlignment: HeroCardAlignment;
+}
+
+export const DEFAULT_HERO_CONFIG: HeroConfig = {
+  headline: 'Invoice. Scan. Get Paid.',
+  headlineHighlight: 'Get Paid.',
+  subtitle:
+    'The all-in-one client CRM, deliverable tracker, and automated invoicing workspace built specifically for Indian freelancers and digital studios.',
+  benefits: [
+    {
+      id: 'b1',
+      title: 'Direct UPI Payments',
+      description: 'Zero gateway commissions. 100% money goes directly to your bank.',
+    },
+    {
+      id: 'b2',
+      title: 'Deliverable Tracking',
+      description: 'Log edits, revisions, and status updates seamlessly for every client.',
+    },
+    {
+      id: 'b3',
+      title: 'Automated Delivery',
+      description: 'Scheduled WhatsApp-ready and email invoices at 6:00 AM sharp.',
+    },
+  ],
+  showWorkflowIllustration: true,
+  backgroundType: 'color',
+  backgroundColor: '#333333',
+  backgroundImageUrl: '',
+  backgroundVideoUrl: '',
+  backgroundOverlayOpacity: 0.65,
+  cardAlignment: 'right',
+};
+
+const STORAGE_KEY = 'crestflow_hero_config_v1';
+const EVENT_NAME = 'crestflow:hero-config-changed';
+
+/**
+ * Safely merges partial remote or cached hero data with canonical defaults.
+ */
+export function mergeHeroConfig(raw?: Partial<HeroConfig> | null): HeroConfig {
+  if (!raw || typeof raw !== 'object') {
+    return {
+      ...DEFAULT_HERO_CONFIG,
+      benefits: DEFAULT_HERO_CONFIG.benefits.map((b) => ({ ...b })),
+    };
+  }
+
+  const cleanBenefits: HeroBenefit[] = Array.isArray(raw.benefits)
+    ? raw.benefits
+        .filter((b) => b && typeof b === 'object' && typeof b.title === 'string')
+        .map((b, idx) => ({
+          id: String(b.id || `b-${idx + 1}`),
+          title: String(b.title || '').trim(),
+          description: String(b.description || '').trim(),
+        }))
+    : DEFAULT_HERO_CONFIG.benefits.map((b) => ({ ...b }));
+
+  const validTypes: HeroBackgroundType[] = ['color', 'image', 'video'];
+  const validAlignments: HeroCardAlignment[] = ['right', 'left', 'center'];
+
+  return {
+    headline: typeof raw.headline === 'string' && raw.headline.trim() ? raw.headline.trim() : DEFAULT_HERO_CONFIG.headline,
+    headlineHighlight: typeof raw.headlineHighlight === 'string' ? raw.headlineHighlight.trim() : DEFAULT_HERO_CONFIG.headlineHighlight,
+    subtitle: typeof raw.subtitle === 'string' && raw.subtitle.trim() ? raw.subtitle.trim() : DEFAULT_HERO_CONFIG.subtitle,
+    benefits: cleanBenefits.length > 0 ? cleanBenefits : DEFAULT_HERO_CONFIG.benefits.map((b) => ({ ...b })),
+    showWorkflowIllustration: raw.showWorkflowIllustration !== false,
+    backgroundType: validTypes.includes(raw.backgroundType as any) ? (raw.backgroundType as HeroBackgroundType) : 'color',
+    backgroundColor: typeof raw.backgroundColor === 'string' && raw.backgroundColor.trim() ? raw.backgroundColor.trim() : '#333333',
+    backgroundImageUrl: typeof raw.backgroundImageUrl === 'string' ? raw.backgroundImageUrl.trim() : '',
+    backgroundVideoUrl: typeof raw.backgroundVideoUrl === 'string' ? raw.backgroundVideoUrl.trim() : '',
+    backgroundOverlayOpacity:
+      typeof raw.backgroundOverlayOpacity === 'number' && !Number.isNaN(raw.backgroundOverlayOpacity)
+        ? Math.max(0, Math.min(1, raw.backgroundOverlayOpacity))
+        : 0.65,
+    cardAlignment: validAlignments.includes(raw.cardAlignment as any) ? (raw.cardAlignment as HeroCardAlignment) : 'right',
+  };
+}
+
+/**
+ * Synchronously retrieves cached hero config from localStorage, falling back to defaults.
+ */
+export function getHeroConfigSync(): HeroConfig {
+  if (typeof window === 'undefined') return DEFAULT_HERO_CONFIG;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return DEFAULT_HERO_CONFIG;
+    return mergeHeroConfig(JSON.parse(raw));
+  } catch {
+    return DEFAULT_HERO_CONFIG;
+  }
+}
+
+/**
+ * Persists updated hero configuration to Firestore via the admin settings API.
+ */
+export async function saveHeroConfig(config: HeroConfig): Promise<HeroConfig> {
+  const normalized = mergeHeroConfig(config);
+  const currentUser = auth.currentUser;
+  if (!currentUser) throw new Error('You must be signed in as an administrator to save hero settings.');
+
+  const token = await currentUser.getIdToken(true);
+  const res = await fetch('/api/admin/settings', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      settingId: 'hero_config',
+      data: normalized,
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as any)?.error || `Failed to save hero config (${res.status})`);
+  }
+
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+  } catch {}
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: { config: normalized } }));
+  }
+
+  return normalized;
+}
+
+/**
+ * Resets hero configuration back to defaults.
+ */
+export async function resetHeroConfig(): Promise<HeroConfig> {
+  return saveHeroConfig(DEFAULT_HERO_CONFIG);
+}
+
+/**
+ * React hook returning live, admin-editable hero configuration.
+ */
+export function useHeroConfig() {
+  const [config, setConfig] = useState<HeroConfig>(() => getHeroConfigSync());
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const fetchRemote = useCallback(async () => {
+    try {
+      const res = await fetch('/api/hero-config', { cache: 'no-store' });
+      if (res.ok) {
+        const payload = (await res.json()) as { config?: Partial<HeroConfig> | null };
+        if (payload?.config) {
+          const merged = mergeHeroConfig(payload.config);
+          setConfig(merged);
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+          } catch {}
+        }
+      }
+    } catch {
+      // Offline fallback
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchRemote();
+
+    const handleLocal = (e: any) => {
+      if (e?.detail?.config) setConfig(mergeHeroConfig(e.detail.config));
+    };
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY && e.newValue) {
+        try {
+          setConfig(mergeHeroConfig(JSON.parse(e.newValue)));
+        } catch {}
+      }
+    };
+
+    window.addEventListener(EVENT_NAME, handleLocal);
+    window.addEventListener('storage', handleStorage);
+    return () => {
+      window.removeEventListener(EVENT_NAME, handleLocal);
+      window.removeEventListener('storage', handleStorage);
+    };
+  }, [fetchRemote]);
+
+  return {
+    config,
+    saveConfig: saveHeroConfig,
+    resetConfig: resetHeroConfig,
+    loading,
+    refresh: fetchRemote,
+  };
+}

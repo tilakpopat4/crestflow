@@ -3,6 +3,7 @@ import { motion, useReducedMotion } from 'motion/react';
 import { SignInCard } from './SignInCard';
 import { WorkflowIllustration } from './WorkflowIllustration';
 import Footer from '../Footer';
+import { useHeroConfig } from '../../lib/heroConfig';
 
 interface SignInScreenProps {
   isAdminRoute: boolean;
@@ -15,10 +16,8 @@ interface SignInScreenProps {
 
 /**
  * SignInScreen renders the editorial landing and sign-in view for CrestFlow:
- * - Solid studio grey background across entire main content screen (#333333)
- * - Desktop: Left column (Headline, 3 key benefits, workflow diagram) + Right column (SignInCard)
- * - Mobile (/adapt): Clean stacked hierarchy
- * - Website standard Footer: (#282828)
+ * - Fully configurable text, benefits, custom photo/video background, and card alignment.
+ * - Managed in real-time from the Admin Command Center.
  */
 export const SignInScreen: React.FC<SignInScreenProps> = ({
   isAdminRoute,
@@ -29,6 +28,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
   onSupportingNavigate,
 }) => {
   const shouldReduceMotion = useReducedMotion();
+  const { config } = useHeroConfig();
 
   // If admin route, display the focused admin sign-in card
   if (isAdminRoute) {
@@ -49,70 +49,155 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
     );
   }
 
+  const renderHeadline = () => {
+    if (!config.headlineHighlight || !config.headline.includes(config.headlineHighlight)) {
+      return config.headline;
+    }
+    const idx = config.headline.indexOf(config.headlineHighlight);
+    const before = config.headline.slice(0, idx);
+    const after = config.headline.slice(idx + config.headlineHighlight.length);
+    return (
+      <>
+        {before}
+        <span className="text-[#6366f1]">{config.headlineHighlight}</span>
+        {after}
+      </>
+    );
+  };
+
+  const heroContent = (
+    <div className={`flex flex-col justify-center space-y-4 sm:space-y-6 ${config.cardAlignment === 'center' ? 'items-center text-center' : ''}`}>
+      <div>
+        <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-[62px] font-black italic tracking-tight text-white leading-[1.08]">
+          {renderHeadline()}
+        </h1>
+        <p className={`text-xs sm:text-sm lg:text-base text-slate-300 sm:text-slate-400 mt-3 sm:mt-4 leading-relaxed ${config.cardAlignment === 'center' ? 'max-w-2xl mx-auto' : 'max-w-xl'}`}>
+          {config.subtitle}
+        </p>
+      </div>
+
+      {/* Dynamic Benefits Chips */}
+      {config.benefits.length > 0 && (
+        <div className={`grid gap-3 pt-2 w-full ${config.benefits.length === 1 ? 'grid-cols-1 max-w-md' : config.benefits.length === 2 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 sm:grid-cols-3'}`}>
+          {config.benefits.map((b) => (
+            <div key={b.id} className="bg-[#282828]/90 border border-[#383838] p-3 rounded-lg text-left backdrop-blur-xs">
+              <p className="text-xs font-semibold text-white">{b.title}</p>
+              <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">{b.description}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Desktop Workflow Diagram Illustration */}
+      {config.showWorkflowIllustration && (
+        <div className={`hidden lg:block pt-3 xl:pt-4 ${config.cardAlignment === 'center' ? 'max-w-2xl mx-auto' : ''}`}>
+          <WorkflowIllustration className="w-full max-w-xl xl:max-w-2xl" />
+        </div>
+      )}
+    </div>
+  );
+
+  const authCard = (
+    <div className="flex flex-col items-center justify-center w-full">
+      <SignInCard
+        isAdminRoute={isAdminRoute}
+        isSigningIn={isSigningIn}
+        onLogin={onLogin}
+        onEmailSignUp={onEmailSignUp}
+        onEmailSignIn={onEmailSignIn}
+        onSupportingNavigate={onSupportingNavigate}
+      />
+
+      {/* Mobile / Tablet Workflow Diagram */}
+      {config.showWorkflowIllustration && (
+        <div className="block lg:hidden mt-8 sm:mt-10 w-full max-w-sm sm:max-w-md mx-auto">
+          <WorkflowIllustration className="w-full" />
+        </div>
+      )}
+    </div>
+  );
+
+  const containerBgStyle = {
+    backgroundColor: config.backgroundType === 'color' ? (config.backgroundColor || '#333333') : '#121212',
+  };
+
   return (
-    <div className="min-h-screen w-full flex flex-col justify-between font-sans relative overflow-x-hidden select-none text-slate-100 bg-[#333333]">
+    <div
+      style={containerBgStyle}
+      className="min-h-screen w-full flex flex-col justify-between font-sans relative overflow-x-hidden select-none text-slate-100"
+    >
+      {/* Background Media (Image or Video) with Dimmer Overlay */}
+      {config.backgroundType === 'image' && config.backgroundImageUrl && (
+        <>
+          <div
+            className="absolute inset-0 bg-cover bg-center pointer-events-none z-0"
+            style={{ backgroundImage: `url("${config.backgroundImageUrl}")` }}
+          />
+          <div
+            className="absolute inset-0 bg-black pointer-events-none z-0"
+            style={{ opacity: config.backgroundOverlayOpacity }}
+          />
+        </>
+      )}
+
+      {config.backgroundType === 'video' && config.backgroundVideoUrl && (
+        <>
+          <video
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
+            autoPlay
+            loop
+            muted
+            playsInline
+            src={config.backgroundVideoUrl}
+          />
+          <div
+            className="absolute inset-0 bg-black pointer-events-none z-0"
+            style={{ opacity: config.backgroundOverlayOpacity }}
+          />
+        </>
+      )}
+
       {/* Main Hero & Placement Section (fullscreen-responsive) */}
       <main className="flex-1 flex items-center justify-center px-4 py-8 sm:px-8 md:px-12 lg:px-16 xl:px-20 lg:py-16 relative z-10 max-w-7xl 2xl:max-w-[1440px] mx-auto w-full">
         <motion.div
           initial={{ opacity: shouldReduceMotion ? 1 : 0, y: shouldReduceMotion ? 0 : 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: shouldReduceMotion ? 0 : 0.3 }}
-          className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16 items-center w-full"
+          className="w-full"
         >
-          {/* Left Column: Heading, 3 Key Benefits & Workflow Illustration */}
-          <div className="lg:col-span-7 flex flex-col justify-center space-y-4 sm:space-y-6">
-            <div>
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-[62px] font-black italic tracking-tight text-white leading-[1.08]">
-                Invoice. Scan. <span className="text-[#6366f1]">Get Paid.</span>
-              </h1>
-              <p className="text-xs sm:text-sm lg:text-base text-slate-300 sm:text-slate-400 mt-3 sm:mt-4 leading-relaxed max-w-xl">
-                The all-in-one client CRM, deliverable tracker, and automated invoicing workspace built specifically for Indian freelancers and digital studios.
-              </p>
-            </div>
-
-            {/* 3 Core Benefits */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-              <div className="bg-[#282828] border border-[#383838] p-3 rounded-lg">
-                <p className="text-xs font-semibold text-white">Direct UPI Payments</p>
-                <p className="text-[11px] text-slate-400 mt-0.5">Zero gateway commissions. 100% money goes directly to your bank.</p>
-              </div>
-              <div className="bg-[#282828] border border-[#383838] p-3 rounded-lg">
-                <p className="text-xs font-semibold text-white">Deliverable Tracking</p>
-                <p className="text-[11px] text-slate-400 mt-0.5">Log edits, revisions, and status updates seamlessly for every client.</p>
-              </div>
-              <div className="bg-[#282828] border border-[#383838] p-3 rounded-lg">
-                <p className="text-xs font-semibold text-white">Automated Delivery</p>
-                <p className="text-[11px] text-slate-400 mt-0.5">Scheduled WhatsApp-ready and email invoices at 6:00 AM sharp.</p>
+          {config.cardAlignment === 'center' ? (
+            <div className="flex flex-col items-center space-y-8 max-w-4xl mx-auto w-full">
+              {heroContent}
+              <div className="w-full max-w-md mx-auto pt-2">
+                {authCard}
               </div>
             </div>
-
-            {/* Desktop Workflow Diagram Illustration */}
-            <div className="hidden lg:block pt-3 xl:pt-4">
-              <WorkflowIllustration className="w-full max-w-xl xl:max-w-2xl" />
+          ) : config.cardAlignment === 'left' ? (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16 items-center w-full">
+              <div className="lg:col-span-5 order-2 lg:order-1">
+                {authCard}
+              </div>
+              <div className="lg:col-span-7 order-1 lg:order-2">
+                {heroContent}
+              </div>
             </div>
-          </div>
-
-          {/* Right Column: Sign-In Card */}
-          <div className="lg:col-span-5 flex flex-col items-center justify-center w-full">
-            <SignInCard
-              isAdminRoute={isAdminRoute}
-              isSigningIn={isSigningIn}
-              onLogin={onLogin}
-              onEmailSignUp={onEmailSignUp}
-              onEmailSignIn={onEmailSignIn}
-              onSupportingNavigate={onSupportingNavigate}
-            />
-
-            {/* Mobile / Tablet Workflow Diagram (adaptive: placed under card on mobile phones) */}
-            <div className="block lg:hidden mt-8 sm:mt-10 w-full max-w-sm sm:max-w-md mx-auto">
-              <WorkflowIllustration className="w-full" />
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16 items-center w-full">
+              <div className="lg:col-span-7">
+                {heroContent}
+              </div>
+              <div className="lg:col-span-5">
+                {authCard}
+              </div>
             </div>
-          </div>
+          )}
         </motion.div>
       </main>
 
-      {/* Full Website Footer (Identical on all pages) */}
-      <Footer onNavigate={onSupportingNavigate} />
+      {/* Full Website Footer */}
+      <div className="relative z-10">
+        <Footer onNavigate={onSupportingNavigate} />
+      </div>
     </div>
   );
 };

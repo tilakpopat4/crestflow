@@ -3,7 +3,27 @@ import { verifyFirebaseIdToken } from '../auth';
 import { jsonResponse, getBearerToken } from './subscription';
 import { parseServiceAccount, getFirestoreDoc, setFirestoreDoc } from '../firestore';
 
-const ALLOWED_SETTINGS = new Set(['subscriptions', 'footer_config', 'ai_config', 'pricing_config']);
+const ALLOWED_SETTINGS = new Set(['subscriptions', 'footer_config', 'ai_config', 'pricing_config', 'hero_config']);
+
+/**
+ * Public read endpoint for hero section and landing page configuration.
+ * Reads `system_settings/hero_config` via service account since direct client reads are blocked.
+ */
+export async function handleGetHeroConfig(env: Env): Promise<Response> {
+  try {
+    const creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
+    const data = await getFirestoreDoc(creds, 'system_settings/hero_config');
+    return new Response(JSON.stringify({ config: data || null }), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store',
+      },
+    });
+  } catch (err: any) {
+    return jsonResponse({ config: null, error: err?.message || 'Failed to read hero config' }, 200);
+  }
+}
 
 /**
  * Public read endpoint for subscription wall & pricing plans configuration.
