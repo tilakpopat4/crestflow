@@ -128,6 +128,7 @@ export default function App() {
         onEmailSignUp={handleEmailSignUp}
         onEmailSignIn={handleEmailSignIn}
         onSupportingNavigate={(r) => navigate(r)}
+        initialMode={isSpecialMode === 'auth' ? 'auth' : 'promo'}
       />
     );
   }
