@@ -1,9 +1,10 @@
-import React, { useRef, useEffect, useMemo, useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { SignInCard } from './SignInCard';
 import { WorkflowIllustration } from './WorkflowIllustration';
 import Footer from '../Footer';
-import { useHeroConfig, parseVideoSource } from '../../lib/heroConfig';
+import { useHeroConfig } from '../../lib/heroConfig';
+import { siteConfig } from '../../config/site';
 
 interface SignInScreenProps {
   isAdminRoute: boolean;
@@ -25,18 +26,24 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
   const shouldReduceMotion = useReducedMotion();
   const { config } = useHeroConfig();
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [videoFailed, setVideoFailed] = useState(false);
   const [isMobileScreen, setIsMobileScreen] = useState(false);
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [loadedAfterPaint, setLoadedAfterPaint] = useState(false);
 
-  const isDataSaver = typeof navigator !== 'undefined' && Boolean((navigator as any).connection?.saveData);
+  const connection = typeof navigator !== 'undefined' ? (navigator as any).connection : null;
+  const isDataSaver = Boolean(connection?.saveData);
+  const isSlowNetwork = connection?.effectiveType === 'slow-2g' || connection?.effectiveType === '2g';
   const isReducedMotion = shouldReduceMotion || (typeof window !== 'undefined' && Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches));
-  const parsedVideo = useMemo(() => parseVideoSource(config.backgroundVideoUrl), [config.backgroundVideoUrl]);
-  const isVideoConfigured = config.backgroundType === 'video' && Boolean(config.backgroundVideoUrl?.trim());
-  const canPlayVideo = isVideoConfigured && config.videoEnabled !== false && !isReducedMotion && !isDataSaver && (!isMobileScreen || config.showOnMobile === true) && !videoFailed;
-  // Discard auto-generated YouTube thumbnails with text/logos in favor of clean slate surface
-  const effectivePosterUrl = config.posterUrl && !config.posterUrl.includes('img.youtube.com') ? config.posterUrl.trim() : '';
+
+  const webmUrl = siteConfig.heroVideo.webm && !siteConfig.heroVideo.webm.includes('REPLACE_ME') ? siteConfig.heroVideo.webm.trim() : '';
+  const mp4Url = siteConfig.heroVideo.mp4 && !siteConfig.heroVideo.mp4.includes('REPLACE_ME')
+    ? siteConfig.heroVideo.mp4.trim()
+    : config.backgroundVideoUrl && !config.backgroundVideoUrl.includes('youtube') && !config.backgroundVideoUrl.includes('youtu.be')
+    ? config.backgroundVideoUrl.trim()
+    : '';
+  const hasVideoSource = Boolean(webmUrl || mp4Url);
+  const posterSrc = siteConfig.heroVideo.poster || '/hero-v1-poster.jpg';
+  const shouldSuppressAutoplay = isReducedMotion || isDataSaver || isSlowNetwork || (!config.showOnMobile && isMobileScreen);
 
   useEffect(() => {
     const checkMobile = () => setIsMobileScreen(window.innerWidth < 768);
@@ -45,56 +52,38 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Delay media streaming until after initial layout and first paint for optimal LCP
   useEffect(() => {
-    if (canPlayVideo && parsedVideo.type === 'direct' && videoRef.current) {
+    const raf = requestAnimationFrame(() => {
+      requestAnimationFrame(() => setLoadedAfterPaint(true));
+    });
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  useEffect(() => {
+    if (loadedAfterPaint && !shouldSuppressAutoplay && hasVideoSource && videoRef.current) {
       const v = videoRef.current;
       v.muted = true;
       v.defaultMuted = true;
       v.playsInline = true;
-      v.play().then(() => setIsVideoPlaying(true)).catch(() => {
-        v.muted = true;
-        v.play().then(() => setIsVideoPlaying(true)).catch(() => setVideoFailed(true));
+      v.play().catch(() => {
+        // If browser blocks autoplay, keep the poster visible gracefully
       });
     }
-  }, [canPlayVideo, parsedVideo.type, parsedVideo.directUrl]);
-
-  useEffect(() => {
-    if (!canPlayVideo) {
-      setIsVideoPlaying(false);
-      return;
-    }
-
-    // Auto-reveal video smoothly without getting trapped on a static thumbnail
-    const readyTimer = setTimeout(() => setIsVideoPlaying(true), 600);
-
-    if (parsedVideo.type === 'youtube') {
-      const ping = () => {
-        iframeRef.current?.contentWindow?.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-      };
-      const pings = [100, 300, 800].map((t) => setTimeout(ping, t));
-      return () => {
-        clearTimeout(readyTimer);
-        pings.forEach(clearTimeout);
-      };
-    }
-
-    return () => clearTimeout(readyTimer);
-  }, [canPlayVideo, parsedVideo.type, parsedVideo.embedUrl]);
+  }, [loadedAfterPaint, shouldSuppressAutoplay, hasVideoSource, webmUrl, mp4Url]);
 
   useEffect(() => {
     const handleVisibility = () => {
+      if (!videoRef.current) return;
       if (document.hidden) {
-        if (videoRef.current) videoRef.current.pause();
-      } else if (canPlayVideo) {
-        if (videoRef.current) videoRef.current.play().catch(() => {});
-        if (iframeRef.current?.contentWindow) {
-          iframeRef.current.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-        }
+        videoRef.current.pause();
+      } else if (!shouldSuppressAutoplay && !videoFailed) {
+        videoRef.current.play().catch(() => {});
       }
     };
     document.addEventListener('visibilitychange', handleVisibility);
     return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, [canPlayVideo]);
+  }, [shouldSuppressAutoplay, videoFailed]);
 
   if (isAdminRoute) {
     return (
@@ -154,14 +143,14 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
     </div>
   );
 
-  const isVideo = isVideoConfigured && config.videoEnabled !== false;
   const isImage = config.backgroundType === 'image' && Boolean(config.backgroundImageUrl?.trim());
 
   return (
     <div
-      style={{ backgroundColor: isVideo || isImage ? 'transparent' : (config.backgroundColor || '#1E1E1E') }}
-      className={`min-h-screen w-full flex flex-col justify-between font-sans relative overflow-x-hidden select-none text-slate-100 ${isVideo || isImage ? '!bg-transparent' : ''}`}
+      style={{ backgroundColor: !isImage ? (config.backgroundColor || '#1E1E1E') : 'transparent' }}
+      className={`min-h-screen w-full flex flex-col justify-between font-sans relative overflow-x-hidden select-none text-slate-100 ${isImage ? '!bg-transparent' : ''}`}
     >
+      {/* Static Image Background Mode */}
       {isImage && (
         <div className="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0 select-none">
           <div className="absolute inset-0 w-full h-full bg-cover bg-center" style={{ backgroundImage: `url("${config.backgroundImageUrl}")` }} />
@@ -169,83 +158,54 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
         </div>
       )}
 
-      {isVideo && (
-        <div className="fixed inset-0 w-full h-full overflow-hidden z-0 select-none bg-[#1E1E1E]">
-          {canPlayVideo && parsedVideo.type === 'direct' && (
-            <video
-              ref={videoRef}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 min-w-full min-h-full w-auto h-auto object-cover max-w-none pointer-events-none z-0"
-              autoPlay
-              loop
-              muted
-              playsInline
-              preload="metadata"
-              poster={effectivePosterUrl || undefined}
-              onPlay={() => setIsVideoPlaying(true)}
-              onCanPlay={() => setIsVideoPlaying(true)}
-              onLoadedData={() => setIsVideoPlaying(true)}
-              onError={() => setVideoFailed(true)}
-              src={parsedVideo.directUrl}
-            />
-          )}
+      {/* Self-Hosted Background Video with Zero Player UI */}
+      {!isImage && (
+        <div className="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0 select-none bg-[#1E1E1E]">
+          <video
+            ref={videoRef}
+            autoPlay={!shouldSuppressAutoplay}
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            disablePictureInPicture
+            controlsList="nodownload noremoteplayback"
+            tabIndex={-1}
+            aria-hidden="true"
+            poster={posterSrc}
+            onError={() => setVideoFailed(true)}
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+            style={{ aspectRatio: '16/9' }}
+          >
+            {loadedAfterPaint && !shouldSuppressAutoplay && !videoFailed && (
+              <>
+                {webmUrl && <source src={webmUrl} type="video/webm" />}
+                {mp4Url && <source src={mp4Url} type="video/mp4" />}
+              </>
+            )}
+          </video>
 
-          {canPlayVideo && (parsedVideo.type === 'youtube' || parsedVideo.type === 'vimeo' || parsedVideo.type === 'drive') && (
-            <iframe
-              ref={iframeRef}
-              title="CrestFlow Hero Background Video"
-              className="absolute top-1/2 left-1/2 pointer-events-none border-0 select-none z-0"
+          {/* Fallback poster displayed when video fails, motion is reduced, or on data saver */}
+          {(videoFailed || shouldSuppressAutoplay || !hasVideoSource) && (
+            <div
+              className="absolute inset-0 w-full h-full bg-cover bg-center z-[5]"
               style={{
-                width: '100vw',
-                height: '56.25vw',
-                minHeight: '100vh',
-                minWidth: '177.78vh',
-                transform: 'translate(-50%, -50%) scale(1.35)',
-              }}
-              src={parsedVideo.embedUrl}
-              allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
-              tabIndex={-1}
-              onLoad={() => {
-                iframeRef.current?.contentWindow?.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-                setTimeout(() => setIsVideoPlaying(true), 250);
+                backgroundImage: `url("${posterSrc}")`,
+                backgroundColor: config.backgroundColor || '#1E1E1E',
               }}
             />
           )}
 
-          {/* Clean surface cover / custom poster: transitions smoothly to reveal moving video */}
+          {/* Dark gradient overlay (from-black/60 to-black/80 with surface-900 / #1A1A1A) for AA contrast */}
           <div
-            className={`absolute inset-0 w-full h-full bg-cover bg-center transition-opacity duration-700 z-[5] ${
-              canPlayVideo && isVideoPlaying ? 'opacity-0 pointer-events-none' : 'opacity-100'
-            }`}
-            style={{
-              backgroundImage: effectivePosterUrl ? `url("${effectivePosterUrl}")` : undefined,
-              backgroundColor: !effectivePosterUrl ? (config.backgroundColor || '#1E1E1E') : undefined,
-            }}
-          />
-
-          {/* Interaction blocker shield: prevents mouse or touch from reaching video player */}
-          <div
-            className="absolute inset-0 z-10 pointer-events-auto select-none bg-transparent"
+            className="absolute inset-0 z-10 pointer-events-none bg-gradient-to-b from-black/60 to-black/80"
+            style={{ backgroundColor: '#1A1A1A', opacity: config.backgroundOverlayOpacity || 0.65 }}
             aria-hidden="true"
-            onContextMenu={(e) => e.preventDefault()}
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-            onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
-            onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); }}
-          />
-
-          {/* Dark scrim between video and content using surface-900 (#1A1A1A) */}
-          <div
-            className="absolute inset-0 z-20 bg-[#1A1A1A] pointer-events-auto"
-            style={{ opacity: config.backgroundOverlayOpacity || 0.65 }}
-            aria-hidden="true"
-            onContextMenu={(e) => e.preventDefault()}
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-            onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
-            onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); }}
           />
         </div>
       )}
 
-      {/* Main Hero & Placement Section (fullscreen-responsive) */}
+      {/* Main Hero & Content Section */}
       <main
         style={{ backgroundColor: 'transparent' }}
         className="!bg-transparent flex-1 flex items-center justify-center px-4 py-8 sm:px-8 md:px-12 lg:px-16 xl:px-20 lg:py-16 relative z-30 max-w-7xl 2xl:max-w-[1440px] mx-auto w-full"
@@ -270,7 +230,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
         </motion.div>
       </main>
 
-      {/* Minimal transparent footer so background media flows under */}
+      {/* Minimal transparent footer */}
       <div className="relative z-30 w-full mt-auto">
         <Footer variant="minimal" transparent={true} onNavigate={onSupportingNavigate} className="!bg-transparent border-t border-white/10" />
       </div>

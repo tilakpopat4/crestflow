@@ -97,6 +97,21 @@ export async function handleStaticAsset(request: Request, env: Env): Promise<Res
     headers.set('Pragma', 'no-cache');
     headers.set('Expires', '0');
 
+    // Content-Security-Policy: Enforced mode (media-src permits UploadThing; YouTube embed allowances removed)
+    const csp = [
+      "default-src 'self'",
+      "base-uri 'self'",
+      "font-src 'self' https://fonts.gstatic.com data:",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "script-src 'self' 'unsafe-inline' https://apis.google.com",
+      "connect-src 'self' https://*.googleapis.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://api.razorpay.com https://utfs.io https://*.ufs.sh",
+      "img-src 'self' data: blob: https:",
+      "media-src 'self' https://utfs.io https://*.ufs.sh blob: data:",
+      "object-src 'none'",
+      "form-action 'self'",
+    ].join('; ');
+    headers.set('Content-Security-Policy', csp);
+
     const isKnown = isKnownAppRoute(url.pathname);
     if (!isKnown) {
       return new Response(response.body, {
