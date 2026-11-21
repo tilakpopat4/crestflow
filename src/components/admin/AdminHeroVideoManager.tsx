@@ -42,13 +42,13 @@ export const AdminHeroVideoManager: React.FC<AdminHeroVideoManagerProps> = ({ dr
   const hasVideo = Boolean(draft.backgroundVideoUrl?.trim());
   const parsed = useMemo(() => parseVideoSource(draft.backgroundVideoUrl), [draft.backgroundVideoUrl]);
 
-  const handleApplyPreset = (url: string, id?: string) => {
+  const handleApplyPreset = (url: string) => {
     setDraft((prev) => ({
       ...prev,
       backgroundType: 'video',
       backgroundVideoUrl: url,
       videoEnabled: true,
-      posterUrl: id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : prev.posterUrl,
+      posterUrl: prev.posterUrl && !prev.posterUrl.includes('img.youtube.com') ? prev.posterUrl : '',
     }));
   };
 
@@ -85,12 +85,11 @@ export const AdminHeroVideoManager: React.FC<AdminHeroVideoManagerProps> = ({ dr
             value={draft.backgroundVideoUrl}
             onChange={(e) => {
               const val = e.target.value.trim();
-              const p = parseVideoSource(val);
               setDraft((prev) => ({
                 ...prev,
                 backgroundType: 'video',
                 backgroundVideoUrl: val,
-                ...(p.posterUrl && !prev.posterUrl ? { posterUrl: p.posterUrl } : {}),
+                posterUrl: prev.posterUrl && !prev.posterUrl.includes('img.youtube.com') ? prev.posterUrl : '',
               }));
             }}
             placeholder="https://www.youtube.com/watch?v=... or 11-char ID"
@@ -115,7 +114,7 @@ export const AdminHeroVideoManager: React.FC<AdminHeroVideoManagerProps> = ({ dr
               <button
                 key={p.label}
                 type="button"
-                onClick={() => handleApplyPreset(p.url, p.id)}
+                onClick={() => handleApplyPreset(p.url)}
                 className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer border ${
                   isCurrent
                     ? 'border-accent bg-accent/15 text-white'

@@ -35,7 +35,8 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
   const parsedVideo = useMemo(() => parseVideoSource(config.backgroundVideoUrl), [config.backgroundVideoUrl]);
   const isVideoConfigured = config.backgroundType === 'video' && Boolean(config.backgroundVideoUrl?.trim());
   const canPlayVideo = isVideoConfigured && config.videoEnabled !== false && !isReducedMotion && !isDataSaver && (!isMobileScreen || config.showOnMobile === true) && !videoFailed;
-  const effectivePosterUrl = config.posterUrl || (parsedVideo.type === 'youtube' ? parsedVideo.posterUrl : '');
+  // Discard auto-generated YouTube thumbnails with text/logos in favor of clean slate surface
+  const effectivePosterUrl = config.posterUrl && !config.posterUrl.includes('img.youtube.com') ? config.posterUrl.trim() : '';
 
   useEffect(() => {
     const checkMobile = () => setIsMobileScreen(window.innerWidth < 768);
@@ -62,33 +63,22 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
       setIsVideoPlaying(false);
       return;
     }
-    if (parsedVideo.type === 'direct') return;
+
+    // Auto-reveal video smoothly without getting trapped on a static thumbnail
+    const readyTimer = setTimeout(() => setIsVideoPlaying(true), 600);
+
     if (parsedVideo.type === 'youtube') {
-      const handleMsg = (e: MessageEvent) => {
-        try {
-          const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
-          if (data?.event === 'onStateChange') {
-            if (data.info === 1) setIsVideoPlaying(true);
-            else if (data.info === 2 || data.info === 0) {
-              setIsVideoPlaying(false);
-              iframeRef.current?.contentWindow?.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-            }
-          } else if (data?.info?.playerState === 1) {
-            setIsVideoPlaying(true);
-          }
-        } catch {}
+      const ping = () => {
+        iframeRef.current?.contentWindow?.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
       };
-      window.addEventListener('message', handleMsg);
-      const timers = [150, 500, 1200, 2500].map((t) =>
-        setTimeout(() => {
-          iframeRef.current?.contentWindow?.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-        }, t)
-      );
+      const pings = [100, 300, 800].map((t) => setTimeout(ping, t));
       return () => {
-        window.removeEventListener('message', handleMsg);
-        timers.forEach(clearTimeout);
+        clearTimeout(readyTimer);
+        pings.forEach(clearTimeout);
       };
     }
+
+    return () => clearTimeout(readyTimer);
   }, [canPlayVideo, parsedVideo.type, parsedVideo.embedUrl]);
 
   useEffect(() => {
@@ -192,6 +182,8 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
               preload="metadata"
               poster={effectivePosterUrl || undefined}
               onPlay={() => setIsVideoPlaying(true)}
+              onCanPlay={() => setIsVideoPlaying(true)}
+              onLoadedData={() => setIsVideoPlaying(true)}
               onError={() => setVideoFailed(true)}
               src={parsedVideo.directUrl}
             />
@@ -214,22 +206,21 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
               tabIndex={-1}
               onLoad={() => {
                 iframeRef.current?.contentWindow?.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+                setTimeout(() => setIsVideoPlaying(true), 250);
               }}
             />
           )}
 
-          {/* Poster or solid fallback: covers video/iframe at z-[5] until isVideoPlaying */}
-          {(!canPlayVideo || !isVideoPlaying || effectivePosterUrl) && (
-            <div
-              className={`absolute inset-0 w-full h-full bg-cover bg-center transition-opacity duration-700 z-[5] ${
-                canPlayVideo && isVideoPlaying ? 'opacity-0 pointer-events-none' : 'opacity-100'
-              }`}
-              style={{
-                backgroundImage: effectivePosterUrl ? `url("${effectivePosterUrl}")` : undefined,
-                backgroundColor: !effectivePosterUrl ? (config.backgroundColor || '#1E1E1E') : undefined,
-              }}
-            />
-          )}
+          {/* Clean surface cover / custom poster: transitions smoothly to reveal moving video */}
+          <div
+            className={`absolute inset-0 w-full h-full bg-cover bg-center transition-opacity duration-700 z-[5] ${
+              canPlayVideo && isVideoPlaying ? 'opacity-0 pointer-events-none' : 'opacity-100'
+            }`}
+            style={{
+              backgroundImage: effectivePosterUrl ? `url("${effectivePosterUrl}")` : undefined,
+              backgroundColor: !effectivePosterUrl ? (config.backgroundColor || '#1E1E1E') : undefined,
+            }}
+          />
 
           {/* Interaction blocker shield: prevents mouse or touch from reaching video player */}
           <div
