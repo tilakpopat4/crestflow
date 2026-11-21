@@ -21,7 +21,7 @@
     "EMAILJS_SERVICE_ID": "service_u6nm96l",
     "EMAILJS_TEMPLATE_ID": "template_g3ojhpa",
     "EMAILJS_PUBLIC_KEY": "MY75lMNsMx8rYRLa4",
-    "VITE_HERO_VIDEO_MP4": "https://n0ohengfxq.ufs.sh/f/5eQObb6EGfZUbFbEqe1zlKdcPQ7uSWwnfGFYeVU19MkHLIas"
+    "VITE_HERO_VIDEO_MP4": "https://n0ohengfxq.ufs.sh/f/5eQObb6EGfZURJzJcIAi9haOpYM4NLEoy2zs3KJtPI1DB6xn"
   },
   "triggers": {
     "crons": ["0 0 * * *"]

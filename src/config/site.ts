@@ -20,7 +20,7 @@ export const siteConfig: SiteConfig = {
     webm: (import.meta as any).env?.VITE_HERO_VIDEO_WEBM || 'https://REPLACE_ME/hero-v1.webm',
     mp4:
       (import.meta as any).env?.VITE_HERO_VIDEO_MP4 ||
-      'https://n0ohengfxq.ufs.sh/f/5eQObb6EGfZUbFbEqe1zlKdcPQ7uSWwnfGFYeVU19MkHLIas',
+      'https://n0ohengfxq.ufs.sh/f/5eQObb6EGfZURJzJcIAi9haOpYM4NLEoy2zs3KJtPI1DB6xn',
     poster: '/hero-v1-poster.jpg',
   },
 };
