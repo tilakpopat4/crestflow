@@ -152,8 +152,8 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
         </video>
       </div>
 
-      {/* Top Header Navbar */}
-      <header className="relative z-30 w-full border-b border-white/10 bg-[#0c0c0c]/80 backdrop-blur-md px-4 sm:px-8 py-3.5">
+      {/* Top Header Navbar - Transparent without border */}
+      <header className="relative z-30 w-full bg-transparent px-4 sm:px-8 py-4 sm:py-5">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <button
             type="button"
