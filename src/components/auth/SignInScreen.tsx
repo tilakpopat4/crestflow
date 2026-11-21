@@ -2,6 +2,8 @@ import React, { useRef, useEffect, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { ArrowLeft } from 'lucide-react';
 import { SignInCard } from './SignInCard';
+import { VideoLandingHero } from './VideoLandingHero';
+import { WorkflowIllustration } from './WorkflowIllustration';
 import { CenteredProductHero } from '../promo/CenteredProductHero';
 import Footer from '../Footer';
 import Logo from '../Logo';
@@ -67,27 +69,27 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
   }, []);
 
   useEffect(() => {
-    if (loadedAfterPaint && !shouldSuppressAutoplay && hasVideoSource && videoRef.current) {
+    if (loadedAfterPaint && !shouldSuppressAutoplay && hasVideoSource && videoRef.current && authView === 'auth') {
       const v = videoRef.current;
       v.muted = true;
       v.defaultMuted = true;
       v.playsInline = true;
       v.play().catch(() => {});
     }
-  }, [loadedAfterPaint, shouldSuppressAutoplay, hasVideoSource, webmUrl, mp4Url]);
+  }, [loadedAfterPaint, shouldSuppressAutoplay, hasVideoSource, webmUrl, mp4Url, authView]);
 
   useEffect(() => {
     const handleVisibility = () => {
       if (!videoRef.current) return;
       if (document.hidden) {
         videoRef.current.pause();
-      } else if (!shouldSuppressAutoplay && !videoFailed) {
+      } else if (!shouldSuppressAutoplay && !videoFailed && authView === 'auth') {
         videoRef.current.play().catch(() => {});
       }
     };
     document.addEventListener('visibilitychange', handleVisibility);
     return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, [shouldSuppressAutoplay, videoFailed]);
+  }, [shouldSuppressAutoplay, videoFailed, authView]);
 
   if (isAdminRoute) {
     return (
@@ -107,53 +109,55 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
       style={{ backgroundColor: '#0c0c0c' }}
       className="min-h-screen w-full flex flex-col justify-between font-sans relative overflow-x-hidden select-none text-slate-100 bg-[#0c0c0c]"
     >
-      {/* Still Solid Color & Image Background (#1A1A1A dark scrim) */}
+      {/* Background Media Engine: Video on Auth Landing, Still Solid Backdrop on Promo */}
       <div className="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0 select-none bg-[#0c0c0c]">
-        {/* Still solid poster image backdrop */}
+        {/* Still solid poster image backdrop for promo mode or fallback */}
         <div
           className="absolute inset-0 w-full h-full bg-cover bg-center bg-[#0c0c0c]"
           style={{
             backgroundImage: `url("${(isImage && config.backgroundImageUrl?.trim()) || posterSrc}")`,
             backgroundColor: '#1A1A1A',
-            opacity: 0.18,
+            opacity: authView === 'promo' ? 0.18 : 0.4,
           }}
         />
 
-        {/* Gradient overlay from-black/60 to-black/80 for contrast */}
+        {/* Video Background active during Landing Page (authView === 'auth') */}
+        {authView === 'auth' && (
+          <video
+            ref={videoRef}
+            autoPlay={!shouldSuppressAutoplay}
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            disablePictureInPicture
+            controlsList="nodownload noremoteplayback"
+            tabIndex={-1}
+            aria-hidden="true"
+            poster={posterSrc}
+            onError={() => setVideoFailed(true)}
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+            style={{ aspectRatio: '16/9' }}
+          >
+            {loadedAfterPaint && !shouldSuppressAutoplay && !videoFailed && (
+              <>
+                {webmUrl && <source src={webmUrl} type="video/webm" />}
+                {mp4Url && <source src={mp4Url} type="video/mp4" />}
+              </>
+            )}
+          </video>
+        )}
+
+        {/* Gradient overlay from-black/60 to-black/80 with #1A1A1A dark scrim */}
         <div
           className="absolute inset-0 z-10 pointer-events-none bg-gradient-to-b from-black/60 to-black/80"
-          style={{ backgroundColor: '#1A1A1A', opacity: 0.92 }}
+          style={{ backgroundColor: '#1A1A1A', opacity: authView === 'promo' ? 0.94 : (config.backgroundOverlayOpacity || 0.65) }}
           aria-hidden="true"
         />
-
-        {/* Video element retained in DOM for tests & media-src compliance */}
-        <video
-          ref={videoRef}
-          autoPlay={!shouldSuppressAutoplay}
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          disablePictureInPicture
-          controlsList="nodownload noremoteplayback"
-          tabIndex={-1}
-          aria-hidden="true"
-          poster={posterSrc}
-          onError={() => setVideoFailed(true)}
-          className="hidden"
-          style={{ aspectRatio: '16/9' }}
-        >
-          {loadedAfterPaint && !shouldSuppressAutoplay && !videoFailed && (
-            <>
-              {webmUrl && <source src={webmUrl} type="video/webm" />}
-              {mp4Url && <source src={mp4Url} type="video/mp4" />}
-            </>
-          )}
-        </video>
       </div>
 
-      {/* Top Header Navbar - Transparent without border */}
-      <header className="relative z-30 w-full bg-transparent px-4 sm:px-8 py-4 sm:py-5">
+      {/* Top Header Navbar */}
+      <header className="relative z-30 w-full bg-transparent px-4 sm:px-8 py-3.5 sm:py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <button
             type="button"
@@ -203,9 +207,9 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
         </div>
       </header>
 
-      {/* Main Content Area: Flush layout so dashboard preview touches till bottom */}
-      <main className="!bg-transparent flex-1 flex flex-col items-center justify-start relative z-30 w-full min-h-0">
-        {authView === 'promo' ? (
+      {/* Main Content Area */}
+      {authView === 'promo' ? (
+        <main className="!bg-transparent flex-1 flex flex-col items-center justify-start relative z-30 w-full min-h-0">
           <motion.div
             key="promo"
             initial={{ opacity: shouldReduceMotion ? 1 : 0, y: shouldReduceMotion ? 0 : 8 }}
@@ -221,28 +225,64 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
               onComparePlans={() => onSupportingNavigate('pricing')}
             />
           </motion.div>
-        ) : (
+        </main>
+      ) : (
+        <main
+          style={{ backgroundColor: 'transparent' }}
+          className="!bg-transparent flex-1 flex items-center justify-center px-4 py-8 sm:px-8 md:px-12 lg:px-16 xl:px-20 lg:py-16 relative z-30 max-w-7xl 2xl:max-w-[1440px] mx-auto w-full"
+        >
           <motion.div
-            key="auth"
+            key="auth-landing"
             initial={{ opacity: shouldReduceMotion ? 1 : 0, y: shouldReduceMotion ? 0 : 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
-            className="w-full max-w-md mx-auto p-4 sm:p-6 my-auto"
+            transition={{ duration: shouldReduceMotion ? 0 : 0.25 }}
+            className="w-full"
           >
-            <SignInCard
-              isAdminRoute={false}
-              initialMode={authCardInitialMode}
-              isSigningIn={isSigningIn}
-              onLogin={onLogin}
-              onEmailSignUp={onEmailSignUp}
-              onEmailSignIn={onEmailSignIn}
-              onSupportingNavigate={onSupportingNavigate}
-            />
+            {config.cardAlignment === 'center' ? (
+              <div className="flex flex-col items-center space-y-8 max-w-4xl mx-auto w-full">
+                <VideoLandingHero config={config} />
+                <div className="w-full max-w-md mx-auto pt-2">
+                  <SignInCard
+                    isAdminRoute={false}
+                    initialMode={authCardInitialMode}
+                    isSigningIn={isSigningIn}
+                    onLogin={onLogin}
+                    onEmailSignUp={onEmailSignUp}
+                    onEmailSignIn={onEmailSignIn}
+                    onSupportingNavigate={onSupportingNavigate}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16 items-center w-full">
+                <div className={`lg:col-span-7 ${config.cardAlignment === 'left' ? 'order-1 lg:order-2' : ''}`}>
+                  <VideoLandingHero config={config} />
+                </div>
+                <div className={`lg:col-span-5 ${config.cardAlignment === 'left' ? 'order-2 lg:order-1' : ''}`}>
+                  <div className="flex flex-col items-center justify-center w-full">
+                    <SignInCard
+                      isAdminRoute={false}
+                      initialMode={authCardInitialMode}
+                      isSigningIn={isSigningIn}
+                      onLogin={onLogin}
+                      onEmailSignUp={onEmailSignUp}
+                      onEmailSignIn={onEmailSignIn}
+                      onSupportingNavigate={onSupportingNavigate}
+                    />
+                    {config.showWorkflowIllustration && (
+                      <div className="block lg:hidden mt-8 sm:mt-10 w-full max-w-sm sm:max-w-md mx-auto">
+                        <WorkflowIllustration className="w-full" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </motion.div>
-        )}
-      </main>
+        </main>
+      )}
 
-      {/* Minimal Footer touching flush below preview */}
+      {/* Minimal Footer */}
       <div className="relative z-30 w-full mt-auto">
         <Footer variant="minimal" transparent={true} onNavigate={onSupportingNavigate} className="!bg-transparent border-t border-white/10" />
       </div>
