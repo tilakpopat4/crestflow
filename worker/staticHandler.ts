@@ -104,9 +104,9 @@ export async function handleStaticAsset(request: Request, env: Env): Promise<Res
       "font-src 'self' https://fonts.gstatic.com data:",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "script-src 'self' 'unsafe-inline' https://apis.google.com",
-      "connect-src 'self' https://*.googleapis.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://api.razorpay.com https://utfs.io https://*.ufs.sh",
+      "connect-src 'self' https://*.googleapis.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://api.razorpay.com https://utfs.io https://*.ufs.sh https://n0ohengfxq.ufs.sh",
       "img-src 'self' data: blob: https:",
-      "media-src 'self' https://utfs.io https://*.ufs.sh blob: data:",
+      "media-src 'self' https://utfs.io https://*.ufs.sh https://n0ohengfxq.ufs.sh blob: data:",
       "object-src 'none'",
       "form-action 'self'",
     ].join('; ');

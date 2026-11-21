@@ -20,7 +20,8 @@
     "RESEND_FROM_EMAIL": "CrestFlow <onboarding@resend.dev>",
     "EMAILJS_SERVICE_ID": "service_u6nm96l",
     "EMAILJS_TEMPLATE_ID": "template_g3ojhpa",
-    "EMAILJS_PUBLIC_KEY": "MY75lMNsMx8rYRLa4"
+    "EMAILJS_PUBLIC_KEY": "MY75lMNsMx8rYRLa4",
+    "VITE_HERO_VIDEO_MP4": "https://n0ohengfxq.ufs.sh/f/5eQObb6EGfZUbFbEqe1zlKdcPQ7uSWwnfGFYeVU19MkHLIas"
   },
   "triggers": {
     "crons": ["0 0 * * *"]
