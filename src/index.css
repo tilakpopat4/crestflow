@@ -158,11 +158,14 @@
 /* Eliminate white background anywhere across the application */
 body,
 main:not(.bg-transparent):not([class*="bg-transparent"]),
-header,
+header:not(.bg-transparent):not([class*="bg-transparent"]),
 .bg-slate-50 {
   background-color: #333333 !important;
 }
 
+header.bg-transparent,
+header.\!bg-transparent,
+header[class*="bg-transparent"],
 main.bg-transparent,
 main.\!bg-transparent,
 footer.bg-transparent,

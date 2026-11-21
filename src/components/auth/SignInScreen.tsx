@@ -156,8 +156,11 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
         />
       </div>
 
-      {/* Top Header Navbar */}
-      <header className="relative z-30 w-full bg-transparent px-4 sm:px-8 py-3.5 sm:py-4">
+      {/* Top Header Navbar - 100% transparent */}
+      <header
+        style={{ backgroundColor: 'transparent' }}
+        className="relative z-30 w-full !bg-transparent bg-transparent px-4 sm:px-8 py-3.5 sm:py-4"
+      >
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <button
             type="button"
