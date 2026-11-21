@@ -13,31 +13,34 @@ interface CenteredProductHeroProps {
  * - Headline with accent highlight
  * - Studio-focused subtitle
  * - Dual action buttons: 'Start 7-Day Trial' (auth) & 'Compare Plans' (/pricing)
- * - Authentic CrestFlow live dashboard preview
+ * - Dashboard preview touching flush till the end of the page
  */
 export const CenteredProductHero: React.FC<CenteredProductHeroProps> = ({
   onStartTrial,
   onComparePlans,
 }) => {
   return (
-    <section aria-labelledby="hero-product-title" className="relative isolate overflow-hidden px-4 pt-12 sm:pt-20 pb-16 md:px-8 max-w-7xl mx-auto w-full text-center">
-      <div className="mx-auto max-w-5xl">
+    <section
+      aria-labelledby="hero-product-title"
+      className="relative isolate overflow-hidden px-3 sm:px-6 md:px-8 pt-8 sm:pt-14 pb-0 max-w-7xl mx-auto w-full text-center flex flex-col items-center"
+    >
+      <div className="mx-auto max-w-4xl">
         {/* Main Headline */}
         <h1
           id="hero-product-title"
-          className="mx-auto max-w-4xl text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight text-white leading-[1.08]"
+          className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight text-white leading-[1.08]"
         >
           Invoice. Scan. <span className="text-accent">Get Paid.</span>
         </h1>
 
         {/* Subtitle */}
-        <p className="mx-auto mt-5 max-w-2xl text-base sm:text-lg text-slate-300 leading-relaxed font-normal">
+        <p className="mt-4 sm:mt-5 max-w-2xl mx-auto text-base sm:text-lg text-slate-300 leading-relaxed font-normal">
           The all-in-one client CRM, deliverable tracker, and automated invoicing workspace
           <br className="hidden sm:inline" /> built specifically for Indian freelancers and digital studios.
         </p>
 
         {/* Action Buttons: Start 7-Day Trial & Compare Plans */}
-        <div className="mt-8 sm:mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-center">
+        <div className="mt-7 sm:mt-9 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-center">
           <button
             type="button"
             onClick={onStartTrial}
@@ -56,10 +59,10 @@ export const CenteredProductHero: React.FC<CenteredProductHeroProps> = ({
             <span>Compare Plans</span>
           </button>
         </div>
-
-        {/* Authentic CrestFlow Dashboard Preview Card */}
-        <DashboardPreviewMock />
       </div>
+
+      {/* Dashboard Preview Touching Till Bottom of Page */}
+      <DashboardPreviewMock />
     </section>
   );
 };

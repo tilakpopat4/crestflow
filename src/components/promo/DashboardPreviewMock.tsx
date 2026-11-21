@@ -19,18 +19,14 @@ import {
 
 /**
  * High-fidelity visual preview of the CrestFlow application dashboard.
- * Faithfully mirrors the live product UI:
- * - Collapsible navigation sidebar with PRO status
- * - Global header with search shortcut, streak counter & notification bell
- * - 4-column metric grid (Earnings, Dues, Overdues, Invoice Count)
- * - Net revenue monthly comparison chart with 10-month historical trajectory
+ * Positioned to extend flush towards the bottom of the promo page.
  */
 export const DashboardPreviewMock: React.FC = () => {
   return (
-    <div className="relative mx-auto mt-10 sm:mt-14 max-w-5xl text-left select-none">
-      {/* Outer framing shell */}
-      <div className="rounded-2xl border border-[#2b2b2b] bg-[#121212] overflow-hidden shadow-2xl">
-        <div className="flex h-[380px] sm:h-[480px] bg-[#141414] overflow-hidden">
+    <div className="relative mx-auto mt-8 sm:mt-12 w-full max-w-5xl lg:max-w-6xl text-left select-none">
+      {/* Outer framing shell - rounded top, flush bottom */}
+      <div className="rounded-t-2xl sm:rounded-t-3xl border-t border-x border-[#2b2b2b] bg-[#121212] overflow-hidden shadow-2xl">
+        <div className="flex h-[420px] sm:h-[510px] lg:h-[550px] bg-[#141414] overflow-hidden">
           {/* Left Navigation Sidebar */}
           <div className="hidden md:flex w-48 shrink-0 flex-col justify-between border-r border-[#242424] bg-[#161616] p-3 text-xs">
             <div className="space-y-4">
@@ -186,7 +182,7 @@ export const DashboardPreviewMock: React.FC = () => {
                 </div>
 
                 {/* SVG Graph */}
-                <div className="relative w-full h-20 sm:h-28 my-1">
+                <div className="relative w-full h-24 sm:h-32 my-1">
                   <svg className="w-full h-full overflow-visible" viewBox="0 0 600 100" preserveAspectRatio="none">
                     {/* Horizontal Grid lines */}
                     <line x1="40" y1="20" x2="590" y2="20" stroke="#262626" strokeWidth="1" />
