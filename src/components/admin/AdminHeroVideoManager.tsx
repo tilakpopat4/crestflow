@@ -8,10 +8,11 @@ interface AdminHeroVideoManagerProps {
   setDraft: React.Dispatch<React.SetStateAction<HeroConfig>>;
 }
 
-const YOUTUBE_PRESETS = [
-  { label: 'Dark Ambient Wave', id: '4xDzrJKXOOY', url: 'https://www.youtube.com/watch?v=4xDzrJKXOOY' },
-  { label: 'Studio Neon Loop', id: 'rE6FjM13a80', url: 'https://www.youtube.com/watch?v=rE6FjM13a80' },
-  { label: 'Cyber Tech Grid', id: 'L_LUpnjgPso', url: 'https://www.youtube.com/watch?v=L_LUpnjgPso' },
+const VIDEO_PRESETS = [
+  { label: 'Built-in Ambient Loop (MP4)', url: '/videos/hero-background.mp4', id: '' },
+  { label: 'Dark Ambient Wave (YT)', id: '4xDzrJKXOOY', url: 'https://www.youtube.com/watch?v=4xDzrJKXOOY' },
+  { label: 'Studio Neon Loop (YT)', id: 'rE6FjM13a80', url: 'https://www.youtube.com/watch?v=rE6FjM13a80' },
+  { label: 'Cyber Tech Grid (YT)', id: 'L_LUpnjgPso', url: 'https://www.youtube.com/watch?v=L_LUpnjgPso' },
 ];
 
 /**
@@ -41,13 +42,13 @@ export const AdminHeroVideoManager: React.FC<AdminHeroVideoManagerProps> = ({ dr
   const hasVideo = Boolean(draft.backgroundVideoUrl?.trim());
   const parsed = useMemo(() => parseVideoSource(draft.backgroundVideoUrl), [draft.backgroundVideoUrl]);
 
-  const handleApplyPreset = (url: string, id: string) => {
+  const handleApplyPreset = (url: string, id?: string) => {
     setDraft((prev) => ({
       ...prev,
       backgroundType: 'video',
       backgroundVideoUrl: url,
       videoEnabled: true,
-      posterUrl: prev.posterUrl || `https://img.youtube.com/vi/${id}/hqdefault.jpg`,
+      posterUrl: id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : prev.posterUrl,
     }));
   };
 
@@ -108,11 +109,11 @@ export const AdminHeroVideoManager: React.FC<AdminHeroVideoManagerProps> = ({ dr
       <div>
         <span className="block text-[11px] text-[#aaaaaa] mb-1.5 font-medium">Quick Ambient Presets (1-Click Test)</span>
         <div className="flex flex-wrap gap-2">
-          {YOUTUBE_PRESETS.map((p) => {
-            const isCurrent = draft.backgroundVideoUrl.includes(p.id);
+          {VIDEO_PRESETS.map((p) => {
+            const isCurrent = draft.backgroundVideoUrl === p.url || (Boolean(p.id) && draft.backgroundVideoUrl.includes(p.id));
             return (
               <button
-                key={p.id}
+                key={p.label}
                 type="button"
                 onClick={() => handleApplyPreset(p.url, p.id)}
                 className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer border ${

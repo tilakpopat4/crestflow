@@ -177,27 +177,25 @@ export function useAdminLandingMedia({ draft, setDraft }: UseAdminLandingMediaPr
 
   const handleRemoveMedia = async () => {
     if (!window.confirm('Remove the custom video background and revert to default surface?')) return;
+    setDraft((prev) => ({
+      ...prev,
+      backgroundType: 'color',
+      backgroundVideoUrl: '',
+      posterUrl: '',
+      videoEnabled: false,
+      fileSize: 0,
+    }));
+    setStatusMessage('Custom background video removed.');
+
     const token = await auth.currentUser?.getIdToken();
-    if (!token) return setErrorMessage('Authentication required.');
+    if (!token) return;
 
     try {
-      const res = await fetch('/api/admin/landing-media', {
+      await fetch('/api/admin/landing-media', {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error('Failed to delete media from storage.');
-      setDraft((prev) => ({
-        ...prev,
-        backgroundType: 'color',
-        backgroundVideoUrl: '',
-        posterUrl: '',
-        videoEnabled: false,
-        fileSize: 0,
-      }));
-      setStatusMessage('Custom background video removed.');
-    } catch (err: any) {
-      setErrorMessage(err?.message || 'Failed to remove media.');
-    }
+    } catch {}
   };
 
   return {
