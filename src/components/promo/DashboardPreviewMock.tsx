@@ -4,51 +4,52 @@ import {
   Clock,
   TrendingUp,
   AlertCircle,
-  Download,
-  Upload,
+  DownloadCloud,
+  UploadCloud,
   Search,
   Bell,
   ChevronLeft,
   Users,
-  Briefcase,
+  ClipboardList,
   FileText,
-  Star,
+  MessageSquare,
   UserPlus,
-  Flame,
+  Calendar,
+  LayoutDashboard,
 } from 'lucide-react';
+import Logo from '../Logo';
 
 /**
- * High-fidelity visual preview of the CrestFlow application dashboard.
- * Positioned to extend flush towards the bottom of the promo page.
+ * Normalized High-fidelity visual preview of the CrestFlow application dashboard.
+ * Designed to touch flush towards the bottom of the promo page.
+ * Follows GEMINI.md design tokens: flat graphite/slate palette, restrained typography.
  */
 export const DashboardPreviewMock: React.FC = () => {
   return (
-    <div className="relative mx-auto mt-8 sm:mt-12 w-full max-w-5xl lg:max-w-6xl text-left select-none">
+    <div className="relative mx-auto mt-6 sm:mt-10 w-full max-w-6xl xl:max-w-7xl text-left select-none flex-1 flex flex-col justify-end">
       {/* Outer framing shell - rounded top, flush bottom */}
-      <div className="rounded-t-2xl sm:rounded-t-3xl border-t border-x border-[#2b2b2b] bg-[#121212] overflow-hidden shadow-2xl">
-        <div className="flex h-[420px] sm:h-[510px] lg:h-[550px] bg-[#141414] overflow-hidden">
+      <div className="rounded-t-xl sm:rounded-t-2xl border-t border-x border-[#2b2b2b] bg-[#121212] overflow-hidden shadow-2xl flex flex-col w-full flex-1 min-h-[460px] sm:min-h-[520px] lg:min-h-[560px]">
+        <div className="flex flex-1 bg-[#141414] overflow-hidden">
           {/* Left Navigation Sidebar */}
           <div className="hidden md:flex w-48 shrink-0 flex-col justify-between border-r border-[#242424] bg-[#161616] p-3 text-xs">
             <div className="space-y-4">
               {/* Sidebar Header */}
               <div>
                 <div className="flex items-center gap-1.5 px-1 py-0.5">
-                  <span className="flex size-5 items-center justify-center rounded-sm bg-[#e1002d] text-white font-black text-[11px]">
-                    C
-                  </span>
+                  <Logo className="w-5 h-5 shrink-0" />
                   <span className="font-bold text-white tracking-tight text-xs">CrestFlow</span>
-                  <span className="text-[9px] font-mono uppercase bg-[#2a2a2a] text-slate-300 px-1 py-0.2 rounded font-semibold">
+                  <span className="text-[9px] font-mono uppercase bg-[#282828] text-slate-300 px-1.5 py-0.5 rounded font-semibold ml-auto">
                     PRO
                   </span>
-                  <ChevronLeft className="size-3.5 text-slate-500 ml-auto" />
+                  <ChevronLeft className="size-3.5 text-slate-500 ml-1" />
                 </div>
                 <p className="text-[10px] text-slate-500 px-1 mt-0.5">Freelancing Client Manager</p>
               </div>
 
-              {/* Navigation Items */}
+              {/* Navigation Items - Normalized to CrestFlow Sidebar */}
               <div className="space-y-0.5 text-slate-400 font-medium text-[11px]">
-                <div className="flex h-7 items-center gap-2 rounded-md bg-[#222222] px-2 text-white font-semibold">
-                  <TrendingUp className="size-3.5 text-white" />
+                <div className="flex h-7 items-center gap-2 rounded-md bg-[#222222] px-2 text-white font-medium">
+                  <LayoutDashboard className="size-3.5 text-white" />
                   <span>Dashboard</span>
                 </div>
                 <div className="flex h-7 items-center gap-2 px-2 hover:text-white transition-colors">
@@ -56,7 +57,7 @@ export const DashboardPreviewMock: React.FC = () => {
                   <span>Clients</span>
                 </div>
                 <div className="flex h-7 items-center gap-2 px-2 hover:text-white transition-colors">
-                  <Briefcase className="size-3.5" />
+                  <ClipboardList className="size-3.5" />
                   <span>Work Log</span>
                 </div>
                 <div className="flex h-7 items-center gap-2 px-2 hover:text-white transition-colors">
@@ -64,7 +65,7 @@ export const DashboardPreviewMock: React.FC = () => {
                   <span>Invoices</span>
                 </div>
                 <div className="flex h-7 items-center gap-2 px-2 hover:text-white transition-colors">
-                  <Star className="size-3.5" />
+                  <MessageSquare className="size-3.5" />
                   <span>Reviews</span>
                 </div>
                 <div className="flex h-7 items-center gap-2 px-2 hover:text-white transition-colors">
@@ -78,7 +79,7 @@ export const DashboardPreviewMock: React.FC = () => {
           {/* Main App Workspace */}
           <div className="flex-1 flex flex-col min-w-0 bg-[#121212]">
             {/* Global Header Bar */}
-            <div className="h-11 border-b border-[#242424] px-3 sm:px-4 flex items-center justify-between gap-3 text-xs bg-[#161616]">
+            <div className="h-10 sm:h-11 border-b border-[#242424] px-3 sm:px-4 flex items-center justify-between gap-3 text-xs bg-[#161616]">
               {/* Search Bar */}
               <div className="flex-1 max-w-sm sm:max-w-md bg-[#1d1d1d] border border-[#2b2b2b] rounded-md px-2.5 py-1 flex items-center gap-2 text-slate-400 text-[11px]">
                 <Search className="size-3 shrink-0 text-slate-500" />
@@ -86,11 +87,11 @@ export const DashboardPreviewMock: React.FC = () => {
                 <span className="ml-auto text-[10px] font-mono text-slate-500 bg-[#262626] px-1 rounded">⌘K</span>
               </div>
 
-              {/* Header Right Tools */}
+              {/* Header Right Tools: Normalized to GlobalHeader */}
               <div className="flex items-center gap-2 sm:gap-2.5 text-slate-400 text-[11px] shrink-0">
                 <Bell className="size-3.5 text-slate-400 hover:text-white" />
-                <span className="hidden sm:inline-flex items-center gap-1 text-[11px] text-slate-400">
-                  <Flame className="size-3 text-slate-400" />
+                <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] text-slate-400">
+                  <Calendar className="size-3.5 text-slate-400" />
                   <span>280 days worked</span>
                 </span>
                 <span className="text-[10px] text-slate-400 font-mono bg-[#222222] px-1.5 py-0.5 rounded border border-[#2e2e2e]">
@@ -108,18 +109,18 @@ export const DashboardPreviewMock: React.FC = () => {
                   <p className="text-[10px] sm:text-[11px] text-slate-400">Financial overview & payment cycles.</p>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
-                  <button type="button" className="px-2 py-1 text-[11px] bg-[#1e1e1e] border border-[#2b2b2b] text-slate-300 rounded inline-flex items-center gap-1">
-                    <Download className="size-2.5" /> Export
+                  <button type="button" className="px-2.5 py-1 text-[11px] bg-[#222222] hover:bg-[#2a2a2a] text-slate-300 rounded inline-flex items-center gap-1 border-none cursor-pointer">
+                    <DownloadCloud className="size-3" /> Export
                   </button>
-                  <button type="button" className="px-2 py-1 text-[11px] bg-[#1e1e1e] border border-[#2b2b2b] text-slate-300 rounded inline-flex items-center gap-1">
-                    <Upload className="size-2.5" /> Import
+                  <button type="button" className="px-2.5 py-1 text-[11px] bg-[#222222] hover:bg-[#2a2a2a] text-slate-300 rounded inline-flex items-center gap-1 border-none cursor-pointer">
+                    <UploadCloud className="size-3" /> Import
                   </button>
                 </div>
               </div>
 
               {/* 4 Stat Cards */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5">
-                <div className="bg-[#181818] border border-[#262626] rounded-lg p-2.5">
+                <div className="bg-[#181818] border border-[#262626] rounded-lg p-2.5 sm:p-3">
                   <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
                     <span>TOTAL EARNED THIS MONTH</span>
                     <IndianRupee className="size-3 text-slate-500" />
@@ -128,7 +129,7 @@ export const DashboardPreviewMock: React.FC = () => {
                   <p className="text-[9px] text-slate-500 mt-0.5">1 invoice this month</p>
                 </div>
 
-                <div className="bg-[#181818] border border-[#262626] rounded-lg p-2.5">
+                <div className="bg-[#181818] border border-[#262626] rounded-lg p-2.5 sm:p-3">
                   <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
                     <span>TOTAL DUE</span>
                     <Clock className="size-3 text-slate-500" />
@@ -137,7 +138,7 @@ export const DashboardPreviewMock: React.FC = () => {
                   <p className="text-[9px] text-slate-500 mt-0.5">Across active clients</p>
                 </div>
 
-                <div className="hidden sm:block bg-[#181818] border border-[#262626] rounded-lg p-2.5">
+                <div className="hidden sm:block bg-[#181818] border border-[#262626] rounded-lg p-2.5 sm:p-3">
                   <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
                     <span>OVERDUE AMOUNT</span>
                     <AlertCircle className="size-3 text-slate-500" />
@@ -146,7 +147,7 @@ export const DashboardPreviewMock: React.FC = () => {
                   <p className="text-[9px] text-slate-500 mt-0.5">All invoices current</p>
                 </div>
 
-                <div className="hidden sm:block bg-[#181818] border border-[#262626] rounded-lg p-2.5">
+                <div className="hidden sm:block bg-[#181818] border border-[#262626] rounded-lg p-2.5 sm:p-3">
                   <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
                     <span>INVOICES ISSUED</span>
                     <TrendingUp className="size-3 text-slate-500" />

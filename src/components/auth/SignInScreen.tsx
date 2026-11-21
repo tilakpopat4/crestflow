@@ -175,7 +175,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
             <button
               type="button"
               onClick={() => onSupportingNavigate('pricing')}
-              className="text-xs font-semibold px-3 py-1.5 rounded-lg text-slate-300 hover:text-white transition-colors cursor-pointer border-none bg-transparent"
+              className="text-xs font-medium px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition-colors duration-120 cursor-pointer border-none bg-transparent"
             >
               Compare Plans
             </button>
@@ -184,14 +184,14 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
                 <button
                   type="button"
                   onClick={() => { setAuthCardInitialMode('signin'); setAuthView('auth'); }}
-                  className="text-xs font-semibold px-3 py-1.5 rounded-lg text-slate-300 hover:text-white transition-colors cursor-pointer border-none bg-transparent"
+                  className="text-xs font-medium px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition-colors duration-120 cursor-pointer border-none bg-transparent"
                 >
                   Sign In
                 </button>
                 <button
                   type="button"
                   onClick={() => { setAuthCardInitialMode('signup'); setAuthView('auth'); }}
-                  className="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-accent hover:bg-accent-hover text-white transition-colors cursor-pointer border-none"
+                  className="px-3.5 py-1.5 text-xs font-medium rounded-lg bg-accent hover:bg-accent-hover text-white transition-colors duration-120 cursor-pointer border-none"
                 >
                   Start 7-Day Trial
                 </button>
@@ -200,7 +200,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
               <button
                 type="button"
                 onClick={() => setAuthView('promo')}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-white transition-colors cursor-pointer border-none bg-[#242424] rounded-lg"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-white transition-colors duration-120 cursor-pointer border-none bg-[#242424] rounded-lg"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Overview</span>
@@ -218,7 +218,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
             initial={{ opacity: shouldReduceMotion ? 1 : 0, y: shouldReduceMotion ? 0 : 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
-            className="w-full flex-1 flex flex-col justify-start"
+            className="w-full flex-1 flex flex-col justify-between"
           >
             <CenteredProductHero
               onStartTrial={() => {
