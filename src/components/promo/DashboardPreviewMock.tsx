@@ -1,164 +1,245 @@
 import React from 'react';
-import { IndianRupee, Clock, TrendingUp, CheckCircle, FileText, Users, Briefcase } from 'lucide-react';
+import {
+  IndianRupee,
+  Clock,
+  TrendingUp,
+  AlertCircle,
+  Download,
+  Upload,
+  Search,
+  Bell,
+  ChevronLeft,
+  Users,
+  Briefcase,
+  FileText,
+  Star,
+  UserPlus,
+  Flame,
+} from 'lucide-react';
 
 /**
- * Realistic mock preview of the CrestFlow workspace dashboard for unauthenticated promo visitors.
- * Follows GEMINI.md design tokens: studio dark canvas (#0f0f0f / #181818), plain text status dots,
- * and clean typography.
+ * High-fidelity visual preview of the CrestFlow application dashboard.
+ * Faithfully mirrors the live product UI:
+ * - Collapsible navigation sidebar with PRO status
+ * - Global header with search shortcut, streak counter & notification bell
+ * - 4-column metric grid (Earnings, Dues, Overdues, Invoice Count)
+ * - Net revenue monthly comparison chart with 10-month historical trajectory
  */
 export const DashboardPreviewMock: React.FC = () => {
   return (
-    <div className="relative mx-auto mt-12 sm:mt-16 max-w-5xl text-left select-none">
-      {/* Outer framing container */}
-      <div className="rounded-2xl sm:rounded-3xl bg-[#1e1e1e] p-2 sm:p-3 shadow-2xl ring-1 ring-white/10 dark:ring-neutral-800">
-        <div className="flex h-80 sm:h-[420px] rounded-xl sm:rounded-2xl bg-[#141414] overflow-hidden border border-[#2a2a2a]">
-          {/* Mock Left Mini-Sidebar */}
-          <div className="hidden sm:flex w-44 shrink-0 flex-col justify-between border-r border-[#2a2a2a] bg-[#181818] p-3 text-xs">
+    <div className="relative mx-auto mt-10 sm:mt-14 max-w-5xl text-left select-none">
+      {/* Outer framing shell */}
+      <div className="rounded-2xl border border-[#2b2b2b] bg-[#121212] overflow-hidden shadow-2xl">
+        <div className="flex h-[380px] sm:h-[480px] bg-[#141414] overflow-hidden">
+          {/* Left Navigation Sidebar */}
+          <div className="hidden md:flex w-48 shrink-0 flex-col justify-between border-r border-[#242424] bg-[#161616] p-3 text-xs">
             <div className="space-y-4">
-              <div className="flex items-center gap-2 px-1 py-1">
-                <span className="flex size-6 items-center justify-center rounded-md bg-[#e1002d] text-white font-bold text-xs">
-                  C
-                </span>
-                <span className="font-semibold text-white tracking-tight">CrestFlow</span>
-                <span className="ml-auto text-[9px] font-mono uppercase bg-[#282828] text-slate-300 px-1 py-0.5 rounded">
-                  Pro
-                </span>
+              {/* Sidebar Header */}
+              <div>
+                <div className="flex items-center gap-1.5 px-1 py-0.5">
+                  <span className="flex size-5 items-center justify-center rounded-sm bg-[#e1002d] text-white font-black text-[11px]">
+                    C
+                  </span>
+                  <span className="font-bold text-white tracking-tight text-xs">CrestFlow</span>
+                  <span className="text-[9px] font-mono uppercase bg-[#2a2a2a] text-slate-300 px-1 py-0.2 rounded font-semibold">
+                    PRO
+                  </span>
+                  <ChevronLeft className="size-3.5 text-slate-500 ml-auto" />
+                </div>
+                <p className="text-[10px] text-slate-500 px-1 mt-0.5">Freelancing Client Manager</p>
               </div>
 
-              <div className="space-y-1 text-slate-400 font-medium">
-                <div className="flex h-7 items-center gap-2 rounded-md bg-[#242424] px-2 text-white">
-                  <TrendingUp className="size-3.5 shrink-0 text-white" />
+              {/* Navigation Items */}
+              <div className="space-y-0.5 text-slate-400 font-medium text-[11px]">
+                <div className="flex h-7 items-center gap-2 rounded-md bg-[#222222] px-2 text-white font-semibold">
+                  <TrendingUp className="size-3.5 text-white" />
                   <span>Dashboard</span>
                 </div>
                 <div className="flex h-7 items-center gap-2 px-2 hover:text-white transition-colors">
-                  <Users className="size-3.5 shrink-0" />
+                  <Users className="size-3.5" />
                   <span>Clients</span>
-                  <span className="ml-auto text-[10px] tabular-nums text-slate-500">6</span>
                 </div>
                 <div className="flex h-7 items-center gap-2 px-2 hover:text-white transition-colors">
-                  <Briefcase className="size-3.5 shrink-0" />
+                  <Briefcase className="size-3.5" />
                   <span>Work Log</span>
-                  <span className="ml-auto text-[10px] tabular-nums text-slate-500">14</span>
                 </div>
                 <div className="flex h-7 items-center gap-2 px-2 hover:text-white transition-colors">
-                  <FileText className="size-3.5 shrink-0" />
+                  <FileText className="size-3.5" />
                   <span>Invoices</span>
-                  <span className="ml-auto text-[10px] tabular-nums text-slate-500">8</span>
                 </div>
-              </div>
-            </div>
-
-            {/* Profile footer snippet */}
-            <div className="pt-2 border-t border-[#2a2a2a] flex items-center gap-2">
-              <div className="size-6 rounded-full bg-[#333333] flex items-center justify-center text-[10px] text-white font-semibold">
-                TP
-              </div>
-              <div className="min-w-0">
-                <p className="text-[11px] font-medium text-white truncate">Tilak Studio</p>
-                <p className="text-[9px] text-slate-500 truncate">tilak@crestflow.space</p>
+                <div className="flex h-7 items-center gap-2 px-2 hover:text-white transition-colors">
+                  <Star className="size-3.5" />
+                  <span>Reviews</span>
+                </div>
+                <div className="flex h-7 items-center gap-2 px-2 hover:text-white transition-colors">
+                  <UserPlus className="size-3.5" />
+                  <span>Onboarding</span>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Main Dashboard Canvas Preview */}
-          <div className="flex-1 flex flex-col p-4 sm:p-5 overflow-hidden">
-            {/* Header */}
-            <div className="flex items-center justify-between gap-2 pb-3 border-b border-[#2a2a2a]">
-              <div>
-                <h3 className="text-sm sm:text-base font-semibold text-white">Financial Dashboard</h3>
-                <p className="text-[11px] text-slate-400">Monthly revenue pulse & active client deliverables</p>
-              </div>
-              <span className="inline-flex items-center gap-1.5 text-xs text-slate-300 bg-[#222222] px-2.5 py-1 rounded-md border border-[#333333]">
-                <span className="size-1.5 rounded-full bg-emerald-400"></span>
-                <span>November 2026</span>
-              </span>
-            </div>
-
-            {/* Top Stat Cards Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 my-3">
-              <div className="bg-[#1c1c1c] border border-[#2e2e2e] rounded-lg p-2.5 sm:p-3">
-                <span className="text-[10px] sm:text-[11px] text-slate-400 flex items-center gap-1 font-medium">
-                  <IndianRupee className="size-3 text-slate-400" /> Total Earned
-                </span>
-                <p className="mt-1 text-sm sm:text-lg font-bold text-white tabular-nums tracking-tight">₹1,48,500</p>
-                <span className="text-[10px] text-slate-500">8 invoices this month</span>
+          {/* Main App Workspace */}
+          <div className="flex-1 flex flex-col min-w-0 bg-[#121212]">
+            {/* Global Header Bar */}
+            <div className="h-11 border-b border-[#242424] px-3 sm:px-4 flex items-center justify-between gap-3 text-xs bg-[#161616]">
+              {/* Search Bar */}
+              <div className="flex-1 max-w-sm sm:max-w-md bg-[#1d1d1d] border border-[#2b2b2b] rounded-md px-2.5 py-1 flex items-center gap-2 text-slate-400 text-[11px]">
+                <Search className="size-3 shrink-0 text-slate-500" />
+                <span className="truncate">Search clients, work items, video links, invoices...</span>
+                <span className="ml-auto text-[10px] font-mono text-slate-500 bg-[#262626] px-1 rounded">⌘K</span>
               </div>
 
-              <div className="bg-[#1c1c1c] border border-[#2e2e2e] rounded-lg p-2.5 sm:p-3">
-                <span className="text-[10px] sm:text-[11px] text-slate-400 flex items-center gap-1 font-medium">
-                  <Clock className="size-3 text-slate-400" /> Total Due
+              {/* Header Right Tools */}
+              <div className="flex items-center gap-2 sm:gap-2.5 text-slate-400 text-[11px] shrink-0">
+                <Bell className="size-3.5 text-slate-400 hover:text-white" />
+                <span className="hidden sm:inline-flex items-center gap-1 text-[11px] text-slate-400">
+                  <Flame className="size-3 text-slate-400" />
+                  <span>280 days worked</span>
                 </span>
-                <p className="mt-1 text-sm sm:text-lg font-bold text-white tabular-nums tracking-tight">₹32,000</p>
-                <span className="text-[10px] text-slate-500">2 pending clients</span>
-              </div>
-
-              <div className="hidden sm:block bg-[#1c1c1c] border border-[#2e2e2e] rounded-lg p-2.5 sm:p-3">
-                <span className="text-[10px] sm:text-[11px] text-slate-400 flex items-center gap-1 font-medium">
-                  <CheckCircle className="size-3 text-slate-400" /> Overdue
+                <span className="text-[10px] text-slate-400 font-mono bg-[#222222] px-1.5 py-0.5 rounded border border-[#2e2e2e]">
+                  Pro • 999d
                 </span>
-                <p className="mt-1 text-sm sm:text-lg font-bold text-white tabular-nums tracking-tight">₹0</p>
-                <span className="text-[10px] text-slate-500">All invoices on time</span>
-              </div>
-
-              <div className="hidden sm:block bg-[#1c1c1c] border border-[#2e2e2e] rounded-lg p-2.5 sm:p-3">
-                <span className="text-[10px] sm:text-[11px] text-slate-400 flex items-center gap-1 font-medium">
-                  <TrendingUp className="size-3 text-slate-400" /> Invoices Issued
-                </span>
-                <p className="mt-1 text-sm sm:text-lg font-bold text-white tabular-nums tracking-tight">8</p>
-                <span className="text-[10px] text-slate-500">Direct UPI & Bank</span>
               </div>
             </div>
 
-            {/* Invoices & Work Delivery Table Preview */}
-            <div className="flex-1 min-h-0 bg-[#181818] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex flex-col justify-between">
-              <div className="flex items-center justify-between pb-2 border-b border-[#252525]">
-                <span className="text-[11px] font-semibold text-slate-300 uppercase tracking-wider">
-                  Recent Deliverables & Invoices
-                </span>
-                <span className="text-[10px] text-slate-500">Automated 6:00 AM WhatsApp Invoicing</span>
+            {/* Dashboard Content Canvas */}
+            <div className="flex-1 p-3.5 sm:p-5 overflow-hidden flex flex-col justify-between space-y-3">
+              {/* Page Title & Action Controls */}
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <h2 className="text-base sm:text-lg font-bold text-white tracking-tight">Dashboard</h2>
+                  <p className="text-[10px] sm:text-[11px] text-slate-400">Financial overview & payment cycles.</p>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button type="button" className="px-2 py-1 text-[11px] bg-[#1e1e1e] border border-[#2b2b2b] text-slate-300 rounded inline-flex items-center gap-1">
+                    <Download className="size-2.5" /> Export
+                  </button>
+                  <button type="button" className="px-2 py-1 text-[11px] bg-[#1e1e1e] border border-[#2b2b2b] text-slate-300 rounded inline-flex items-center gap-1">
+                    <Upload className="size-2.5" /> Import
+                  </button>
+                </div>
               </div>
 
-              <div className="divide-y divide-[#252525] text-xs">
-                {/* Row 1 */}
-                <div className="flex items-center justify-between py-2 gap-2">
-                  <div className="min-w-0">
-                    <p className="text-white font-medium truncate">Acme Media Corp</p>
-                    <p className="text-[10px] text-slate-400 truncate">4K Commercial Edit & VFX Finishing</p>
+              {/* 4 Stat Cards */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5">
+                <div className="bg-[#181818] border border-[#262626] rounded-lg p-2.5">
+                  <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                    <span>TOTAL EARNED THIS MONTH</span>
+                    <IndianRupee className="size-3 text-slate-500" />
                   </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-white font-medium tabular-nums">₹45,000</p>
-                    <span className="text-[11px] text-indigo-400 font-medium inline-flex items-center gap-1">
-                      <span className="size-1.5 rounded-full bg-indigo-500"></span>Paid
+                  <p className="mt-1 text-sm sm:text-base font-bold text-white tabular-nums tracking-tight">₹10,000</p>
+                  <p className="text-[9px] text-slate-500 mt-0.5">1 invoice this month</p>
+                </div>
+
+                <div className="bg-[#181818] border border-[#262626] rounded-lg p-2.5">
+                  <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                    <span>TOTAL DUE</span>
+                    <Clock className="size-3 text-slate-500" />
+                  </div>
+                  <p className="mt-1 text-sm sm:text-base font-bold text-white tabular-nums tracking-tight">₹0</p>
+                  <p className="text-[9px] text-slate-500 mt-0.5">Across active clients</p>
+                </div>
+
+                <div className="hidden sm:block bg-[#181818] border border-[#262626] rounded-lg p-2.5">
+                  <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                    <span>OVERDUE AMOUNT</span>
+                    <AlertCircle className="size-3 text-slate-500" />
+                  </div>
+                  <p className="mt-1 text-sm sm:text-base font-bold text-white tabular-nums tracking-tight">₹0</p>
+                  <p className="text-[9px] text-slate-500 mt-0.5">All invoices current</p>
+                </div>
+
+                <div className="hidden sm:block bg-[#181818] border border-[#262626] rounded-lg p-2.5">
+                  <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                    <span>INVOICES ISSUED</span>
+                    <TrendingUp className="size-3 text-slate-500" />
+                  </div>
+                  <p className="mt-1 text-sm sm:text-base font-bold text-white tabular-nums tracking-tight">1</p>
+                  <p className="text-[9px] text-slate-500 mt-0.5">Issued this month</p>
+                </div>
+              </div>
+
+              {/* Net Revenue Comparison Chart */}
+              <div className="flex-1 bg-[#181818] border border-[#262626] rounded-lg p-3 sm:p-4 flex flex-col justify-between min-h-[140px]">
+                {/* Chart Header */}
+                <div className="flex items-start justify-between gap-2 pb-1">
+                  <div>
+                    <span className="text-[9px] sm:text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
+                      NET REVENUE BY MONTH, INR
+                    </span>
+                    <p className="text-xs sm:text-sm font-semibold text-white tracking-tight mt-0.5">
+                      Collected ₹36,700 of ₹36,700 invoiced (100% matched)
+                    </p>
+                    <p className="text-[9px] sm:text-[10px] text-slate-400">
+                      ₹36,700 across the last 10 months (since Feb 2026) against ₹36,700 in invoiced.
+                    </p>
+                  </div>
+                  <div className="hidden sm:flex items-center gap-3 text-[10px] text-slate-400">
+                    <span className="flex items-center gap-1 text-white">
+                      <span className="w-2.5 h-0.5 bg-white inline-block"></span> Last 10 months
+                    </span>
+                    <span className="flex items-center gap-1 text-slate-400">
+                      <span className="w-2.5 h-0.5 border-t border-dashed border-slate-400 inline-block"></span> Total Invoiced
                     </span>
                   </div>
                 </div>
 
-                {/* Row 2 */}
-                <div className="flex items-center justify-between py-2 gap-2">
-                  <div className="min-w-0">
-                    <p className="text-white font-medium truncate">Zenflow Design Studio</p>
-                    <p className="text-[10px] text-slate-400 truncate">Mobile App Design System & Tokens</p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-white font-medium tabular-nums">₹32,000</p>
-                    <span className="text-[11px] text-slate-300 font-medium inline-flex items-center gap-1">
-                      <span className="size-1.5 rounded-full bg-slate-400"></span>Invoiced
-                    </span>
-                  </div>
+                {/* SVG Graph */}
+                <div className="relative w-full h-20 sm:h-28 my-1">
+                  <svg className="w-full h-full overflow-visible" viewBox="0 0 600 100" preserveAspectRatio="none">
+                    {/* Horizontal Grid lines */}
+                    <line x1="40" y1="20" x2="590" y2="20" stroke="#262626" strokeWidth="1" />
+                    <line x1="40" y1="50" x2="590" y2="50" stroke="#262626" strokeWidth="1" />
+                    <line x1="40" y1="80" x2="590" y2="80" stroke="#262626" strokeWidth="1" />
+
+                    {/* Y Axis Labels */}
+                    <text x="35" y="24" fill="#666666" fontSize="9" textAnchor="end">₹36k</text>
+                    <text x="35" y="54" fill="#666666" fontSize="9" textAnchor="end">₹20k</text>
+                    <text x="35" y="84" fill="#666666" fontSize="9" textAnchor="end">₹0k</text>
+
+                    {/* Dashed Total Invoiced Line */}
+                    <path
+                      d="M 60 80 L 115 80 L 170 80 L 225 80 L 280 80 L 335 78 L 390 55 L 445 68 L 500 80 L 560 20"
+                      fill="none"
+                      stroke="#555555"
+                      strokeWidth="1.5"
+                      strokeDasharray="3 3"
+                    />
+
+                    {/* Solid Net Revenue Line */}
+                    <path
+                      d="M 60 80 L 115 80 L 170 80 L 225 80 L 280 80 L 335 80 L 390 80 L 445 80 L 500 80 L 560 20"
+                      fill="none"
+                      stroke="#ffffff"
+                      strokeWidth="2"
+                    />
+
+                    {/* Peak Point on Nov */}
+                    <circle cx="560" cy="20" r="3.5" fill="#ffffff" />
+                    <rect x="535" y="6" width="32" height="14" rx="3" fill="#242424" stroke="#383838" strokeWidth="1" />
+                    <text x="551" y="16" fill="#ffffff" fontSize="8" fontWeight="bold" textAnchor="middle">₹36k</text>
+                  </svg>
                 </div>
 
-                {/* Row 3 */}
-                <div className="flex items-center justify-between py-2 gap-2">
-                  <div className="min-w-0">
-                    <p className="text-white font-medium truncate">Apex Digital Agency</p>
-                    <p className="text-[10px] text-slate-400 truncate">Monthly Retainer • 12 Video Deliverables</p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-white font-medium tabular-nums">₹60,000</p>
-                    <span className="text-[11px] text-indigo-400 font-medium inline-flex items-center gap-1">
-                      <span className="size-1.5 rounded-full bg-indigo-500"></span>Paid
-                    </span>
-                  </div>
+                {/* X Axis Month Labels */}
+                <div className="flex justify-between pl-8 pr-3 text-[9px] text-slate-500 font-mono">
+                  <span>Feb</span>
+                  <span>Mar</span>
+                  <span>Apr</span>
+                  <span>May</span>
+                  <span>Jun</span>
+                  <span>Jul</span>
+                  <span>Aug</span>
+                  <span>Sep</span>
+                  <span>Oct</span>
+                  <span className="text-white font-bold">Nov</span>
+                </div>
+
+                {/* Chart Footer Sub-bar */}
+                <div className="flex items-center justify-between pt-1 border-t border-[#222222] text-[9px] text-slate-500">
+                  <span>CrestFlow • Paid invoices, net of refunds • Updated 21 Nov 2026</span>
+                  <span className="text-slate-400 hover:text-white cursor-pointer">View as table</span>
                 </div>
               </div>
             </div>

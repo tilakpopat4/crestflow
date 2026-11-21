@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 describe('Unauthenticated Promo Page & Dashboard Preview Suite', () => {
-  test('1. CenteredProductHero contains headline, 7-day trial button, compare plans button, and rating', () => {
+  test('1. CenteredProductHero contains headline, 7-day trial button, compare plans button, and preview', () => {
     const heroPath = path.join(process.cwd(), 'src/components/promo/CenteredProductHero.tsx');
     assert.ok(fs.existsSync(heroPath), 'CenteredProductHero.tsx must exist');
 
@@ -13,19 +13,18 @@ describe('Unauthenticated Promo Page & Dashboard Preview Suite', () => {
     assert.ok(heroSource.includes('Start 7-Day Trial'), 'Must contain Start 7-Day Trial CTA button');
     assert.ok(heroSource.includes('Compare Plans'), 'Must contain Compare Plans CTA button');
     assert.ok(heroSource.includes('DashboardPreviewMock'), 'Must embed DashboardPreviewMock');
-    assert.ok(heroSource.includes('4.9 out of 5'), 'Must show social proof rating');
   });
 
-  test('2. DashboardPreviewMock renders realistic financial stats and client deliverables', () => {
+  test('2. DashboardPreviewMock renders realistic financial stats and revenue comparison chart', () => {
     const mockPath = path.join(process.cwd(), 'src/components/promo/DashboardPreviewMock.tsx');
     assert.ok(fs.existsSync(mockPath), 'DashboardPreviewMock.tsx must exist');
 
     const mockSource = fs.readFileSync(mockPath, 'utf-8');
-    assert.ok(mockSource.includes('Total Earned'), 'Must show Total Earned metric');
-    assert.ok(mockSource.includes('₹1,48,500'), 'Must show realistic INR earnings');
-    assert.ok(mockSource.includes('Total Due'), 'Must show Total Due metric');
-    assert.ok(mockSource.includes('₹32,000'), 'Must show realistic INR due');
-    assert.ok(mockSource.includes('Recent Deliverables & Invoices'), 'Must render deliverables table');
+    assert.ok(mockSource.includes('TOTAL EARNED THIS MONTH'), 'Must show Total Earned metric');
+    assert.ok(mockSource.includes('₹10,000'), 'Must show ₹10,000 earnings');
+    assert.ok(mockSource.includes('TOTAL DUE'), 'Must show Total Due metric');
+    assert.ok(mockSource.includes('NET REVENUE BY MONTH, INR'), 'Must render revenue comparison chart');
+    assert.ok(mockSource.includes('280 days worked'), 'Must render streak badge');
   });
 
   test('3. SignInScreen coordinates promo mode and auth mode cleanly', () => {
