@@ -36,13 +36,15 @@ export interface StatusBadgeProps {
 
 /**
  * Standard Design System StatusBadge.
- * Conforms to project-rules.md:
- * - No green or amber.
- * - Distinguishes state by icon/fill style, text, and restrained tokens:
- *   - Paid / Approved: Solid white dot + text-text-primary (#F1F1F1)
- *   - Pending / Invoiced: Outlined ring dot + text-text-secondary (#AAAAAA)
- *   - Draft / Uninvoiced: Dotted ring + text-text-muted (#666666)
- *   - Overdue / Blocked / Changes: Solid red dot + text-accent (#E1002D)
+ * Conforms strictly to GEMINI.md:
+ * - Status column: plain text, 13px, weight 500, no background, no border, no pill.
+ * - Allowed colors:
+ *   - Paid / Approved: steel blue text (#4870aa)
+ *   - Invoiced / Pending / Active: slate-700 text (slate-300 in dark mode)
+ *   - Draft / Uninvoiced / Closed: slate-500 text
+ *   - Overdue / Blocked / Changes: red text (red-600 / red-400 in dark mode)
+ * - Optional: a 6px solid dot before the label in the same color as the text.
+ * - No icons, no checkmarks, no circles with ticks.
  */
 export function StatusBadge({
   status,
@@ -54,17 +56,17 @@ export function StatusBadge({
 }: StatusBadgeProps) {
   const norm = (status || '').toString().trim().toLowerCase();
 
-  let textClass = 'text-text-secondary';
+  let textClass = 'text-slate-700 dark:text-slate-300';
   let indicator: React.ReactNode = (
-    <span className="w-1.5 h-1.5 rounded-full border border-text-secondary shrink-0" />
+    <span className="w-1.5 h-1.5 rounded-full bg-slate-700 dark:bg-slate-300 shrink-0" />
   );
   let defaultLabel = status || 'Pending';
 
   switch (norm) {
     case 'paid':
     case 'approved':
-      textClass = 'text-text-primary font-semibold';
-      indicator = <span className="w-1.5 h-1.5 rounded-full bg-text-primary shrink-0" />;
+      textClass = 'text-[#4870aa] dark:text-[#4870aa]';
+      indicator = <span className="w-1.5 h-1.5 rounded-full bg-[#4870aa] shrink-0" />;
       defaultLabel = norm === 'approved' ? 'Approved' : 'Paid';
       break;
 
@@ -72,8 +74,8 @@ export function StatusBadge({
     case 'blocked':
     case 'changes_requested':
     case 'failed':
-      textClass = 'text-accent font-semibold';
-      indicator = <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />;
+      textClass = 'text-red-600 dark:text-red-400';
+      indicator = <span className="w-1.5 h-1.5 rounded-full bg-red-600 dark:bg-red-400 shrink-0" />;
       defaultLabel = norm === 'changes_requested' ? 'Changes Requested' : norm === 'blocked' ? 'Blocked' : 'Overdue';
       break;
 
@@ -81,8 +83,8 @@ export function StatusBadge({
     case 'active':
     case 'pending':
     case 'pending_review':
-      textClass = 'text-text-secondary font-medium';
-      indicator = <span className="w-1.5 h-1.5 rounded-full border border-text-secondary shrink-0" />;
+      textClass = 'text-slate-700 dark:text-slate-300';
+      indicator = <span className="w-1.5 h-1.5 rounded-full bg-slate-700 dark:bg-slate-300 shrink-0" />;
       defaultLabel = norm === 'pending_review' ? 'Pending Review' : norm === 'active' ? 'Active' : norm === 'invoiced' ? 'Invoiced' : 'Pending';
       break;
 
@@ -90,8 +92,8 @@ export function StatusBadge({
     case 'uninvoiced':
     case 'closed':
     default:
-      textClass = 'text-text-muted font-normal';
-      indicator = <span className="w-1.5 h-1.5 rounded-full border border-dashed border-text-muted shrink-0" />;
+      textClass = 'text-slate-500';
+      indicator = <span className="w-1.5 h-1.5 rounded-full bg-slate-500 shrink-0" />;
       defaultLabel = norm === 'uninvoiced' ? 'Uninvoiced' : norm === 'closed' ? 'Closed' : 'Draft';
       break;
   }
@@ -106,7 +108,7 @@ export function StatusBadge({
   );
 
   const classes = cn(
-    "text-xs inline-flex items-center gap-1.5 select-none transition-colors duration-120",
+    "text-[13px] font-medium inline-flex items-center gap-1.5 select-none transition-colors duration-120",
     textClass,
     className
   );

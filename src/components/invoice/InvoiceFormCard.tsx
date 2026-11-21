@@ -72,21 +72,9 @@ export function InvoiceFormCard({
   isGenerating,
   discount,
   grandTotal,
-  onClientChange,
-  setDateFrom,
-  setDateTo,
-  setInvoiceBillingMode,
-  setMonthlyRetainerInput,
-  setMonthlyServiceDescription,
-  onAddItem,
-  onUpdateReel,
-  onRemoveReel,
-  setDiscountAmount,
-  setExtraCostAmount,
-  onRoundFigures,
-  setCustomUpiId,
-  onGenerateInvoice,
-  onCancelEdit,
+  onClientChange, setDateFrom, setDateTo, setInvoiceBillingMode, setMonthlyRetainerInput,
+  setMonthlyServiceDescription, onAddItem, onUpdateReel, onRemoveReel, setDiscountAmount,
+  setExtraCostAmount, onRoundFigures, setCustomUpiId, onGenerateInvoice, onCancelEdit,
 }: InvoiceFormCardProps) {
   const selectedClient = clients.find((c) => c.id === selectedClientId);
 
@@ -107,7 +95,7 @@ export function InvoiceFormCard({
           <button
             type="button"
             onClick={() => setInvoiceBillingMode('per_reel')}
-            className={`px-3 py-1 rounded-md text-xs font-semibold transition-colors cursor-pointer border-0 ${
+            className={`px-3 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer border-0 ${
               invoiceBillingMode === 'per_reel'
                 ? 'bg-surface-500 text-text-primary'
                 : 'bg-transparent text-text-muted hover:text-text-primary'
@@ -118,7 +106,7 @@ export function InvoiceFormCard({
           <button
             type="button"
             onClick={() => setInvoiceBillingMode('monthly_retainer')}
-            className={`px-3 py-1 rounded-md text-xs font-semibold transition-colors cursor-pointer border-0 ${
+            className={`px-3 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer border-0 ${
               invoiceBillingMode === 'monthly_retainer'
                 ? 'bg-surface-500 text-text-primary'
                 : 'bg-transparent text-text-muted hover:text-text-primary'
@@ -132,7 +120,7 @@ export function InvoiceFormCard({
       {/* Client and Date Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
         <div>
-          <label className="block text-xs font-semibold text-text-secondary mb-1">Client *</label>
+          <label className="block text-xs font-medium text-text-secondary mb-1">Client *</label>
           <select
             value={selectedClientId}
             onChange={(e) => onClientChange(e.target.value)}
@@ -150,7 +138,7 @@ export function InvoiceFormCard({
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-text-secondary mb-1">Billing From</label>
+          <label className="block text-xs font-medium text-text-secondary mb-1">Billing From</label>
           <DateInput
             value={dateFrom}
             onChange={(val) => setDateFrom(val)}
@@ -159,7 +147,7 @@ export function InvoiceFormCard({
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-text-secondary mb-1">Billing To</label>
+          <label className="block text-xs font-medium text-text-secondary mb-1">Billing To</label>
           <DateInput
             value={dateTo}
             onChange={(val) => setDateTo(val)}
@@ -173,7 +161,7 @@ export function InvoiceFormCard({
         <div className="space-y-3.5">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 bg-surface-800 p-3.5 rounded-lg border border-surface-400">
             <div className="sm:col-span-2">
-              <label className="block text-xs font-semibold text-text-secondary mb-1">
+              <label className="block text-xs font-medium text-text-secondary mb-1">
                 Retainer Service Description
               </label>
               <input
@@ -185,7 +173,7 @@ export function InvoiceFormCard({
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-text-secondary mb-1">
+              <label className="block text-xs font-medium text-text-secondary mb-1">
                 Retainer Amount ({selectedClient?.currency || 'INR'}) *
               </label>
               <input
@@ -217,7 +205,7 @@ export function InvoiceFormCard({
       {/* Adjustments: Discount, Extra Costs, UPI override */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-surface-400/70">
         <div>
-          <label className="block text-[11px] font-semibold text-text-secondary mb-1">Discount Amount</label>
+          <label className="block text-[11px] font-medium text-text-secondary mb-1">Discount Amount</label>
           <input
             type="number"
             min="0"
@@ -228,7 +216,7 @@ export function InvoiceFormCard({
           />
         </div>
         <div>
-          <label className="block text-[11px] font-semibold text-text-secondary mb-1">Extra Expense / Cost</label>
+          <label className="block text-[11px] font-medium text-text-secondary mb-1">Extra Expense / Cost</label>
           <input
             type="number"
             min="0"
@@ -239,7 +227,7 @@ export function InvoiceFormCard({
           />
         </div>
         <div>
-          <label className="block text-[11px] font-semibold text-text-secondary mb-1">Payee UPI ID (Override)</label>
+          <label className="block text-[11px] font-medium text-text-secondary mb-1">Payee UPI ID (Override)</label>
           <input
             type="text"
             value={customUpiId}

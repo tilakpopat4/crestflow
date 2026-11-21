@@ -13,16 +13,16 @@ import { cn } from "@/lib/utils";
  * - icon: compact icon action trigger
  */
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg text-xs font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-surface-400 disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer",
+  "inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg text-xs font-medium transition-colors duration-120 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-surface-400 disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer",
   {
     variants: {
       variant: {
         primary:
           "bg-accent hover:bg-[#c70027] text-white border-0 shadow-xs",
         secondary:
-          "bg-surface-500 hover:bg-surface-400 text-text-primary border border-surface-400 shadow-2xs",
+          "bg-surface-500 hover:bg-surface-400 text-text-primary border-0 shadow-2xs",
         blue:
-          "bg-surface-500 hover:bg-surface-400 text-text-primary border border-surface-400 shadow-2xs",
+          "bg-surface-500 hover:bg-surface-400 text-text-primary border-0 shadow-2xs",
         outline:
           "border border-surface-400 bg-surface-700 hover:bg-surface-600 text-text-primary",
         ghost:

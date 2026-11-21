@@ -79,7 +79,7 @@ export function InvoiceTable({
             variant="secondary"
             size="sm"
             onClick={() => setShowClosed((prev) => !prev)}
-            className="gap-1.5 w-full sm:w-auto text-xs"
+            className="gap-1.5 w-full sm:w-auto text-xs border-0 font-medium"
             title={showClosed ? 'Hide closed client invoices' : 'Show closed client invoices'}
           >
             <Archive size={13} />
@@ -117,6 +117,7 @@ export function InvoiceTable({
                   month: 'short',
                   year: 'numeric',
                 });
+                const subClient = inv.reels.find((r) => Boolean(r.subClientName))?.subClientName;
 
                 return (
                   <tr key={inv.id} className="hover:bg-surface-600/40 transition-colors">
@@ -130,7 +131,12 @@ export function InvoiceTable({
                     </td>
 
                     <td className="py-3 px-4 font-semibold text-text-primary">
-                      {inv.clientName}
+                      <div>{inv.clientName}</div>
+                      {subClient && (
+                        <div className="text-xs text-text-muted font-normal mt-0.5">
+                          {subClient}
+                        </div>
+                      )}
                     </td>
 
                     <td className="py-3 px-4 text-text-secondary min-w-[200px] max-w-[280px]">
@@ -140,9 +146,6 @@ export function InvoiceTable({
                             ? '1 Monthly Retainer'
                             : `${inv.reels.length} item(s)`}
                         </span>
-                        {inv.invoiceType === 'monthly_retainer' && (
-                          <span className="text-[11px] text-text-muted">Retainer</span>
-                        )}
                       </div>
                       <div
                         className="text-[11px] text-text-muted truncate max-w-[260px] mt-0.5"
@@ -172,7 +175,7 @@ export function InvoiceTable({
                           variant="secondary"
                           size="sm"
                           onClick={() => onOpenEmailModal(inv)}
-                          className="gap-1.5 whitespace-nowrap shrink-0 text-xs h-7"
+                          className="gap-1.5 whitespace-nowrap shrink-0 text-xs h-7 border-0 font-medium"
                           title="Send via Gmail"
                         >
                           <Mail size={12} />
