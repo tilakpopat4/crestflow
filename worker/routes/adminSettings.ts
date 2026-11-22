@@ -46,6 +46,26 @@ export async function handleGetPricingConfig(env: Env): Promise<Response> {
 }
 
 /**
+ * Public read endpoint for footer navigation and branding configuration.
+ * Reads `system_settings/footer_config` via service account since direct client reads are blocked.
+ */
+export async function handleGetFooterConfig(env: Env): Promise<Response> {
+  try {
+    const creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
+    const data = await getFirestoreDoc(creds, 'system_settings/footer_config');
+    return new Response(JSON.stringify({ config: data || null }), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store',
+      },
+    });
+  } catch (err: any) {
+    return jsonResponse({ config: null, error: err?.message || 'Failed to read footer config' }, 200);
+  }
+}
+
+/**
  * Trusted server path for writing system and global settings.
  * Verifies Firebase Auth ID token and requires admin custom claim, admin_users entry, or Super Admin identity.
  * Denies direct browser/client Firestore writes to system_settings.

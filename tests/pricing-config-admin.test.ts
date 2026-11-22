@@ -5,8 +5,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DEFAULT_PRICING_CONFIG, mergePricingConfig } from '../src/lib/pricingConfig';
+import { DEFAULT_FOOTER_CONFIG, mergeFooterConfig } from '../src/lib/footerConfig';
 import { getTrialDisclosureText } from '../src/lib/subscriptionPlans';
-import { handleAdminSettings, handleGetPricingConfig } from '../worker/routes/adminSettings';
+import { handleAdminSettings, handleGetPricingConfig, handleGetFooterConfig } from '../worker/routes/adminSettings';
 import { Env } from '../worker/types';
 import { createMockIdToken } from './mockWebhookFetch';
 
@@ -158,6 +159,7 @@ describe('Editable Subscription Wall & Admin Pricing Config Suite', () => {
   it('3. All new and modified subscription/admin files remain <= 300 lines (AGENTS.md)', () => {
     const filesToCheck = [
       'src/lib/pricingConfig.ts',
+      'src/lib/footerConfig.ts',
       'src/lib/subscriptionPlans.ts',
       'src/components/admin/AdminPricingManager.tsx',
       'src/components/admin/AdminPlanEditorCard.tsx',
@@ -175,5 +177,32 @@ describe('Editable Subscription Wall & Admin Pricing Config Suite', () => {
       const lines = fs.readFileSync(path.join(ROOT, relPath), 'utf8').split(/\r?\n/).length;
       assert.ok(lines <= 300, `${relPath} has ${lines} lines (max 300)`);
     }
+  });
+
+  it('4. POST /api/admin/settings updates footer_config and handleGetFooterConfig returns it globally with no-store', async () => {
+    const adminToken = await createMockIdToken('usr_admin', 'tilakpopat2007@gmail.com', testPrivateKeyPem);
+    const customFooter = mergeFooterConfig({
+      brandName: 'CrestFlow Studio Global',
+      copyrightText: '© 2026 CrestFlow Global. All rights reserved.',
+      versionText: '2.0.0',
+    });
+
+    const saveRes = await handleAdminSettings(
+      new Request('https://crestflow.space/api/admin/settings', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${adminToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ settingId: 'footer_config', data: customFooter }),
+      }),
+      TEST_ENV
+    );
+    assert.equal(saveRes.status, 200);
+
+    const getRes = await handleGetFooterConfig(TEST_ENV);
+    assert.equal(getRes.status, 200);
+    assert.equal(getRes.headers.get('Cache-Control'), 'no-store');
+    const json = (await getRes.json()) as any;
+    assert.equal(json.config.brandName, 'CrestFlow Studio Global');
+    assert.equal(json.config.copyrightText, '© 2026 CrestFlow Global. All rights reserved.');
+    assert.equal(json.config.versionText, '2.0.0');
   });
 });

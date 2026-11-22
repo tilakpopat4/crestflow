@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
-import { db, auth } from '../firebase';
-import { doc, setDoc, onSnapshot } from 'firebase/firestore';
+import { useState, useEffect, useCallback } from 'react';
+import { auth } from '../firebase';
 
 export interface FooterLink {
   id: string;
@@ -59,132 +58,161 @@ const STORAGE_KEY = 'crestflow_footer_config_v1';
 const EVENT_NAME = 'crestflow:footer-config-changed';
 
 /**
+ * Sanitizes and validates footer configuration payload against defaults.
+ */
+export function mergeFooterConfig(raw?: Partial<FooterConfig> | null): FooterConfig {
+  if (!raw || typeof raw !== 'object') return DEFAULT_FOOTER_CONFIG;
+  return {
+    ...DEFAULT_FOOTER_CONFIG,
+    ...raw,
+    brandName: typeof raw.brandName === 'string' && raw.brandName.trim() ? raw.brandName.trim() : DEFAULT_FOOTER_CONFIG.brandName,
+    tagline: typeof raw.tagline === 'string' ? raw.tagline : DEFAULT_FOOTER_CONFIG.tagline,
+    copyrightText: typeof raw.copyrightText === 'string' && raw.copyrightText.trim() ? raw.copyrightText.trim() : DEFAULT_FOOTER_CONFIG.copyrightText,
+    versionText: typeof raw.versionText === 'string' && raw.versionText.trim() ? raw.versionText.trim() : DEFAULT_FOOTER_CONFIG.versionText,
+    primaryLinks: Array.isArray(raw.primaryLinks)
+      ? raw.primaryLinks.map((l) => ({
+          id: String(l?.id || `link_${Math.random().toString(36).substring(2, 7)}`),
+          name: String(l?.name || '').trim(),
+          url: String(l?.url || '#').trim(),
+          route: typeof l?.route === 'string' ? l.route.trim() : undefined,
+          openInNewTab: Boolean(l?.openInNewTab),
+        }))
+      : DEFAULT_FOOTER_CONFIG.primaryLinks,
+    legalLinks: Array.isArray(raw.legalLinks)
+      ? raw.legalLinks.map((l) => ({
+          id: String(l?.id || `legal_${Math.random().toString(36).substring(2, 7)}`),
+          name: String(l?.name || '').trim(),
+          url: String(l?.url || '#').trim(),
+          route: typeof l?.route === 'string' ? l.route.trim() : undefined,
+          openInNewTab: Boolean(l?.openInNewTab),
+        }))
+      : DEFAULT_FOOTER_CONFIG.legalLinks,
+    socialLinks: Array.isArray(raw.socialLinks)
+      ? raw.socialLinks.map((s) => ({
+          id: String(s?.id || `soc_${Math.random().toString(36).substring(2, 7)}`),
+          platform: s?.platform || 'custom',
+          name: String(s?.name || '').trim(),
+          url: String(s?.url || '#').trim(),
+        }))
+      : DEFAULT_FOOTER_CONFIG.socialLinks,
+  };
+}
+
+/**
  * Returns the cached or default footer configuration synchronously.
  */
 export function getFooterConfigSync(): FooterConfig {
+  if (typeof window === 'undefined') return DEFAULT_FOOTER_CONFIG;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULT_FOOTER_CONFIG;
-    const parsed = JSON.parse(raw);
-    return {
-      ...DEFAULT_FOOTER_CONFIG,
-      ...parsed,
-      primaryLinks: Array.isArray(parsed?.primaryLinks) ? parsed.primaryLinks : DEFAULT_FOOTER_CONFIG.primaryLinks,
-      legalLinks: Array.isArray(parsed?.legalLinks) ? parsed.legalLinks : DEFAULT_FOOTER_CONFIG.legalLinks,
-      socialLinks: Array.isArray(parsed?.socialLinks) ? parsed.socialLinks : DEFAULT_FOOTER_CONFIG.socialLinks,
-    };
+    return mergeFooterConfig(JSON.parse(raw));
   } catch {
     return DEFAULT_FOOTER_CONFIG;
   }
 }
 
 /**
- * Updates footer configuration in localStorage, Firestore, and notifies subscribers.
+ * Updates footer configuration in localStorage, publishes to Cloudflare Worker, and notifies subscribers.
  */
-export async function saveFooterConfig(config: FooterConfig): Promise<void> {
+export async function saveFooterConfig(config: FooterConfig): Promise<FooterConfig> {
+  const merged = mergeFooterConfig(config);
+
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
   } catch {}
 
-  window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: { config } }));
-
-  try {
-    const token = await auth.currentUser?.getIdToken();
-    if (token) {
-      const res = await fetch('/api/admin/settings', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          settingId: 'footer_config',
-          data: { ...config, updatedAt: Date.now() },
-        }),
-      });
-      if (res.ok) return;
-    }
-    await setDoc(doc(db, 'system_settings', 'footer_config'), {
-      ...config,
-      updatedAt: Date.now(),
-    }, { merge: true });
-  } catch (err) {
-    console.warn('[footerConfig] Save warning:', err);
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: { config: merged } }));
   }
+
+  const currentUser = auth.currentUser;
+  if (!currentUser) return merged;
+
+  const token = await currentUser.getIdToken(true);
+  const res = await fetch('/api/admin/settings', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      settingId: 'footer_config',
+      data: { ...merged, updatedAt: Date.now() },
+    }),
+  });
+
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData?.error || `Failed to publish footer globally (${res.status})`);
+  }
+
+  return merged;
 }
 
 /**
  * Resets footer configuration back to project defaults.
  */
-export async function resetFooterConfig(): Promise<void> {
-  await saveFooterConfig(DEFAULT_FOOTER_CONFIG);
+export async function resetFooterConfig(): Promise<FooterConfig> {
+  return saveFooterConfig(DEFAULT_FOOTER_CONFIG);
 }
 
 /**
- * Hook to read and subscribe to real-time footer configuration changes.
+ * Hook to read and subscribe to real-time footer configuration changes across all devices.
  */
 export function useFooterConfig() {
   const [config, setConfig] = useState<FooterConfig>(() => getFooterConfigSync());
   const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    const handleLocal = (e: any) => {
-      if (e?.detail?.config) {
-        setConfig(e.detail.config);
-      }
-    };
-    window.addEventListener(EVENT_NAME, handleLocal);
-
-    const handleStorage = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY && e.newValue) {
-        try {
-          setConfig(JSON.parse(e.newValue));
-        } catch {}
-      }
-    };
-    window.addEventListener('storage', handleStorage);
-
-    let unsubscribe = () => {};
+  const fetchRemote = useCallback(async () => {
     try {
-      unsubscribe = onSnapshot(doc(db, 'system_settings', 'footer_config'), (snap) => {
-        if (snap.exists()) {
-          const remoteData = snap.data() as Partial<FooterConfig>;
-          const merged: FooterConfig = {
-            brandName: remoteData.brandName || DEFAULT_FOOTER_CONFIG.brandName,
-            tagline: remoteData.tagline || DEFAULT_FOOTER_CONFIG.tagline,
-            copyrightText: remoteData.copyrightText || DEFAULT_FOOTER_CONFIG.copyrightText,
-            versionText: remoteData.versionText || DEFAULT_FOOTER_CONFIG.versionText,
-            primaryLinks: Array.isArray(remoteData.primaryLinks)
-              ? remoteData.primaryLinks
-              : DEFAULT_FOOTER_CONFIG.primaryLinks,
-            legalLinks: Array.isArray(remoteData.legalLinks)
-              ? remoteData.legalLinks
-              : DEFAULT_FOOTER_CONFIG.legalLinks,
-            socialLinks: Array.isArray(remoteData.socialLinks)
-              ? remoteData.socialLinks
-              : DEFAULT_FOOTER_CONFIG.socialLinks,
-          };
+      const res = await fetch('/api/footer-config', { cache: 'no-store' });
+      if (res.ok) {
+        const payload = (await res.json()) as { config?: Partial<FooterConfig> | null };
+        if (payload?.config) {
+          const merged = mergeFooterConfig(payload.config);
           setConfig(merged);
           try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
           } catch {}
         }
-        setLoading(false);
-      }, (err) => {
-        console.warn('[footerConfig] onSnapshot error:', err);
-        setLoading(false);
-      });
+      }
     } catch {
+      // Offline fallback
+    } finally {
       setLoading(false);
     }
+  }, []);
 
+  useEffect(() => {
+    fetchRemote();
+
+    const handleLocal = (e: any) => {
+      if (e?.detail?.config) {
+        setConfig(mergeFooterConfig(e.detail.config));
+      }
+    };
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY && e.newValue) {
+        try {
+          setConfig(mergeFooterConfig(JSON.parse(e.newValue)));
+        } catch {}
+      }
+    };
+
+    window.addEventListener(EVENT_NAME, handleLocal);
+    window.addEventListener('storage', handleStorage);
     return () => {
       window.removeEventListener(EVENT_NAME, handleLocal);
       window.removeEventListener('storage', handleStorage);
-      unsubscribe();
     };
-  }, []);
+  }, [fetchRemote]);
 
-  return { config, loading, saveConfig: saveFooterConfig, resetConfig: resetFooterConfig };
+  return {
+    config,
+    loading,
+    saveConfig: saveFooterConfig,
+    resetConfig: resetFooterConfig,
+    refresh: fetchRemote,
+  };
 }
-

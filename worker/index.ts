@@ -21,7 +21,7 @@ import { handleSeoRoutes } from './routes/seo';
 import { processDueEmailJobs } from './emailDispatcher';
 import { handleStaticAsset } from './staticHandler';
 import { handleCreateClient, handleCreateInvoice } from './routes/limits';
-import { handleAdminSettings, handleGetPricingConfig, handleGetHeroConfig } from './routes/adminSettings';
+import { handleAdminSettings, handleGetPricingConfig, handleGetHeroConfig, handleGetFooterConfig } from './routes/adminSettings';
 import { handleGetPublicProfile } from './routes/publicProfile';
 import { handleDeleteAccount } from './routes/account';
 import { handleDriveRoutes } from './routes/drive';
@@ -230,6 +230,9 @@ export default {
       }
       if (url.pathname === '/api/hero-config' && request.method === 'GET') {
         return await handleGetHeroConfig(env);
+      }
+      if (url.pathname === '/api/footer-config' && request.method === 'GET') {
+        return await handleGetFooterConfig(env);
       }
 
       // 20. POST /api/delete-account (Authenticated complete account & workspace deletion)
