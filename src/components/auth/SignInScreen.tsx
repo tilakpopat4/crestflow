@@ -275,7 +275,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
 
       {/* Minimal Footer */}
       <div className="relative z-30 w-full mt-auto">
-        <Footer variant="minimal" transparent={true} onNavigate={onSupportingNavigate} className="!bg-transparent border-t border-white/10" />
+        <Footer variant="minimal" transparent={true} onNavigate={onSupportingNavigate} className="!bg-transparent border-none" />
         {/* Slight black fade from bottom, below the footer */}
         <div className="w-full h-4 sm:h-6 bg-gradient-to-t from-black to-transparent pointer-events-none" aria-hidden="true" />
       </div>

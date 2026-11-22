@@ -243,6 +243,12 @@ export const DashboardPreviewMock: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Black fade overlay covering the portal preview from bottom */}
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-48 sm:h-64 md:h-80 bg-gradient-to-t from-black via-black/80 to-transparent z-20"
+        aria-hidden="true"
+      />
     </div>
   );
 };
