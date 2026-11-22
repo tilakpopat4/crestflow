@@ -60,10 +60,10 @@ export default function App() {
     updatePageMeta(currentRoute);
   }, [currentRoute]);
 
-  // Safe redirect authenticated users away from explicit /login and /signup routes
+  // Safe redirect: if any user is already logged in, never show auth/promo landing pages
   useEffect(() => {
-    if (user && isSpecialMode === 'auth') {
-      navigate('dashboard');
+    if (user && (isSpecialMode === 'auth' || isSpecialMode === 'promo')) {
+      navigate('dashboard', undefined, true);
     }
   }, [user, isSpecialMode, navigate]);
 
@@ -122,6 +122,7 @@ export default function App() {
   if (!user) {
     return (
       <SignInScreen
+        user={user}
         isAdminRoute={currentRoute === 'admin'}
         isSigningIn={isSigningIn}
         onLogin={handleLogin}

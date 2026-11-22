@@ -9,9 +9,11 @@ import Footer from '../Footer';
 import Logo from '../Logo';
 import { useHeroConfig } from '../../lib/heroConfig';
 import { siteConfig } from '../../config/site';
+import { auth } from '../../firebase';
 
 // Palette compliance reference: text-accent (#e1002d) for headline highlight & active brand accents
 interface SignInScreenProps {
+  user?: any;
   isAdminRoute: boolean;
   isSigningIn: boolean;
   onLogin: () => void;
@@ -22,6 +24,7 @@ interface SignInScreenProps {
 }
 
 export const SignInScreen: React.FC<SignInScreenProps> = ({
+  user,
   isAdminRoute,
   isSigningIn,
   onLogin,
@@ -30,6 +33,12 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
   onSupportingNavigate,
   initialMode = 'promo',
 }) => {
+  // Conditional Logic: If any user is already logged in, never display landing/promo page
+  useEffect(() => {
+    if (user || auth.currentUser) onSupportingNavigate('dashboard');
+  }, [user, onSupportingNavigate]);
+
+  if (user || auth.currentUser) return null;
   const shouldReduceMotion = useReducedMotion();
   const { config } = useHeroConfig();
   const videoRef = useRef<HTMLVideoElement | null>(null);

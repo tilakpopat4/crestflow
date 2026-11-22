@@ -23,7 +23,7 @@ export interface RouteMatch {
   route: AppRoute;
   path: string;
   params: Record<string, string>;
-  isSpecialMode?: 'freelancer_profile' | 'feedback' | 'auth';
+  isSpecialMode?: 'freelancer_profile' | 'feedback' | 'auth' | 'promo';
 }
 
 export const ROUTE_PATHS: Record<AppRoute, string> = {
@@ -148,6 +148,10 @@ export function resolveRoute(pathname: string, search: string = ''): RouteMatch 
     case '/signup':
     case '/register':
       return { route: 'dashboard', path: '/signup', params, isSpecialMode: 'auth' };
+
+    case '/landing':
+    case '/promo':
+      return { route: 'dashboard', path: '/landing', params, isSpecialMode: 'promo' };
 
     case '/refund':
     case '/refund-policy':

@@ -36,9 +36,27 @@ describe('Unauthenticated Promo Page & Dashboard Preview Suite', () => {
     assert.ok(signInSource.includes('SignInCard'), 'Must render SignInCard in auth mode');
     assert.ok(signInSource.includes("onSupportingNavigate('pricing')"), 'Must wire Compare Plans to /pricing');
     assert.ok(signInSource.includes('initialMode'), 'Must accept initialMode prop');
+    assert.ok(
+      signInSource.includes('if (user || auth.currentUser) return null;'),
+      'Must guard against logged-in users and never render landing page'
+    );
   });
 
-  test('4. AGENTS.md Line Count Compliance (all <= 300 lines)', () => {
+  test('4. Logged-in user bypasses landing page in App.tsx and router', () => {
+    const appPath = path.join(process.cwd(), 'src/App.tsx');
+    const appSource = fs.readFileSync(appPath, 'utf-8');
+    assert.ok(
+      appSource.includes("isSpecialMode === 'auth' || isSpecialMode === 'promo'"),
+      'Must redirect authenticated users away from promo landing and auth pages'
+    );
+
+    const routerPath = path.join(process.cwd(), 'src/lib/router.ts');
+    const routerSource = fs.readFileSync(routerPath, 'utf-8');
+    assert.ok(routerSource.includes("case '/landing':"), 'Must resolve /landing route');
+    assert.ok(routerSource.includes("case '/promo':"), 'Must resolve /promo route');
+  });
+
+  test('5. AGENTS.md Line Count Compliance (all <= 300 lines)', () => {
     const files = [
       'src/components/promo/CenteredProductHero.tsx',
       'src/components/promo/DashboardPreviewMock.tsx',

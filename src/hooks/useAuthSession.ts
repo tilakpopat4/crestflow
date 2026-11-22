@@ -12,8 +12,8 @@ import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { auth, googleProvider, db } from '../firebase';
 
 export function useAuthSession() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(() => auth.currentUser || null);
+  const [loading, setLoading] = useState<boolean>(() => !auth.currentUser);
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [isBlocked, setIsBlocked] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
