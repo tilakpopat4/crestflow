@@ -33,13 +33,12 @@ export const CenteredProductHero: React.FC<CenteredProductHeroProps> = ({
           Invoice. Scan. <span className="text-[#e1002d]">Get Paid.</span>
         </h1>
 
-        {/* Subtitle */}
-        <p className="mt-3 sm:mt-4 max-w-2xl mx-auto text-sm sm:text-base text-slate-400 leading-relaxed font-normal">
-          The all-in-one client CRM, deliverable tracker, and automated invoicing workspace
-          <br className="hidden sm:inline" /> built specifically for Indian freelancers and digital studios.
+        {/* Subtitle - Simplified & Punchy */}
+        <p className="mt-3 sm:mt-4 max-w-xl mx-auto text-sm sm:text-base text-slate-400 leading-relaxed font-normal">
+          Client management, deliverable tracking, and automated invoicing built for digital studios.
         </p>
 
-        {/* Action Buttons: Start 7-Day Trial & Compare Plans */}
+        {/* Action Buttons: Primary Start 7-Day Trial & Secondary Compare Plans */}
         <div className="mt-6 sm:mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-center">
           <button
             type="button"
@@ -53,7 +52,7 @@ export const CenteredProductHero: React.FC<CenteredProductHeroProps> = ({
           <button
             type="button"
             onClick={onComparePlans}
-            className="inline-flex h-10 sm:h-11 cursor-pointer items-center justify-center gap-2 rounded-lg bg-[#282828] hover:bg-[#333333] px-5 sm:px-6 text-sm font-medium whitespace-nowrap text-white transition-colors duration-120 border-none"
+            className="inline-flex h-10 sm:h-11 cursor-pointer items-center justify-center gap-2 rounded-lg bg-[#242424] hover:bg-[#2e2e2e] px-4 sm:px-5 text-sm font-medium whitespace-nowrap text-slate-300 hover:text-white transition-colors duration-120 border-none"
           >
             <Layers className="w-3.5 h-3.5 shrink-0 text-slate-400" />
             <span>Compare Plans</span>
