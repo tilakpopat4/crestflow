@@ -124,20 +124,10 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
         {/* Video Background active during Landing Page (authView === 'auth') */}
         {authView === 'auth' && (
           <video
-            ref={videoRef}
-            autoPlay={!shouldSuppressAutoplay}
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            disablePictureInPicture
-            controlsList="nodownload noremoteplayback"
-            tabIndex={-1}
-            aria-hidden="true"
-            poster={posterSrc}
-            onError={() => setVideoFailed(true)}
-            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-            style={{ aspectRatio: '16/9' }}
+            ref={videoRef} autoPlay={!shouldSuppressAutoplay} muted loop playsInline preload="metadata"
+            disablePictureInPicture controlsList="nodownload noremoteplayback" tabIndex={-1} aria-hidden="true"
+            poster={posterSrc} onError={() => setVideoFailed(true)}
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none" style={{ aspectRatio: '16/9' }}
           >
             {loadedAfterPaint && !shouldSuppressAutoplay && !videoFailed && (
               <>
@@ -246,12 +236,8 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
                 <VideoLandingHero config={config} />
                 <div className="w-full max-w-md mx-auto pt-2">
                   <SignInCard
-                    isAdminRoute={false}
-                    initialMode={authCardInitialMode}
-                    isSigningIn={isSigningIn}
-                    onLogin={onLogin}
-                    onEmailSignUp={onEmailSignUp}
-                    onEmailSignIn={onEmailSignIn}
+                    isAdminRoute={false} initialMode={authCardInitialMode} isSigningIn={isSigningIn}
+                    onLogin={onLogin} onEmailSignUp={onEmailSignUp} onEmailSignIn={onEmailSignIn}
                     onSupportingNavigate={onSupportingNavigate}
                   />
                 </div>
@@ -264,12 +250,8 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
                 <div className={`lg:col-span-5 ${config.cardAlignment === 'left' ? 'order-2 lg:order-1' : ''}`}>
                   <div className="flex flex-col items-center justify-center w-full">
                     <SignInCard
-                      isAdminRoute={false}
-                      initialMode={authCardInitialMode}
-                      isSigningIn={isSigningIn}
-                      onLogin={onLogin}
-                      onEmailSignUp={onEmailSignUp}
-                      onEmailSignIn={onEmailSignIn}
+                      isAdminRoute={false} initialMode={authCardInitialMode} isSigningIn={isSigningIn}
+                      onLogin={onLogin} onEmailSignUp={onEmailSignUp} onEmailSignIn={onEmailSignIn}
                       onSupportingNavigate={onSupportingNavigate}
                     />
                     {config.showWorkflowIllustration && (
@@ -285,9 +267,17 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
         </main>
       )}
 
+      {/* Slight Black Fade From Bottom, Behind The Footer */}
+      <div
+        className="pointer-events-none absolute bottom-0 inset-x-0 h-40 sm:h-56 bg-gradient-to-t from-black via-black/80 to-transparent z-20"
+        aria-hidden="true"
+      />
+
       {/* Minimal Footer */}
       <div className="relative z-30 w-full mt-auto">
         <Footer variant="minimal" transparent={true} onNavigate={onSupportingNavigate} className="!bg-transparent border-t border-white/10" />
+        {/* Slight black fade from bottom, below the footer */}
+        <div className="w-full h-4 sm:h-6 bg-gradient-to-t from-black to-transparent pointer-events-none" aria-hidden="true" />
       </div>
     </div>
   );

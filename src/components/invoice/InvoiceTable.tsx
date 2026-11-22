@@ -163,9 +163,8 @@ export function InvoiceTable({
                       <StatusBadge
                         status={inv.status}
                         onClick={() => onToggleStatus(inv.id)}
-                        title={`Click to mark as ${
-                          inv.status === 'Paid' ? 'Pending' : 'Paid & update last payment date'
-                        }`}
+                        title={`Click to mark as ${inv.status === 'Paid' ? 'Pending' : 'Paid & update last payment date'
+                          }`}
                       />
                     </td>
 
