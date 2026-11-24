@@ -28,7 +28,7 @@ export const CenteredProductHero: React.FC<CenteredProductHeroProps> = ({
         {/* Main Headline */}
         <h1
           id="hero-product-title"
-          className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.1]"
+          className="font-hero-condensed text-5xl sm:text-6xl lg:text-[72px] font-normal tracking-[0.015em] text-white leading-[1.02]"
         >
           Invoice. Scan. <span className="text-[#e1002d]">Get Paid.</span>
         </h1>

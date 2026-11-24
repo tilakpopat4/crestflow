@@ -103,6 +103,12 @@
   letter-spacing: -0.035em;
 }
 
+.font-hero-condensed {
+  font-family: 'Anton', 'Space Grotesk', system-ui, sans-serif;
+  letter-spacing: 0.015em;
+  font-weight: 400;
+}
+
 .text-accent-indigo {
   color: #6366f1 !important;
 }
