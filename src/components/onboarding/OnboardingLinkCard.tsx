@@ -16,7 +16,7 @@ interface OnboardingLinkCardProps {
 
 /**
  * OnboardingLinkCard Component
- * Displays the freelancer's public client intake link, copy tools, preview launch, and QR code.
+ * Displays the freelancer's shareable intake link, copy action, preview, and QR code.
  */
 export const OnboardingLinkCard: React.FC<OnboardingLinkCardProps> = ({
   onboardingUrl,
@@ -46,38 +46,28 @@ export const OnboardingLinkCard: React.FC<OnboardingLinkCardProps> = ({
     }
   };
 
+  const hasDistinctProfileUrl = Boolean(publicProfileUrl && publicProfileUrl !== onboardingUrl);
+
   return (
-    <Card className="p-5 sm:p-6 space-y-4 bg-surface-700 border-surface-400">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-accent" />
-            <h2 className="text-base sm:text-lg font-bold text-text-primary tracking-tight">
-              Professional Public Links
-            </h2>
-          </div>
-          <p className="text-sm text-text-secondary mt-1">
-            Clean, professional branded links without random user IDs. Share with clients to view your work and receive project briefs.
-          </p>
+    <Card className="h-full p-4 sm:p-5 flex flex-col justify-between gap-4 bg-surface-700 border-surface-400">
+      <div className="space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-sm font-semibold text-text-primary tracking-tight">
+            Intake Link
+          </h2>
+          {profile?.professionalTitle && (
+            <span className="text-xs text-text-secondary truncate">
+              {profile.professionalTitle}
+            </span>
+          )}
         </div>
 
-        {profile?.professionalTitle && (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface-800 border border-surface-400 rounded-lg text-xs sm:text-sm font-semibold text-text-secondary self-start sm:self-auto">
-            {profile.professionalTitle}
-          </span>
-        )}
-      </div>
-
-      {/* Main Link Input or Set Username Prompt */}
-      {!hasUsername ? (
-        <div className="p-4 rounded-xl bg-surface-800 border border-surface-400 space-y-2">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        {!hasUsername ? (
+          <div className="p-3.5 rounded-lg bg-surface-800 border border-surface-400 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold text-text-primary">
-                Username required
-              </p>
+              <p className="text-sm font-semibold text-text-primary">Username required</p>
               <p className="text-xs text-text-secondary mt-0.5">
-                Set a custom username in your Profile settings first to generate your shareable client onboarding link, client portal, and portfolio.
+                Set a username in Profile to activate your intake link.
               </p>
             </div>
             {onNavigateToProfile && (
@@ -88,26 +78,20 @@ export const OnboardingLinkCard: React.FC<OnboardingLinkCardProps> = ({
                 onClick={onNavigateToProfile}
                 className="text-xs shrink-0"
               >
-                Set Username in Profile
+                Set Username
               </Button>
             )}
           </div>
-        </div>
-      ) : (
-        <div className="space-y-1">
-          <label className="text-xs font-semibold text-text-secondary">
-            Client Onboarding Intake URL
-          </label>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-0.5">
-            <div className="relative flex-1 min-w-0">
-              <input
-                type="text"
-                readOnly
-                value={onboardingUrl}
-                onClick={(e) => (e.target as HTMLInputElement).select()}
-                className="w-full bg-surface-800 border border-surface-400 rounded-lg px-4 py-2 text-sm font-mono text-text-primary outline-none select-all focus:border-surface-300 transition-colors"
-              />
-            </div>
+        ) : (
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <input
+              type="text"
+              readOnly
+              value={onboardingUrl}
+              onClick={(e) => (e.target as HTMLInputElement).select()}
+              aria-label="Client onboarding intake URL"
+              className="flex-1 min-w-0 bg-surface-800 border border-surface-400 rounded-lg px-3.5 py-2 text-xs sm:text-sm font-mono text-text-primary outline-none select-all focus:border-surface-300 transition-colors"
+            />
 
             <div className="flex items-center gap-2 shrink-0">
               <Button
@@ -115,21 +99,21 @@ export const OnboardingLinkCard: React.FC<OnboardingLinkCardProps> = ({
                 variant="secondary"
                 size="sm"
                 onClick={() => handleCopy(onboardingUrl, 'onboarding')}
-                className="text-xs h-9 px-3.5"
+                className="text-xs h-9 px-3"
               >
-                {copiedType === 'onboarding' ? <Check size={14} className="text-accent" /> : <Copy size={14} />}
-                <span>{copiedType === 'onboarding' ? 'Copied' : 'Copy Onboarding'}</span>
+                {copiedType === 'onboarding' ? <Check size={14} /> : <Copy size={14} />}
+                <span>{copiedType === 'onboarding' ? 'Copied' : 'Copy'}</span>
               </Button>
 
               <a
                 href={onboardingUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-1.5 px-3.5 h-9 bg-surface-600 hover:bg-surface-500 text-text-primary rounded-lg text-xs font-medium transition-colors cursor-pointer border-0"
-                title="Open client onboarding page in new tab"
+                className="inline-flex items-center justify-center gap-1.5 px-3 h-9 bg-surface-600 hover:bg-surface-500 text-text-primary rounded-lg text-xs font-medium transition-colors cursor-pointer border-0"
+                title="Preview intake page"
               >
                 <ExternalLink size={14} />
-                <span className="hidden sm:inline">Preview</span>
+                <span>Preview</span>
               </a>
 
               <Button
@@ -138,23 +122,22 @@ export const OnboardingLinkCard: React.FC<OnboardingLinkCardProps> = ({
                 size="sm"
                 onClick={() => setShowQr(!showQr)}
                 className="text-xs h-9 px-3"
-                title="Toggle QR Code display"
+                title="Toggle QR code"
               >
                 <QrCode size={14} />
-                <span className="hidden sm:inline">QR</span>
+                <span>QR</span>
               </Button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* Secondary Link (Public Freelancer Profile) */}
-      {hasUsername && publicProfileUrl && (
-        <div className="pt-2 border-t border-surface-400/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+      {hasUsername && hasDistinctProfileUrl && (
+        <div className="pt-2.5 border-t border-surface-400/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
           <div className="flex items-center gap-2 min-w-0">
             <span className="text-text-muted shrink-0 font-medium inline-flex items-center gap-1">
               <User size={13} />
-              Public Freelancer Profile:
+              Profile:
             </span>
             <span className="font-mono text-text-secondary truncate">
               {publicProfileUrl}
@@ -165,10 +148,10 @@ export const OnboardingLinkCard: React.FC<OnboardingLinkCardProps> = ({
               type="button"
               variant="secondary"
               size="sm"
-              onClick={() => handleCopy(publicProfileUrl, 'profile')}
+              onClick={() => handleCopy(publicProfileUrl!, 'profile')}
               className="text-[11px] h-7 px-2.5"
             >
-              {copiedType === 'profile' ? <Check size={12} className="text-accent" /> : <Copy size={12} />}
+              {copiedType === 'profile' ? <Check size={12} /> : <Copy size={12} />}
               <span>{copiedType === 'profile' ? 'Copied' : 'Copy'}</span>
             </Button>
             <a
@@ -193,14 +176,14 @@ export const OnboardingLinkCard: React.FC<OnboardingLinkCardProps> = ({
             transition={{ duration: shouldReduceMotion ? 0.01 : 0.2, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
-            <div className="pt-3 border-t border-surface-400/80 flex flex-col sm:flex-row items-center gap-4 bg-surface-800 p-4 rounded-xl border border-surface-400">
-              <div className="p-3 bg-white rounded-lg shrink-0">
-                <QRCodeSVG value={onboardingUrl} size={110} level="M" />
+            <div className="flex flex-col sm:flex-row items-center gap-4 bg-surface-800 p-3.5 rounded-lg border border-surface-400">
+              <div className="p-2.5 bg-white rounded-lg shrink-0">
+                <QRCodeSVG value={onboardingUrl} size={96} level="M" />
               </div>
-              <div className="space-y-1 text-center sm:text-left text-sm">
-                <p className="font-bold text-text-primary">Scan to Open Onboarding Page</p>
-                <p className="text-text-secondary text-xs leading-relaxed max-w-sm">
-                  Clients can scan this QR code with their mobile device camera to open your branded onboarding form instantly.
+              <div className="space-y-0.5 text-center sm:text-left">
+                <p className="text-sm font-semibold text-text-primary">Scan to open</p>
+                <p className="text-text-secondary text-xs">
+                  Opens your intake form on mobile.
                 </p>
               </div>
             </div>

@@ -14,7 +14,7 @@ interface OnboardingSampleVideoBannerProps {
 
 /**
  * OnboardingSampleVideoBanner Component
- * Workspace banner linking to the Drive-connected public sample video manager.
+ * Compact card linking to the Drive-connected public sample video manager.
  */
 export const OnboardingSampleVideoBanner: React.FC<OnboardingSampleVideoBannerProps> = ({
   profile,
@@ -35,40 +35,40 @@ export const OnboardingSampleVideoBanner: React.FC<OnboardingSampleVideoBannerPr
 
   return (
     <>
-      <Card className="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface-700 border-surface-400">
+      <Card className="h-full p-4 sm:p-5 flex flex-col justify-between gap-4 bg-surface-700 border-surface-400">
         <div className="space-y-1">
-          <h2 className="text-sm font-bold text-text-primary">
-            Public Sample Video Library
+          <h2 className="text-sm font-semibold text-text-primary tracking-tight">
+            Sample Videos
           </h2>
           <p className="text-xs text-text-secondary">
             {samples.length > 0
-              ? `${samples.length} sample video${samples.length > 1 ? 's' : ''} connected to Google Drive for prospective clients.`
-              : 'Manually select sample edited videos connected to Google Drive to showcase on your onboarding link.'}
+              ? `${samples.length} video${samples.length > 1 ? 's' : ''} linked via Drive`
+              : 'No Drive videos linked'}
           </p>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
-          {samples.length > 0 && (
-            <a
-              href={`${onboardingUrl}?view=samples`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-3 h-8 bg-surface-600 hover:bg-surface-500 text-text-primary text-xs font-medium rounded-lg inline-flex items-center gap-1.5 no-underline transition-colors"
-            >
-              <ExternalLink size={13} />
-              Preview Public Library
-            </a>
-          )}
+        <div className="flex items-center gap-2 flex-wrap">
           <Button
             type="button"
             variant="secondary"
             size="sm"
             onClick={() => setIsModalOpen(true)}
-            className="text-xs h-8 inline-flex items-center gap-1.5"
+            className="text-xs h-9 px-3 inline-flex items-center gap-1.5"
           >
             <Video size={14} />
-            Manage Sample Videos ({samples.length})
+            <span>Manage ({samples.length})</span>
           </Button>
+          {samples.length > 0 && (
+            <a
+              href={`${onboardingUrl}?view=samples`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 h-9 bg-surface-600 hover:bg-surface-500 text-text-primary text-xs font-medium rounded-lg inline-flex items-center gap-1.5 no-underline transition-colors"
+            >
+              <ExternalLink size={13} />
+              <span>Preview</span>
+            </a>
+          )}
         </div>
       </Card>
 

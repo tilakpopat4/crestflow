@@ -14,7 +14,7 @@ interface OnboardingRequestCardProps {
 
 /**
  * OnboardingRequestCard Component
- * Displays an incoming client onboarding lead or project request with actions to convert or decline.
+ * Displays an incoming client onboarding lead with actions to accept, decline, or restore.
  */
 export const OnboardingRequestCard: React.FC<OnboardingRequestCardProps> = ({
   request,
@@ -29,49 +29,33 @@ export const OnboardingRequestCard: React.FC<OnboardingRequestCardProps> = ({
     year: 'numeric',
   });
 
-  const getStatusBadge = () => {
+  const renderStatus = () => {
     switch (request.status) {
       case 'accepted':
-        return (
-          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-primary">
-            <span className="w-2 h-2 rounded-full bg-accent" />
-            Accepted
-          </span>
-        );
+        return <span className="text-xs font-medium text-text-primary">Accepted</span>;
       case 'declined':
-        return (
-          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-text-muted">
-            <span className="w-2 h-2 rounded-full bg-surface-400" />
-            Declined
-          </span>
-        );
+        return <span className="text-xs font-medium text-text-muted">Declined</span>;
       case 'pending':
       default:
-        return (
-          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-secondary">
-            <span className="w-2 h-2 rounded-full bg-amber-400" />
-            Pending Review
-          </span>
-        );
+        return <span className="text-xs font-medium text-text-secondary">Pending</span>;
     }
   };
 
   return (
-    <Card className="p-5 sm:p-6 flex flex-col justify-between gap-4 bg-surface-700 border-surface-400">
+    <Card className="p-4 sm:p-5 flex flex-col justify-between gap-4 bg-surface-700 border-surface-400">
       <div className="space-y-3">
-        {/* Header: Client & Status */}
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h3 className="text-base font-bold text-text-primary tracking-tight">
+            <h3 className="text-base font-semibold text-text-primary tracking-tight">
               {request.clientName}
             </h3>
             <p className="text-xs text-text-secondary mt-0.5">
-              Contact: <span className="font-semibold text-text-primary">{request.contactName}</span>
+              {request.contactName}
             </p>
           </div>
 
           <div className="flex flex-col items-end gap-1 shrink-0">
-            {getStatusBadge()}
+            {renderStatus()}
             <span className="text-xs text-text-muted flex items-center gap-1 font-mono tabular-nums">
               <Clock size={12} />
               {formattedDate}
@@ -79,23 +63,20 @@ export const OnboardingRequestCard: React.FC<OnboardingRequestCardProps> = ({
           </div>
         </div>
 
-        {/* Proposed Rate */}
         {request.proposedRate && (
-          <div className="text-xs font-semibold text-text-secondary">
-            Proposed Rate:{' '}
-            <span className="text-text-primary font-mono tabular-nums font-bold">
+          <div className="text-xs text-text-secondary">
+            Rate:{' '}
+            <span className="text-text-primary font-mono tabular-nums font-semibold">
               ₹{request.proposedRate} / reel
             </span>
           </div>
         )}
 
-        {/* Project Scope / Description */}
-        <div className="bg-surface-800 border border-surface-400 rounded-lg p-3.5 text-xs text-text-secondary leading-relaxed whitespace-pre-line">
+        <div className="bg-surface-800 border border-surface-400 rounded-lg p-3 text-xs text-text-secondary leading-relaxed whitespace-pre-line">
           {request.projectDetails}
         </div>
 
-        {/* Contact Links */}
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-text-muted pt-1">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-text-muted">
           {request.contactPhone && (
             <a
               href={`tel:${request.contactPhone}`}
@@ -130,7 +111,6 @@ export const OnboardingRequestCard: React.FC<OnboardingRequestCardProps> = ({
         </div>
       </div>
 
-      {/* Action Footer */}
       <div className="flex items-center justify-end gap-2 pt-3 border-t border-surface-400/80">
         {request.status === 'pending' && (
           <>
@@ -150,33 +130,28 @@ export const OnboardingRequestCard: React.FC<OnboardingRequestCardProps> = ({
               onClick={() => onAccept(request)}
               className="text-xs font-semibold"
             >
-              Accept &amp; Add Client
+              Accept
             </Button>
           </>
         )}
 
-        {request.status === 'accepted' && (
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-text-secondary font-semibold">Client Added</span>
-            {onNavigateToClients && (
-              <button
-                type="button"
-                onClick={onNavigateToClients}
-                className="text-xs font-semibold text-text-primary hover:underline cursor-pointer border-0 bg-transparent"
-              >
-                View in Clients
-              </button>
-            )}
-          </div>
+        {request.status === 'accepted' && onNavigateToClients && (
+          <button
+            type="button"
+            onClick={onNavigateToClients}
+            className="text-xs font-medium text-text-secondary hover:text-text-primary cursor-pointer border-0 bg-transparent"
+          >
+            View client
+          </button>
         )}
 
         {request.status === 'declined' && onRestore && (
           <button
             type="button"
             onClick={() => onRestore(request)}
-            className="text-xs font-semibold text-text-muted hover:text-text-primary underline cursor-pointer border-0 bg-transparent"
+            className="text-xs font-medium text-text-muted hover:text-text-primary cursor-pointer border-0 bg-transparent"
           >
-            Restore Request
+            Restore
           </button>
         )}
       </div>

@@ -23,9 +23,9 @@ interface ClientOnboardingTabProps {
 type FilterStatus = 'pending' | 'accepted' | 'declined' | 'all';
 
 /**
- * ClientOnboardingTab provides freelancers with a dedicated hub to:
- * 1. View, copy, and share their branded public onboarding link & QR code.
- * 2. Track, review, and convert incoming client inquiries into active clients.
+ * ClientOnboardingTab provides freelancers with a streamlined workspace to:
+ * 1. Share their intake link, QR code, and Drive-connected sample videos.
+ * 2. Track and convert incoming client leads.
  */
 export default function ClientOnboardingTab({
   user,
@@ -50,7 +50,6 @@ export default function ClientOnboardingTab({
   const onboardingUrl = useMemo(() => getOnboardingUrl(handle), [handle]);
   const publicProfileUrl = useMemo(() => getPublicProfileUrl(handle), [handle]);
 
-  // Derived counts with tabular numbers
   const counts = useMemo(() => {
     return {
       all: serviceRequests.length,
@@ -60,7 +59,6 @@ export default function ClientOnboardingTab({
     };
   }, [serviceRequests]);
 
-  // Filtered requests
   const filteredRequests = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     return serviceRequests
@@ -123,57 +121,47 @@ export default function ClientOnboardingTab({
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 w-full min-w-0 text-text-primary">
-      {/* Workspace Header */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">
           Client Onboarding
         </h1>
         <p className="text-text-secondary mt-1 text-sm">
-          Manage your client intake pipeline, copy your shareable link, and convert inquiries into clients.
+          Intake link and client leads.
         </p>
       </div>
 
-      <OnboardingLinkCard
-        onboardingUrl={onboardingUrl}
-        publicProfileUrl={publicProfileUrl}
-        profile={profile}
-        hasUsername={hasUsername}
-        onNavigateToProfile={onNavigateToProfile}
-      />
-
-      <OnboardingSampleVideoBanner
-        profile={profile}
-        workItems={workItems}
-        onboardingUrl={onboardingUrl}
-        onSaveProfile={onSaveProfile}
-      />
-
-      {/* Summary Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
-        <StatCard
-          label="Pending Inquiries"
-          value={counts.pending}
-          icon={Inbox}
-        />
-        <StatCard
-          label="Accepted Clients"
-          value={counts.accepted}
-          icon={CheckCircle2}
-        />
-        <StatCard
-          label="Total Leads"
-          value={counts.all}
-          icon={Users}
-        />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-5">
+        <StatCard label="Pending" value={counts.pending} icon={Inbox} />
+        <StatCard label="Accepted" value={counts.accepted} icon={CheckCircle2} />
+        <StatCard label="Total Leads" value={counts.all} icon={Users} />
       </div>
 
-      {/* Filter and Search Bar */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5 items-stretch">
+        <div className="lg:col-span-2">
+          <OnboardingLinkCard
+            onboardingUrl={onboardingUrl}
+            publicProfileUrl={publicProfileUrl}
+            profile={profile}
+            hasUsername={hasUsername}
+            onNavigateToProfile={onNavigateToProfile}
+          />
+        </div>
+        <div className="lg:col-span-1">
+          <OnboardingSampleVideoBanner
+            profile={profile}
+            workItems={workItems}
+            onboardingUrl={onboardingUrl}
+            onSaveProfile={onSaveProfile}
+          />
+        </div>
+      </div>
+
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={15} />
           <input
             type="text"
-            placeholder="Search leads by name, email, details..."
+            placeholder="Search leads..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-surface-800 border border-surface-400 rounded-lg pl-9 pr-4 py-2 text-xs text-text-primary placeholder:text-text-muted outline-none focus:border-surface-300 transition-colors"
@@ -206,10 +194,9 @@ export default function ClientOnboardingTab({
         </div>
       </div>
 
-      {/* Requests Grid */}
       {loading ? (
         <div className="p-12 text-center text-xs text-text-muted font-mono">
-          Loading incoming requests...
+          Loading...
         </div>
       ) : (
         <AnimatePresence mode="wait">
@@ -226,19 +213,19 @@ export default function ClientOnboardingTab({
                 icon={Inbox}
                 title={
                   searchQuery
-                    ? 'No requests match your search'
+                    ? 'No matching leads'
                     : statusFilter === 'pending'
-                    ? 'No pending onboarding requests'
-                    : 'No requests in this status'
+                    ? 'No pending requests'
+                    : 'No requests'
                 }
                 description={
                   searchQuery
-                    ? 'Try adjusting your search terms or filter view.'
-                    : 'Share your public onboarding link with prospective clients to receive incoming project briefs.'
+                    ? 'Try a different search or filter.'
+                    : 'Leads from your intake link appear here.'
                 }
               />
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
                 {filteredRequests.map((req) => (
                   <OnboardingRequestCard
                     key={req.id}
