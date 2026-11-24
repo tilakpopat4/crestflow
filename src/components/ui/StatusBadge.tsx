@@ -39,7 +39,7 @@ export interface StatusBadgeProps {
  * Conforms strictly to GEMINI.md:
  * - Status column: plain text, 13px, weight 500, no background, no border, no pill.
  * - Allowed colors:
- *   - Paid / Approved: steel blue text (#4870aa)
+ *   - Paid / Approved: white text (white indicator via currentColor)
  *   - Invoiced / Pending / Active: slate-700 text (slate-300 in dark mode)
  *   - Draft / Uninvoiced / Closed: slate-500 text
  *   - Overdue / Blocked / Changes: red text (red-600 / red-400 in dark mode)
@@ -58,15 +58,15 @@ export function StatusBadge({
 
   let textClass = 'text-slate-700 dark:text-slate-300';
   let indicator: React.ReactNode = (
-    <span className="w-1.5 h-1.5 rounded-full bg-slate-700 dark:bg-slate-300 shrink-0" />
+    <span className="w-1.5 h-1.5 rounded-full bg-current shrink-0" />
   );
   let defaultLabel = status || 'Pending';
 
   switch (norm) {
     case 'paid':
     case 'approved':
-      textClass = 'text-[#4870aa] dark:text-[#4870aa]';
-      indicator = <span className="w-1.5 h-1.5 rounded-full bg-[#4870aa] shrink-0" />;
+      textClass = 'text-white';
+      indicator = <span className="w-1.5 h-1.5 rounded-full bg-current shrink-0" />;
       defaultLabel = norm === 'approved' ? 'Approved' : 'Paid';
       break;
 
