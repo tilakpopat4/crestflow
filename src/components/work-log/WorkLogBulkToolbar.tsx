@@ -23,7 +23,7 @@ export function WorkLogBulkToolbar({
   if (selectedCount === 0) return null;
 
   return (
-    <div className="fixed bottom-20 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2 sm:py-2.5 bg-surface-700 text-text-primary rounded-xl shadow-xl border border-surface-400 animate-in fade-in max-w-[calc(100vw-2rem)]">
+    <div className="fixed bottom-20 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2 sm:py-2.5 bg-surface-700 text-text-primary rounded-xl shadow-xl border-0 animate-in fade-in max-w-[calc(100vw-2rem)]">
       <div className="flex items-center gap-2">
         <CheckSquare size={15} className="text-text-primary" />
         <span className="text-xs font-semibold">{selectedCount} selected</span>
@@ -33,21 +33,21 @@ export function WorkLogBulkToolbar({
           </span>
         )}
       </div>
-      <div className="w-px h-4 bg-surface-400" />
+      <div className="w-px h-4 bg-surface-500" />
       <Button
         variant="secondary"
         size="sm"
         onClick={onOpenBulkEdit}
-        className="gap-1.5 h-8 text-xs"
+        className="gap-1.5 h-8 text-xs border-0"
       >
         <Layers size={13} />
-        <span>Bulk Edit</span>
+        <span>Edit</span>
       </Button>
       <Button
         variant="destructive"
         size="sm"
         onClick={onBulkDelete}
-        className="gap-1.5 h-8 text-xs"
+        className="gap-1.5 h-8 text-xs border-0"
       >
         <Trash2 size={13} />
         <span>Delete</span>

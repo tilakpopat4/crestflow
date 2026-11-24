@@ -34,18 +34,17 @@ export function WorkLogToolbar({
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
       <div>
         <h2 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">Work Log</h2>
-        <p className="text-text-muted mt-1 text-sm">Track deliverables and services.</p>
+        <p className="text-text-muted mt-1 text-sm">Client deliverables.</p>
       </div>
 
       <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
-        {/* Work Log Filter Search Bar */}
-        <div className="relative flex-1 min-w-[180px] w-full sm:w-auto">
+        <div className="relative flex-1 min-w-[160px] w-full sm:w-auto">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search work or client..."
+            placeholder="Search..."
             className="w-full bg-surface-800 text-sm pl-9 pr-7 py-2 rounded-lg border border-surface-400 text-text-primary placeholder:text-text-muted outline-none focus:border-surface-300"
           />
           {searchQuery && (
@@ -64,11 +63,11 @@ export function WorkLogToolbar({
             variant="secondary"
             size="sm"
             onClick={() => setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'))}
-            className="gap-1.5"
+            className="gap-1.5 border-0"
             title="Toggle sort order"
           >
             <ArrowUpDown size={13} />
-            <span>Sort: {sortOrder === 'asc' ? 'Oldest' : 'Newest'}</span>
+            <span>{sortOrder === 'asc' ? 'Oldest' : 'Newest'}</span>
           </Button>
 
           {closedCount > 0 && (
@@ -76,11 +75,11 @@ export function WorkLogToolbar({
               variant="secondary"
               size="sm"
               onClick={() => setShowClosed((prev) => !prev)}
-              className="gap-1.5"
-              title={showClosed ? 'Hide work logs of closed clients' : 'Show work logs of closed clients'}
+              className="gap-1.5 border-0"
+              title={showClosed ? 'Hide closed clients' : 'Show closed clients'}
             >
               <Archive size={13} />
-              <span>{showClosed ? 'Hide Closed' : `Show Closed (${closedCount})`}</span>
+              <span>{showClosed ? 'Hide Closed' : `Closed (${closedCount})`}</span>
             </Button>
           )}
 
@@ -90,18 +89,18 @@ export function WorkLogToolbar({
                 variant="secondary"
                 size="sm"
                 onClick={onOpenDrive}
-                className="gap-1.5 flex-1 sm:flex-initial"
-                title="Upload video to Google Drive"
+                className="gap-1.5 flex-1 sm:flex-initial border-0"
+                title="Upload video to Drive"
               >
                 <UploadCloud size={13} />
-                <span>Upload to Drive</span>
+                <span>Drive Upload</span>
               </Button>
 
               <Button
                 variant="primary"
                 size="sm"
                 onClick={onOpenForm}
-                className="gap-1.5 flex-1 sm:flex-initial"
+                className="gap-1.5 flex-1 sm:flex-initial border-0"
               >
                 <Plus size={13} />
                 <span>Log Work</span>

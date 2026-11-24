@@ -40,8 +40,7 @@ export function WorkLogTable({
   onOpenEmbed,
 }: WorkLogTableProps) {
   return (
-    <div className="bg-surface-700 border border-surface-400 rounded-xl overflow-hidden shadow-xs">
-      {/* Mobile Card View */}
+    <div className="bg-surface-700 border-0 rounded-xl overflow-hidden">
       <WorkLogMobileCards
         sortedWork={sortedWork}
         clients={clients}
@@ -56,11 +55,10 @@ export function WorkLogTable({
         onOpenEmbed={onOpenEmbed}
       />
 
-      {/* Desktop Table View */}
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-left border-collapse min-w-[700px] text-xs">
           <thead>
-            <tr className="bg-surface-800 border-b border-surface-400/80 text-[11px] font-semibold text-text-secondary uppercase tracking-wider">
+            <tr className="bg-surface-800 text-[11px] font-semibold text-text-secondary uppercase tracking-wider">
               <th className="py-3 pl-4 pr-2 w-10">
                 <Checkbox
                   checked={allVisibleSelected}
@@ -72,7 +70,7 @@ export function WorkLogTable({
               </th>
               <th className="py-3 px-3">Date</th>
               <th className="py-3 px-3">Client</th>
-              <th className="py-3 px-3">Description / Video Link</th>
+              <th className="py-3 px-3">Deliverable</th>
               <th className="py-3 px-3 text-right">Amount</th>
               <th className="py-3 px-3 text-center">Status</th>
               <th className="py-3 px-4 text-right">Actions</th>
@@ -106,7 +104,7 @@ export function WorkLogTable({
                     })}
                   </td>
                   <td className="py-3 px-3 font-medium text-text-primary">
-                    <div className="font-semibold">{client?.name || 'Unknown Client'}</div>
+                    <div className="font-semibold">{client?.name || 'Unknown'}</div>
                     {work.subClientName && (
                       <div className="text-[11px] text-text-muted font-normal mt-0.5">
                         {work.subClientName}
@@ -116,15 +114,17 @@ export function WorkLogTable({
                   <td className="py-3 px-3 text-text-secondary">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                       <span className="font-medium text-text-primary">{work.description}</span>
-                      <span className="text-text-muted font-mono tabular-nums">({work.quantity}x)</span>
+                      {work.quantity > 1 && (
+                        <span className="text-text-muted font-mono tabular-nums">×{work.quantity}</span>
+                      )}
                       {videoUrl && (
                         <button
                           type="button"
                           onClick={() => onOpenEmbed({ isOpen: true, url: videoUrl, title: work.description, clientName: client?.name })}
-                          className="text-xs font-medium text-text-primary hover:underline inline-flex items-center gap-1 cursor-pointer bg-transparent border-0 p-0 shrink-0"
-                          title={`Watch embedded preview: ${videoUrl}`}
+                          className="text-xs font-medium text-text-secondary hover:text-text-primary inline-flex items-center gap-1 cursor-pointer bg-transparent border-0 p-0 shrink-0"
+                          title={`Preview: ${videoUrl}`}
                         >
-                          <Play size={12} className="text-text-muted" /> Watch Preview
+                          <Play size={12} /> Preview
                         </button>
                       )}
                     </div>
@@ -147,7 +147,7 @@ export function WorkLogTable({
                           target="_blank"
                           rel="noopener noreferrer"
                           className="p-1.5 text-text-muted hover:text-text-primary hover:bg-surface-600 rounded transition-colors"
-                          title="Open external link"
+                          title="Open link"
                         >
                           <ExternalLink size={13} />
                         </a>

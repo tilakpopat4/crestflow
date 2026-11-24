@@ -31,10 +31,10 @@ export function WorkLogFormCard({
   const isMonthly = selectedClient?.paymentBasis === 'monthly_retainer';
 
   return (
-    <div className="bg-surface-700 border border-surface-400 p-5 sm:p-6 rounded-xl shadow-xs space-y-4">
-      <div className="flex justify-between items-center pb-3 border-b border-surface-400/80">
+    <div className="bg-surface-700 border-0 p-5 sm:p-6 rounded-xl space-y-4">
+      <div className="flex justify-between items-center">
         <h3 className="text-base font-semibold text-text-primary">
-          {editingWorkId ? 'Edit Work Log Entry' : 'Log Completed Work'}
+          {editingWorkId ? 'Edit Entry' : 'Log Work'}
         </h3>
         <button
           type="button"
@@ -48,7 +48,7 @@ export function WorkLogFormCard({
       <form onSubmit={onSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-text-secondary mb-1">Client *</label>
+            <label className="block text-xs font-semibold text-text-secondary mb-1">Client</label>
             <select
               required
               className="w-full p-2.5 bg-surface-800 text-text-primary border border-surface-400 rounded-lg outline-none focus:border-surface-300 text-xs font-medium"
@@ -65,7 +65,7 @@ export function WorkLogFormCard({
                 });
               }}
             >
-              <option value="">Select Client</option>
+              <option value="">Select client</option>
               {clients
                 .filter((c) => !c.isClosed)
                 .map((c) => (
@@ -76,19 +76,19 @@ export function WorkLogFormCard({
             </select>
 
             {selectedClient?.subClients && selectedClient.subClients.length > 0 && (
-              <div className="mt-2.5 bg-surface-800 p-2.5 rounded-lg border border-surface-400">
+              <div className="mt-2.5 bg-surface-800 p-2.5 rounded-lg border-0">
                 <label className="block text-[11px] font-semibold text-text-secondary mb-1 flex items-center gap-1">
-                  <Users size={12} className="text-text-muted" /> Assign Sub-Client (Optional)
+                  <Users size={12} className="text-text-muted" /> Sub-Client
                 </label>
                 <select
                   className="w-full p-2 border border-surface-400 rounded-md text-xs bg-surface-900 font-medium text-text-primary outline-none focus:border-surface-300"
                   value={formData.subClientId}
                   onChange={(e) => setFormData({ ...formData, subClientId: e.target.value })}
                 >
-                  <option value="">Direct Parent Client ({selectedClient.name})</option>
+                  <option value="">Direct ({selectedClient.name})</option>
                   {selectedClient.subClients.map((sc) => (
                     <option key={sc.id} value={sc.id}>
-                      Sub-Client: {sc.name} {sc.code ? `(${sc.code})` : ''}
+                      {sc.name} {sc.code ? `(${sc.code})` : ''}
                     </option>
                   ))}
                 </select>
@@ -97,7 +97,7 @@ export function WorkLogFormCard({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-text-secondary mb-1">Date Completed *</label>
+            <label className="block text-xs font-semibold text-text-secondary mb-1">Date</label>
             <DateInput
               required
               className="p-2.5 bg-surface-800 text-text-primary border border-surface-400 rounded-lg outline-none focus:border-surface-300 text-xs font-mono"
@@ -109,7 +109,7 @@ export function WorkLogFormCard({
 
         <div>
           <label className="block text-xs font-semibold text-text-secondary mb-1">
-            Description (e.g., Real Estate Reel, VLOG Edit) *
+            Description
           </label>
           <input
             type="text"
@@ -117,19 +117,19 @@ export function WorkLogFormCard({
             className="w-full p-2.5 bg-surface-800 text-text-primary placeholder:text-text-muted border border-surface-400 rounded-lg outline-none focus:border-surface-300 text-xs"
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            placeholder="Description of work"
+            placeholder="Deliverable name"
           />
         </div>
 
         <div>
           <div className="flex items-center justify-between mb-1">
-            <label className="block text-xs font-semibold text-text-secondary">Video / Post Link (Optional)</label>
+            <label className="block text-xs font-semibold text-text-secondary">Link</label>
             <button
               type="button"
               onClick={onOpenDrive}
-              className="text-xs font-medium text-text-primary hover:underline flex items-center gap-1 cursor-pointer bg-transparent border-0 p-0"
+              className="text-xs font-medium text-text-secondary hover:text-text-primary flex items-center gap-1 cursor-pointer bg-transparent border-0 p-0"
             >
-              <UploadCloud size={12} /> Upload to Google Drive
+              <UploadCloud size={12} /> Upload to Drive
             </button>
           </div>
           <input
@@ -137,13 +137,13 @@ export function WorkLogFormCard({
             className="w-full p-2.5 bg-surface-800 text-text-primary placeholder:text-text-muted border border-surface-400 rounded-lg outline-none focus:border-surface-300 text-xs font-mono"
             value={formData.videoUrl}
             onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
-            placeholder="https://drive.google.com/file/d/... or YouTube / Instagram link"
+            placeholder="Drive, YouTube, or Instagram URL"
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-text-secondary mb-1">Quantity *</label>
+            <label className="block text-xs font-semibold text-text-secondary mb-1">Qty</label>
             <input
               type="number"
               min="1"
@@ -155,14 +155,14 @@ export function WorkLogFormCard({
           </div>
 
           {isMonthly ? (
-            <div className="flex items-center">
-              <div className="w-full p-2.5 bg-surface-800 border border-surface-400 rounded-lg text-xs text-text-secondary flex items-center h-[38px]">
-                <span>Covered by monthly retainer (no per-item rate)</span>
+            <div className="flex items-end">
+              <div className="w-full p-2.5 bg-surface-800 border-0 rounded-lg text-xs text-text-secondary flex items-center h-[38px]">
+                <span>Included in retainer</span>
               </div>
             </div>
           ) : (
             <div>
-              <label className="block text-xs font-semibold text-text-secondary mb-1">Rate *</label>
+              <label className="block text-xs font-semibold text-text-secondary mb-1">Rate</label>
               <input
                 type="number"
                 required
@@ -174,12 +174,12 @@ export function WorkLogFormCard({
           )}
         </div>
 
-        <div className="flex justify-end gap-2 pt-3 border-t border-surface-400/80">
+        <div className="flex justify-end gap-2 pt-2">
           <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
             Cancel
           </Button>
           <Button type="submit" variant="primary" size="sm">
-            {editingWorkId ? 'Save Changes' : 'Log Work'}
+            {editingWorkId ? 'Save' : 'Log Work'}
           </Button>
         </div>
       </form>

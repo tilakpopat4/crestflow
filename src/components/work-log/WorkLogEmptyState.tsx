@@ -23,16 +23,16 @@ export function WorkLogEmptyState({
   onNavigateToClients,
 }: WorkLogEmptyStateProps) {
   return (
-    <div className="text-center py-16 px-4 bg-surface-700 rounded-xl border border-surface-400 space-y-4 max-w-xl mx-auto my-4 shadow-xs">
+    <div className="text-center py-14 px-4 bg-surface-700 border-0 rounded-xl space-y-4 max-w-xl mx-auto my-4">
       {!hasClients ? (
         <>
           <div className="w-12 h-12 rounded-xl bg-surface-600 text-text-secondary flex items-center justify-center mx-auto">
             <Users size={22} />
           </div>
           <div className="space-y-1">
-            <h3 className="text-base font-semibold text-text-primary">Add a client before logging work</h3>
+            <h3 className="text-base font-semibold text-text-primary">Add a client first</h3>
             <p className="text-xs text-text-muted">
-              Every deliverable is linked to a client so rates, retainers, and invoice statements calculate automatically.
+              Link deliverables to a client for automatic invoicing.
             </p>
           </div>
           {onNavigateToClients && (
@@ -55,8 +55,8 @@ export function WorkLogEmptyState({
           </div>
           <div className="space-y-1.5">
             <h3 className="text-base font-semibold text-text-primary">No work logged yet</h3>
-            <p className="text-xs text-text-muted leading-relaxed max-w-md mx-auto">
-              Record video deliverables, reels, or editing tasks to automatically aggregate them into invoices with UPI payment QR codes.
+            <p className="text-xs text-text-muted leading-relaxed max-w-sm mx-auto">
+              Log deliverables to generate invoices automatically.
             </p>
           </div>
           <div className="pt-2">
@@ -77,9 +77,9 @@ export function WorkLogEmptyState({
             <Search size={22} />
           </div>
           <div className="space-y-1">
-            <h3 className="text-base font-semibold text-text-primary">No matching work items</h3>
+            <h3 className="text-base font-semibold text-text-primary">No matching work</h3>
             <p className="text-xs text-text-muted">
-              No deliverables match your search query &quot;{searchQuery}&quot;.
+              No items match &quot;{searchQuery}&quot;.
             </p>
           </div>
           <Button
@@ -88,7 +88,7 @@ export function WorkLogEmptyState({
             size="sm"
             onClick={onClearSearch}
           >
-            Clear Search
+            Clear
           </Button>
         </>
       )}

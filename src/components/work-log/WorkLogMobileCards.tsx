@@ -40,23 +40,23 @@ export function WorkLogMobileCards({
 }: WorkLogMobileCardsProps) {
   return (
     <div className="md:hidden">
-      {/* Mobile Select Header Bar */}
-      <div className="flex items-center justify-between p-3.5 bg-surface-800 border-b border-surface-400/80 text-xs font-semibold text-text-secondary">
+      <div className="flex items-center justify-between p-3.5 bg-surface-800 border-0 text-xs font-semibold text-text-secondary">
         <label className="flex items-center gap-2.5 cursor-pointer select-none">
           <Checkbox
             checked={allVisibleSelected}
             indeterminate={someVisibleSelected}
             onChange={onSelectAll}
-            aria-label={`Select all visible ${sortedWork.length} deliverables`}
+            aria-label={`Select all ${sortedWork.length} deliverables`}
           />
-          <span>Select All ({sortedWork.length})</span>
+          <span>All ({sortedWork.length})</span>
         </label>
-        <span className="text-[11px] font-normal text-text-muted">
-          {selectedCount > 0 ? `${selectedCount} selected` : 'Deliverables'}
-        </span>
+        {selectedCount > 0 && (
+          <span className="text-[11px] font-normal text-text-muted">
+            {selectedCount} selected
+          </span>
+        )}
       </div>
 
-      {/* Mobile Work Cards List */}
       <div className="divide-y divide-surface-400/60">
         {sortedWork.map((work) => {
           const client = clients.find((c) => c.id === work.clientId);
@@ -69,7 +69,7 @@ export function WorkLogMobileCards({
           });
           const isMonthly = client?.paymentBasis === 'monthly_retainer';
           const amountText = isMonthly
-            ? 'Monthly Retainer'
+            ? 'Retainer'
             : formatCurrencyAmount(work.quantity * work.rate, client?.currency);
 
           return (
@@ -89,7 +89,7 @@ export function WorkLogMobileCards({
                   />
                   <div className="min-w-0">
                     <h4 className="font-semibold text-text-primary text-sm truncate">
-                      {client?.name || 'Unknown Client'}
+                      {client?.name || 'Unknown'}
                     </h4>
                     {work.subClientName && (
                       <p className="text-xs text-text-muted truncate mt-0.5">
@@ -104,13 +104,15 @@ export function WorkLogMobileCards({
                 </div>
               </div>
 
-              <div className="bg-surface-800 rounded-lg p-3 border border-surface-400 space-y-1.5">
+              <div className="bg-surface-800 rounded-lg p-3 border-0 space-y-1.5">
                 <div className="flex items-center justify-between gap-2 text-xs">
                   <span className="font-medium text-text-primary break-words flex-1">
                     {work.description}{' '}
-                    <span className="text-text-muted font-normal font-mono tabular-nums">
-                      ({work.quantity}x)
-                    </span>
+                    {work.quantity > 1 && (
+                      <span className="text-text-muted font-normal font-mono tabular-nums">
+                        ×{work.quantity}
+                      </span>
+                    )}
                   </span>
                   <span className="font-semibold text-text-primary shrink-0 font-mono tabular-nums">
                     {amountText}
@@ -123,47 +125,42 @@ export function WorkLogMobileCards({
                     <button
                       type="button"
                       onClick={() => onOpenEmbed({ isOpen: true, url: videoUrl, title: work.description, clientName: client?.name })}
-                      className="text-xs font-semibold text-text-primary hover:underline inline-flex items-center gap-1 cursor-pointer bg-transparent border-0 p-0"
+                      className="text-xs font-medium text-text-secondary hover:text-text-primary inline-flex items-center gap-1 cursor-pointer bg-transparent border-0 p-0"
                     >
-                      <Play size={12} className="text-text-muted" /> Watch Preview
+                      <Play size={12} /> Preview
                     </button>
                   )}
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-1">
-                <span className="text-[11px] text-text-muted font-mono">
-                  #{work.id.substring(0, 6)}
-                </span>
-                <div className="flex items-center gap-1">
-                  {videoUrl && (
-                    <a
-                      href={videoUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-1.5 text-text-muted hover:text-text-primary hover:bg-surface-600 rounded transition-colors"
-                      title="Open external link"
-                    >
-                      <ExternalLink size={14} />
-                    </a>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onEditWork(work)}
-                    title="Edit Work Log"
+              <div className="flex items-center justify-end gap-1">
+                {videoUrl && (
+                  <a
+                    href={videoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-1.5 text-text-muted hover:text-text-primary hover:bg-surface-600 rounded transition-colors"
+                    title="Open link"
                   >
-                    <Edit2 size={13} />
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    onClick={() => onDeleteWork(work)}
-                    title="Delete Work Log"
-                  >
-                    <Trash2 size={13} />
-                  </Button>
-                </div>
+                    <ExternalLink size={14} />
+                  </a>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onEditWork(work)}
+                  title="Edit Work Log"
+                >
+                  <Edit2 size={13} />
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  onClick={() => onDeleteWork(work)}
+                  title="Delete Work Log"
+                >
+                  <Trash2 size={13} />
+                </Button>
               </div>
             </div>
           );
