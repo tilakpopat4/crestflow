@@ -10,7 +10,6 @@ interface InvoiceRetainerDeliverablesListProps {
 
 /**
  * Displays work log deliverables included in the selected monthly retainer period.
- * Confirms deliverables are listed under the fixed retainer price without inflating total.
  */
 export const InvoiceRetainerDeliverablesList: React.FC<InvoiceRetainerDeliverablesListProps> = ({
   deliverables,
@@ -18,13 +17,13 @@ export const InvoiceRetainerDeliverablesList: React.FC<InvoiceRetainerDeliverabl
   fixedTotal,
 }) => {
   return (
-    <div className="bg-surface-800 p-3.5 rounded-lg border border-surface-400 space-y-2.5">
+    <div className="bg-surface-800 p-3.5 rounded-lg border-0 space-y-2.5">
       <div className="flex items-center justify-between text-xs">
         <span className="font-semibold text-text-primary">
-          Work Logs in Period {deliverables.length > 0 ? `(${deliverables.length})` : ''}
+          Work Logs {deliverables.length > 0 ? `(${deliverables.length})` : ''}
         </span>
         <span className="text-text-muted font-mono text-[11px]">
-          Retainer Total: <strong className="text-text-primary font-semibold">{formatCurrencyAmount(fixedTotal, currency)}</strong> (Fixed)
+          Fixed: <strong className="text-text-primary font-semibold">{formatCurrencyAmount(fixedTotal, currency)}</strong>
         </span>
       </div>
 
@@ -37,7 +36,7 @@ export const InvoiceRetainerDeliverablesList: React.FC<InvoiceRetainerDeliverabl
             return (
               <div
                 key={item.id || idx}
-                className="flex items-center justify-between bg-surface-900/80 px-2.5 py-1.5 rounded border border-surface-400/50 text-xs"
+                className="flex items-center justify-between bg-surface-900/80 px-2.5 py-1.5 rounded border-0 text-xs"
               >
                 <div className="flex items-center gap-2 min-w-0 flex-1 pr-2">
                   <span className="text-text-muted text-[11px] font-mono shrink-0">
@@ -54,7 +53,7 @@ export const InvoiceRetainerDeliverablesList: React.FC<InvoiceRetainerDeliverabl
                 </div>
                 <div className="flex items-center gap-3 shrink-0 text-text-muted text-[11px]">
                   {dateStr && <span>{dateStr}</span>}
-                  <span className="font-mono">Qty: {item.quantity}</span>
+                  <span className="font-mono">x{item.quantity}</span>
                   <span className="text-text-secondary font-medium font-mono text-[11px]">
                     Included
                   </span>
@@ -63,12 +62,12 @@ export const InvoiceRetainerDeliverablesList: React.FC<InvoiceRetainerDeliverabl
             );
           })}
           <p className="text-[11px] text-text-muted pt-1">
-            These work items will be marked Invoiced upon creation. The invoice total remains fixed as per the monthly retainer price.
+            Marked invoiced on creation; total stays fixed.
           </p>
         </div>
       ) : (
         <p className="text-xs text-text-muted py-1">
-          No uninvoiced work logs found for this period. A single fixed monthly retainer item will be invoiced.
+          No uninvoiced work logs; billed as a single retainer item.
         </p>
       )}
     </div>

@@ -64,9 +64,7 @@ export function InvoiceFormCard({
   effectiveReels,
   currentBillingDeliverables,
   discountAmount,
-  discountDescription,
   extraCostAmount,
-  extraCostDescription,
   customUpiId,
   editingInvoiceId,
   isGenerating,
@@ -79,19 +77,13 @@ export function InvoiceFormCard({
   const selectedClient = clients.find((c) => c.id === selectedClientId);
 
   return (
-    <div className="bg-surface-700 border border-surface-400 p-5 sm:p-6 rounded-xl shadow-xs space-y-5 text-text-primary">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-surface-400/80">
-        <div>
-          <h3 className="text-base font-semibold text-text-primary tracking-tight">
-            {editingInvoiceId ? 'Edit Invoice' : 'Create New Invoice'}
-          </h3>
-          <p className="text-xs text-text-muted mt-0.5">
-            Auto-aggregate unbilled work items or issue recurring retainers.
-          </p>
-        </div>
+    <div className="bg-surface-700 border-0 p-5 sm:p-6 rounded-xl space-y-5 text-text-primary">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <h3 className="text-base font-semibold text-text-primary tracking-tight">
+          {editingInvoiceId ? 'Edit Invoice' : 'New Invoice'}
+        </h3>
 
-        {/* Mode Selector */}
-        <div className="flex items-center gap-1 bg-surface-800 p-1 rounded-lg border border-surface-400/80 w-fit">
+        <div className="flex items-center gap-1 bg-surface-800 p-1 rounded-lg border-0 w-fit">
           <button
             type="button"
             onClick={() => setInvoiceBillingMode('per_reel')}
@@ -101,7 +93,7 @@ export function InvoiceFormCard({
                 : 'bg-transparent text-text-muted hover:text-text-primary'
             }`}
           >
-            Per Deliverable
+            Deliverables
           </button>
           <button
             type="button"
@@ -112,21 +104,20 @@ export function InvoiceFormCard({
                 : 'bg-transparent text-text-muted hover:text-text-primary'
             }`}
           >
-            Monthly Retainer
+            Retainer
           </button>
         </div>
       </div>
 
-      {/* Client and Date Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
         <div>
-          <label className="block text-xs font-medium text-text-secondary mb-1">Client *</label>
+          <label className="block text-xs font-medium text-text-secondary mb-1">Client</label>
           <select
             value={selectedClientId}
             onChange={(e) => onClientChange(e.target.value)}
             className="w-full p-2.5 bg-surface-800 text-text-primary border border-surface-400 rounded-lg outline-none focus:border-surface-300 text-xs font-medium"
           >
-            <option value="">Select a Client</option>
+            <option value="">Select client</option>
             {clients
               .filter((c) => !c.isClosed)
               .map((c) => (
@@ -138,7 +129,7 @@ export function InvoiceFormCard({
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-text-secondary mb-1">Billing From</label>
+          <label className="block text-xs font-medium text-text-secondary mb-1">From</label>
           <DateInput
             value={dateFrom}
             onChange={(val) => setDateFrom(val)}
@@ -147,7 +138,7 @@ export function InvoiceFormCard({
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-text-secondary mb-1">Billing To</label>
+          <label className="block text-xs font-medium text-text-secondary mb-1">To</label>
           <DateInput
             value={dateTo}
             onChange={(val) => setDateTo(val)}
@@ -156,31 +147,30 @@ export function InvoiceFormCard({
         </div>
       </div>
 
-      {/* Retainer specific inputs or line items */}
       {invoiceBillingMode === 'monthly_retainer' ? (
         <div className="space-y-3.5">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 bg-surface-800 p-3.5 rounded-lg border border-surface-400">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 bg-surface-800 p-3.5 rounded-lg border-0">
             <div className="sm:col-span-2">
               <label className="block text-xs font-medium text-text-secondary mb-1">
-                Retainer Service Description
+                Description
               </label>
               <input
                 type="text"
                 value={monthlyServiceDescription}
                 onChange={(e) => setMonthlyServiceDescription(e.target.value)}
-                placeholder="e.g. Monthly Video Editing Retainer"
+                placeholder="Monthly retainer"
                 className="w-full p-2 bg-surface-900 border border-surface-400 rounded-md text-xs text-text-primary outline-none focus:border-surface-300"
               />
             </div>
             <div>
               <label className="block text-xs font-medium text-text-secondary mb-1">
-                Retainer Amount ({selectedClient?.currency || 'INR'}) *
+                Amount ({selectedClient?.currency || 'INR'})
               </label>
               <input
                 type="number"
                 value={monthlyRetainerInput}
                 onChange={(e) => setMonthlyRetainerInput(e.target.value)}
-                placeholder="e.g. 25000"
+                placeholder="25000"
                 className="w-full p-2 bg-surface-900 border border-surface-400 rounded-md text-xs text-text-primary font-mono outline-none focus:border-surface-300"
               />
             </div>
@@ -202,10 +192,9 @@ export function InvoiceFormCard({
         />
       )}
 
-      {/* Adjustments: Discount, Extra Costs, UPI override */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-surface-400/70">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
         <div>
-          <label className="block text-[11px] font-medium text-text-secondary mb-1">Discount Amount</label>
+          <label className="block text-[11px] font-medium text-text-secondary mb-1">Discount</label>
           <input
             type="number"
             min="0"
@@ -216,7 +205,7 @@ export function InvoiceFormCard({
           />
         </div>
         <div>
-          <label className="block text-[11px] font-medium text-text-secondary mb-1">Extra Expense / Cost</label>
+          <label className="block text-[11px] font-medium text-text-secondary mb-1">Extra Cost</label>
           <input
             type="number"
             min="0"
@@ -227,7 +216,7 @@ export function InvoiceFormCard({
           />
         </div>
         <div>
-          <label className="block text-[11px] font-medium text-text-secondary mb-1">Payee UPI ID (Override)</label>
+          <label className="block text-[11px] font-medium text-text-secondary mb-1">UPI ID</label>
           <input
             type="text"
             value={customUpiId}
@@ -238,16 +227,15 @@ export function InvoiceFormCard({
         </div>
       </div>
 
-      {/* Grand Total & Actions Row */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 border-t border-surface-400/80">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
         <div className="flex items-center gap-3">
-          <div className="text-xs text-text-secondary font-medium">Grand Total:</div>
+          <div className="text-xs text-text-secondary font-medium">Total</div>
           <div className="text-xl sm:text-2xl font-bold text-text-primary font-mono tabular-nums">
             {formatCurrencyAmount(grandTotal, selectedClient?.currency)}
           </div>
           {discount > 0 && (
             <span className="text-xs text-text-muted font-mono tabular-nums">
-              (-{formatCurrencyAmount(discount, selectedClient?.currency)} discount)
+              (-{formatCurrencyAmount(discount, selectedClient?.currency)})
             </span>
           )}
         </div>
@@ -274,7 +262,7 @@ export function InvoiceFormCard({
             ) : (
               <>
                 <IndianRupee size={13} />
-                <span>{editingInvoiceId ? 'Save Changes' : 'Generate Invoice & Download'}</span>
+                <span>{editingInvoiceId ? 'Save' : 'Generate PDF'}</span>
               </>
             )}
           </Button>

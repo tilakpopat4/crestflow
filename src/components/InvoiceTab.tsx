@@ -126,7 +126,7 @@ export default function InvoiceTab({
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">Invoices</h2>
           <p className="text-text-muted mt-1 text-sm">
-            Generate printable PDF invoices, attach QR codes, and deliver via Gmail.
+            Create invoices and track payments.
           </p>
         </div>
       </div>
@@ -188,14 +188,14 @@ export default function InvoiceTab({
 
       {/* Empty State when zero invoices exist */}
       {displayedInvoices.length === 0 ? (
-        <div className="text-center py-16 px-4 bg-surface-700 rounded-xl border border-surface-400 space-y-4 max-w-xl mx-auto my-4 shadow-xs">
+        <div className="text-center py-14 px-4 bg-surface-700 border-0 rounded-xl space-y-4 max-w-xl mx-auto my-4">
           <div className="w-12 h-12 rounded-xl bg-surface-600 text-text-secondary flex items-center justify-center mx-auto">
             <FileText size={22} />
           </div>
           <div className="space-y-1">
-            <h3 className="text-base font-semibold text-text-primary">No invoices generated yet</h3>
-            <p className="text-xs text-text-muted leading-relaxed max-w-md mx-auto">
-              Select a client above to assemble billed work items and download an instant PDF invoice with UPI payment details.
+            <h3 className="text-base font-semibold text-text-primary">No invoices yet</h3>
+            <p className="text-xs text-text-muted leading-relaxed max-w-sm mx-auto">
+              Select a client above to generate your first invoice.
             </p>
           </div>
           <div className="pt-2">

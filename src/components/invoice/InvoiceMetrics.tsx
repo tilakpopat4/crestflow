@@ -31,29 +31,31 @@ export function InvoiceMetrics({
         label="Total Earned"
         value={formatCurrencyAmount(totalEarned, currency)}
         icon={IndianRupee}
-        subtext={`${paidCount} invoice${paidCount === 1 ? '' : 's'} paid`}
+        subtext={`${paidCount} paid`}
+        className="border-0 shadow-none"
       />
 
       <StatCard
-        label="Pending Balance"
+        label="Pending"
         value={formatCurrencyAmount(pendingAmount, currency)}
         icon={Clock}
         alert={pendingAmount > 0}
-        subtext={`${pendingCount} awaiting payment`}
+        subtext={`${pendingCount} awaiting`}
+        className="border-0 shadow-none"
       />
 
       <StatCard
         label="Total Invoiced"
         value={formatCurrencyAmount(totalInvoiced, currency)}
         icon={CheckCircle2}
-        subtext="Cumulative billing"
+        className="border-0 shadow-none"
       />
 
       <StatCard
-        label="Invoices Generated"
+        label="Invoices"
         value={totalCount}
         icon={FileText}
-        subtext="All-time active records"
+        className="border-0 shadow-none"
       />
     </div>
   );

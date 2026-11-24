@@ -51,16 +51,15 @@ export function InvoiceTable({
   });
 
   return (
-    <div className="bg-surface-700 border border-surface-400 rounded-xl overflow-hidden shadow-xs space-y-3">
-      {/* Search & Closed Toolbar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 border-b border-surface-400/80">
+    <div className="bg-surface-700 border-0 rounded-xl overflow-hidden">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4">
         <div className="relative w-full sm:w-72">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search invoices by # or client..."
+            placeholder="Search invoices..."
             className="w-full bg-surface-800 text-xs pl-9 pr-7 py-2 rounded-lg border border-surface-400 text-text-primary placeholder:text-text-muted outline-none focus:border-surface-300"
           />
           {searchQuery && (
@@ -83,20 +82,19 @@ export function InvoiceTable({
             title={showClosed ? 'Hide closed client invoices' : 'Show closed client invoices'}
           >
             <Archive size={13} />
-            <span>{showClosed ? 'Hide Closed' : `Show Closed (${closedCount})`}</span>
+            <span>{showClosed ? 'Hide Closed' : `Closed (${closedCount})`}</span>
           </Button>
         )}
       </div>
 
-      {/* Invoices Table Container */}
       <div className="overflow-x-auto w-full max-w-full">
         <table className="w-full min-w-[960px] text-left border-collapse text-xs">
           <thead>
-            <tr className="bg-surface-800 border-b border-surface-400/80 text-[11px] font-semibold text-text-secondary uppercase tracking-wider">
-              <th className="py-3 px-4">Invoice # &amp; Date</th>
+            <tr className="bg-surface-800 text-[11px] font-semibold text-text-secondary uppercase tracking-wider">
+              <th className="py-3 px-4">Invoice</th>
               <th className="py-3 px-4">Client</th>
-              <th className="py-3 px-4">Deliverables / Items</th>
-              <th className="py-3 px-4 text-right">Total Amount</th>
+              <th className="py-3 px-4">Items</th>
+              <th className="py-3 px-4 text-right">Amount</th>
               <th className="py-3 px-4 text-center">Status</th>
               <th className="py-3 px-4 text-right">Actions</th>
             </tr>
@@ -105,7 +103,7 @@ export function InvoiceTable({
             {filteredInvoices.length === 0 ? (
               <tr>
                 <td colSpan={6} className="py-10 text-center text-text-muted">
-                  {searchQuery ? `No invoices matching "${searchQuery}"` : 'No invoices generated yet.'}
+                  {searchQuery ? 'No matching invoices.' : 'No invoices yet.'}
                 </td>
               </tr>
             ) : (
@@ -143,8 +141,8 @@ export function InvoiceTable({
                       <div className="flex items-center gap-1.5 whitespace-nowrap">
                         <span className="font-medium text-text-primary">
                           {inv.invoiceType === 'monthly_retainer'
-                            ? '1 Monthly Retainer'
-                            : `${inv.reels.length} item(s)`}
+                            ? 'Retainer'
+                            : `${inv.reels.length} ${inv.reels.length === 1 ? 'item' : 'items'}`}
                         </span>
                       </div>
                       <div
@@ -163,8 +161,7 @@ export function InvoiceTable({
                       <StatusBadge
                         status={inv.status}
                         onClick={() => onToggleStatus(inv.id)}
-                        title={`Click to mark as ${inv.status === 'Paid' ? 'Pending' : 'Paid & update last payment date'
-                          }`}
+                        title={`Click to mark as ${inv.status === 'Paid' ? 'Pending' : 'Paid'}`}
                       />
                     </td>
 
@@ -187,7 +184,7 @@ export function InvoiceTable({
                           onClick={() => onRedownloadPdf(inv)}
                           disabled={downloadingPdfId === inv.id}
                           title="Download PDF"
-                          className="h-7 w-7"
+                          className="h-7 w-7 border-0"
                         >
                           {downloadingPdfId === inv.id ? (
                             <Loader2 size={13} className="animate-spin text-text-muted" />
@@ -201,7 +198,7 @@ export function InvoiceTable({
                           size="icon"
                           onClick={() => onEditInvoice(inv)}
                           title="Edit Invoice"
-                          className="h-7 w-7"
+                          className="h-7 w-7 border-0"
                         >
                           <Edit2 size={13} />
                         </Button>
@@ -211,7 +208,7 @@ export function InvoiceTable({
                           size="icon"
                           onClick={() => onDeleteInvoice(inv.id)}
                           title="Delete Invoice"
-                          className="h-7 w-7"
+                          className="h-7 w-7 border-0"
                         >
                           <Trash2 size={13} />
                         </Button>

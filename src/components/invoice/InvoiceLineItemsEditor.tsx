@@ -27,7 +27,7 @@ export function InvoiceLineItemsEditor({
     <div className="space-y-2.5">
       <div className="flex items-center justify-between">
         <span className="text-xs font-semibold text-text-secondary uppercase tracking-wider">
-          Deliverables / Line Items ({effectiveReels.length})
+          Items ({effectiveReels.length})
         </span>
         <div className="flex items-center gap-2">
           <Button
@@ -35,18 +35,18 @@ export function InvoiceLineItemsEditor({
             variant="ghost"
             size="sm"
             onClick={onRoundFigures}
-            className="gap-1 h-7 text-xs"
+            className="gap-1 h-7 text-xs border-0"
             title="Round line totals to nearest 100"
           >
             <Coins size={12} />
-            <span>Round Figures</span>
+            <span>Round</span>
           </Button>
           <Button
             type="button"
             variant="secondary"
             size="sm"
-            onClick={() => onAddItem('Video Deliverable', defaultRate)}
-            className="gap-1 h-7 text-xs"
+            onClick={() => onAddItem('Deliverable', defaultRate)}
+            className="gap-1 h-7 text-xs border-0"
           >
             <Plus size={12} />
             <span>Add Item</span>
@@ -58,14 +58,14 @@ export function InvoiceLineItemsEditor({
         {effectiveReels.map((reel) => (
           <div
             key={reel.id}
-            className="grid grid-cols-12 gap-2 items-center bg-surface-800 p-2.5 rounded-lg border border-surface-400"
+            className="grid grid-cols-12 gap-2 items-center bg-surface-800 p-2.5 rounded-lg border-0"
           >
             <div className="col-span-12 sm:col-span-6">
               <input
                 type="text"
                 value={reel.title}
                 onChange={(e) => onUpdateReel(reel.id, 'title', e.target.value)}
-                placeholder="Item description / title"
+                placeholder="Description"
                 className="w-full bg-surface-900 border border-surface-400 rounded px-2.5 py-1.5 text-xs text-text-primary outline-none focus:border-surface-300"
               />
             </div>
@@ -86,7 +86,7 @@ export function InvoiceLineItemsEditor({
                 value={reel.rate}
                 onChange={(e) => onUpdateReel(reel.id, 'rate', Number(e.target.value))}
                 className="w-full bg-surface-900 border border-surface-400 rounded px-2 py-1.5 text-xs text-text-primary font-mono outline-none focus:border-surface-300"
-                title="Rate per item"
+                title="Rate"
               />
             </div>
             <div className="col-span-2 sm:col-span-1 flex justify-end">
@@ -97,7 +97,7 @@ export function InvoiceLineItemsEditor({
                 onClick={() => onRemoveReel(reel.id)}
                 disabled={effectiveReels.length <= 1}
                 title="Remove item"
-                className="h-7 w-7"
+                className="h-7 w-7 border-0"
               >
                 <Trash2 size={12} />
               </Button>

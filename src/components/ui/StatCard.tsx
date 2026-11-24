@@ -54,8 +54,8 @@ export function StatCard({
         {icon && (
           <div
             className={cn(
-              "w-8 h-8 rounded-lg bg-surface-600 border border-surface-400/80 flex items-center justify-center text-text-secondary shrink-0",
-              alert && "text-accent border-accent/30"
+              "w-8 h-8 rounded-lg bg-surface-600 border-0 flex items-center justify-center text-text-secondary shrink-0",
+              alert && "text-accent"
             )}
           >
             {renderIcon()}
