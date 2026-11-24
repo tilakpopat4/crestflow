@@ -17,24 +17,19 @@ export const DashboardRecentInvoices: React.FC<DashboardRecentInvoicesProps> = (
   onNavigateToInvoices,
 }) => {
   return (
-    <div className="bg-surface-700 border border-surface-400 rounded-xl shadow-2xs overflow-hidden flex flex-col">
-      <div className="p-4 sm:p-5 flex justify-between items-center border-b border-surface-400/60 bg-surface-700">
-        <div>
-          <h3 className="text-xs sm:text-sm font-semibold text-text-primary uppercase tracking-wider">
-            Recent Invoices
-          </h3>
-          <p className="text-[11px] text-text-secondary mt-0.5">
-            Latest client billing activities and statuses.
-          </p>
-        </div>
+    <div className="bg-surface-700 border-0 rounded-xl overflow-hidden flex flex-col">
+      <div className="p-4 sm:p-5 flex justify-between items-center bg-surface-700">
+        <h3 className="text-xs sm:text-sm font-semibold text-text-primary uppercase tracking-wider">
+          Recent Invoices
+        </h3>
         {recentInvoices.length > 0 && onNavigateToInvoices && (
           <Button
             variant="ghost"
             size="sm"
             onClick={onNavigateToInvoices}
-            className="text-xs text-text-secondary hover:text-text-primary"
+            className="text-xs text-text-secondary hover:text-text-primary border-0"
           >
-            View All ({recentInvoices.length}) &rarr;
+            View all ({recentInvoices.length}) &rarr;
           </Button>
         )}
       </div>
@@ -42,7 +37,7 @@ export const DashboardRecentInvoices: React.FC<DashboardRecentInvoicesProps> = (
       <div className="overflow-x-auto w-full">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-surface-800 border-b border-surface-400/60 text-[10px] sm:text-xs uppercase tracking-wider text-text-secondary font-semibold">
+            <tr className="bg-surface-800 text-[10px] sm:text-xs uppercase tracking-wider text-text-secondary font-semibold">
               <th className="px-3 sm:px-6 py-2.5 sm:py-3 whitespace-nowrap">Date</th>
               <th className="px-3 sm:px-6 py-2.5 sm:py-3">Client</th>
               <th className="px-3 sm:px-6 py-2.5 sm:py-3 text-right whitespace-nowrap">Amount</th>
@@ -53,16 +48,16 @@ export const DashboardRecentInvoices: React.FC<DashboardRecentInvoicesProps> = (
           <tbody className="divide-y divide-surface-500">
             {recentInvoices.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 sm:px-6 py-12 text-center text-text-secondary">
+                <td colSpan={5} className="px-4 sm:px-6 py-10 text-center text-text-secondary">
                   <div className="flex flex-col items-center justify-center space-y-2.5">
-                    <p className="text-xs">No invoices generated yet.</p>
+                    <p className="text-xs">No invoices yet.</p>
                     {onNavigateToInvoices && (
                       <Button
                         variant="primary"
                         size="sm"
                         onClick={onNavigateToInvoices}
                       >
-                        Create Your First Invoice
+                        Create Invoice
                       </Button>
                     )}
                   </div>
@@ -97,7 +92,7 @@ export const DashboardRecentInvoices: React.FC<DashboardRecentInvoicesProps> = (
                     <StatusBadge
                       status={inv.status}
                       onClick={() => toggleInvoiceStatus(inv.id)}
-                      title="Click to toggle payment status"
+                      title="Toggle payment status"
                     />
                   </td>
                   <td className="px-3 sm:px-6 py-3 text-right whitespace-nowrap space-x-1.5 text-xs">
@@ -105,15 +100,15 @@ export const DashboardRecentInvoices: React.FC<DashboardRecentInvoicesProps> = (
                       variant="ghost"
                       size="sm"
                       onClick={() => toggleInvoiceStatus(inv.id)}
-                      className="text-xs h-7 px-2"
+                      className="text-xs h-7 px-2 border-0"
                     >
-                      {inv.status === 'Paid' ? 'Mark Pending' : 'Approve Payment'}
+                      {inv.status === 'Paid' ? 'Mark Pending' : 'Mark Paid'}
                     </Button>
                     <Button
                       variant="destructive"
                       size="sm"
                       onClick={() => deleteInvoice(inv.id)}
-                      className="text-xs h-7 px-2 text-text-secondary hover:text-accent"
+                      className="text-xs h-7 px-2 text-text-secondary hover:text-accent border-0"
                     >
                       Delete
                     </Button>

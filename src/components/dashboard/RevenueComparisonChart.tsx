@@ -263,21 +263,21 @@ export default function RevenueComparisonChart({
       {/* Footer & Toggle Table Button */}
       <div className="mt-5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-surface-500 pt-3">
         <p className="text-xs text-text-muted">
-          CrestFlow &middot; Paid invoices, net of refunds &middot; Updated {new Date().toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}
+          Net of refunds · {new Date().toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}
         </p>
 
         <button
           type="button"
           aria-expanded={tableOpen}
           onClick={() => setTableOpen(!tableOpen)}
-          className="inline-flex h-7 items-center gap-1.5 rounded-lg px-2 text-xs font-medium text-text-secondary hover:text-text-primary hover:bg-surface-600 border border-transparent hover:border-surface-400 cursor-pointer transition-colors duration-150"
+          className="inline-flex h-7 items-center gap-1.5 rounded-lg px-2 text-xs font-medium text-text-secondary hover:text-text-primary hover:bg-surface-600 border-0 cursor-pointer transition-colors duration-150"
         >
           <svg className="size-3.5 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
             <path d="M3 9h18" />
             <path d="M9 3v18" />
             <rect x="3" y="3" width="18" height="18" rx="2" />
           </svg>
-          <span>{tableOpen ? 'Hide table' : 'View as table'}</span>
+          <span>{tableOpen ? 'Hide table' : 'View table'}</span>
         </button>
       </div>
 

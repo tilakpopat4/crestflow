@@ -131,7 +131,7 @@ export default function DashboardTab({
       <div className="flex flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-text-primary">Dashboard</h2>
-          <p className="text-text-secondary mt-1 text-sm">Financial overview & payment cycles.</p>
+          <p className="text-text-secondary mt-1 text-sm">Financial overview.</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {localStorage.getItem('clients') || localStorage.getItem('monthlyWork') ? (
@@ -156,31 +156,34 @@ export default function DashboardTab({
           label="Total Earned This Month"
           value={`₹${metrics.totalEarned.toLocaleString('en-IN')}`}
           icon={<IndianRupee size={16} />}
-          comparison={`${metrics.totalInvoicesThisMonth} invoice${metrics.totalInvoicesThisMonth === 1 ? '' : 's'} this month`}
+          comparison={`${metrics.totalInvoicesThisMonth} this month`}
+          className="border-0 shadow-none"
         />
         <StatCard
           label="Total Due"
           value={`₹${metrics.totalDue.toLocaleString('en-IN')}`}
           icon={<Clock size={16} />}
-          comparison="Across active clients"
+          comparison="Active clients"
+          className="border-0 shadow-none"
         />
         <StatCard
           label="Overdue Amount"
           value={<span className={metrics.overdueAmount > 0 ? 'text-accent' : 'text-text-primary'}>₹{metrics.overdueAmount.toLocaleString('en-IN')}</span>}
           icon={<AlertCircle size={16} className={metrics.overdueAmount > 0 ? 'text-accent' : 'text-text-secondary'} />}
-          comparison={metrics.overdueAmount > 0 ? 'Past payment cycle due date' : 'All invoices current'}
-          className={metrics.overdueAmount > 0 ? 'border-accent/40' : ''}
+          comparison={metrics.overdueAmount > 0 ? 'Past due date' : 'On time'}
+          className="border-0 shadow-none"
         />
         <StatCard
           label="Invoices Issued"
           value={metrics.totalInvoicesThisMonth}
           icon={<TrendingUp size={16} />}
-          comparison="Issued this month"
+          comparison="This month"
+          className="border-0 shadow-none"
         />
       </div>
 
       {/* Analytics & Charts Section */}
-      <div className="bg-surface-700 border border-surface-400 p-4 sm:p-6 rounded-xl shadow-2xs flex flex-col min-w-0">
+      <div className="bg-surface-700 border-0 p-4 sm:p-6 rounded-xl flex flex-col min-w-0">
         <RevenueComparisonChart
           invoices={invoices}
           freelanceStartDate={profile?.freelanceStartDate}
@@ -197,44 +200,39 @@ export default function DashboardTab({
       />
 
       {/* Workspace Tools: Progressive Disclosure */}
-      <div className="bg-surface-700 border border-surface-400 p-4 sm:p-6 rounded-xl shadow-2xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 mb-4">
-          <div>
-            <h3 className="text-xs sm:text-sm font-semibold text-text-primary uppercase tracking-wider">Workspace Tools</h3>
-            <p className="text-[11px] sm:text-xs text-text-secondary mt-0.5">
-              {isAiEnabled ? 'Quick access to scratchpad notes and Gemini AI summaries' : 'Quick access to scratchpad notes and client snippets'}
-            </p>
-          </div>
-          <div className="inline-flex p-0.5 bg-surface-800 border border-surface-400 rounded-lg shrink-0 self-start sm:self-auto flex-wrap">
+      <div className="bg-surface-700 border-0 p-4 sm:p-6 rounded-xl">
+        <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 ${activeWorkspaceTool !== 'none' ? 'mb-4' : ''}`}>
+          <h3 className="text-xs sm:text-sm font-semibold text-text-primary uppercase tracking-wider">Workspace Tools</h3>
+          <div className="inline-flex p-0.5 bg-surface-800 border-0 rounded-lg shrink-0 self-start sm:self-auto flex-wrap">
             <button
               type="button"
               onClick={() => setActiveWorkspaceTool((prev) => (prev === 'notes' ? 'none' : 'notes'))}
-              className={`px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer border-0 ${
-                activeWorkspaceTool === 'notes' ? 'bg-surface-600 text-text-primary shadow-xs' : 'text-text-secondary hover:text-text-primary'
+              className={`px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer border-0 ${
+                activeWorkspaceTool === 'notes' ? 'bg-surface-600 text-text-primary' : 'text-text-secondary hover:text-text-primary'
               }`}
             >
-              <StickyNoteIcon size={13} /> Notes {activeWorkspaceTool === 'notes' ? '(Active)' : ''}
+              <StickyNoteIcon size={13} /> Notes
             </button>
             {isAiEnabled && (
               <button
                 type="button"
                 onClick={() => setActiveWorkspaceTool((prev) => (prev === 'ai' ? 'none' : 'ai'))}
-                className={`px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer border-0 ${
-                  activeWorkspaceTool === 'ai' ? 'bg-surface-600 text-text-primary shadow-xs' : 'text-text-secondary hover:text-text-primary'
+                className={`px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer border-0 ${
+                  activeWorkspaceTool === 'ai' ? 'bg-surface-600 text-text-primary' : 'text-text-secondary hover:text-text-primary'
                 }`}
               >
-                <FileText size={13} /> AI Summarizer {activeWorkspaceTool === 'ai' ? '(Active)' : ''}
+                <FileText size={13} /> AI Summarizer
               </button>
             )}
             {journey && (
               <button
                 type="button"
                 onClick={() => setActiveWorkspaceTool((prev) => (prev === 'milestones' ? 'none' : 'milestones'))}
-                className={`px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer border-0 ${
-                  activeWorkspaceTool === 'milestones' ? 'bg-surface-600 text-text-primary shadow-xs' : 'text-text-secondary hover:text-text-primary'
+                className={`px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer border-0 ${
+                  activeWorkspaceTool === 'milestones' ? 'bg-surface-600 text-text-primary' : 'text-text-secondary hover:text-text-primary'
                 }`}
               >
-                <Award size={13} /> Milestones {activeWorkspaceTool === 'milestones' ? '(Active)' : ''}
+                <Award size={13} /> Milestones
               </button>
             )}
           </div>

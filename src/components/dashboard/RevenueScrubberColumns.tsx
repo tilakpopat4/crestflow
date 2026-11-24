@@ -55,7 +55,7 @@ export const RevenueScrubberColumns: React.FC<RevenueScrubberColumnsProps> = ({
 
             <span
               aria-hidden="true"
-              className={`pointer-events-none absolute top-0 z-20 hidden w-44 rounded-lg bg-surface-700 p-3 text-left text-xs shadow-lg border border-surface-400 group-data-active/pt:block sm:w-48 ${
+              className={`pointer-events-none absolute top-0 z-20 hidden w-44 rounded-lg bg-surface-800 p-3 text-left text-xs shadow-md border-0 group-data-active/pt:block sm:w-48 ${
                 i < months.length / 2 ? 'left-[calc(50%+12px)]' : 'right-[calc(50%+12px)]'
               }`}
             >
