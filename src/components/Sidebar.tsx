@@ -150,7 +150,7 @@ export default function Sidebar({
               whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
               title={isIconOnly ? item.label : undefined}
               className={clsx(
-                "group relative flex items-center justify-center px-1 min-[380px]:px-2 md:px-3 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-medium flex-1 md:flex-initial md:w-full md:max-w-none flex-shrink md:flex-shrink-0 min-w-0 min-h-[44px] md:min-h-0 outline-none select-none cursor-pointer",
+                "group relative flex items-center justify-center px-1 min-[380px]:px-2 md:px-3 py-2 md:py-2.5 rounded-lg text-xs md:text-sm font-medium flex-1 md:flex-initial md:w-full md:max-w-none flex-shrink md:flex-shrink-0 min-w-0 min-h-[44px] md:min-h-0 border-0 outline-none select-none cursor-pointer",
                 isIconOnly ? "md:justify-center" : "md:justify-start md:space-x-3",
                 isActive
                   ? "text-white"
@@ -160,7 +160,7 @@ export default function Sidebar({
               {isActive && (
                 <motion.div
                   layoutId="active-sidebar-nav-pill"
-                  className="absolute inset-0 rounded-xl bg-[#282828] border border-[#3a3a3a]"
+                  className="absolute inset-0 rounded-lg bg-[#282828] border-0"
                   transition={
                     shouldReduceMotion
                       ? { duration: 0 }
