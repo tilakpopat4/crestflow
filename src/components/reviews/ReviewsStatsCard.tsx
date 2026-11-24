@@ -10,7 +10,7 @@ interface ReviewsStatsCardProps {
 
 /**
  * ReviewsStatsCard Component
- * Displays the overall client rating score, star representation, and rating distribution bars.
+ * Displays overall client rating score and rating distribution bars.
  */
 export const ReviewsStatsCard: React.FC<ReviewsStatsCardProps> = ({
   averageRating,
@@ -18,14 +18,12 @@ export const ReviewsStatsCard: React.FC<ReviewsStatsCardProps> = ({
   ratingCounts,
 }) => {
   return (
-    <Card className="p-6 flex flex-col md:flex-row lg:col-span-2 items-stretch gap-6 md:gap-8 bg-surface-700 border-surface-400">
-      {/* Average Rating Hero */}
-      <div className="flex flex-col items-center justify-center text-center p-4 md:border-r border-surface-400 md:pr-8 min-w-[150px]">
+    <Card className="p-6 flex flex-col md:flex-row lg:col-span-2 items-stretch gap-6 md:gap-8 bg-surface-700 border-0 shadow-none">
+      <div className="flex flex-col items-center justify-center text-center p-4 md:border-r md:border-surface-500/60 md:pr-8 min-w-[150px]">
         <span className="text-5xl sm:text-6xl font-extrabold text-text-primary leading-none font-mono tabular-nums">
           {averageRating ? averageRating.toFixed(1) : '0.0'}
         </span>
 
-        {/* Stars Display */}
         <div className="flex gap-0.5 mt-3 mb-1">
           {[1, 2, 3, 4, 5].map((star) => (
             <Star
@@ -44,7 +42,6 @@ export const ReviewsStatsCard: React.FC<ReviewsStatsCardProps> = ({
         </span>
       </div>
 
-      {/* Rating Breakdown Progress Bars */}
       <div className="flex-1 flex flex-col justify-center space-y-2">
         {[5, 4, 3, 2, 1].map((rating) => {
           const count = ratingCounts[rating as 5 | 4 | 3 | 2 | 1] || 0;

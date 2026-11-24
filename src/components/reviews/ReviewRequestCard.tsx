@@ -1,5 +1,5 @@
 import React from 'react';
-import { Share2, Copy, Check, Mail } from 'lucide-react';
+import { Copy, Check, Mail } from 'lucide-react';
 import { Client } from '../../types';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/button';
@@ -15,7 +15,7 @@ interface ReviewRequestCardProps {
 
 /**
  * ReviewRequestCard Component
- * Enables sending review invitations to existing clients via email or link copy.
+ * Enables sending review invitations to active clients via email or link copy.
  */
 export const ReviewRequestCard: React.FC<ReviewRequestCardProps> = ({
   clients,
@@ -28,25 +28,22 @@ export const ReviewRequestCard: React.FC<ReviewRequestCardProps> = ({
   const selectedClient = clients.find((c) => c.id === selectedClientId);
 
   return (
-    <Card className="p-6 flex flex-col justify-between bg-surface-700 border-surface-400">
+    <Card className="p-6 flex flex-col justify-between bg-surface-700 border-0 shadow-none">
       <div className="space-y-4">
-        <h3 className="font-bold text-text-primary text-sm flex items-center gap-1.5">
-          <Share2 className="w-4 h-4 text-accent" /> Request a Review
+        <h3 className="font-semibold text-text-primary text-sm tracking-tight">
+          Request Review
         </h3>
-        <p className="text-xs text-text-secondary leading-relaxed">
-          Generate a personalized review submission link to send directly to your clients.
-        </p>
 
-        <div className="space-y-2">
-          <label className="block text-[10px] font-bold text-text-muted uppercase tracking-wider">
-            Select Client
+        <div className="space-y-1.5">
+          <label className="block text-[11px] font-medium text-text-secondary">
+            Client
           </label>
           <select
             value={selectedClientId}
             onChange={(e) => onSelectClient(e.target.value)}
-            className="w-full border border-surface-400 rounded-lg px-3 py-2 text-sm bg-surface-800 text-text-primary outline-none transition-colors focus:border-surface-300 font-medium cursor-pointer"
+            className="w-full border border-surface-400 rounded-lg px-3 py-2 text-xs sm:text-sm bg-surface-800 text-text-primary outline-none transition-colors focus:border-surface-300 font-medium cursor-pointer"
           >
-            <option value="">-- Choose an active client --</option>
+            <option value="">Select client</option>
             {clients.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -56,24 +53,24 @@ export const ReviewRequestCard: React.FC<ReviewRequestCardProps> = ({
         </div>
       </div>
 
-      <div className="pt-5 flex items-center gap-3">
+      <div className="pt-4 flex items-center gap-2.5">
         {selectedClient ? (
           <>
             <Button
               variant="secondary"
               size="sm"
               onClick={() => onCopyLink(selectedClient)}
-              className="flex-1 text-xs"
+              className="flex-1 text-xs border-0"
             >
               {copiedClientId === selectedClient.id ? (
                 <>
-                  <Check className="w-3.5 h-3.5 text-accent" />
-                  <span>Link Copied</span>
+                  <Check className="w-3.5 h-3.5" />
+                  <span>Copied</span>
                 </>
               ) : (
                 <>
                   <Copy className="w-3.5 h-3.5" />
-                  <span>Copy Link</span>
+                  <span>Copy</span>
                 </>
               )}
             </Button>
@@ -81,15 +78,15 @@ export const ReviewRequestCard: React.FC<ReviewRequestCardProps> = ({
               variant="primary"
               size="sm"
               onClick={() => onEmailClient(selectedClient)}
-              className="flex-1 text-xs"
+              className="flex-1 text-xs border-0"
             >
               <Mail className="w-3.5 h-3.5" />
-              <span>Email Client</span>
+              <span>Email</span>
             </Button>
           </>
         ) : (
-          <div className="w-full text-center text-xs text-text-muted bg-surface-800/60 border border-dashed border-surface-400 py-3 rounded-lg font-medium">
-            Select a client to generate invite link
+          <div className="w-full text-center text-xs text-text-muted bg-surface-800/60 border-0 py-2.5 rounded-lg">
+            Select a client to share link
           </div>
         )}
       </div>

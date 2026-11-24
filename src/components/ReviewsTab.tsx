@@ -83,13 +83,13 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 w-full min-w-0 pb-24 md:pb-8">
       {/* Workspace Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-surface-400 pb-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">
             Client Reviews
           </h1>
           <p className="text-text-secondary mt-1 text-sm">
-            Gather testimonials, view ratings, and build client trust.
+            Client feedback and ratings.
           </p>
         </div>
       </div>
