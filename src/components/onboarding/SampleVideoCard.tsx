@@ -5,105 +5,90 @@ import { getDriveThumbnailUrl } from '../../lib/driveService';
 
 interface SampleVideoCardProps {
   item: SampleWorkItem;
-  onSelect: (item: SampleWorkItem) => void;
+  onSelect: (item: SampleWorkItem, isPortrait: boolean) => void;
 }
 
 /**
- * SampleVideoCard renders an individual curated sample video with a
- * professional pitch-black preview box, direct thumbnail display,
- * and a single unified play action.
+ * SampleVideoCard renders a curated sample video with automatic portrait (9:16)
+ * or landscape (16:9) aspect ratio matching and minimal metadata.
  */
 export const SampleVideoCard: React.FC<SampleVideoCardProps> = ({ item, onSelect }) => {
   const [hasImageError, setHasImageError] = useState(false);
+  const [isPortrait, setIsPortrait] = useState(false);
 
   const thumbUrl = item.thumbnailUrl || getDriveThumbnailUrl(item.videoUrl, 800);
   const showThumbnail = thumbUrl && !hasImageError;
 
+  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    if (img.naturalWidth > 0 && img.naturalHeight > img.naturalWidth) {
+      setIsPortrait(true);
+    } else {
+      setIsPortrait(false);
+    }
+  };
+
   return (
-    <div className="bg-[#181818] border border-[#282828] hover:border-[#383838] rounded-xl overflow-hidden flex flex-col justify-between transition-colors shadow-xs group">
-      {/* Video Viewport: Pure Solid Black, No Translucent White Letterboxing */}
+    <div className="bg-[#181818] hover:bg-[#1e1e1e] border-0 rounded-xl overflow-hidden flex flex-col break-inside-avoid transition-colors group">
       <div
-        onClick={() => onSelect(item)}
-        className="relative aspect-video bg-black w-full overflow-hidden flex items-center justify-center cursor-pointer select-none"
-        title={`Watch preview: ${item.title}`}
+        onClick={() => onSelect(item, isPortrait)}
+        className={`relative bg-black w-full overflow-hidden flex items-center justify-center cursor-pointer select-none ${
+          isPortrait ? 'aspect-[9/16]' : 'aspect-video'
+        }`}
+        title={item.title}
       >
         {showThumbnail ? (
           <img
             src={thumbUrl}
             alt={item.title}
-            className="w-full h-full object-contain"
+            className="w-full h-full object-cover"
             loading="lazy"
             referrerPolicy="no-referrer"
+            onLoad={handleImageLoad}
             onError={() => setHasImageError(true)}
           />
         ) : (
           <div className="flex flex-col items-center justify-center text-slate-500 gap-2 p-4 text-center">
             <Film className="w-8 h-8 text-slate-600" />
-            <span className="text-[11px] font-mono text-slate-400">Google Drive Deliverable</span>
+            <span className="text-[11px] text-slate-400">Video preview</span>
           </div>
         )}
 
-        {/* Subtle Dark Vignette on Hover (Zero White Washout) */}
-        <div className="absolute inset-0 bg-black/10 group-hover:bg-black/25 transition-colors pointer-events-none" />
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors pointer-events-none" />
 
-        {/* Fallback Play Indicator only when no thumbnail image is present */}
         {!showThumbnail && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-11 h-11 rounded-full bg-[#1e1e1e]/90 text-white border border-[#333333] flex items-center justify-center shadow-lg">
+            <div className="w-11 h-11 rounded-full bg-[#1e1e1e]/90 text-white flex items-center justify-center">
               <Play size={18} className="ml-0.5 fill-current text-white" />
             </div>
           </div>
         )}
       </div>
 
-      {/* Card Body */}
-      <div className="p-4 space-y-2 flex-1 flex flex-col justify-between">
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between gap-2">
-            <h3
-              onClick={() => onSelect(item)}
-              className="text-sm font-semibold text-white truncate cursor-pointer hover:text-slate-200 transition-colors"
-              title={item.title}
-            >
-              {item.title}
-            </h3>
-            {item.category && (
-              <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-[#242424] text-slate-300 border border-[#303030] shrink-0">
-                {item.category}
-              </span>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2 text-[11px] text-slate-400">
-            {item.clientName ? (
-              <span className="truncate">{item.clientName}</span>
-            ) : (
-              <span>Client deliverable</span>
-            )}
-            {item.createdAt && (
-              <>
-                <span>•</span>
-                <span>{new Date(item.createdAt).toLocaleDateString()}</span>
-              </>
-            )}
-          </div>
-
-          {item.description && (
-            <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed pt-0.5">
-              {item.description}
-            </p>
+      <div className="p-3.5 space-y-2.5">
+        <div className="flex items-center justify-between gap-2">
+          <h3
+            onClick={() => onSelect(item, isPortrait)}
+            className="text-sm font-semibold text-white truncate cursor-pointer hover:text-slate-200 transition-colors"
+            title={item.title}
+          >
+            {item.title}
+          </h3>
+          {item.category && (
+            <span className="text-[11px] text-slate-400 shrink-0 truncate max-w-[120px]">
+              {item.category}
+            </span>
           )}
         </div>
 
-        {/* Card Footer: Watch Preview Link & Source Link per GEMINI.md */}
-        <div className="pt-3 border-t border-[#262626] flex items-center justify-between gap-2 text-xs mt-2">
+        <div className="pt-2 border-t border-[#242424] flex items-center justify-between gap-2 text-xs">
           <button
             type="button"
-            onClick={() => onSelect(item)}
-            className="inline-flex items-center gap-1.5 text-text-primary hover:text-white font-medium cursor-pointer border-0 bg-transparent p-0 transition-colors"
+            onClick={() => onSelect(item, isPortrait)}
+            className="inline-flex items-center gap-1.5 text-slate-200 hover:text-white font-medium cursor-pointer border-0 bg-transparent p-0 transition-colors"
           >
-            <Play size={14} className="fill-current" />
-            <span>Watch Preview</span>
+            <Play size={13} className="fill-current" />
+            <span>Preview</span>
           </button>
 
           <a
@@ -111,7 +96,7 @@ export const SampleVideoCard: React.FC<SampleVideoCardProps> = ({ item, onSelect
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 text-slate-400 hover:text-white transition-colors"
-            title="Open in Google Drive"
+            title="Open in Drive"
           >
             <span>Drive</span>
             <ExternalLink size={12} />

@@ -12,81 +12,72 @@ interface SampleVideoLibraryProps {
 
 /**
  * SampleVideoLibrary displays the freelancer's curated video library
- * connected to Google Drive on the public client onboarding page.
+ * on the public client onboarding page.
  */
 export default function SampleVideoLibrary({
   samples = [],
-  freelancerName,
   onOpenIntake,
 }: SampleVideoLibraryProps) {
   const [selectedVideo, setSelectedVideo] = useState<{
     url: string;
     title: string;
     clientName?: string;
+    isPortrait: boolean;
   } | null>(null);
 
   const hasSamples = samples && samples.length > 0;
 
   return (
-    <div className="space-y-6">
-      {/* Section Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <Film className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-            <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">
-              Sample Works & Video Library
-            </h2>
-          </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Curated video edits and client deliverables hosted on Google Drive.
-          </p>
-        </div>
+    <div className="space-y-5">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-base sm:text-lg font-semibold text-white tracking-tight">
+          Sample Videos
+        </h2>
 
         {onOpenIntake && (
           <button
             type="button"
             onClick={onOpenIntake}
-            className="self-start sm:self-auto px-3.5 py-1.5 bg-surface-500 hover:bg-surface-400 text-text-primary border border-surface-400 text-xs font-medium rounded-lg transition-colors cursor-pointer"
+            className="px-3.5 py-1.5 bg-surface-500 hover:bg-surface-400 text-text-primary border-0 text-xs font-medium rounded-lg transition-colors cursor-pointer"
           >
-            Submit Project Brief
+            Project Brief
           </button>
         )}
       </div>
 
-      {/* Video Grid */}
       {!hasSamples ? (
-        <div className="bg-[#181818] border border-[#282828] rounded-xl p-8 text-center space-y-3">
-          <div className="w-12 h-12 mx-auto rounded-full bg-[#242424] text-slate-400 flex items-center justify-center">
-            <Film className="w-6 h-6 text-slate-400" />
+        <div className="bg-[#181818] border-0 rounded-xl p-8 text-center space-y-2.5">
+          <div className="w-11 h-11 mx-auto rounded-full bg-[#242424] text-slate-400 flex items-center justify-center">
+            <Film className="w-5 h-5 text-slate-400" />
           </div>
           <p className="text-sm font-semibold text-slate-200">
-            No sample videos published yet
+            No sample videos
           </p>
-          <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
-            {freelancerName ? `${freelancerName}'s` : "The freelancer's"} public video library will appear here once sample edits are linked.
+          <p className="text-xs text-slate-400">
+            No videos published yet.
           </p>
           {onOpenIntake && (
             <button
               type="button"
               onClick={onOpenIntake}
-              className="mt-2 text-xs font-semibold text-indigo-400 hover:underline cursor-pointer border-0 bg-transparent"
+              className="mt-1 text-xs font-medium text-slate-300 hover:text-white cursor-pointer border-0 bg-transparent"
             >
-              Submit an inquiry to request custom samples &rarr;
+              Request samples &rarr;
             </button>
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="columns-1 sm:columns-2 gap-4 space-y-4">
           {samples.map((item) => (
             <SampleVideoCard
               key={item.id}
               item={item}
-              onSelect={(selected) =>
+              onSelect={(selected, isPortrait) =>
                 setSelectedVideo({
                   url: selected.videoUrl,
                   title: selected.title,
                   clientName: selected.clientName,
+                  isPortrait,
                 })
               }
             />
@@ -94,7 +85,6 @@ export default function SampleVideoLibrary({
         </div>
       )}
 
-      {/* Fullscreen Video Player Modal */}
       {selectedVideo && (
         <MediaEmbedModal
           isOpen={true}
@@ -102,6 +92,7 @@ export default function SampleVideoLibrary({
           url={selectedVideo.url}
           title={selectedVideo.title}
           clientName={selectedVideo.clientName}
+          isPortrait={selectedVideo.isPortrait}
         />
       )}
     </div>
