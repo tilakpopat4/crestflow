@@ -163,7 +163,7 @@ export default function PublicOnboardingForm({
           <button
             type="button"
             onClick={onClear}
-            className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium transition-colors duration-120 cursor-pointer border-0"
+            className="px-3.5 py-2 bg-surface-500 hover:bg-surface-400 text-text-primary rounded-lg text-xs font-medium transition-colors duration-120 cursor-pointer border-0"
           >
             Clear
           </button>

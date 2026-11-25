@@ -60,7 +60,7 @@ export const PublicFreelancerProfileSubmitted: React.FC<PublicFreelancerProfileS
           <button
             type="button"
             onClick={onReset}
-            className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium transition-colors cursor-pointer border-0"
+            className="w-full py-2 bg-surface-500 hover:bg-surface-400 text-text-primary rounded-lg text-xs font-medium transition-colors cursor-pointer border-0"
           >
             Submit Another
           </button>
