@@ -200,10 +200,10 @@ export default function ProfilePage({
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 w-full min-w-0 flex-1">
-      <div className="pb-4 border-b border-slate-200 dark:border-slate-800">
+      <div className="pb-2">
         <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-3xl">Settings</h1>
         <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-          Your creator identity, client invoicing rails, AI integrations, and CrestFlow membership.
+          Profile, payouts, and plan.
         </p>
       </div>
 
@@ -222,7 +222,7 @@ export default function ProfilePage({
           isAdmin={isAdmin}
         />
 
-        <div className="min-w-0 divide-y divide-slate-200 dark:divide-slate-800 space-y-8">
+        <div className="min-w-0 space-y-8">
           <ProfilePublicSection
             user={user}
             name={name}

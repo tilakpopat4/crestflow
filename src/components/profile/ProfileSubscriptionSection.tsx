@@ -58,13 +58,13 @@ export const ProfileSubscriptionSection: React.FC<ProfileSubscriptionSectionProp
           Membership &amp; plan
         </h2>
         <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-          Manage your membership tier, recurring billing interval, and platform access.
+          Plan and billing cycle.
         </p>
       </div>
 
-      <div className="rounded-xl bg-white dark:bg-slate-900 shadow-xs ring-1 ring-slate-200 dark:ring-slate-800 overflow-hidden">
+      <div className="rounded-xl bg-white dark:bg-slate-900 overflow-hidden">
         <div className="p-5 sm:p-6 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
@@ -93,7 +93,7 @@ export const ProfileSubscriptionSection: React.FC<ProfileSubscriptionSectionProp
                   ? subscriptionState.currentPeriodEnd
                     ? `Current period renews on ${new Date(subscriptionState.currentPeriodEnd).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`
                     : 'Active recurring membership'
-                  : 'Upgrade to CrestFlow Pro for unlimited invoices, automated reminders, and client portals.'}
+                  : 'Upgrade to Pro for unlimited invoices and client portals.'}
               </p>
             </div>
 
@@ -103,7 +103,7 @@ export const ProfileSubscriptionSection: React.FC<ProfileSubscriptionSectionProp
                   <button
                     type="button"
                     onClick={onOpenSubscriptionModal}
-                    className="h-8.5 px-3.5 rounded-lg text-xs font-semibold bg-[#282828] hover:bg-[#383838] text-slate-300 hover:text-white border border-[#3a3a3a] cursor-pointer transition-colors duration-120"
+                    className="h-8.5 px-3.5 rounded-lg text-xs font-semibold bg-[#333333] hover:bg-[#3e3e3e] text-slate-300 hover:text-white border-0 cursor-pointer transition-colors duration-120"
                   >
                     Change plan
                   </button>
@@ -132,7 +132,7 @@ export const ProfileSubscriptionSection: React.FC<ProfileSubscriptionSectionProp
           </div>
 
           {cancelMessage && (
-            <div className="p-3 text-xs rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+            <div className="p-3 text-xs rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
               {cancelMessage}
             </div>
           )}

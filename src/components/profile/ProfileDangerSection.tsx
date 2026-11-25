@@ -82,18 +82,18 @@ export const ProfileDangerSection: React.FC<ProfileDangerSectionProps> = ({ user
           Delete account
         </h2>
         <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-          Permanently remove your CrestFlow account and all associated workspace records.
+          Permanently delete your account.
         </p>
       </div>
 
-      <div className="rounded-xl bg-white dark:bg-slate-900 shadow-xs ring-1 ring-slate-200 dark:ring-slate-800 overflow-hidden">
+      <div className="rounded-xl bg-white dark:bg-slate-900 overflow-hidden">
         <div className="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1 max-w-xl">
             <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
               Permanently delete your account
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              This erases your profile, clients, work logs, invoices, reviews, and login credentials. Any active recurring subscription is cancelled automatically. This action cannot be undone.
+              Erases all workspace data and cancels any active subscription.
             </p>
           </div>
 

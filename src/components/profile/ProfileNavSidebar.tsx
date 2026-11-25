@@ -49,10 +49,10 @@ export const ProfileNavSidebar: React.FC<ProfileNavSidebarProps> = ({
           type="button"
           onClick={() => onSelectSection(item.id)}
           aria-current={isActive ? 'page' : undefined}
-          className={`flex h-10 w-full items-center gap-2.5 rounded-lg px-3 text-sm font-medium whitespace-nowrap transition-colors duration-120 cursor-pointer text-left lg:h-8.5 lg:px-2.5 border ${
+          className={`flex h-10 w-full items-center gap-2.5 rounded-lg px-3 text-sm font-medium whitespace-nowrap transition-colors duration-120 cursor-pointer text-left lg:h-8.5 lg:px-2.5 border-0 ${
             isActive
-              ? 'bg-[#282828] text-white font-semibold border-[#3a3a3a] shadow-xs'
-              : 'text-[#aaaaaa] hover:text-white hover:bg-[#282828] border-transparent'
+              ? 'bg-[#282828] text-white font-semibold'
+              : 'text-[#aaaaaa] hover:text-white hover:bg-[#282828]'
           }`}
         >
           <Icon className={`size-4 shrink-0 ${isActive ? 'text-white' : 'text-[#aaaaaa]'}`} strokeWidth={1.75} />

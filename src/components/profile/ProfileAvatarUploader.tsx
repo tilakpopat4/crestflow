@@ -59,7 +59,7 @@ export const ProfileAvatarUploader: React.FC<ProfileAvatarUploaderProps> = ({
 
         <div
           onClick={() => !disabled && !isProcessing && fileInputRef.current?.click()}
-          className="relative size-16 rounded-full cursor-pointer overflow-hidden border-2 border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 flex items-center justify-center transition-opacity hover:opacity-90"
+          className="relative size-16 rounded-full cursor-pointer overflow-hidden border-0 bg-slate-100 dark:bg-slate-800 flex items-center justify-center transition-opacity hover:opacity-90"
           title="Click to upload profile photo directly from device"
           role="button"
           tabIndex={0}
@@ -118,7 +118,7 @@ export const ProfileAvatarUploader: React.FC<ProfileAvatarUploaderProps> = ({
         </div>
 
         <p className="text-[11px] text-slate-500 dark:text-slate-400">
-          Direct device upload (PNG, JPG, or WEBP). No external link required.
+          PNG, JPG, or WEBP.
         </p>
 
         {uploadError && (

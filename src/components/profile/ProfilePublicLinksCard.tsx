@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Copy, Check, ExternalLink, Link2 } from 'lucide-react';
+import { Copy, Check, ExternalLink } from 'lucide-react';
 import { isValidUsername } from '../../lib/userHandle';
 
 interface ProfilePublicLinksCardProps {
@@ -38,12 +38,12 @@ export const ProfilePublicLinksCard: React.FC<ProfilePublicLinksCardProps> = ({
 
   if (!isHandleValid) {
     return (
-      <div className="sm:col-span-2 p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-1">
+      <div className="sm:col-span-2 p-3.5 rounded-lg bg-slate-50/50 dark:bg-slate-800/40 space-y-1">
         <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
           Username required
         </p>
         <p className="text-[11px] text-slate-500 dark:text-slate-400">
-          Enter and save a valid username above (3-30 alphanumeric characters) to activate your branded intake link.
+          Save a valid username above to activate your link.
         </p>
       </div>
     );
@@ -52,11 +52,10 @@ export const ProfilePublicLinksCard: React.FC<ProfilePublicLinksCardProps> = ({
   return (
     <div className="sm:col-span-2 pt-1">
       {/* Unified Onboarding Link Card */}
-      <div className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-2">
+      <div className="p-3.5 rounded-lg bg-slate-50/50 dark:bg-slate-800/40 space-y-1.5">
         <div className="flex items-center justify-between gap-2">
-          <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 inline-flex items-center gap-1.5">
-            <Link2 size={13} className="text-indigo-600 dark:text-indigo-400" />
-            Client Onboarding Link
+          <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+            Onboarding link
           </span>
           <div className="flex items-center gap-1">
             <button
