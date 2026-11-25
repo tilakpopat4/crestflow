@@ -1,4 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { X } from 'lucide-react';
 import {
   CalendarCell,
   YearMonth,
@@ -184,8 +185,9 @@ export const CalendarPopover: React.FC<CalendarPopoverProps> = ({
             type="button"
             onClick={onClose}
             className="p-1.5 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+            aria-label="Close calendar"
           >
-            ✕
+            <X size={15} />
           </button>
         </div>
 

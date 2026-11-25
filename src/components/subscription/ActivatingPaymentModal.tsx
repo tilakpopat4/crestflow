@@ -78,21 +78,18 @@ export const ActivatingPaymentModal: React.FC<ActivatingPaymentModalProps> = ({
           </div>
         ) : (
           <div>
-            <div className="w-8 h-8 mx-auto mb-4 bg-surface-800 border border-surface-400 text-accent rounded-full flex items-center justify-center font-bold text-sm">
-              ✓
-            </div>
             <h3 className="text-base font-semibold text-text-primary mb-2">
-              Membership Activated
+              Membership Active
             </h3>
             <p className="text-xs text-text-secondary leading-relaxed mb-6">
-              Your access has been confirmed. Full write access to client management, automated invoicing, and UPI payment tracking is now unlocked.
+              Workspace access unlocked.
             </p>
             <button
               type="button"
               onClick={onActivated}
               className="w-full py-2.5 px-4 rounded-lg bg-accent hover:bg-accent-hover text-white text-xs font-semibold transition-colors cursor-pointer border-0"
             >
-              Continue to Workspace
+              Continue
             </button>
           </div>
         )}

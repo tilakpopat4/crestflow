@@ -1,6 +1,5 @@
 import React from 'react';
 import { UserProfile } from '../types';
-import { Phone, Mail, Film } from 'lucide-react';
 import { auth } from '../firebase';
 
 interface PublicFreelancerProfileCardProps {
@@ -40,13 +39,12 @@ export default function PublicFreelancerProfileCard({
         )}
 
         <div className="flex-1 min-w-0">
-          <div className="mb-0.5">
-            <span className="text-[11px] font-medium text-slate-400 inline-flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-current" />
-              Available
-            </span>
-          </div>
-          <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight truncate">{profile.name}</h1>
+          <span className="text-[11px] font-medium text-slate-400 block mb-0.5">
+            Available
+          </span>
+          <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight truncate">
+            {profile.name}
+          </h1>
           {profile.professionalTitle && (
             <p className="text-slate-400 font-medium text-xs uppercase tracking-wider mt-0.5 truncate">
               {profile.professionalTitle}
@@ -66,29 +64,25 @@ export default function PublicFreelancerProfileCard({
         </div>
       )}
 
-      <div className="pt-3 border-t border-surface-500/50 space-y-2">
-        {profile.phone && (
-          <div className="flex items-center gap-2.5 text-xs text-slate-300 font-mono">
-            <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-            <span>{profile.phone}</span>
-          </div>
-        )}
-        <div className="flex items-center gap-2.5 text-xs text-slate-400">
-          <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-          <span>Contact via intake form</span>
-        </div>
+      {(profile.phone || (onViewSamples && samplesCount !== undefined && samplesCount > 0)) && (
+        <div className="pt-3 border-t border-surface-500/50 space-y-2.5">
+          {profile.phone && (
+            <p className="text-xs text-slate-300 font-mono">
+              {profile.phone}
+            </p>
+          )}
 
-        {onViewSamples && samplesCount !== undefined && samplesCount > 0 && (
-          <button
-            type="button"
-            onClick={onViewSamples}
-            className="w-full mt-2 py-2 px-3 bg-[#242424] hover:bg-[#2e2e2e] text-slate-100 text-xs font-medium rounded-lg flex items-center justify-center gap-1.5 cursor-pointer border-0 transition-colors"
-          >
-            <Film size={14} className="text-slate-300" />
-            <span>Sample Videos ({samplesCount})</span>
-          </button>
-        )}
-      </div>
+          {onViewSamples && samplesCount !== undefined && samplesCount > 0 && (
+            <button
+              type="button"
+              onClick={onViewSamples}
+              className="w-full py-2 px-3 bg-[#242424] hover:bg-[#2e2e2e] text-slate-100 text-xs font-medium rounded-lg text-center cursor-pointer border-0 transition-colors"
+            >
+              Sample Videos ({samplesCount})
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

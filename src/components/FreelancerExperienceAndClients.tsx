@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { UserProfile, Client } from '../types';
 import { calculateWorkJourney } from '../lib/anniversary';
-import { Clock, Calendar } from 'lucide-react';
 
 interface FreelancerExperienceAndClientsProps {
   profile: UserProfile;
@@ -30,8 +29,7 @@ export default function FreelancerExperienceAndClients({
               Experience
             </h2>
             {workJourney && (
-              <span className="text-xs text-slate-400 font-medium flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-slate-400" />
+              <span className="text-xs text-slate-400 font-medium">
                 {workJourney.formattedDuration}
               </span>
             )}
@@ -39,7 +37,7 @@ export default function FreelancerExperienceAndClients({
 
           <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-line">
             {profile.workExperienceBio ||
-              `Providing ${profile.servicesDescription.toLowerCase()} with fast turnarounds and clear communication.`}
+              `Providing ${profile.servicesDescription.toLowerCase()} with fast turnarounds.`}
           </p>
 
           <div className="grid grid-cols-2 gap-3 pt-1">
@@ -64,9 +62,8 @@ export default function FreelancerExperienceAndClients({
         </div>
 
         {profile.freelanceStartDate && (
-          <div className="text-xs text-slate-400 flex items-center gap-1.5 pt-2 border-t border-surface-500/50">
-            <Calendar className="w-3.5 h-3.5 text-slate-400" />
-            <span>Active since {workJourney?.startDateFormatted || profile.freelanceStartDate}</span>
+          <div className="text-xs text-slate-400 pt-2 border-t border-surface-500/50">
+            Active since {workJourney?.startDateFormatted || profile.freelanceStartDate}
           </div>
         )}
       </div>

@@ -213,7 +213,7 @@ export default function PublicFreelancerProfile({ freelancerId }: PublicFreelanc
             <span className="text-base font-bold text-slate-900 dark:text-white tracking-tight">CrestFlow</span>
           </div>
           <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-            Client Onboarding Portal
+            Onboarding
           </span>
         </div>
 
