@@ -13,7 +13,7 @@ const env = (typeof import.meta !== 'undefined' && (import.meta as any).env) || 
 
 const firebaseConfig = {
   apiKey: env.VITE_FIREBASE_API_KEY || "AIzaSyDVC84sK2RE7u-Tv-oxtVJCesqTzsyirVo",
-  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || "crestflow-14f4b.firebaseapp.com",
+  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || "crestflow.space",
   projectId: env.VITE_FIREBASE_PROJECT_ID || "crestflow-14f4b",
   storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || "crestflow-14f4b.firebasestorage.app",
   appId: env.VITE_FIREBASE_APP_ID || "1:960977935987:web:9c55663e25a9d8c30a1406",
