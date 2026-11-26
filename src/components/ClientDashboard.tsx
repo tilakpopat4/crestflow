@@ -6,6 +6,7 @@ import { Client } from '../types';
 import { formatCurrencyAmount } from '../lib/currencyUtils';
 import { Button } from '@/components/ui/button';
 import { StatCard } from '@/components/ui/StatCard';
+import { useAccess } from '../hooks/useAccess';
 import { useClientDashboard } from '../hooks/useClientDashboard';
 import GoogleDriveUploadModal from './GoogleDriveUploadModal';
 import MediaEmbedModal from './MediaEmbedModal';
@@ -31,6 +32,7 @@ interface ClientDashboardProps {
  */
 export default function ClientDashboard({ client, user, onBack, onEditClient }: ClientDashboardProps) {
   const shouldReduceMotion = useReducedMotion();
+  const access = useAccess();
   const {
     invoices,
     clientInvoices,
@@ -87,7 +89,16 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
             {copiedReviewLink ? <><CheckCircle2 size={13} /> Link Copied!</> : <><MessageSquare size={13} /> Request Review</>}
           </Button>
 
-          <Button variant="secondary" size="sm" onClick={() => setIsSubClientsModalOpen(true)} className="gap-1.5" title="Add or edit sub-clients for this client">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              if (!access.requireAccess('edit_client', 'Add or manage client sub-brands.')) return;
+              setIsSubClientsModalOpen(true);
+            }}
+            className="gap-1.5"
+            title="Add or edit sub-clients for this client"
+          >
             <Users size={13} /> Sub-Clients {client.subClients?.length ? `(${client.subClients.length})` : ''}
           </Button>
 
@@ -95,7 +106,15 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
             <Edit3 size={13} /> Edit
           </Button>
 
-          <Button variant="primary" size="sm" onClick={() => setIsPaymentModalOpen(true)} className="gap-1.5">
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => {
+              if (!access.requireAccess('edit_client', 'Record client payments and update billing cycles.')) return;
+              setIsPaymentModalOpen(true);
+            }}
+            className="gap-1.5"
+          >
             <Calendar size={13} /> Record Payment
           </Button>
         </div>
@@ -237,37 +256,21 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
       </div>
 
       <ClientRecordPaymentModal
-        isOpen={isPaymentModalOpen}
-        onClose={() => setIsPaymentModalOpen(false)}
-        client={client}
-        pendingInvoicesCount={financials.pendingInvoices.length}
-        pendingInvoiceTotal={financials.pendingInvoiceTotal}
-        onSave={handleSavePaymentDate}
+        isOpen={isPaymentModalOpen} onClose={() => setIsPaymentModalOpen(false)} client={client}
+        pendingInvoicesCount={financials.pendingInvoices.length} pendingInvoiceTotal={financials.pendingInvoiceTotal} onSave={handleSavePaymentDate}
       />
       <SubClientsModal
-        isOpen={isSubClientsModalOpen}
-        onClose={() => setIsSubClientsModalOpen(false)}
-        client={client}
-        clientWorkItems={clientWorkItems}
-        onUpdateClient={updateClient}
+        isOpen={isSubClientsModalOpen} onClose={() => setIsSubClientsModalOpen(false)} client={client}
+        clientWorkItems={clientWorkItems} onUpdateClient={updateClient}
       />
       <ClientWorkFormModal
-        isOpen={isWorkFormOpen}
-        onClose={() => { setEditingWorkId(null); setIsWorkFormOpen(false); }}
-        editingWorkId={editingWorkId}
-        workFormData={workFormData}
-        setWorkFormData={setWorkFormData}
-        client={client}
-        currencySymbol={currencySymbol}
-        onSave={handleSaveWorkLog}
-        onOpenDrive={() => setIsDriveModalOpen(true)}
-        onOpenSubClients={() => setIsSubClientsModalOpen(true)}
+        isOpen={isWorkFormOpen} onClose={() => { setEditingWorkId(null); setIsWorkFormOpen(false); }}
+        editingWorkId={editingWorkId} workFormData={workFormData} setWorkFormData={setWorkFormData}
+        client={client} currencySymbol={currencySymbol} onSave={handleSaveWorkLog}
+        onOpenDrive={() => setIsDriveModalOpen(true)} onOpenSubClients={() => setIsSubClientsModalOpen(true)}
       />
       <GoogleDriveUploadModal
-        isOpen={isDriveModalOpen}
-        onClose={() => setIsDriveModalOpen(false)}
-        clients={[client]}
-        defaultClientId={client.id}
+        isOpen={isDriveModalOpen} onClose={() => setIsDriveModalOpen(false)} clients={[client]} defaultClientId={client.id}
         onWorkItemCreated={async (newWork) => { await updateWorkItem(newWork); setIsDriveModalOpen(false); }}
         onLinkGenerated={(result) => {
           setWorkFormData((prev) => ({ ...prev, videoUrl: result.webViewLink, description: prev.description.trim() ? prev.description : result.name }));
@@ -275,18 +278,10 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
         }}
       />
       <MediaEmbedModal
-        isOpen={!!embedModalData?.isOpen}
-        onClose={() => setEmbedModalData(null)}
-        url={embedModalData?.url || ''}
-        title={embedModalData?.title || 'Video Deliverable'}
-        clientName={embedModalData?.clientName}
+        isOpen={!!embedModalData?.isOpen} onClose={() => setEmbedModalData(null)}
+        url={embedModalData?.url || ''} title={embedModalData?.title || 'Video Deliverable'} clientName={embedModalData?.clientName}
       />
-      <ClientRatesModal
-        isOpen={isRatesModalOpen}
-        onClose={() => setIsRatesModalOpen(false)}
-        client={client}
-        onSaveRates={handleSaveRates}
-      />
+      <ClientRatesModal isOpen={isRatesModalOpen} onClose={() => setIsRatesModalOpen(false)} client={client} onSaveRates={handleSaveRates} />
     </div>
   );
 }

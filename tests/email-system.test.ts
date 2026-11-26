@@ -31,6 +31,7 @@ describe('Production-Ready Automated Email System Suite', () => {
     mockState = {
       processedEvents: new Set(),
       firestoreSubscriptions: new Map(),
+      entitlements: new Map(),
       trialLedger: new Map(),
       razorpaySubscriptions: new Map(),
       refundedPayments: [],
@@ -42,6 +43,16 @@ describe('Production-Ready Automated Email System Suite', () => {
       profiles: new Map(),
       publicKeyJwk: { ...jwk, kid: 'mock_kid', alg: 'RS256', use: 'sig' },
     };
+
+    const futureIso = new Date(Date.now() + 30 * 86400 * 1000).toISOString();
+    for (const uid of ['usr_admin', 'usr_milestone_100', 'usr_concurrent_milestone', 'usr_due_freelancer', 'usr_scheduler', 'user_sub_receipt_test']) {
+      mockState.entitlements!.set(uid, {
+        userId: uid,
+        status: 'active',
+        plan: 'pro_monthly',
+        validUntil: futureIso,
+      });
+    }
 
     globalThis.fetch = createMockFetch(mockState, originalFetch);
 

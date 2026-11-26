@@ -1,10 +1,25 @@
 import crypto from 'node:crypto';
+import {
+  fieldsToObj,
+  handleCollectionDoc,
+  handleCommitRequest,
+  listCollectionResponse,
+  objToFields,
+} from './mockFirestoreRest';
 
 export interface MockWebhookState {
   processedEvents: Set<string>;
   firestoreSubscriptions: Map<string, any>;
+  entitlements?: Map<string, any>;
   trialLedger: Map<string, any>;
+  trialClaims?: Map<string, any>;
+  invoiceShares?: Map<string, any>;
+  invoices?: Map<string, any>;
+  systemSettings?: Map<string, any>;
+  extraDocs?: Map<string, any>;
   razorpaySubscriptions: Map<string, any>;
+  razorpayOrders?: Map<string, any>;
+  razorpayPayments?: Map<string, any>;
   refundedPayments: Array<{ paymentId: string; amount: number }>;
   cancelledSubscriptions: string[];
   cancellationsDetailed: Array<{ subId: string; cancelAtCycleEnd: number }>;
@@ -16,20 +31,46 @@ export interface MockWebhookState {
 }
 
 export function createMockFetch(state: MockWebhookState, originalFetch: typeof globalThis.fetch) {
+  if (!state.entitlements) state.entitlements = new Map();
+  if (!state.trialClaims) state.trialClaims = new Map();
+  if (!state.invoiceShares) state.invoiceShares = new Map();
+  if (!state.invoices) state.invoices = new Map();
+  if (!state.systemSettings) state.systemSettings = new Map();
+  if (!state.extraDocs) state.extraDocs = new Map();
+  if (!state.razorpayOrders) state.razorpayOrders = new Map();
+  if (!state.razorpayPayments) state.razorpayPayments = new Map();
+  if (!state.emailJobs) state.emailJobs = new Map();
+  if (!state.emailIdempotency) state.emailIdempotency = new Map();
+  if (!state.profiles) state.profiles = new Map();
+
+  const resolveDocStore = (relPath: string): { map: Map<string, any>; id: string } => {
+    const clean = relPath.split('?')[0].replace(/^\/+/, '');
+    const parts = clean.split('/');
+    const col = parts[0];
+    const id = parts.slice(1).join('/');
+    if (col === 'entitlements') return { map: state.entitlements!, id };
+    if (col === 'subscriptions') return { map: state.firestoreSubscriptions, id };
+    if (col === 'trialClaims') return { map: state.trialClaims!, id };
+    if (col === 'trial_ledger') return { map: state.trialLedger, id };
+    if (col === 'invoice_shares') return { map: state.invoiceShares!, id };
+    if (col === 'invoices') return { map: state.invoices!, id };
+    if (col === 'system_settings') return { map: state.systemSettings!, id };
+    if (col === 'emailJobs') return { map: state.emailJobs!, id };
+    if (col === 'emailIdempotency') return { map: state.emailIdempotency!, id };
+    if (col === 'profiles') return { map: state.profiles!, id };
+    return { map: state.extraDocs!, id: clean };
+  };
+
   return async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
     const urlStr = input.toString();
 
-    // 0. Google JWKS public keys for Firebase token verification
     if (urlStr.includes('securetoken@system.gserviceaccount.com') && state.publicKeyJwk) {
-      return new Response(
-        JSON.stringify({
-          keys: [state.publicKeyJwk],
-        }),
-        { status: 200, headers: { 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ keys: [state.publicKeyJwk] }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
-    // 1. Google OAuth2 token exchange
     if (urlStr.includes('oauth2.googleapis.com/token')) {
       return new Response(JSON.stringify({ access_token: 'mock_token', expires_in: 3600 }), {
         status: 200,
@@ -37,7 +78,6 @@ export function createMockFetch(state: MockWebhookState, originalFetch: typeof g
       });
     }
 
-    // 2. Email Delivery APIs (EmailJS & Resend)
     if (urlStr.includes('api.emailjs.com/api/v1.0/email/send')) {
       const body = JSON.parse((init?.body as string) || '{}');
       const params = body.template_params || {};
@@ -47,10 +87,7 @@ export function createMockFetch(state: MockWebhookState, originalFetch: typeof g
         html: params.message_html || '',
         text: params.message_text || '',
       });
-      return new Response('OK', {
-        status: 200,
-        headers: { 'Content-Type': 'text/plain' },
-      });
+      return new Response('OK', { status: 200 });
     }
 
     if (urlStr.includes('api.resend.com/emails')) {
@@ -67,7 +104,6 @@ export function createMockFetch(state: MockWebhookState, originalFetch: typeof g
       });
     }
 
-    // 3. Razorpay Subscriptions API: Create / Cancel / Fetch
     if (urlStr.includes('api.razorpay.com/v1/subscriptions')) {
       if (urlStr.endsWith('/subscriptions') && init?.method === 'POST') {
         const body = JSON.parse((init?.body as string) || '{}');
@@ -78,267 +114,88 @@ export function createMockFetch(state: MockWebhookState, originalFetch: typeof g
           headers: { 'Content-Type': 'application/json' },
         });
       }
-
       const parts = urlStr.split('/');
       const isCancel = urlStr.endsWith('/cancel');
       const subId = isCancel ? parts[parts.length - 2] : parts[parts.length - 1].split('?')[0];
-
       if (isCancel) {
         const body = JSON.parse((init?.body as string) || '{}');
         state.cancelledSubscriptions.push(subId);
-        if (!state.cancellationsDetailed) state.cancellationsDetailed = [];
         state.cancellationsDetailed.push({ subId, cancelAtCycleEnd: body.cancel_at_cycle_end ?? 1 });
-        return new Response(JSON.stringify({ id: subId, status: 'cancelled' }), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        });
+        return new Response(JSON.stringify({ id: subId, status: 'cancelled' }), { status: 200 });
       }
-
       const sub = state.razorpaySubscriptions.get(subId);
-      if (!sub) {
-        return new Response(JSON.stringify({ error: { description: 'Subscription not found' } }), {
-          status: 404,
-        });
-      }
-      return new Response(JSON.stringify(sub), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      if (!sub) return new Response(JSON.stringify({ error: { description: 'Subscription not found' } }), { status: 404 });
+      return new Response(JSON.stringify(sub), { status: 200 });
     }
 
-    // 4. Razorpay Payments Refund API
-    if (urlStr.includes('api.razorpay.com/v1/payments/') && urlStr.endsWith('/refund')) {
-      const parts = urlStr.split('/');
-      const paymentId = parts[parts.length - 2];
-      const body = JSON.parse((init?.body as string) || '{}');
-      state.refundedPayments.push({ paymentId, amount: body.amount || 100 });
-      return new Response(JSON.stringify({ id: `rfnd_${Date.now()}`, status: 'processed' }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      });
+    if (urlStr.includes('api.razorpay.com/v1/orders')) {
+      if (init?.method === 'POST') {
+        const body = JSON.parse((init?.body as string) || '{}');
+        const id = `order_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+        const ord = { id, ...body };
+        state.razorpayOrders!.set(id, ord);
+        return new Response(JSON.stringify(ord), { status: 200 });
+      }
+      const ordId = urlStr.split('/').pop()?.split('?')[0] || '';
+      const ord = state.razorpayOrders!.get(ordId);
+      if (!ord) return new Response('Not found', { status: 404 });
+      return new Response(JSON.stringify(ord), { status: 200 });
     }
 
-    // 5. Firestore processed_events (Deduplication)
-    if (urlStr.includes('/documents/processed_events/')) {
-      const eventId = urlStr.split('/').pop()?.split('?')[0] || '';
-      if (init?.method === 'PATCH') {
-        state.processedEvents.add(eventId);
-        return new Response(JSON.stringify({ name: eventId }), { status: 200 });
+    if (urlStr.includes('api.razorpay.com/v1/payments/')) {
+      if (urlStr.endsWith('/refund')) {
+        const parts = urlStr.split('/');
+        const paymentId = parts[parts.length - 2];
+        const body = JSON.parse((init?.body as string) || '{}');
+        state.refundedPayments.push({ paymentId, amount: body.amount || 0 });
+        return new Response(JSON.stringify({ id: `rfnd_${Date.now()}`, status: 'processed' }), { status: 200 });
       }
-      if (state.processedEvents.has(eventId)) {
-        return new Response(JSON.stringify({ name: eventId }), { status: 200 });
-      }
-      return new Response('Not found', { status: 404 });
+      const payId = urlStr.split('/').pop()?.split('?')[0] || '';
+      const pay = state.razorpayPayments!.get(payId) || { id: payId, status: 'captured', amount: 7900, method: 'upi' };
+      return new Response(JSON.stringify(pay), { status: 200 });
     }
 
-    // 6. Firestore trial_ledger/{hash}
-    if (urlStr.includes('/documents/trial_ledger/')) {
-      const hash = urlStr.split('/').pop()?.split('?')[0] || '';
-      if (init?.method === 'PATCH') {
-        const body = JSON.parse((init.body as string) || '{}');
-        const existing = state.trialLedger.get(hash) || {};
-        const incomingFields: Record<string, any> = {};
-
-        for (const [k, v] of Object.entries(body.fields || {})) {
-          incomingFields[k] = parseMockFirestoreValue(v);
-        }
-
-        state.trialLedger.set(hash, { ...existing, ...incomingFields });
-        return new Response(JSON.stringify({ name: hash }), { status: 200 });
+    if (urlStr.includes('firestore.googleapis.com/')) {
+      if (urlStr.includes(':commit')) {
+        const body = JSON.parse((init?.body as string) || '{}');
+        return handleCommitRequest(body.writes || [], resolveDocStore);
       }
-
-      const entry = state.trialLedger.get(hash);
-      if (!entry) return new Response('Not found', { status: 404 });
-
-      const fields: Record<string, any> = {};
-      for (const [k, v] of Object.entries(entry)) {
-        fields[k] = toMockFirestoreValue(v);
-      }
-      return new Response(JSON.stringify({ fields }), { status: 200 });
-    }
-
-    // 7. Firestore list subscriptions: /documents/subscriptions?pageSize=...
-    if (urlStr.includes('/documents/subscriptions') && !urlStr.includes('/documents/subscriptions/')) {
-      const documents: any[] = [];
-      for (const [userId, sub] of state.firestoreSubscriptions.entries()) {
-        const fields: Record<string, any> = {};
-        for (const [k, v] of Object.entries(sub)) {
-          fields[k] = toMockFirestoreValue(v);
-        }
-        documents.push({
-          name: `projects/demo/databases/(default)/documents/subscriptions/${userId}`,
-          fields,
-        });
-      }
-      return new Response(JSON.stringify({ documents }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    // 8. Firestore single subscription: /documents/subscriptions/{userId}
-    if (urlStr.includes('/documents/subscriptions/')) {
-      const userId = urlStr.split('/').pop()?.split('?')[0] || '';
-      if (init?.method === 'PATCH') {
-        const body = JSON.parse((init.body as string) || '{}');
-        const existing = state.firestoreSubscriptions.get(userId) || {};
-        const incomingFields: Record<string, any> = {};
-
-        for (const [k, v] of Object.entries(body.fields || {})) {
-          incomingFields[k] = parseMockFirestoreValue(v);
-        }
-
-        state.firestoreSubscriptions.set(userId, { ...existing, ...incomingFields });
-        return new Response(JSON.stringify({ name: userId }), { status: 200 });
-      }
-
-      const sub = state.firestoreSubscriptions.get(userId);
-      if (!sub) return new Response('Not found', { status: 404 });
-
-      const fields: Record<string, any> = {};
-      for (const [k, v] of Object.entries(sub)) {
-        fields[k] = toMockFirestoreValue(v);
-      }
-      return new Response(JSON.stringify({ fields }), { status: 200 });
-    }
-
-    // 9. Firestore emailIdempotency/{cleanKey}
-    if (urlStr.includes('/documents/emailIdempotency/')) {
-      const key = urlStr.split('/').pop()?.split('?')[0] || '';
-      if (!state.emailIdempotency) state.emailIdempotency = new Map();
-      if (init?.method === 'PATCH') {
-        const hasPrecondition = urlStr.includes('currentDocument.exists=false');
-        if (hasPrecondition && state.emailIdempotency.has(key)) {
-          return new Response(JSON.stringify({ error: { code: 412, message: 'Precondition failed: document exists' } }), {
-            status: 412,
-            headers: { 'Content-Type': 'application/json' },
-          });
-        }
-        const body = JSON.parse((init.body as string) || '{}');
-        const jobId = body.fields?.jobId?.stringValue || 'job_mock';
-        state.emailIdempotency.set(key, { jobId });
-        return new Response(JSON.stringify({ name: key }), { status: 200 });
-      }
-      const existing = state.emailIdempotency.get(key);
-      if (existing) {
-        return new Response(JSON.stringify({ fields: { jobId: { stringValue: existing.jobId } } }), { status: 200 });
-      }
-      return new Response('Not found', { status: 404 });
-    }
-
-    // 10a. Firestore list emailJobs: /documents/emailJobs?pageSize=...
-    if (urlStr.includes('/documents/emailJobs') && !urlStr.includes('/documents/emailJobs/')) {
-      const documents: any[] = [];
-      if (state.emailJobs) {
-        for (const [jobId, job] of state.emailJobs.entries()) {
-          const fields: Record<string, any> = {};
-          for (const [k, v] of Object.entries(job)) {
-            fields[k] = toMockFirestoreValue(v);
-          }
-          documents.push({
-            name: `projects/demo/databases/(default)/documents/emailJobs/${jobId}`,
-            fields,
-          });
-        }
-      }
-      return new Response(JSON.stringify({ documents }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    // 10b. Firestore emailJobs/{jobId}
-    if (urlStr.includes('/documents/emailJobs/')) {
-      const jobId = urlStr.split('/').pop()?.split('?')[0] || '';
-      if (!state.emailJobs) state.emailJobs = new Map();
-      if (init?.method === 'PATCH') {
-        const body = JSON.parse((init.body as string) || '{}');
-        const existing = state.emailJobs.get(jobId) || {};
-        const incomingFields: Record<string, any> = {};
-        for (const [k, v] of Object.entries(body.fields || {})) {
-          incomingFields[k] = parseMockFirestoreValue(v);
-        }
-        state.emailJobs.set(jobId, { ...existing, ...incomingFields });
-        return new Response(JSON.stringify({ name: jobId }), { status: 200 });
-      }
-      const job = state.emailJobs.get(jobId);
-      if (!job) return new Response('Not found', { status: 404 });
-      const fields: Record<string, any> = {};
-      for (const [k, v] of Object.entries(job)) {
-        fields[k] = toMockFirestoreValue(v);
-      }
-      return new Response(JSON.stringify({ fields }), { status: 200 });
-    }
-
-    // 11. Firestore runQuery
-    if (urlStr.includes('/documents:runQuery')) {
-      const results: any[] = [];
-      if (state.emailJobs) {
-        for (const [jobId, job] of state.emailJobs.entries()) {
-          const fields: Record<string, any> = {};
-          for (const [k, v] of Object.entries(job)) {
-            fields[k] = toMockFirestoreValue(v);
-          }
+      if (urlStr.includes('/documents:runQuery')) {
+        const results: any[] = [];
+        for (const [jobId, job] of state.emailJobs!.entries()) {
           results.push({
             document: {
-              name: `projects/demo/databases/(default)/documents/emailJobs/${jobId}`,
-              fields,
+              name: `projects/test-project/databases/(default)/documents/emailJobs/${jobId}`,
+              fields: objToFields(job),
             },
           });
         }
+        return new Response(JSON.stringify(results), { status: 200 });
       }
-      return new Response(JSON.stringify(results), { status: 200, headers: { 'Content-Type': 'application/json' } });
-    }
+      if (urlStr.includes('/documents/webhook_events/') || urlStr.includes('/documents/processed_events/')) {
+        const eventId = urlStr.split('/').pop()?.split('?')[0] || '';
+        if (init?.method === 'PATCH') {
+          state.processedEvents.add(eventId);
+          return new Response(JSON.stringify({ name: eventId }), { status: 200 });
+        }
+        return state.processedEvents.has(eventId)
+          ? new Response(JSON.stringify({ name: eventId }), { status: 200 })
+          : new Response('Not found', { status: 404 });
+      }
 
-    // 12. Firestore profiles/{userId}
-    if (urlStr.includes('/documents/profiles/')) {
-      const userId = urlStr.split('/').pop()?.split('?')[0] || '';
-      if (!state.profiles) state.profiles = new Map();
-      const prof = state.profiles.get(userId);
-      if (!prof) return new Response('Not found', { status: 404 });
-      const fields: Record<string, any> = {};
-      for (const [k, v] of Object.entries(prof)) {
-        fields[k] = toMockFirestoreValue(v);
-      }
-      return new Response(JSON.stringify({ fields }), { status: 200 });
+      const relAfterDocs = urlStr.split('/documents/')[1] || '';
+      const cleanRel = relAfterDocs.split('?')[0].replace(/^\/+/, '');
+      if (cleanRel === 'entitlements') return listCollectionResponse(state.entitlements!, 'entitlements');
+      if (cleanRel === 'subscriptions') return listCollectionResponse(state.firestoreSubscriptions, 'subscriptions');
+      if (cleanRel === 'emailJobs') return listCollectionResponse(state.emailJobs!, 'emailJobs');
+      if (cleanRel === 'profiles') return listCollectionResponse(state.profiles!, 'profiles');
+
+      const { map, id } = resolveDocStore(cleanRel);
+      return handleCollectionDoc(map, id, init, urlStr);
     }
 
     return originalFetch(input, init);
   };
-}
-
-function parseMockFirestoreValue(val: any): any {
-  if (!val) return null;
-  if ('stringValue' in val) return val.stringValue;
-  if ('integerValue' in val) return parseInt(val.integerValue, 10);
-  if ('doubleValue' in val) return val.doubleValue;
-  if ('booleanValue' in val) return val.booleanValue;
-  if ('timestampValue' in val) return val.timestampValue;
-  if ('arrayValue' in val) return (val.arrayValue.values || []).map(parseMockFirestoreValue);
-  if ('mapValue' in val) {
-    const res: Record<string, any> = {};
-    for (const [k, v] of Object.entries(val.mapValue.fields || {})) {
-      res[k] = parseMockFirestoreValue(v);
-    }
-    return res;
-  }
-  return null;
-}
-
-function toMockFirestoreValue(v: any): any {
-  if (v === null || v === undefined) return { nullValue: null };
-  if (typeof v === 'number') return { integerValue: String(v) };
-  if (typeof v === 'boolean') return { booleanValue: v };
-  if (typeof v === 'string') return { stringValue: v };
-  if (Array.isArray(v)) return { arrayValue: { values: v.map(toMockFirestoreValue) } };
-  if (typeof v === 'object') {
-    const fields: Record<string, any> = {};
-    for (const [k, val] of Object.entries(v)) {
-      fields[k] = toMockFirestoreValue(val);
-    }
-    return { mapValue: { fields } };
-  }
-  return { stringValue: String(v) };
 }
 
 export function createMockIdToken(uid: string, email: string, privateKeyPem: string): string {
@@ -354,10 +211,7 @@ export function createMockIdToken(uid: string, email: string, privateKeyPem: str
       email,
     })
   ).toString('base64url');
-
   const sign = crypto.createSign('RSA-SHA256');
   sign.update(`${header}.${payload}`);
-  const signature = sign.sign(privateKeyPem, 'base64url');
-
-  return `${header}.${payload}.${signature}`;
+  return `${header}.${payload}.${sign.sign(privateKeyPem, 'base64url')}`;
 }

@@ -4,12 +4,12 @@
  */
 
 import { Env } from '../types';
-import { verifyFirebaseIdToken } from '../auth';
+import { requireEntitlement } from '../entitlements';
 import { parseServiceAccount } from '../firestore';
 import { enqueueEmailJob } from '../emailQueue';
 import { dispatchEmailJob } from '../emailDispatcher';
 import { SupportedEventType } from '../emailTemplates';
-import { jsonResponse, getBearerToken } from './subscription';
+import { jsonResponse } from './subscription';
 import {
   handleScheduleEmail,
   handleCancelEmail,
@@ -18,6 +18,11 @@ import {
 } from './emailSchedule';
 import { handleNotifyPaymentDueToday } from './paymentDueRoutes';
 import { handleNotifyNewClientRequest } from './clientRequestRoutes';
+import {
+  sendWelcomeEmailForUser,
+  handleNotifyWelcome,
+  handleNotifyTestEmail,
+} from './welcomeEmailRoute';
 
 export {
   handleScheduleEmail,
@@ -25,6 +30,9 @@ export {
   handleProcessEmailQueue,
   handleNotifyPaymentDueToday,
   handleNotifyNewClientRequest,
+  sendWelcomeEmailForUser,
+  handleNotifyWelcome,
+  handleNotifyTestEmail,
   EMAIL_REGEX,
 };
 
@@ -157,87 +165,13 @@ export async function handleNotifyContact(request: Request, env: Env): Promise<R
 }
 
 /**
- * Helper to dispatch welcome email to a first-time subscriber or newly registered freelancer.
- * Enforces strict deduplication via idempotencyKey = welcome_${uid}.
- */
-export async function sendWelcomeEmailForUser(
-  env: Env,
-  creds: any,
-  uid: string,
-  email: string,
-  name?: string,
-  force = false
-): Promise<{ success: boolean; duplicate?: boolean }> {
-  if (!email || !EMAIL_REGEX.test(email)) return { success: false };
-  const idempotencyKey = force ? `welcome_${uid}_${Date.now()}` : `welcome_${uid}`;
-  const { jobId, duplicate } = await enqueueEmailJob(creds, {
-    eventType: 'welcome_freelancer',
-    recipient: email,
-    templateData: {
-      name: name || undefined,
-      workspaceUrl: `${env.BASE_URL || 'https://crestflow.app'}/profile`,
-    },
-    idempotencyKey,
-    createdBy: uid,
-  });
-
-  if (duplicate && !force) return { success: true, duplicate: true };
-
-  const job = {
-    jobId,
-    eventType: 'welcome_freelancer' as SupportedEventType,
-    recipient: email,
-    templateId: 'welcome_freelancer',
-    templateData: {
-      name: name || undefined,
-      workspaceUrl: `${env.BASE_URL || 'https://crestflow.app'}/profile`,
-    },
-    status: 'queued' as const,
-    scheduledAt: Date.now(),
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-    attemptCount: 0,
-    maxAttempts: 3,
-    nextAttemptAt: Date.now(),
-    idempotencyKey,
-  };
-
-  const dispatchResult = await dispatchEmailJob(env, creds, job);
-  return { success: dispatchResult.success };
-}
-
-/**
- * 2. POST /api/notify/welcome
- * Authenticated welcome email for newly registered or first-time freelancers.
- */
-export async function handleNotifyWelcome(request: Request, env: Env): Promise<Response> {
-  const token = getBearerToken(request);
-  if (!token) {
-    return jsonResponse({ error: 'Missing or malformed Authorization header' }, 401);
-  }
-
-  const creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
-  const verifiedUser = await verifyFirebaseIdToken(token, creds.project_id);
-  const targetEmail = verifiedUser.email;
-
-  if (!targetEmail || !EMAIL_REGEX.test(targetEmail)) {
-    return jsonResponse({ error: 'User does not have a valid email address' }, 400);
-  }
-
-  const res = await sendWelcomeEmailForUser(env, creds, verifiedUser.uid, targetEmail, verifiedUser.name);
-  return jsonResponse({ success: true, already_sent: res.duplicate, dispatched: res.success });
-}
-
-/**
  * 3. POST /api/notify/milestone
  * Triggers a work anniversary or days-worked milestone celebration email.
  */
 export async function handleNotifyMilestone(request: Request, env: Env): Promise<Response> {
-  const token = getBearerToken(request);
-  if (!token) return jsonResponse({ error: 'Unauthorized' }, 401);
-
-  const creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
-  const verifiedUser = await verifyFirebaseIdToken(token, creds.project_id);
+  const gate = await requireEntitlement(request, env);
+  if (!gate.ok) return gate.response;
+  const { user: verifiedUser, creds } = gate;
   const targetEmail = verifiedUser.email;
   if (!targetEmail || !EMAIL_REGEX.test(targetEmail)) {
     return jsonResponse({ error: 'User email missing or invalid' }, 400);
@@ -293,59 +227,4 @@ export async function handleNotifyMilestone(request: Request, env: Env): Promise
 
   const dispatchResult = await dispatchEmailJob(env, creds, job);
   return jsonResponse({ success: true, jobId, dispatched: dispatchResult.success });
-}
-
-/**
- * 4. POST /api/notify/test-email
- * Interactive test dispatch for administrator console
- */
-export async function handleNotifyTestEmail(request: Request, env: Env): Promise<Response> {
-  const token = getBearerToken(request);
-  if (!token) {
-    return jsonResponse({ error: 'Missing Authorization header' }, 401);
-  }
-
-  const creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
-  const verifiedUser = await verifyFirebaseIdToken(token, creds.project_id);
-  const body = (await request.json().catch(() => ({}))) as { targetEmail?: string };
-  const targetEmail = body.targetEmail || verifiedUser.email || 'tilakpopat2007@gmail.com';
-
-  const { jobId } = await enqueueEmailJob(creds, {
-    eventType: 'welcome_freelancer',
-    recipient: targetEmail,
-    templateData: {
-      name: verifiedUser.name || 'Admin',
-      workspaceUrl: `${env.BASE_URL || 'https://crestflow.app'}/dashboard`,
-    },
-    idempotencyKey: `test_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-    createdBy: verifiedUser.uid,
-  });
-
-  const res = await dispatchEmailJob(env, creds, {
-    jobId,
-    eventType: 'welcome_freelancer',
-    recipient: targetEmail,
-    templateId: 'welcome_freelancer',
-    templateData: {
-      name: verifiedUser.name || 'Admin',
-      workspaceUrl: `${env.BASE_URL || 'https://crestflow.app'}/dashboard`,
-    },
-    status: 'queued',
-    scheduledAt: Date.now(),
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-    attemptCount: 0,
-    maxAttempts: 1,
-    nextAttemptAt: Date.now(),
-    idempotencyKey: `test_${Date.now()}`,
-    createdBy: verifiedUser.uid,
-  });
-
-  return jsonResponse({
-    success: res.success,
-    id: res.id,
-    error: res.error,
-    recipient: targetEmail,
-    provider: 'EmailJS',
-  });
 }

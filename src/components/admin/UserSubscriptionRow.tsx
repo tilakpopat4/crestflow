@@ -23,7 +23,7 @@ interface UserSubscriptionRowProps {
   profile: ProfileRowData;
   isBlocked: boolean;
   isProcessing: boolean;
-  onGrantDays: (userId: string, name: string) => void;
+  onGrantDays: (userId: string, name: string, grantLifetime?: boolean) => void;
   onRevoke: (userId: string, name: string) => void;
   onToggleBlock: (userId: string, currentlyBlocked: boolean) => void;
   onViewHistory: (profile: ProfileRowData) => void;
@@ -44,7 +44,9 @@ export default function UserSubscriptionRow({
 }: UserSubscriptionRowProps) {
   const now = Date.now();
   const expiryDate = profile.current_period_end ? new Date(profile.current_period_end) : null;
-  const isSubActive = profile.subscription_status === 'active' && (!expiryDate || expiryDate.getTime() > now);
+  const isLifetime = profile.subscription_plan === 'lifetime' && profile.subscription_status === 'active';
+  const isEntitledStatus = ['active', 'trialing', 'grace'].includes(profile.subscription_status || '');
+  const isSubActive = isLifetime || (isEntitledStatus && (!expiryDate || expiryDate.getTime() > now));
 
   return (
     <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors duration-120">
@@ -87,10 +89,15 @@ export default function UserSubscriptionRow({
             <span className="w-2 h-2 rounded-full bg-red-500" />
             <span>Blocked</span>
           </div>
+        ) : isLifetime ? (
+          <div className="inline-flex items-center gap-1.5 text-sm font-medium text-[#FFC145]">
+            <span className="w-2 h-2 rounded-full bg-[#FFC145]" />
+            <span>Lifetime Pro</span>
+          </div>
         ) : isSubActive ? (
-          <div className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-200">
-            <span className="w-2 h-2 rounded-full admin-indicator-active" />
-            <span>Active Pro</span>
+          <div className="inline-flex items-center gap-1.5 text-sm font-medium text-[#2DD4A0]">
+            <span className="w-2 h-2 rounded-full bg-[#2DD4A0]" />
+            <span>{profile.subscription_status === 'trialing' ? 'Trial' : profile.subscription_status === 'grace' ? 'Grace' : 'Active Pro'}</span>
           </div>
         ) : (
           <div className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-400">
@@ -114,14 +121,25 @@ export default function UserSubscriptionRow({
           </button>
 
           <button
-            onClick={() => onGrantDays(profile.id, profile.name)}
+            onClick={() => onGrantDays(profile.id, profile.name, false)}
             disabled={isProcessing}
             className="bg-surface-500 hover:bg-surface-400 text-text-primary border border-surface-400 font-semibold text-xs px-2.5 py-1.5 rounded-lg transition-colors duration-120 disabled:opacity-50 inline-flex items-center gap-1 cursor-pointer"
-            title="Add 30 days to user's subscription"
+            title="Add 30 days to user's entitlement"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>+30d</span>
           </button>
+
+          {!isLifetime && (
+            <button
+              onClick={() => onGrantDays(profile.id, profile.name, true)}
+              disabled={isProcessing}
+              className="bg-[#1B1B22] hover:bg-[#22222B] text-[#FFC145] border border-[#2A2A33] font-semibold text-xs px-2.5 py-1.5 rounded-lg transition-colors duration-120 disabled:opacity-50 inline-flex items-center gap-1 cursor-pointer"
+              title="Grant Lifetime Pro access"
+            >
+              <span>Lifetime</span>
+            </button>
+          )}
 
           {isSubActive && (
             <button

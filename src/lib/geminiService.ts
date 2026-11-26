@@ -1,4 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
+import { auth } from '../firebase';
 import { Client, WorkItem, UserProfile } from '../types';
 
 /**
@@ -29,6 +30,25 @@ export async function generateWorkSummary(
   const apiKey = typeof rawKey === 'string' ? rawKey.trim().replace(/^["']|["']$/g, '') : '';
   if (!apiKey) {
     throw new Error("Gemini API key is not configured. Please add your API key in Profile Settings.");
+  }
+
+  const currentUser = auth.currentUser;
+  if (currentUser) {
+    const token = await currentUser.getIdToken();
+    const authRes = await fetch('/api/ai/authorize', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ action: 'work_summary' }),
+    });
+    if (!authRes.ok) {
+      const errData = (await authRes.json().catch(() => ({}))) as { error?: string; code?: string };
+      const err = new Error(errData.error || 'Active trial or subscription required to use AI summarization.');
+      (err as Error & { code?: string }).code = errData.code || 'ENTITLEMENT_REQUIRED';
+      throw err;
+    }
   }
 
   const ai = new GoogleGenAI({ apiKey });

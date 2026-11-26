@@ -1,8 +1,10 @@
 /**
- * Cloudflare Worker environment bindings and subscription types.
+ * Cloudflare Worker environment bindings, pricing plan keys, and entitlement types.
  */
 
-export type PlanKey = 'trial' | 'monthly' | 'quarterly' | 'half' | 'yearly';
+export type PlanKey = 'trial' | 'monthly' | 'quarterly' | 'yearly';
+export type PaidPlanKey = 'monthly' | 'quarterly' | 'yearly';
+export type EntitlementStatus = 'none' | 'trialing' | 'active' | 'grace' | 'expired' | 'suspended';
 
 export interface R2UploadedObject {
   key: string;
@@ -24,74 +26,48 @@ export interface R2ObjectBody extends R2UploadedObject {
 
 export interface R2Bucket {
   get: (key: string, options?: any) => Promise<R2ObjectBody | null>;
-  put: (key: string, value: ReadableStream | ArrayBuffer | ArrayBufferView | string | null | Blob, options?: any) => Promise<R2UploadedObject>;
+  put: (
+    key: string,
+    value: ReadableStream | ArrayBuffer | ArrayBufferView | string | null | Blob,
+    options?: any
+  ) => Promise<R2UploadedObject>;
   delete: (keys: string | string[]) => Promise<void>;
   head: (key: string) => Promise<R2UploadedObject | null>;
 }
 
 export interface Env {
-  // Cloudflare Static Assets Binding
   ASSETS: {
     fetch: (request: Request) => Promise<Response>;
   };
-
-  // Cloudflare R2 Bucket Binding for Videos & Media
   VIDEOS_BUCKET?: R2Bucket;
-
-  // Application Base URL (configurable origin)
   BASE_URL?: string;
-
-  // Cron Secret for authenticating /api/reconcile-cron
   CRON_SECRET?: string;
 
-  // Razorpay Secrets (Stored via wrangler secret put)
   RAZORPAY_KEY_ID: string;
   RAZORPAY_KEY_SECRET: string;
   RAZORPAY_WEBHOOK_SECRET: string;
   RAZORPAY_PLAN_MONTHLY?: string;
   RAZORPAY_PLAN_QUARTERLY?: string;
-  RAZORPAY_PLAN_HALF?: string;
   RAZORPAY_PLAN_YEARLY?: string;
 
-  // Firebase Service Account Credentials (Stored as single JSON string in worker secret)
   FIREBASE_SERVICE_ACCOUNT: string;
-
-  // Optional project ID override
   FIREBASE_PROJECT_ID?: string;
-
-  // Secret pepper for salting trial ledger SHA-256 hashes
   TRIAL_LEDGER_PEPPER?: string;
 
-  // Resend API Configuration
   RESEND_API_KEY?: string;
   RESEND_FROM_EMAIL?: string;
-
-  // EmailJS API Configuration (direct Gmail sending)
   EMAILJS_SERVICE_ID?: string;
   EMAILJS_TEMPLATE_ID?: string;
   EMAILJS_PUBLIC_KEY?: string;
   EMAILJS_PRIVATE_KEY?: string;
 
-  // Direct Gmail REST API Configuration (support.crestflow@gmail.com)
   GMAIL_CLIENT_ID?: string;
   GMAIL_CLIENT_SECRET?: string;
   GMAIL_REFRESH_TOKEN?: string;
   GMAIL_USER_EMAIL?: string;
 
-  // Optional dedicated Google Drive OAuth Client (falls back to GMAIL_CLIENT_ID/SECRET)
   GOOGLE_DRIVE_CLIENT_ID?: string;
   GOOGLE_DRIVE_CLIENT_SECRET?: string;
-}
-
-export interface TrialLedgerEntry {
-  hash: string;
-  type: 'email' | 'vpa';
-  status: 'reserved' | 'used';
-  claimedByUid: string;
-  reservedAt: number;
-  expiresAt?: number;
-  usedAt?: number;
-  subscriptionId?: string;
 }
 
 export interface ServiceAccountCredentials {
@@ -109,48 +85,82 @@ export interface VerifiedUser {
   uid: string;
   email?: string;
   name?: string;
+  admin?: boolean;
 }
 
-export interface PendingPlanChange {
-  newPlan: PlanKey;
-  newPlanId: string;
-  newSubscriptionId: string;
-  effectiveDate: number;
-  requestedAt: number;
+export interface EntitlementRecord {
+  userId: string;
+  userEmail?: string;
+  userName?: string;
+  status: EntitlementStatus;
+  plan: string;
+  billingCycle?: PaidPlanKey | 'trial' | 'lifetime';
+  validUntil: string | null;
+  graceUntil?: string | null;
+  trialStartedAt?: string | null;
+  trialUsed: boolean;
+  cancelAtPeriodEnd: boolean;
+  razorpayCustomerId?: string | null;
+  razorpaySubscriptionId?: string | null;
+  razorpayOrderId?: string | null;
+  razorpayPaymentId?: string | null;
+  checkoutMode?: 'subscription' | 'order' | null;
+  lastEventTimestamp?: number;
+  lockTimestamp?: number;
+  notifiedTrialDay5?: boolean;
+  notifiedChargeFailed?: boolean;
+  notifiedExpired?: boolean;
+  lastPaymentAt?: number;
+  lastPaymentAmount?: number;
+  lastPaymentMethod?: string;
+  lastPaymentVpa?: string | null;
+  welcomeEmailSent?: boolean;
+  updatedAt: string;
 }
 
+export interface TrialLedgerEntry {
+  hash?: string;
+  keyHash?: string;
+  type?: 'uid' | 'email' | 'vpa' | string;
+  status: 'used' | 'reserved' | string;
+  claimedByUid?: string;
+  claimedAt?: number;
+  reservedAt?: number;
+  expiresAt?: number;
+  usedAt?: number;
+  subscriptionId?: string;
+  createdAt?: number;
+}
+
+/**
+ * Legacy type kept only for migration script typing and backward-compat readers.
+ */
 export interface SubscriptionRecord {
   userId: string;
   userEmail?: string;
   userName?: string;
-  plan: 'free' | 'pro' | PlanKey;
-  billingCycle?: PlanKey;
-  status: 'active' | 'trialing' | 'pending' | 'past_due' | 'cancelled' | 'halted' | 'expired';
+  plan: string;
+  billingCycle?: string;
+  status: string;
   currentPeriodStart?: number;
   currentPeriodEnd?: number;
   accessUntil?: string | Date;
   trialEndsAt?: string | Date | null;
   trialClaimed?: boolean;
   trialClaimedAt?: number;
-  trialStartedAt?: number;
+  trialStartedAt?: number | string;
   graceUntil?: string | null;
   hasHadTrial?: boolean;
   hasHadSubscription?: boolean;
   razorpaySubscriptionId?: string;
   razorpayPlanId?: string;
   cancelAtPeriodEnd?: boolean;
-  lockTimestamp?: number;
   lastEventTimestamp?: number;
-  notifiedTrialDay5?: boolean;
-  notifiedCharge24h?: boolean;
-  notifiedChargeFailed?: boolean;
-  notifiedExpired?: boolean;
-  pendingPlanChange?: PendingPlanChange;
   lastPaymentAt?: number;
   lastPaymentAmount?: number;
   lastPaymentMethod?: string;
   lastPaymentVpa?: string;
   lastPaymentId?: string;
   welcomeEmailSent?: boolean;
-  updatedAt: number;
+  updatedAt?: number;
 }

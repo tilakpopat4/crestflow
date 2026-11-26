@@ -10,7 +10,7 @@ describe('Unauthenticated Promo Page & Dashboard Preview Suite', () => {
 
     const heroSource = fs.readFileSync(heroPath, 'utf-8');
     assert.ok(heroSource.includes('Invoice. Scan.'), 'Hero must contain headline');
-    assert.ok(heroSource.includes('Start 7-Day Trial'), 'Must contain Start 7-Day Trial CTA button');
+    assert.ok(heroSource.includes('Start Free Trial'), 'Must contain Start Free Trial CTA button');
     assert.ok(heroSource.includes('Compare Plans'), 'Must contain Compare Plans CTA button');
     assert.ok(heroSource.includes('DashboardPreviewMock'), 'Must embed DashboardPreviewMock');
   });

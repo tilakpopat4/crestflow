@@ -12,9 +12,7 @@ export interface EmptyStateProps {
 }
 
 /**
- * Standard Design System EmptyState.
- * Quiet surface-700 container with surface-400 border, centered icon,
- * clear explanation, and optional single primary action.
+ * Standard EmptyState styled with Section 9 surface (#131318) and hairline border (#2A2A33).
  */
 export function EmptyState({
   icon,
@@ -37,22 +35,18 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "bg-surface-700/50 border border-dashed border-surface-400 rounded-xl p-8 sm:p-12 text-center flex flex-col items-center justify-center max-w-lg mx-auto my-6 space-y-3",
-        className
+        'bg-[#131318] border border-dashed border-[#2A2A33] rounded-xl p-8 sm:p-12 text-center flex flex-col items-center justify-center max-w-lg mx-auto my-6 space-y-3',
+        className,
       )}
     >
       {icon && (
-        <div className="w-12 h-12 rounded-xl bg-surface-600 border border-surface-400 flex items-center justify-center text-text-secondary mb-1">
+        <div className="w-12 h-12 rounded-xl bg-[#1B1B22] border border-[#2A2A33] flex items-center justify-center text-[#A1A1AA] mb-1">
           {renderIcon()}
         </div>
       )}
       <div className="space-y-1">
-        <h4 className="text-sm font-semibold text-text-primary tracking-tight">
-          {title}
-        </h4>
-        <p className="text-xs text-text-secondary max-w-sm leading-relaxed">
-          {description}
-        </p>
+        <h4 className="text-sm font-semibold text-[#F7F7F8] tracking-tight">{title}</h4>
+        <p className="text-xs text-[#A1A1AA] max-w-sm leading-relaxed">{description}</p>
       </div>
       {actionLabel && onAction && (
         <div className="pt-2">

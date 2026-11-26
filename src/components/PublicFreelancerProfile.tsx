@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { db, auth, googleProvider } from '../firebase';
+import { auth, googleProvider } from '../firebase';
 import { signInWithPopup } from 'firebase/auth';
-import { query, where, getDocs, collection } from 'firebase/firestore';
 import { UserProfile, Client } from '../types';
 import Logo from './Logo';
 import Footer from './Footer';
@@ -12,7 +11,7 @@ import PublicOnboardingForm from './PublicOnboardingForm';
 import PublicFreelancerProfileSubmitted from './PublicFreelancerProfileSubmitted';
 import SampleVideoLibrary from './onboarding/SampleVideoLibrary';
 import OnboardingViewTabs from './onboarding/OnboardingViewTabs';
-import { lookupPublicProfile } from '../lib/profileLookup';
+import { lookupPublicProfileWithStatus } from '../lib/profileLookup';
 import { submitOnboardingServiceRequest } from '../lib/onboardingLead';
 import PublicProfileNotFound from './onboarding/PublicProfileNotFound';
 import { PublicProfileSkeleton } from './skeletons';
@@ -23,10 +22,11 @@ interface PublicFreelancerProfileProps {
 
 export default function PublicFreelancerProfile({ freelancerId }: PublicFreelancerProfileProps) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [acceptingRequests, setAcceptingRequests] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [clients, setClients] = useState<Client[]>([]);
-  const [clientsLoading, setClientsLoading] = useState(true);
+  const [clientsLoading, setClientsLoading] = useState(false);
 
   // Form State
   const [clientName, setClientName] = useState('');
@@ -91,24 +91,20 @@ export default function PublicFreelancerProfile({ freelancerId }: PublicFreelanc
         setLoading(true);
         setError(null);
 
-        const foundProfile = await lookupPublicProfile(freelancerId);
-        if (foundProfile) {
-          setProfile(foundProfile);
-          const targetUid = foundProfile.userId || foundProfile.id;
-
-          try {
-            setClientsLoading(true);
-            const q = query(collection(db, 'clients'), where('userId', '==', targetUid));
-            const clientsSnap = await getDocs(q);
-            const clientList: Client[] = [];
-            clientsSnap.forEach((cSnap) => {
-              clientList.push({ id: cSnap.id, ...cSnap.data() } as Client);
-            });
-            setClients(clientList);
-          } catch (clientErr) {
-            console.warn('[PublicProfile] Could not load clients for profile:', clientErr);
-          } finally {
-            setClientsLoading(false);
+        const result = await lookupPublicProfileWithStatus(freelancerId);
+        if (result) {
+          setProfile(result.profile);
+          setAcceptingRequests(result.acceptingRequests);
+          if (result.stats?.clientsCount) {
+            const synthetic = Array.from({ length: result.stats.clientsCount }, (_, idx) => ({
+              id: `stat-${idx}`,
+              name: '',
+              phone: '',
+              email: '',
+              defaultRate: 0,
+              createdAt: 0,
+            }));
+            setClients(synthetic);
           }
         } else {
           setError('Freelancer profile not found. Please verify the URL handle.');
@@ -118,11 +114,12 @@ export default function PublicFreelancerProfile({ freelancerId }: PublicFreelanc
         setError('Failed to load freelancer profile. Please check your internet connection.');
       } finally {
         setLoading(false);
+        setClientsLoading(false);
       }
     }
 
     if (freelancerId) {
-      fetchFreelancerData();
+      void fetchFreelancerData();
     }
   }, [freelancerId]);
 
@@ -204,15 +201,15 @@ export default function PublicFreelancerProfile({ freelancerId }: PublicFreelanc
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col font-sans text-slate-900 dark:text-slate-100 transition-colors duration-150">
+    <div className="min-h-screen bg-[#0B0B0E] flex flex-col font-sans text-[#F7F7F8]">
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 md:p-8 space-y-6">
         {/* Brand Header */}
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
             <Logo className="w-7 h-7 rounded-lg" />
-            <span className="text-base font-bold text-slate-900 dark:text-white tracking-tight">CrestFlow</span>
+            <span className="text-base font-bold text-[#F7F7F8] tracking-tight">CrestFlow</span>
           </div>
-          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+          <span className="text-xs text-[#A1A1AA] font-medium">
             Onboarding
           </span>
         </div>
@@ -247,6 +244,15 @@ export default function PublicFreelancerProfile({ freelancerId }: PublicFreelanc
                 freelancerName={profile.name}
                 onOpenIntake={() => setActiveView('intake')}
               />
+            ) : !acceptingRequests ? (
+              <div className="rounded-xl bg-[#131318] border border-[#2A2A33] p-6 sm:p-8 space-y-2 text-center my-auto">
+                <h2 className="text-base font-semibold text-[#F7F7F8]">
+                  Not accepting new requests right now
+                </h2>
+                <p className="text-xs text-[#A1A1AA] leading-relaxed max-w-md mx-auto">
+                  {profile.name} is not accepting new client onboarding requests right now. Check back later or explore existing portfolio samples.
+                </p>
+              </div>
             ) : (
               <PublicOnboardingForm
                 profile={profile}

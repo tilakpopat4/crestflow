@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { User } from 'firebase/auth';
 import { Client, ClientReview, UserProfile } from '../types';
 import { useFirestore } from '../hooks/useFirestore';
+import { useAccess } from '../hooks/useAccess';
+import { SAMPLE_CLIENTS, SAMPLE_REVIEWS } from '../data/sampleWorkspaceData';
 import { ReviewsSkeleton } from './skeletons';
 import { ReviewsStatsCard } from './reviews/ReviewsStatsCard';
 import { ReviewRequestCard } from './reviews/ReviewRequestCard';
@@ -18,8 +20,22 @@ interface ReviewsTabProps {
  * Client reviews and testimonials management view.
  */
 export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
-  const { data: clients, loading: clientsLoading } = useFirestore<Client>('clients', user?.uid);
-  const { data: reviews, loading: reviewsLoading, removeItem: deleteReview } = useFirestore<ClientReview>('reviews', user?.uid);
+  const access = useAccess();
+  const isExploring = access.state === 'none';
+  const liveUid = !isExploring ? user?.uid : undefined;
+
+  const { data: fsClients, loading: fsClientsLoading } = useFirestore<Client>('clients', liveUid);
+  const { data: fsReviews, loading: fsReviewsLoading, removeItem: rawDeleteReview } = useFirestore<ClientReview>('reviews', liveUid);
+
+  const clients = isExploring ? SAMPLE_CLIENTS : fsClients;
+  const reviews = isExploring ? SAMPLE_REVIEWS : fsReviews;
+  const clientsLoading = isExploring ? false : fsClientsLoading;
+  const reviewsLoading = isExploring ? false : fsReviewsLoading;
+
+  const deleteReview = async (reviewId: string) => {
+    if (!access.requireAccess('manage_reviews', 'Manage and curate verified client reviews.')) return;
+    await rawDeleteReview(reviewId);
+  };
 
   const [selectedClientId, setSelectedClientId] = useState('');
   const [copiedClientId, setCopiedClientId] = useState<string | null>(null);
@@ -92,7 +108,32 @@ export default function ReviewsTab({ user, profile }: ReviewsTabProps) {
             Client feedback and ratings.
           </p>
         </div>
+        {isExploring && (
+          <span className="text-xs font-medium text-[#FFC145] bg-[#1B1B22] border border-[#2A2A33] px-2.5 py-1 rounded self-start">
+            Sample data
+          </span>
+        )}
       </div>
+
+      {access.isExpired && totalReviews > 0 && (
+        <div className="rounded-xl bg-[#131318] border border-[#FFB020]/40 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <span className="text-[#F7F7F8]">
+            <strong className="text-[#FFB020]">{totalReviews} waiting</strong>, reactivate to respond or manage testimonials.
+          </span>
+          <button
+            type="button"
+            onClick={() =>
+              access.openUpgradeSheet({
+                action: 'manage_reviews',
+                benefit: 'Reactivate your plan to feature and respond to new client reviews.',
+              })
+            }
+            className="px-3 py-1.5 rounded-lg cf-btn-primary text-xs font-semibold cursor-pointer shrink-0"
+          >
+            Reactivate to respond
+          </button>
+        </div>
+      )}
 
       {/* Stats and Request Generator Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

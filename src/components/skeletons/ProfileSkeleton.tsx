@@ -11,7 +11,7 @@ export const ProfileSkeleton: React.FC = () => {
       </div>
 
       {/* Main Profile Identity Card */}
-      <div className="p-6 rounded-lg border border-slate-200 dark:border-[#383838] bg-white dark:bg-[#212121] flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6">
+      <div className="p-6 rounded-xl border border-[#2A2A33] bg-[#131318] flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6">
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
           <Skeleton className="h-20 w-20" rounded="full" />
           <div className="space-y-2 text-center sm:text-left">
@@ -32,7 +32,7 @@ export const ProfileSkeleton: React.FC = () => {
       {/* 2-Column Form Settings Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Personal & Business Info */}
-        <div className="p-6 rounded-lg border border-slate-200 dark:border-[#383838] bg-white dark:bg-[#212121] space-y-5">
+        <div className="p-6 rounded-xl border border-[#2A2A33] bg-[#131318] space-y-5">
           <Skeleton className="h-5 w-36" />
           <div className="space-y-4">
             <div className="space-y-2">
@@ -51,7 +51,7 @@ export const ProfileSkeleton: React.FC = () => {
         </div>
 
         {/* UPI & Payment Settings */}
-        <div className="p-6 rounded-lg border border-slate-200 dark:border-[#383838] bg-white dark:bg-[#212121] space-y-5">
+        <div className="p-6 rounded-xl border border-[#2A2A33] bg-[#131318] space-y-5">
           <Skeleton className="h-5 w-40" />
           <div className="space-y-4">
             <div className="space-y-2">
@@ -64,7 +64,7 @@ export const ProfileSkeleton: React.FC = () => {
             </div>
             <div className="space-y-2">
               <Skeleton className="h-3 w-32" />
-              <div className="h-28 border border-dashed border-slate-200 dark:border-[#383838] rounded-lg flex items-center justify-center">
+              <div className="h-28 border border-dashed border-[#2A2A33] rounded-lg flex items-center justify-center">
                 <Skeleton className="h-6 w-32" />
               </div>
             </div>

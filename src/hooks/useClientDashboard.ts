@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { User } from 'firebase/auth';
 import { Client, Invoice, WorkItem, UserProfile } from '../types';
 import { useFirestore } from './useFirestore';
+import { useAccess } from './useAccess';
+import { SAMPLE_INVOICES, SAMPLE_WORK_ITEMS } from '../data/sampleWorkspaceData';
 import { calculateClientFinancials, getPaymentStatusInfo } from '../lib/paymentUtils';
 import { getCurrencySymbol } from '../lib/currencyUtils';
 import { formatLocalDateToYMD, parseYMDToTimestamp } from '../lib/dateUtils';
@@ -11,10 +13,17 @@ import { generateUUID } from '../lib/utils';
  * Encapsulates state and mutation logic for ClientDashboard.
  */
 export function useClientDashboard(client: Client, user: User | null) {
-  const { data: invoices, addOrUpdateItem: updateInvoice } = useFirestore<Invoice>('invoices', user?.uid);
-  const { data: workItems, addOrUpdateItem: updateWorkItem, removeItem: removeWorkItem } = useFirestore<WorkItem>('workItems', user?.uid);
-  const { addOrUpdateItem: updateClient } = useFirestore<Client>('clients', user?.uid);
-  const { data: profiles } = useFirestore<UserProfile>('profiles', user?.uid);
+  const access = useAccess();
+  const isExploring = access.state === 'none';
+  const liveUid = !isExploring ? user?.uid : undefined;
+
+  const { data: fsInvoices, addOrUpdateItem: updateInvoice } = useFirestore<Invoice>('invoices', liveUid);
+  const { data: fsWorkItems, addOrUpdateItem: updateWorkItem, removeItem: removeWorkItem } = useFirestore<WorkItem>('workItems', liveUid);
+  const { addOrUpdateItem: updateClient } = useFirestore<Client>('clients', liveUid);
+  const { data: profiles } = useFirestore<UserProfile>('profiles', liveUid);
+
+  const invoices = isExploring ? SAMPLE_INVOICES : fsInvoices;
+  const workItems = isExploring ? SAMPLE_WORK_ITEMS : fsWorkItems;
 
   const profile = profiles[0] || null;
   const currencySymbol = getCurrencySymbol(client.currency);
@@ -60,6 +69,7 @@ export function useClientDashboard(client: Client, user: User | null) {
   };
 
   const handleSavePaymentDate = async (paymentDateStr: string, markPaid: boolean) => {
+    if (!access.requireAccess('edit_client', 'Update client payment dates and settle pending invoices.')) return;
     const selectedTimestamp = parseYMDToTimestamp(paymentDateStr);
     await updateClient({ ...client, lastPaymentDate: selectedTimestamp });
     if (markPaid) {
@@ -79,6 +89,7 @@ export function useClientDashboard(client: Client, user: User | null) {
     websiteMakingRate?: number;
     revisionsIncluded?: number;
   }) => {
+    if (!access.requireAccess('edit_client', 'Update agreed deliverable rates and billing settings.')) return;
     const updatedClient: Client = {
       ...client,
       currency: rates.currency || client.currency || 'INR',
@@ -97,6 +108,7 @@ export function useClientDashboard(client: Client, user: User | null) {
   };
 
   const handleOpenAddWork = () => {
+    if (!access.requireAccess('log_work', 'Log deliverables and billable client tasks.')) return;
     setEditingWorkId(null);
     setWorkFormData({
       subClientId: '',
@@ -110,6 +122,7 @@ export function useClientDashboard(client: Client, user: User | null) {
   };
 
   const handleStartEditWork = (item: WorkItem) => {
+    if (!access.requireAccess('log_work', 'Edit logged deliverables and preview links.')) return;
     setEditingWorkId(item.id);
     setWorkFormData({
       subClientId: item.subClientId || '',
@@ -124,6 +137,7 @@ export function useClientDashboard(client: Client, user: User | null) {
 
   const handleSaveWorkLog = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!access.requireAccess('log_work', 'Log deliverables and sync invoiced line items.')) return;
     try {
       const isMonthlyClient = client.paymentBasis === 'monthly_retainer';
       const selectedRate = isMonthlyClient ? 0 : (Number(workFormData.rate) || client.defaultRate);
@@ -196,6 +210,7 @@ export function useClientDashboard(client: Client, user: User | null) {
   };
 
   const handleDeleteWork = async (id: string) => {
+    if (!access.requireAccess('log_work', 'Remove logged client deliverables.')) return;
     if (window.confirm('Are you sure you want to delete this work item?')) {
       await removeWorkItem(id);
     }

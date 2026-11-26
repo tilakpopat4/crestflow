@@ -102,7 +102,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
 
   if (isAdminRoute) {
     return (
-      <div className="min-h-screen w-full flex flex-col justify-between font-sans relative select-none text-slate-100 bg-[#333333]">
+      <div className="min-h-screen w-full flex flex-col justify-between font-sans relative select-none text-[#F7F7F8] bg-[#0B0B0E]">
         <main className="flex-1 flex items-center justify-center p-4 sm:p-6 relative z-10 max-w-md mx-auto w-full">
           <SignInCard isAdminRoute={isAdminRoute} isSigningIn={isSigningIn} onLogin={onLogin} onEmailSignUp={onEmailSignUp} onEmailSignIn={onEmailSignIn} onSupportingNavigate={onSupportingNavigate} />
         </main>
@@ -115,28 +115,25 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
 
   return (
     <div
-      style={{ backgroundColor: '#0c0c0c' }}
-      className="min-h-screen w-full flex flex-col justify-between font-sans relative overflow-x-hidden select-none text-slate-100 bg-[#0c0c0c]"
+      style={{ backgroundColor: '#0B0B0E' }}
+      className="min-h-screen w-full flex flex-col justify-between font-sans relative overflow-x-hidden select-none text-[#F7F7F8] bg-[#0B0B0E]"
     >
-      {/* Background Media Engine: Video on Auth Landing, Still Solid Backdrop on Promo */}
-      <div className="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0 select-none bg-[#0c0c0c]">
-        {/* Still solid poster image backdrop for promo mode or fallback */}
-        <div
-          className="absolute inset-0 w-full h-full bg-cover bg-center bg-[#0c0c0c]"
-          style={{
-            backgroundImage: `url("${(isImage && config.backgroundImageUrl?.trim()) || posterSrc}")`,
-            backgroundColor: '#1A1A1A',
-            opacity: authView === 'promo' ? 0.18 : 0.4,
-          }}
-        />
-
-        {/* Video Background active during Landing Page (authView === 'auth') */}
-        {authView === 'auth' && (
+      {/* Background Engine: Obsidian canvas + hairline grid + permitted radial ember glow */}
+      <div className="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0 select-none bg-[#0B0B0E]">
+        <div className="absolute inset-0 landing-grid-pattern opacity-65" aria-hidden="true" />
+        <div className="absolute inset-0 hero-radial-glow" aria-hidden="true" />
+        {authView === 'auth' && isImage && config.backgroundImageUrl?.trim() && (
+          <div
+            className="absolute inset-0 w-full h-full bg-cover bg-center opacity-20"
+            style={{ backgroundImage: `url("${config.backgroundImageUrl.trim()}")` }}
+          />
+        )}
+        {authView === 'auth' && !isImage && (
           <video
             ref={videoRef} autoPlay={!shouldSuppressAutoplay} muted loop playsInline preload="metadata"
             disablePictureInPicture controlsList="nodownload noremoteplayback" tabIndex={-1} aria-hidden="true"
             poster={posterSrc} onError={() => setVideoFailed(true)}
-            className="absolute inset-0 w-full h-full object-cover pointer-events-none" style={{ aspectRatio: '16/9' }}
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-25" style={{ aspectRatio: '16/9' }}
           >
             {loadedAfterPaint && !shouldSuppressAutoplay && !videoFailed && (
               <>
@@ -146,13 +143,6 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
             )}
           </video>
         )}
-
-        {/* Gradient overlay from-black/60 to-black/80 with #1A1A1A dark scrim */}
-        <div
-          className="absolute inset-0 z-10 pointer-events-none bg-gradient-to-b from-black/60 to-black/80"
-          style={{ backgroundColor: '#1A1A1A', opacity: authView === 'promo' ? 0.94 : (config.backgroundOverlayOpacity || 0.65) }}
-          aria-hidden="true"
-        />
       </div>
 
       {/* Top Header Navbar - 100% transparent */}

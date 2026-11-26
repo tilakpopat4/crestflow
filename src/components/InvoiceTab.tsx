@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { InvoicesSkeleton } from './skeletons';
 import PaymentDateModal from './PaymentDateModal';
 import { useInvoiceTab } from '../hooks/useInvoiceTab';
+import { useAccess } from '../hooks/useAccess';
 import InvoiceMetrics from './invoice/InvoiceMetrics';
 import InvoiceFormCard from './invoice/InvoiceFormCard';
 import InvoiceTable from './invoice/InvoiceTable';
@@ -34,10 +35,19 @@ export default function InvoiceTab({
   profile,
   initialSearchQuery = '',
   onNavigateToClients,
+  onNavigateToProfile,
   subscriptionState,
   onOpenSubscriptionModal,
 }: InvoiceTabProps) {
+  const access = useAccess();
   const {
+    isExploring,
+    canWrite,
+    upiMissingError,
+    sharedLinks,
+    shareLoadingId,
+    handleCreateShareLink,
+    handleRevokeShareLink,
     clients,
     invoices,
     clientsLoading,
@@ -123,11 +133,18 @@ export default function InvoiceTab({
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 w-full min-w-0">
       {/* Workspace Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">Invoices</h2>
-          <p className="text-text-muted mt-1 text-sm">
-            Create invoices and track payments.
-          </p>
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">Invoices</h2>
+            <p className="text-text-muted mt-1 text-sm">
+              Create invoices and track payments.
+            </p>
+          </div>
+          {isExploring && (
+            <span className="text-xs font-medium text-[#FFC145] bg-[#1B1B22] border border-[#2A2A33] px-2.5 py-1 rounded">
+              Sample data
+            </span>
+          )}
         </div>
       </div>
 
@@ -161,6 +178,15 @@ export default function InvoiceTab({
         customUpiId={customUpiId}
         editingInvoiceId={editingInvoiceId}
         isGenerating={isGenerating}
+        canWrite={canWrite}
+        upiError={upiMissingError}
+        onOpenUpiSettings={() => {
+          window.location.hash = 'invoicing';
+          onNavigateToProfile?.();
+          window.setTimeout(() => {
+            document.getElementById('invoicing-upi')?.focus();
+          }, 300);
+        }}
         total={total}
         discount={discount}
         extraCost={extraCost}
@@ -226,11 +252,22 @@ export default function InvoiceTab({
           setShowClosed={setShowClosed}
           closedCount={closedCount}
           downloadingPdfId={downloadingPdfId}
+          canWrite={canWrite}
+          sharedLinks={sharedLinks}
+          shareLoadingId={shareLoadingId}
           onToggleStatus={toggleInvoiceStatus}
           onRedownloadPdf={handleRedownloadPdf}
           onEditInvoice={handleEditInvoice}
           onDeleteInvoice={handleDeleteInvoice}
+          onCreateShareLink={handleCreateShareLink}
+          onRevokeShareLink={handleRevokeShareLink}
+          onConfirmPaymentClaim={(inv) => {
+            void handleConfirmPaymentDate(inv.id, Date.now());
+          }}
           onOpenEmailModal={(inv) => {
+            if (!access.requireAccess('send_invoice', 'Send this invoice with an offline UPI QR directly via Gmail.')) {
+              return;
+            }
             const clientObj = clients.find((c) => c.id === inv.clientId);
             setEmailModalData({
               isOpen: true,
@@ -248,24 +285,14 @@ export default function InvoiceTab({
         />
       )}
 
-      {/* Payment Confirmation Date Modal */}
       {paymentModalState.isOpen && (
         <PaymentDateModal
-          isOpen={paymentModalState.isOpen}
-          onClose={() => setPaymentModalState({ invoiceId: null, isOpen: false })}
-          invoiceId={paymentModalState.invoiceId || ''}
-          onConfirmPayment={handleConfirmPaymentDate}
+          isOpen={paymentModalState.isOpen} onClose={() => setPaymentModalState({ invoiceId: null, isOpen: false })}
+          invoiceId={paymentModalState.invoiceId || ''} onConfirmPayment={handleConfirmPaymentDate}
         />
       )}
-
-      {/* Email Preview & Dispatch Modal */}
       {emailModalData && (
-        <InvoiceEmailModal
-          data={emailModalData}
-          onClose={() => setEmailModalData(null)}
-          onSendGmail={handleSendGmailManual}
-          isSendingGmail={isSendingGmail}
-        />
+        <InvoiceEmailModal data={emailModalData} onClose={() => setEmailModalData(null)} onSendGmail={handleSendGmailManual} isSendingGmail={isSendingGmail} />
       )}
     </div>
   );

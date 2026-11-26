@@ -1,146 +1,18 @@
-/**
- * CrestFlow 4 Subscription Plans (Monthly, Quarterly, 6-Month, Yearly) & Limits.
- */
-
-export type PlanIntervalKey = 'trial' | 'monthly' | 'quarterly' | 'half' | 'yearly';
-
-export interface PlanPricing {
-  id: PlanIntervalKey;
-  planCode: string;
-  name: string;
-  tabLabel?: string;
-  price: number;
-  currency: string;
-  interval: string;
-  durationDays: number;
-  periodLabel: string;
-  monthlyEquivalent: number;
-  savingsBadge?: string;
-  description: string;
-  features: string[];
-  disclosureText?: string;
-  ctaLabel?: string;
-  extraInfo?: string;
-  isTrial?: boolean;
-}
-
-export const FREE_TIER_LIMITS = {
-  maxClients: 2,
-  maxInvoicesPerMonth: 3,
-};
-
-export const TRIAL_PLAN: PlanPricing = {
-  id: 'trial',
-  planCode: 'pro_trial',
-  name: '7-Day Free Trial',
-  price: 0,
-  currency: 'INR',
-  interval: '7 days',
-  durationDays: 7,
-  periodLabel: 'for 7 days',
-  monthlyEquivalent: 0,
-  savingsBadge: '100% Free',
-  description: 'Enjoy complete CrestFlow Pro access for 7 days. No payment method required. One free trial per account.',
-  isTrial: true,
-  features: [
-    '7 days full access to all Pro features',
-    'Unlimited clients, deliverables & invoices',
-    'Automated 6:00 AM delivery scheduling',
-    'Client review portal & public freelancer portfolio',
-    'Direct UPI payment tracking without commission',
-  ],
-};
-
-export const PRO_PLANS: PlanPricing[] = [
-  {
-    id: 'monthly',
-    planCode: 'pro_monthly',
-    name: 'Pro Monthly',
-    price: 79,
-    currency: 'INR',
-    interval: 'month',
-    durationDays: 30,
-    periodLabel: '/ month',
-    monthlyEquivalent: 79,
-    description: 'Billed monthly. Complete flexibility.',
-    features: [
-      'Unlimited clients & sub-clients',
-      'Unlimited invoices with personal UPI QR codes',
-      'Automated 6:00 AM delivery scheduling',
-      'Client review portal & public freelancer portfolio',
-      'Direct UPI payment tracking without gateway commission',
-    ],
-  },
-  {
-    id: 'quarterly',
-    planCode: 'pro_quarterly',
-    name: 'Pro Quarterly',
-    price: 199,
-    currency: 'INR',
-    interval: '3 months',
-    durationDays: 90,
-    periodLabel: '/ quarter',
-    monthlyEquivalent: 66,
-    savingsBadge: 'Save 16%',
-    description: 'Billed every 3 months (~₹66/mo).',
-    features: [
-      'All Pro Monthly features included',
-      'Quarterly uninterrupted workflow',
-      'Priority delivery & support',
-    ],
-  },
-  {
-    id: 'half',
-    planCode: 'pro_half',
-    name: 'Pro 6-Month',
-    price: 449,
-    currency: 'INR',
-    interval: '6 months',
-    durationDays: 180,
-    periodLabel: '/ 6 months',
-    monthlyEquivalent: 75,
-    savingsBadge: 'Save 5%',
-    description: 'Billed every 6 months (~₹75/mo).',
-    features: [
-      'All Pro features included',
-      'Half-year locked pricing',
-      'Client review portal & priority roadmap',
-    ],
-  },
-  {
-    id: 'yearly',
-    planCode: 'pro_yearly',
-    name: 'Pro Yearly',
-    price: 899,
-    currency: 'INR',
-    interval: 'year',
-    durationDays: 365,
-    periodLabel: '/ year',
-    monthlyEquivalent: 75,
-    savingsBadge: 'Save 5%',
-    description: 'Billed annually (~₹75/mo).',
-    features: [
-      'All Pro features included',
-      'Full year uninterrupted access',
-      'Custom domain & priority beta features',
-    ],
-  },
-];
-
-export const ALL_DISPLAY_PLANS: PlanPricing[] = [
+export {
+  type PlanIntervalKey,
+  type PaidPlanKey,
+  TRIAL_DURATION_DAYS,
+  GRACE_DURATION_DAYS,
+  INACTIVE_REQUEST_PAUSE_DAYS,
+  LIFETIME_VALID_UNTIL_ISO,
+  TRIAL_PROMISE_COPY,
+  type PlanPricing,
   TRIAL_PLAN,
-  ...PRO_PLANS,
-];
+  PRO_PLANS,
+  ALL_DISPLAY_PLANS,
+  SERVER_PLAN_CATALOG,
+  resolvePaidPlanKey,
+  getPlanDisclosureText,
+  getTrialDisclosureText,
+} from '../shared/pricing';
 
-/**
- * Returns the plain disclosure text for the selected plan.
- */
-export function getTrialDisclosureText(plan: PlanPricing, baseDate = new Date()): string {
-  if (plan.disclosureText && plan.disclosureText.trim()) {
-    return plan.disclosureText.trim();
-  }
-  if (plan.isTrial || plan.id === 'trial') {
-    return 'Enjoy complete CrestFlow Pro access for 7 days. No payment method required. One free trial per account. No automatic payment deduction when the trial expires.';
-  }
-  return `Billed at ₹${plan.price.toLocaleString('en-IN')} immediately upon payment. Renews every ${plan.interval} until cancelled.`;
-}

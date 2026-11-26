@@ -80,7 +80,7 @@ describe('Hero Section & Landing Page CMS Suite', () => {
     assert.ok(signInSource.includes('isMobileScreen'), 'SignInScreen must detect mobile screen size');
     assert.ok(signInSource.includes('shouldReduceMotion') || signInSource.includes('prefers-reduced-motion'), 'SignInScreen must respect reduced motion');
     assert.ok(signInSource.includes('visibilitychange'), 'SignInScreen must pause video when tab hidden');
-    assert.ok(signInSource.includes('surface-900') || signInSource.includes('#1A1A1A'), 'SignInScreen must use #1A1A1A dark scrim');
+    assert.ok(signInSource.includes('#0B0B0E') && signInSource.includes('hero-radial-glow'), 'SignInScreen must use Section 9 #0B0B0E obsidian canvas & ember radial glow');
   });
 
   test('5. Admin & Worker route landing media endpoints and Cloudflare R2 bucket', () => {

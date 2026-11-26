@@ -37,7 +37,8 @@ export default function Sidebar({
   onCollapse,
 }: SidebarProps) {
   const shouldReduceMotion = useReducedMotion();
-  const isUpgradedPro = Boolean(subscriptionState?.hasAccess && !subscriptionState?.isTrialing);
+  const accessState = subscriptionState;
+  const isUpgradedPro = Boolean(accessState?.isPaidActive || accessState?.isLifetime);
   const {
     width,
     isIconOnly,
@@ -61,7 +62,7 @@ export default function Sidebar({
     <nav
       style={{ '--sidebar-width': `${width}px` } as React.CSSProperties}
       className={clsx(
-        "fixed md:relative bottom-0 left-0 w-full bg-[#1e1e1e] text-slate-100 flex md:flex-col md:h-full z-20 border-r border-[#2a2a2a] border-t md:border-t-0 pb-[max(env(safe-area-inset-bottom),4px)] md:pb-0",
+        "fixed md:relative bottom-0 left-0 w-full bg-[#131318] text-[#F7F7F8] flex md:flex-col md:h-full z-20 border-r border-[#2A2A33] border-t md:border-t-0 pb-[max(env(safe-area-inset-bottom),4px)] md:pb-0",
         isResizing ? "transition-none" : "transition-all duration-200 ease-in-out",
         isCollapsed
           ? "md:w-0 md:-translate-x-full md:opacity-0 md:pointer-events-none md:border-r-0 overflow-hidden"
@@ -95,7 +96,7 @@ export default function Sidebar({
                   {isUpgradedPro ? (
                     <span className="inline-flex items-center gap-1.5">
                       <span>CrestFlow</span>
-                      <span className="px-1.5 py-0.5 text-[10px] font-semibold tracking-wider uppercase rounded bg-[#282828] text-slate-200 shrink-0">
+                      <span className="px-1.5 py-0.5 text-[10px] font-semibold tracking-wider uppercase rounded bg-[#1B1B22] border border-[#FFC145]/40 text-[#FFC145] shrink-0">
                         PRO
                       </span>
                     </span>

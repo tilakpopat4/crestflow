@@ -1,5 +1,19 @@
 import React from 'react';
-import { Mail, Download, Edit2, Trash2, Search, X, Archive, Loader2 } from 'lucide-react';
+import {
+  Mail,
+  Download,
+  Edit2,
+  Trash2,
+  Search,
+  X,
+  Archive,
+  Loader2,
+  Link2,
+  Link2Off,
+  Check,
+  CheckCircle2,
+  Lock,
+} from 'lucide-react';
 import { Client, Invoice } from '../../types';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/ui/StatusBadge';
@@ -16,11 +30,17 @@ interface InvoiceTableProps {
   setShowClosed: React.Dispatch<React.SetStateAction<boolean>>;
   closedCount: number;
   downloadingPdfId: string | null;
+  canWrite?: boolean;
+  sharedLinks?: Record<string, string>;
+  shareLoadingId?: string | null;
   onToggleStatus: (id: string) => void;
   onRedownloadPdf: (inv: Invoice) => void;
   onEditInvoice: (inv: Invoice) => void;
   onDeleteInvoice: (id: string) => void;
   onOpenEmailModal: (inv: Invoice) => void;
+  onCreateShareLink?: (inv: Invoice) => void;
+  onRevokeShareLink?: (inv: Invoice) => void;
+  onConfirmPaymentClaim?: (inv: Invoice) => void;
 }
 
 /**
@@ -36,11 +56,17 @@ export function InvoiceTable({
   setShowClosed,
   closedCount,
   downloadingPdfId,
+  canWrite = true,
+  sharedLinks = {},
+  shareLoadingId,
   onToggleStatus,
   onRedownloadPdf,
   onEditInvoice,
   onDeleteInvoice,
   onOpenEmailModal,
+  onCreateShareLink,
+  onRevokeShareLink,
+  onConfirmPaymentClaim,
 }: InvoiceTableProps) {
   const filteredInvoices = invoices.filter((inv) => {
     if (!searchQuery.trim()) return true;
@@ -158,59 +184,82 @@ export function InvoiceTable({
                     </td>
 
                     <td className="py-3 px-4 text-center whitespace-nowrap">
-                      <StatusBadge
-                        status={inv.status}
-                        onClick={() => onToggleStatus(inv.id)}
-                        title={`Click to mark as ${inv.status === 'Paid' ? 'Pending' : 'Paid'}`}
-                      />
+                      <div className="flex flex-col items-center gap-1">
+                        <StatusBadge
+                          status={inv.status}
+                          onClick={() => onToggleStatus(inv.id)}
+                          title={`Click to mark as ${inv.status === 'Paid' ? 'Pending' : 'Paid'}`}
+                        />
+                        {inv.status === 'Pending' && inv.paymentClaim && (
+                          <button
+                            type="button"
+                            onClick={() => onConfirmPaymentClaim?.(inv)}
+                            className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#FFB020] hover:text-[#FFC145] bg-[#1B1B22] border border-[#FFB020]/40 px-2 py-0.5 rounded cursor-pointer"
+                            title="Client notified payment. Click to confirm Paid."
+                          >
+                            <CheckCircle2 size={10} />
+                            <span>Confirm claim</span>
+                          </button>
+                        )}
+                      </div>
                     </td>
 
                     <td className="py-3 px-4 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-1.5 whitespace-nowrap shrink-0">
+                        {onCreateShareLink && (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => onCreateShareLink(inv)}
+                            disabled={shareLoadingId === inv.id}
+                            className="gap-1 whitespace-nowrap shrink-0 text-xs h-7"
+                            title="Copy or rotate client payment link"
+                          >
+                            {shareLoadingId === inv.id ? (
+                              <Loader2 size={12} className="animate-spin" />
+                            ) : sharedLinks[inv.id] ? (
+                              <Check size={12} className="text-[#2DD4A0]" />
+                            ) : !canWrite ? (
+                              <Lock size={11} />
+                            ) : (
+                              <Link2 size={12} />
+                            )}
+                            <span>{sharedLinks[inv.id] ? 'Copied link' : 'Share link'}</span>
+                          </Button>
+                        )}
+
+                        {onRevokeShareLink && (inv.shareEnabled || sharedLinks[inv.id]) && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => onRevokeShareLink(inv)}
+                            disabled={shareLoadingId === inv.id}
+                            title="Revoke public invoice link"
+                            className="h-7 w-7"
+                          >
+                            <Link2Off size={13} className="text-[#F0607A]" />
+                          </Button>
+                        )}
+
                         <Button
                           variant="secondary"
                           size="sm"
                           onClick={() => onOpenEmailModal(inv)}
-                          className="gap-1.5 whitespace-nowrap shrink-0 text-xs h-7 border-0 font-medium"
+                          className="gap-1.5 whitespace-nowrap shrink-0 text-xs h-7 font-medium"
                           title="Send via Gmail"
                         >
-                          <Mail size={12} />
+                          {!canWrite ? <Lock size={11} /> : <Mail size={12} />}
                           <span>Send via Gmail</span>
                         </Button>
 
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => onRedownloadPdf(inv)}
-                          disabled={downloadingPdfId === inv.id}
-                          title="Download PDF"
-                          className="h-7 w-7 border-0"
-                        >
-                          {downloadingPdfId === inv.id ? (
-                            <Loader2 size={13} className="animate-spin text-text-muted" />
-                          ) : (
-                            <Download size={13} />
-                          )}
+                        <Button variant="ghost" size="icon" onClick={() => onRedownloadPdf(inv)} disabled={downloadingPdfId === inv.id} title="Download PDF" className="h-7 w-7 border-0">
+                          {downloadingPdfId === inv.id ? <Loader2 size={13} className="animate-spin text-text-muted" /> : <Download size={13} />}
                         </Button>
-
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => onEditInvoice(inv)}
-                          title="Edit Invoice"
-                          className="h-7 w-7 border-0"
-                        >
-                          <Edit2 size={13} />
+                        <Button variant="ghost" size="icon" onClick={() => onEditInvoice(inv)} title="Edit Invoice" className="h-7 w-7 border-0">
+                          {!canWrite ? <Lock size={12} /> : <Edit2 size={13} />}
                         </Button>
-
-                        <Button
-                          variant="destructive"
-                          size="icon"
-                          onClick={() => onDeleteInvoice(inv.id)}
-                          title="Delete Invoice"
-                          className="h-7 w-7 border-0"
-                        >
-                          <Trash2 size={13} />
+                        <Button variant="destructive" size="icon" onClick={() => onDeleteInvoice(inv.id)} title="Delete Invoice" className="h-7 w-7 border-0">
+                          {!canWrite ? <Lock size={12} /> : <Trash2 size={13} />}
                         </Button>
                       </div>
                     </td>

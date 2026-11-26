@@ -1,16 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
-import { Search, X, Users, ClipboardList, FileText, ExternalLink, Play, ArrowRight, CheckCircle2, Clock, Award, Calendar, LogOut, PanelLeft } from 'lucide-react';
+import React from 'react';
+import { Search, X, LogOut, PanelLeft } from 'lucide-react';
 import { User } from 'firebase/auth';
 import { useFirestore } from '../hooks/useFirestore';
-import { formatInvoiceNumber } from '../lib/invoiceUtils';
 import { Client, WorkItem, Invoice, UserProfile } from '../types';
 import { Tab } from '../App';
 import Logo from './Logo';
 import { calculateWorkJourney } from '../lib/anniversary';
-import StatusBadge from './StatusBadge';
 import { SubscriptionState } from '../hooks/useSubscription';
+import { useAccess } from '../hooks/useAccess';
+import { SAMPLE_CLIENTS, SAMPLE_INVOICES, SAMPLE_WORK_ITEMS } from '../data/sampleWorkspaceData';
+import { useGlobalHeaderSearch } from '../hooks/useGlobalHeaderSearch';
 import NotificationBellPopover from './notifications/NotificationBellPopover';
+import GlobalSearchDropdown from './header/GlobalSearchDropdown';
+import JourneyStatusPopover from './header/JourneyStatusPopover';
+import AccessStatusBadgeButton from './header/AccessStatusBadgeButton';
 
 interface GlobalHeaderProps {
   user: User | null;
@@ -31,7 +34,6 @@ interface GlobalHeaderProps {
 
 export default function GlobalHeader({
   user,
-  activeTab,
   setActiveTab,
   onSearchSelect,
   globalQuery,
@@ -40,130 +42,42 @@ export default function GlobalHeader({
   onEditProfile,
   onOpenAnniversaryModal,
   onLogout,
-  subscriptionState,
   onOpenSubscriptionModal,
   isSidebarCollapsed = false,
-  onToggleSidebar
+  onToggleSidebar,
 }: GlobalHeaderProps) {
   const journey = calculateWorkJourney(profile?.freelanceStartDate);
-  const [showJourneyMenu, setShowJourneyMenu] = useState(false);
-  const journeyMenuRef = useRef<HTMLDivElement>(null);
+  const access = useAccess();
+  const isExploring = access.state === 'none';
+  const liveUid = !isExploring ? user?.uid : undefined;
 
-  const { data: clients } = useFirestore<Client>('clients', user?.uid);
-  const { data: workItems } = useFirestore<WorkItem>('workItems', user?.uid);
-  const { data: invoices } = useFirestore<Invoice>('invoices', user?.uid);
+  const { data: fsClients } = useFirestore<Client>('clients', liveUid);
+  const { data: fsWorkItems } = useFirestore<WorkItem>('workItems', liveUid);
+  const { data: fsInvoices } = useFirestore<Invoice>('invoices', liveUid);
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState<'all' | 'clients' | 'work' | 'invoices'>('all');
-  const shouldReduceMotion = useReducedMotion();
-  const searchRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const clients = isExploring ? SAMPLE_CLIENTS : fsClients;
+  const workItems = isExploring ? SAMPLE_WORK_ITEMS : fsWorkItems;
+  const invoices = isExploring ? SAMPLE_INVOICES : fsInvoices;
 
-  // Global keyboard shortcut (⌘K or /) to focus search
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        inputRef.current?.focus();
-        setIsOpen(true);
-      } else if (e.key === '/' && document.activeElement !== inputRef.current && !(document.activeElement instanceof HTMLInputElement || document.activeElement instanceof HTMLTextAreaElement)) {
-        e.preventDefault();
-        inputRef.current?.focus();
-        setIsOpen(true);
-      } else if (e.key === 'Escape') {
-        setIsOpen(false);
-        setShowJourneyMenu(false);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  // Close dropdown on click outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-      if (journeyMenuRef.current && !journeyMenuRef.current.contains(e.target as Node)) {
-        setShowJourneyMenu(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const cleanQuery = globalQuery.trim().toLowerCase();
-
-  // Filter clients
-  const filteredClients = cleanQuery ? clients.filter(c => 
-    c.name.toLowerCase().includes(cleanQuery) ||
-    (c.email && c.email.toLowerCase().includes(cleanQuery)) ||
-    (c.phone && c.phone.toLowerCase().includes(cleanQuery))
-  ) : [];
-
-  // Filter work items
-  const filteredWork = cleanQuery ? workItems.filter(w => {
-    const client = clients.find(c => c.id === w.clientId);
-    if (client?.isClosed) return false;
-    const clientName = client ? client.name.toLowerCase() : '';
-    return w.description.toLowerCase().includes(cleanQuery) ||
-      clientName.includes(cleanQuery) ||
-      (w.videoUrl && w.videoUrl.toLowerCase().includes(cleanQuery));
-  }) : [];
-
-  // Filter invoices
-  const filteredInvoices = cleanQuery ? invoices.filter(inv => {
-    const client = clients.find(c => c.id === inv.clientId || c.name === inv.clientName);
-    if (client?.isClosed) return false;
-    const invoiceNo = formatInvoiceNumber(inv, invoices).toLowerCase();
-    const itemsText = inv.reels ? inv.reels.map(r => r.title).join(' ').toLowerCase() : '';
-    return inv.clientName.toLowerCase().includes(cleanQuery) ||
-      invoiceNo.includes(cleanQuery) ||
-      itemsText.includes(cleanQuery);
-  }) : [];
-
-  const totalResults = filteredClients.length + filteredWork.length + filteredInvoices.length;
-
-  const handleSelectClient = (client: Client) => {
-    setIsOpen(false);
-    if (onSearchSelect) {
-      onSearchSelect('client', client.id, globalQuery);
-    } else {
-      setActiveTab('clients', globalQuery);
-    }
-  };
-
-  const handleSelectWork = (work: WorkItem) => {
-    setIsOpen(false);
-    if (onSearchSelect) {
-      onSearchSelect('work', work.id, globalQuery);
-    } else {
-      setActiveTab('work', globalQuery);
-    }
-  };
-
-  const handleSelectInvoice = (inv: Invoice) => {
-    setIsOpen(false);
-    if (onSearchSelect) {
-      onSearchSelect('invoice', inv.id, globalQuery);
-    } else {
-      setActiveTab('invoice', globalQuery);
-    }
-  };
+  const search = useGlobalHeaderSearch({
+    clients,
+    workItems,
+    invoices,
+    globalQuery,
+    setActiveTab,
+    onSearchSelect,
+  });
 
   return (
-    <header className="sticky top-0 z-30 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-3 py-2.5 md:px-8 md:py-3 transition-colors">
+    <header className="sticky top-0 z-30 bg-[#131318] border-b border-[#2A2A33] px-3 py-2.5 md:px-8 md:py-3 transition-colors">
       <div className="max-w-7xl mx-auto flex flex-wrap md:flex-nowrap items-center justify-between gap-2 md:gap-4">
-        {/* Mobile Logo Branding */}
         <div className="flex items-center gap-2 md:hidden shrink-0">
           <Logo className="w-7 h-7" />
-          <span className="font-extrabold text-slate-900 dark:text-white tracking-tight text-sm">
-            {subscriptionState?.hasAccess && !subscriptionState?.isTrialing ? (
+          <span className="font-bold text-[#F7F7F8] tracking-tight text-sm">
+            {access.state === 'active' || access.state === 'grace' ? (
               <span className="inline-flex items-center gap-1.5">
                 <span>CrestFlow</span>
-                <span className="px-1.5 py-0.5 text-[9px] font-semibold tracking-wider uppercase rounded bg-slate-100 dark:bg-[#282828] text-slate-700 dark:text-slate-200 shrink-0">
+                <span className="px-1.5 py-0.5 text-[9px] font-semibold tracking-wider uppercase rounded bg-[#1B1B22] border border-[#FFC145]/40 text-[#FFC145] shrink-0">
                   PRO
                 </span>
               </span>
@@ -173,246 +87,71 @@ export default function GlobalHeader({
           </span>
         </div>
 
-        {/* Desktop Sidebar Toggle Button */}
         {onToggleSidebar && (
           <button
             type="button"
             onClick={onToggleSidebar}
-            className="hidden md:flex items-center justify-center p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer border-none bg-transparent"
-            title={isSidebarCollapsed ? "Expand sidebar (or swipe right)" : "Collapse sidebar (or swipe left)"}
+            className="hidden md:flex items-center justify-center p-2 rounded-lg text-[#A1A1AA] hover:text-[#F7F7F8] hover:bg-[#1B1B22] transition-colors cursor-pointer border-0 bg-transparent"
+            title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             aria-label="Toggle sidebar"
           >
             <PanelLeft size={18} />
           </button>
         )}
 
-        {/* Real-time Global Search Input (Full width on mobile, max-w-2xl on desktop) */}
-        <div ref={searchRef} className="relative w-full md:w-auto md:flex-1 md:max-w-2xl mx-auto md:mx-0 order-last md:order-none min-w-0">
+        <div ref={search.searchRef} className="relative w-full md:w-auto md:flex-1 md:max-w-2xl mx-auto md:mx-0 order-last md:order-none min-w-0">
           <div className="relative flex items-center">
-            <Search size={16} className="absolute left-3 text-slate-400 dark:text-slate-500 pointer-events-none transition-colors group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400 shrink-0" />
+            <Search size={16} className="absolute left-3 text-[#A1A1AA] pointer-events-none shrink-0" />
             <input
-              ref={inputRef}
+              ref={search.inputRef}
               type="text"
               value={globalQuery}
               onChange={(e) => {
                 setGlobalQuery(e.target.value);
-                setIsOpen(true);
+                search.setIsOpen(true);
               }}
-              onFocus={() => setIsOpen(true)}
+              onFocus={() => search.setIsOpen(true)}
               placeholder="Search clients, work items, video links, invoices..."
-              className="w-full bg-slate-100/80 dark:bg-slate-800/90 hover:bg-slate-100 dark:hover:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs md:text-sm pl-9 pr-10 md:pr-20 py-2 md:py-2.5 rounded-xl border border-slate-200/80 dark:border-slate-700/80 focus:border-indigo-500 dark:focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
+              className="w-full bg-[#1B1B22] focus:bg-[#131318] text-[#F7F7F8] text-xs md:text-sm pl-9 pr-10 md:pr-20 py-2 md:py-2.5 rounded-xl border border-[#2A2A33] focus:border-[#F7F7F8]/40 outline-none transition-colors placeholder:text-[#A1A1AA]"
             />
             <div className="absolute right-3 flex items-center gap-1.5">
               {globalQuery ? (
                 <button
+                  type="button"
                   onClick={() => {
                     setGlobalQuery('');
-                    setIsOpen(false);
+                    search.setIsOpen(false);
                   }}
-                  className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                  className="p-1 hover:bg-[#2A2A33] rounded-full text-[#A1A1AA] hover:text-[#F7F7F8] transition-colors cursor-pointer"
                   title="Clear search"
                   aria-label="Clear search"
                 >
                   <X size={14} />
                 </button>
               ) : (
-                <kbd className="hidden sm:inline-flex items-center gap-0.5 px-2 py-0.5 text-[10px] font-mono font-semibold text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md shadow-2xs pointer-events-none">
+                <kbd className="hidden sm:inline-flex items-center gap-0.5 px-2 py-0.5 text-[10px] font-mono font-semibold text-[#A1A1AA] bg-[#131318] border border-[#2A2A33] rounded-md pointer-events-none">
                   ⌘K
                 </kbd>
               )}
             </div>
           </div>
 
-          {/* Real-Time Filter Search Results Dropdown */}
-          {isOpen && cleanQuery.length > 0 && (
-            <div className="absolute left-0 right-0 top-full mt-2 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[80vh] flex flex-col">
-              {/* Category Filter Chips */}
-              <div className="p-3 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs gap-2 shrink-0 overflow-x-auto">
-                <div className="flex items-center gap-1.5 font-medium">
-                  {[
-                    { id: 'all' as const, label: `All (${totalResults})`, icon: null },
-                    { id: 'clients' as const, label: `Clients (${filteredClients.length})`, icon: Users },
-                    { id: 'work' as const, label: `Work Logs (${filteredWork.length})`, icon: ClipboardList },
-                    { id: 'invoices' as const, label: `Invoices (${filteredInvoices.length})`, icon: FileText },
-                  ].map((cat) => {
-                    const Icon = cat.icon;
-                    const isSelected = activeCategory === cat.id;
-                    return (
-                      <motion.button
-                        key={cat.id}
-                        type="button"
-                        onClick={() => setActiveCategory(cat.id)}
-                        whileTap={shouldReduceMotion ? undefined : { scale: 0.96 }}
-                        className={`relative px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1 cursor-pointer outline-none select-none ${
-                          isSelected
-                            ? 'text-white'
-                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-700/60'
-                        }`}
-                      >
-                        {isSelected && (
-                          <motion.div
-                            layoutId="searchCategoryFilterIndicator"
-                            className="absolute inset-0 bg-[#282828] rounded-lg shadow-2xs -z-0"
-                            transition={
-                              shouldReduceMotion
-                                ? { duration: 0 }
-                                : { type: 'spring', stiffness: 450, damping: 35 }
-                            }
-                          />
-                        )}
-                        <span className="relative z-10 flex items-center gap-1">
-                          {Icon && <Icon size={12} />}
-                          {cat.label}
-                        </span>
-                      </motion.button>
-                    );
-                  })}
-                </div>
-
-                <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium shrink-0">
-                  Real-time results
-                </span>
-              </div>
-
-              {/* Scrollable Results Body */}
-              <div className="overflow-y-auto p-2 space-y-4 divide-y divide-slate-100 dark:divide-slate-800">
-                {totalResults === 0 ? (
-                  <div className="p-8 text-center text-slate-500 dark:text-slate-400 space-y-2">
-                    <Search className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto" />
-                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">No matching records found</p>
-                    <p className="text-xs text-slate-400 dark:text-slate-500">Try searching for a client name, project description, reel title, or invoice ID.</p>
-                  </div>
-                ) : (
-                  <>
-                    {/* Clients Section */}
-                    {(activeCategory === 'all' || activeCategory === 'clients') && filteredClients.length > 0 && (
-                      <div className="pt-2 first:pt-0">
-                        <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                          <Users size={12} className="text-indigo-500 dark:text-indigo-400" /> Clients ({filteredClients.length})
-                        </div>
-                        <div className="mt-1 space-y-1">
-                          {filteredClients.map(client => (
-                            <button
-                              key={client.id}
-                              onClick={() => handleSelectClient(client)}
-                              className="w-full text-left p-3 hover:bg-indigo-50/70 dark:hover:bg-indigo-950/40 rounded-xl transition-all flex items-center justify-between group cursor-pointer border border-transparent hover:border-indigo-100 dark:hover:border-indigo-900/50"
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-bold flex items-center justify-center text-sm shrink-0">
-                                  {client.name.charAt(0).toUpperCase()}
-                                </div>
-                                <div>
-                                  <div className="font-semibold text-xs md:text-sm text-slate-900 dark:text-slate-100 group-hover:text-indigo-700 dark:group-hover:text-indigo-400 flex items-center gap-2">
-                                    {client.name}
-                                  </div>
-                                  <div className="text-[11px] text-slate-400 dark:text-slate-500 flex items-center gap-3 mt-0.5">
-                                    {client.email && <span>{client.email}</span>}
-                                    {client.phone && <span>{client.phone}</span>}
-                                    <span>Rate: ₹{client.defaultRate}/reel</span>
-                                  </div>
-                                </div>
-                              </div>
-                              <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-1 shrink-0">
-                                View Client <ArrowRight size={13} />
-                              </span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Work Logs Section */}
-                    {(activeCategory === 'all' || activeCategory === 'work') && filteredWork.length > 0 && (
-                      <div className="pt-2 first:pt-0">
-                        <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                          <ClipboardList size={12} className="text-indigo-500 dark:text-indigo-400" /> Work Logs ({filteredWork.length})
-                        </div>
-                        <div className="mt-1 space-y-1">
-                          {filteredWork.map(work => {
-                            const client = clients.find(c => c.id === work.clientId);
-                            return (
-                              <button
-                                key={work.id}
-                                onClick={() => handleSelectWork(work)}
-                                className="w-full text-left p-3 hover:bg-indigo-50/70 dark:hover:bg-indigo-950/40 rounded-xl transition-all flex items-center justify-between group cursor-pointer border border-transparent hover:border-indigo-100 dark:hover:border-indigo-900/50"
-                              >
-                                <div className="flex items-center gap-3 min-w-0 pr-2">
-                                  <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold flex items-center justify-center text-xs shrink-0">
-                                    <ClipboardList size={16} className="text-slate-600 dark:text-slate-400" />
-                                  </div>
-                                  <div className="min-w-0">
-                                    <div className="font-semibold text-xs md:text-sm text-slate-900 dark:text-slate-100 group-hover:text-indigo-700 dark:group-hover:text-indigo-400 truncate">
-                                      {work.description}
-                                    </div>
-                                    <div className="text-[11px] text-slate-400 dark:text-slate-500 flex items-center gap-2.5 mt-0.5 flex-wrap">
-                                      <span className="font-medium text-slate-600 dark:text-slate-400">{client ? client.name : 'Unknown Client'}</span>
-                                      <span>•</span>
-                                      <span>{new Date(work.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
-                                      <span>•</span>
-                                      <span className="font-semibold text-slate-700 dark:text-slate-300">₹{(work.quantity * work.rate).toLocaleString('en-IN')}</span>
-                                      <span>•</span>
-                                      <StatusBadge status={work.status === 'Invoiced' ? 'Invoiced' : 'Pending'} />
-                                    </div>
-                                  </div>
-                                </div>
-                                <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-1 shrink-0">
-                                  View Log <ArrowRight size={13} />
-                                </span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Invoices Section */}
-                    {(activeCategory === 'all' || activeCategory === 'invoices') && filteredInvoices.length > 0 && (
-                      <div className="pt-2 first:pt-0">
-                        <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                          <FileText size={12} className="text-indigo-500 dark:text-indigo-400" /> Invoices ({filteredInvoices.length})
-                        </div>
-                        <div className="mt-1 space-y-1">
-                          {filteredInvoices.map(inv => (
-                            <button
-                              key={inv.id}
-                              onClick={() => handleSelectInvoice(inv)}
-                              className="w-full text-left p-3 hover:bg-indigo-50/70 dark:hover:bg-indigo-950/40 rounded-xl transition-all flex items-center justify-between group cursor-pointer border border-transparent hover:border-indigo-100 dark:hover:border-indigo-900/50"
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono text-xs font-bold flex items-center justify-center shrink-0">
-                                  #{inv.id.substring(0, 4).toUpperCase()}
-                                </div>
-                                <div>
-                                  <div className="font-semibold text-xs md:text-sm text-slate-900 dark:text-slate-100 group-hover:text-indigo-700 dark:group-hover:text-indigo-400 flex items-center gap-2">
-                                    <span>{formatInvoiceNumber(inv, invoices)}</span>
-                                    <span className="text-slate-400 dark:text-slate-600 font-normal">•</span>
-                                    <span>{inv.clientName}</span>
-                                  </div>
-                                  <div className="text-[11px] text-slate-400 dark:text-slate-500 flex items-center gap-2 mt-0.5">
-                                    <span>{new Date(inv.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-                                    <span>•</span>
-                                    <span className="font-bold text-slate-900 dark:text-slate-200">₹{inv.totalAmount.toLocaleString('en-IN')}</span>
-                                    <span>•</span>
-                                    <StatusBadge status={inv.status} />
-                                  </div>
-                                </div>
-                              </div>
-                              <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-1 shrink-0">
-                                View Invoice <ArrowRight size={13} />
-                              </span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-            </div>
+          {search.isOpen && search.cleanQuery.length > 0 && (
+            <GlobalSearchDropdown
+              activeCategory={search.activeCategory}
+              setActiveCategory={search.setActiveCategory}
+              clients={clients}
+              filteredClients={search.filteredClients}
+              filteredWork={search.filteredWork}
+              filteredInvoices={search.filteredInvoices}
+              invoices={invoices}
+              onSelectClient={search.handleSelectClient}
+              onSelectWork={search.handleSelectWork}
+              onSelectInvoice={search.handleSelectInvoice}
+            />
           )}
         </div>
 
-        {/* Right Actions Bar (Streak, Theme, Profile, Logout) */}
         <div className="flex items-center gap-1 sm:gap-2 md:gap-3 shrink-0 ml-auto md:ml-0">
           <NotificationBellPopover
             user={user}
@@ -422,205 +161,57 @@ export default function GlobalHeader({
             onNavigateToClients={() => setActiveTab('clients')}
           />
 
-          {/* Worked Days / Career Journey Widget */}
-          <div className="relative shrink-0" ref={journeyMenuRef}>
-          {journey ? (
-            <>
+          <JourneyStatusPopover
+            journey={journey}
+            isOpen={search.showJourneyMenu}
+            onToggle={() => search.setShowJourneyMenu((v) => !v)}
+            onClose={() => search.setShowJourneyMenu(false)}
+            onEditProfile={onEditProfile}
+            onOpenAnniversaryModal={onOpenAnniversaryModal}
+            menuRef={search.journeyMenuRef}
+          />
+
+          <AccessStatusBadgeButton onOpenSubscriptionModal={onOpenSubscriptionModal} />
+
+          <div className="flex md:hidden items-center gap-1.5 shrink-0">
+            {onEditProfile && (
               <button
                 type="button"
-                onClick={() => setShowJourneyMenu(!showJourneyMenu)}
-                className="py-1.5 px-2 md:py-2 text-xs font-medium text-slate-400 hover:text-white hover:bg-[#282828] rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 border-none bg-transparent"
-                title={`Started: ${journey.startDateFormatted} (${journey.workedDays} days freelancing). Click for details.`}
+                onClick={onEditProfile}
+                className="p-1 rounded-full hover:bg-[#1B1B22] transition-colors cursor-pointer border-0 bg-transparent"
+                title="Open Profile Settings"
+                aria-label="Open Profile Settings"
               >
-                <Calendar size={14} className="text-slate-400" />
-                <span className="font-medium text-slate-200">
-                  {journey.workedDays}
-                </span>
-                <span className="hidden sm:inline text-slate-400">
-                  days worked
-                </span>
-                <span className="sm:hidden text-slate-400">
-                  d
-                </span>
+                {user?.photoURL ? (
+                  <img
+                    src={user.photoURL}
+                    alt="Profile"
+                    className="w-7 h-7 rounded-full object-cover border border-[#2A2A33]"
+                    referrerPolicy="no-referrer"
+                    decoding="async"
+                  />
+                ) : (
+                  <div className="w-7 h-7 rounded-full bg-[#1B1B22] border border-[#2A2A33] text-[#F7F7F8] flex items-center justify-center text-xs font-semibold">
+                    {(profile?.name || user?.displayName)?.charAt(0) || 'U'}
+                  </div>
+                )}
               </button>
+            )}
 
-              {/* Journey Details Popover */}
-              {showJourneyMenu && (
-                <div className="absolute right-0 top-full mt-2 w-72 md:w-80 max-w-[calc(100vw-1.5rem)] bg-[#212121] text-white rounded-xl shadow-2xl border border-[#333333] p-4 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                  <div className="flex items-center justify-between pb-3 border-b border-[#333333]">
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-lg bg-[#282828] border border-[#383838] text-white flex items-center justify-center">
-                        <Award size={16} />
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-bold text-white">Freelancing Journey</h4>
-                        <p className="text-[10px] text-[#aaaaaa]">Since {journey.startDateFormatted}</p>
-                      </div>
-                    </div>
-                    {onEditProfile && (
-                      <button
-                        type="button"
-                        onClick={() => { setShowJourneyMenu(false); onEditProfile(); }}
-                        className="text-[10px] font-semibold text-slate-300 hover:text-white hover:underline cursor-pointer bg-transparent border-none"
-                      >
-                        Edit Date
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="py-3 space-y-2.5">
-                    <div className="bg-[#282828] rounded-xl p-3 border border-[#383838] flex items-center justify-between">
-                      <div>
-                        <span className="text-[10px] uppercase font-bold tracking-wider text-[#aaaaaa] block">Total Worked</span>
-                        <span className="text-lg font-black text-white">
-                          {journey.workedDays} <span className="text-xs font-normal text-[#888888]">days</span>
-                        </span>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-[10px] uppercase font-bold tracking-wider text-[#aaaaaa] block">Duration</span>
-                        <span className="text-xs font-semibold text-white">
-                          {journey.formattedDuration}
-                        </span>
-                      </div>
-                    </div>
-
-                    {journey.currentAnniversary && (
-                      <div className="bg-[#282828] border border-[#383838] rounded-xl p-3">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Award size={14} className="text-white shrink-0" />
-                          <span className="text-xs font-bold text-white">
-                            {journey.currentAnniversary.title}
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-[#aaaaaa] leading-relaxed mb-2">
-                          {journey.currentAnniversary.description}
-                        </p>
-                        {onOpenAnniversaryModal && (
-                          <button
-                            type="button"
-                            onClick={() => { setShowJourneyMenu(false); onOpenAnniversaryModal(); }}
-                            className="w-full py-1.5 bg-[#282828] hover:bg-[#333333] text-white border border-[#444444] rounded-lg text-xs font-medium transition-colors cursor-pointer"
-                          >
-                            View Celebration Card
-                          </button>
-                        )}
-                      </div>
-                    )}
-
-                    {journey.nextMilestone && (
-                      <div className="bg-[#282828] rounded-xl p-3 border border-[#383838] flex items-center justify-between text-xs">
-                        <div className="flex items-center gap-2">
-                          <Calendar size={14} className="text-[#aaaaaa] shrink-0" />
-                          <div className="text-[11px] text-white">
-                            Next milestone: <strong className="font-semibold text-white">{journey.nextMilestone.badge}</strong>
-                          </div>
-                        </div>
-                        <span className="text-[11px] font-medium text-[#aaaaaa]">
-                          in {Math.abs(journey.nextMilestone.diffDays)}d
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </>
-          ) : onEditProfile ? (
-            <button
-              type="button"
-              onClick={onEditProfile}
-              className="py-1.5 px-2.5 md:px-3 md:py-2 rounded-lg text-xs font-medium text-text-secondary hover:text-text-primary bg-surface-700 hover:bg-surface-600 border border-dashed border-surface-400 hover:border-surface-300 transition-colors flex items-center gap-1.5 cursor-pointer"
-              title="Set your freelancing start date to track worked days"
-            >
-              <Calendar size={14} className="text-text-muted" />
-              <span className="hidden sm:inline">+ Start Date</span>
-              <span className="sm:hidden">+ Date</span>
-            </button>
-          ) : null}
-        </div>
-
-        {/* Subscription Status Indicator */}
-        {subscriptionState && subscriptionState.isSubscriptionFeatureEnabled && onOpenSubscriptionModal && (
-          <button
-            type="button"
-            onClick={onOpenSubscriptionModal}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-colors duration-120 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer border-none bg-transparent shrink-0"
-            title={
-              subscriptionState.isTrialing
-                ? `7-Day Free Trial active (${subscriptionState.daysRemaining} ${subscriptionState.daysRemaining === 1 ? 'day' : 'days'} remaining). Click to upgrade to Pro.`
-                : subscriptionState.isPaidActive
-                ? `CrestFlow Pro Active (${subscriptionState.daysRemaining} days remaining)`
-                : 'Subscription required (₹79/month). Click to activate.'
-            }
-          >
-            <span
-              className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                subscriptionState.isTrialing
-                  ? 'bg-slate-300'
-                  : subscriptionState.isPaidActive
-                  ? 'bg-slate-300'
-                  : 'bg-red-500'
-              }`}
-            />
-            <span
-              className={
-                subscriptionState.isTrialing
-                  ? 'text-slate-200 font-medium text-[13px] whitespace-nowrap'
-                  : subscriptionState.isPaidActive
-                  ? 'text-slate-200 font-medium text-[13px] whitespace-nowrap'
-                  : 'text-red-400 font-medium text-[13px] whitespace-nowrap'
-              }
-            >
-              {subscriptionState.isTrialing
-                ? `Trial • ${subscriptionState.daysRemaining} ${subscriptionState.daysRemaining === 1 ? 'day' : 'days'} left`
-                : subscriptionState.isPaidActive
-                ? `Pro • ${subscriptionState.daysRemaining}d`
-                : 'Subscribe • ₹79/mo'}
-            </span>
-          </button>
-        )}
-
-
-
-        {/* Mobile Profile & Logout Controls */}
-        <div className="flex md:hidden items-center gap-1.5 shrink-0">
-          {onEditProfile && (
-            <button
-              type="button"
-              onClick={onEditProfile}
-              className="p-1 rounded-full hover:bg-[#282828] transition-colors cursor-pointer border-none bg-transparent"
-              title="Open Profile Settings"
-              aria-label="Open Profile Settings"
-            >
-              {user?.photoURL ? (
-                <img
-                  src={user.photoURL}
-                  alt="Profile"
-                  className="w-7 h-7 rounded-full object-cover border border-[#383838]"
-                  referrerPolicy="no-referrer"
-                  decoding="async"
-                />
-              ) : (
-                <div className="w-7 h-7 rounded-full bg-[#282828] border border-[#383838] text-white flex items-center justify-center text-xs font-semibold">
-                  {(profile?.name || user?.displayName)?.charAt(0) || 'U'}
-                </div>
-              )}
-            </button>
-          )}
-
-          {onLogout && (
-            <button
-              type="button"
-              onClick={onLogout}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#282828] transition-colors cursor-pointer border-none bg-transparent"
-              title="Sign Out"
-              aria-label="Sign Out"
-            >
-              <LogOut size={16} />
-            </button>
-          )}
+            {onLogout && (
+              <button
+                type="button"
+                onClick={onLogout}
+                className="p-1.5 rounded-lg text-[#A1A1AA] hover:text-[#F7F7F8] hover:bg-[#1B1B22] transition-colors cursor-pointer border-0 bg-transparent"
+                title="Sign Out"
+                aria-label="Sign Out"
+              >
+                <LogOut size={16} />
+              </button>
+            )}
+          </div>
         </div>
       </div>
-    </div>
-  </header>
-);
+    </header>
+  );
 }

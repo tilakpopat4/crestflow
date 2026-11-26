@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { User as FirebaseUser } from 'firebase/auth';
 import { UserProfile } from '../types';
 import { SubscriptionState } from '../hooks/useSubscription';
+import { useAccess } from '../hooks/useAccess';
 import { useAdminAuth } from '../hooks/useAdminAuth';
 import ProfileNavSidebar, { SettingsSectionId } from './profile/ProfileNavSidebar';
 import ProfilePublicSection from './profile/ProfilePublicSection';
@@ -38,6 +39,7 @@ export default function ProfilePage({
 }: ProfilePageProps) {
   const { isEnabled: isAiEnabled } = useAiSummarizerConfig();
   const { isAdmin } = useAdminAuth(user);
+  const access = useAccess();
 
   // Live form state
   const [name, setName] = useState(''); const [username, setUsername] = useState('');
@@ -108,6 +110,17 @@ export default function ProfilePage({
   const isInvoicingDirty = upiId !== savedSnapshot.upiId || phone !== savedSnapshot.phone || servicesDescription !== savedSnapshot.servicesDescription;
   const isAiDirty = geminiApiKey !== savedSnapshot.geminiApiKey;
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (window.location.hash === '#invoicing') {
+      setActiveSection('invoicing');
+      window.setTimeout(() => {
+        document.getElementById('section-invoicing')?.scrollIntoView({ behavior: 'smooth' });
+        document.getElementById('invoicing-upi')?.focus();
+      }, 150);
+    }
+  }, []);
+
   const handleDiscardProfile = () => {
     setName(savedSnapshot.name); setUsername(savedSnapshot.username); setProfessionalTitle(savedSnapshot.professionalTitle);
     setFreelanceStartDate(savedSnapshot.freelanceStartDate); setWorkExperienceBio(savedSnapshot.workExperienceBio); setPhotoURL(savedSnapshot.photoURL);
@@ -121,14 +134,21 @@ export default function ProfilePage({
     const trimmedName = name.trim() || user.displayName || 'Creator';
     const trimmedUpi = upiId.trim();
 
+    if (section === 'profile' && !access.canWrite && cleanUsername(username) !== cleanUsername(savedSnapshot.username)) {
+      setUsername(savedSnapshot.username);
+      access.requireAccess('publish_portal', 'Activate a plan to update your public handle.');
+      return;
+    }
+
     if (section === 'invoicing') {
-      if (trimmedUpi && !trimmedUpi.includes('@') || (trimmedUpi && !isValidUpiId(trimmedUpi))) {
-        setUpiError('Please enter a valid UPI ID (e.g. yourname@bank).');
+      if (!trimmedUpi || !isValidUpiId(trimmedUpi)) {
+        setUpiError('UPI ID is required to generate invoices (e.g. yourname@okicici).');
         setActiveSection('invoicing');
         document.getElementById('section-invoicing')?.scrollIntoView({ behavior: 'smooth' });
+        document.getElementById('invoicing-upi')?.focus();
         return;
       }
-      if (trimmedUpi && trimmedUpi !== savedSnapshot.upiId) {
+      if (trimmedUpi !== savedSnapshot.upiId) {
         if (!window.confirm(`Payments from your clients will go to this ID: ${trimmedUpi}. Is this correct?`)) return;
       }
     }
@@ -224,69 +244,34 @@ export default function ProfilePage({
 
         <div className="min-w-0 space-y-8">
           <ProfilePublicSection
-            user={user}
-            name={name}
-            setName={setName}
-            username={username}
-            setUsername={setUsername}
-            professionalTitle={professionalTitle}
-            setProfessionalTitle={setProfessionalTitle}
-            bio={workExperienceBio}
-            setBio={setWorkExperienceBio}
-            freelanceStartDate={freelanceStartDate}
-            setFreelanceStartDate={setFreelanceStartDate}
-            onAutoSaveDate={handleAutoSaveStartDate}
-            photoURL={photoURL}
-            onPhotoChange={(url) => setPhotoURL(url)}
-            isSaving={isSaving}
-            isSaved={savedSection === 'profile'}
-            isDirty={isProfileDirty}
-            onSave={() => handleSaveSection('profile')}
-            onDiscard={handleDiscardProfile}
+            user={user} name={name} setName={setName} username={username} setUsername={setUsername}
+            professionalTitle={professionalTitle} setProfessionalTitle={setProfessionalTitle}
+            bio={workExperienceBio} setBio={setWorkExperienceBio}
+            freelanceStartDate={freelanceStartDate} setFreelanceStartDate={setFreelanceStartDate}
+            onAutoSaveDate={handleAutoSaveStartDate} photoURL={photoURL} onPhotoChange={setPhotoURL}
+            canEditUsername={access.canWrite} isSaving={isSaving} isSaved={savedSection === 'profile'}
+            isDirty={isProfileDirty} onSave={() => handleSaveSection('profile')} onDiscard={handleDiscardProfile}
           />
-
           <ProfileInvoicingSection
-            userId={user.uid}
-            handle={cleanUsername(username) || getUserHandle(profile, user)}
-            upiId={upiId}
-            setUpiId={setUpiId}
-            upiError={upiError}
-            phone={phone}
-            setPhone={setPhone}
-            servicesDescription={servicesDescription}
-            setServicesDescription={setServicesDescription}
-            isSaving={isSaving}
-            isSaved={savedSection === 'invoicing'}
-            isDirty={isInvoicingDirty}
-            onSave={() => handleSaveSection('invoicing')}
-            onDiscard={handleDiscardInvoicing}
+            userId={user.uid} handle={cleanUsername(username) || getUserHandle(profile, user)}
+            upiId={upiId} setUpiId={setUpiId} upiError={upiError} phone={phone} setPhone={setPhone}
+            servicesDescription={servicesDescription} setServicesDescription={setServicesDescription}
+            isSaving={isSaving} isSaved={savedSection === 'invoicing'} isDirty={isInvoicingDirty}
+            onSave={() => handleSaveSection('invoicing')} onDiscard={handleDiscardInvoicing}
           />
-
           {isAiEnabled && (
             <ProfilePreferencesCard
-              geminiApiKey={geminiApiKey}
-              setGeminiApiKey={setGeminiApiKey}
-              isSaving={isSaving}
-              isSaved={savedSection === 'ai'}
-              isDirty={isAiDirty}
-              onSave={() => handleSaveSection('ai')}
-              onDiscard={handleDiscardAi}
+              geminiApiKey={geminiApiKey} setGeminiApiKey={setGeminiApiKey}
+              isSaving={isSaving} isSaved={savedSection === 'ai'} isDirty={isAiDirty}
+              onSave={() => handleSaveSection('ai')} onDiscard={handleDiscardAi}
             />
           )}
-
           {subscriptionState && (
-            <ProfileSubscriptionSection
-              subscriptionState={subscriptionState}
-              onOpenSubscriptionModal={onOpenSubscriptionModal}
-            />
+            <ProfileSubscriptionSection subscriptionState={subscriptionState} onOpenSubscriptionModal={onOpenSubscriptionModal} />
           )}
-
           {isAdmin && (
-            <section id="section-landing" className="pt-8 space-y-4">
-              <AdminHeroManager />
-            </section>
+            <section id="section-landing" className="pt-8 space-y-4"><AdminHeroManager /></section>
           )}
-
           <ProfileDangerSection user={user} />
         </div>
       </div>

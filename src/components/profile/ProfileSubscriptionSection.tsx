@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Zap } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { SubscriptionState } from '../../hooks/useSubscription';
+import { useAccess } from '../../hooks/useAccess';
 
 interface ProfileSubscriptionSectionProps {
   subscriptionState?: SubscriptionState;
@@ -8,28 +9,27 @@ interface ProfileSubscriptionSectionProps {
 }
 
 /**
- * Membership and plan settings section matching the split layout.
- * Shows active tier, billing cycle, cancel subscription option, or upgrade button.
+ * Membership and plan settings section aligned with server entitlements.
  */
 export const ProfileSubscriptionSection: React.FC<ProfileSubscriptionSectionProps> = ({
-  subscriptionState,
   onOpenSubscriptionModal,
 }) => {
+  const access = useAccess();
   const [cancelling, setCancelling] = useState(false);
   const [cancelMessage, setCancelMessage] = useState<string | null>(null);
 
-  if (!subscriptionState || !subscriptionState.isSubscriptionFeatureEnabled || !onOpenSubscriptionModal) {
-    return null;
-  }
-
   const handleCancel = async () => {
-    const formattedDate = subscriptionState.currentPeriodEnd
-      ? new Date(subscriptionState.currentPeriodEnd).toLocaleDateString()
+    const formattedDate = access.validUntil
+      ? new Date(access.validUntil).toLocaleDateString('en-IN', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+        })
       : 'the end of your billing cycle';
 
     if (
       !window.confirm(
-        `Are you sure you want to cancel your Pro subscription?\n\nYou will keep full Pro access until ${formattedDate}, after which your account will return to the Free Tier.`
+        `Cancel auto-renewal?\n\nYou will keep full Pro access until ${formattedDate}, then your data remains readable and exportable.`,
       )
     ) {
       return;
@@ -38,8 +38,8 @@ export const ProfileSubscriptionSection: React.FC<ProfileSubscriptionSectionProp
     setCancelling(true);
     setCancelMessage(null);
     try {
-      await subscriptionState.cancelSubscription();
-      setCancelMessage(`Subscription cancelled. Pro access remains active through ${formattedDate}.`);
+      await access.cancelSubscription();
+      setCancelMessage(`Auto-renewal cancelled. Pro access continues until ${formattedDate}.`);
     } catch (err: any) {
       alert(`Error cancelling subscription: ${err.message || err}`);
     } finally {
@@ -47,92 +47,125 @@ export const ProfileSubscriptionSection: React.FC<ProfileSubscriptionSectionProp
     }
   };
 
-  const isPro = subscriptionState.isPaidActive;
-  const isCancelled = subscriptionState.cancelAtPeriodEnd;
-  const cycleLabel = subscriptionState.billingCycle === 'yearly' ? 'Yearly' : 'Monthly';
+  const isTrial = access.state === 'trialing';
+  const isPaidActive = access.state === 'active' || access.state === 'grace';
+  const cycleLabel =
+    access.billingCycle === 'yearly'
+      ? 'Yearly'
+      : access.billingCycle === 'quarterly'
+      ? 'Quarterly'
+      : 'Monthly';
+
+  const statusText = isTrial
+    ? 'Trial active'
+    : access.state === 'grace'
+    ? 'Grace period'
+    : access.isLifetime
+    ? 'Lifetime'
+    : isPaidActive
+    ? access.cancelAtPeriodEnd
+      ? 'Cancels at period end'
+      : 'Active'
+    : access.state === 'none'
+    ? 'Exploring sample data'
+    : 'Expired';
+
+  const formattedValidUntil = access.validUntil
+    ? new Date(access.validUntil).toLocaleDateString('en-IN', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      })
+    : null;
 
   return (
     <section id="section-billing" className="grid grid-cols-1 gap-x-8 gap-y-4 pt-8 lg:grid-cols-[13rem_minmax(0,1fr)]">
       <div>
-        <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+        <h2 className="text-base font-semibold text-[#F7F7F8]">
           Membership &amp; plan
         </h2>
-        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-          Plan and billing cycle.
+        <p className="mt-1 text-xs text-[#A1A1AA] leading-relaxed">
+          Plan status and billing cycle.
         </p>
       </div>
 
-      <div className="rounded-xl bg-white dark:bg-slate-900 overflow-hidden">
+      <div className="rounded-xl bg-[#131318] border border-[#2A2A33] overflow-hidden">
         <div className="p-5 sm:p-6 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                  {subscriptionState.status === 'trialing'
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-sm font-semibold text-[#F7F7F8]">
+                  {isTrial
                     ? 'CrestFlow Pro (7-Day Free Trial)'
-                    : isPro
+                    : access.isLifetime
+                    ? 'CrestFlow Pro (Lifetime)'
+                    : isPaidActive
                     ? `CrestFlow Pro (${cycleLabel})`
-                    : subscriptionState.status === 'expired'
-                    ? 'Pro Subscription Expired'
-                    : 'CrestFlow Account'}
+                    : access.state === 'none'
+                    ? 'CrestFlow Explorer'
+                    : 'Plan Expired'}
                 </span>
-                <span className="text-[11px] font-semibold text-text-primary">
-                  &bull; {subscriptionState.status === 'trialing'
-                    ? 'Trial Active'
-                    : isPro
-                    ? (isCancelled ? 'Cancelling at period end' : 'Active')
-                    : subscriptionState.status === 'expired'
-                    ? 'Expired'
-                    : 'Inactive'}
+                <span
+                  className={`text-[11px] font-semibold ${
+                    access.isExpired
+                      ? 'text-[#F0607A]'
+                      : isTrial
+                      ? 'text-[#FFC145]'
+                      : isPaidActive
+                      ? 'text-[#2DD4A0]'
+                      : 'text-[#A1A1AA]'
+                  }`}
+                >
+                  &bull; {statusText}
                 </span>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                {subscriptionState.status === 'trialing'
-                  ? `Trial active until ${subscriptionState.accessUntil ? new Date(subscriptionState.accessUntil).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '7 days'}`
-                  : isPro
-                  ? subscriptionState.currentPeriodEnd
-                    ? `Current period renews on ${new Date(subscriptionState.currentPeriodEnd).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`
-                    : 'Active recurring membership'
-                  : 'Upgrade to Pro for unlimited invoices and client portals.'}
+
+              <p className="text-xs text-[#A1A1AA] mt-1">
+                {isTrial && formattedValidUntil
+                  ? `Trial Day ${access.trialDay} of 7 · Ends ${formattedValidUntil}. No card stored, no automatic charge.`
+                  : access.isLifetime
+                  ? 'Lifetime Pro account granted.'
+                  : isPaidActive && formattedValidUntil
+                  ? access.checkoutMode === 'order' || access.cancelAtPeriodEnd
+                    ? `Access active until ${formattedValidUntil} (no auto-renewal).`
+                    : `Renews automatically on ${formattedValidUntil}.`
+                  : access.state === 'none'
+                  ? '7-day free trial, no card needed, no automatic charge.'
+                  : 'Your data stays safe and exportable. Reactivate anytime to resume editing.'}
               </p>
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
-              {isPro ? (
-                <>
+              {isPaidActive && !access.isLifetime ? (
+                !access.cancelAtPeriodEnd && access.checkoutMode !== 'order' && (
                   <button
                     type="button"
-                    onClick={onOpenSubscriptionModal}
-                    className="h-8.5 px-3.5 rounded-lg text-xs font-semibold bg-[#333333] hover:bg-[#3e3e3e] text-slate-300 hover:text-white border-0 cursor-pointer transition-colors duration-120"
+                    disabled={cancelling}
+                    onClick={handleCancel}
+                    className="h-9 px-3.5 rounded-lg text-xs font-semibold text-[#F0607A] bg-[#1B1B22] hover:bg-[#22222B] border border-[#2A2A33] cursor-pointer"
                   >
-                    Change plan
+                    {cancelling ? 'Cancelling...' : 'Cancel auto-renewal'}
                   </button>
-                  {!isCancelled && (
-                    <button
-                      type="button"
-                      disabled={cancelling}
-                      onClick={handleCancel}
-                      className="h-8.5 px-3 rounded-lg text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 border-0 cursor-pointer transition-colors duration-120"
-                    >
-                      {cancelling ? 'Cancelling...' : 'Cancel'}
-                    </button>
-                  )}
-                </>
-              ) : (
+                )
+              ) : !access.isLifetime ? (
                 <button
                   type="button"
-                  onClick={onOpenSubscriptionModal}
-                  className="h-8.5 px-4 rounded-lg text-xs font-semibold bg-accent hover:bg-accent-hover text-white border-0 cursor-pointer transition-colors duration-120 inline-flex items-center gap-1.5"
+                  onClick={() =>
+                    onOpenSubscriptionModal
+                      ? onOpenSubscriptionModal()
+                      : access.openUpgradeSheet({ action: 'upgrade' })
+                  }
+                  className="h-9 px-4 rounded-lg text-xs font-semibold cf-btn-primary text-white cursor-pointer inline-flex items-center gap-1.5"
                 >
-                  <Zap size={13} />
-                  <span>Upgrade to Pro</span>
+                  <span>{access.isExpired ? 'Reactivate' : 'View plans'}</span>
+                  <ArrowUpRight size={13} />
                 </button>
-              )}
+              ) : null}
             </div>
           </div>
 
           {cancelMessage && (
-            <div className="p-3 text-xs rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+            <div className="p-3 text-xs rounded-lg bg-[#1B1B22] border border-[#2A2A33] text-[#F7F7F8]">
               {cancelMessage}
             </div>
           )}
@@ -143,4 +176,3 @@ export const ProfileSubscriptionSection: React.FC<ProfileSubscriptionSectionProp
 };
 
 export default ProfileSubscriptionSection;
-

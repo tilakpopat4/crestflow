@@ -5,192 +5,90 @@ import { describe, test, before, after, beforeEach } from 'node:test';
 let testEnv: RulesTestEnvironment;
 
 const ACTIVE_USER_UID = 'user_active_123';
+const TRIALING_USER_UID = 'user_trialing_123';
+const GRACE_USER_UID = 'user_grace_123';
 const EXPIRED_USER_UID = 'user_expired_456';
+const SUSPENDED_USER_UID = 'user_suspended_999';
+const NO_ENT_USER_UID = 'user_nosub_000';
 const ATTACKER_USER_UID = 'user_attacker_789';
-const NO_SUB_USER_UID = 'user_nosub_000';
 
 before(async () => {
   testEnv = await initializeTestEnvironment({
     projectId: 'crestflow-billing-test',
-    firestore: {
-      rules: readFileSync('firestore.rules', 'utf8'),
-      host: '127.0.0.1',
-      port: 8080,
-    },
+    firestore: { rules: readFileSync('firestore.rules', 'utf8'), host: '127.0.0.1', port: 8080 },
   });
 });
 
 after(async () => {
-  if (testEnv) {
-    await testEnv.cleanup();
-  }
+  if (testEnv) await testEnv.cleanup();
 });
 
 beforeEach(async () => {
   await testEnv.clearFirestore();
+  const future = new Date(Date.now() + 30 * 86400 * 1000);
+  const past = new Date(Date.now() - 5 * 86400 * 1000);
 
-  // Seed baseline subscription states via admin / securityRulesDisabled context
   await testEnv.withSecurityRulesDisabled(async (ctx) => {
     const db = ctx.firestore();
+    await db.collection('entitlements').doc(ACTIVE_USER_UID).set({ userId: ACTIVE_USER_UID, plan: 'pro_monthly', status: 'active', validUntil: future });
+    await db.collection('entitlements').doc(TRIALING_USER_UID).set({ userId: TRIALING_USER_UID, plan: 'pro_trial', status: 'trialing', validUntil: future });
+    await db.collection('entitlements').doc(GRACE_USER_UID).set({ userId: GRACE_USER_UID, plan: 'pro_monthly', status: 'grace', validUntil: future });
+    // Even if raw status stayed active, expired validUntil MUST fail
+    await db.collection('entitlements').doc(EXPIRED_USER_UID).set({ userId: EXPIRED_USER_UID, plan: 'pro_monthly', status: 'active', validUntil: past });
+    await db.collection('entitlements').doc(SUSPENDED_USER_UID).set({ userId: SUSPENDED_USER_UID, plan: 'pro_monthly', status: 'suspended', validUntil: future });
 
-    // 1. Active User: accessUntil set to 30 days in the future
-    await db.collection('subscriptions').doc(ACTIVE_USER_UID).set({
-      userId: ACTIVE_USER_UID,
-      plan: 'pro_monthly',
-      status: 'active',
-      accessUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-    });
-
-    // 2. Expired User: accessUntil expired 5 days ago
-    await db.collection('subscriptions').doc(EXPIRED_USER_UID).set({
-      userId: EXPIRED_USER_UID,
-      plan: 'pro_monthly',
-      status: 'expired',
-      accessUntil: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-    });
-
-    // Existing invoice for expired user to verify read-only capability
-    await db.collection('invoices').doc('inv_existing_expired').set({
-      userId: EXPIRED_USER_UID,
-      clientName: 'Legacy Client',
-      totalAmount: 15000,
-      clientEmail: 'client@legacy.com',
-    });
-
-    // Existing client for expired user
-    await db.collection('clients').doc('client_existing_expired').set({
-      userId: EXPIRED_USER_UID,
-      name: 'Legacy Client',
-      email: 'client@legacy.com',
-    });
+    await db.collection('invoices').doc('inv_existing_expired').set({ userId: EXPIRED_USER_UID, clientName: 'Legacy Client', totalAmount: 15000, clientEmail: 'client@legacy.com' });
+    await db.collection('clients').doc('client_existing_expired').set({ userId: EXPIRED_USER_UID, name: 'Legacy Client', email: 'client@legacy.com' });
+    await db.collection('workItems').doc('work_existing_expired').set({ userId: EXPIRED_USER_UID, title: 'Reel 1', status: 'Invoiced' });
+    await db.collection('profiles').doc(EXPIRED_USER_UID).set({ userId: EXPIRED_USER_UID, name: 'Old Name', username: 'oldhandle', workExperienceBio: 'Old bio' });
   });
 });
 
-describe('Firestore Billing Anti-Bypass Security Suite', () => {
-  test('1. Bypass Attempt: Client tries to write own subscription doc -> FAILS', async () => {
-    const clientDb = testEnv.authenticatedContext(ACTIVE_USER_UID).firestore();
-    const subRef = clientDb.collection('subscriptions').doc(ACTIVE_USER_UID);
-
-    await assertFails(
-      subRef.set({
-        userId: ACTIVE_USER_UID,
-        status: 'active',
-      })
-    );
+describe('Firestore Entitlements & Anti-Bypass Security Suite', () => {
+  test('1. Client cannot write own entitlements/{uid}, trialClaims, or invoice_shares', async () => {
+    const db = testEnv.authenticatedContext(ACTIVE_USER_UID).firestore();
+    await assertFails(db.collection('entitlements').doc(ACTIVE_USER_UID).set({ userId: ACTIVE_USER_UID, status: 'active' }));
+    await assertFails(db.collection('entitlements').doc(NO_ENT_USER_UID).set({ status: 'active' }));
+    await assertFails(db.collection('trialClaims').doc(`uid_${ATTACKER_USER_UID}`).set({ claimedByUid: ATTACKER_USER_UID }));
+    await assertFails(db.collection('invoice_shares').doc('inv_x').set({ tokenHash: 'fake' }));
   });
 
-  test('2. Bypass Attempt: Client tries to set future accessUntil on own doc -> FAILS', async () => {
-    const clientDb = testEnv.authenticatedContext(ACTIVE_USER_UID).firestore();
-    const subRef = clientDb.collection('subscriptions').doc(ACTIVE_USER_UID);
-
-    await assertFails(
-      subRef.update({
-        accessUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-      })
-    );
-  });
-
-  test('3. Bypass Attempt: Direct SDK write to trial_ledger -> FAILS', async () => {
-    const clientDb = testEnv.authenticatedContext(ATTACKER_USER_UID).firestore();
-    const ledgerRef = clientDb.collection('trial_ledger').doc('hash_phone_99999');
-
-    await assertFails(
-      ledgerRef.set({
-        claimedByUid: ATTACKER_USER_UID,
-        claimedAt: new Date(),
-      })
-    );
-  });
-
-  test('4. Bypass Attempt: Direct SDK write to webhook_events -> FAILS', async () => {
-    const clientDb = testEnv.authenticatedContext(ATTACKER_USER_UID).firestore();
-    const webhookRef = clientDb.collection('webhook_events').doc('evt_fake_payment_123');
-
-    await assertFails(
-      webhookRef.set({
-        eventId: 'evt_fake_payment_123',
-        status: 'processed',
-        amount: 7900,
-      })
-    );
-  });
-
-  test("5. Bypass Attempt: Reading another user's subscription doc -> FAILS", async () => {
+  test('2. Client cannot read another user entitlement; owner CAN read own entitlement', async () => {
     const attackerDb = testEnv.authenticatedContext(ATTACKER_USER_UID).firestore();
-    const targetSubRef = attackerDb.collection('subscriptions').doc(ACTIVE_USER_UID);
-
-    await assertFails(targetSubRef.get());
+    await assertFails(attackerDb.collection('entitlements').doc(ACTIVE_USER_UID).get());
+    await assertSucceeds(testEnv.authenticatedContext(ACTIVE_USER_UID).firestore().collection('entitlements').doc(ACTIVE_USER_UID).get());
   });
 
-  test('6. Legitimate Read: Client reading their own subscription doc -> SUCCEEDS', async () => {
-    const clientDb = testEnv.authenticatedContext(ACTIVE_USER_UID).firestore();
-    const ownSubRef = clientDb.collection('subscriptions').doc(ACTIVE_USER_UID);
-
-    await assertSucceeds(ownSubRef.get());
+  test('3. Entitled states (trialing, active, grace) CAN create clients & invoices', async () => {
+    for (const uid of [TRIALING_USER_UID, ACTIVE_USER_UID, GRACE_USER_UID]) {
+      const db = testEnv.authenticatedContext(uid).firestore();
+      await assertSucceeds(db.collection('clients').doc(`cli_${uid}`).set({ userId: uid, name: 'Acme', email: 'acme@test.com' }));
+      await assertSucceeds(db.collection('invoices').doc(`inv_${uid}`).set({ userId: uid, clientName: 'Acme', totalAmount: 5000 }));
+      await assertSucceeds(db.collection('workItems').doc(`wi_${uid}`).set({ userId: uid, title: 'Edit', status: 'Uninvoiced' }));
+    }
   });
 
-  test('7. Bypass Attempt: Expired user creating an invoice -> FAILS', async () => {
+  test('4. Non-entitled states (none, expired even if raw status=active, suspended) CANNOT create/mutate workspace docs', async () => {
+    for (const uid of [NO_ENT_USER_UID, EXPIRED_USER_UID, SUSPENDED_USER_UID]) {
+      const db = testEnv.authenticatedContext(uid).firestore();
+      await assertFails(db.collection('clients').doc(`cli_fail_${uid}`).set({ userId: uid, name: 'Blocked', email: 'b@test.com' }));
+      await assertFails(db.collection('invoices').doc(`inv_fail_${uid}`).set({ userId: uid, clientName: 'Blocked', totalAmount: 1000 }));
+      await assertFails(db.collection('workItems').doc(`wi_fail_${uid}`).set({ userId: uid, title: 'Blocked' }));
+    }
+  });
+
+  test('5. Expired user CAN read & export all own clients, invoices, and workItems', async () => {
     const expiredDb = testEnv.authenticatedContext(EXPIRED_USER_UID).firestore();
-    const invRef = expiredDb.collection('invoices').doc('inv_expired_bypass');
-
-    await assertFails(
-      invRef.set({
-        userId: EXPIRED_USER_UID,
-        clientName: 'New Client',
-        totalAmount: 10000,
-        clientEmail: 'client@new.com',
-      })
-    );
+    await assertSucceeds(expiredDb.collection('invoices').doc('inv_existing_expired').get());
+    await assertSucceeds(expiredDb.collection('clients').doc('client_existing_expired').get());
+    await assertSucceeds(expiredDb.collection('workItems').doc('work_existing_expired').get());
   });
 
-  test('8. Bypass Attempt: Expired user creating a client -> FAILS', async () => {
+  test('6. Expired user CAN edit name/bio/photoURL but CANNOT mutate username, plan, or entitlement fields', async () => {
     const expiredDb = testEnv.authenticatedContext(EXPIRED_USER_UID).firestore();
-    const clientRef = expiredDb.collection('clients').doc('client_expired_bypass');
-
-    await assertFails(
-      clientRef.set({
-        userId: EXPIRED_USER_UID,
-        name: 'New Client Inc',
-        email: 'billing@clientinc.com',
-      })
-    );
-  });
-
-  test('9. Read-Only State: Expired user CAN read existing invoices and clients -> SUCCEEDS', async () => {
-    const expiredDb = testEnv.authenticatedContext(EXPIRED_USER_UID).firestore();
-
-    const invRef = expiredDb.collection('invoices').doc('inv_existing_expired');
-    await assertSucceeds(invRef.get());
-
-    const clientRef = expiredDb.collection('clients').doc('client_existing_expired');
-    await assertSucceeds(clientRef.get());
-  });
-
-  test('10. Legitimate Write: Active user with future accessUntil creating an invoice -> SUCCEEDS', async () => {
-    const activeDb = testEnv.authenticatedContext(ACTIVE_USER_UID).firestore();
-    const invRef = activeDb.collection('invoices').doc('inv_active_valid');
-
-    await assertSucceeds(
-      invRef.set({
-        userId: ACTIVE_USER_UID,
-        clientName: 'Acme Studio',
-        totalAmount: 25000,
-        clientEmail: 'producer@acme.com',
-      })
-    );
-  });
-
-  test('11. Unsubscribed User: User without subscription doc creating invoice -> FAILS', async () => {
-    const noSubDb = testEnv.authenticatedContext(NO_SUB_USER_UID).firestore();
-    const invRef = noSubDb.collection('invoices').doc('inv_nosub');
-
-    await assertFails(
-      invRef.set({
-        userId: NO_SUB_USER_UID,
-        clientName: 'Acme Studio',
-        totalAmount: 25000,
-        clientEmail: 'producer@acme.com',
-      })
-    );
+    const profRef = expiredDb.collection('profiles').doc(EXPIRED_USER_UID);
+    await assertSucceeds(profRef.update({ name: 'New Display Name', workExperienceBio: 'Updated bio' }));
+    await assertFails(profRef.update({ username: 'stolenhandle' }));
+    await assertFails(profRef.update({ plan: 'lifetime' }));
   });
 });

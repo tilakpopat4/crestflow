@@ -184,18 +184,17 @@ VITE_BASE_URL=https://crestflow.app
 
 ### Cloudflare Worker Production Secrets
 Backend environment variables must be provisioned via `npx wrangler secret put <NAME>`:
-- `RAZORPAY_KEY_ID`: Live Razorpay Key ID (`rzp_live_...`)
-- `RAZORPAY_KEY_SECRET`: Live Razorpay Secret
-- `RAZORPAY_WEBHOOK_SECRET`: Secret used to compute HMAC-SHA256 signature
+- `RAZORPAY_KEY_ID`: Razorpay Key ID
+- `RAZORPAY_KEY_SECRET`: Razorpay Key Secret
+- `RAZORPAY_WEBHOOK_SECRET`: Secret used to verify HMAC-SHA256 webhook signatures
 - `FIREBASE_SERVICE_ACCOUNT`: Full Firebase Admin Service Account JSON string
 - `CRON_SECRET`: High-entropy bearer secret required for `/api/reconcile-cron`
-- `TRIAL_LEDGER_PEPPER`: Secret salt used when computing SHA-256 digests of emails and VPAs
-- `PLAN_ID_MONTHLY`: Razorpay Plan ID for ₹79/month
-- `PLAN_ID_QUARTERLY`: Razorpay Plan ID for ₹199/3 months
-- `PLAN_ID_HALF`: Razorpay Plan ID for ₹449/6 months
-- `PLAN_ID_YEARLY`: Razorpay Plan ID for ₹899/year
+- `TRIAL_LEDGER_PEPPER`: Secret salt used when computing SHA-256 digests of normalized emails for `trialClaims`
+- `RAZORPAY_PLAN_MONTHLY`: Optional Razorpay Plan ID for ₹79/month auto-renewing subscriptions
+- `RAZORPAY_PLAN_QUARTERLY`: Optional Razorpay Plan ID for ₹199/3 months auto-renewing subscriptions
+- `RAZORPAY_PLAN_YEARLY`: Optional Razorpay Plan ID for ₹699/year auto-renewing subscriptions
 - `RESEND_API_KEY`: API key for lifecycle emails
-- `BASE_URL`: Application origin (default: `https://crestflow.app`)
+- `BASE_URL`: Application origin (default: `https://crestflow.space`)
 
 
 ---

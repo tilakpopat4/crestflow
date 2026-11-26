@@ -4,9 +4,12 @@
  */
 
 import { useState, useEffect, Suspense } from 'react';
+import { User } from 'firebase/auth';
 import Sidebar from './components/Sidebar';
 import GlobalHeader from './components/GlobalHeader';
 import { useAuthSession } from './hooks/useAuthSession';
+import { AccessProvider } from './context/AccessContext';
+import { useAccess } from './hooks/useAccess';
 import { useSubscription } from './hooks/useSubscription';
 import { useUserProfile } from './hooks/useUserProfile';
 import { useAppRouter } from './hooks/useAppRouter';
@@ -18,6 +21,7 @@ import { SignInScreen } from './components/auth/SignInScreen';
 import { AppRouterView } from './components/layout/AppRouterView';
 import { SidebarSwipeReveal } from './components/layout/SidebarSwipeReveal';
 import { MembershipBanner } from './components/subscription/MembershipBanner';
+import { UpgradeSheet } from './components/access/UpgradeSheet';
 import { PwaInstallPrompt } from './components/pwa/PwaInstallPrompt';
 import Footer from './components/Footer';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -29,48 +33,75 @@ import { updatePageMeta } from './lib/seoMeta';
 const AdminTab = lazyWithRetry(() => import('./components/AdminTab'));
 const PublicFreelancerProfile = lazyWithRetry(() => import('./components/PublicFreelancerProfile'));
 const ClientFeedbackForm = lazyWithRetry(() => import('./components/ClientFeedbackForm'));
-const SubscriptionModal = lazyWithRetry(() => import('./components/SubscriptionModal'));
+const PublicInvoicePage = lazyWithRetry(() => import('./components/invoice/PublicInvoicePage'));
 const AnniversaryModal = lazyWithRetry(() => import('./components/AnniversaryModal'));
 const NotFoundScreen = lazyWithRetry(() => import('./components/NotFoundScreen'));
-const SubscriptionWallPage = lazyWithRetry(() => import('./components/subscription/SubscriptionWallPage'));
-const UserOnboardingModal: React.ComponentType<any> = lazyWithRetry(() => import('./components/onboarding/UserOnboardingModal'), m => ({ default: m.default || m.UserOnboardingModal }));
+const UserOnboardingModal: React.ComponentType<any> = lazyWithRetry(
+  () => import('./components/onboarding/UserOnboardingModal'),
+  (m) => ({ default: m.default || m.UserOnboardingModal }),
+);
 
 const ViewLoadingFallback = () => (
-  <div className="flex-1 flex flex-col items-center justify-center p-12 min-h-[360px] animate-in fade-in duration-150 select-none">
-    <div className="relative flex items-center justify-center mb-3.5">
-      <div className="w-9 h-9 rounded-full border-2 border-indigo-100 dark:border-indigo-950/60" />
-      <div className="absolute w-9 h-9 rounded-full border-2 border-indigo-600 dark:border-indigo-400 border-t-transparent animate-spin" />
-    </div>
-    <span className="text-xs font-medium text-slate-400 dark:text-slate-500 tracking-wide">Loading workspace...</span>
+  <div className="flex-1 flex flex-col items-center justify-center p-12 min-h-[360px] bg-[#0B0B0E] select-none">
+    <div className="w-8 h-8 rounded-full border-2 border-[#2A2A33] border-t-[#E0002B] animate-spin mb-3" />
+    <span className="text-xs font-medium text-[#A1A1AA] tracking-wide">Loading workspace...</span>
   </div>
 );
 
 export type Tab = 'dashboard' | 'clients' | 'work' | 'invoice' | 'reviews' | 'onboarding' | 'admin' | 'profile';
 
-export default function App() {
+interface AppWorkspaceProps {
+  user: User | null;
+  authLoading: boolean;
+  isSigningIn: boolean;
+  isBlocked: boolean | null;
+  handleLogin: () => Promise<void>;
+  handleEmailSignUp: (email: string, password: string, displayName?: string) => Promise<{ success: boolean; error?: string }>;
+  handleEmailSignIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  handleLogout: () => Promise<void>;
+}
+
+function AppWorkspace({
+  user,
+  authLoading,
+  isSigningIn,
+  isBlocked,
+  handleLogin,
+  handleEmailSignUp,
+  handleEmailSignIn,
+  handleLogout,
+}: AppWorkspaceProps) {
   const { currentRoute, params, isSpecialMode, navigate } = useAppRouter();
-  const { user, loading, isSigningIn, isBlocked, handleLogin, handleEmailSignUp, handleEmailSignIn, handleLogout } = useAuthSession();
+  const access = useAccess();
+  const subscriptionState = useSubscription(user?.uid, user?.email || undefined);
+  const { isCollapsed: isSidebarCollapsed, toggleSidebar, collapseSidebar, expandSidebar } = useSidebarCollapse();
+  const { profile, profilesLoading, handleSaveProfile } = useUserProfile(user);
+  const { journey, isAnniversaryModalOpen, openAnniversaryModal, closeAnniversaryModal } = useAnniversaryCheck(
+    user,
+    profile?.freelanceStartDate,
+  );
 
   const [globalSearchQuery, setGlobalSearchQuery] = useState('');
   const [selectedClientIdFromSearch, setSelectedClientIdFromSearch] = useState<string | null>(null);
-  const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
   const [isOnboardingCompleted, setIsOnboardingCompleted] = useState(false);
 
   useEffect(() => {
     updatePageMeta(currentRoute);
   }, [currentRoute]);
 
-  // Safe redirect: if any user is already logged in, never show auth/promo landing pages
   useEffect(() => {
     if (user && (isSpecialMode === 'auth' || isSpecialMode === 'promo')) {
       navigate('dashboard', undefined, true);
     }
   }, [user, isSpecialMode, navigate]);
 
-  const { isCollapsed: isSidebarCollapsed, toggleSidebar, collapseSidebar, expandSidebar } = useSidebarCollapse();
-  const { profile, profilesLoading, handleSaveProfile } = useUserProfile(user);
-  const subscriptionState = useSubscription(user?.uid, profile, user?.email || undefined);
-  const { journey, isAnniversaryModalOpen, openAnniversaryModal, closeAnniversaryModal } = useAnniversaryCheck(user, profile?.freelanceStartDate);
+  if (isSpecialMode === 'public_invoice' && params.invoiceId) {
+    return (
+      <Suspense fallback={<ViewLoadingFallback />}>
+        <PublicInvoicePage invoiceId={params.invoiceId} token={params.t || ''} />
+      </Suspense>
+    );
+  }
 
   if (isSpecialMode === 'feedback') {
     return (
@@ -97,8 +128,8 @@ export default function App() {
     );
   }
 
-  // Consistent initialization without flash: keep skeleton active until user state is fully known
-  if (loading || (user && (profilesLoading || subscriptionState.loading))) {
+  // Flicker-free initialization: never render a paywall or partial screen while auth or access resolves
+  if (authLoading || (user && (profilesLoading || access.isLoading))) {
     return <WorkspaceShellSkeleton />;
   }
 
@@ -106,7 +137,6 @@ export default function App() {
     return <BlockedUserScreen user={user} onLogout={handleLogout} />;
   }
 
-  // Public supporting pages accessible to all visitors without login
   if (['privacy', 'terms', 'refund', 'contact', 'pricing'].includes(currentRoute)) {
     return (
       <Suspense fallback={<ViewLoadingFallback />}>
@@ -136,7 +166,7 @@ export default function App() {
 
   if (currentRoute === 'admin') {
     return (
-      <div className="h-screen w-full bg-slate-50 dark:bg-slate-950 overflow-y-auto flex flex-col">
+      <div className="h-screen w-full bg-[#0B0B0E] text-[#F7F7F8] overflow-y-auto flex flex-col">
         <div className="flex-1">
           <Suspense fallback={<ViewLoadingFallback />}>
             <AdminTab user={user} onNavigateBack={() => navigate('dashboard')} />
@@ -149,17 +179,28 @@ export default function App() {
 
   const isSupportingRoute = ['privacy', 'terms', 'contact', 'refund', 'pricing'].includes(currentRoute);
   const hasCompletedProfile = Boolean(
-    isOnboardingCompleted || (user && localStorage.getItem(`crestflow_onboarded_${user.uid}`)) ||
-    profile?.upiId || (profile?.name && profile?.professionalTitle)
+    isOnboardingCompleted || localStorage.getItem(`crestflow_onboarded_${user.uid}`) || (profile?.upiId && profile?.name),
   );
 
-  // Mandatory subscription wall
-  if (user && subscriptionState.isSubscriptionFeatureEnabled && !subscriptionState.hasAccess && !isSupportingRoute) {
+  // Starting a trial enters onboarding wizard directly
+  if (access.state === 'trialing' && !isSupportingRoute && (access.justStartedTrial || !hasCompletedProfile)) {
     return (
-      <div className="h-screen w-full bg-slate-50 dark:bg-slate-950 overflow-y-auto flex flex-col">
-        <ErrorBoundary fallbackTitle="Subscription Activation">
+      <div className="h-screen w-full bg-[#0B0B0E] text-[#F7F7F8] overflow-y-auto flex flex-col justify-between">
+        <ErrorBoundary fallbackTitle="Workspace Setup">
           <Suspense fallback={<ViewLoadingFallback />}>
-            <SubscriptionWallPage user={user} profile={profile} subscriptionState={subscriptionState} onLogout={handleLogout} onNavigate={r => navigate(r)} />
+            <UserOnboardingModal
+              user={user}
+              profile={profile}
+              isOpen={true}
+              onSaveProfile={handleSaveProfile}
+              onLogout={handleLogout}
+              onComplete={(nextRoute?: AppRoute) => {
+                localStorage.setItem(`crestflow_onboarded_${user.uid}`, 'true');
+                setIsOnboardingCompleted(true);
+                access.clearJustStartedTrial();
+                if (nextRoute) navigate(nextRoute);
+              }}
+            />
           </Suspense>
         </ErrorBoundary>
         <Footer onNavigate={(r) => navigate(r)} />
@@ -167,28 +208,17 @@ export default function App() {
     );
   }
 
-  // First-time workspace onboarding
-  if (user && !profilesLoading && !hasCompletedProfile && !isSupportingRoute) {
-    return (
-      <div className="h-screen w-full bg-slate-50 dark:bg-slate-950 overflow-y-auto flex flex-col justify-between">
-        <ErrorBoundary fallbackTitle="Workspace Setup">
-          <Suspense fallback={<ViewLoadingFallback />}>
-            <UserOnboardingModal user={user} profile={profile} isOpen={true} onLogout={handleLogout} onComplete={() => { localStorage.setItem(`crestflow_onboarded_${user.uid}`, 'true'); setIsOnboardingCompleted(true); }} />
-          </Suspense>
-        </ErrorBoundary>
-        <Footer onNavigate={(r) => navigate(r)} />
-      </div>
-    );
-  }
+  const openUpgrade = () =>
+    access.openUpgradeSheet({
+      action: 'upgrade',
+      benefit: 'Choose a CrestFlow Pro plan for uninterrupted client & UPI invoice management.',
+    });
 
   const sidebarTab = currentRoute === 'invoices' ? 'invoice' : currentRoute;
 
   return (
-    <div className="flex flex-col md:flex-row h-[100dvh] max-h-[100dvh] w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-hidden font-sans transition-colors duration-150 relative">
-      <SidebarSwipeReveal
-        isCollapsed={isSidebarCollapsed}
-        onExpand={expandSidebar}
-      />
+    <div className="flex flex-col md:flex-row h-[100dvh] max-h-[100dvh] w-full bg-[#0B0B0E] text-[#F7F7F8] overflow-hidden font-sans relative">
+      <SidebarSwipeReveal isCollapsed={isSidebarCollapsed} onExpand={expandSidebar} />
 
       <Sidebar
         activeTab={isSupportingRoute ? ('' as any) : sidebarTab}
@@ -201,12 +231,12 @@ export default function App() {
         profile={profile}
         onEditProfile={() => navigate('profile')}
         subscriptionState={subscriptionState}
-        onOpenSubscriptionModal={() => setIsSubscriptionModalOpen(true)}
+        onOpenSubscriptionModal={openUpgrade}
         isCollapsed={isSidebarCollapsed}
         onCollapse={collapseSidebar}
       />
 
-      <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative pb-16 md:pb-0 transition-all duration-200">
+      <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative pb-16 md:pb-0 bg-[#0B0B0E]">
         <GlobalHeader
           user={user}
           activeTab={isSupportingRoute ? ('' as any) : sidebarTab}
@@ -233,51 +263,37 @@ export default function App() {
           onOpenAnniversaryModal={openAnniversaryModal}
           onLogout={handleLogout}
           subscriptionState={subscriptionState}
-          onOpenSubscriptionModal={() => setIsSubscriptionModalOpen(true)}
+          onOpenSubscriptionModal={openUpgrade}
           isSidebarCollapsed={isSidebarCollapsed}
           onToggleSidebar={toggleSidebar}
         />
 
-        <MembershipBanner
-          subscriptionState={subscriptionState}
-          onOpenPricing={() => navigate('pricing')}
-          onOpenBilling={() => navigate('billing')}
-        />
-
+        <MembershipBanner subscriptionState={subscriptionState} profile={profile} onOpenPricing={() => navigate('pricing')} onOpenBilling={() => navigate('billing')} />
         <AppRouterView
-          currentRoute={currentRoute}
-          user={user}
-          profile={profile}
-          subscriptionState={subscriptionState}
-          globalSearchQuery={globalSearchQuery}
-          selectedClientId={selectedClientIdFromSearch || params.id || null}
-          onNavigate={(r) => navigate(r)}
-          onSaveProfile={handleSaveProfile}
-          onOpenSubscriptionModal={() => setIsSubscriptionModalOpen(true)}
+          currentRoute={currentRoute} user={user} profile={profile} subscriptionState={subscriptionState}
+          globalSearchQuery={globalSearchQuery} selectedClientId={selectedClientIdFromSearch || params.id || null}
+          onNavigate={(r) => navigate(r)} onSaveProfile={handleSaveProfile} onOpenSubscriptionModal={openUpgrade}
         />
       </main>
-
-      {user && isSubscriptionModalOpen && subscriptionState.isSubscriptionFeatureEnabled && (
-        <Suspense fallback={null}>
-          <SubscriptionModal
-            isOpen={isSubscriptionModalOpen}
-            onClose={() => setIsSubscriptionModalOpen(false)}
-            user={user}
-            profile={profile}
-            onSubscriptionUpdated={async () => { await subscriptionState.refreshSubscription(); }}
-            isMandatory={!subscriptionState.hasAccess}
-            onLogout={handleLogout}
-          />
-        </Suspense>
-      )}
-
       {user && isAnniversaryModalOpen && (
         <Suspense fallback={null}>
           <AnniversaryModal isOpen={isAnniversaryModalOpen} onClose={closeAnniversaryModal} milestone={journey?.currentAnniversary || null} stats={journey} freelancerName={profile?.name || user.displayName || undefined} />
         </Suspense>
       )}
-
       <PwaInstallPrompt />
     </div>
+  );
+}
+
+export default function App() {
+  const { user, loading, isSigningIn, isBlocked, handleLogin, handleEmailSignUp, handleEmailSignIn, handleLogout } = useAuthSession();
+  return (
+    <AccessProvider user={user} authLoading={loading}>
+      <AppWorkspace
+        user={user} authLoading={loading} isSigningIn={isSigningIn} isBlocked={isBlocked}
+        handleLogin={handleLogin} handleEmailSignUp={handleEmailSignUp} handleEmailSignIn={handleEmailSignIn} handleLogout={handleLogout}
+      />
+      <UpgradeSheet />
+    </AccessProvider>
   );
 }

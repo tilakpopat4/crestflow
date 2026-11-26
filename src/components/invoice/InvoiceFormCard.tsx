@@ -1,5 +1,5 @@
 import React from 'react';
-import { IndianRupee, Loader2 } from 'lucide-react';
+import { IndianRupee, Loader2, Lock, AlertCircle, ArrowUpRight } from 'lucide-react';
 import { Client, Reel, InvoiceDeliverable } from '../../types';
 import { Button } from '@/components/ui/button';
 import { DateInput } from '../DateInput';
@@ -25,6 +25,9 @@ interface InvoiceFormCardProps {
   customUpiId: string;
   editingInvoiceId: string | null;
   isGenerating: boolean;
+  canWrite?: boolean;
+  upiError?: string | null;
+  onOpenUpiSettings?: () => void;
   total: number;
   discount: number;
   extraCost: number;
@@ -68,6 +71,9 @@ export function InvoiceFormCard({
   customUpiId,
   editingInvoiceId,
   isGenerating,
+  canWrite = true,
+  upiError,
+  onOpenUpiSettings,
   discount,
   grandTotal,
   onClientChange, setDateFrom, setDateTo, setInvoiceBillingMode, setMonthlyRetainerInput,
@@ -227,44 +233,45 @@ export function InvoiceFormCard({
         </div>
       </div>
 
+      {upiError && (
+        <div
+          role="alert"
+          className="rounded-lg bg-[#131318] border border-[#F0607A]/50 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+        >
+          <div className="flex items-start gap-2 text-[#F0607A]">
+            <AlertCircle size={15} className="shrink-0 mt-0.5" />
+            <span>{upiError}</span>
+          </div>
+          {onOpenUpiSettings && (
+            <button
+              type="button"
+              onClick={onOpenUpiSettings}
+              className="px-3 py-1.5 rounded-lg bg-[#1B1B22] hover:bg-[#22222B] border border-[#2A2A33] text-[#F7F7F8] text-xs font-semibold inline-flex items-center gap-1 shrink-0 cursor-pointer"
+            >
+              <span>Add UPI ID in Settings</span>
+              <ArrowUpRight size={13} />
+            </button>
+          )}
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
         <div className="flex items-center gap-3">
           <div className="text-xs text-text-secondary font-medium">Total</div>
-          <div className="text-xl sm:text-2xl font-bold text-text-primary font-mono tabular-nums">
+          <div className="text-xl sm:text-2xl font-bold text-[#FFC145] tabular-figures">
             {formatCurrencyAmount(grandTotal, selectedClient?.currency)}
           </div>
           {discount > 0 && (
-            <span className="text-xs text-text-muted font-mono tabular-nums">
+            <span className="text-xs text-text-muted tabular-figures">
               (-{formatCurrencyAmount(discount, selectedClient?.currency)})
             </span>
           )}
         </div>
 
         <div className="flex items-center gap-2">
-          {editingInvoiceId && (
-            <Button type="button" variant="ghost" size="sm" onClick={onCancelEdit}>
-              Cancel
-            </Button>
-          )}
-          <Button
-            type="button"
-            variant="primary"
-            size="sm"
-            onClick={onGenerateInvoice}
-            disabled={isGenerating || !selectedClientId}
-            className="gap-1.5"
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 size={13} className="animate-spin" />
-                <span>Generating...</span>
-              </>
-            ) : (
-              <>
-                <IndianRupee size={13} />
-                <span>{editingInvoiceId ? 'Save' : 'Generate PDF'}</span>
-              </>
-            )}
+          {editingInvoiceId && <Button type="button" variant="ghost" size="sm" onClick={onCancelEdit}>Cancel</Button>}
+          <Button type="button" variant="primary" size="sm" onClick={onGenerateInvoice} disabled={isGenerating || (canWrite && !selectedClientId)} className="gap-1.5">
+            {isGenerating ? <><Loader2 size={13} className="animate-spin" /><span>Generating...</span></> : <>{!canWrite ? <Lock size={12} /> : <IndianRupee size={13} />}<span>{editingInvoiceId ? 'Save' : 'Generate PDF'}</span></>}
           </Button>
         </div>
       </div>

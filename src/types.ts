@@ -110,10 +110,17 @@ export interface Invoice {
   deliverables?: InvoiceDeliverable[]; // Snapshot of completed deliverables without rates for monthly retainer invoices
   payeeName?: string;
   payeeUpiId?: string;
+  shareEnabled?: boolean;
+  paymentClaim?: {
+    claimedAt: number;
+    claimedBy?: string;
+    note?: string;
+    reference?: string;
+  };
 }
 
 export type SubscriptionStatus = 'free' | 'inactive' | 'active' | 'pending' | 'expired' | 'cancelled' | 'halted';
-export type SubscriptionPlan = 'free' | 'pro' | 'monthly' | 'yearly' | string;
+export type SubscriptionPlan = 'free' | 'pro' | 'monthly' | 'quarterly' | 'yearly' | 'lifetime' | string;
 
 export interface SubscriptionPlanItem {
   id: string;

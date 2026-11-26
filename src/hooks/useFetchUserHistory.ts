@@ -77,9 +77,10 @@ export function useFetchUserHistory(userId?: string | null, userEmail?: string |
         const profSnap = await getDoc(doc(db, 'profiles', userId)).catch(() => null);
         const profData = profSnap?.exists() ? profSnap.data() : null;
 
-        // 5. Fetch Subscription Doc
+        // 5. Fetch Entitlement Doc (authoritative) + Legacy Subscription Doc
+        const entSnap = await getDoc(doc(db, 'entitlements', userId)).catch(() => null);
         const subSnap = await getDoc(doc(db, 'subscriptions', userId)).catch(() => null);
-        const subData = subSnap?.exists() ? subSnap.data() : null;
+        const subData = entSnap?.exists() ? entSnap.data() : subSnap?.exists() ? subSnap.data() : null;
 
         if (isMounted) {
           invList.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));

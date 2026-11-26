@@ -1,290 +1,252 @@
 import React, { useState } from 'react';
 import { User } from 'firebase/auth';
+import { Download, ArrowUpRight, AlertCircle } from 'lucide-react';
+import { Client, Invoice, WorkItem } from '../../types';
 import { SubscriptionState } from '../../hooks/useSubscription';
-import { PRO_PLANS, PlanPricing } from '../../lib/subscriptionPlans';
+import { useAccess } from '../../hooks/useAccess';
+import { useFirestore } from '../../hooks/useFirestore';
+import { PRO_PLANS, TRIAL_PROMISE_COPY } from '../../shared/pricing';
+import {
+  buildClientsCsv,
+  buildInvoicesCsv,
+  buildWorkItemsCsv,
+  buildWorkspaceBackupJson,
+  downloadExportFile,
+} from '../../lib/workspaceExport';
+import { trackAccessEvent } from '../../lib/analytics';
 
 interface BillingPageProps {
   user: User;
-  subscriptionState: SubscriptionState;
+  subscriptionState?: SubscriptionState;
   onNavigateToPricing: () => void;
   onNavigateToDashboard?: () => void;
 }
 
 /**
- * Dedicated Billing Page complying strictly with GEMINI.md design standards.
- * Allows viewing current plan, next charge date, changing plans, and cancellation.
+ * Dedicated Billing & Membership overview matching Section 9 tokens.
  */
 export default function BillingPage({
-  subscriptionState,
+  user,
   onNavigateToPricing,
 }: BillingPageProps) {
+  const access = useAccess();
   const [cancelling, setCancelling] = useState(false);
-  const [changePlanOpen, setChangePlanOpen] = useState(false);
-  const [selectedNewPlan, setSelectedNewPlan] = useState<string>('yearly');
-  const [changingPlan, setChangingPlan] = useState(false);
-  const [feedbackMessage, setFeedbackMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  const {
-    plan,
-    status,
-    isTrialing,
-    isPastDue,
-    isCancelled,
-    isExpired,
-    cancelAtPeriodEnd,
-    accessUntil,
-    trialEndsAt,
-    cancelSubscription,
-    refreshSubscription,
-  } = subscriptionState;
+  const liveUid = access.state !== 'none' ? user?.uid : undefined;
+  const { data: clients } = useFirestore<Client>('clients', liveUid);
+  const { data: workItems } = useFirestore<WorkItem>('workItems', liveUid);
+  const { data: invoices } = useFirestore<Invoice>('invoices', liveUid);
 
-  const currentPlanObj = PRO_PLANS.find((p) => p.id === plan || p.planCode === plan) || PRO_PLANS[0];
+  const currentPlanObj =
+    PRO_PLANS.find((p) => p.id === access.billingCycle || p.id === access.plan) || PRO_PLANS[2];
 
   const formatDate = (dateStr?: string | null) => {
     if (!dateStr) return '—';
-    try {
-      return new Date(dateStr).toLocaleDateString('en-IN', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      });
-    } catch {
-      return dateStr;
-    }
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
   };
 
   const handleCancel = async () => {
-    const isTrial = isTrialing;
-    if (isTrial) {
-      setFeedbackMessage({
+    if (access.state === 'trialing') {
+      setFeedback({
         type: 'success',
-        text: 'Your 7-day free trial has no automatic billing or payment deduction. You retain full access until the end of your trial.',
+        text: `${TRIAL_PROMISE_COPY} Your trial ends automatically unless you choose a plan.`,
       });
       return;
     }
-    const confirmText = 'Are you sure you want to cancel your subscription auto-renewal? Your account will remain active until the end of your current paid billing period.';
 
-    if (!window.confirm(confirmText)) return;
+    if (
+      !window.confirm(
+        'Cancel auto-renewal? You keep full Pro access until the end of your current paid period.',
+      )
+    ) {
+      return;
+    }
 
     setCancelling(true);
-    setFeedbackMessage(null);
+    setFeedback(null);
     try {
-      await cancelSubscription();
-      setFeedbackMessage({
+      await access.cancelSubscription();
+      setFeedback({
         type: 'success',
-        text: 'Subscription cancelled. Access remains active until the end of your billing cycle.',
+        text: `Auto-renewal cancelled. Pro access remains active until ${formatDate(access.validUntil)}.`,
       });
-    } catch (err: any) {
-      setFeedbackMessage({ type: 'error', text: err.message || 'Failed to cancel subscription.' });
+    } catch (err) {
+      setFeedback({
+        type: 'error',
+        text: err instanceof Error ? err.message : 'Failed to cancel subscription.',
+      });
     } finally {
       setCancelling(false);
     }
   };
 
-  const handleChangePlan = async () => {
-    setChangingPlan(true);
-    setFeedbackMessage(null);
-    try {
-      const token = await (window as any).firebase?.auth?.()?.currentUser?.getIdToken?.() || '';
-      const res = await fetch('/api/change-plan', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ newPlanKey: selectedNewPlan }),
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || 'Failed to schedule plan change');
-      }
-
-      const data = await res.json();
-      setChangePlanOpen(false);
-      setFeedbackMessage({
-        type: 'success',
-        text: data.message || `Plan switch to ${selectedNewPlan} scheduled for the end of your current cycle.`,
-      });
-      await refreshSubscription();
-    } catch (err: any) {
-      setFeedbackMessage({ type: 'error', text: err.message || 'Failed to update plan.' });
-    } finally {
-      setChangingPlan(false);
-    }
+  const handleExportJson = () => {
+    trackAccessEvent('export_clicked', { format: 'json', source: 'billing' });
+    const stamp = new Date().toISOString().slice(0, 10);
+    const json = buildWorkspaceBackupJson({ clients, workItems, invoices });
+    downloadExportFile(`crestflow-backup-${stamp}.json`, json, 'application/json;charset=utf-8');
   };
 
-  // Status text styling per GEMINI.md:
-  // Draft: slate-500, Invoiced/Cancelled: slate-700, Paid/Active/Trialing: indigo text, Overdue/Expired: red text
-  const getStatusDisplay = () => {
-    if (isExpired || status === 'expired') {
-      return <span className="text-[13px] font-medium text-red-600 dark:text-red-400">Expired</span>;
-    }
-    if (isPastDue || status === 'past_due') {
-      return <span className="text-[13px] font-medium text-red-600 dark:text-red-400">Past Due</span>;
-    }
-    if (isCancelled || cancelAtPeriodEnd) {
-      return <span className="text-[13px] font-medium text-slate-700 dark:text-slate-300">Cancelled (Ends Period End)</span>;
-    }
-    if (isTrialing) {
-      return <span className="text-[13px] font-medium text-text-primary">Trialing</span>;
-    }
-    if (status === 'active') {
-      return <span className="text-[13px] font-medium text-text-primary">Active</span>;
-    }
-    return <span className="text-[13px] font-medium text-slate-500">None</span>;
+  const handleExportCsv = () => {
+    trackAccessEvent('export_clicked', { format: 'csv', source: 'billing' });
+    const stamp = new Date().toISOString().slice(0, 10);
+    downloadExportFile(`crestflow-clients-${stamp}.csv`, buildClientsCsv(clients), 'text/csv;charset=utf-8');
+    downloadExportFile(`crestflow-work-items-${stamp}.csv`, buildWorkItemsCsv(workItems, clients), 'text/csv;charset=utf-8');
+    downloadExportFile(`crestflow-invoices-${stamp}.csv`, buildInvoicesCsv(invoices, clients), 'text/csv;charset=utf-8');
   };
+
+  const statusTone =
+    access.state === 'active'
+      ? 'text-[#2DD4A0]'
+      : access.state === 'trialing'
+      ? 'text-[#FFC145]'
+      : access.state === 'grace'
+      ? 'text-[#FFB020]'
+      : access.state === 'expired' || access.state === 'suspended'
+      ? 'text-[#F0607A]'
+      : 'text-[#A1A1AA]';
+
+  const statusLabel =
+    access.state === 'none'
+      ? 'Exploring sample data'
+      : access.state === 'trialing'
+      ? `Trial (${access.daysLeft} days left)`
+      : access.state === 'grace'
+      ? `Grace (${access.daysLeft} days left)`
+      : access.state === 'active'
+      ? access.isLifetime
+        ? 'Active · Lifetime'
+        : access.cancelAtPeriodEnd
+        ? 'Active · Ends Period End'
+        : 'Active'
+      : access.state === 'suspended'
+      ? 'Suspended'
+      : 'Expired';
 
   return (
-    <div className="min-h-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-6 md:p-8 flex flex-col items-center">
-      <div className="w-full max-w-3xl">
-        <div className="mb-6">
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white mb-1">
-            Billing & Membership
-          </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Manage your subscription tier, billing cycles, and automated invoicing access.
+    <div className="min-h-full bg-[#0B0B0E] text-[#F7F7F8] p-6 md:p-8 flex flex-col items-center">
+      <div className="w-full max-w-3xl space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-[#F7F7F8]">Billing &amp; Membership</h1>
+          <p className="text-xs text-[#A1A1AA] mt-1">
+            Server-verified membership state, valid dates, cancellation, and workspace backups.
           </p>
         </div>
 
-        {feedbackMessage && (
+        {feedback && (
           <div
-            className={`mb-6 p-4 rounded text-xs ${feedbackMessage.type === 'success'
-              ? 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700'
-              : 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-900'
-              }`}
+            className={`p-3.5 rounded-xl border text-xs flex items-start gap-2 ${
+              feedback.type === 'success'
+                ? 'bg-[#131318] border-[#2DD4A0]/40 text-[#2DD4A0]'
+                : 'bg-[#131318] border-[#F0607A]/40 text-[#F0607A]'
+            }`}
           >
-            {feedbackMessage.text}
+            <AlertCircle size={14} className="shrink-0 mt-0.5" />
+            <span>{feedback.text}</span>
           </div>
         )}
 
-        {/* Current Plan Overview Card */}
-        <div className="bg-white dark:bg-slate-900 rounded-lg shadow-xs p-6 mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800 gap-4">
+        <div className="rounded-xl bg-[#131318] border border-[#2A2A33] p-6 space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#2A2A33]">
             <div>
-              <div className="text-xs uppercase tracking-wider text-slate-500 mb-1">Current Tier</div>
-              <div className="text-lg font-bold text-slate-900 dark:text-white">
-                {currentPlanObj.name}
+              <div className="text-xs uppercase tracking-wider text-[#A1A1AA] font-semibold">
+                Current Plan
+              </div>
+              <div className="text-lg font-bold text-[#F7F7F8] mt-1">
+                {access.state === 'trialing'
+                  ? 'CrestFlow Pro (7-Day Free Trial)'
+                  : access.isLifetime
+                  ? 'CrestFlow Pro (Lifetime)'
+                  : access.state === 'active' || access.state === 'grace'
+                  ? currentPlanObj.name
+                  : 'No Active Paid Plan'}
               </div>
             </div>
-            <div>
-              <div className="text-xs uppercase tracking-wider text-slate-500 mb-1">Subscription Status</div>
-              <div>{getStatusDisplay()}</div>
+            <span className={`text-sm font-semibold ${statusTone}`}>{statusLabel}</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div className="rounded-lg bg-[#1B1B22] border border-[#2A2A33] p-3.5">
+              <div className="text-[#A1A1AA]">Valid until</div>
+              <div className="text-sm font-semibold text-[#F7F7F8] mt-1 tabular-figures">
+                {access.isLifetime ? 'Lifetime' : formatDate(access.validUntil)}
+              </div>
+            </div>
+            <div className="rounded-lg bg-[#1B1B22] border border-[#2A2A33] p-3.5">
+              <div className="text-[#A1A1AA]">Billing mode</div>
+              <div className="text-sm font-semibold text-[#F7F7F8] mt-1">
+                {access.state === 'trialing'
+                  ? 'Cardless trial (no charge)'
+                  : access.checkoutMode === 'order' || access.cancelAtPeriodEnd
+                  ? 'One-time / ends automatically'
+                  : access.state === 'active'
+                  ? 'Auto-renewing Razorpay subscription'
+                  : 'Pay when ready'}
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 text-xs">
-            <div>
-              <span className="text-slate-500">Access Until: </span>
-              <strong className="text-slate-900 dark:text-white">{formatDate(accessUntil || trialEndsAt)}</strong>
-            </div>
-
-            <div>
-              <span className="text-slate-500">Next Scheduled Charge: </span>
-              <strong className="text-slate-900 dark:text-white">
-                {cancelAtPeriodEnd
-                  ? 'None (Cancelling)'
-                  : isTrialing
-                    ? `₹${currentPlanObj.price.toLocaleString('en-IN')} on ${formatDate(trialEndsAt || accessUntil)}`
-                    : `₹${currentPlanObj.price.toLocaleString('en-IN')} on ${formatDate(accessUntil)}`}
-              </strong>
-            </div>
-          </div>
-
-          {/* Action Row */}
-          <div className="flex flex-wrap items-center gap-3 pt-6 mt-4 border-t border-slate-100 dark:border-slate-800">
-            {isExpired || status === 'none' ? (
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+            <div className="flex flex-wrap items-center gap-2">
+              {!access.canWrite && (
+                <button
+                  type="button"
+                  onClick={() => access.openUpgradeSheet({ action: 'upgrade' })}
+                  className="px-4 py-2 rounded-lg cf-btn-primary text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer"
+                >
+                  <span>{access.state === 'none' ? 'Start 7-day free trial' : 'Reactivate Pro'}</span>
+                  <ArrowUpRight size={13} />
+                </button>
+              )}
               <button
                 type="button"
                 onClick={onNavigateToPricing}
-                className="px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer border-none"
+                className="px-3.5 py-2 rounded-lg bg-[#1B1B22] hover:bg-[#22222B] border border-[#2A2A33] text-xs font-semibold text-[#F7F7F8] cursor-pointer"
               >
-                Reactivate Subscription
+                Compare plans
               </button>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={() => setChangePlanOpen(true)}
-                  className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded text-xs font-medium transition-colors cursor-pointer border-none"
-                >
-                  Change Plan
-                </button>
-
-                {!cancelAtPeriodEnd && (
+              {access.state === 'active' &&
+                !access.isLifetime &&
+                !access.cancelAtPeriodEnd &&
+                access.checkoutMode !== 'order' && (
                   <button
                     type="button"
-                    onClick={handleCancel}
                     disabled={cancelling}
-                    className="px-4 py-2 text-red-600 hover:text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded text-xs font-medium transition-colors cursor-pointer border-none bg-transparent"
+                    onClick={handleCancel}
+                    className="px-3.5 py-2 rounded-lg bg-[#1B1B22] border border-[#2A2A33] text-xs font-semibold text-[#F0607A] cursor-pointer disabled:opacity-50"
                   >
-                    {cancelling ? 'Processing...' : 'Cancel Subscription'}
+                    {cancelling ? 'Cancelling...' : 'Cancel auto-renewal'}
                   </button>
                 )}
-              </>
-            )}
-          </div>
-        </div>
+            </div>
 
-        {/* Change Plan Modal */}
-        {changePlanOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/25 backdrop-blur-sm p-4 select-none">
-            <div className="w-full max-w-lg bg-surface-700 rounded-xl border border-surface-400 p-6 shadow-xl text-text-primary">
-              <h3 className="text-base font-bold text-text-primary mb-2">
-                Select a New Plan
-              </h3>
-              <p className="text-xs text-text-secondary mb-4">
-                Your new plan will activate automatically at the conclusion of your current billing period ({formatDate(accessUntil)}).
-              </p>
-
-              <div className="space-y-2 mb-6">
-                {PRO_PLANS.map((p) => (
-                  <label
-                    key={p.id}
-                    className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer text-xs ${selectedNewPlan === p.id
-                      ? 'border-accent bg-surface-600'
-                      : 'border-surface-400 bg-surface-700'
-                      }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        name="plan"
-                        value={p.id}
-                        checked={selectedNewPlan === p.id}
-                        onChange={() => setSelectedNewPlan(p.id)}
-                        className="accent-[#e1002d]"
-                      />
-                      <span className="font-semibold text-text-primary">{p.name}</span>
-                    </div>
-                    <div className="text-right">
-                      <strong className="text-text-primary">₹{p.price.toLocaleString('en-IN')}</strong>
-                      <span className="text-text-secondary ml-1">{p.periodLabel}</span>
-                    </div>
-                  </label>
-                ))}
-              </div>
-
-              <div className="flex items-center justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setChangePlanOpen(false)}
-                  className="px-3 py-1.5 bg-surface-600 hover:bg-surface-500 text-text-primary rounded-lg text-xs cursor-pointer border-none"
-                >
-                  Close
-                </button>
-                <button
-                  type="button"
-                  onClick={handleChangePlan}
-                  disabled={changingPlan}
-                  className="px-4 py-1.5 bg-accent hover:bg-accent-hover text-white rounded-lg text-xs font-semibold cursor-pointer border-none disabled:opacity-50"
-                >
-                  {changingPlan ? 'Scheduling...' : 'Confirm Plan Change'}
-                </button>
-              </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleExportJson}
+                className="px-3 py-2 rounded-lg bg-[#1B1B22] border border-[#2A2A33] text-xs font-medium text-[#F7F7F8] inline-flex items-center gap-1.5 cursor-pointer"
+              >
+                <Download size={13} /> Export JSON
+              </button>
+              <button
+                type="button"
+                onClick={handleExportCsv}
+                className="px-3 py-2 rounded-lg bg-[#1B1B22] border border-[#2A2A33] text-xs font-medium text-[#F7F7F8] inline-flex items-center gap-1.5 cursor-pointer"
+              >
+                <Download size={13} /> Export CSV
+              </button>
             </div>
           </div>
-        )}
+
+          {access.state === 'active' && !access.isLifetime && (
+            <p className="text-[11px] text-[#A1A1AA]">
+              Mid-period plan switching is disabled in this release. Wait until {formatDate(access.validUntil)} or cancel auto-renewal to pick another billing cycle next period.
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

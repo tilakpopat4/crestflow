@@ -1,78 +1,93 @@
-import * as React from "react";
-import { cn } from "@/lib/utils";
+import React from 'react';
+import { cn } from '@/lib/utils';
 
-/**
- * Standard Design System StatCard for executive metrics.
- * - Large tabular numerals (font-mono tabular-nums text-text-primary)
- * - Quiet small uppercase label (text-[11px] text-text-secondary tracking-wider)
- * - Optional contextual comparison line (e.g. vs last month)
- */
 export interface StatCardProps extends React.HTMLAttributes<HTMLDivElement> {
   label: string;
   value: React.ReactNode;
   comparison?: React.ReactNode;
+  sublabel?: string;
   subtext?: React.ReactNode;
-  icon?: React.ReactNode | React.ElementType;
-  badge?: React.ReactNode;
   alert?: boolean;
+  accentColor?: 'default' | 'gold' | 'mint' | 'amber' | 'rose' | 'indigo' | 'emerald' | 'blue' | 'red';
+  useDisplayFont?: boolean;
+  icon?: React.ReactNode | React.ElementType;
+  action?: React.ReactNode;
 }
 
+/**
+ * KPI Metric Card styled with Section 9 obsidian surface (#131318) and hairline border (#2A2A33).
+ * Gold #FFC145 is reserved strictly for financial/metric totals where appropriate.
+ */
 export function StatCard({
   label,
   value,
   comparison,
+  sublabel,
   subtext,
+  alert = false,
+  accentColor = 'default',
+  useDisplayFont = false,
   icon,
-  badge,
-  alert,
+  action,
   className,
   ...props
 }: StatCardProps) {
+  const effectiveTone = alert && accentColor === 'default' ? 'amber' : accentColor;
+  const valueTone =
+    effectiveTone === 'gold'
+      ? 'text-[#FFC145]'
+      : effectiveTone === 'mint' || effectiveTone === 'emerald'
+      ? 'text-[#2DD4A0]'
+      : effectiveTone === 'amber'
+      ? 'text-[#FFB020]'
+      : effectiveTone === 'rose' || effectiveTone === 'red'
+      ? 'text-[#F0607A]'
+      : 'text-[#F7F7F8]';
+
   const renderIcon = () => {
     if (!icon) return null;
     if (React.isValidElement(icon)) return icon;
     if (typeof icon === 'function' || (typeof icon === 'object' && icon !== null)) {
       const IconComp = icon as React.ComponentType<{ size?: number; className?: string }>;
-      return <IconComp size={16} className={alert ? "text-accent" : undefined} />;
+      return <IconComp size={16} />;
     }
     return <>{icon}</>;
   };
 
+  const footerPrimary = comparison ?? subtext;
+
   return (
     <div
       className={cn(
-        "bg-surface-700 border border-surface-400 rounded-xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between min-w-0 transition-colors",
-        alert && "border-accent/40",
-        className
+        'bg-[#131318] border border-[#2A2A33] rounded-xl p-4 sm:p-5 flex flex-col justify-between transition-colors contain-paint',
+        className,
       )}
       {...props}
     >
-      <div className="flex items-center justify-between gap-2 mb-2">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary truncate">
+      <div className="flex items-start justify-between gap-2">
+        <div className="text-[11px] font-medium text-[#A1A1AA] uppercase tracking-wider leading-snug">
           {label}
-        </span>
-        {icon && (
-          <div
-            className={cn(
-              "w-8 h-8 rounded-lg bg-surface-600 border-0 flex items-center justify-center text-text-secondary shrink-0",
-              alert && "text-accent"
-            )}
-          >
-            {renderIcon()}
-          </div>
-        )}
+        </div>
+        {icon && <div className="text-[#A1A1AA] shrink-0">{renderIcon()}</div>}
       </div>
 
-      <div className="flex items-baseline gap-2 my-1">
-        <div className="text-2xl sm:text-3xl font-bold font-mono tabular-nums text-text-primary tracking-tight truncate">
+      <div className="mt-2.5 flex items-baseline justify-between gap-2 flex-wrap">
+        <div
+          className={cn(
+            useDisplayFont ? 'font-anton-display text-2xl sm:text-3xl' : 'text-xl sm:text-2xl font-semibold',
+            'tracking-tight tabular-figures leading-none',
+            valueTone,
+          )}
+        >
           {value}
         </div>
-        {badge && <div className="shrink-0">{badge}</div>}
+        {action && <div className="shrink-0">{action}</div>}
       </div>
 
-      {(subtext || comparison) && (
-        <div className="text-xs text-text-secondary mt-1 truncate">
-          {subtext || comparison}
+      {(footerPrimary || sublabel) && (
+        <div className="mt-2 flex items-center justify-between gap-2 text-xs text-[#A1A1AA] tabular-figures">
+          {footerPrimary ? <span>{footerPrimary}</span> : <span />}
+          {sublabel && <span className="truncate">{sublabel}</span>}
         </div>
       )}
     </div>

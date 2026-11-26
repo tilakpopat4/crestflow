@@ -104,7 +104,7 @@ describe('Editable Subscription Wall & Admin Pricing Config Suite', () => {
     });
 
     assert.equal(merged.wallTitle, 'Custom Wall Headline');
-    assert.equal(merged.plans.length, 5);
+    assert.equal(merged.plans.length, 4);
 
     const trial = merged.plans.find((p) => p.id === 'trial')!;
     assert.equal(trial.name, 'Free 7-Day Pass');
@@ -153,7 +153,7 @@ describe('Editable Subscription Wall & Admin Pricing Config Suite', () => {
     const json = (await getRes.json()) as any;
     assert.equal(json.config.wallTitle, 'Unlock Your Studio');
     assert.equal(json.config.footerNote, 'Powered by CrestFlow Billing.');
-    assert.equal(json.config.plans.length, 5);
+    assert.equal(json.config.plans.length, 4);
   });
 
   it('3. All new and modified subscription/admin files remain <= 300 lines (AGENTS.md)', () => {
@@ -164,11 +164,10 @@ describe('Editable Subscription Wall & Admin Pricing Config Suite', () => {
       'src/components/admin/AdminPricingManager.tsx',
       'src/components/admin/AdminPlanEditorCard.tsx',
       'src/components/AdminTab.tsx',
-      'src/components/subscription/SubscriptionWallPage.tsx',
+      'src/components/access/UpgradeSheet.tsx',
+      'src/components/access/TrialProgressCard.tsx',
       'src/components/subscription/PricingPage.tsx',
       'src/components/subscription/PricingCard.tsx',
-      'src/components/subscription/PlanSelectionStep.tsx',
-      'src/components/SubscriptionModal.tsx',
       'worker/routes/adminSettings.ts',
       'worker/index.ts',
     ];

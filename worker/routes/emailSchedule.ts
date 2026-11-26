@@ -4,8 +4,8 @@
  */
 
 import { Env } from '../types';
-import { verifyFirebaseIdToken } from '../auth';
 import { parseServiceAccount } from '../firestore';
+import { requireEntitlement } from '../entitlements';
 import { enqueueEmailJob, cancelEmailJob } from '../emailQueue';
 import { processDueEmailJobs } from '../emailDispatcher';
 import { SupportedEventType } from '../emailTemplates';
@@ -16,14 +16,12 @@ export const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-z
 
 /**
  * 1. POST /api/email/schedule
- * Schedules an email for future delivery at a specified UTC timestamp.
+ * Schedules an email reminder (entitlement-gated).
  */
 export async function handleScheduleEmail(request: Request, env: Env): Promise<Response> {
-  const token = getBearerToken(request);
-  if (!token) return jsonResponse({ error: 'Unauthorized' }, 401);
-
-  const creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
-  const verifiedUser = await verifyFirebaseIdToken(token, creds.project_id);
+  const gate = await requireEntitlement(request, env);
+  if (!gate.ok) return gate.response;
+  const { user: verifiedUser, creds } = gate;
 
   let body: any;
   try {
@@ -83,11 +81,9 @@ export async function handleScheduleEmail(request: Request, env: Env): Promise<R
  * Cancels a scheduled email job.
  */
 export async function handleCancelEmail(request: Request, env: Env): Promise<Response> {
-  const token = getBearerToken(request);
-  if (!token) return jsonResponse({ error: 'Unauthorized' }, 401);
-
-  const creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
-  await verifyFirebaseIdToken(token, creds.project_id);
+  const gate = await requireEntitlement(request, env);
+  if (!gate.ok) return gate.response;
+  const { creds } = gate;
 
   let body: any;
   try {

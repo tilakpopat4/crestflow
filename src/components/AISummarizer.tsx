@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Client, WorkItem, UserProfile } from '../types';
-import { Sparkles, Copy, Calendar, Loader2 } from 'lucide-react';
+import { FileText, Lock, Copy, Calendar, Loader2 } from 'lucide-react';
 import { useAiSummarizerConfig } from '../lib/aiConfig';
+import { useAccess } from '../hooks/useAccess';
 
 interface AISummarizerProps {
   clients: Client[];
@@ -11,6 +12,7 @@ interface AISummarizerProps {
 
 export default function AISummarizer({ clients, workItems, profile }: AISummarizerProps) {
   const { isEnabled: isAiEnabled } = useAiSummarizerConfig();
+  const access = useAccess();
   const [targetDate, setTargetDate] = useState<string>(
     new Date().toISOString().split('T')[0]
   );
@@ -20,19 +22,24 @@ export default function AISummarizer({ clients, workItems, profile }: AISummariz
   const [copied, setCopied] = useState(false);
 
   const handleGenerate = async () => {
+    if (!access.requireAccess('ai_summary', 'Summarize deliverables and draft client portfolio notes.')) {
+      return;
+    }
     setIsGenerating(true);
     setError(null);
     setSummary('');
     setCopied(false);
     try {
       const upToDate = new Date(targetDate);
-      // Set to end of the day
       upToDate.setHours(23, 59, 59, 999);
-      
+
       const { generateWorkSummary } = await import('../lib/geminiService');
       const generatedText = await generateWorkSummary(clients, workItems, upToDate, profile);
       setSummary(generatedText);
     } catch (err: any) {
+      if (err?.code === 'ENTITLEMENT_REQUIRED') {
+        access.requireAccess('ai_summary');
+      }
       setError(err.message || 'Failed to generate summary.');
     } finally {
       setIsGenerating(false);
@@ -50,51 +57,52 @@ export default function AISummarizer({ clients, workItems, profile }: AISummariz
   if (!isAiEnabled) return null;
 
   return (
-    <div className="bg-slate-50 dark:bg-slate-900 rounded-xl shadow-xs overflow-hidden flex flex-col mt-8">
-      <div className="p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-800/80">
+    <div className="bg-[#131318] border border-[#2A2A33] rounded-xl overflow-hidden flex flex-col mt-6">
+      <div className="p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-[#1B1B22] border-b border-[#2A2A33]">
         <div>
-          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-            <Sparkles className="text-text-primary" size={20} />
+          <h3 className="text-base font-semibold text-[#F7F7F8] flex items-center gap-2">
+            <FileText className="text-[#A1A1AA]" size={18} />
             AI Work Summarizer
           </h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Generate a professional summary of your work experience, clients, and achievements up to a specific date.
+          <p className="text-xs text-[#A1A1AA] mt-1">
+            Generate a concise summary of your work experience and achievements up to a specific date.
           </p>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <div className="relative flex-1 sm:w-40">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Calendar size={14} className="text-slate-400 dark:text-slate-500" />
+              <Calendar size={14} className="text-[#A1A1AA]" />
             </div>
             <input
               type="date"
               value={targetDate}
               onChange={(e) => setTargetDate(e.target.value)}
               max={new Date().toISOString().split('T')[0]}
-              className="pl-9 w-full rounded-lg border-slate-200 dark:border-slate-700 text-sm focus:border-surface-400 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 py-2 shadow-xs transition-colors"
+              className="pl-9 w-full rounded-lg border border-[#2A2A33] text-xs bg-[#131318] text-[#F7F7F8] py-2 outline-none"
             />
           </div>
           <button
+            type="button"
             onClick={handleGenerate}
             disabled={isGenerating}
-            className="flex items-center gap-2 bg-accent hover:bg-accent-hover disabled:opacity-70 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-xs whitespace-nowrap cursor-pointer"
+            className="flex items-center gap-2 cf-btn-primary disabled:opacity-60 text-white px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap cursor-pointer"
           >
-            {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
+            {isGenerating ? <Loader2 size={14} className="animate-spin" /> : !access.canWrite ? <Lock size={14} /> : <FileText size={14} />}
             {isGenerating ? 'Generating...' : 'Generate'}
           </button>
         </div>
       </div>
-      
-      <div className="p-6 bg-[#212121]">
+
+      <div className="p-5 bg-[#131318]">
         {error && (
-          <div className="p-3.5 bg-[#181818] border border-red-600/40 text-red-400 rounded-lg text-sm mb-4">
+          <div className="p-3 bg-[#1B1B22] border border-[#F0607A]/40 text-[#F0607A] rounded-lg text-xs mb-4">
             {error}
           </div>
         )}
 
         {!summary && !isGenerating && !error && (
-          <div className="text-center py-8 text-slate-400 text-sm italic">
-            Select a date and click "Generate" to create your AI summary.
+          <div className="text-center py-6 text-[#A1A1AA] text-xs">
+            Select a date and click &quot;Generate&quot; to create your AI summary.
           </div>
         )}
 

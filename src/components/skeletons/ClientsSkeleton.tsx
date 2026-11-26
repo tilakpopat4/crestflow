@@ -28,7 +28,7 @@ export const ClientsSkeleton: React.FC = () => {
         {[1, 2, 3, 4, 5, 6].map((i) => (
           <div
             key={i}
-            className="p-5 rounded-lg border border-slate-200 dark:border-[#383838] bg-white dark:bg-[#212121] space-y-4"
+            className="p-5 rounded-xl border border-[#2A2A33] bg-[#131318] space-y-4"
           >
             {/* Top row: Avatar & Client Name & Action menu */}
             <div className="flex items-start justify-between gap-3">
@@ -43,7 +43,7 @@ export const ClientsSkeleton: React.FC = () => {
             </div>
 
             {/* Divider */}
-            <div className="border-t border-slate-100 dark:border-[#2a2a2a]" />
+            <div className="border-t border-[#2A2A33]" />
 
             {/* Metrics Row */}
             <div className="grid grid-cols-2 gap-3">
@@ -58,7 +58,7 @@ export const ClientsSkeleton: React.FC = () => {
             </div>
 
             {/* Footer action buttons */}
-            <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-[#2a2a2a]">
+            <div className="flex items-center justify-between pt-2 border-t border-[#2A2A33]">
               <Skeleton className="h-3 w-24" />
               <Skeleton className="h-7 w-24" rounded="md" />
             </div>

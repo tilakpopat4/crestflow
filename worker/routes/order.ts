@@ -1,122 +1,114 @@
 import { Env } from '../types';
 import { verifyFirebaseIdToken } from '../auth';
-import { parseServiceAccount, getSubscriptionFromFirestore, updateSubscriptionInFirestore } from '../firestore';
+import { parseServiceAccount } from '../firestore';
+import {
+  getEntitlementFromFirestore,
+  isEntitledRecord,
+  resolveEffectiveStatus,
+  writeEntitlement,
+} from '../entitlements';
+import { createRazorpayOrder } from '../razorpay';
+import { resolvePaidPlanKey, SERVER_PLAN_CATALOG } from '../../src/shared/pricing';
 import { jsonResponse, getBearerToken } from './subscription';
 
 /**
  * Handles POST /api/create-order
- * Razorpay Standard Web Checkout order creation
+ * Fallback one-time Razorpay Order checkout. Server ALWAYS resolves price from planKey.
+ * Preserves any running trial entitlement until verified payment completes.
  */
 export async function handleCreateOrder(request: Request, env: Env): Promise<Response> {
   const idToken = getBearerToken(request);
   if (!idToken) {
-    return jsonResponse({ error: 'Missing or unauthorized Authorization header' }, 401);
+    return jsonResponse({ error: 'Missing Authorization header' }, 401, request, env);
   }
 
-  let verifiedUser;
   let creds;
+  let verifiedUser;
   try {
     creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
     const projectId = env.FIREBASE_PROJECT_ID || creds.project_id;
     verifiedUser = await verifyFirebaseIdToken(idToken, projectId);
-  } catch (err: any) {
-    return jsonResponse({ error: `Authentication failed: ${err.message}` }, 401);
+  } catch {
+    return jsonResponse({ error: 'Authentication failed' }, 401, request, env);
   }
 
   const body = (await request.json().catch(() => ({}))) as {
-    amount?: number;
-    currency?: string;
-    receipt?: string;
+    plan?: string;
     planKey?: string;
-    notes?: Record<string, string>;
   };
 
-  const amountPaise = Number(body.amount);
-  if (isNaN(amountPaise) || amountPaise < 100) {
+  const paidPlanKey = resolvePaidPlanKey(body.planKey || body.plan);
+  if (!paidPlanKey) {
     return jsonResponse(
-      { error: 'Amount must be at least 100 paise (₹1)' },
-      400
+      { error: 'Please choose a valid paid plan (monthly, quarterly, or yearly).' },
+      400,
+      request,
+      env
     );
   }
 
-  const existing = await getSubscriptionFromFirestore(creds, verifiedUser.uid);
-  const isTrialRequest = body.planKey === 'trial' || amountPaise === 100;
-  const hasUsedTrial = Boolean(
-    existing?.status === 'trialing' ||
-    Boolean(existing?.trialEndsAt) ||
-    (existing?.hasHadTrial && existing?.status !== 'pending' && Boolean(existing?.trialEndsAt || existing?.hasHadSubscription))
-  );
-  if (isTrialRequest && (hasUsedTrial || existing?.status === 'active')) {
+  const planSpec = SERVER_PLAN_CATALOG[paidPlanKey];
+  const existing = await getEntitlementFromFirestore(creds, verifiedUser.uid);
+  const effectiveStatus = resolveEffectiveStatus(existing);
+
+  if (existing && (effectiveStatus === 'active' || effectiveStatus === 'grace')) {
     return jsonResponse(
-      { error: 'The 7-day trial is only available once per account. Please select one of our paid plans.' },
-      403
+      {
+        error: 'You already have an active plan. Mid-period plan switching is unavailable until your current period ends.',
+        code: 'ALREADY_ACTIVE',
+        validUntil: existing.validUntil,
+      },
+      409,
+      request,
+      env
     );
   }
-
-  const currency = (body.currency || 'INR').toUpperCase();
-  const receipt = body.receipt || `rcpt_${verifiedUser.uid.substring(0, 8)}_${Date.now()}`;
 
   try {
-    const authHeader = `Basic ${btoa(`${env.RAZORPAY_KEY_ID}:${env.RAZORPAY_KEY_SECRET}`)}`;
-    const rzpRes = await fetch('https://api.razorpay.com/v1/orders', {
-      method: 'POST',
-      headers: {
-        Authorization: authHeader,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        amount: amountPaise,
-        currency,
-        receipt,
-        notes: {
-          uid: verifiedUser.uid,
-          userId: verifiedUser.uid,
-          userEmail: verifiedUser.email || '',
-          planKey: body.planKey || '',
-          ...(body.notes || {}),
-        },
-      }),
-    });
+    const orderData = await createRazorpayOrder(
+      env,
+      planSpec.amountPaise,
+      verifiedUser.uid,
+      paidPlanKey,
+      verifiedUser.email,
+      verifiedUser.name
+    );
 
-    if (!rzpRes.ok) {
-      const errText = await rzpRes.text();
-      return jsonResponse(
-        { error: `Razorpay order creation failed: ${errText}` },
-        500
-      );
-    }
+    const now = Date.now();
+    const validUntilEstimate = new Date(now + planSpec.durationDays * 86400 * 1000).toISOString();
 
-    const orderData = (await rzpRes.json()) as any;
-
-    // Track pending order in Firestore
-    const effectivePlan = body.planKey === 'trial' ? 'monthly' : body.planKey || 'monthly';
-    await updateSubscriptionInFirestore(creds, verifiedUser.uid, {
+    await writeEntitlement(creds, verifiedUser.uid, {
       userId: verifiedUser.uid,
       userEmail: verifiedUser.email,
       userName: verifiedUser.name,
-      plan: effectivePlan as any,
-      billingCycle: effectivePlan as any,
-      status: 'pending',
-      hasHadTrial: existing?.hasHadTrial && existing?.status !== 'pending' ? true : false,
-      razorpaySubscriptionId: orderData.id,
-      razorpayPlanId: 'order_mode',
-      cancelAtPeriodEnd: false,
-      lockTimestamp: 0,
-      updatedAt: Date.now(),
+      status: existing?.status && isEntitledRecord(existing, now) ? existing.status : existing?.status || 'none',
+      plan: existing?.plan && existing.plan !== 'none' ? existing.plan : 'none',
+      validUntil: existing?.validUntil ?? null,
+      trialUsed: Boolean(existing?.trialUsed),
+      cancelAtPeriodEnd: Boolean(existing?.cancelAtPeriodEnd),
+      checkoutMode: 'order',
+      razorpayOrderId: orderData.id,
+      updatedAt: new Date(now).toISOString(),
     });
 
-    return jsonResponse({
-      order_id: orderData.id,
-      orderId: orderData.id,
-      amount: orderData.amount,
-      currency: orderData.currency,
-      key_id: env.RAZORPAY_KEY_ID,
-      keyId: env.RAZORPAY_KEY_ID,
-    });
-  } catch (apiErr: any) {
     return jsonResponse(
-      { error: `Internal server error: ${apiErr.message}` },
-      500
+      {
+        mode: 'order',
+        order_id: orderData.id,
+        orderId: orderData.id,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        key_id: env.RAZORPAY_KEY_ID,
+        keyId: env.RAZORPAY_KEY_ID,
+        planKey: paidPlanKey,
+        validUntilEstimate,
+      },
+      200,
+      request,
+      env
     );
+  } catch (err: any) {
+    console.error('[create-order] Error creating order:', err?.message);
+    return jsonResponse({ error: 'Unable to initialize payment order. Please try again.' }, 500, request, env);
   }
 }

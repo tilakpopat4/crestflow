@@ -23,7 +23,7 @@ export interface RouteMatch {
   route: AppRoute;
   path: string;
   params: Record<string, string>;
-  isSpecialMode?: 'freelancer_profile' | 'feedback' | 'auth' | 'promo';
+  isSpecialMode?: 'freelancer_profile' | 'feedback' | 'auth' | 'promo' | 'public_invoice';
 }
 
 export const ROUTE_PATHS: Record<AppRoute, string> = {
@@ -86,6 +86,17 @@ export function resolveRoute(pathname: string, search: string = ''): RouteMatch 
       path: `/onboarding/${targetFreelancerId}`,
       params: { ...params, freelancerId: targetFreelancerId, username: targetFreelancerId, mode: 'onboarding' },
       isSpecialMode: 'freelancer_profile',
+    };
+  }
+
+  const invoiceShareMatch = rawPath.match(/^\/invoice\/([a-zA-Z0-9_-]{4,128})\/?$/i);
+  if (invoiceShareMatch) {
+    const invoiceId = invoiceShareMatch[1];
+    return {
+      route: 'invoices',
+      path: `/invoice/${invoiceId}`,
+      params: { ...params, invoiceId, t: params.t || '' },
+      isSpecialMode: 'public_invoice',
     };
   }
 

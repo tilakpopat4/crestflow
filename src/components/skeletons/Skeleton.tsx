@@ -6,9 +6,7 @@ export interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 /**
- * Base minimal skeleton loader block.
- * Built per GEMINI.md standards: flat, restrained neutral palette, calm opacity pulse,
- * zero neon or decorative pastel tinting.
+ * Base minimal skeleton loader block aligned with Section 9 raised obsidian palette (#1B1B22).
  */
 export const Skeleton: React.FC<SkeletonProps> = ({
   className = '',
@@ -29,7 +27,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
   return (
     <div
       aria-hidden="true"
-      className={`bg-slate-200/60 dark:bg-[#2a2a2a] animate-pulse pointer-events-none select-none ${roundedCls} ${className}`}
+      className={`bg-[#1B1B22] animate-pulse pointer-events-none select-none ${roundedCls} ${className}`}
       {...props}
     />
   );

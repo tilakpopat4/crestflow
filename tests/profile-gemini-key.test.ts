@@ -53,15 +53,15 @@ describe('Gemini API Key Persistence & Profile State Management', () => {
     );
   });
 
-  it('ProfilePage allows saving partial details without requiring UPI ID or blocking on empty optional fields', () => {
+  it('ProfilePage requires UPI ID on invoicing payouts while allowing public/AI sections to save independently', () => {
     const content = fs.readFileSync(profilePageFile, 'utf-8');
     assert.ok(
-      !content.includes('!upiId.trim()'),
-      'ProfilePage must not block saving when upiId is empty'
+      content.includes("if (section === 'invoicing')") && content.includes('!trimmedUpi || !isValidUpiId(trimmedUpi)'),
+      'ProfilePage must require valid UPI ID when saving invoicing/payout details'
     );
     assert.ok(
-      content.includes('trimmedUpi && !trimmedUpi.includes(\'@\')'),
-      'ProfilePage should only validate UPI format if a UPI ID is actually provided'
+      content.includes("section === 'profile'"),
+      'ProfilePage must support independent section saves so profile/AI edits work smoothly'
     );
   });
 
@@ -96,8 +96,12 @@ describe('Gemini API Key Persistence & Profile State Management', () => {
       'firestore.rules must enforce authenticated ownership for profiles collection'
     );
     assert.ok(
-      rulesContent.includes('isOwner(profileId) && isValidProfile(request.resource.data)'),
-      'firestore.rules must allow create for owners without restricting auth UID formats'
+      rulesContent.includes('isOwner(profileId)') && rulesContent.includes('isValidProfile(request.resource.data)'),
+      'firestore.rules must enforce authenticated ownership and profile validation'
+    );
+    assert.ok(
+      rulesContent.includes("affectedKeys().hasAny(['username', 'sampleWorks']) || entitled(profileId)"),
+      'firestore.rules must lock username and sampleWorks edits after expiry'
     );
     assert.ok(
       rulesContent.includes("!request.resource.data.keys().hasAny(['admin', 'isAdmin', 'is_admin'"),

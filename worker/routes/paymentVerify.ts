@@ -1,147 +1,215 @@
 import { Env } from '../types';
 import { verifyFirebaseIdToken } from '../auth';
-import { parseServiceAccount, updateSubscriptionInFirestore, getSubscriptionFromFirestore } from '../firestore';
-import { jsonResponse, getBearerToken } from './subscription';
-import { verifyRazorpayPaymentSignature } from '../razorpay';
-import { sendWelcomeEmailForUser } from './notifications';
+import { parseServiceAccount } from '../firestore';
+import {
+  getEntitlementFromFirestore,
+  isEntitledRecord,
+  writeEntitlement,
+} from '../entitlements';
+import {
+  verifyRazorpayCheckoutSignature,
+  fetchRazorpayPayment,
+  fetchRazorpaySubscription,
+} from '../razorpay';
+import { resolvePaidPlanKey, SERVER_PLAN_CATALOG } from '../../src/shared/pricing';
 import { sendPaymentChargedReceipt } from '../emailDispatcher';
+import { sendWelcomeEmailForUser } from './notifications';
+import { jsonResponse, getBearerToken } from './subscription';
 
 /**
  * Handles POST /api/verify-payment
- * Instant client payment verification and access provisioning
- * Algorithm: HMAC-SHA256(order_id + "|" + payment_id, KEY_SECRET)
+ * - Requires mandatory HMAC-SHA256 signature verification (Orders OR Subscriptions).
+ * - Confirms payment status + minimum plan amount directly from Razorpay REST API.
+ * - Writes `entitlements/{uid}` idempotently (safe if webhook arrives before or after verify).
  */
 export async function handleVerifyPayment(request: Request, env: Env): Promise<Response> {
   const idToken = getBearerToken(request);
-  if (!idToken) return jsonResponse({ error: 'Missing or unauthorized Authorization header' }, 401);
+  if (!idToken) {
+    return jsonResponse({ error: 'Missing Authorization header' }, 401, request, env);
+  }
 
+  let creds;
   let verifiedUser;
   try {
-    const creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
+    creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
     const projectId = env.FIREBASE_PROJECT_ID || creds.project_id;
     verifiedUser = await verifyFirebaseIdToken(idToken, projectId);
-  } catch (err: any) {
-    return jsonResponse({ error: `Authentication failed: ${err.message}` }, 401);
+  } catch {
+    return jsonResponse({ error: 'Authentication failed' }, 401, request, env);
   }
 
   const body = (await request.json().catch(() => ({}))) as any;
   const paymentId = body.razorpay_payment_id || body.paymentId;
   const orderId = body.razorpay_order_id || body.orderId;
+  const subscriptionId = body.razorpay_subscription_id || body.subscriptionId;
   const signature = body.razorpay_signature || body.signature;
-  const planKey = body.planKey || '';
 
-  // Required field validation per spec
-  if (!paymentId || !orderId) {
-    return jsonResponse({ error: 'Missing required fields: paymentId and orderId are required' }, 400);
-  }
-
-  // If signature is provided, verify using HMAC-SHA256(order_id + "|" + payment_id, KEY_SECRET)
-  if (signature) {
-    const isValidSignature = await verifyRazorpayPaymentSignature(
-      orderId,
-      paymentId,
-      signature,
-      env.RAZORPAY_KEY_SECRET
+  if (!paymentId || !signature || (!orderId && !subscriptionId)) {
+    return jsonResponse(
+      { error: 'Missing required payment verification fields.' },
+      400,
+      request,
+      env
     );
-
-    if (!isValidSignature) {
-      return jsonResponse({ error: 'Payment signature mismatch. Verification failed.' }, 400);
-    }
   }
 
-  const authHeader = `Basic ${btoa(`${env.RAZORPAY_KEY_ID}:${env.RAZORPAY_KEY_SECRET}`)}`;
-  const payRes = await fetch(`https://api.razorpay.com/v1/payments/${paymentId}`, {
-    headers: { Authorization: authHeader },
+  const isValidSignature = await verifyRazorpayCheckoutSignature({
+    orderId,
+    subscriptionId,
+    paymentId,
+    signature,
+    secret: env.RAZORPAY_KEY_SECRET,
   });
 
-  if (!payRes.ok) {
-    const errText = await payRes.text();
-    return jsonResponse({ error: `Payment verification failed: ${errText}` }, 400);
+  if (!isValidSignature) {
+    return jsonResponse({ error: 'Payment signature verification failed.' }, 400, request, env);
   }
 
-  const payData = (await payRes.json()) as any;
+  let payData: any;
+  try {
+    payData = await fetchRazorpayPayment(env, paymentId);
+  } catch (err: any) {
+    console.warn('[verify-payment] Razorpay payment lookup failed:', err?.message);
+    return jsonResponse({ error: 'Unable to confirm payment with gateway.' }, 400, request, env);
+  }
+
   if (payData.status !== 'captured' && payData.status !== 'authorized') {
-    return jsonResponse({ error: `Payment not completed. Status: ${payData.status}` }, 400);
+    return jsonResponse(
+      { error: `Payment not completed (${payData.status || 'unknown'}).` },
+      400,
+      request,
+      env
+    );
   }
 
+  const paymentUid = payData.notes?.uid || payData.notes?.userId;
+  if (paymentUid && paymentUid !== verifiedUser.uid) {
+    return jsonResponse({ error: 'Payment ownership mismatch.' }, 403, request, env);
+  }
+
+  const existing = await getEntitlementFromFirestore(creds, verifiedUser.uid).catch(() => null);
   const nowMs = Date.now();
-  const isTrial = (planKey || '').toLowerCase() === 'trial' || payData.amount === 100;
-  const days = isTrial
-    ? 7
-    : planKey === 'yearly'
-    ? 365
-    : planKey === 'half'
-    ? 180
-    : planKey === 'quarterly'
-    ? 90
-    : 30;
 
-  const accessUntil = new Date(nowMs + days * 86400 * 1000).toISOString();
-  const creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
-  const existing = await getSubscriptionFromFirestore(creds, verifiedUser.uid).catch(() => null);
+  // Idempotent return if webhook already activated this exact paymentId
+  if (
+    existing?.razorpayPaymentId === paymentId &&
+    existing.status === 'active' &&
+    isEntitledRecord(existing, nowMs)
+  ) {
+    return jsonResponse(
+      {
+        status: 'ok',
+        success: true,
+        idempotent: true,
+        entitlementStatus: existing.status,
+        plan: existing.plan,
+        validUntil: existing.validUntil,
+        paymentId,
+        orderId,
+        subscriptionId,
+      },
+      200,
+      request,
+      env
+    );
+  }
 
-  const paymentAmount = payData.amount ? payData.amount / 100 : (isTrial ? 1 : 79);
+  const resolvedKey =
+    resolvePaidPlanKey(payData.notes?.planKey || body.planKey || existing?.billingCycle) || 'monthly';
+  const planSpec = SERVER_PLAN_CATALOG[resolvedKey];
+
+  if (typeof payData.amount === 'number' && payData.amount < planSpec.amountPaise) {
+    return jsonResponse(
+      { error: 'Verified payment amount does not match selected plan.' },
+      400,
+      request,
+      env
+    );
+  }
+
+  let validUntilMs = nowMs + planSpec.durationDays * 86400 * 1000;
+  let rzpCustomerId = payData.customer_id || existing?.razorpayCustomerId || null;
+  if (subscriptionId) {
+    try {
+      const rzpSub = await fetchRazorpaySubscription(env, subscriptionId);
+      if (rzpSub.notes?.uid && rzpSub.notes.uid !== verifiedUser.uid) {
+        return jsonResponse({ error: 'Subscription ownership mismatch.' }, 403, request, env);
+      }
+      if (rzpSub.current_end && rzpSub.current_end * 1000 > nowMs) {
+        validUntilMs = rzpSub.current_end * 1000;
+      }
+      rzpCustomerId = rzpSub.customer_id || rzpCustomerId;
+    } catch {}
+  }
+
+  const validUntilIso = new Date(validUntilMs).toISOString();
+  const paymentAmount = payData.amount ? payData.amount / 100 : planSpec.priceInr;
   const paymentMethod = payData.method || (payData.vpa ? 'upi' : 'card');
   const paymentVpa = payData.vpa || null;
-  const effectiveCycle = isTrial ? 'trial' : planKey || 'monthly';
+  const checkoutMode = subscriptionId ? 'subscription' : 'order';
 
-  await updateSubscriptionInFirestore(creds, verifiedUser.uid, {
+  await writeEntitlement(creds, verifiedUser.uid, {
     userId: verifiedUser.uid,
-    status: isTrial ? 'trialing' : 'active',
-    plan: 'pro',
-    billingCycle: effectiveCycle,
-    currentPeriodStart: nowMs,
-    currentPeriodEnd: nowMs + days * 86400 * 1000,
-    accessUntil,
-    trialEndsAt: isTrial ? accessUntil : null,
-    hasHadSubscription: true,
-    hasHadTrial: isTrial ? true : (existing?.hasHadTrial || false),
-    lastPaymentId: paymentId,
+    userEmail: verifiedUser.email,
+    userName: verifiedUser.name,
+    status: 'active',
+    plan: planSpec.planCode,
+    billingCycle: resolvedKey,
+    validUntil: validUntilIso,
+    graceUntil: null,
+    trialUsed: Boolean(existing?.trialUsed),
+    cancelAtPeriodEnd: false,
+    checkoutMode,
+    razorpayCustomerId: rzpCustomerId,
+    razorpaySubscriptionId: subscriptionId || existing?.razorpaySubscriptionId || null,
+    razorpayOrderId: orderId || payData.order_id || existing?.razorpayOrderId || null,
+    razorpayPaymentId: paymentId,
     lastPaymentAmount: paymentAmount,
     lastPaymentMethod: paymentMethod,
     lastPaymentVpa: paymentVpa,
     lastPaymentAt: nowMs,
-    razorpaySubscriptionId: orderId || paymentId,
-    cancelAtPeriodEnd: false,
-    updatedAt: nowMs,
+    notifiedExpired: false,
+    notifiedChargeFailed: false,
+    updatedAt: new Date(nowMs).toISOString(),
   });
 
-  // 1. Send Payment Receipt Email for any successful payment
   if (verifiedUser.email) {
-    const planName = isTrial ? 'Pro 7-Day Trial' : (effectiveCycle === 'yearly' ? 'Pro Yearly' : 'Pro Monthly');
-    const amountStr = `₹${paymentAmount.toLocaleString('en-IN')}`;
+    const planLabel =
+      resolvedKey === 'yearly' ? 'Pro Yearly' : resolvedKey === 'quarterly' ? 'Pro Quarterly' : 'Pro Monthly';
     sendPaymentChargedReceipt(env, creds, {
       userId: verifiedUser.uid,
       userEmail: verifiedUser.email,
       userName: verifiedUser.name,
-      planName,
-      amountFormatted: amountStr,
+      planName: planLabel,
+      amountFormatted: `₹${paymentAmount.toLocaleString('en-IN')}`,
       periodStartMs: nowMs,
-      periodEndMs: nowMs + days * 86400 * 1000,
-      subId: orderId || paymentId,
+      periodEndMs: validUntilMs,
+      subId: subscriptionId || orderId || paymentId,
       eventId: `pay_${paymentId}`,
-    }).catch((err) => console.warn('[paymentVerify] Payment receipt email dispatch error:', err));
+    }).catch((err) => console.warn('[verify-payment] Receipt email warning:', err));
+
+    if (!existing?.welcomeEmailSent) {
+      sendWelcomeEmailForUser(env, creds, verifiedUser.uid, verifiedUser.email, verifiedUser.name, false)
+        .then(() => writeEntitlement(creds, verifiedUser.uid, { welcomeEmailSent: true }).catch(() => {}))
+        .catch(() => {});
+    }
   }
 
-  // 2. Welcome email on first-time subscription payment or if not sent yet
-  const isFirstPayment = !existing?.hasHadSubscription || !existing?.lastPaymentAt || !existing?.welcomeEmailSent;
-  if (isFirstPayment && verifiedUser.email) {
-    sendWelcomeEmailForUser(env, creds, verifiedUser.uid, verifiedUser.email, verifiedUser.name, true)
-      .then(() => {
-        updateSubscriptionInFirestore(creds, verifiedUser.uid, { welcomeEmailSent: true }).catch(() => {});
-      })
-      .catch((err) =>
-        console.warn('[paymentVerify] Welcome email dispatch error:', err)
-      );
-  }
-
-  return jsonResponse({
-    status: 'ok',
-    success: true,
-    subscriptionStatus: isTrial ? 'trialing' : 'active',
-    accessUntil,
-    paymentId,
-    orderId,
-  });
+  return jsonResponse(
+    {
+      status: 'ok',
+      success: true,
+      entitlementStatus: 'active',
+      plan: planSpec.planCode,
+      billingCycle: resolvedKey,
+      checkoutMode,
+      validUntil: validUntilIso,
+      paymentId,
+      orderId,
+      subscriptionId,
+    },
+    200,
+    request,
+    env
+  );
 }
-

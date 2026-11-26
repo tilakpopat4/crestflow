@@ -1,11 +1,18 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { User } from 'firebase/auth';
 import { UserProfile } from '../../types';
-import { PlanPricing } from '../../lib/subscriptionPlans';
+import {
+  PlanPricing,
+  PaidPlanKey,
+  TRIAL_PROMISE_COPY,
+  getPlanDisclosureText,
+} from '../../shared/pricing';
 import { usePricingConfig } from '../../lib/pricingConfig';
-import { loadRazorpayScript } from '../../lib/razorpay';
+import { useAccess } from '../../hooks/useAccess';
+import { useToast } from '../../context/ToastContext';
+import { launchPlanCheckout } from '../../lib/razorpay';
 import { PricingCard } from './PricingCard';
-import { ActivatingPaymentModal } from './ActivatingPaymentModal';
+import { Loader2, RefreshCw, ShieldCheck, AlertCircle } from 'lucide-react';
 
 interface PricingPageProps {
   user?: User | null;
@@ -16,6 +23,28 @@ interface PricingPageProps {
   onNavigateToAuth?: () => void;
 }
 
+const PRICING_FAQS = [
+  {
+    q: 'Do I need a card to start the 7-day free trial?',
+    a: 'No. Your trial starts with zero payment method required and zero automatic charge when day 7 ends.',
+  },
+  {
+    q: 'What happens if my trial or plan expires?',
+    a: 'Your workspace switches to read & export mode. Existing client, work item, and invoice records remain safe and exportable as JSON or CSV anytime.',
+  },
+  {
+    q: 'Do shared client invoice links keep working after expiry?',
+    a: 'Yes. Existing token-protected invoice links stay viewable and payable via UPI so your clients are never disrupted.',
+  },
+  {
+    q: 'Does CrestFlow take a cut from my client payments?',
+    a: 'No. Client UPI QR payments go directly from your client to your own UPI ID with 0% commission.',
+  },
+];
+
+/**
+ * Unified Pricing Page in Section 9 Obsidian + Ember palette highlighting Yearly Best Value.
+ */
 export default function PricingPage({
   user,
   profile,
@@ -24,12 +53,25 @@ export default function PricingPage({
   onNavigateToAuth,
 }: PricingPageProps) {
   const { config: pricingConfig, trialPlan, proPlans } = usePricingConfig();
-  const [selectedPlanId, setSelectedPlanId] = useState<string>('monthly');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isActivatingOpen, setIsActivatingOpen] = useState(false);
+  const access = useAccess();
+  const { showToast } = useToast();
 
-  const handleStartPlanCheckout = async (plan: PlanPricing) => {
+  const [selectedPlanId, setSelectedPlanId] = useState<string>('yearly');
+  const [loadingPlanId, setLoadingPlanId] = useState<string | null>(null);
+  const [activatingTimedOut, setActivatingTimedOut] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const timeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  const orderedPlans: PlanPricing[] = [trialPlan, ...proPlans].filter(Boolean);
+  const checkoutMode = access.recurringPlansConfigured ? 'subscription' : 'order';
+
+  const handleSelectPlan = async (plan: PlanPricing) => {
     if (!user) {
       if (onNavigateToAuth) {
         onNavigateToAuth();
@@ -41,219 +83,181 @@ export default function PricingPage({
     }
 
     setSelectedPlanId(plan.id);
-    setLoading(true);
     setError(null);
 
-    // Free Trial: activate directly with ₹0 and no payment method required
     if (plan.isTrial || plan.id === 'trial') {
-      try {
-        const idToken = await user.getIdToken();
-        const res = await fetch('/api/activate-trial', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${idToken}`,
-          },
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          throw new Error(data.error || 'Failed to activate 7-day free trial.');
-        }
-        if (onSubscriptionActivated) onSubscriptionActivated();
-        if (onNavigateToDashboard) onNavigateToDashboard();
-      } catch (err: any) {
-        setError(err.message || 'Trial activation failed.');
-      } finally {
-        setLoading(false);
+      setLoadingPlanId('trial');
+      const res = await access.activateTrial();
+      setLoadingPlanId(null);
+      if (!res.success) {
+        setError(res.error || 'Unable to start free trial.');
+        return;
       }
+      showToast('7-day free trial activated.', 'success');
+      await onSubscriptionActivated?.();
+      onNavigateToDashboard?.();
       return;
     }
 
+    if (access.state === 'active' || access.state === 'grace') {
+      setError('You already have an active paid plan. Mid-period switching is disabled in this phase.');
+      return;
+    }
+
+    setLoadingPlanId(plan.id);
+    setActivatingTimedOut(false);
+
     try {
-      const isScriptLoaded = await loadRazorpayScript();
-      if (!isScriptLoaded) {
-        throw new Error('Could not load Razorpay payment gateway. Please check your network connection.');
-      }
-
-      const idToken = await user.getIdToken();
-
-      const res = await fetch('/api/create-order', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${idToken}`,
+      await launchPlanCheckout({
+        planKey: plan.id as PaidPlanKey,
+        name: profile?.name || user.displayName || 'CrestFlow Creator',
+        email: user.email || '',
+        phone: profile?.phone || '',
+        uid: user.uid,
+        onActivating: () => {
+          access.setActivatingPlan(true);
+          if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
+          timeoutRef.current = window.setTimeout(() => setActivatingTimedOut(true), 10000);
         },
-        body: JSON.stringify({
-          amount: plan.price * 100,
-          currency: 'INR',
-          planKey: plan.id,
-        }),
+        onDismiss: () => {
+          setLoadingPlanId(null);
+          access.setActivatingPlan(false);
+        },
+        onFailure: (msg) => {
+          if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
+          setLoadingPlanId(null);
+          access.setActivatingPlan(false);
+          setActivatingTimedOut(false);
+          setError(msg);
+        },
+        onSuccess: async () => {
+          if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
+          await access.refreshAccess();
+          await onSubscriptionActivated?.();
+          setLoadingPlanId(null);
+          access.setActivatingPlan(false);
+          setActivatingTimedOut(false);
+          showToast(`${plan.name} activated.`, 'success');
+          onNavigateToDashboard?.();
+        },
       });
-
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || 'Failed to initialize payment order');
-      }
-
-      const { order_id, orderId, key_id, keyId, amount: resAmount } = await res.json();
-      const effectiveOrderId = order_id || orderId;
-      const rzpKey = (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || key_id || keyId;
-
-      if (!rzpKey) {
-        throw new Error('Razorpay public key is missing.');
-      }
-
-      const options: any = {
-        key: rzpKey,
-        order_id: effectiveOrderId,
-        amount: resAmount || plan.price * 100,
-        currency: 'INR',
-        name: 'CrestFlow Pro',
-        description: `${plan.name} Subscription`,
-        image: '/app_logo_icon.png',
-        prefill: {
-          name: profile?.name || user.displayName || '',
-          email: user.email || '',
-          contact: profile?.phone || '',
-        },
-        theme: {
-          color: '#282828',
-        },
-        handler: async function (response: any) {
-          setIsActivatingOpen(true);
-          setLoading(false);
-          try {
-            const paymentId = response.razorpay_payment_id;
-            const resOrder = response.razorpay_order_id || effectiveOrderId;
-
-            await fetch('/api/verify-payment', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${idToken}`,
-              },
-              body: JSON.stringify({
-                paymentId,
-                orderId: resOrder,
-                signature: response.razorpay_signature,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_order_id: resOrder,
-                razorpay_signature: response.razorpay_signature,
-                planKey: plan.id,
-              }),
-            });
-          } catch (e) {
-            console.warn('[PricingPage] verify error:', e);
-          }
-        },
-        modal: {
-          ondismiss: function () {
-            setLoading(false);
-          },
-        },
-      };
-
-      const rzp = new (window as any).Razorpay(options);
-      rzp.on('payment.failed', function (resp: any) {
-        setError(`Payment failed: ${resp.error?.description || 'Transaction declined'}`);
-        setLoading(false);
-      });
-      rzp.open();
-    } catch (err: any) {
-      console.error('[PricingPage] Checkout error:', err);
-      setError(err.message || 'Payment initiation failed. Please try again.');
-      setLoading(false);
+    } catch (err) {
+      setLoadingPlanId(null);
+      access.setActivatingPlan(false);
+      setError(err instanceof Error ? err.message : 'Unable to start Razorpay checkout.');
     }
   };
 
   return (
-    <div className="min-h-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-6 md:p-8 flex flex-col items-center">
-      <div className="w-full max-w-5xl">
+    <div className="w-full bg-[#0B0B0E] text-[#F7F7F8] py-10 md:py-16 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto space-y-12">
         {/* Header */}
-        <div className="text-center max-w-2xl mx-auto mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-2">
+        <div className="max-w-2xl mx-auto text-center space-y-3">
+          <span className="inline-block text-xs font-semibold uppercase tracking-wider text-[#FFC145]">
+            CrestFlow Pro Pricing
+          </span>
+          <h1 className="font-hero-condensed text-4xl sm:text-5xl text-[#F7F7F8] tracking-wide uppercase">
             {pricingConfig.pricingTitle}
           </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            {pricingConfig.pricingSubtitle}
+          <p className="text-sm text-[#A1A1AA] leading-relaxed">
+            {TRIAL_PROMISE_COPY} Direct UPI invoicing with zero commission on client payments.
           </p>
         </div>
 
-        {/* 7-Day Free Trial Card */}
-        <div className="max-w-2xl mx-auto mb-8 p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-slate-900 dark:text-slate-100 text-sm">{trialPlan.name}</span>
-              {trialPlan.savingsBadge && (
-                <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800">
-                  {trialPlan.savingsBadge}
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              {trialPlan.description}
+        {/* Activating Plan State (zero wall / flicker while verifying checkout) */}
+        {access.activatingPlan && (
+          <div className="max-w-lg mx-auto rounded-xl bg-[#131318] border border-[#FFC145]/40 p-5 text-center space-y-3">
+            <Loader2 size={24} className="animate-spin text-[#FFC145] mx-auto" />
+            <div className="text-sm font-semibold text-[#F7F7F8]">Activating your plan...</div>
+            <p className="text-xs text-[#A1A1AA]">
+              Confirming payment signature and syncing your workspace access.
             </p>
-            {trialPlan.extraInfo && (
-              <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-1.5">
-                {trialPlan.extraInfo}
-              </p>
+            {activatingTimedOut && (
+              <button
+                type="button"
+                onClick={async () => {
+                  await access.refreshAccess();
+                  if (access.canWrite) {
+                    access.setActivatingPlan(false);
+                    onNavigateToDashboard?.();
+                  }
+                }}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#1B1B22] border border-[#2A2A33] text-xs font-semibold text-[#F7F7F8] cursor-pointer"
+              >
+                <RefreshCw size={13} />
+                <span>Refresh status</span>
+              </button>
             )}
-          </div>
-          <button
-            type="button"
-            onClick={() => handleStartPlanCheckout(trialPlan)}
-            disabled={loading}
-            className="w-full sm:w-auto px-4 py-2 text-xs font-semibold rounded-lg bg-accent hover:bg-accent-hover text-white transition-colors cursor-pointer border-none disabled:opacity-50 shrink-0"
-          >
-            {loading && selectedPlanId === 'trial'
-              ? 'Activating...'
-              : trialPlan.ctaLabel || 'Start 7-Day Free Trial'}
-          </button>
-        </div>
-
-        {error && (
-          <div className="mb-6 p-4 rounded bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-xs text-red-700 dark:text-red-300">
-            {error}
           </div>
         )}
 
-        {/* Pro Plans Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-          {proPlans.map((plan) => (
-            <PricingCard
-              key={plan.id}
-              plan={plan}
-              isSelected={selectedPlanId === plan.id}
-              onSelect={handleStartPlanCheckout}
-              isLoading={loading}
-              isFirstTime={false}
-            />
-          ))}
+        {error && (
+          <div className="max-w-xl mx-auto rounded-xl bg-[#1B1B22] border border-[#F0607A]/50 p-3.5 flex items-start gap-2.5 text-xs text-[#F0607A]">
+            <AlertCircle size={15} className="shrink-0 mt-0.5" />
+            <span>{error}</span>
+          </div>
+        )}
+
+        {/* Plan Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 items-stretch">
+          {orderedPlans.map((plan) => {
+            const isTrial = Boolean(plan.isTrial || plan.id === 'trial');
+            const isCurrentPlan =
+              (isTrial && access.state === 'trialing') ||
+              (!isTrial && access.state === 'active' && access.billingCycle === plan.id);
+            const disclosureText = isTrial
+              ? TRIAL_PROMISE_COPY
+              : getPlanDisclosureText(plan, checkoutMode);
+
+            return (
+              <PricingCard
+                key={plan.id}
+                plan={plan}
+                isSelected={selectedPlanId === plan.id}
+                isCurrentPlan={isCurrentPlan}
+                isTrialUsed={Boolean(user && access.trialUsed)}
+                loading={loadingPlanId === plan.id}
+                disclosureText={disclosureText}
+                onSelect={handleSelectPlan}
+              />
+            );
+          })}
         </div>
 
-        {/* Policy & Disclosure Note */}
-        <div className="max-w-2xl mx-auto p-4 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 leading-relaxed text-center space-y-1">
-          <p className="font-medium text-slate-700 dark:text-slate-300">
-            {pricingConfig.termsTitle}
-          </p>
-          <p>
-            {pricingConfig.termsBody}
-          </p>
+        {/* Honest Refund & Cancellation Guarantee Matching /refund */}
+        <div className="max-w-3xl mx-auto rounded-xl bg-[#131318] border border-[#2A2A33] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-[#A1A1AA]">
+          <div className="flex items-start gap-2.5">
+            <ShieldCheck size={16} className="text-[#2DD4A0] shrink-0 mt-0.5" />
+            <span>
+              Cancel auto-renewal anytime and keep Pro access until the end of your current paid period. Refunds on initial charges are reviewed within 7 calendar days under our Refund Policy.
+            </span>
+          </div>
+          <a
+            href="/refund"
+            className="text-[#F7F7F8] font-semibold whitespace-nowrap hover:underline shrink-0"
+          >
+            Read Refund Policy
+          </a>
+        </div>
+
+        {/* FAQ */}
+        <div className="max-w-4xl mx-auto space-y-5">
+          <h2 className="text-lg font-semibold text-[#F7F7F8] text-center">
+            Frequently Asked Questions
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {PRICING_FAQS.map((item) => (
+              <div
+                key={item.q}
+                className="rounded-xl bg-[#131318] border border-[#2A2A33] p-4 space-y-1.5"
+              >
+                <h3 className="text-xs font-semibold text-[#F7F7F8]">{item.q}</h3>
+                <p className="text-xs text-[#A1A1AA] leading-relaxed">{item.a}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-
-      {user && (
-        <ActivatingPaymentModal
-          userId={user.uid}
-          isOpen={isActivatingOpen}
-          onActivated={() => {
-            setIsActivatingOpen(false);
-            if (onSubscriptionActivated) onSubscriptionActivated();
-            if (onNavigateToDashboard) onNavigateToDashboard();
-          }}
-          onClose={() => setIsActivatingOpen(false)}
-        />
-      )}
     </div>
   );
 }

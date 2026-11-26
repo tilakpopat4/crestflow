@@ -121,7 +121,7 @@ export default function AdminPricingManager() {
 
       {/* Section 1: Plan Selector & Plan Editor */}
       <div className="space-y-3">
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 p-1 bg-slate-100 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1 bg-slate-100 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
           {draft.plans.map((p) => {
             const isSelected = p.id === selectedPlanId;
             return (

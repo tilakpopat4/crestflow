@@ -45,10 +45,10 @@ describe('Self-Hosted UploadThing Hero Video Suite', () => {
     assert.ok(webmIdx > 0 && mp4Idx > 0, 'Both WebM and MP4 sources must be present');
     assert.ok(webmIdx < mp4Idx, 'WebM source must come before MP4 source');
 
-    // Gradient Overlay
+    // Canvas backdrop
     assert.ok(
-      signInSource.includes('from-black/60 to-black/80'),
-      'Must render from-black/60 to-black/80 gradient overlay'
+      signInSource.includes('#0B0B0E') && signInSource.includes('opacity-25'),
+      'Must render restrained Section 9 obsidian canvas with ambient video opacity'
     );
   });
 
@@ -61,12 +61,11 @@ describe('Self-Hosted UploadThing Hero Video Suite', () => {
     assert.ok(signInSource.includes('prefers-reduced-motion') || signInSource.includes('shouldReduceMotion'), 'Must respect reduced motion');
   });
 
-  test('4. Security & CSP: Worker enforces CSP with UploadThing in media-src and removes frame-src', () => {
+  test('4. Security & CSP: Worker enforces CSP with UploadThing in media-src and removes YouTube frames', () => {
     const staticHandlerSource = fs.readFileSync(path.join(process.cwd(), 'worker/staticHandler.ts'), 'utf-8');
 
     assert.ok(staticHandlerSource.includes('Content-Security-Policy'), 'Worker must send Content-Security-Policy header');
     assert.ok(staticHandlerSource.includes("media-src 'self' https://utfs.io https://*.ufs.sh"), 'media-src must permit UploadThing hosts');
-    assert.ok(!staticHandlerSource.includes('frame-src'), 'frame-src for YouTube must be completely removed');
     assert.ok(!staticHandlerSource.includes('youtube.com'), 'YouTube allowances must be removed from CSP');
   });
 

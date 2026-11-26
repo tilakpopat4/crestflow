@@ -4,25 +4,23 @@ import { cn } from '@/lib/utils';
 export type StatusVariant =
   | 'Draft'
   | 'draft'
+  | 'Uninvoiced'
   | 'Invoiced'
   | 'invoiced'
+  | 'Pending'
+  | 'pending'
   | 'Paid'
   | 'paid'
   | 'Overdue'
   | 'overdue'
-  | 'Pending'
-  | 'pending'
-  | 'Uninvoiced'
-  | 'uninvoiced'
-  | 'Closed'
-  | 'closed'
   | 'Active'
   | 'active'
-  | 'Blocked'
-  | 'blocked'
-  | 'approved'
-  | 'changes_requested'
-  | 'pending_review'
+  | 'Closed'
+  | 'closed'
+  | 'Expired'
+  | 'expired'
+  | 'Grace'
+  | 'grace'
   | string;
 
 export interface StatusBadgeProps {
@@ -34,17 +32,30 @@ export interface StatusBadgeProps {
   className?: string;
 }
 
+const STATUS_STYLE_MAP: Record<string, { dot: string; text: string }> = {
+  paid: { dot: 'bg-[#2DD4A0]', text: 'text-[#2DD4A0]' },
+  active: { dot: 'bg-[#2DD4A0]', text: 'text-[#2DD4A0]' },
+  approved: { dot: 'bg-[#2DD4A0]', text: 'text-[#2DD4A0]' },
+  accepted: { dot: 'bg-[#2DD4A0]', text: 'text-[#2DD4A0]' },
+
+  pending: { dot: 'bg-[#FFB020]', text: 'text-[#FFB020]' },
+  invoiced: { dot: 'bg-[#FFB020]', text: 'text-[#FFB020]' },
+  grace: { dot: 'bg-[#FFB020]', text: 'text-[#FFB020]' },
+  pending_review: { dot: 'bg-[#FFB020]', text: 'text-[#FFB020]' },
+
+  overdue: { dot: 'bg-[#F0607A]', text: 'text-[#F0607A]' },
+  expired: { dot: 'bg-[#F0607A]', text: 'text-[#F0607A]' },
+  declined: { dot: 'bg-[#F0607A]', text: 'text-[#F0607A]' },
+  changes_requested: { dot: 'bg-[#F0607A]', text: 'text-[#F0607A]' },
+
+  draft: { dot: 'bg-[#A1A1AA]', text: 'text-[#A1A1AA]' },
+  uninvoiced: { dot: 'bg-[#A1A1AA]', text: 'text-[#A1A1AA]' },
+  closed: { dot: 'bg-[#8E8E98]', text: 'text-[#A1A1AA]' },
+};
+
 /**
- * Standard Design System StatusBadge.
- * Conforms strictly to GEMINI.md:
- * - Status column: plain text, 13px, weight 500, no background, no border, no pill.
- * - Allowed colors:
- *   - Paid / Approved: white text (white indicator via currentColor)
- *   - Invoiced / Pending / Active: slate-700 text (slate-300 in dark mode)
- *   - Draft / Uninvoiced / Closed: slate-500 text
- *   - Overdue / Blocked / Changes: red text (red-600 / red-400 in dark mode)
- * - Optional: a 6px solid dot before the label in the same color as the text.
- * - No icons, no checkmarks, no circles with ticks.
+ * Calm plain-text status display with a 6px semantic indicator dot per GEMINI.md.
+ * No pastel pill capsules, keeping tables crisp and scannable in dark mode and grayscale.
  */
 export function StatusBadge({
   status,
@@ -54,63 +65,23 @@ export function StatusBadge({
   title,
   className,
 }: StatusBadgeProps) {
-  const norm = (status || '').toString().trim().toLowerCase();
-
-  let textClass = 'text-slate-700 dark:text-slate-300';
-  let indicator: React.ReactNode = (
-    <span className="w-1.5 h-1.5 rounded-full bg-current shrink-0" />
-  );
-  let defaultLabel = status || 'Pending';
-
-  switch (norm) {
-    case 'paid':
-    case 'approved':
-      textClass = 'text-white';
-      indicator = <span className="w-1.5 h-1.5 rounded-full bg-current shrink-0" />;
-      defaultLabel = norm === 'approved' ? 'Approved' : 'Paid';
-      break;
-
-    case 'overdue':
-    case 'blocked':
-    case 'changes_requested':
-    case 'failed':
-      textClass = 'text-red-600 dark:text-red-400';
-      indicator = <span className="w-1.5 h-1.5 rounded-full bg-red-600 dark:bg-red-400 shrink-0" />;
-      defaultLabel = norm === 'changes_requested' ? 'Changes Requested' : norm === 'blocked' ? 'Blocked' : 'Overdue';
-      break;
-
-    case 'invoiced':
-    case 'active':
-    case 'pending':
-    case 'pending_review':
-      textClass = 'text-slate-700 dark:text-slate-300';
-      indicator = <span className="w-1.5 h-1.5 rounded-full bg-slate-700 dark:bg-slate-300 shrink-0" />;
-      defaultLabel = norm === 'pending_review' ? 'Pending Review' : norm === 'active' ? 'Active' : norm === 'invoiced' ? 'Invoiced' : 'Pending';
-      break;
-
-    case 'draft':
-    case 'uninvoiced':
-    case 'closed':
-    default:
-      textClass = 'text-slate-500';
-      indicator = <span className="w-1.5 h-1.5 rounded-full bg-slate-500 shrink-0" />;
-      defaultLabel = norm === 'uninvoiced' ? 'Uninvoiced' : norm === 'closed' ? 'Closed' : 'Draft';
-      break;
-  }
-
-  const display = label ?? defaultLabel;
+  const key = String(status || 'draft').toLowerCase().replace(/\s+/g, '_');
+  const style = STATUS_STYLE_MAP[key] || STATUS_STYLE_MAP.draft;
+  const displayLabel = label || status;
 
   const content = (
-    <>
-      {showIndicator && indicator}
-      <span className="truncate">{display}</span>
-    </>
-  );
-
-  const classes = cn(
-    "text-[13px] font-medium inline-flex items-center gap-1.5 select-none transition-colors duration-120",
-    textClass,
-    className
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 text-[13px] font-medium whitespace-nowrap',
+        style.text,
+        className,
+      )}
+    >
+      {showIndicator && (
+        <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', style.dot)} aria-hidden="true" />
+      )}
+      <span>{displayLabel}</span>
+    </span>
   );
 
   if (onClick) {
@@ -119,7 +90,7 @@ export function StatusBadge({
         type="button"
         onClick={onClick}
         title={title}
-        className={cn(classes, "cursor-pointer hover:opacity-80 bg-transparent border-0 p-0 m-0")}
+        className="inline-flex items-center px-1.5 py-0.5 rounded hover:bg-[#1B1B22] transition-colors cursor-pointer border-0 bg-transparent"
       >
         {content}
       </button>
@@ -127,7 +98,7 @@ export function StatusBadge({
   }
 
   return (
-    <span title={title} className={classes}>
+    <span title={title} className="inline-flex items-center">
       {content}
     </span>
   );

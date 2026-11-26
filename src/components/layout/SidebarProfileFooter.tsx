@@ -34,7 +34,7 @@ export const SidebarProfileFooter: React.FC<SidebarProfileFooterProps> = ({
   return (
     <div
       className={clsx(
-        "hidden md:flex border-t border-[#2a2a2a] transition-all duration-200",
+        "hidden md:flex border-t border-[#2A2A33] transition-all duration-200",
         isIconOnly ? "p-2 flex-col items-center gap-2" : "p-4 items-center justify-between gap-2"
       )}
     >
@@ -42,11 +42,11 @@ export const SidebarProfileFooter: React.FC<SidebarProfileFooterProps> = ({
         type="button"
         onClick={onEditProfile}
         className={clsx(
-          "flex items-center overflow-hidden rounded-lg transition-colors text-left cursor-pointer border-none outline-none focus-visible:ring-1 focus-visible:ring-indigo-400 group",
+          "flex items-center overflow-hidden rounded-lg transition-colors text-left cursor-pointer border-none outline-none focus-visible:ring-1 focus-visible:ring-[#F7F7F8] group",
           isIconOnly ? "justify-center p-1.5" : "space-x-3 flex-1 min-w-0 p-1.5",
           activeTab === 'profile'
-            ? "bg-[#333333] text-white"
-            : "hover:bg-[#282828] active:bg-[#333333] text-slate-300"
+            ? "bg-[#1B1B22] text-[#F7F7F8]"
+            : "hover:bg-[#1B1B22] active:bg-[#22222B] text-[#A1A1AA]"
         )}
         title={isIconOnly ? (profile?.name || user?.displayName || 'Profile Settings') : "Open Profile Settings"}
       >

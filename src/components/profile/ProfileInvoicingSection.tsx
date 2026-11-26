@@ -20,7 +20,7 @@ interface ProfileInvoicingSectionProps {
 
 /**
  * Invoicing & Payout Rails settings section.
- * Configures UPI receiver, telephone contact, and onboarding link.
+ * Enforces UPI ID as required for invoice QR generation.
  */
 export const ProfileInvoicingSection: React.FC<ProfileInvoicingSectionProps> = ({
   upiId,
@@ -29,8 +29,6 @@ export const ProfileInvoicingSection: React.FC<ProfileInvoicingSectionProps> = (
   setPhone,
   servicesDescription,
   setServicesDescription,
-  userId,
-  handle,
   isSaving,
   isSaved,
   isDirty,
@@ -41,46 +39,51 @@ export const ProfileInvoicingSection: React.FC<ProfileInvoicingSectionProps> = (
   return (
     <section id="section-invoicing" className="grid grid-cols-1 gap-x-8 gap-y-4 pt-8 lg:grid-cols-[13rem_minmax(0,1fr)]">
       <div>
-        <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+        <h2 className="text-base font-semibold text-[#F7F7F8]">
           Invoicing &amp; payouts
         </h2>
-        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+        <p className="mt-1 text-xs text-[#A1A1AA] leading-relaxed">
           UPI destination and default invoice details.
         </p>
       </div>
 
-      <div className="rounded-xl bg-white dark:bg-slate-900 overflow-hidden">
+      <div className="rounded-xl bg-[#131318] border border-[#2A2A33] overflow-hidden">
         <div className="grid grid-cols-1 gap-x-4 gap-y-5 p-5 sm:grid-cols-2 sm:p-6">
-          {/* UPI ID / VPA */}
+          {/* UPI ID / VPA - Required for generating invoices */}
           <div className="sm:col-span-2">
             <div className="mb-1.5 flex items-baseline justify-between gap-2">
-              <label htmlFor="invoicing-upi" className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                UPI ID / VPA
+              <label htmlFor="invoicing-upi" className="block text-xs font-semibold text-[#F7F7F8]">
+                UPI ID / VPA <span className="text-[#F0607A]">*</span>
               </label>
-              <span className="text-[11px] text-slate-400 dark:text-slate-500">Optional</span>
+              <span className="text-[11px] font-medium text-[#FFC145]">Required for invoices</span>
             </div>
             <input
               id="invoicing-upi"
               type="text"
+              required
               value={upiId}
               onChange={(e) => setUpiId(e.target.value)}
-              placeholder="e.g. yourname@bank"
-              className={`block h-10 w-full rounded-lg bg-slate-50 dark:bg-slate-800/60 px-3 text-sm text-slate-900 dark:text-slate-100 border ${
-                upiError ? 'border-red-500 focus:border-red-600' : 'border-slate-200 dark:border-slate-700 focus:border-slate-400 dark:focus:border-slate-500'
-              } placeholder:text-slate-400 outline-none transition-colors`}
+              placeholder="e.g. yourname@okicici"
+              className={`block h-10 w-full rounded-lg bg-[#1B1B22] px-3 text-sm text-[#F7F7F8] border ${
+                upiError ? 'border-[#F0607A] focus:border-[#F0607A]' : 'border-[#2A2A33] focus:border-[#F7F7F8]'
+              } placeholder:text-[#8E8E98] outline-none transition-colors`}
             />
-            {upiError && (
-              <p className="mt-1 text-xs text-red-600 dark:text-red-400 font-medium">{upiError}</p>
+            {upiError ? (
+              <p className="mt-1 text-xs text-[#F0607A] font-medium">{upiError}</p>
+            ) : (
+              <p className="mt-1 text-[11px] text-[#A1A1AA]">
+                Printed as a scannable payment QR code on every PDF and shareable client invoice.
+              </p>
             )}
           </div>
 
           {/* Contact Phone */}
           <div>
             <div className="mb-1.5 flex items-baseline justify-between gap-2">
-              <label htmlFor="invoicing-phone" className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+              <label htmlFor="invoicing-phone" className="block text-xs font-semibold text-[#F7F7F8]">
                 Phone number
               </label>
-              <span className="text-[11px] text-slate-400 dark:text-slate-500">Optional</span>
+              <span className="text-[11px] text-[#A1A1AA]">Optional</span>
             </div>
             <input
               id="invoicing-phone"
@@ -88,13 +91,13 @@ export const ProfileInvoicingSection: React.FC<ProfileInvoicingSectionProps> = (
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="e.g. +91 98765 43210"
-              className="block h-10 w-full rounded-lg bg-slate-50 dark:bg-slate-800/60 px-3 text-sm text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 placeholder:text-slate-400 focus:border-slate-400 dark:focus:border-slate-500 outline-none transition-colors"
+              className="block h-10 w-full rounded-lg bg-[#1B1B22] px-3 text-sm text-[#F7F7F8] border border-[#2A2A33] placeholder:text-[#8E8E98] focus:border-[#F7F7F8] outline-none transition-colors"
             />
           </div>
 
           {/* Default Services Description */}
           <div className="sm:col-span-2">
-            <label htmlFor="invoicing-services" className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <label htmlFor="invoicing-services" className="mb-1.5 block text-xs font-semibold text-[#F7F7F8]">
               Default invoice item
             </label>
             <input
@@ -103,22 +106,22 @@ export const ProfileInvoicingSection: React.FC<ProfileInvoicingSectionProps> = (
               value={servicesDescription}
               onChange={(e) => setServicesDescription(e.target.value)}
               placeholder="e.g. Video Editing Services"
-              className="block h-10 w-full rounded-lg bg-slate-50 dark:bg-slate-800/60 px-3 text-sm text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 placeholder:text-slate-400 focus:border-slate-400 dark:focus:border-slate-500 outline-none transition-colors"
+              className="block h-10 w-full rounded-lg bg-[#1B1B22] px-3 text-sm text-[#F7F7F8] border border-[#2A2A33] placeholder:text-[#8E8E98] focus:border-[#F7F7F8] outline-none transition-colors"
             />
           </div>
         </div>
 
         {/* Section Action Bar */}
-        <div className="flex min-h-14 flex-wrap items-center justify-end gap-x-3 gap-y-2 border-t border-[#333333] px-5 py-3 sm:px-6">
-          <p className="mr-auto flex items-center gap-1.5 text-xs text-slate-400">
+        <div className="flex min-h-14 flex-wrap items-center justify-end gap-x-3 gap-y-2 border-t border-[#2A2A33] px-5 py-3 sm:px-6">
+          <p className="mr-auto flex items-center gap-1.5 text-xs text-[#A1A1AA]">
             {isSaved ? (
-              <span className="inline-flex items-center gap-1 text-slate-300 font-medium">
+              <span className="inline-flex items-center gap-1 text-[#2DD4A0] font-medium">
                 <Check size={13} />
                 <span>Saved</span>
               </span>
             ) : isDirty ? (
-              <span className="inline-flex items-center gap-1.5 text-slate-300 font-medium">
-                <span className="size-1.5 rounded-full bg-slate-400" />
+              <span className="inline-flex items-center gap-1.5 text-[#F7F7F8] font-medium">
+                <span className="size-1.5 rounded-full bg-[#FFB020]" />
                 <span>Unsaved changes</span>
               </span>
             ) : (
@@ -131,7 +134,7 @@ export const ProfileInvoicingSection: React.FC<ProfileInvoicingSectionProps> = (
               type="button"
               disabled={isSaving}
               onClick={onDiscard}
-              className="inline-flex h-9 items-center justify-center rounded-lg bg-[#333333] hover:bg-[#3e3e3e] border-0 px-3.5 text-xs font-semibold text-slate-300 hover:text-white cursor-pointer transition-colors duration-120"
+              className="inline-flex h-9 items-center justify-center rounded-lg bg-[#1B1B22] hover:bg-[#22222B] border border-[#2A2A33] px-3.5 text-xs font-semibold text-[#A1A1AA] hover:text-[#F7F7F8] cursor-pointer"
             >
               Discard
             </button>
@@ -141,7 +144,7 @@ export const ProfileInvoicingSection: React.FC<ProfileInvoicingSectionProps> = (
             type="button"
             disabled={isSaving || !isDirty}
             onClick={onSave}
-            className="inline-flex h-9 items-center justify-center rounded-lg bg-accent hover:bg-accent-hover disabled:opacity-50 text-white px-4 text-xs font-semibold cursor-pointer border-0 transition-colors duration-120"
+            className="inline-flex h-9 items-center justify-center rounded-lg cf-btn-primary disabled:opacity-50 text-white px-4 text-xs font-semibold cursor-pointer"
           >
             {isSaving ? 'Saving...' : 'Save'}
           </button>

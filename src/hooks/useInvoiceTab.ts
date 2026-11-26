@@ -2,14 +2,18 @@ import { useState, useMemo } from 'react';
 import { User } from 'firebase/auth';
 import { Invoice, Client, WorkItem, UserProfile } from '../types';
 import { useFirestore } from './useFirestore';
+import { useAccess } from './useAccess';
+import { useToast } from '../context/ToastContext';
+import { SAMPLE_CLIENTS, SAMPLE_INVOICES, SAMPLE_WORK_ITEMS } from '../data/sampleWorkspaceData';
 import { generateUUID } from '../lib/utils';
-import { isValidUpiId, buildUpiPaymentUri } from '../lib/upiQr';
+import { isValidUpiId } from '../lib/upiQr';
 import { formatInvoiceNumber, getNextInvoiceNumber } from '../lib/invoiceUtils';
 import { generateInvoiceEmailDetails } from '../lib/paymentUtils';
 import { generateOffscreenPdfBlob } from '../lib/invoiceRenderer';
 import { SubscriptionState } from './useSubscription';
 import { useInvoicePdfOperations } from './useInvoicePdfOperations';
 import { useInvoiceFormState } from './useInvoiceFormState';
+import { useInvoiceShareActions } from './useInvoiceShareActions';
 
 interface UseInvoiceTabOptions {
   user: User | null;
@@ -26,18 +30,30 @@ export function useInvoiceTab({
   user,
   profile,
   initialSearchQuery = '',
-  subscriptionState,
-  onOpenSubscriptionModal,
 }: UseInvoiceTabOptions) {
-  const { data: clients, loading: clientsLoading, addOrUpdateItem: updateClient } = useFirestore<Client>('clients', user?.uid);
-  const { data: invoices, loading: invoicesLoading, addOrUpdateItem: addInvoice, removeItem: deleteInvoice } = useFirestore<Invoice>('invoices', user?.uid);
-  const { data: workItems, loading: workLoading, addOrUpdateItem: updateWorkItem } = useFirestore<WorkItem>('workItems', user?.uid);
+  const access = useAccess();
+  const { showToast } = useToast();
+  const isExploring = access.state === 'none';
+  const liveUid = !isExploring ? user?.uid : undefined;
+
+  const { data: fsClients, loading: fsClientsLoading, addOrUpdateItem: updateClient } = useFirestore<Client>('clients', liveUid);
+  const { data: fsInvoices, loading: fsInvoicesLoading, addOrUpdateItem: addInvoice, removeItem: deleteInvoice } = useFirestore<Invoice>('invoices', liveUid);
+  const { data: fsWorkItems, loading: fsWorkLoading, addOrUpdateItem: updateWorkItem } = useFirestore<WorkItem>('workItems', liveUid);
+
+  const clients = isExploring ? SAMPLE_CLIENTS : fsClients;
+  const invoices = isExploring ? SAMPLE_INVOICES : fsInvoices;
+  const workItems = isExploring ? SAMPLE_WORK_ITEMS : fsWorkItems;
+  const clientsLoading = isExploring ? false : fsClientsLoading;
+  const invoicesLoading = isExploring ? false : fsInvoicesLoading;
+  const workLoading = isExploring ? false : fsWorkLoading;
 
   const [showClosed, setShowClosed] = useState(false);
   const [invoiceSearchQuery, setInvoiceSearchQuery] = useState(initialSearchQuery);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [upiMissingError, setUpiMissingError] = useState<string | null>(null);
   const [emailModalData, setEmailModalData] = useState<any>(null);
   const [paymentModalState, setPaymentModalState] = useState<{ invoiceId: string | null; isOpen: boolean }>({ invoiceId: null, isOpen: false });
+  const { sharedLinks, shareLoadingId, handleCreateShareLink, handleRevokeShareLink } = useInvoiceShareActions(user);
 
   const closedClientIds = useMemo(() => new Set(clients.filter((c) => c.isClosed).map((c) => c.id)), [clients]);
   const closedClientNames = useMemo(() => new Set(clients.filter((c) => c.isClosed).map((c) => c.name.toLowerCase())), [clients]);
@@ -74,6 +90,7 @@ export function useInvoiceTab({
   });
 
   const handleDeleteInvoice = async (invoiceId: string) => {
+    if (!access.requireAccess('create_invoice', 'Modify or remove existing invoices.')) return;
     const inv = invoices.find((i) => i.id === invoiceId);
     if (!inv || !window.confirm(`Delete Invoice ${formatInvoiceNumber(inv, invoices)} for ${inv.clientName}?`)) return;
     try {
@@ -86,18 +103,27 @@ export function useInvoiceTab({
       }
     } catch (err) {
       console.error(err);
-      alert('Failed to delete invoice.');
+      showToast('Failed to delete invoice.', 'error');
     }
   };
 
-  const toggleInvoiceStatus = (id: string) => setPaymentModalState({ invoiceId: id, isOpen: true });
+  const toggleInvoiceStatus = (id: string) => {
+    if (!access.requireAccess('create_invoice', 'Mark invoices Paid or Pending.')) return;
+    setPaymentModalState({ invoiceId: id, isOpen: true });
+  };
 
   const handleConfirmPaymentDate = async (invoiceId: string, timestamp: number | null) => {
+    if (!access.requireAccess('create_invoice', 'Mark invoices Paid or Pending.')) return;
     const inv = invoices.find((i) => i.id === invoiceId);
     if (inv) {
       const nextStatus = timestamp ? 'Paid' : 'Pending';
       const pDate = timestamp || undefined;
-      await addInvoice({ ...inv, status: nextStatus, lastPaymentDate: pDate });
+      await addInvoice({
+        ...inv,
+        status: nextStatus,
+        lastPaymentDate: pDate,
+        ...(nextStatus === 'Paid' ? { paymentClaim: undefined } : {}),
+      });
       if (nextStatus === 'Paid') {
         const clientObj = clients.find((c) => c.id === inv.clientId || c.name === inv.clientName);
         if (clientObj?.id) await updateClient({ ...clientObj, lastPaymentDate: pDate || Date.now() });
@@ -107,6 +133,7 @@ export function useInvoiceTab({
   };
 
   const handleEditInvoice = (inv: Invoice) => {
+    if (!access.requireAccess('create_invoice', 'Edit existing invoice items and totals.')) return;
     formState.setSelectedClientId(inv.clientId);
     formState.setReels(inv.reels.map((r) => ({ ...r, id: generateUUID() })));
     const isRetainer = inv.invoiceType === 'monthly_retainer' || (inv.reels.length === 1 && inv.reels[0].title.toLowerCase().includes('retainer'));
@@ -125,12 +152,21 @@ export function useInvoiceTab({
   };
 
   const handleGenerateInvoice = async () => {
-    if (subscriptionState && !subscriptionState.canCreateInvoice(currentMonthInvoicesCount)) {
-      if (onOpenSubscriptionModal) onOpenSubscriptionModal();
-      else alert(`Free plan limit reached. Upgrade to Pro for unlimited invoices.`);
+    if (!access.requireAccess('create_invoice', 'Generate GST-ready PDFs and UPI QR invoices in seconds.')) {
       return;
     }
-    if (!formState.selectedClient) return alert('Please select a client first.');
+    if (!formState.selectedClient) {
+      showToast('Please select a client first.', 'warning');
+      return;
+    }
+    const candidateUpi = formState.customUpiId.trim() || (hasSavedUpi ? profile!.upiId!.trim() : '');
+    if (!candidateUpi || !isValidUpiId(candidateUpi)) {
+      setUpiMissingError('UPI ID is required to generate invoices with scannable QR payments. Add your UPI ID in Settings or enter a valid VPA below.');
+      showToast('Add a valid UPI ID to generate invoices.', 'warning');
+      return;
+    }
+    setUpiMissingError(null);
+
     const targetReels = formState.invoiceBillingMode === 'monthly_retainer' ? formState.effectiveReels : formState.reels;
     if (targetReels.some((r) => !r.title.trim())) return alert('Please provide a title for invoice items.');
     if (formState.invoiceBillingMode === 'monthly_retainer' && (!formState.monthlyRetainerInput || Number(formState.monthlyRetainerInput) <= 0)) return alert('Please enter a valid monthly retainer amount.');
@@ -208,7 +244,21 @@ export function useInvoiceTab({
     }
   };
 
+  const handleGatedSendGmail = async () => {
+    if (!access.requireAccess('send_invoice', 'Send this invoice with an offline UPI QR directly via Gmail.')) return;
+    await handleSendGmailManual();
+  };
+
   return {
+    isExploring,
+    canWrite: access.canWrite,
+    hasValidUpi: Boolean(activeUpi),
+    upiMissingError,
+    setUpiMissingError,
+    sharedLinks,
+    shareLoadingId,
+    handleCreateShareLink,
+    handleRevokeShareLink,
     clients,
     invoices,
     workItems,
@@ -238,6 +288,6 @@ export function useInvoiceTab({
     handleEditInvoice,
     handleGenerateInvoice,
     handleRedownloadPdf,
-    handleSendGmailManual,
+    handleSendGmailManual: handleGatedSendGmail,
   };
 }

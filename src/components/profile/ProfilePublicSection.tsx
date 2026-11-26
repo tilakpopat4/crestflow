@@ -21,6 +21,7 @@ interface ProfilePublicSectionProps {
   onAutoSaveDate?: (val: string) => void;
   photoURL?: string;
   onPhotoChange?: (val: string) => void;
+  canEditUsername?: boolean;
   isSaving: boolean;
   isSaved: boolean;
   isDirty: boolean;
@@ -47,6 +48,7 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
   onAutoSaveDate,
   photoURL,
   onPhotoChange,
+  canEditUsername = true,
   isSaving,
   isSaved,
   isDirty,
@@ -144,22 +146,28 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
 
           {/* Professional Username Handle */}
           <div className="sm:col-span-2">
-            <label htmlFor="profile-username" className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
-              Username
-            </label>
-            <div className="flex h-10 w-full overflow-hidden rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 focus-within:border-slate-400 dark:focus-within:border-slate-500 transition-colors">
-              <span className="flex shrink-0 items-center pl-3 text-xs text-slate-500 dark:text-slate-400 select-none font-mono">
+            <div className="mb-1.5 flex items-baseline justify-between gap-2">
+              <label htmlFor="profile-username" className="block text-xs font-semibold text-[#F7F7F8]">
+                Username
+              </label>
+              {!canEditUsername && (
+                <span className="text-[11px] text-[#FFB020]">Activate plan to change public handle</span>
+              )}
+            </div>
+            <div className="flex h-10 w-full overflow-hidden rounded-lg bg-[#1B1B22] border border-[#2A2A33] focus-within:border-[#F7F7F8] transition-colors">
+              <span className="flex shrink-0 items-center pl-3 text-xs text-[#A1A1AA] select-none font-mono">
                 {SITE_URL.replace(/^https?:\/\//, '')}/
               </span>
               <input
                 id="profile-username"
                 type="text"
+                disabled={!canEditUsername}
                 value={username}
                 onChange={(e) => setUsername(cleanUsername(e.target.value))}
                 placeholder="username"
-                className="min-w-0 flex-1 bg-transparent px-1 text-xs text-slate-800 dark:text-slate-200 font-mono outline-none"
+                className="min-w-0 flex-1 bg-transparent px-1 text-xs text-[#F7F7F8] font-mono outline-none disabled:opacity-60"
               />
-              <span className="flex shrink-0 items-center pr-3 text-xs text-slate-400 dark:text-slate-500 select-none font-mono">
+              <span className="flex shrink-0 items-center pr-3 text-xs text-[#A1A1AA] select-none font-mono">
                 /onboarding
               </span>
             </div>

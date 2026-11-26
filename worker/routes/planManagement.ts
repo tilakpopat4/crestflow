@@ -1,166 +1,90 @@
-import { Env, PlanKey } from '../types';
+import { Env } from '../types';
 import { verifyFirebaseIdToken } from '../auth';
-import {
-  parseServiceAccount,
-  getSubscriptionFromFirestore,
-  updateSubscriptionInFirestore,
-} from '../firestore';
-import {
-  createRazorpaySubscription,
-  cancelRazorpaySubscription,
-} from '../razorpay';
-import { jsonResponse, getBearerToken, resolveServerPlanId } from './subscription';
+import { parseServiceAccount } from '../firestore';
+import { getEntitlementFromFirestore, resolveEffectiveStatus, writeEntitlement } from '../entitlements';
+import { cancelRazorpaySubscription } from '../razorpay';
+import { jsonResponse, getBearerToken } from './subscription';
 
 /**
  * Handles POST /api/cancel-subscription
- * - trialing: cancels immediately in Razorpay (cancel_at_cycle_end: 0) so user is never billed,
- *   but keeps access until trialEndsAt in Firestore.
- * - active: cancels at cycle end in Razorpay (cancel_at_cycle_end: 1), keeping access until period end.
+ * Cancels auto-renewal on Razorpay at period end; preserves `validUntil`.
  */
 export async function handleCancelSubscription(request: Request, env: Env): Promise<Response> {
   const idToken = getBearerToken(request);
   if (!idToken) {
-    return jsonResponse({ error: 'Missing Authorization header' }, 401);
+    return jsonResponse({ error: 'Missing Authorization header' }, 401, request, env);
   }
 
-  const creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
-  const projectId = env.FIREBASE_PROJECT_ID || creds.project_id;
-  const verifiedUser = await verifyFirebaseIdToken(idToken, projectId);
-
-  const currentSub = await getSubscriptionFromFirestore(creds, verifiedUser.uid);
-  if (!currentSub) {
-    return jsonResponse({ error: 'No active subscription found to cancel' }, 404);
+  let creds;
+  let verifiedUser;
+  try {
+    creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
+    const projectId = env.FIREBASE_PROJECT_ID || creds.project_id;
+    verifiedUser = await verifyFirebaseIdToken(idToken, projectId);
+  } catch {
+    return jsonResponse({ error: 'Authentication failed' }, 401, request, env);
   }
 
-  const isTrialing = currentSub.status === 'trialing';
+  const currentEnt = await getEntitlementFromFirestore(creds, verifiedUser.uid);
+  const effectiveStatus = resolveEffectiveStatus(currentEnt);
+  if (!currentEnt || (effectiveStatus !== 'active' && effectiveStatus !== 'grace' && effectiveStatus !== 'trialing')) {
+    return jsonResponse({ error: 'No active plan found to cancel' }, 404, request, env);
+  }
 
-  if (currentSub.razorpaySubscriptionId) {
+  if (effectiveStatus === 'trialing') {
+    return jsonResponse({
+      success: true,
+      status: 'trialing',
+      cancelAtPeriodEnd: false,
+      validUntil: currentEnt.validUntil,
+      message: 'Free trial requires no payment method and has no automatic charge when it ends.',
+    }, 200, request, env);
+  }
+
+  if (currentEnt.razorpaySubscriptionId && currentEnt.checkoutMode === 'subscription') {
     try {
-      await cancelRazorpaySubscription(env, currentSub.razorpaySubscriptionId, !isTrialing);
+      await cancelRazorpaySubscription(env, currentEnt.razorpaySubscriptionId, true);
     } catch (err: any) {
-      console.warn('[handleCancelSubscription] Razorpay cancel notice:', err?.message || err);
+      console.warn('[handleCancelSubscription] Razorpay cancel warning:', err?.message || err);
     }
   }
 
-  const retainedAccessUntil =
-    currentSub.trialEndsAt ||
-    currentSub.accessUntil ||
-    (currentSub.currentPeriodEnd ? new Date(currentSub.currentPeriodEnd).toISOString() : undefined);
-
-  await updateSubscriptionInFirestore(creds, verifiedUser.uid, {
+  await writeEntitlement(creds, verifiedUser.uid, {
     cancelAtPeriodEnd: true,
-    status: 'cancelled',
-    accessUntil: retainedAccessUntil,
-    updatedAt: Date.now(),
+    updatedAt: new Date().toISOString(),
   });
 
-  return jsonResponse({
-    success: true,
-    status: 'cancelled',
-    cancelAtPeriodEnd: true,
-    accessUntil: retainedAccessUntil,
-    isTrialing,
-    message: isTrialing
-      ? 'Trial subscription cancelled. You retain full access until your trial ends.'
-      : 'Subscription will cancel automatically at the end of the current billing cycle.',
-  });
+  return jsonResponse(
+    {
+      success: true,
+      status: currentEnt.status,
+      cancelAtPeriodEnd: true,
+      validUntil: currentEnt.validUntil,
+      message: 'Auto-renewal cancelled. You keep full access until the end of your current period.',
+    },
+    200,
+    request,
+    env
+  );
 }
 
 /**
  * Handles POST /api/change-plan
- * - Cancels the current subscription at period end (cancel_at_cycle_end: 1)
- * - Creates a new subscription in Razorpay with start_at set to the cycle end date
- * - Records pending plan change in Firestore
+ * Decision 6: No mid-period plan switching in this phase.
  */
 export async function handleChangePlan(request: Request, env: Env): Promise<Response> {
   const idToken = getBearerToken(request);
   if (!idToken) {
-    return jsonResponse({ error: 'Missing Authorization header' }, 401);
+    return jsonResponse({ error: 'Missing Authorization header' }, 401, request, env);
   }
 
-  const creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
-  const projectId = env.FIREBASE_PROJECT_ID || creds.project_id;
-  const verifiedUser = await verifyFirebaseIdToken(idToken, projectId);
-
-  const body = (await request.json().catch(() => ({}))) as {
-    plan?: string;
-    planKey?: string;
-    newPlanKey?: string;
-  };
-  const targetPlanKey = (body.newPlanKey || body.planKey || body.plan || '').toLowerCase() as PlanKey;
-
-  const targetPlanId = resolveServerPlanId(env, targetPlanKey);
-  if (!targetPlanId) {
-    return jsonResponse(
-      {
-        error: `Invalid plan key '${targetPlanKey}'. Supported plans: monthly, quarterly, half, yearly.`,
-      },
-      400
-    );
-  }
-
-  const currentSub = await getSubscriptionFromFirestore(creds, verifiedUser.uid);
-  if (!currentSub || !currentSub.razorpaySubscriptionId) {
-    return jsonResponse({ error: 'No active recurring subscription found to change' }, 404);
-  }
-
-  if (currentSub.plan === targetPlanKey || currentSub.billingCycle === targetPlanKey) {
-    return jsonResponse({ error: `User is already subscribed to the ${targetPlanKey} plan.` }, 400);
-  }
-
-  // 1. Cancel current subscription at cycle end if recurring
-  if (currentSub.razorpaySubscriptionId) {
-    try {
-      await cancelRazorpaySubscription(env, currentSub.razorpaySubscriptionId, true);
-    } catch (err: any) {
-      console.warn('[handleChangePlan] Current subscription cancel notice:', err?.message || err);
-    }
-  }
-
-  // 2. Determine target start_at date (epoch seconds)
-  const nowSec = Math.floor(Date.now() / 1000);
-  let effectiveDateSec = nowSec;
-
-  if (currentSub.currentPeriodEnd) {
-    effectiveDateSec = currentSub.currentPeriodEnd > 1e11
-      ? Math.floor(currentSub.currentPeriodEnd / 1000)
-      : currentSub.currentPeriodEnd;
-  } else if (currentSub.accessUntil) {
-    effectiveDateSec = Math.floor(new Date(currentSub.accessUntil).getTime() / 1000);
-  }
-
-  // Razorpay start_at must be strictly in the future (minimum +60s from now)
-  const scheduledStartAt = Math.max(nowSec + 60, effectiveDateSec);
-
-  // 3. Create new subscription in Razorpay scheduled to begin at that date
-  const newSub = await createRazorpaySubscription(
-    env,
-    targetPlanId,
-    verifiedUser.uid,
-    false, // Not first-time, no trial verification addon
-    verifiedUser.email || currentSub.userEmail,
-    verifiedUser.name || currentSub.userName,
-    scheduledStartAt
-  );
-
-  // 4. Update Firestore with scheduled plan change
-  await updateSubscriptionInFirestore(creds, verifiedUser.uid, {
-    cancelAtPeriodEnd: true,
-    pendingPlanChange: {
-      newPlan: targetPlanKey,
-      newPlanId: targetPlanId,
-      newSubscriptionId: newSub.id,
-      effectiveDate: scheduledStartAt * 1000,
-      requestedAt: Date.now(),
+  return jsonResponse(
+    {
+      error: 'Mid-period plan switching is unavailable. You can choose a different plan after your current period ends.',
+      code: 'PLAN_SWITCH_DISABLED',
     },
-    updatedAt: Date.now(),
-  });
-
-  return jsonResponse({
-    success: true,
-    message: `Plan will change to ${targetPlanKey} at the end of the current billing cycle.`,
-    newSubscriptionId: newSub.id,
-    effectiveDate: new Date(scheduledStartAt * 1000).toISOString(),
-    newPlan: targetPlanKey,
-  });
+    400,
+    request,
+    env
+  );
 }

@@ -31,15 +31,8 @@ export async function verifyRazorpayWebhookSignature(
     ['sign']
   );
 
-  const signatureBytes = await crypto.subtle.sign(
-    'HMAC',
-    key,
-    encoder.encode(rawBody)
-  );
-
-  // Convert HMAC bytes to hex string
-  const hashArray = Array.from(new Uint8Array(signatureBytes));
-  const expectedSignatureHex = hashArray
+  const signatureBytes = await crypto.subtle.sign('HMAC', key, encoder.encode(rawBody));
+  const expectedSignatureHex = Array.from(new Uint8Array(signatureBytes))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('');
 
@@ -47,50 +40,35 @@ export async function verifyRazorpayWebhookSignature(
 }
 
 /**
- * Creates a Razorpay Subscription using the Razorpay REST API.
+ * Creates a paid auto-renewing Razorpay Subscription (no ₹1 trial addon or delay).
  */
 export async function createRazorpaySubscription(
   env: Env,
   planId: string,
   userId: string,
-  isFirstTime: boolean,
+  planKey: string,
   userEmail?: string,
-  userName?: string,
-  startAt?: number
+  userName?: string
 ): Promise<{ id: string; status: string; shortUrl?: string }> {
   const authHeader = `Basic ${btoa(`${env.RAZORPAY_KEY_ID}:${env.RAZORPAY_KEY_SECRET}`)}`;
   const nowSeconds = Math.floor(Date.now() / 1000);
-  const expireBy = nowSeconds + 30 * 60; // Expire in 30 minutes
+  const expireBy = nowSeconds + 30 * 60;
 
   const bodyPayload: Record<string, any> = {
     plan_id: planId,
-    total_count: 120, // 10 years max recurring cycles
+    total_count: 120,
     quantity: 1,
     customer_notify: 1,
     expire_by: expireBy,
     notes: {
       uid: userId,
       userId,
+      planKey,
+      checkoutMode: 'subscription',
       userEmail: userEmail || '',
       userName: userName || '',
     },
   };
-
-  if (startAt && startAt > nowSeconds) {
-    bodyPayload.start_at = startAt;
-  } else if (isFirstTime) {
-    // First-time users get start_at = now+7d plus a ₹1 (100 paise) addon
-    bodyPayload.start_at = nowSeconds + 7 * 24 * 60 * 60;
-    bodyPayload.addons = [
-      {
-        item: {
-          name: '7-Day Trial Verification Fee',
-          amount: 100, // 100 paise = ₹1
-          currency: 'INR',
-        },
-      },
-    ];
-  }
 
   const res = await fetch('https://api.razorpay.com/v1/subscriptions', {
     method: 'POST',
@@ -103,7 +81,7 @@ export async function createRazorpaySubscription(
 
   if (!res.ok) {
     const errorText = await res.text();
-    throw new Error(`Razorpay create subscription failed: ${res.status} ${errorText}`);
+    throw new Error(`Razorpay create subscription failed (${res.status}): ${errorText}`);
   }
 
   const data = (await res.json()) as { id: string; status: string; short_url?: string };
@@ -115,65 +93,51 @@ export async function createRazorpaySubscription(
 }
 
 /**
- * Cancels an active or trialing Razorpay subscription.
- * @param cancelAtCycleEnd When true, subscription runs until current cycle end. When false, terminates immediately (used for trials).
+ * Cancels an active Razorpay subscription at cycle end or immediately.
  */
 export async function cancelRazorpaySubscription(
   env: Env,
   subscriptionId: string,
   cancelAtCycleEnd = true
 ): Promise<{ id: string; status: string }> {
-  // If the ID is empty, missing, or an order/payment ID (not a recurring subscription sub_...)
   if (!subscriptionId || !subscriptionId.startsWith('sub_')) {
-    console.warn(`[Razorpay] Skipping cancel for non-recurring or order ID: ${subscriptionId}`);
     return { id: subscriptionId || '', status: 'cancelled' };
   }
 
   const authHeader = `Basic ${btoa(`${env.RAZORPAY_KEY_ID}:${env.RAZORPAY_KEY_SECRET}`)}`;
 
-  const res = await fetch(
-    `https://api.razorpay.com/v1/subscriptions/${subscriptionId}/cancel`,
-    {
-      method: 'POST',
-      headers: {
-        Authorization: authHeader,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        cancel_at_cycle_end: cancelAtCycleEnd ? 1 : 0,
-      }),
-    }
-  );
+  const res = await fetch(`https://api.razorpay.com/v1/subscriptions/${subscriptionId}/cancel`, {
+    method: 'POST',
+    headers: {
+      Authorization: authHeader,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      cancel_at_cycle_end: cancelAtCycleEnd ? 1 : 0,
+    }),
+  });
 
   if (!res.ok) {
     const errorText = await res.text();
-    // If the subscription is already cancelled, expired, completed, or not found on Razorpay, treat as handled
     if (
       res.status === 400 &&
       (errorText.includes('could not be found') ||
-        errorText.includes('invalid') ||
         errorText.includes('already cancelled') ||
-        errorText.includes('completed') ||
-        errorText.includes('BAD_REQUEST_ERROR'))
+        errorText.includes('completed'))
     ) {
-      console.warn(`[Razorpay] Subscription ${subscriptionId} cancel handled safely: ${errorText}`);
       return { id: subscriptionId, status: 'cancelled' };
     }
-    throw new Error(`Razorpay cancel subscription failed: ${res.status} ${errorText}`);
+    throw new Error(`Razorpay cancel subscription failed (${res.status}): ${errorText}`);
   }
 
   return (await res.json()) as { id: string; status: string };
 }
 
 /**
- * Re-fetches the authoritative subscription entity directly from Razorpay.
+ * Fetches an authoritative subscription entity from Razorpay.
  */
-export async function fetchRazorpaySubscription(
-  env: Env,
-  subscriptionId: string
-): Promise<any> {
+export async function fetchRazorpaySubscription(env: Env, subscriptionId: string): Promise<any> {
   const authHeader = `Basic ${btoa(`${env.RAZORPAY_KEY_ID}:${env.RAZORPAY_KEY_SECRET}`)}`;
-
   const res = await fetch(`https://api.razorpay.com/v1/subscriptions/${subscriptionId}`, {
     method: 'GET',
     headers: {
@@ -181,49 +145,34 @@ export async function fetchRazorpaySubscription(
       'Content-Type': 'application/json',
     },
   });
-
   if (!res.ok) {
     const errorText = await res.text();
-    throw new Error(`Razorpay fetch subscription failed: ${res.status} ${errorText}`);
+    throw new Error(`Razorpay fetch subscription failed (${res.status}): ${errorText}`);
   }
-
   return await res.json();
 }
 
 /**
- * Refunds a payment via Razorpay REST API (e.g. ₹1 trial fee on abuse detection).
+ * Fetches an authoritative payment entity from Razorpay.
  */
-export async function refundRazorpayPayment(
-  env: Env,
-  paymentId: string,
-  amountPaise = 100
-): Promise<any> {
+export async function fetchRazorpayPayment(env: Env, paymentId: string): Promise<any> {
   const authHeader = `Basic ${btoa(`${env.RAZORPAY_KEY_ID}:${env.RAZORPAY_KEY_SECRET}`)}`;
-
-  const res = await fetch(`https://api.razorpay.com/v1/payments/${paymentId}/refund`, {
-    method: 'POST',
+  const res = await fetch(`https://api.razorpay.com/v1/payments/${paymentId}`, {
+    method: 'GET',
     headers: {
       Authorization: authHeader,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      amount: amountPaise,
-      notes: {
-        reason: 'Trial abuse policy enforcement refund',
-      },
-    }),
   });
-
   if (!res.ok) {
     const errorText = await res.text();
-    throw new Error(`Razorpay refund failed: ${res.status} ${errorText}`);
+    throw new Error(`Razorpay fetch payment failed (${res.status}): ${errorText}`);
   }
-
   return await res.json();
 }
 
 /**
- * Creates a Razorpay Order for direct plan checkout or trial fee.
+ * Creates a one-time Razorpay Order for fixed-period fallback checkout.
  */
 export async function createRazorpayOrder(
   env: Env,
@@ -248,6 +197,7 @@ export async function createRazorpayOrder(
         uid: userId,
         userId,
         planKey,
+        checkoutMode: 'order',
         userEmail: userEmail || '',
         userName: userName || '',
       },
@@ -256,7 +206,7 @@ export async function createRazorpayOrder(
 
   if (!res.ok) {
     const errorText = await res.text();
-    throw new Error(`Razorpay create order failed: ${res.status} ${errorText}`);
+    throw new Error(`Razorpay create order failed (${res.status}): ${errorText}`);
   }
 
   const data = (await res.json()) as { id: string; amount: number; currency: string };
@@ -268,7 +218,32 @@ export async function createRazorpayOrder(
 }
 
 /**
- * Verifies Razorpay payment signature for standard checkout: HMAC-SHA256(order_id + "|" + payment_id, secret)
+ * Verifies Razorpay checkout signature:
+ * - Orders: HMAC-SHA256(order_id + "|" + payment_id, secret)
+ * - Subscriptions: HMAC-SHA256(razorpay_payment_id + "|" + subscription_id, secret)
+ */
+export async function verifyRazorpayCheckoutSignature(params: {
+  orderId?: string | null;
+  subscriptionId?: string | null;
+  paymentId: string;
+  signature: string;
+  secret: string;
+}): Promise<boolean> {
+  const { orderId, subscriptionId, paymentId, signature, secret } = params;
+  if (!paymentId || !signature || !secret) return false;
+  if (subscriptionId) {
+    const okSub = await verifyRazorpayWebhookSignature(`${paymentId}|${subscriptionId}`, signature, secret);
+    if (okSub) return true;
+  }
+  if (orderId) {
+    const okOrd = await verifyRazorpayWebhookSignature(`${orderId}|${paymentId}`, signature, secret);
+    if (okOrd) return true;
+  }
+  return false;
+}
+
+/**
+ * Legacy Order signature helper preserved for signature tests.
  */
 export async function verifyRazorpayPaymentSignature(
   orderId: string,
@@ -276,7 +251,5 @@ export async function verifyRazorpayPaymentSignature(
   signature: string,
   secret: string
 ): Promise<boolean> {
-  if (!orderId || !paymentId || !signature || !secret) return false;
-  const payload = `${orderId}|${paymentId}`;
-  return await verifyRazorpayWebhookSignature(payload, signature, secret);
+  return verifyRazorpayCheckoutSignature({ orderId, paymentId, signature, secret });
 }

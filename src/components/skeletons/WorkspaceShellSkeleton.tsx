@@ -3,23 +3,19 @@ import { Skeleton } from './Skeleton';
 import { DashboardSkeleton } from './DashboardSkeleton';
 
 /**
- * Full Workspace Shell Skeleton.
- * Replaces the jarring full-screen spinner with an exact structural skeleton of CrestFlow:
- * Left Sidebar rail + Global Header + Dashboard Content skeleton.
+ * Full Workspace Shell Skeleton aligned with Section 9 obsidian tokens (#0B0B0E / #131318 / #2A2A33).
  */
 export const WorkspaceShellSkeleton: React.FC = () => {
   return (
-    <div className="flex h-screen w-full bg-[#f1f1f1] dark:bg-[#181818] overflow-hidden select-none">
+    <div className="flex h-screen w-full bg-[#0B0B0E] overflow-hidden select-none">
       {/* Sidebar Rail Skeleton (desktop) */}
-      <aside className="hidden md:flex flex-col w-16 lg:w-56 border-r border-slate-200 dark:border-[#2e2e2e] bg-white dark:bg-[#212121] p-3 justify-between shrink-0">
+      <aside className="hidden md:flex flex-col w-16 lg:w-56 border-r border-[#2A2A33] bg-[#131318] p-3 justify-between shrink-0">
         <div className="space-y-6">
-          {/* Logo */}
           <div className="flex items-center gap-3 px-2 pt-2">
             <Skeleton className="h-7 w-7" rounded="md" />
             <Skeleton className="hidden lg:block h-5 w-24" />
           </div>
 
-          {/* Nav Items */}
           <div className="space-y-2 pt-4">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="flex items-center gap-3 p-2 rounded-md">
@@ -30,8 +26,7 @@ export const WorkspaceShellSkeleton: React.FC = () => {
           </div>
         </div>
 
-        {/* User Footer Profile */}
-        <div className="flex items-center gap-3 p-2 border-t border-slate-100 dark:border-[#2a2a2a]">
+        <div className="flex items-center gap-3 p-2 border-t border-[#2A2A33]">
           <Skeleton className="h-8 w-8" rounded="full" />
           <div className="hidden lg:block space-y-1">
             <Skeleton className="h-3 w-20" />
@@ -42,8 +37,7 @@ export const WorkspaceShellSkeleton: React.FC = () => {
 
       {/* Main Container */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Global Header Skeleton */}
-        <header className="h-14 border-b border-slate-200 dark:border-[#2e2e2e] bg-white dark:bg-[#212121] px-4 md:px-8 flex items-center justify-between shrink-0">
+        <header className="h-14 border-b border-[#2A2A33] bg-[#131318] px-4 md:px-8 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3 flex-1 max-w-md">
             <Skeleton className="h-8 w-8 md:hidden" rounded="md" />
             <Skeleton className="h-8 w-full max-w-xs" rounded="md" />
@@ -55,8 +49,7 @@ export const WorkspaceShellSkeleton: React.FC = () => {
           </div>
         </header>
 
-        {/* Body Content Skeleton */}
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto bg-[#0B0B0E]">
           <DashboardSkeleton />
         </main>
       </div>

@@ -14,7 +14,7 @@ export const BillingSkeleton: React.FC = () => {
       </div>
 
       {/* Active Membership Hero Card */}
-      <div className="p-6 rounded-lg border border-slate-200 dark:border-[#383838] bg-white dark:bg-[#212121] space-y-5">
+      <div className="p-6 rounded-xl border border-[#2A2A33] bg-[#131318] space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-2">
             <div className="flex items-center gap-2.5">
@@ -29,7 +29,7 @@ export const BillingSkeleton: React.FC = () => {
           </div>
         </div>
 
-        <div className="border-t border-slate-100 dark:border-[#2a2a2a] pt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="border-t border-[#2A2A33] pt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="space-y-1">
             <Skeleton className="h-3 w-20" />
             <Skeleton className="h-5 w-24" />
@@ -46,9 +46,9 @@ export const BillingSkeleton: React.FC = () => {
       </div>
 
       {/* Payment History Card */}
-      <div className="p-6 rounded-lg border border-slate-200 dark:border-[#383838] bg-white dark:bg-[#212121] space-y-4">
+      <div className="p-6 rounded-xl border border-[#2A2A33] bg-[#131318] space-y-4">
         <Skeleton className="h-5 w-36" />
-        <div className="divide-y divide-slate-100 dark:divide-[#2a2a2a]">
+        <div className="divide-y divide-[#2A2A33]">
           {[1, 2, 3].map((i) => (
             <div key={i} className="py-3.5 flex items-center justify-between">
               <div className="space-y-1">

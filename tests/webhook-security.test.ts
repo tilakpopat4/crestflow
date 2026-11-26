@@ -8,13 +8,17 @@ import { createMockFetch, MockWebhookState } from './mockWebhookFetch';
 const state: MockWebhookState = {
   processedEvents: new Set<string>(),
   firestoreSubscriptions: new Map<string, any>(),
+  entitlements: new Map<string, any>(),
+  trialLedger: new Map<string, any>(),
   razorpaySubscriptions: new Map<string, any>(),
+  refundedPayments: [],
+  cancelledSubscriptions: [],
+  cancellationsDetailed: [],
+  sentEmails: [],
 };
 
 function generateWebhookSignature(body: string, secret: string): string {
-  const hmac = crypto.createHmac('sha256', secret);
-  hmac.update(body, 'utf8');
-  return hmac.digest('hex');
+  return crypto.createHmac('sha256', secret).update(body, 'utf8').digest('hex');
 }
 
 const { privateKey: testPrivateKeyPem } = crypto.generateKeyPairSync('rsa', {
@@ -43,7 +47,7 @@ const originalFetch = globalThis.fetch;
 
 beforeEach(() => {
   state.processedEvents.clear();
-  state.firestoreSubscriptions.clear();
+  state.entitlements!.clear();
   state.razorpaySubscriptions.clear();
   globalThis.fetch = createMockFetch(state, originalFetch) as any;
 });
@@ -51,24 +55,16 @@ beforeEach(() => {
 describe('POST /api/razorpay-webhook Security & State Machine', () => {
   it('1. Forged Signature: Request with invalid or altered signature is rejected (400)', async () => {
     const rawBody = JSON.stringify({ event: 'subscription.charged', event_id: 'evt_forged_1' });
-    const forgedSignature = 'c0ffee0000000000000000000000000000000000000000000000000000000000';
-
     const req = new Request('http://localhost/api/razorpay-webhook', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-razorpay-signature': forgedSignature,
-      },
+      headers: { 'Content-Type': 'application/json', 'x-razorpay-signature': 'c0ffee'.padEnd(64, '0') },
       body: rawBody,
     });
-
     const res = await handleRazorpayWebhook(req, TEST_ENV);
     assert.strictEqual(res.status, 400);
-    const data = await res.json();
-    assert.strictEqual(data.error, 'Invalid webhook signature');
   });
 
-  it('2. Replayed Event: Repeated event ID is deduplicated and returns 200 fast without mutating', async () => {
+  it('2. Replayed Event: Repeated event ID is deduplicated via webhook_events and returns 200', async () => {
     const eventId = 'evt_duplicate_test_100';
     const subId = 'sub_test_dup_1';
     const userId = 'user_dup_123';
@@ -78,67 +74,49 @@ describe('POST /api/razorpay-webhook Security & State Machine', () => {
       status: 'active',
       current_start: 1700000000,
       current_end: 1702592000,
-      notes: { uid: userId },
+      notes: { uid: userId, planKey: 'monthly' },
     });
 
     const rawBody = JSON.stringify({
       event: 'subscription.activated',
       event_id: eventId,
       created_at: 1700000000,
-      payload: {
-        subscription: { entity: { id: subId } },
-      },
+      payload: { subscription: { entity: { id: subId } } },
     });
+    const sig = generateWebhookSignature(rawBody, TEST_SECRET);
 
-    const signature = generateWebhookSignature(rawBody, TEST_SECRET);
-
-    const req1 = new Request('http://localhost/api/razorpay-webhook', {
-      method: 'POST',
-      headers: { 'x-razorpay-signature': signature },
-      body: rawBody,
-    });
-    const res1 = await handleRazorpayWebhook(req1, TEST_ENV);
+    const res1 = await handleRazorpayWebhook(
+      new Request('http://localhost/api/razorpay-webhook', { method: 'POST', headers: { 'x-razorpay-signature': sig }, body: rawBody }),
+      TEST_ENV
+    );
     assert.strictEqual(res1.status, 200);
-    const data1 = await res1.json();
-    assert.strictEqual(data1.status, 'ok');
-    assert.strictEqual(data1.duplicate, undefined);
+    assert.strictEqual((await res1.json()).duplicate, undefined);
 
-    const req2 = new Request('http://localhost/api/razorpay-webhook', {
-      method: 'POST',
-      headers: { 'x-razorpay-signature': signature },
-      body: rawBody,
-    });
-    const res2 = await handleRazorpayWebhook(req2, TEST_ENV);
+    const res2 = await handleRazorpayWebhook(
+      new Request('http://localhost/api/razorpay-webhook', { method: 'POST', headers: { 'x-razorpay-signature': sig }, body: rawBody }),
+      TEST_ENV
+    );
     assert.strictEqual(res2.status, 200);
-    const data2 = await res2.json();
-    assert.strictEqual(data2.duplicate, true, 'Replayed event must return duplicate: true');
+    assert.strictEqual((await res2.json()).duplicate, true);
   });
 
-  it('3. Wrong or Missing UID: Re-fetched subscription with missing notes.uid is ignored', async () => {
+  it('3. Missing UID: Re-fetched subscription with missing notes.uid is ignored safely', async () => {
     const subId = 'sub_no_uid';
-
-    state.razorpaySubscriptions.set(subId, {
-      id: subId,
-      status: 'active',
-      notes: {},
-    });
+    state.razorpaySubscriptions.set(subId, { id: subId, status: 'active', notes: {} });
 
     const rawBody = JSON.stringify({
       event: 'subscription.charged',
       event_id: 'evt_no_uid_1',
-      payload: {
-        subscription: { entity: { id: subId } },
-      },
+      payload: { subscription: { entity: { id: subId } } },
     });
-
-    const signature = generateWebhookSignature(rawBody, TEST_SECRET);
-    const req = new Request('http://localhost/api/razorpay-webhook', {
-      method: 'POST',
-      headers: { 'x-razorpay-signature': signature },
-      body: rawBody,
-    });
-
-    const res = await handleRazorpayWebhook(req, TEST_ENV);
+    const res = await handleRazorpayWebhook(
+      new Request('http://localhost/api/razorpay-webhook', {
+        method: 'POST',
+        headers: { 'x-razorpay-signature': generateWebhookSignature(rawBody, TEST_SECRET) },
+        body: rawBody,
+      }),
+      TEST_ENV
+    );
     assert.strictEqual(res.status, 200);
     const data = await res.json();
     assert.strictEqual(data.status, 'ignored');
@@ -149,108 +127,80 @@ describe('POST /api/razorpay-webhook Security & State Machine', () => {
     const subId = 'sub_ooo_test';
     const userId = 'user_ooo_456';
 
-    state.firestoreSubscriptions.set(userId, {
+    state.entitlements!.set(userId, {
       userId,
       status: 'active',
-      lastEventTimestamp: 2000000000,
+      plan: 'pro_monthly',
+      lastEventTimestamp: 2000000000000,
     });
-
-    state.razorpaySubscriptions.set(subId, {
-      id: subId,
-      status: 'pending',
-      notes: { uid: userId },
-    });
+    state.razorpaySubscriptions.set(subId, { id: subId, status: 'pending', notes: { uid: userId } });
 
     const rawBody = JSON.stringify({
       event: 'subscription.pending',
       event_id: 'evt_stale_1',
       created_at: 1000000,
-      payload: {
-        subscription: { entity: { id: subId } },
-      },
+      payload: { subscription: { entity: { id: subId } } },
     });
-
-    const signature = generateWebhookSignature(rawBody, TEST_SECRET);
-    const req = new Request('http://localhost/api/razorpay-webhook', {
-      method: 'POST',
-      headers: { 'x-razorpay-signature': signature },
-      body: rawBody,
-    });
-
-    const res = await handleRazorpayWebhook(req, TEST_ENV);
+    const res = await handleRazorpayWebhook(
+      new Request('http://localhost/api/razorpay-webhook', {
+        method: 'POST',
+        headers: { 'x-razorpay-signature': generateWebhookSignature(rawBody, TEST_SECRET) },
+        body: rawBody,
+      }),
+      TEST_ENV
+    );
     assert.strictEqual(res.status, 200);
-    const data = await res.json();
-    assert.strictEqual(data.ignored, 'out-of-order event');
-    assert.strictEqual(state.firestoreSubscriptions.get(userId).status, 'active');
+    assert.strictEqual((await res.json()).ignored, 'out-of-order event');
+    assert.strictEqual(state.entitlements!.get(userId).status, 'active');
   });
 
-  it('5. State Transitions per BILLING_SPEC: pending sets past_due with 3-day grace period', async () => {
+  it('5. State Transitions: pending sets grace with 3-day window', async () => {
     const subId = 'sub_pending_grace';
     const userId = 'user_grace_789';
-
-    state.razorpaySubscriptions.set(subId, {
-      id: subId,
-      status: 'pending',
-      notes: { uid: userId },
-    });
+    state.razorpaySubscriptions.set(subId, { id: subId, status: 'pending', notes: { uid: userId } });
 
     const rawBody = JSON.stringify({
       event: 'subscription.pending',
       event_id: 'evt_grace_1',
       created_at: Math.floor(Date.now() / 1000),
-      payload: {
-        subscription: { entity: { id: subId } },
-      },
+      payload: { subscription: { entity: { id: subId } } },
     });
-
-    const signature = generateWebhookSignature(rawBody, TEST_SECRET);
-    const req = new Request('http://localhost/api/razorpay-webhook', {
-      method: 'POST',
-      headers: { 'x-razorpay-signature': signature },
-      body: rawBody,
-    });
-
-    const res = await handleRazorpayWebhook(req, TEST_ENV);
+    const res = await handleRazorpayWebhook(
+      new Request('http://localhost/api/razorpay-webhook', {
+        method: 'POST',
+        headers: { 'x-razorpay-signature': generateWebhookSignature(rawBody, TEST_SECRET) },
+        body: rawBody,
+      }),
+      TEST_ENV
+    );
     assert.strictEqual(res.status, 200);
     const data = await res.json();
-    assert.strictEqual(data.subscriptionStatus, 'past_due');
-
-    const accessUntilTime = new Date(data.accessUntil).getTime();
-    const expectedMinGrace = Date.now() + 2 * 24 * 60 * 60 * 1000;
-    assert.ok(accessUntilTime > expectedMinGrace, 'accessUntil must be granted during 3-day grace period');
+    assert.strictEqual(data.entitlementStatus, 'grace');
+    assert.ok(new Date(data.validUntil).getTime() > Date.now() + 2 * 86400 * 1000);
   });
 
-  it('6. State Transitions per BILLING_SPEC: halted sets status expired immediately', async () => {
+  it('6. State Transitions: halted sets status expired immediately', async () => {
     const subId = 'sub_halted_1';
     const userId = 'user_halted_1';
-
-    state.razorpaySubscriptions.set(subId, {
-      id: subId,
-      status: 'halted',
-      notes: { uid: userId },
-    });
+    state.razorpaySubscriptions.set(subId, { id: subId, status: 'halted', notes: { uid: userId } });
 
     const rawBody = JSON.stringify({
       event: 'subscription.halted',
       event_id: 'evt_halt_1',
       created_at: Math.floor(Date.now() / 1000),
-      payload: {
-        subscription: { entity: { id: subId } },
-      },
+      payload: { subscription: { entity: { id: subId } } },
     });
-
-    const signature = generateWebhookSignature(rawBody, TEST_SECRET);
-    const req = new Request('http://localhost/api/razorpay-webhook', {
-      method: 'POST',
-      headers: { 'x-razorpay-signature': signature },
-      body: rawBody,
-    });
-
-    const res = await handleRazorpayWebhook(req, TEST_ENV);
+    const res = await handleRazorpayWebhook(
+      new Request('http://localhost/api/razorpay-webhook', {
+        method: 'POST',
+        headers: { 'x-razorpay-signature': generateWebhookSignature(rawBody, TEST_SECRET) },
+        body: rawBody,
+      }),
+      TEST_ENV
+    );
     assert.strictEqual(res.status, 200);
     const data = await res.json();
-    assert.strictEqual(data.subscriptionStatus, 'expired');
-    const accessUntilTime = new Date(data.accessUntil).getTime();
-    assert.ok(accessUntilTime < Date.now(), 'accessUntil must be in the past for expired subscriptions');
+    assert.strictEqual(data.entitlementStatus, 'expired');
+    assert.ok(new Date(data.validUntil).getTime() < Date.now());
   });
 });

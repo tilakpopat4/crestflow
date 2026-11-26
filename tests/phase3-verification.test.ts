@@ -2,7 +2,8 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert';
 import crypto from 'node:crypto';
 import { buildUpiPaymentUri } from '../src/lib/upiQr';
-import { FREE_TIER_LIMITS, PRO_PLANS } from '../src/lib/subscriptionPlans';
+import { PRO_PLANS, TRIAL_PLAN, getTrialDisclosureText } from '../src/lib/subscriptionPlans';
+import { TRIAL_PROMISE_COPY } from '../src/shared/pricing';
 
 describe('PHASE 3 Verification: Core Subscriptions, Security & Direct UPI', () => {
   it('1. Direct Invoice UPI QR URI complies with NPCI format', () => {
@@ -14,33 +15,21 @@ describe('PHASE 3 Verification: Core Subscriptions, Security & Direct UPI', () =
     assert.ok(uri.includes('cu=INR'), 'URI must specify INR currency');
   });
 
-  it('2. Free Tier Limit Boundaries match requirements', () => {
-    assert.strictEqual(FREE_TIER_LIMITS.maxClients, 2, 'Free tier limit must be exactly 2 clients');
-    assert.strictEqual(FREE_TIER_LIMITS.maxInvoicesPerMonth, 3, 'Free tier limit must be exactly 3 invoices/month');
-
-    // Simulate limit check
-    const canCreateClient = (count: number) => count < FREE_TIER_LIMITS.maxClients;
-    assert.strictEqual(canCreateClient(0), true, '0 clients: allowed');
-    assert.strictEqual(canCreateClient(1), true, '1 client: allowed');
-    assert.strictEqual(canCreateClient(2), false, '2 clients: limit reached (blocked)');
-
-    const canCreateInvoice = (count: number) => count < FREE_TIER_LIMITS.maxInvoicesPerMonth;
-    assert.strictEqual(canCreateInvoice(0), true, '0 invoices: allowed');
-    assert.strictEqual(canCreateInvoice(2), true, '2 invoices: allowed');
-    assert.strictEqual(canCreateInvoice(3), false, '3 invoices: limit reached (blocked)');
+  it('2. Canonical 7-Day Cardless Trial Promise (no free tier)', () => {
+    assert.strictEqual(TRIAL_PLAN.price, 0);
+    assert.strictEqual(TRIAL_PLAN.durationDays, 7);
+    assert.strictEqual(getTrialDisclosureText(TRIAL_PLAN), TRIAL_PROMISE_COPY);
   });
 
-  it('3. Razorpay Subscription Plans Configuration', () => {
-    const monthly = PRO_PLANS.find(p => p.id === 'monthly');
-    const yearly = PRO_PLANS.find(p => p.id === 'yearly');
+  it('3. Razorpay Paid Plans Configuration (79 / 199 / 699)', () => {
+    assert.strictEqual(PRO_PLANS.length, 3);
+    const monthly = PRO_PLANS.find((p) => p.id === 'monthly');
+    const quarterly = PRO_PLANS.find((p) => p.id === 'quarterly');
+    const yearly = PRO_PLANS.find((p) => p.id === 'yearly');
 
-    assert.ok(monthly, 'Monthly plan must exist');
-    assert.strictEqual(monthly.price, 79, 'Monthly price must be ₹79');
-    assert.strictEqual(monthly.currency, 'INR');
-
-    assert.ok(yearly, 'Yearly plan must exist');
-    assert.strictEqual(yearly.price, 899, 'Yearly price must be ₹899');
-    assert.strictEqual(yearly.currency, 'INR');
+    assert.ok(monthly && monthly.price === 79 && monthly.currency === 'INR');
+    assert.ok(quarterly && quarterly.price === 199 && quarterly.currency === 'INR');
+    assert.ok(yearly && yearly.price === 699 && yearly.currency === 'INR' && yearly.isBestValue);
   });
 
   it('4. Razorpay Webhook HMAC-SHA256 Signature Verification', () => {
@@ -49,33 +38,16 @@ describe('PHASE 3 Verification: Core Subscriptions, Security & Direct UPI', () =
       entity: 'event',
       account_id: 'acc_12345',
       event: 'subscription.charged',
-      contains: ['subscription', 'payment'],
-      payload: {
-        subscription: {
-          entity: {
-            id: 'sub_test_123',
-            plan_id: 'plan_monthly_79',
-            status: 'active'
-          }
-        }
-      }
+      payload: { subscription: { entity: { id: 'sub_test_123', status: 'active' } } },
     });
 
-    // Compute expected signature
-    const hmac = crypto.createHmac('sha256', secret);
-    hmac.update(payload, 'utf8');
-    const expectedSignature = hmac.digest('hex');
-
-    // Verify signature with timing-safe comparison
-    const verificationHmac = crypto.createHmac('sha256', secret);
-    verificationHmac.update(payload, 'utf8');
-    const actualSignature = verificationHmac.digest('hex');
+    const expectedSignature = crypto.createHmac('sha256', secret).update(payload, 'utf8').digest('hex');
+    const actualSignature = crypto.createHmac('sha256', secret).update(payload, 'utf8').digest('hex');
 
     const isValid = crypto.timingSafeEqual(
       Buffer.from(expectedSignature, 'utf8'),
       Buffer.from(actualSignature, 'utf8')
     );
-
-    assert.strictEqual(isValid, true, 'Timing-safe HMAC-SHA256 signature must be verified successfully');
+    assert.strictEqual(isValid, true);
   });
 });

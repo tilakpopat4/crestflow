@@ -158,33 +158,33 @@ function wrapEmailHtml(title: string, contentHtml: string): string {
 }
 
 /**
- * 1. Day 5 of Trial Notification
+ * 1. Day 5 of Trial Notification (No card / no automatic charge)
  */
 export async function sendTrialDay5Email(
   env: Env,
   toEmail: string,
   name?: string
 ): Promise<{ success: boolean; id?: string; error?: string }> {
-  const baseUrl = env.BASE_URL || 'https://crestflow.app';
+  const baseUrl = env.BASE_URL || 'https://crestflow.space';
   const greeting = name ? `Hi ${name},` : 'Hello,';
-  const subject = 'Your CrestFlow Pro trial ends in 2 days';
-  const text = `${greeting}\n\nYou have 2 days remaining on your 7-day CrestFlow Pro trial.\n\nAll your client portals, automated 6 AM delivery schedules, and direct UPI payment links will continue uninterrupted. When your trial ends, your selected recurring subscription will seamlessly activate.\n\nIf you need to make any adjustments or cancel before your billing cycle starts, you can manage your subscription directly in your account settings.\n\nManage Subscription: ${baseUrl}/billing\n\n— The CrestFlow Team`;
+  const subject = '2 days left on your CrestFlow trial';
+  const text = `${greeting}\n\nYou have 2 days remaining on your 7-day free trial.\n\nReminder: 7-day free trial, no card needed, no automatic charge. Your clients, deliverables, and invoices stay safe when the trial ends.\n\nTo keep creating invoices and managing client portals after day 7, pick Monthly (₹79), Quarterly (₹199), or Yearly (₹699) at ${baseUrl}/pricing\n\n— The CrestFlow Team`;
 
   const html = wrapEmailHtml(
     subject,
-    `<h1>Your Pro trial ends in 2 days</h1>
+    `<h1>2 days left on your CrestFlow trial</h1>
      <p>${greeting}</p>
-     <p>You have <strong>2 days remaining</strong> on your 7-day CrestFlow Pro trial.</p>
-     <p>All your client portals, automated 6 AM delivery schedules, and direct UPI payment links will continue uninterrupted. When your trial ends, your selected recurring subscription will seamlessly activate.</p>
-     <p>If you need to make adjustments or cancel before your primary billing begins, you can do so anytime in your dashboard:</p>
-     <p><a href="${baseUrl}/billing" class="btn">Manage Subscription</a></p>`
+     <p>You have <strong>2 days remaining</strong> on your 7-day free trial.</p>
+     <p>7-day free trial, no card needed, no automatic charge. All of your existing clients, deliverables, and invoices stay safe when the trial ends.</p>
+     <p>Choose Monthly (&#8377;79), Quarterly (&#8377;199), or Yearly (&#8377;699) anytime to continue without interruption:</p>
+     <p><a href="${baseUrl}/pricing" class="btn">View Plans</a></p>`
   );
 
   return sendResendEmail(env, { to: toEmail, subject, text, html });
 }
 
 /**
- * 2. 24h Before First Charge Notification
+ * 2. Paid Plan Upcoming Renewal Notification (Auto-renewing subscribers only)
  */
 export async function sendCharge24hEmail(
   env: Env,
@@ -192,18 +192,18 @@ export async function sendCharge24hEmail(
   name?: string,
   planName = 'Pro'
 ): Promise<{ success: boolean; id?: string; error?: string }> {
-  const baseUrl = env.BASE_URL || 'https://crestflow.app';
+  const baseUrl = env.BASE_URL || 'https://crestflow.space';
   const greeting = name ? `Hi ${name},` : 'Hello,';
-  const subject = 'Reminder: Your CrestFlow subscription begins tomorrow';
-  const text = `${greeting}\n\nThis is a reminder that your 7-day ₹1 trial is ending tomorrow. Your ${planName} subscription will be charged to your payment method automatically in 24 hours.\n\nYou will continue having full access to unlimited clients, unlimited invoices, and automated delivery features.\n\nView or update your subscription at: ${baseUrl}/billing\n\n— The CrestFlow Team`;
+  const subject = 'Reminder: Your CrestFlow renewal is scheduled tomorrow';
+  const text = `${greeting}\n\nYour ${planName} subscription is scheduled to renew in 24 hours so your workspace access continues uninterrupted.\n\nReview or cancel auto-renewal anytime at: ${baseUrl}/billing\n\n— The CrestFlow Team`;
 
   const html = wrapEmailHtml(
     subject,
-    `<h1>Your subscription begins tomorrow</h1>
+    `<h1>Your renewal is scheduled tomorrow</h1>
      <p>${greeting}</p>
-     <p>This is a reminder that your 7-day &#8377;1 trial is ending tomorrow. Your <strong>${planName}</strong> subscription will be charged to your payment method automatically in 24 hours.</p>
-     <p>You will continue to have full access to unlimited clients, unlimited invoices, direct UPI payments, and automated deliveries.</p>
-     <p><a href="${baseUrl}/billing" class="btn">View Subscription</a></p>`
+     <p>Your <strong>${planName}</strong> plan is scheduled to renew in 24 hours so your invoicing and client portals remain active.</p>
+     <p>You can review or cancel auto-renewal anytime in Billing:</p>
+     <p><a href="${baseUrl}/billing" class="btn">Manage Billing</a></p>`
   );
 
   return sendResendEmail(env, { to: toEmail, subject, text, html });

@@ -1,7 +1,8 @@
-import { Env } from '../types';
-import { parseServiceAccount, getSubscriptionFromFirestore, updateSubscriptionInFirestore, isEventProcessed, markEventProcessed } from '../firestore';
-import { verifyRazorpayWebhookSignature, fetchRazorpaySubscription, cancelRazorpaySubscription, refundRazorpayPayment } from '../razorpay';
-import { normalizeGoogleEmail, normalizeUpiVpa, hashIdentifier, markTrialLedgerUsed } from '../trialLedger';
+import { Env, EntitlementStatus } from '../types';
+import { parseServiceAccount, isEventProcessed, markEventProcessed } from '../firestore';
+import { verifyRazorpayWebhookSignature, fetchRazorpaySubscription } from '../razorpay';
+import { getEntitlementFromFirestore, writeEntitlement } from '../entitlements';
+import { resolvePaidPlanKey, SERVER_PLAN_CATALOG, GRACE_DURATION_DAYS } from '../../src/shared/pricing';
 import { jsonResponse } from './subscription';
 import { sendPaymentChargedReceipt } from '../emailDispatcher';
 import { sendWelcomeEmailForUser } from './notifications';
@@ -9,18 +10,15 @@ import { handleOrderWebhook } from './webhookOrderHandler';
 
 /**
  * Handles POST /api/razorpay-webhook
- * 1. Verifies HMAC-SHA256 signature on RAW body using constant-time comparison
- * 2. Deduplicates by event ID and returns 200 fast
- * 3. Re-fetches the subscription entity directly from Razorpay
- * 4. Validates notes.uid
- * 5. Guards against out-of-order events
- * 6. Updates status and accessUntil per docs/BILLING_SPEC.md
+ * 1. Verifies HMAC-SHA256 signature on RAW body (constant-time)
+ * 2. Deduplicates by eventId in `webhook_events`
+ * 3. Guards out-of-order events with `lastEventTimestamp`
+ * 4. Updates `entitlements/{uid}` for active, grace (3 days), cancelAtPeriodEnd, and expired
  */
 export async function handleRazorpayWebhook(request: Request, env: Env): Promise<Response> {
   const rawBody = await request.text();
   const signature = request.headers.get('x-razorpay-signature');
 
-  // 1. Verify X-Razorpay-Signature on RAW body (HMAC-SHA256, constant-time compare)
   const isValid = await verifyRazorpayWebhookSignature(
     rawBody,
     signature,
@@ -28,196 +26,94 @@ export async function handleRazorpayWebhook(request: Request, env: Env): Promise
   );
 
   if (!isValid) {
-    return jsonResponse({ error: 'Invalid webhook signature' }, 400);
+    return jsonResponse({ error: 'Invalid webhook signature' }, 400, request, env);
   }
 
   let eventPayload: any;
   try {
     eventPayload = JSON.parse(rawBody);
   } catch {
-    return jsonResponse({ error: 'Invalid JSON payload' }, 400);
+    return jsonResponse({ error: 'Invalid JSON payload' }, 400, request, env);
   }
 
   const creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
+  const eventType: string = eventPayload.event || '';
+  const eventId = eventPayload.event_id || `${eventType}_${eventPayload.created_at || Date.now()}`;
 
-  // 2. Event Deduplication via processed_events / webhook_events
-  const eventId = eventPayload.event_id || `${eventPayload.event}_${eventPayload.created_at || Date.now()}`;
   if (await isEventProcessed(creds, eventId)) {
-    return jsonResponse({ status: 'ok', duplicate: true }, 200);
+    return jsonResponse({ status: 'ok', duplicate: true }, 200, request, env);
   }
-  await markEventProcessed(creds, eventId);
 
   const nowMs = Date.now();
-  const eventCreatedAtMs = eventPayload.created_at
-    ? eventPayload.created_at * 1000
-    : nowMs;
-
-  const eventType: string = eventPayload.event || '';
+  const eventCreatedAtMs = eventPayload.created_at ? eventPayload.created_at * 1000 : nowMs;
   const payloadData = eventPayload.payload || {};
 
-  // Extract subscription ID from various possible event entities
   const subId: string | null =
     payloadData.subscription?.entity?.id ||
     payloadData.payment?.entity?.subscription_id ||
     null;
 
   if (!subId) {
-    // Handle one-off / standard web checkout orders (order.paid, payment.captured)
-    return handleOrderWebhook(eventPayload, env, creds, eventCreatedAtMs);
+    const orderRes = await handleOrderWebhook(eventPayload, env, creds, eventCreatedAtMs, request);
+    await markEventProcessed(creds, eventId, { eventType, status: 'processed' }).catch(() => { });
+    return orderRes;
   }
 
-  // 3. Re-fetch authoritative subscription from Razorpay API
   let rzpSub: any;
   try {
     rzpSub = await fetchRazorpaySubscription(env, subId);
   } catch (err: any) {
-    console.error(`[Webhook] Failed to re-fetch subscription ${subId} from Razorpay:`, err);
-    return jsonResponse({ error: 'Failed to re-fetch subscription from provider' }, 500);
+    console.error(`[Webhook] Failed to fetch subscription ${subId}:`, err?.message);
+    return jsonResponse({ error: 'Failed to re-fetch subscription' }, 500, request, env);
   }
 
-  // 4. Validate notes.uid against authoritative subscription
   const userId: string | undefined = rzpSub.notes?.uid || rzpSub.notes?.userId;
   if (!userId) {
-    console.warn(`[Webhook] Subscription ${subId} has missing or empty notes.uid. Skipping.`);
-    return jsonResponse({ status: 'ignored', reason: 'missing notes.uid' }, 200);
+    await markEventProcessed(creds, eventId, { eventType, status: 'ignored' }).catch(() => { });
+    return jsonResponse({ status: 'ignored', reason: 'missing notes.uid' }, 200, request, env);
   }
 
-  // 5. Guard against out-of-order events
-  const existing = await getSubscriptionFromFirestore(creds, userId);
+  const existing = await getEntitlementFromFirestore(creds, userId);
   if (existing?.lastEventTimestamp && eventCreatedAtMs < existing.lastEventTimestamp) {
-    console.warn(
-      `[Webhook] Out-of-order event ${eventId} (${eventCreatedAtMs} < ${existing.lastEventTimestamp}). Skipping state update.`
-    );
-    return jsonResponse({ status: 'ok', ignored: 'out-of-order event' }, 200);
+    await markEventProcessed(creds, eventId, { eventType, status: 'ignored_out_of_order', userId }).catch(() => { });
+    return jsonResponse({ status: 'ok', ignored: 'out-of-order event' }, 200, request, env);
   }
 
-  const userEmail = rzpSub.notes?.userEmail || payloadData.payment?.entity?.email || existing?.userEmail;
-
-  // 6. Trial Ledger Confirmation & Anti-Abuse Checks (VPA & Email)
-  const isPaymentCaptured =
-    eventType === 'payment.captured' ||
-    payloadData.payment?.entity?.status === 'captured';
-
-  const isPaymentConfirmation =
-    eventType === 'subscription.authenticated' ||
-    eventType === 'subscription.activated' ||
-    eventType === 'subscription.charged' ||
-    isPaymentCaptured;
-
-  if (isPaymentConfirmation) {
-    // 6a. Check & Confirm Email Hash in trial_ledger
-    let emailAbused = false;
-    if (userEmail) {
-      const emailHash = await hashIdentifier(normalizeGoogleEmail(userEmail), env.TRIAL_LEDGER_PEPPER);
-      const emailCheck = await markTrialLedgerUsed(creds, emailHash, 'email', userId, subId);
-      if (emailCheck.alreadyUsedByOther) {
-        emailAbused = true;
-      }
-    }
-
-    // 6b. Check & Confirm UPI VPA in trial_ledger
-    const upiVpa = payloadData.payment?.entity?.vpa;
-    let vpaAbused = false;
-    if (upiVpa) {
-      const vpaHash = await hashIdentifier(normalizeUpiVpa(upiVpa), env.TRIAL_LEDGER_PEPPER);
-      const vpaCheck = await markTrialLedgerUsed(creds, vpaHash, 'vpa', userId, subId);
-      if (vpaCheck.alreadyUsedByOther) {
-        vpaAbused = true;
-      }
-    }
-
-    // If duplicate email or duplicate UPI VPA detected, revoke immediately, cancel, and refund
-    if (emailAbused || vpaAbused) {
-      const reason = emailAbused
-        ? 'Google email already claimed for another free trial.'
-        : 'UPI VPA already used for another free trial.';
-      console.warn(`[Trial Abuse] ${reason} Cancelling & refunding.`);
-
-      await cancelRazorpaySubscription(env, subId, false).catch(console.error);
-
-      const paymentId = payloadData.payment?.entity?.id;
-      if (paymentId) {
-        await refundRazorpayPayment(env, paymentId, 100).catch(console.error);
-      }
-
-      await updateSubscriptionInFirestore(creds, userId, {
-        userId,
-        status: 'expired',
-        plan: 'free',
-        accessUntil: new Date(nowMs - 1000).toISOString(),
-        trialEndsAt: null,
-        cancelAtPeriodEnd: true,
-        lastEventTimestamp: eventCreatedAtMs,
-        updatedAt: nowMs,
-      });
-
-      return jsonResponse(
-        {
-          status: 'abused',
-          action: 'cancelled_and_refunded',
-          reason,
-        },
-        200
-      );
-    }
-  }
-
-  // 7. State Machine & accessUntil Calculation per docs/BILLING_SPEC.md
+  const paidKey = resolvePaidPlanKey(rzpSub.notes?.planKey || existing?.billingCycle) || 'monthly';
+  const planSpec = SERVER_PLAN_CATALOG[paidKey];
   const rzpStatus: string = rzpSub.status || '';
-
-  let newStatus: 'pending' | 'trialing' | 'active' | 'past_due' | 'cancelled' | 'halted' | 'expired' = 'active';
-  let accessUntilIso: string = new Date(nowMs + 30 * 86400 * 1000).toISOString();
-  let trialEndsAtIso: string | null = null;
-  let cancelAtPeriodEnd = false;
+  const paymentEntity = payloadData.payment?.entity || {};
+  const refundEntity = payloadData.refund?.entity || {};
 
   const currentPeriodStartMs = rzpSub.current_start ? rzpSub.current_start * 1000 : nowMs;
-  const currentPeriodEndMs = rzpSub.current_end ? rzpSub.current_end * 1000 : nowMs + 30 * 86400 * 1000;
+  const currentPeriodEndMs = rzpSub.current_end
+    ? rzpSub.current_end * 1000
+    : nowMs + planSpec.durationDays * 86400 * 1000;
+
+  let newStatus: EntitlementStatus = 'active';
+  let validUntilIso = new Date(currentPeriodEndMs).toISOString();
+  let graceUntilIso: string | null = existing?.graceUntil || null;
+  let cancelAtPeriodEnd = Boolean(existing?.cancelAtPeriodEnd);
 
   if (eventType === 'refund.processed') {
-    // 4. refund.processed handling:
-    // Do not end membership for ₹1 trial fee refunds unless abuse refund.
-    // End access only when renewal/plan payment is fully refunded. Partial refunds just log.
-    const refundEntity = payloadData.refund?.entity || {};
-    const paymentEntity = payloadData.payment?.entity || {};
     const refundAmount = refundEntity.amount || 0;
     const paymentAmount = paymentEntity.amount || 0;
+    const amountRefunded = paymentEntity.amount_refunded || refundAmount;
+    const isFullRefund = paymentAmount > 0 ? amountRefunded >= paymentAmount : paymentEntity.status === 'refunded';
 
-    const isTrialFee = refundAmount === 100 || paymentAmount === 100;
-    const notesReason = String(refundEntity.notes?.reason || paymentEntity.notes?.reason || '');
-    const isAbuseRefund = notesReason.toLowerCase().includes('abuse');
-
-    if (isTrialFee && !isAbuseRefund) {
-      console.log(`[Webhook] ₹1 trial fee refund processed for user ${userId}. Membership unaffected.`);
-      return jsonResponse({ status: 'ok', ignored: 'trial_fee_refund_non_abuse' }, 200);
+    if (!isFullRefund) {
+      await markEventProcessed(creds, eventId, { eventType, status: 'partial_refund', userId }).catch(() => { });
+      return jsonResponse({ status: 'ok', partial_refund: true }, 200, request, env);
     }
 
-    if (!isTrialFee) {
-      const amountRefunded = paymentEntity.amount_refunded || refundAmount;
-      const isFullRefund = paymentAmount > 0 ? amountRefunded >= paymentAmount : paymentEntity.status === 'refunded';
-
-      if (!isFullRefund) {
-        console.log(`[Webhook] Partial refund of ₹${(refundAmount / 100).toFixed(2)} processed for user ${userId}. Membership unaffected.`);
-        return jsonResponse({ status: 'ok', partial_refund: true, amount: refundAmount }, 200);
-      }
-    }
-
-    // Full renewal refund or abuse refund: immediately expire access
     newStatus = 'expired';
-    accessUntilIso = new Date(nowMs - 1000).toISOString();
-  } else if (eventType === 'subscription.authenticated' || rzpStatus === 'authenticated') {
-    // Grant "trialing" only after the ₹1 addon payment is confirmed captured
-    if (isPaymentCaptured || (rzpSub.paid_count && rzpSub.paid_count > 0)) {
-      newStatus = 'trialing';
-      // trialEndsAt must equal the subscription's start_at
-      const startAtSec = rzpSub.start_at || rzpSub.current_start;
-      trialEndsAtIso = startAtSec
-        ? new Date(startAtSec * 1000).toISOString()
-        : new Date(nowMs + 7 * 86400 * 1000).toISOString();
-      accessUntilIso = trialEndsAtIso;
-    } else {
-      newStatus = 'pending';
-      accessUntilIso = new Date(nowMs - 1000).toISOString();
-    }
+    validUntilIso = new Date(nowMs - 1000).toISOString();
+    graceUntilIso = null;
+    cancelAtPeriodEnd = false;
+  } else if (eventType === 'subscription.authenticated') {
+    // Only mark active when subscription is already paid/active; no card-based trial grant
+    await markEventProcessed(creds, eventId, { eventType, status: 'authenticated_ack', userId }).catch(() => { });
+    return jsonResponse({ status: 'ok', acknowledged: true }, 200, request, env);
   } else if (
     eventType === 'subscription.activated' ||
     eventType === 'subscription.charged' ||
@@ -225,66 +121,91 @@ export async function handleRazorpayWebhook(request: Request, env: Env): Promise
     rzpStatus === 'active'
   ) {
     newStatus = 'active';
-    accessUntilIso = new Date(currentPeriodEndMs).toISOString();
+    validUntilIso = new Date(currentPeriodEndMs).toISOString();
+    graceUntilIso = null;
+    cancelAtPeriodEnd = false;
 
+    const userEmail = rzpSub.notes?.userEmail || paymentEntity.email || existing?.userEmail;
     if (eventType === 'subscription.charged' && userEmail) {
-      const planAmt = payloadData.payment?.entity?.amount ? `₹${(payloadData.payment.entity.amount / 100).toFixed(0)}` : '₹79';
+      const planAmt = paymentEntity.amount ? `₹${(paymentEntity.amount / 100).toFixed(0)}` : `₹${planSpec.priceInr}`;
       await sendPaymentChargedReceipt(env, creds, {
-        userId, userEmail, planName: 'Pro', amountFormatted: planAmt,
-        periodStartMs: currentPeriodStartMs || nowMs, periodEndMs: currentPeriodEndMs, subId, eventId,
-      }).catch((err) => console.warn('[Webhook] Payment receipt error:', err));
+        userId,
+        userEmail,
+        planName: `Pro ${paidKey.charAt(0).toUpperCase() + paidKey.slice(1)}`,
+        amountFormatted: planAmt,
+        periodStartMs: currentPeriodStartMs,
+        periodEndMs: currentPeriodEndMs,
+        subId,
+        eventId,
+      }).catch((err) => console.warn('[Webhook] Receipt email error:', err));
     }
-    const userName = rzpSub.notes?.userName || rzpSub.notes?.name || existing?.userName;
-    const isFirstPayment = !existing?.hasHadSubscription && !existing?.trialEndsAt && !existing?.lastPaymentAt;
-    if (isFirstPayment && userEmail) {
-      sendWelcomeEmailForUser(env, creds, userId, userEmail, userName).catch(() => {});
+    const userName = rzpSub.notes?.userName || existing?.userName;
+    if (userEmail && !existing?.welcomeEmailSent) {
+      sendWelcomeEmailForUser(env, creds, userId, userEmail, userName, false).catch(() => { });
     }
   } else if (
     eventType === 'subscription.pending' ||
     eventType === 'payment.failed' ||
     rzpStatus === 'pending'
   ) {
-    // Grace period: set graceUntil ONCE (periodEnd + 3 days) upon first failure. Later retries do not extend it.
-    newStatus = 'past_due';
-    let graceUntilIso = existing?.graceUntil;
+    // 3-day grace window set ONCE on first renewal failure; retries never extend graceUntil
+    newStatus = 'grace';
     if (!graceUntilIso) {
-      const baseEndMs = currentPeriodEndMs > 0 ? currentPeriodEndMs : nowMs;
-      graceUntilIso = new Date(baseEndMs + 3 * 24 * 60 * 60 * 1000).toISOString();
+      const existingEndMs = existing?.validUntil ? new Date(existing.validUntil).getTime() : 0;
+      const baseEndMs = Math.max(currentPeriodEndMs, existingEndMs, nowMs);
+      graceUntilIso = new Date(baseEndMs + GRACE_DURATION_DAYS * 86400 * 1000).toISOString();
     }
-    accessUntilIso = graceUntilIso;
+    validUntilIso = graceUntilIso;
   } else if (eventType === 'subscription.cancelled' || rzpStatus === 'cancelled') {
-    // Cancelled: User retains access until current period end
-    newStatus = 'cancelled';
     cancelAtPeriodEnd = true;
-    accessUntilIso = new Date(currentPeriodEndMs).toISOString();
-  } else if (eventType === 'subscription.halted' || eventType === 'subscription.completed' || rzpStatus === 'halted' || rzpStatus === 'completed') {
+    const retainedEndMs = currentPeriodEndMs;
+    validUntilIso = new Date(retainedEndMs).toISOString();
+    newStatus = retainedEndMs > nowMs ? 'active' : 'expired';
+  } else if (
+    eventType === 'subscription.halted' ||
+    eventType === 'subscription.completed' ||
+    rzpStatus === 'halted' ||
+    rzpStatus === 'completed'
+  ) {
     newStatus = 'expired';
-    accessUntilIso = new Date(nowMs - 1000).toISOString();
+    validUntilIso = new Date(nowMs - 1000).toISOString();
+    graceUntilIso = null;
   }
 
-  // 8. Write to Firestore `subscriptions/{userId}`
-  await updateSubscriptionInFirestore(creds, userId, {
-    userId, status: newStatus, plan: newStatus === 'expired' ? 'free' : 'pro',
-    currentPeriodStart: currentPeriodStartMs, currentPeriodEnd: currentPeriodEndMs,
-    accessUntil: accessUntilIso, trialEndsAt: trialEndsAtIso,
-    graceUntil: newStatus === 'past_due' ? (existing?.graceUntil || accessUntilIso) : newStatus === 'active' ? null : (existing?.graceUntil || null),
-    hasHadSubscription: true,
-    hasHadTrial: existing?.hasHadTrial || newStatus === 'trialing' || Boolean(trialEndsAtIso) || false,
-    lastPaymentId: payloadData.payment?.entity?.id || subId,
-    lastPaymentAmount: payloadData.payment?.entity?.amount ? payloadData.payment.entity.amount / 100 : (newStatus === 'trialing' ? 1 : 79),
-    lastPaymentMethod: payloadData.payment?.entity?.method || (payloadData.payment?.entity?.vpa ? 'upi' : 'card'),
-    lastPaymentVpa: payloadData.payment?.entity?.vpa || null,
-    lastPaymentAt: nowMs,
-    razorpaySubscriptionId: subId,
+  await writeEntitlement(creds, userId, {
+    userId,
+    userEmail: rzpSub.notes?.userEmail || paymentEntity.email || existing?.userEmail,
+    userName: rzpSub.notes?.userName || existing?.userName,
+    status: newStatus,
+    plan: existing?.plan === 'lifetime' ? 'lifetime' : planSpec.planCode,
+    billingCycle: existing?.plan === 'lifetime' ? 'lifetime' : paidKey,
+    validUntil: existing?.plan === 'lifetime' ? existing.validUntil : validUntilIso,
+    graceUntil: graceUntilIso,
+    trialUsed: Boolean(existing?.trialUsed),
     cancelAtPeriodEnd,
+    checkoutMode: 'subscription',
+    razorpayCustomerId: rzpSub.customer_id || existing?.razorpayCustomerId || null,
+    razorpaySubscriptionId: subId,
+    razorpayPaymentId: paymentEntity.id || existing?.razorpayPaymentId || null,
+    lastPaymentAmount: paymentEntity.amount ? paymentEntity.amount / 100 : existing?.lastPaymentAmount,
+    lastPaymentMethod: paymentEntity.method || existing?.lastPaymentMethod,
+    lastPaymentVpa: paymentEntity.vpa || existing?.lastPaymentVpa || null,
+    lastPaymentAt: paymentEntity.id ? nowMs : existing?.lastPaymentAt,
     lastEventTimestamp: eventCreatedAtMs,
-    updatedAt: nowMs,
+    updatedAt: new Date(nowMs).toISOString(),
   });
 
-  return jsonResponse({
-    status: 'ok',
-    event: eventType,
-    subscriptionStatus: newStatus,
-    accessUntil: accessUntilIso,
-  }, 200);
+  await markEventProcessed(creds, eventId, { eventType, status: 'processed', userId }).catch(() => { });
+
+  return jsonResponse(
+    {
+      status: 'ok',
+      event: eventType,
+      entitlementStatus: newStatus,
+      validUntil: validUntilIso,
+    },
+    200,
+    request,
+    env
+  );
 }

@@ -1,16 +1,12 @@
-import { describe, it, before, after } from 'node:test';
+import { describe, it, before, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import worker from '../worker/index';
-import { Env, SubscriptionRecord } from '../worker/types';
-import {
-  MockWebhookState,
-  createMockFetch,
-  createMockIdToken,
-} from './mockWebhookFetch';
+import { Env } from '../worker/types';
+import { MockWebhookState, createMockFetch, createMockIdToken } from './mockWebhookFetch';
 import { handleCronReconciliation } from '../worker/reconcile';
 
-describe('Subscription Lifecycle, Plan Changes & Cron Reconciliation Suite', () => {
+describe('Entitlement Lifecycle, Cancellation & Cron Reconciliation Suite', () => {
   let originalFetch: typeof globalThis.fetch;
   let keyPair: crypto.KeyPairSyncResult<string, string>;
   let mockState: MockWebhookState;
@@ -22,14 +18,13 @@ describe('Subscription Lifecycle, Plan Changes & Cron Reconciliation Suite', () 
       publicKeyEncoding: { type: 'spki', format: 'pem' },
       privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
     });
-
-    const pubKeyObj = crypto.createPublicKey(keyPair.privateKey);
-    const jwk = pubKeyObj.export({ format: 'jwk' }) as any;
+    const jwk = crypto.createPublicKey(keyPair.privateKey).export({ format: 'jwk' }) as any;
 
     originalFetch = globalThis.fetch;
     mockState = {
       processedEvents: new Set(),
       firestoreSubscriptions: new Map(),
+      entitlements: new Map(),
       trialLedger: new Map(),
       razorpaySubscriptions: new Map(),
       refundedPayments: [],
@@ -38,17 +33,16 @@ describe('Subscription Lifecycle, Plan Changes & Cron Reconciliation Suite', () 
       sentEmails: [],
       publicKeyJwk: { ...jwk, kid: 'mock_kid', alg: 'RS256', use: 'sig' },
     };
-
     globalThis.fetch = createMockFetch(mockState, originalFetch);
 
     testEnv = {
       ASSETS: { fetch: async () => new Response('Asset') },
+      BASE_URL: 'https://crestflow.space',
       RAZORPAY_KEY_ID: 'rzp_test_key123',
       RAZORPAY_KEY_SECRET: 'rzp_test_secret123',
       RAZORPAY_WEBHOOK_SECRET: 'webhook_secret_xyz',
       RAZORPAY_PLAN_MONTHLY: 'plan_monthly_123',
       RAZORPAY_PLAN_QUARTERLY: 'plan_quarterly_123',
-      RAZORPAY_PLAN_HALF: 'plan_half_123',
       RAZORPAY_PLAN_YEARLY: 'plan_yearly_123',
       FIREBASE_PROJECT_ID: 'test-project',
       FIREBASE_SERVICE_ACCOUNT: JSON.stringify({
@@ -58,7 +52,7 @@ describe('Subscription Lifecycle, Plan Changes & Cron Reconciliation Suite', () 
       }),
       TRIAL_LEDGER_PEPPER: 'test_pepper_9999',
       RESEND_API_KEY: 're_test_key_abc123',
-      RESEND_FROM_EMAIL: 'CrestFlow <billing@crestflow.com>',
+      RESEND_FROM_EMAIL: 'CrestFlow <billing@crestflow.space>',
     };
   });
 
@@ -66,228 +60,140 @@ describe('Subscription Lifecycle, Plan Changes & Cron Reconciliation Suite', () 
     globalThis.fetch = originalFetch;
   });
 
-  it('1. Cancellation (trialing): cancels in Razorpay immediately (cycle_end=0) but preserves access until trialEndsAt', async () => {
-    const uid = 'user_trial_cancel';
-    const trialEndsAt = new Date(Date.now() + 5 * 86400 * 1000).toISOString();
-    const token = createMockIdToken(uid, 'trialer@example.com', keyPair.privateKey);
-
-    mockState.firestoreSubscriptions.set(uid, {
-      userId: uid,
-      userEmail: 'trialer@example.com',
-      plan: 'pro',
-      status: 'trialing',
-      razorpaySubscriptionId: 'sub_trial_rzp_1',
-      trialEndsAt,
-      accessUntil: trialEndsAt,
-      cancelAtPeriodEnd: false,
-      updatedAt: Date.now(),
-    });
-
-    const res = await worker.fetch(
-      new Request('https://crestflow.com/api/cancel-subscription', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      }),
-      testEnv
-    );
-
-    assert.equal(res.status, 200);
-    const body = await res.json();
-    assert.equal(body.success, true);
-    assert.equal(body.isTrialing, true);
-    assert.equal(body.accessUntil, trialEndsAt);
-
-    // Assert Razorpay was called with cancel_at_cycle_end: 0
-    const cancelCall = mockState.cancellationsDetailed.find((c) => c.subId === 'sub_trial_rzp_1');
-    assert.ok(cancelCall);
-    assert.equal(cancelCall.cancelAtCycleEnd, 0);
-
-    // Assert Firestore record has cancelled status and preserved accessUntil
-    const updated = mockState.firestoreSubscriptions.get(uid);
-    assert.equal(updated.status, 'cancelled');
-    assert.equal(updated.cancelAtPeriodEnd, true);
-    assert.equal(updated.accessUntil, trialEndsAt);
+  beforeEach(() => {
+    mockState.entitlements!.clear();
+    mockState.cancellationsDetailed = [];
+    mockState.sentEmails = [];
   });
 
-  it('2. Cancellation (active): cancels in Razorpay at cycle end (cycle_end=1)', async () => {
-    const uid = 'user_active_cancel';
-    const cycleEndMs = Date.now() + 20 * 86400 * 1000;
-    const accessUntil = new Date(cycleEndMs).toISOString();
-    const token = createMockIdToken(uid, 'active@example.com', keyPair.privateKey);
+  it('1. Cancellation (trialing): explains cardless trial has no auto-charge and preserves validUntil', async () => {
+    const uid = 'user_trial_cancel';
+    const validUntil = new Date(Date.now() + 5 * 86400 * 1000).toISOString();
+    const token = createMockIdToken(uid, 'trialer@example.com', keyPair.privateKey);
 
-    mockState.firestoreSubscriptions.set(uid, {
+    mockState.entitlements!.set(uid, {
       userId: uid,
-      userEmail: 'active@example.com',
-      plan: 'monthly',
-      status: 'active',
-      razorpaySubscriptionId: 'sub_active_rzp_1',
-      currentPeriodEnd: cycleEndMs,
-      accessUntil,
+      userEmail: 'trialer@example.com',
+      plan: 'pro_trial',
+      status: 'trialing',
+      trialUsed: true,
+      validUntil,
       cancelAtPeriodEnd: false,
-      updatedAt: Date.now(),
     });
 
     const res = await worker.fetch(
-      new Request('https://crestflow.com/api/cancel-subscription', {
+      new Request('https://crestflow.space/api/cancel-subscription', {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       }),
       testEnv
     );
-
     assert.equal(res.status, 200);
-    const body = await res.json();
+    const body = (await res.json()) as any;
     assert.equal(body.success, true);
-    assert.equal(body.isTrialing, false);
+    assert.equal(body.status, 'trialing');
+    assert.equal(body.cancelAtPeriodEnd, false);
+    assert.equal(body.validUntil, validUntil);
+    assert.equal(mockState.cancellationsDetailed.length, 0);
+  });
 
-    // Assert Razorpay was called with cancel_at_cycle_end: 1
+  it('2. Cancellation (active subscription): cancels in Razorpay at cycle end (cycle_end=1) & retains validUntil', async () => {
+    const uid = 'user_active_cancel';
+    const validUntil = new Date(Date.now() + 20 * 86400 * 1000).toISOString();
+    const token = createMockIdToken(uid, 'active@example.com', keyPair.privateKey);
+
+    mockState.entitlements!.set(uid, {
+      userId: uid,
+      userEmail: 'active@example.com',
+      plan: 'pro_monthly',
+      billingCycle: 'monthly',
+      status: 'active',
+      checkoutMode: 'subscription',
+      razorpaySubscriptionId: 'sub_active_rzp_1',
+      validUntil,
+      cancelAtPeriodEnd: false,
+    });
+
+    const res = await worker.fetch(
+      new Request('https://crestflow.space/api/cancel-subscription', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      }),
+      testEnv
+    );
+    assert.equal(res.status, 200);
+    const body = (await res.json()) as any;
+    assert.equal(body.success, true);
+    assert.equal(body.cancelAtPeriodEnd, true);
+
     const cancelCall = mockState.cancellationsDetailed.find((c) => c.subId === 'sub_active_rzp_1');
     assert.ok(cancelCall);
     assert.equal(cancelCall.cancelAtCycleEnd, 1);
 
-    const updated = mockState.firestoreSubscriptions.get(uid);
-    assert.equal(updated.status, 'cancelled');
+    const updated = mockState.entitlements!.get(uid);
+    assert.equal(updated.status, 'active');
     assert.equal(updated.cancelAtPeriodEnd, true);
-    assert.equal(updated.accessUntil, accessUntil);
+    assert.equal(updated.validUntil, validUntil);
   });
 
-  it('3. Plan Changes: cancels at period end and creates new subscription with start_at at that date', async () => {
-    const uid = 'user_plan_change';
-    const currentEndSec = Math.floor(Date.now() / 1000) + 15 * 86400;
-    const token = createMockIdToken(uid, 'changer@example.com', keyPair.privateKey);
-
-    mockState.firestoreSubscriptions.set(uid, {
-      userId: uid,
-      userEmail: 'changer@example.com',
-      plan: 'monthly',
-      status: 'active',
-      razorpaySubscriptionId: 'sub_monthly_orig',
-      currentPeriodEnd: currentEndSec * 1000,
-      accessUntil: new Date(currentEndSec * 1000).toISOString(),
-      cancelAtPeriodEnd: false,
-      updatedAt: Date.now(),
-    });
-
+  it('3. Plan Changes: rejected with PLAN_SWITCH_DISABLED during active period', async () => {
+    const token = createMockIdToken('user_plan_change', 'changer@example.com', keyPair.privateKey);
     const res = await worker.fetch(
-      new Request('https://crestflow.com/api/change-plan', {
+      new Request('https://crestflow.space/api/change-plan', {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ newPlanKey: 'yearly' }),
       }),
       testEnv
     );
-
-    assert.equal(res.status, 200);
-    const body = await res.json();
-    assert.equal(body.success, true);
-    assert.equal(body.newPlan, 'yearly');
-    assert.ok(body.newSubscriptionId);
-
-    // Assert existing sub was cancelled at cycle end
-    const cancelCall = mockState.cancellationsDetailed.find((c) => c.subId === 'sub_monthly_orig');
-    assert.ok(cancelCall);
-    assert.equal(cancelCall.cancelAtCycleEnd, 1);
-
-    // Assert new sub was created with start_at at period end
-    const newRzpSub = mockState.razorpaySubscriptions.get(body.newSubscriptionId);
-    assert.ok(newRzpSub);
-    assert.equal(newRzpSub.plan_id, testEnv.RAZORPAY_PLAN_YEARLY);
-    assert.equal(newRzpSub.start_at, currentEndSec);
-
-    // Assert Firestore has pendingPlanChange registered
-    const updated = mockState.firestoreSubscriptions.get(uid);
-    assert.ok(updated.pendingPlanChange);
-    assert.equal(updated.pendingPlanChange.newPlan, 'yearly');
-    assert.equal(updated.pendingPlanChange.newSubscriptionId, body.newSubscriptionId);
+    assert.equal(res.status, 400);
+    assert.equal(((await res.json()) as any).code, 'PLAN_SWITCH_DISABLED');
   });
 
-  it('4. Daily Cron Trigger: reconciles subscriptions, expires past access, and sends Resend emails', async () => {
-    mockState.sentEmails = [];
-    mockState.firestoreSubscriptions.clear();
+  it('4. Daily Cron Trigger: reconciles entitlements, expires past access, and sends emails idempotently', async () => {
     const nowMs = 1700000000000;
 
-    // Sub 1: Expired access
-    mockState.firestoreSubscriptions.set('user_expired', {
+    mockState.entitlements!.set('user_expired', {
       userId: 'user_expired',
       userEmail: 'expired@example.com',
       userName: 'Expired User',
       status: 'active',
-      accessUntil: new Date(nowMs - 10000).toISOString(),
+      plan: 'pro_monthly',
+      validUntil: new Date(nowMs - 10000).toISOString(),
     });
 
-    // Sub 2: Trial day 5 (2 days remaining on 7d trial: 40h remaining)
-    mockState.firestoreSubscriptions.set('user_trial_day5', {
+    mockState.entitlements!.set('user_trial_day5', {
       userId: 'user_trial_day5',
       userEmail: 'day5@example.com',
       userName: 'Day5 User',
       status: 'trialing',
-      trialEndsAt: new Date(nowMs + 40 * 3600 * 1000).toISOString(),
-      accessUntil: new Date(nowMs + 40 * 3600 * 1000).toISOString(),
+      plan: 'pro_trial',
+      validUntil: new Date(nowMs + 40 * 3600 * 1000).toISOString(),
       cancelAtPeriodEnd: false,
     });
 
-    // Sub 3: 24h before first charge (18h remaining on trial)
-    mockState.firestoreSubscriptions.set('user_charge_24h', {
-      userId: 'user_charge_24h',
-      userEmail: 'charge24h@example.com',
-      userName: 'Charge24h User',
-      plan: 'pro_monthly',
-      status: 'trialing',
-      trialEndsAt: new Date(nowMs + 18 * 3600 * 1000).toISOString(),
-      accessUntil: new Date(nowMs + 18 * 3600 * 1000).toISOString(),
-      cancelAtPeriodEnd: false,
-    });
-
-    // Sub 4: Charge failed / past due
-    mockState.firestoreSubscriptions.set('user_charge_failed', {
+    mockState.entitlements!.set('user_charge_failed', {
       userId: 'user_charge_failed',
       userEmail: 'failed@example.com',
       userName: 'Failed User',
-      status: 'past_due',
-      accessUntil: new Date(nowMs + 2 * 86400 * 1000).toISOString(),
+      status: 'grace',
+      plan: 'pro_monthly',
+      validUntil: new Date(nowMs + 2 * 86400 * 1000).toISOString(),
+      graceUntil: new Date(nowMs + 2 * 86400 * 1000).toISOString(),
     });
 
     const stats = await handleCronReconciliation(testEnv, nowMs);
-    assert.ok(stats.processed >= 4);
-    assert.ok(stats.emailsSent >= 4);
+    assert.ok(stats.processed >= 3);
+    assert.ok(stats.emailsSent >= 3);
 
-    // Verify Expired
-    assert.equal(mockState.firestoreSubscriptions.get('user_expired').status, 'expired');
-    const expiredEmail = mockState.sentEmails.find((e) => e.to.includes('expired@example.com'));
-    assert.ok(expiredEmail);
-    assert.match(expiredEmail.subject, /subscription has expired/i);
+    assert.equal(mockState.entitlements!.get('user_expired').status, 'expired');
+    assert.ok(mockState.sentEmails.some((e) => e.to.includes('expired@example.com') && /expired/i.test(e.subject)));
+    assert.ok(mockState.sentEmails.some((e) => e.to.includes('day5@example.com') && /2 days left/i.test(e.subject)));
+    assert.ok(mockState.sentEmails.some((e) => e.to.includes('failed@example.com') && /Payment failed/i.test(e.subject)));
 
-    // Verify Day 5 email
-    const day5Email = mockState.sentEmails.find((e) => e.to.includes('day5@example.com'));
-    assert.ok(day5Email);
-    assert.match(day5Email.subject, /trial ends in 2 days/i);
-    assert.equal(mockState.firestoreSubscriptions.get('user_trial_day5').notifiedTrialDay5, true);
-
-    // Verify 24h charge email
-    const charge24Email = mockState.sentEmails.find((e) => e.to.includes('charge24h@example.com'));
-    assert.ok(charge24Email);
-    assert.match(charge24Email.subject, /subscription begins tomorrow/i);
-    assert.equal(mockState.firestoreSubscriptions.get('user_charge_24h').notifiedCharge24h, true);
-
-    // Verify Charge failed email
-    const failedEmail = mockState.sentEmails.find((e) => e.to.includes('failed@example.com'));
-    assert.ok(failedEmail);
-    assert.match(failedEmail.subject, /payment failed/i);
-    assert.equal(mockState.firestoreSubscriptions.get('user_charge_failed').notifiedChargeFailed, true);
-
-    // Test Deduplication: Re-running cron should not re-send emails
-    const initialEmailCount = mockState.sentEmails.length;
+    const initialCount = mockState.sentEmails.length;
     const secondStats = await handleCronReconciliation(testEnv, nowMs);
     assert.equal(secondStats.emailsSent, 0);
-    assert.equal(mockState.sentEmails.length, initialEmailCount);
+    assert.equal(mockState.sentEmails.length, initialCount);
   });
 });

@@ -115,7 +115,7 @@ export async function updateSubscriptionInFirestore(
 }
 
 /**
- * Checks if a webhook event ID was already processed (deduplication).
+ * Checks if a webhook event ID was already processed (deduplication in `webhook_events`).
  */
 export async function isEventProcessed(
   creds: ServiceAccountCredentials,
@@ -123,7 +123,7 @@ export async function isEventProcessed(
 ): Promise<boolean> {
   const token = await getGoogleAccessToken(creds);
   const cleanId = eventId.replace(/[^a-zA-Z0-9_-]/g, '_');
-  const url = `https://firestore.googleapis.com/v1/projects/${creds.project_id}/databases/(default)/documents/processed_events/${cleanId}`;
+  const url = `https://firestore.googleapis.com/v1/projects/${creds.project_id}/databases/(default)/documents/webhook_events/${cleanId}`;
 
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${token}` },
@@ -133,15 +133,16 @@ export async function isEventProcessed(
 }
 
 /**
- * Marks a webhook event ID as processed in Firestore.
+ * Marks a webhook event ID as processed in `webhook_events`.
  */
 export async function markEventProcessed(
   creds: ServiceAccountCredentials,
-  eventId: string
+  eventId: string,
+  meta: { eventType?: string; status?: string; userId?: string } = {}
 ): Promise<void> {
   const token = await getGoogleAccessToken(creds);
   const cleanId = eventId.replace(/[^a-zA-Z0-9_-]/g, '_');
-  const url = `https://firestore.googleapis.com/v1/projects/${creds.project_id}/databases/(default)/documents/processed_events/${cleanId}`;
+  const url = `https://firestore.googleapis.com/v1/projects/${creds.project_id}/databases/(default)/documents/webhook_events/${cleanId}`;
 
   await fetch(url, {
     method: 'PATCH',
@@ -151,7 +152,11 @@ export async function markEventProcessed(
     },
     body: JSON.stringify({
       fields: {
-        processedAt: toFirestoreValue(Date.now()),
+        eventId: toFirestoreValue(eventId),
+        eventType: toFirestoreValue(meta.eventType || ''),
+        status: toFirestoreValue(meta.status || 'processed'),
+        userId: toFirestoreValue(meta.userId || ''),
+        processedAt: toFirestoreValue(new Date().toISOString()),
       },
     }),
   });

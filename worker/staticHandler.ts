@@ -38,12 +38,15 @@ export function isKnownAppRoute(pathname: string): boolean {
     '/signin',
     '/signup',
     '/register',
+    '/landing',
+    '/promo',
     '/404',
   ]);
 
   if (known.has(clean)) return true;
   if (/^\/[a-z0-9_-]+\/(?:onboarding|publicprofile|public-profile)$/.test(clean)) return true;
   if (/^\/(?:onboarding|client-onboarding|publicprofile|public-profile)\/[a-z0-9_-]+$/.test(clean)) return true;
+  if (/^\/invoice\/[a-z0-9_-]+$/i.test(clean)) return true;
   return false;
 }
 
@@ -51,7 +54,6 @@ export async function handleStaticAsset(request: Request, env: Env): Promise<Res
   const url = new URL(request.url);
   const response = await env.ASSETS.fetch(request);
 
-  // PWA Service Worker & Manifest headers
   if (url.pathname === '/sw.js') {
     const newHeaders = new Headers(response.headers);
     newHeaders.set('Content-Type', 'application/javascript; charset=utf-8');
@@ -72,9 +74,6 @@ export async function handleStaticAsset(request: Request, env: Env): Promise<Res
     });
   }
 
-  // 1. Missing JS/CSS Chunk Handling:
-  // By returning a 404 for missing /assets/* files, Vite and lazyWithRetry immediately detect the missing chunk
-  // and perform a clean automatic reload to fetch the latest deployment.
   if (url.pathname.startsWith('/assets/')) {
     const ct = response.headers.get('content-type') || '';
     if (ct.includes('text/html') || response.status === 404) {
@@ -89,7 +88,6 @@ export async function handleStaticAsset(request: Request, env: Env): Promise<Res
     return response;
   }
 
-  // 2. Prevent Stale index.html Caching & Return Real 404 on Unknown HTML Routes:
   const ct = response.headers.get('content-type') || '';
   if (ct.includes('text/html') || url.pathname === '/' || !url.pathname.includes('.')) {
     const headers = new Headers(response.headers);
@@ -97,14 +95,14 @@ export async function handleStaticAsset(request: Request, env: Env): Promise<Res
     headers.set('Pragma', 'no-cache');
     headers.set('Expires', '0');
 
-    // Content-Security-Policy: Enforced mode (media-src permits UploadThing; YouTube embed allowances removed)
     const csp = [
       "default-src 'self'",
       "base-uri 'self'",
       "font-src 'self' https://fonts.gstatic.com data:",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "script-src 'self' 'unsafe-inline' https://apis.google.com",
-      "connect-src 'self' https://*.googleapis.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://api.razorpay.com https://utfs.io https://*.ufs.sh https://n0ohengfxq.ufs.sh",
+      "script-src 'self' 'unsafe-inline' https://apis.google.com https://checkout.razorpay.com",
+      "frame-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://accounts.google.com",
+      "connect-src 'self' https://*.googleapis.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://api.razorpay.com https://lumberjack.razorpay.com https://utfs.io https://*.ufs.sh https://n0ohengfxq.ufs.sh",
       "img-src 'self' data: blob: https:",
       "media-src 'self' https://utfs.io https://*.ufs.sh https://n0ohengfxq.ufs.sh blob: data:",
       "object-src 'none'",
@@ -121,7 +119,20 @@ export async function handleStaticAsset(request: Request, env: Env): Promise<Res
       });
     }
 
-    // Check for personalized onboarding link previews
+    // Token-scoped public invoice routes must never be indexed
+    if (/^\/invoice\/[a-zA-Z0-9_-]+$/i.test(url.pathname.replace(/\/+$/, ''))) {
+      headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+      try {
+        const rawHtml = await response.text();
+        const noindexHtml = rawHtml.replace(
+          /<meta\s+name=["']robots["'][^>]*>/i,
+          '<meta name="robots" content="noindex, nofollow, noarchive" />'
+        );
+        headers.set('Content-Type', 'text/html; charset=utf-8');
+        return new Response(noindexHtml, { status: 200, statusText: 'OK', headers });
+      } catch {}
+    }
+
     const onboardingHandle = extractOnboardingHandle(url.pathname);
     if (onboardingHandle) {
       try {
@@ -130,23 +141,14 @@ export async function handleStaticAsset(request: Request, env: Env): Promise<Res
         if (profile) {
           const personalizedHtml = injectPersonalizedOnboardingMeta(rawHtml, profile, url.toString());
           headers.set('Content-Type', 'text/html; charset=utf-8');
-          return new Response(personalizedHtml, {
-            status: 200,
-            statusText: 'OK',
-            headers,
-          });
+          return new Response(personalizedHtml, { status: 200, statusText: 'OK', headers });
         }
-        return new Response(rawHtml, {
-          status: 200,
-          statusText: 'OK',
-          headers,
-        });
+        return new Response(rawHtml, { status: 200, statusText: 'OK', headers });
       } catch (err) {
         console.warn('[handleStaticAsset] Onboarding meta injection failed:', err);
       }
     }
 
-    // SSR Canonical URL injection for public marketing & legal routes
     const cleanPath = url.pathname.toLowerCase().replace(/\/+$/, '') || '/';
     const publicSupportingRoutes = new Set(['/pricing', '/terms', '/privacy', '/refund', '/contact']);
     if (publicSupportingRoutes.has(cleanPath)) {
@@ -163,11 +165,7 @@ export async function handleStaticAsset(request: Request, env: Env): Promise<Res
             `<meta property="og:url" content="${fullCanonical}" />`
           );
         headers.set('Content-Type', 'text/html; charset=utf-8');
-        return new Response(updatedHtml, {
-          status: 200,
-          statusText: 'OK',
-          headers,
-        });
+        return new Response(updatedHtml, { status: 200, statusText: 'OK', headers });
       } catch (err) {
         console.warn('[handleStaticAsset] Canonical injection failed:', err);
       }

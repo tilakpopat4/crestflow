@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Logo from '../Logo';
 import { Eye, EyeOff } from 'lucide-react';
+import { TRIAL_PROMISE_COPY } from '../../shared/pricing';
 
 interface SignInCardProps {
   isAdminRoute: boolean;
@@ -75,20 +76,20 @@ export const SignInCard: React.FC<SignInCardProps> = ({
 
   return (
     <div className="w-full max-w-[420px] mx-auto">
-      <div className="bg-[#181818] border border-[#2b2b2b] p-6 sm:p-8 rounded-xl shadow-xl text-left">
+      <div className="bg-[#131318] border border-[#2A2A33] p-6 sm:p-8 rounded-xl text-left">
         {/* Brand Header */}
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
             <Logo className="w-6 h-6" />
-            <span className="text-sm font-bold text-white tracking-tight">CrestFlow</span>
+            <span className="text-sm font-bold text-[#F7F7F8] tracking-tight">CrestFlow</span>
           </div>
           {!isAdminRoute && (
-            <div className="flex items-center bg-[#242424] p-0.5 rounded-lg border border-[#333]">
+            <div className="flex items-center bg-[#1B1B22] p-0.5 rounded-lg border border-[#2A2A33]">
               <button
                 type="button"
                 onClick={() => { setAuthMode('signup'); setFormError(null); }}
                 className={`px-2.5 py-1 text-[11px] font-medium rounded transition-colors border-none cursor-pointer ${
-                  authMode === 'signup' ? 'bg-[#383838] text-white' : 'text-slate-400 hover:text-white bg-transparent'
+                  authMode === 'signup' ? 'bg-[#2A2A33] text-[#F7F7F8]' : 'text-[#A1A1AA] hover:text-[#F7F7F8] bg-transparent'
                 }`}
               >
                 Sign Up
@@ -97,7 +98,7 @@ export const SignInCard: React.FC<SignInCardProps> = ({
                 type="button"
                 onClick={() => { setAuthMode('signin'); setFormError(null); }}
                 className={`px-2.5 py-1 text-[11px] font-medium rounded transition-colors border-none cursor-pointer ${
-                  authMode === 'signin' ? 'bg-[#383838] text-white' : 'text-slate-400 hover:text-white bg-transparent'
+                  authMode === 'signin' ? 'bg-[#2A2A33] text-[#F7F7F8]' : 'text-[#A1A1AA] hover:text-[#F7F7F8] bg-transparent'
                 }`}
               >
                 Sign In
@@ -106,23 +107,23 @@ export const SignInCard: React.FC<SignInCardProps> = ({
           )}
         </div>
 
-        <h2 className="text-lg font-bold text-white mb-1">
+        <h2 className="text-lg font-bold text-[#F7F7F8] mb-1">
           {isAdminRoute
             ? 'Admin Portal'
             : authMode === 'signup'
             ? 'Create Your Workspace'
             : 'Welcome Back'}
         </h2>
-        <p className="text-slate-400 mb-5 text-xs leading-relaxed">
+        <p className="text-[#A1A1AA] mb-5 text-xs leading-relaxed">
           {isAdminRoute
             ? 'Sign in with your authorized admin Google account.'
             : authMode === 'signup'
-            ? 'Start your 7-day free trial. No payment method required.'
+            ? TRIAL_PROMISE_COPY
             : 'Sign in to access your clients, work items, and invoices.'}
         </p>
 
         {formError && (
-          <div className="mb-4 p-2.5 rounded bg-red-950/40 border border-red-900/60 text-xs text-red-400">
+          <div className="mb-4 p-2.5 rounded bg-[#1B1B22] border border-[#F0607A]/50 text-xs text-[#F0607A]">
             {formError}
           </div>
         )}

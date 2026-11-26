@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { User } from 'firebase/auth';
 import { useFirestore } from './useFirestore';
+import { useAccess } from './useAccess';
+import { SAMPLE_CLIENTS, SAMPLE_INVOICES, SAMPLE_WORK_ITEMS } from '../data/sampleWorkspaceData';
 import { Client, WorkItem, Invoice } from '../types';
 import { generateUUID } from '../lib/utils';
 import { formatLocalDateToYMD, parseYMDToTimestamp } from '../lib/dateUtils';
@@ -30,9 +32,20 @@ const initialFormData: WorkLogFormData = {
  * Encapsulates state, query filtering, and mutation handlers for WorkLogTab.
  */
 export function useWorkLog(user: User, initialSearchQuery: string = '') {
-  const { data: clients, loading: clientsLoading } = useFirestore<Client>('clients', user?.uid);
-  const { data: workItems, loading: workLoading, addOrUpdateItem, removeItem } = useFirestore<WorkItem>('workItems', user?.uid);
-  const { data: invoices, loading: invoicesLoading, addOrUpdateItem: addOrUpdateInvoice, removeItem: removeInvoice } = useFirestore<any>('invoices', user?.uid);
+  const access = useAccess();
+  const isExploring = access.state === 'none';
+  const liveUid = !isExploring ? user?.uid : undefined;
+
+  const { data: fsClients, loading: fsClientsLoading } = useFirestore<Client>('clients', liveUid);
+  const { data: fsWorkItems, loading: fsWorkLoading, addOrUpdateItem, removeItem } = useFirestore<WorkItem>('workItems', liveUid);
+  const { data: fsInvoices, loading: fsInvoicesLoading, addOrUpdateItem: addOrUpdateInvoice, removeItem: removeInvoice } = useFirestore<any>('invoices', liveUid);
+
+  const clients = isExploring ? SAMPLE_CLIENTS : fsClients;
+  const workItems = isExploring ? SAMPLE_WORK_ITEMS : fsWorkItems;
+  const invoices = isExploring ? SAMPLE_INVOICES : fsInvoices;
+  const clientsLoading = isExploring ? false : fsClientsLoading;
+  const workLoading = isExploring ? false : fsWorkLoading;
+  const invoicesLoading = isExploring ? false : fsInvoicesLoading;
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDriveModalOpen, setIsDriveModalOpen] = useState(false);
@@ -55,6 +68,7 @@ export function useWorkLog(user: User, initialSearchQuery: string = '') {
   );
 
   const handleEditWork = (work: WorkItem) => {
+    if (!access.requireAccess('log_work', 'Edit logged deliverables, rates, and Drive preview links.')) return;
     setEditingWorkId(work.id);
     setFormData({
       clientId: work.clientId,
@@ -77,6 +91,7 @@ export function useWorkLog(user: User, initialSearchQuery: string = '') {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!access.requireAccess('log_work', 'Log deliverables and track client work items.')) return;
     if (!formData.clientId) return alert('Please select a client');
 
     const client = clients.find((c) => c.id === formData.clientId);
@@ -147,6 +162,7 @@ export function useWorkLog(user: User, initialSearchQuery: string = '') {
   };
 
   const deleteWork = async (item: WorkItem) => {
+    if (!access.requireAccess('log_work', 'Modify or delete logged work items.')) return;
     const isInvoiced = item.status === 'Invoiced';
     const message = isInvoiced
       ? 'This work log is currently invoiced. Deleting it will also remove it from the associated invoice and adjust the invoice totals. Are you sure you want to delete this work log?'
@@ -218,6 +234,7 @@ export function useWorkLog(user: User, initialSearchQuery: string = '') {
   };
 
   const handleBulkDelete = async () => {
+    if (!access.requireAccess('log_work', 'Modify or delete work items in bulk.')) return;
     if (selectedWorkIds.size === 0) return;
     const itemsToDelete = workItems.filter((w) => selectedWorkIds.has(w.id));
     const invoicedCount = itemsToDelete.filter((w) => w.status === 'Invoiced').length;
@@ -245,52 +262,19 @@ export function useWorkLog(user: User, initialSearchQuery: string = '') {
   };
 
   const handleBulkSave = async (updatedWorkItems: WorkItem[], updatedInvoices: Invoice[]) => {
+    if (!access.requireAccess('log_work', 'Edit work items in bulk.')) return;
     for (const inv of updatedInvoices) await addOrUpdateInvoice(inv);
     for (const wi of updatedWorkItems) await addOrUpdateItem(wi);
     setSelectedWorkIds(new Set());
   };
 
   return {
-    clients,
-    workItems,
-    invoices,
-    clientsLoading,
-    workLoading,
-    invoicesLoading,
-    isFormOpen,
-    setIsFormOpen,
-    isDriveModalOpen,
-    setIsDriveModalOpen,
-    embedModalData,
-    setEmbedModalData,
-    editingWorkId,
-    sortOrder,
-    setSortOrder,
-    searchQuery,
-    setSearchQuery,
-    selectedWorkIds,
-    setSelectedWorkIds,
-    isBulkEditModalOpen,
-    setIsBulkEditModalOpen,
-    showClosed,
-    setShowClosed,
-    formData,
-    setFormData,
-    closedClientIds,
-    handleEditWork,
-    handleCancel,
-    handleSubmit,
-    deleteWork,
-    toggleSelectItem,
-    handleSelectAll,
-    handleBulkDelete,
-    handleBulkSave,
-    sortedWork,
-    allVisibleSelected,
-    someVisibleSelected,
-    selectedCount,
-    selectedItems,
-    selectedInvoicedCount,
-    addOrUpdateItem,
+    clients, workItems, invoices, clientsLoading, workLoading, invoicesLoading,
+    isFormOpen, setIsFormOpen, isDriveModalOpen, setIsDriveModalOpen, embedModalData, setEmbedModalData,
+    editingWorkId, sortOrder, setSortOrder, searchQuery, setSearchQuery,
+    selectedWorkIds, setSelectedWorkIds, isBulkEditModalOpen, setIsBulkEditModalOpen, showClosed, setShowClosed,
+    formData, setFormData, closedClientIds, handleEditWork, handleCancel, handleSubmit, deleteWork,
+    toggleSelectItem, handleSelectAll, handleBulkDelete, handleBulkSave, sortedWork,
+    allVisibleSelected, someVisibleSelected, selectedCount, selectedItems, selectedInvoicedCount, addOrUpdateItem,
   };
 }

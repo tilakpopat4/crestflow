@@ -4,24 +4,21 @@
  */
 
 import { Env } from '../types';
-import { verifyFirebaseIdToken } from '../auth';
-import { parseServiceAccount } from '../firestore';
+import { requireEntitlement } from '../entitlements';
 import { enqueueEmailJob } from '../emailQueue';
 import { dispatchEmailJob } from '../emailDispatcher';
 import { SupportedEventType } from '../emailTemplates';
-import { jsonResponse, getBearerToken } from './subscription';
+import { jsonResponse } from './subscription';
 import { EMAIL_REGEX } from './emailSchedule';
 
 /**
  * POST /api/notify/payment-due-today
- * Notifies the freelancer that an active client has a payment or retainer cycle due today.
+ * Notifies the freelancer that an active client has a payment due today (entitlement-gated).
  */
 export async function handleNotifyPaymentDueToday(request: Request, env: Env): Promise<Response> {
-  const token = getBearerToken(request);
-  if (!token) return jsonResponse({ error: 'Unauthorized' }, 401);
-
-  const creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
-  const verifiedUser = await verifyFirebaseIdToken(token, creds.project_id);
+  const gate = await requireEntitlement(request, env);
+  if (!gate.ok) return gate.response;
+  const { user: verifiedUser, creds } = gate;
   const targetEmail = verifiedUser.email;
   if (!targetEmail || !EMAIL_REGEX.test(targetEmail)) {
     return jsonResponse({ error: 'User email missing or invalid' }, 400);

@@ -25,7 +25,7 @@ describe('Professional Skeleton Loaders & Latency Reduction Suite', () => {
         React.createElement(Skeleton, { className: 'h-4 w-24' })
       );
       assert.ok(html.includes('animate-pulse'), 'Skeleton must have gentle pulse');
-      assert.ok(html.includes('bg-slate-200'), 'Skeleton must use neutral slate palette');
+      assert.ok(html.includes('bg-[#1B1B22]'), 'Skeleton must use Section 9 raised obsidian surface');
       assert.ok(!html.includes('gradient'), 'Skeleton must not have flashy gradients per GEMINI.md');
       assert.ok(!html.includes('purple') && !html.includes('pink'), 'Skeleton must avoid saturated neon/pastel tones');
     });

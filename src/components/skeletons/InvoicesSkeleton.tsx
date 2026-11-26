@@ -19,7 +19,7 @@ export const InvoicesSkeleton: React.FC = () => {
       {/* 4 Summary Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="p-4 rounded-lg border border-slate-200 dark:border-[#383838] bg-white dark:bg-[#212121] space-y-2">
+          <div key={i} className="p-4 rounded-xl border border-[#2A2A33] bg-[#131318] space-y-2">
             <Skeleton className="h-3 w-20" />
             <Skeleton className="h-6 w-28" />
             <Skeleton className="h-2.5 w-16" />
@@ -28,9 +28,9 @@ export const InvoicesSkeleton: React.FC = () => {
       </div>
 
       {/* Invoices Table Container */}
-      <div className="rounded-lg border border-slate-200 dark:border-[#383838] bg-white dark:bg-[#212121] overflow-hidden">
+      <div className="rounded-xl border border-[#2A2A33] bg-[#131318] overflow-hidden">
         {/* Table Header */}
-        <div className="grid grid-cols-12 gap-3 px-5 py-3.5 border-b border-slate-200 dark:border-[#383838] bg-slate-50/50 dark:bg-[#262626]">
+        <div className="grid grid-cols-12 gap-3 px-5 py-3.5 border-b border-[#2A2A33] bg-[#1B1B22]">
           <div className="col-span-3">
             <Skeleton className="h-3 w-20" />
           </div>
@@ -49,7 +49,7 @@ export const InvoicesSkeleton: React.FC = () => {
         </div>
 
         {/* Table Rows */}
-        <div className="divide-y divide-slate-100 dark:divide-[#2a2a2a]">
+        <div className="divide-y divide-[#2A2A33]">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="grid grid-cols-12 gap-3 px-5 py-4 items-center">
               <div className="col-span-3 space-y-1.5">

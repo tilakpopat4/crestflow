@@ -39,6 +39,12 @@ let revokedTokens: string[] = [];
 
 beforeEach(() => {
   firestoreStore.clear();
+  firestoreStore.set('entitlements/uid_creator', {
+    userId: { stringValue: 'uid_creator' },
+    status: { stringValue: 'active' },
+    plan: { stringValue: 'pro_monthly' },
+    validUntil: { timestampValue: new Date(Date.now() + 86400_000).toISOString() },
+  });
   simulateInvalidGrant = false;
   revokedTokens = [];
 
@@ -124,11 +130,26 @@ async function authHeaders(uid = 'uid_creator', email = 'creator@example.com'): 
 }
 
 describe('Persistent Google Drive Connection API & Client Integration', () => {
-  it('rejects unauthenticated requests to /api/drive/status with 401', async () => {
+  it('rejects unauthenticated requests to /api/drive/status with 401 and unentitled /api/drive/session with 403', async () => {
     const req = new Request('https://crestflow.space/api/drive/status', { method: 'GET' });
     const res = await handleDriveRoutes(req, new URL(req.url), TEST_ENV);
     assert.ok(res);
     assert.equal(res.status, 401);
+
+    firestoreStore.delete('entitlements/uid_creator');
+    const headers = await authHeaders();
+    const deniedRes = await handleDriveRoutes(
+      new Request('https://crestflow.space/api/drive/session', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ accessToken: 'tok_unentitled' }),
+      }),
+      new URL('https://crestflow.space/api/drive/session'),
+      TEST_ENV
+    );
+    assert.equal(deniedRes?.status, 403);
+    const deniedJson = (await deniedRes!.json()) as any;
+    assert.equal(deniedJson.code, 'ENTITLEMENT_REQUIRED');
   });
 
   it('persists Firebase Drive session across tabs/reloads via /api/drive/session & /api/drive/status', async () => {

@@ -72,12 +72,14 @@ export function useAdminUsersAndHistory(isAdmin: boolean) {
       // 1. Fetch raw collections in parallel with graceful fallbacks
       let profilesSnap: any = null;
       let subsSnap: any = null;
+      let entSnap: any = null;
       let invoicesSnap: any = null;
       let clientsSnap: any = null;
       let workSnap: any = null;
 
       try { profilesSnap = await getDocs(collection(db, 'profiles')); } catch (e) { console.warn('profiles err:', e); }
       try { subsSnap = await getDocs(collection(db, 'subscriptions')); } catch (e) { console.warn('subs err:', e); }
+      try { entSnap = await getDocs(collection(db, 'entitlements')); } catch (e) { console.warn('entitlements err:', e); }
       try { invoicesSnap = await getDocs(collection(db, 'invoices')); } catch {
         if (curr?.uid) invoicesSnap = await getDocs(query(collection(db, 'invoices'), where('userId', '==', curr.uid))).catch(() => null);
       }
@@ -146,6 +148,22 @@ export function useAdminUsersAndHistory(isAdmin: boolean) {
         if (data.hasHadTrial !== undefined) u.has_had_trial = data.hasHadTrial;
         if (data.accessUntil) {
           const date = data.accessUntil.toDate ? data.accessUntil.toDate() : new Date(data.accessUntil);
+          u.current_period_end = date.toISOString();
+        }
+      });
+
+      // Authoritative Server Entitlements (overrides legacy subscriptions fields)
+      entSnap?.forEach((d: any) => {
+        const data = d.data();
+        const uid = data.uid || d.id;
+        const u = getOrCreate(uid);
+        if (data.status) u.subscription_status = data.status;
+        if (data.plan) u.subscription_plan = data.plan;
+        if (data.billingCycle) u.billing_cycle = data.billingCycle;
+        if (data.razorpaySubscriptionId) u.razorpay_subscription_id = data.razorpaySubscriptionId;
+        if (data.trialUsed !== undefined) u.has_had_trial = Boolean(data.trialUsed);
+        if (data.validUntil) {
+          const date = data.validUntil.toDate ? data.validUntil.toDate() : new Date(data.validUntil);
           u.current_period_end = date.toISOString();
         }
       });

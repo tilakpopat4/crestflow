@@ -5,6 +5,8 @@
 
 import { Env } from '../types';
 import { parseServiceAccount, getGoogleAccessToken } from '../firestore';
+import { getEntitlementFromFirestore, resolveEffectiveStatus } from '../entitlements';
+import { INACTIVE_REQUEST_PAUSE_DAYS } from '../../src/shared/pricing';
 import { enqueueEmailJob } from '../emailQueue';
 import { dispatchEmailJob } from '../emailDispatcher';
 import { SupportedEventType } from '../emailTemplates';
@@ -39,6 +41,28 @@ export async function handleNotifyNewClientRequest(request: Request, env: Env): 
   }
 
   const creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
+  const ent = await getEntitlementFromFirestore(creds, freelancerId).catch(() => null);
+  const effective = resolveEffectiveStatus(ent);
+  if (effective === 'suspended') {
+    return jsonResponse(
+      { error: 'This creator is not accepting new requests right now.', code: 'REQUESTS_PAUSED' },
+      403,
+      request,
+      env
+    );
+  }
+  if (effective === 'expired' && ent?.validUntil) {
+    const expiredMs = Date.now() - new Date(ent.validUntil).getTime();
+    if (expiredMs > INACTIVE_REQUEST_PAUSE_DAYS * 86400 * 1000) {
+      return jsonResponse(
+        { error: 'This creator is not accepting new requests right now.', code: 'REQUESTS_PAUSED' },
+        403,
+        request,
+        env
+      );
+    }
+  }
+
   const token = await getGoogleAccessToken(creds);
 
   const profUrl = `https://firestore.googleapis.com/v1/projects/${creds.project_id}/databases/(default)/documents/profiles/${freelancerId}`;

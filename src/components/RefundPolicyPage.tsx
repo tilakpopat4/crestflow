@@ -1,6 +1,7 @@
 /* Draft: review with a qualified legal professional before publishing. */
 
 import React from 'react';
+import { TRIAL_PROMISE_COPY } from '../shared/pricing';
 
 interface RefundPolicyPageProps {
   onNavigate?: (route: 'privacy' | 'terms' | 'contact' | 'refund' | 'pricing') => void;
@@ -19,100 +20,84 @@ export default function RefundPolicyPage({ onNavigate }: RefundPolicyPageProps) 
   };
 
   return (
-    <div className="w-full py-8 md:py-12 px-4 md:px-6">
+    <div className="w-full py-8 md:py-12 px-4 md:px-6 text-[#F7F7F8]">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
+        <h1 className="text-2xl md:text-3xl font-bold text-[#F7F7F8] tracking-tight">
           Cancellation &amp; Refund Policy
         </h1>
-        <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-1.5 mb-8">
-          Last updated: October 2026 &bull; Review Status: Pending Legal Verification
+        <p className="text-xs md:text-sm text-[#A1A1AA] mt-1.5 mb-8">
+          Last updated: November 2026 &bull; Review Status: Pending Legal Verification
         </p>
 
-        <div className="space-y-6 text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+        <div className="space-y-6 text-sm md:text-base text-[#A1A1AA] leading-relaxed">
           <section>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
-              1. Overview
-            </h2>
+            <h2 className="text-lg font-semibold text-[#F7F7F8] mb-2.5">1. Overview</h2>
             <p>
-              This Cancellation and Refund Policy applies to all digital subscriptions and services offered on <strong className="text-slate-900 dark:text-slate-100">CrestFlow</strong>, operated by <strong className="text-slate-900 dark:text-slate-100">Tilak Popat Films</strong> (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;).
+              This Cancellation and Refund Policy applies to all subscriptions and digital services offered on{' '}
+              <strong className="text-[#F7F7F8]">CrestFlow</strong>, operated by{' '}
+              <strong className="text-[#F7F7F8]">Tilak Popat Films</strong> (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;).
             </p>
           </section>
 
           <section>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
-              2. Subscription Plans and Billing
+            <h2 className="text-lg font-semibold text-[#F7F7F8] mb-2.5">
+              2. Trial &amp; Paid Plans
             </h2>
             <p className="mb-2">
-              CrestFlow provides a perpetual Free tier with basic limits alongside premium Pro memberships billed through Razorpay:
+              New accounts can explore CrestFlow with sample data and activate a single-use trial:
             </p>
-            <ul className="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-300">
-              <li>Free Plan: Up to 2 clients and 3 invoices per calendar month.</li>
-              <li>Pro Monthly: &#8377;79 per month (billed monthly).</li>
-              <li>Pro Quarterly: &#8377;199 per quarter (billed quarterly).</li>
-              <li>Pro 6-Month: &#8377;449 per 6 months (billed semi-annually).</li>
-              <li>Pro Yearly: &#8377;899 per year (billed annually).</li>
-              <li>7-Day Trial: Introductory single-use trial access (&#8377;1).</li>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>7-Day Free Trial: &#8377;0 ({TRIAL_PROMISE_COPY})</li>
+              <li>Pro Monthly: &#8377;79 per month</li>
+              <li>Pro Quarterly: &#8377;199 per quarter</li>
+              <li>Pro Yearly: &#8377;699 per year</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
-              3. Cancellation Terms
-            </h2>
+            <h2 className="text-lg font-semibold text-[#F7F7F8] mb-2.5">3. Cancellation Terms</h2>
             <p className="mb-2">
-              You may cancel your CrestFlow Pro subscription at any time directly from your Settings or Billing page:
+              You may cancel auto-renewal anytime from Settings or Billing:
             </p>
-            <ul className="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-300">
-              <li>Cancellation halts future automated renewals on Razorpay.</li>
-              <li>You will retain full Pro access until the conclusion of your current prepaid billing period.</li>
-              <li>No further recurring charges will be initiated after successful cancellation.</li>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>Cancellation stops future automatic renewals.</li>
+              <li>You keep full Pro access until the end of your current paid period.</li>
+              <li>After expiry, all your workspace data stays readable and exportable (JSON &amp; CSV) anytime.</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
-              4. Refund Conditions
-            </h2>
-            <p className="mb-2">
-              Refunds are reviewed on a case-by-case basis according to the following guidelines:
-            </p>
-            <ul className="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-300">
-              <li><strong className="text-slate-800 dark:text-slate-200">Initial Charge Window:</strong> If you are dissatisfied with CrestFlow Pro, you may request a refund within <strong className="text-slate-900 dark:text-slate-100">7 calendar days</strong> of your initial billing date.</li>
-              <li><strong className="text-slate-800 dark:text-slate-200">Duplicate or Overcharged Transactions:</strong> Unintended duplicate charges caused by network timeouts will be refunded in full upon verification.</li>
-              <li><strong className="text-slate-800 dark:text-slate-200">Trial Fees:</strong> Nominal trial verification fees (&#8377;1) are non-refundable unless duplicate billing occurred.</li>
-              <li><strong className="text-slate-800 dark:text-slate-200">Processing Timeline:</strong> Approved refunds are credited to the original payment source via Razorpay within 5 to 7 business days.</li>
+            <h2 className="text-lg font-semibold text-[#F7F7F8] mb-2.5">4. Refund Conditions</h2>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>
+                <strong className="text-[#F7F7F8]">7-Day Refund Window:</strong> You may request a refund within{' '}
+                <strong className="text-[#F7F7F8]">7 calendar days</strong> of your initial paid subscription charge.
+              </li>
+              <li>
+                <strong className="text-[#F7F7F8]">Duplicate Charges:</strong> Verified duplicate transactions caused by network retries are refunded in full.
+              </li>
+              <li>
+                <strong className="text-[#F7F7F8]">Renewal Notice:</strong> Renewal charges are non-refundable once the renewal cycle starts; cancel prior to the renewal date to prevent the next charge.
+              </li>
+              <li>
+                <strong className="text-[#F7F7F8]">Processing Timeline:</strong> Approved refunds are returned via Razorpay to the original payment method within 5&ndash;7 business days.
+              </li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
-              5. Governing Law (India)
-            </h2>
+            <h2 className="text-lg font-semibold text-[#F7F7F8] mb-2.5">5. Contact</h2>
             <p>
-              This policy is governed by Indian law and the Consumer Protection (E-Commerce) Rules, 2020. Disputes fall within the exclusive jurisdiction of the courts of <strong className="text-slate-900 dark:text-slate-100">Gandhinagar, Gujarat</strong>, India.
+              To request a refund or ask billing questions, email{' '}
+              <a href="mailto:support.crestflow@gmail.com" className="text-[#F7F7F8] underline">
+                support.crestflow@gmail.com
+              </a>{' '}
+              or visit our{' '}
+              <a href="/contact" onClick={handleContactLink} className="text-[#F7F7F8] underline">
+                Contact Page
+              </a>
+              .
             </p>
-          </section>
-
-          <section className="pt-4 border-t border-slate-200 dark:border-slate-800">
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
-              6. How to Request a Refund &amp; Grievance
-            </h2>
-            <div className="space-y-1.5 text-slate-700 dark:text-slate-300">
-              <p><strong className="text-slate-900 dark:text-slate-100">Product:</strong> CrestFlow</p>
-              <p><strong className="text-slate-900 dark:text-slate-100">Company:</strong> Tilak Popat Films</p>
-              <p><strong className="text-slate-900 dark:text-slate-100">Contact:</strong> <a href="mailto:support.crestflow@gmail.com" className="text-indigo-600 dark:text-indigo-400 hover:underline">support.crestflow@gmail.com</a></p>
-              <p><strong className="text-slate-900 dark:text-slate-100">Address:</strong> Uvarsad, Gandhinagar, Gujarat, INDIA.</p>
-              <p><strong className="text-slate-900 dark:text-slate-100">Response Time:</strong> 24-48 working hours.</p>
-              <p className="pt-1 text-xs text-slate-500 dark:text-slate-400">
-                <strong>Grievance Handling:</strong> There is no separate Grievance Officer; all refunds and support inquiries are handled directly by the Founder: <strong className="text-slate-700 dark:text-slate-300">Tilak Popat</strong>.
-              </p>
-              <p className="mt-2 text-xs">
-                You may also reach us via our{' '}
-                <a href="/contact" onClick={handleContactLink} className="text-indigo-600 dark:text-indigo-400 hover:underline font-medium">
-                  Contact page
-                </a>.
-              </p>
-            </div>
           </section>
         </div>
       </div>

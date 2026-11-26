@@ -2,451 +2,250 @@
 
 @variant dark (&:where(.dark, .dark *));
 
+/* Self-hosted font faces (3 downloaded weights total, font-display: swap) */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/inter-400.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/inter-600.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Anton';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/anton-400.woff2') format('woff2');
+}
+
 @theme {
-  --color-slate-50: #333333;
-  --color-slate-100: #333333;
-  --color-slate-200: #404040;
-  --color-slate-300: #666666;
-  --color-slate-400: #aaaaaa;
-  --color-slate-500: #717171;
-  --color-slate-600: #999999;
-  --color-slate-700: #cccccc;
-  --color-slate-800: #e0e0e0;
-  --color-slate-900: #f1f1f1;
-  --color-slate-950: #ffffff;
+  /* Core CrestFlow Brand Tokens (GEMINI.md Section 9) */
+  --color-canvas: #0B0B0E;
+  --color-surface: #131318;
+  --color-raised: #1B1B22;
+  --color-line: #2A2A33;
+  --color-brand: #E0002B;
+  --color-brand-glow: #FF2D4A;
+  --color-gold: #FFC145;
+  --color-mint: #2DD4A0;
+  --color-amber-status: #FFB020;
+  --color-rose-status: #F0607A;
 
-  --color-indigo-50: #282828;
-  --color-indigo-100: #242424;
-  --color-indigo-200: #383838;
-  --color-indigo-300: #525252;
-  --color-indigo-400: #717171;
-  --color-indigo-500: #aaaaaa;
-  --color-indigo-600: #282828;
-  --color-indigo-700: #1c1c1c;
-  --color-indigo-800: #141414;
-  --color-indigo-900: #0f0f0f;
-  --color-indigo-950: #0a0a0a;
+  /* Semantic Surface & Text Mapping */
+  --color-surface-900: #0B0B0E;
+  --color-surface-800: #131318;
+  --color-surface-700: #1B1B22;
+  --color-surface-600: #22222B;
+  --color-surface-500: #262630;
+  --color-surface-400: #2A2A33;
+  --color-surface-300: #3A3A47;
 
-  --color-blue-50: #282828;
-  --color-blue-100: #242424;
-  --color-blue-200: #383838;
-  --color-blue-300: #525252;
-  --color-blue-400: #717171;
-  --color-blue-500: #aaaaaa;
-  --color-blue-600: #282828;
-  --color-blue-700: #1c1c1c;
-  --color-blue-800: #141414;
-  --color-blue-900: #0f0f0f;
+  --color-text-primary: #F7F7F8;
+  --color-text-secondary: #A1A1AA;
+  --color-text-muted: #8E8E98;
 
-  --color-red-500: #eb2b4f;
-  --color-red-600: #e1002d;
-  --color-red-700: #bf0026;
-  --color-red-800: #9e0020;
+  --color-accent: #E0002B;
+  --color-accent-hover: #FF2D4A;
 
-  --color-surface-900: #1a1a1a;
-  --color-surface-800: #1e1e1e;
-  --color-surface-700: #212121;
-  --color-surface-600: #242424;
-  --color-surface-500: #282828;
-  --color-surface-400: #333333;
-  --color-text-primary: #f1f1f1;
-  --color-text-secondary: #aaaaaa;
-  --color-text-muted: #666666;
-  --color-accent: #e1002d;
-  --color-accent-hover: #c70027;
+  /* Neutral Slate mapping tuned to dark obsidian surfaces (AA contrast safe) */
+  --color-slate-50: #1B1B22;
+  --color-slate-100: #131318;
+  --color-slate-200: #2A2A33;
+  --color-slate-300: #3A3A47;
+  --color-slate-400: #A1A1AA;
+  --color-slate-500: #A1A1AA;
+  --color-slate-600: #C4C4CC;
+  --color-slate-700: #E4E4E7;
+  --color-slate-800: #F4F4F5;
+  --color-slate-900: #F7F7F8;
+  --color-slate-950: #FFFFFF;
+
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 @layer base {
   :root {
-    color-scheme: light dark;
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  }
-
-  html.dark {
     color-scheme: dark;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 
   html, body {
-    /* Prevent horizontal overflow on mobile */
     overflow-x: hidden;
-    /* Use small viewport height on mobile to account for browser chrome */
     min-height: 100svh;
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: #0B0B0E;
+    color: #F7F7F8;
   }
 
   *, *::before, *::after {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-  }
-
-  body {
-    background-color: #333333;
-    color: #f1f1f1;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-  }
-
-  html.dark body {
-    background-color: #333333;
-    color: #f1f1f1;
+    border-color: #2A2A33;
   }
 
   :focus-visible {
-    outline: 2px solid #282828;
+    outline: 2px solid #F7F7F8;
     outline-offset: 2px;
   }
 }
 
-/* Sign-in / Landing screen styling */
-.font-display {
-  font-family: 'Space Grotesk', 'Plus Jakarta Sans', system-ui, sans-serif;
-  letter-spacing: -0.035em;
-}
-
-.font-hero-condensed {
-  font-family: 'Anton', 'Space Grotesk', system-ui, sans-serif;
-  letter-spacing: 0.015em;
+/* Marketing headlines & big hero/KPI numerals strictly (Anton weight 400) */
+.font-hero-condensed,
+.font-anton-display {
+  font-family: 'Anton', 'Inter', system-ui, sans-serif;
   font-weight: 400;
+  letter-spacing: 0.01em;
 }
 
-.text-accent-indigo {
-  color: #6366f1 !important;
+.font-display {
+  font-family: 'Inter', system-ui, sans-serif;
+  letter-spacing: -0.025em;
 }
 
-.bg-accent-indigo {
-  background-color: #6366f1 !important;
+/* Monospace numeric alignment */
+.tabular-figures {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
 }
 
-.bg-accent-indigo-hover:hover {
-  background-color: #4f46e5 !important;
+/* Primary action button + permitted Decision-4 glow ONLY on hover */
+.btn-primary,
+.cf-btn-primary {
+  background-color: #E0002B;
+  color: #FFFFFF;
+  border: 1px solid transparent;
+  transition: background-color 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
 }
 
-.border-accent-indigo {
-  border-color: #6366f1 !important;
+.btn-primary:hover:not(:disabled),
+.cf-btn-primary:hover:not(:disabled) {
+  background-color: #FF2D4A;
+  box-shadow: 0 0 22px rgba(255, 45, 74, 0.32);
 }
 
+/* Hero atmospheric glow & hairline grid pattern */
 .landing-grid-pattern {
-  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-  background-size: 24px 24px;
+  background-image:
+    linear-gradient(to right, rgba(42, 42, 51, 0.45) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(42, 42, 51, 0.45) 1px, transparent 1px);
+  background-size: 40px 40px;
 }
 
-.hero-border-beam {
-  position: relative;
+.hero-radial-glow {
+  background: radial-gradient(ellipse 68% 55% at 50% 0%, rgba(255, 45, 74, 0.14), rgba(224, 0, 43, 0.05) 45%, transparent 75%);
 }
 
-.hero-border-beam::after {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.4), transparent);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-  background-size: 200% 100%;
-  animation: beamMove 4s linear infinite;
+.best-value-glow {
+  border-color: rgba(255, 45, 74, 0.55);
+  box-shadow: 0 0 28px rgba(255, 45, 74, 0.16);
 }
 
-@keyframes beamMove {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-border-beam::after {
-    animation: none !important;
-    background: transparent !important;
-  }
-}
-
-/* Eliminate white background anywhere across the application */
-body,
-main:not(.bg-transparent):not([class*="bg-transparent"]),
-header:not(.bg-transparent):not([class*="bg-transparent"]),
-.bg-slate-50 {
-  background-color: #333333 !important;
-}
-
-header.bg-transparent,
-header.\!bg-transparent,
-header[class*="bg-transparent"],
-main.bg-transparent,
-main.\!bg-transparent,
-footer.bg-transparent,
-footer.\!bg-transparent {
-  background-color: transparent !important;
-}
-
-/* Sidebar navigation panel: clean dark surface per GEMINI.md */
-aside,
-aside nav,
-[role="navigation"].sidebar,
-nav.sidebar {
-  background-color: #1e1e1e !important;
-  border-color: #2a2a2a !important;
-}
-
-/* Footer: completely transparent link, list, and container areas */
-footer,
-footer * {
-  box-shadow: none !important;
-}
-
-footer nav,
-footer div,
-footer ul,
-footer li,
-footer a,
-footer p,
-footer span {
-  background-color: transparent !important;
-  border-color: transparent !important;
-}
-
-footer:not(.bg-transparent):not([class*="bg-transparent"]) {
-  background-color: #282828 !important;
-}
-
-/* Primary Action Buttons: Restrained palette per project-rules.md & GEMINI.md */
-button.btn-primary,
-.btn-primary {
-  background-color: #e1002d !important;
-  color: #f1f1f1 !important;
-  border: none !important;
-}
-
-button.btn-primary:hover,
-.btn-primary:hover {
-  background-color: #c70027 !important;
-  color: #ffffff !important;
-}
-
-/* Toggle switches and indicator knobs (exempt from button graphite overrides) */
+/* Admin switch controls */
 button.admin-toggle-switch,
 .admin-toggle-switch {
-  width: 2.75rem !important;
-  height: 1.5rem !important;
-  padding: 2px !important;
-  border-radius: 9999px !important;
-  transition: background-color 150ms ease, border-color 150ms ease !important;
+  width: 2.75rem;
+  height: 1.5rem;
+  padding: 2px;
+  border-radius: 9999px;
+  transition: background-color 180ms ease, border-color 180ms ease;
 }
 
-button.admin-toggle-switch.admin-toggle-active,
 .admin-toggle-switch.admin-toggle-active {
-  background-color: #e1002d !important;
-  border: 1px solid #c70027 !important;
+  background-color: #E0002B;
+  border: 1px solid #FF2D4A;
 }
 
-button.admin-toggle-switch.admin-toggle-inactive,
 .admin-toggle-switch.admin-toggle-inactive {
-  background-color: #383838 !important;
-  border: 1px solid #484848 !important;
+  background-color: #1B1B22;
+  border: 1px solid #2A2A33;
 }
 
-.admin-toggle-knob,
-span.admin-toggle-knob {
-  background-color: #ffffff !important;
-  border-radius: 9999px !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+.admin-toggle-knob {
+  background-color: #F7F7F8;
+  border-radius: 9999px;
 }
 
 .admin-indicator-active {
-  background-color: #e1002d !important;
+  background-color: #E0002B;
 }
 
 .admin-indicator-inactive {
-  background-color: #666666 !important;
+  background-color: #8E8E98;
 }
 
-/* Sub-sections, cards & modals: highlighted & separated purely by #282828 on #333333 canvas without borders */
-.bg-white:not(input):not(select):not(textarea):not(button):not([role="button"]):not(a),
-[class*="bg-white"]:not(input):not(select):not(textarea):not(button):not([role="button"]):not(a):not(:hover) {
-  background-color: #282828 !important;
-  border-color: transparent !important;
+/* Sidebar & shell surfaces */
+aside,
+aside nav,
+nav.sidebar {
+  background-color: #131318;
+  border-color: #2A2A33;
 }
 
-.bg-slate-100:not(button):not([role="button"]):not(a):not(:hover),
-.bg-indigo-50:not(button):not([role="button"]):not(a):not(:hover),
-.bg-indigo-100:not(button):not([role="button"]):not(a):not(:hover),
-.bg-blue-50:not(button):not([role="button"]):not(a):not(:hover),
-.bg-blue-100:not(button):not([role="button"]):not(a):not(:hover) {
-  background-color: #242424 !important;
-}
-
-/* Ensure buttons NEVER render with white backgrounds or wash out icons per user rule & GEMINI.md */
-button.bg-white,
-[role="button"].bg-white,
-button.hover\:bg-red-50:hover,
-[role="button"].hover\:bg-red-50:hover,
-button.hover\:bg-white:hover,
-[role="button"].hover\:bg-white:hover {
-  background-color: #383838 !important;
-  color: #f1f1f1 !important;
-}
-
-/* Ensure calendar selected dates, edge dates, and slate-900 buttons never render with white backgrounds */
-button.bg-slate-900,
-[role="button"].bg-slate-900,
-button.bg-slate-950,
-[role="button"].bg-slate-950,
-td[data-edge] button,
-[data-edge] > button,
-.group[data-edge] button {
-  background-color: #e1002d !important;
-  color: #ffffff !important;
-}
-
-td[data-edge] button:hover,
-[data-edge] > button:hover,
-.group[data-edge] button:hover {
-  background-color: #c70027 !important;
-  color: #ffffff !important;
-}
-
-/* Universal Dialog & Modal Scrim / Backdrop: translucent tint with slight blur per user request (no white wash) */
-.fixed.inset-0[class*="bg-slate-900"],
-.fixed.inset-0[class*="bg-slate-950"],
-.fixed.inset-0[class*="bg-black"],
-div.fixed.inset-0:has(> [role="dialog"]),
-div.fixed.inset-0:has(> [id*="modal"]),
-div.fixed.inset-0:has(> [id*="card"]) {
-  background-color: rgba(0, 0, 0, 0.25) !important;
-  backdrop-filter: blur(6px) !important;
-  -webkit-backdrop-filter: blur(6px) !important;
-}
-
-/* Universal Button & Interactive Element Hover & Active Feedback per GEMINI.md & /animate */
-button:not(:disabled),
-[role="button"]:not([aria-disabled="true"]) {
-  cursor: pointer;
-  transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease, filter 120ms ease, opacity 120ms ease, transform 120ms cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-button:not(:disabled):hover,
-[role="button"]:not([aria-disabled="true"]):hover {
-  filter: brightness(1.12);
-}
-
-button:not(:disabled):active,
-[role="button"]:not([aria-disabled="true"]):active {
-  transform: scale(0.97);
-  filter: brightness(0.92);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  button:not(:disabled):active,
-  [role="button"]:not([aria-disabled="true"]):active {
-    transform: none !important;
-  }
-}
-
-/* Prevent white-on-white text clipping for dark container elements */
-.bg-slate-900,
-.bg-slate-950 {
-  background-color: #1f1f1f !important;
-}
-
-/* Header of every table should be a little dark in color */
-table thead,
-table thead tr,
-table th,
-thead,
-thead tr {
-  background-color: #1a1a1a !important;
-  color: #aaaaaa !important;
-  border-color: #242424 !important;
-}
-
-tbody tr {
-  border-color: #242424 !important;
-}
-
-/* Ensure strong contrast across all text classes so same-color text never hides */
-body, main, .bg-white, [class*="bg-white"], .bg-slate-50,
-.text-slate-950, .text-slate-900, .text-slate-800, .text-slate-700,
-.text-slate-300, .text-slate-200, .text-slate-100,
-.text-neutral-950, .text-neutral-900, .text-neutral-800, .text-neutral-700,
-.text-gray-950, .text-gray-900, .text-gray-800, .text-gray-700,
-.text-zinc-950, .text-zinc-900, .text-zinc-800, .text-zinc-700,
-.text-indigo-900, .text-indigo-800, .text-indigo-700, .text-indigo-600, .text-indigo-500, .text-indigo-400,
-.text-blue-900, .text-blue-800, .text-blue-700, .text-blue-600, .text-blue-500, .text-blue-400, .text-black {
-  color: #f1f1f1 !important;
-}
-
-.text-slate-600, .text-slate-500, .text-slate-400,
-.text-neutral-600, .text-neutral-500, .text-neutral-400,
-.text-gray-600, .text-gray-500, .text-gray-400,
-.text-zinc-600, .text-zinc-500, .text-zinc-400 {
-  color: #aaaaaa !important;
-}
-
-/* Ensure hover states transition to pure white */
-.hover\:text-neutral-950:hover, .hover\:text-neutral-900:hover,
-.hover\:text-slate-900:hover, .hover\:text-slate-800:hover,
-.hover\:text-white:hover, .hover\:text-black:hover {
-  color: #ffffff !important;
-}
-
-/* Remove all light white borders from every boxes - separate purely by background */
-.border-slate-200, .border-slate-100, .border-slate-300,
-.border-neutral-200, .border-neutral-100, .border-neutral-300,
-.border-gray-200, .border-gray-100, .border-gray-300,
-.border-zinc-200, .border-zinc-100, .border-zinc-300,
-.border-white, [class*="border-white"], [class*="border-amber"],
-[class*="border-indigo-100"], [class*="border-indigo-200"], [class*="border-indigo-300"] {
-  border-color: transparent !important;
-}
-
-.bg-white input:not([type="checkbox"]):not([type="radio"]),
-.bg-white select,
-.bg-white textarea,
+/* Form controls */
 input:not([type="checkbox"]):not([type="radio"]),
 select,
 textarea {
-  background-color: #242424 !important;
-  color: #f1f1f1 !important;
-  border: 1px solid #444444 !important;
+  background-color: #131318;
+  color: #F7F7F8;
+  border: 1px solid #2A2A33;
 }
 
 select option {
-  background-color: #242424 !important;
-  color: #f1f1f1 !important;
+  background-color: #1B1B22;
+  color: #F7F7F8;
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: #717171 !important;
+  color: #8E8E98;
 }
 
-/* Checkboxes: Ensure crisp, high-contrast visibility across dark tables and forms */
 input[type="checkbox"] {
-  background-color: #1a1a1a !important;
-  border: 1.5px solid #888888 !important;
-  border-radius: 3px !important;
-  min-width: 16px !important;
-  min-height: 16px !important;
-}
-
-input[type="checkbox"]:hover {
-  border-color: #ffffff !important;
+  background-color: #131318;
+  border: 1.5px solid #A1A1AA;
+  border-radius: 3px;
+  min-width: 16px;
+  min-height: 16px;
 }
 
 input[type="checkbox"]:checked,
 input[type="checkbox"]:indeterminate {
-  background-color: #555555 !important;
-  border-color: #888888 !important;
+  background-color: #E0002B;
+  border-color: #E0002B;
+}
+
+/* Interactive transitions & reduced motion support */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]) {
+  cursor: pointer;
+  transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Safe area insets for notched iPhones (bottom nav) */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
-  /* Bottom navigation bar gets extra padding for home indicator */
   nav.fixed.bottom-0 {
     padding-bottom: max(env(safe-area-inset-bottom), 6px);
   }
 
-  /* Main content area gets extra bottom padding to avoid nav overlap on mobile only */
   @media (max-width: 767px) {
     main {
       padding-bottom: calc(3.75rem + env(safe-area-inset-bottom));
@@ -454,65 +253,15 @@ input[type="checkbox"]:indeterminate {
   }
 }
 
-/* Custom scrollbar styling for dark mode compatibility */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.4);
-  border-radius: 9999px;
-}
-
-html.dark ::-webkit-scrollbar-thumb {
-  background: rgba(71, 85, 105, 0.5);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.7);
-}
-
-html.dark ::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.7);
-}
-
-/* Prevent tables from breaking mobile layout - they scroll horizontally instead */
-table {
-  min-width: 100%;
-}
-
-/* Touch-action improvements for mobile scrolling */
-.overflow-x-auto {
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Hide scrollbar for horizontal tab navs without losing scroll functionality */
-.scrollbar-none {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE / Edge */
-}
-
-.scrollbar-none::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
-}
-
-/* Smooth mobile scrolling overscroll containment */
-.overflow-y-auto {
-  overscroll-behavior-y: contain;
-}
-
-/* Content-visibility optimization for rendering long work/invoice tables without layout freeze */
-.content-auto {
-  content-visibility: auto;
-  contain-intrinsic-size: 1px 300px;
-}
-
-/* Contain layout and paint for independent cards & widgets */
-.contain-paint {
-  contain: paint;
-}
+/* Custom subtle scrollbars */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2A2A33; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #3A3A47; }
+table { min-width: 100%; }
+.overflow-x-auto { -webkit-overflow-scrolling: touch; }
+.scrollbar-none { scrollbar-width: none; -ms-overflow-style: none; }
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.overflow-y-auto { overscroll-behavior-y: contain; }
+.content-auto { content-visibility: auto; contain-intrinsic-size: 1px 300px; }
+.contain-paint { contain: paint; }

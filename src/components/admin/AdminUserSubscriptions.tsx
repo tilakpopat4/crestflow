@@ -51,8 +51,9 @@ export default function AdminUserSubscriptions({
 
   const isUserBlocked = (userId: string) => blockedList.some((u) => u.id === userId);
 
-  const handleGrantDays = async (userId: string, userName: string) => {
-    if (!window.confirm(`Grant 30 extra days of Pro access to ${userName || 'this user'}?`)) return;
+  const handleGrantDays = async (userId: string, userName: string, grantLifetime: boolean = false) => {
+    const label = grantLifetime ? 'Lifetime Pro access' : '30 extra days of Pro access';
+    if (!window.confirm(`Grant ${label} to ${userName || 'this user'}?`)) return;
     setActionLoading(userId);
     try {
       if (!auth.currentUser) throw new Error('You must be signed in as admin');
@@ -60,7 +61,7 @@ export default function AdminUserSubscriptions({
       const res = await fetch('/api/admin/grant-subscription', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ userId, days: 30 }),
+        body: JSON.stringify(grantLifetime ? { userId, plan: 'lifetime' } : { userId, days: 30 }),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));

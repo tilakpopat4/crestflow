@@ -18,27 +18,13 @@ import { UserProfile, UserProfilePrivate } from '../types';
 export function useUserProfile(user: User | null) {
   const [firestoreProfile, setFirestoreProfile] = useState<UserProfile | null>(null);
   const [profilesLoading, setProfilesLoading] = useState(true);
-
-  // Initialize cached public profile from localStorage
   const [cachedProfile, setCachedProfile] = useState<UserProfile | null>(() => {
     if (!user?.uid) return null;
-    try {
-      const saved = localStorage.getItem(`crestflow_profile_${user.uid}`);
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
+    try { return JSON.parse(localStorage.getItem(`crestflow_profile_${user.uid}`) || 'null'); } catch { return null; }
   });
-
-  // Initialize cached private settings (API keys, bank details) from localStorage
   const [privateSettings, setPrivateSettings] = useState<UserProfilePrivate | null>(() => {
     if (!user?.uid) return null;
-    try {
-      const saved = localStorage.getItem(`crestflow_private_${user.uid}`);
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
+    try { return JSON.parse(localStorage.getItem(`crestflow_private_${user.uid}`) || 'null'); } catch { return null; }
   });
 
   // Listen directly to doc(db, 'profiles', user.uid) for real-time public profile updates
@@ -204,14 +190,21 @@ export function useUserProfile(user: User | null) {
     });
 
     const profileDocData: Record<string, any> = { ...sanitizedPublic };
+    if (profileDocData.username === rawProfile?.username) {
+      delete profileDocData.username;
+    }
+    if (
+      profileWithMeta.sampleWorks === undefined ||
+      safeStringify(profileWithMeta.sampleWorks) === safeStringify(rawProfile?.sampleWorks)
+    ) {
+      delete profileDocData.sampleWorks;
+    } else {
+      profileDocData.sampleWorks = sanitizePayload(profileWithMeta.sampleWorks);
+    }
     if (profileWithMeta.freelanceStartDate && profileWithMeta.freelanceStartDate.trim()) {
       profileDocData.freelanceStartDate = profileWithMeta.freelanceStartDate.trim();
     } else if (rawProfile?.freelanceStartDate) {
       profileDocData.freelanceStartDate = deleteField();
-    }
-
-    if (profileWithMeta.sampleWorks !== undefined) {
-      profileDocData.sampleWorks = sanitizePayload(profileWithMeta.sampleWorks);
     }
 
     await setDoc(profileRef, sanitizePayload(profileDocData), { merge: true });
@@ -258,12 +251,13 @@ export function useUserProfile(user: User | null) {
       localStorage.setItem(`crestflow_private_${user.uid}`, safeStringify(newPrivateSettings));
     } catch {}
 
-    // 4. Save private settings document with deleteField support for removals
+    // 4. Save private settings document only when private fields changed (protected by entitled() rules)
     const privateSettingsRef = doc(db, 'profiles', user.uid, 'private', 'settings');
     const privateDocData: Record<string, any> = {
       updatedAt: Date.now(),
     };
 
+    let hasPrivateDiff = false;
     const privateFields: [string, string | undefined, string | undefined][] = [
       ['geminiApiKey', geminiApiKey, privateSettings?.geminiApiKey],
       ['accountNumber', accountNumber, privateSettings?.accountNumber],
@@ -271,11 +265,20 @@ export function useUserProfile(user: User | null) {
       ['bankName', bankName, privateSettings?.bankName],
     ];
     for (const [key, val, prev] of privateFields) {
-      if (val && val.trim()) privateDocData[key] = val.trim();
-      else if (prev) privateDocData[key] = deleteField();
+      const normalized = val?.trim() || '';
+      const prevNorm = prev?.trim() || '';
+      if (normalized && normalized !== prevNorm) {
+        privateDocData[key] = normalized;
+        hasPrivateDiff = true;
+      } else if (!normalized && prevNorm) {
+        privateDocData[key] = deleteField();
+        hasPrivateDiff = true;
+      }
     }
 
-    await setDoc(privateSettingsRef, sanitizePayload(privateDocData), { merge: true });
+    if (hasPrivateDiff) {
+      await setDoc(privateSettingsRef, sanitizePayload(privateDocData), { merge: true });
+    }
   };
 
   return {

@@ -1,119 +1,133 @@
 import React from 'react';
-import { Check } from 'lucide-react';
-import { PlanPricing, getTrialDisclosureText } from '../../lib/subscriptionPlans';
+import { Check, Loader2 } from 'lucide-react';
+import { PlanPricing, TRIAL_PROMISE_COPY } from '../../shared/pricing';
 
 interface PricingCardProps {
   plan: PlanPricing;
-  isSelected: boolean;
+  isCurrentPlan?: boolean;
+  isTrialUsed?: boolean;
+  isSelected?: boolean;
+  loading?: boolean;
+  disclosureText?: string;
   onSelect: (plan: PlanPricing) => void;
-  isLoading: boolean;
-  isFirstTime?: boolean;
 }
 
 /**
- * Individual plan pricing card complying with CrestFlow's flat, restrained design system.
- * Shows mandatory disclosure: "₹1 today for a 7-day trial, then ₹X on [date]; the ₹1 is non-refundable".
+ * Pricing tier card styled in obsidian Section 9 tokens.
+ * Yearly Best-Value card receives subtle permitted #FF2D4A border highlight & badge.
  */
 export const PricingCard: React.FC<PricingCardProps> = ({
   plan,
-  isSelected,
+  isCurrentPlan = false,
+  isTrialUsed = false,
+  isSelected = false,
+  loading = false,
+  disclosureText,
   onSelect,
-  isLoading,
-  isFirstTime = true,
 }) => {
-  const disclosureText = getTrialDisclosureText(plan);
+  const isTrial = Boolean(plan.isTrial || plan.id === 'trial');
+  const isBestValue = Boolean(plan.isBestValue);
+  const perDayText =
+    !isTrial && plan.durationDays > 0
+      ? `~₹${Math.max(1, Math.round(plan.price / plan.durationDays))}/day`
+      : null;
+
+  const isDisabled = loading || isCurrentPlan || (isTrial && isTrialUsed);
 
   return (
     <div
-      className={`rounded-lg p-5 flex flex-col justify-between transition-colors duration-120 ${
-        isSelected
-          ? 'bg-white dark:bg-slate-900 border-2 border-accent shadow-xs'
-          : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800'
+      className={`rounded-xl p-5 flex flex-col justify-between transition-colors ${
+        isBestValue
+          ? 'bg-[#1B1B22] border best-value-glow'
+          : isSelected
+          ? 'bg-[#1B1B22] border border-[#FF2D4A]/60'
+          : 'bg-[#131318] border border-[#2A2A33]'
       }`}
     >
-      <div>
-        {/* Header & Badges */}
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <h3 className="text-base font-semibold text-slate-900 dark:text-white">
-            {plan.name}
-          </h3>
-          {plan.savingsBadge && (
-            <span className="text-[11px] font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
-              {plan.savingsBadge}
+      <div className="space-y-4">
+        <div className="flex items-start justify-between gap-2 min-h-[1.5rem]">
+          <span className="text-sm font-semibold text-[#F7F7F8]">{plan.name}</span>
+          {isBestValue ? (
+            <span className="px-2 py-0.5 rounded bg-[#131318] border border-[#FFC145]/40 text-[10px] font-semibold uppercase tracking-wider text-[#FFC145] shrink-0">
+              Best value
             </span>
+          ) : (
+            plan.savingsBadge && (
+              <span className="px-2 py-0.5 rounded bg-[#1B1B22] border border-[#2DD4A0]/40 text-[10px] font-semibold text-[#2DD4A0] shrink-0">
+                {plan.savingsBadge}
+              </span>
+            )
           )}
         </div>
 
-        <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 min-h-[32px]">
-          {plan.description}
+        <div className="space-y-1">
+          <div className="flex items-baseline gap-1.5">
+            <span className="font-anton-display text-3xl text-[#F7F7F8] tabular-figures">
+              ₹{plan.price}
+            </span>
+            <span className="text-xs text-[#A1A1AA]">{plan.periodLabel}</span>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs text-[#A1A1AA] tabular-figures min-h-[1rem]">
+            {isTrial ? (
+              <span>No card needed · 7 days full access</span>
+            ) : (
+              <>
+                <span>~₹{plan.monthlyEquivalent}/mo</span>
+                {perDayText && <span>· {perDayText}</span>}
+                {plan.savingsBadge && isBestValue && (
+                  <span className="text-[#2DD4A0] font-semibold">· {plan.savingsBadge}</span>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+
+        <p className="text-xs text-[#A1A1AA] leading-relaxed min-h-[2.25rem]">
+          {isTrial ? TRIAL_PROMISE_COPY : plan.description}
         </p>
 
-        {/* Pricing Figure */}
-        <div className="mb-4 pb-4 border-b border-slate-100 dark:border-slate-800">
-          <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-bold text-slate-900 dark:text-white">
-              {plan.price === 0 ? '₹0' : `₹${plan.price.toLocaleString('en-IN')}`}
-            </span>
-            <span className="text-xs text-slate-500 dark:text-slate-400">
-              {plan.periodLabel}
-            </span>
-          </div>
-          {plan.durationDays > 30 && (
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-              Equivalent to ~₹{plan.monthlyEquivalent}/month
-            </p>
-          )}
-        </div>
-
-        {/* Features List */}
-        <ul className="space-y-2.5 mb-6 text-xs text-slate-600 dark:text-slate-300">
-          {plan.features.map((feat, idx) => (
-            <li key={idx} className="flex items-start gap-2">
-              <Check size={14} className="text-slate-900 dark:text-white shrink-0 mt-0.5" />
-              <span>{feat}</span>
+        <ul className="space-y-2 pt-2 border-t border-[#2A2A33]">
+          {plan.features.slice(0, 4).map((feature) => (
+            <li key={feature} className="flex items-start gap-2 text-xs text-[#F7F7F8]">
+              <Check size={13} className="text-[#2DD4A0] shrink-0 mt-0.5" />
+              <span>{feature}</span>
             </li>
           ))}
         </ul>
       </div>
 
-      <div>
-        {plan.extraInfo && (
-          <div className="mb-3 p-2.5 rounded bg-slate-100 dark:bg-slate-800 text-[11px] leading-relaxed text-slate-700 dark:text-slate-200">
-            {plan.extraInfo}
-          </div>
-        )}
-
-        {/* Regulatory Disclosure */}
-        <div className="mb-4 p-2.5 rounded bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 text-[11px] leading-relaxed text-slate-600 dark:text-slate-400">
-          {plan.disclosureText ? (
-            <span>{plan.disclosureText}</span>
-          ) : plan.isTrial ? (
-            <span>{disclosureText}</span>
-          ) : (
-            <span>₹{plan.price.toLocaleString('en-IN')} charged today; renews every {plan.interval}. Cancel anytime.</span>
-          )}
-        </div>
-
-        {/* CTA Button */}
+      <div className="mt-5 space-y-2.5">
         <button
           type="button"
+          disabled={isDisabled}
           onClick={() => onSelect(plan)}
-          disabled={isLoading}
-          className={`w-full py-2.5 px-4 rounded text-xs font-medium transition-colors duration-120 cursor-pointer border-none ${
-            isSelected
-              ? 'bg-accent hover:bg-accent-hover text-white'
-              : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200'
-          } disabled:opacity-50`}
+          className={`w-full py-2.5 px-4 rounded-lg text-xs font-semibold cursor-pointer inline-flex items-center justify-center gap-1.5 disabled:opacity-50 ${
+            isBestValue || isTrial
+              ? 'cf-btn-primary text-white'
+              : 'bg-[#1B1B22] hover:bg-[#22222B] border border-[#2A2A33] text-[#F7F7F8]'
+          }`}
         >
-          {isLoading && isSelected
-            ? 'Initializing...'
-            : plan.ctaLabel
-            ? plan.ctaLabel
-            : plan.isTrial
-            ? 'Start 7-Day Free Trial'
-            : `Pay ₹${plan.price.toLocaleString('en-IN')} & Subscribe`}
+          {loading && <Loader2 size={13} className="animate-spin" />}
+          <span>
+            {isCurrentPlan
+              ? 'Current plan'
+              : isTrial && isTrialUsed
+              ? 'Trial already used'
+              : isTrial
+              ? 'Start 7-day free trial'
+              : `Choose ${plan.name.replace('Pro ', '')}`}
+          </span>
         </button>
+
+        {disclosureText && (
+          <p className="text-[11px] text-[#A1A1AA] text-center leading-snug">
+            {disclosureText}
+          </p>
+        )}
       </div>
     </div>
   );
 };
+
+export default PricingCard;

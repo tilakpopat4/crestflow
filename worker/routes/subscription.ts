@@ -1,29 +1,56 @@
-import { Env, PlanKey } from '../types';
+import { Env, PaidPlanKey } from '../types';
 import { verifyFirebaseIdToken } from '../auth';
+import { parseServiceAccount } from '../firestore';
 import {
-  parseServiceAccount,
-  getSubscriptionFromFirestore,
-  updateSubscriptionInFirestore,
-} from '../firestore';
+  getEntitlementFromFirestore,
+  isEntitledRecord,
+  resolveEffectiveStatus,
+  writeEntitlement,
+} from '../entitlements';
 import {
   createRazorpaySubscription,
   createRazorpayOrder,
-  cancelRazorpaySubscription,
 } from '../razorpay';
-import {
-  normalizeGoogleEmail,
-  hashIdentifier,
-  reserveTrialLedgerEntry,
-} from '../trialLedger';
+import { resolvePaidPlanKey, SERVER_PLAN_CATALOG } from '../../src/shared/pricing';
 
-export function jsonResponse(data: any, status = 200): Response {
+const ALLOWED_ORIGIN_PATTERNS = [
+  /^https:\/\/crestflow\.space$/i,
+  /^https:\/\/www\.crestflow\.space$/i,
+  /^https:\/\/crestflow\.app$/i,
+  /^https:\/\/www\.crestflow\.app$/i,
+  /^http:\/\/localhost(?::\d+)?$/i,
+  /^http:\/\/127\.0\.0\.1(?::\d+)?$/i,
+];
+
+export function resolveCorsOrigin(request?: Request, env?: Env): string {
+  const reqOrigin = request?.headers?.get('Origin') || '';
+  if (reqOrigin) {
+    if (ALLOWED_ORIGIN_PATTERNS.some((p) => p.test(reqOrigin))) {
+      return reqOrigin;
+    }
+    if (env?.BASE_URL && reqOrigin.toLowerCase() === env.BASE_URL.toLowerCase()) {
+      return reqOrigin;
+    }
+  }
+  return env?.BASE_URL || 'https://crestflow.space';
+}
+
+export function jsonResponse(
+  data: any,
+  status = 200,
+  request?: Request,
+  env?: Env,
+  extraHeaders: Record<string, string> = {}
+): Response {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
       'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': resolveCorsOrigin(request, env),
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Vary': 'Origin',
+      ...extraHeaders,
     },
   });
 }
@@ -36,150 +63,86 @@ export function getBearerToken(request: Request): string | null {
 }
 
 /**
- * Server-side plan map resolving plan keys to Razorpay plan IDs configured in environment variables.
+ * Resolves server-configured Razorpay Plan ID for paid billing cycles (no trial / 6-month plan).
  */
 export function resolveServerPlanId(env: Env, planKey: string): string | null {
-  const planMap: Record<PlanKey, string | undefined> = {
-    trial: env.RAZORPAY_PLAN_MONTHLY,
+  const paidKey = resolvePaidPlanKey(planKey);
+  if (!paidKey) return null;
+  const planMap: Record<PaidPlanKey, string | undefined> = {
     monthly: env.RAZORPAY_PLAN_MONTHLY,
     quarterly: env.RAZORPAY_PLAN_QUARTERLY,
-    half: env.RAZORPAY_PLAN_HALF,
     yearly: env.RAZORPAY_PLAN_YEARLY,
   };
-
-  const normalized = planKey.toLowerCase() as PlanKey;
-  return planMap[normalized] || null;
+  return planMap[paidKey] || null;
 }
 
 /**
  * Handles POST /api/create-subscription
- * - Enforces one live subscription per user with an idempotency lock
- * - First-time users get start_at = now + 7d plus a ₹1 (100 paise) addon
- * - Returning users start immediately with no addon
- * - Sets notes.uid and expire_by 30 minutes
+ * - Paid plans only (monthly, quarterly, yearly); trials must use /api/activate-trial.
+ * - Prefers auto-renewing Razorpay Subscription when RAZORPAY_PLAN_* is configured,
+ *   falling back cleanly to one-time Razorpay Order checkout (`mode: 'order'`).
+ * - Blocks mid-period plan switches while an active paid period is still running.
  */
 export async function handleCreateSubscription(request: Request, env: Env): Promise<Response> {
   const idToken = getBearerToken(request);
   if (!idToken) {
-    return jsonResponse({ error: 'Missing Authorization header' }, 401);
+    return jsonResponse({ error: 'Missing Authorization header' }, 401, request, env);
   }
 
-  const creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
-  const projectId = env.FIREBASE_PROJECT_ID || creds.project_id;
-  const verifiedUser = await verifyFirebaseIdToken(idToken, projectId);
+  let creds;
+  let verifiedUser;
+  try {
+    creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
+    const projectId = env.FIREBASE_PROJECT_ID || creds.project_id;
+    verifiedUser = await verifyFirebaseIdToken(idToken, projectId);
+  } catch {
+    return jsonResponse({ error: 'Authentication failed' }, 401, request, env);
+  }
 
   const body = (await request.json().catch(() => ({}))) as {
     plan?: string;
     planKey?: string;
-    isTrial?: boolean;
-    isDirect?: boolean;
   };
-  const requestedPlanKey = (body.planKey || body.plan || 'monthly').toLowerCase();
-  const isDirect = body.isDirect === true || body.isTrial === false;
-  const isTrialRequest = requestedPlanKey === 'trial' || body.isTrial === true;
+  const paidPlanKey = resolvePaidPlanKey(body.planKey || body.plan);
+  if (!paidPlanKey) {
+    return jsonResponse(
+      { error: 'Please choose a valid paid plan (monthly, quarterly, or yearly).' },
+      400,
+      request,
+      env
+    );
+  }
 
-  const planId = resolveServerPlanId(env, requestedPlanKey);
+  const planSpec = SERVER_PLAN_CATALOG[paidPlanKey];
+  const existing = await getEntitlementFromFirestore(creds, verifiedUser.uid);
+  const effectiveStatus = resolveEffectiveStatus(existing);
 
-  // 1. Idempotency Lock & Existing Subscription Verification
-  const existing = await getSubscriptionFromFirestore(creds, verifiedUser.uid);
-
-  // Single-use 7-day trial guard: reject trial request if account has ever used a trial or subscription
-  const hasAlreadyHadTrial = Boolean(
-    existing &&
-      (existing.status === 'trialing' ||
-        Boolean(existing.trialEndsAt) ||
-        (existing.hasHadTrial && existing.status !== 'pending'))
-  );
-
-  if (isTrialRequest && hasAlreadyHadTrial) {
+  if (existing && (effectiveStatus === 'active' || effectiveStatus === 'grace')) {
     return jsonResponse(
       {
-        error: 'The 7-day trial is only available once per account. Please select one of our paid plans.',
+        error: 'You already have an active plan. Mid-period plan switching is disabled; select a new plan after the current period ends.',
+        code: 'ALREADY_ACTIVE',
+        validUntil: existing.validUntil,
       },
-      403
+      409,
+      request,
+      env
     );
   }
 
-  // One live subscription per user check: reject if active or trialing
-  if (existing && (existing.status === 'active' || existing.status === 'trialing')) {
-    return jsonResponse(
-      {
-        error: 'User already has an active subscription.',
-        subscriptionId: existing.razorpaySubscriptionId,
-        status: existing.status,
-      },
-      409
-    );
+  const now = Date.now();
+  if (existing?.lockTimestamp && now - existing.lockTimestamp < 10000) {
+    return jsonResponse({ error: 'Checkout already in progress. Please wait a moment.' }, 429, request, env);
   }
 
-  // Idempotency: return existing pending subscription if created within last 15 minutes
-  if (
-    existing &&
-    existing.status === 'pending' &&
-    existing.razorpaySubscriptionId &&
-    Date.now() - existing.updatedAt < 15 * 60 * 1000
-  ) {
-    const isOrder = existing.razorpaySubscriptionId.startsWith('order_') || existing.razorpayPlanId === 'order_mode';
-    return jsonResponse({
-      subscriptionId: isOrder ? undefined : existing.razorpaySubscriptionId,
-      orderId: isOrder ? existing.razorpaySubscriptionId : undefined,
-      keyId: env.RAZORPAY_KEY_ID,
-      idempotent: true,
-    });
+  if (existing) {
+    await writeEntitlement(creds, verifiedUser.uid, { lockTimestamp: now });
   }
 
-  // Concurrency lock: prevent parallel requests within 10 seconds
-  if (existing?.lockTimestamp && Date.now() - existing.lockTimestamp < 10000) {
-    return jsonResponse(
-      { error: 'Subscription creation in progress. Please wait a moment.' },
-      429
-    );
-  }
-
-  // Set acquisition lock
-  await updateSubscriptionInFirestore(creds, verifiedUser.uid, {
-    lockTimestamp: Date.now(),
-  });
-
-  // 2. First-time trial user vs direct payment user
-  const isReturningUser =
-    existing &&
-    (existing.hasHadSubscription ||
-      existing.status === 'active' ||
-      existing.status === 'cancelled' ||
-      existing.status === 'expired');
-
-  // isFirstTime = true causes Razorpay to delay billing by 7 days and attach a ₹1 (100 paise) addon.
-  // Direct paid plans (isDirect: true) charge immediately upon checkout with isFirstTime = false.
-  let isFirstTime = false;
-  if (isTrialRequest) {
-    isFirstTime = true;
-  } else if (!isDirect && !isReturningUser) {
-    // Backwards-compatible fallback for tests or legacy callers that do not specify isDirect: true
-    isFirstTime = true;
-  }
-
-  // 3. Anti-abuse Trial Ledger: Reserve Google email hash if starting trial
-  let emailHash = '';
-  if (verifiedUser.email && isFirstTime) {
-    const normalizedEmail = normalizeGoogleEmail(verifiedUser.email);
-    emailHash = await hashIdentifier(normalizedEmail, env.TRIAL_LEDGER_PEPPER);
-
-    const reservation = await reserveTrialLedgerEntry(creds, emailHash, 'email', verifiedUser.uid);
-    if (!reservation.success) {
-      return jsonResponse(
-        {
-          error: reservation.reason || 'Free trial already claimed for this Google account. Please choose a paid plan.',
-        },
-        403
-      );
-    }
-  }
-
-  // 4. Create Subscription or Order in Razorpay
-  let rzpSubId = '';
-  let isOrder = false;
-  let orderAmount = 0;
+  const planId = resolveServerPlanId(env, paidPlanKey);
+  let subscriptionId: string | undefined;
+  let orderId: string | undefined;
+  let checkoutMode: 'subscription' | 'order' = 'order';
 
   if (planId) {
     try {
@@ -187,103 +150,114 @@ export async function handleCreateSubscription(request: Request, env: Env): Prom
         env,
         planId,
         verifiedUser.uid,
-        isFirstTime,
+        paidPlanKey,
         verifiedUser.email,
         verifiedUser.name
       );
-      rzpSubId = rzpSub.id;
-    } catch (subErr: any) {
-      console.warn('[Subscription] Recurring subscription failed, using Order:', subErr.message);
+      subscriptionId = rzpSub.id;
+      checkoutMode = 'subscription';
+    } catch (err: any) {
+      console.warn('[Checkout] Razorpay Subscription creation failed, falling back to Order:', err?.message);
     }
   }
 
-  // Fallback to Razorpay Order checkout (works on all Razorpay accounts out of the box)
-  if (!rzpSubId) {
-    const planPrices: Record<string, number> = {
-      trial: 100,
-      monthly: 7900,
-      quarterly: 19900,
-      half: 44900,
-      yearly: 89900,
-    };
-    const amountPaise = isTrialRequest ? 100 : planPrices[requestedPlanKey] || 7900;
+  if (!subscriptionId) {
     const rzpOrder = await createRazorpayOrder(
       env,
-      amountPaise,
+      planSpec.amountPaise,
       verifiedUser.uid,
-      requestedPlanKey,
+      paidPlanKey,
       verifiedUser.email,
       verifiedUser.name
     );
-    rzpSubId = rzpOrder.id;
-    isOrder = true;
-    orderAmount = rzpOrder.amount;
+    orderId = rzpOrder.id;
+    checkoutMode = 'order';
   }
 
-  // 5. Update Firestore Subscription Record
-  const effectivePlan = requestedPlanKey === 'trial' ? 'monthly' : requestedPlanKey;
-  await updateSubscriptionInFirestore(creds, verifiedUser.uid, {
+  const validUntilEstimate = new Date(now + planSpec.durationDays * 86400 * 1000).toISOString();
+
+  await writeEntitlement(creds, verifiedUser.uid, {
     userId: verifiedUser.uid,
     userEmail: verifiedUser.email,
     userName: verifiedUser.name,
-    plan: effectivePlan as any,
-    billingCycle: effectivePlan as any,
-    status: 'pending',
-    hasHadTrial: existing?.hasHadTrial && existing?.status !== 'pending' ? true : false,
-    razorpaySubscriptionId: rzpSubId,
-    razorpayPlanId: planId || (isOrder ? 'order_mode' : ''),
-    cancelAtPeriodEnd: false,
+    status: existing?.status && isEntitledRecord(existing, now) ? existing.status : existing?.status || 'none',
+    plan: existing?.plan && existing.plan !== 'none' ? existing.plan : 'none',
+    validUntil: existing?.validUntil ?? null,
+    trialUsed: Boolean(existing?.trialUsed),
+    cancelAtPeriodEnd: Boolean(existing?.cancelAtPeriodEnd),
+    checkoutMode,
+    razorpaySubscriptionId: subscriptionId || existing?.razorpaySubscriptionId || null,
+    razorpayOrderId: orderId || existing?.razorpayOrderId || null,
     lockTimestamp: 0,
-    updatedAt: Date.now(),
+    updatedAt: new Date(now).toISOString(),
   });
 
-  return jsonResponse({
-    subscriptionId: isOrder ? undefined : rzpSubId,
-    orderId: isOrder ? rzpSubId : undefined,
-    amount: orderAmount,
-    currency: 'INR',
-    keyId: env.RAZORPAY_KEY_ID,
-    isFirstTime,
-  });
+  return jsonResponse(
+    {
+      mode: checkoutMode,
+      subscriptionId,
+      orderId,
+      amount: planSpec.amountPaise,
+      currency: 'INR',
+      keyId: env.RAZORPAY_KEY_ID,
+      planKey: paidPlanKey,
+      validUntilEstimate,
+    },
+    200,
+    request,
+    env
+  );
 }
 
 /**
  * Handles GET /api/me
- * Returning serverNow, status, accessUntil, trialEndsAt
+ * Single server clock sync + authoritative entitlement payload from `entitlements/{uid}`.
  */
 export async function handleGetMe(request: Request, env: Env): Promise<Response> {
   const idToken = getBearerToken(request);
   if (!idToken) {
-    return jsonResponse({ error: 'Missing Authorization header' }, 401);
+    return jsonResponse({ error: 'Missing Authorization header' }, 401, request, env);
   }
 
-  const creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
-  const projectId = env.FIREBASE_PROJECT_ID || creds.project_id;
-  const verifiedUser = await verifyFirebaseIdToken(idToken, projectId);
-
-  const existing = await getSubscriptionFromFirestore(creds, verifiedUser.uid);
+  let creds;
+  let verifiedUser;
+  try {
+    creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
+    const projectId = env.FIREBASE_PROJECT_ID || creds.project_id;
+    verifiedUser = await verifyFirebaseIdToken(idToken, projectId);
+  } catch {
+    return jsonResponse({ error: 'Authentication failed' }, 401, request, env);
+  }
 
   const nowMs = Date.now();
-  const accessUntilMs = existing?.accessUntil ? new Date(existing.accessUntil).getTime() : 0;
-  const hasAccess = accessUntilMs > nowMs;
+  const ent = await getEntitlementFromFirestore(creds, verifiedUser.uid);
+  const status = resolveEffectiveStatus(ent, nowMs);
+  const canWrite = status === 'trialing' || status === 'active' || status === 'grace';
 
-  const trialClaimed = Boolean(
-    existing?.trialClaimed ||
-    existing?.hasHadTrial ||
-    existing?.trialEndsAt ||
-    existing?.status === 'trialing'
+  return jsonResponse(
+    {
+      serverNow: new Date(nowMs).toISOString(),
+      status,
+      rawStatus: ent?.status || 'none',
+      plan: ent?.plan || 'none',
+      billingCycle: ent?.billingCycle || null,
+      validUntil: ent?.validUntil || null,
+      graceUntil: ent?.graceUntil || null,
+      trialStartedAt: ent?.trialStartedAt || null,
+      trialUsed: Boolean(ent?.trialUsed),
+      cancelAtPeriodEnd: Boolean(ent?.cancelAtPeriodEnd),
+      checkoutMode: ent?.checkoutMode || null,
+      canWrite,
+      recurringPlansConfigured: {
+        monthly: Boolean(env.RAZORPAY_PLAN_MONTHLY),
+        quarterly: Boolean(env.RAZORPAY_PLAN_QUARTERLY),
+        yearly: Boolean(env.RAZORPAY_PLAN_YEARLY),
+      },
+    },
+    200,
+    request,
+    env
   );
-
-  return jsonResponse({
-    serverNow: new Date(nowMs).toISOString(),
-    status: existing?.status || 'none',
-    plan: existing?.plan || 'pro',
-    billingCycle: existing?.billingCycle || 'monthly',
-    accessUntil: existing?.accessUntil || null,
-    trialEndsAt: existing?.trialEndsAt || null,
-    trialClaimed,
-    hasAccess,
-  });
 }
 
 export { handleCancelSubscription, handleChangePlan } from './planManagement';

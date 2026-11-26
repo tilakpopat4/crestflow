@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, X, ArrowUpDown, Archive, UploadCloud, Plus } from 'lucide-react';
+import { Search, X, ArrowUpDown, Archive, UploadCloud, Plus, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface WorkLogToolbarProps {
@@ -11,6 +11,8 @@ interface WorkLogToolbarProps {
   showClosed: boolean;
   setShowClosed: React.Dispatch<React.SetStateAction<boolean>>;
   isFormOpen: boolean;
+  canWrite?: boolean;
+  isExploring?: boolean;
   onOpenDrive: () => void;
   onOpenForm: () => void;
 }
@@ -27,14 +29,23 @@ export function WorkLogToolbar({
   showClosed,
   setShowClosed,
   isFormOpen,
+  canWrite = true,
+  isExploring = false,
   onOpenDrive,
   onOpenForm,
 }: WorkLogToolbarProps) {
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-      <div>
-        <h2 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">Work Log</h2>
-        <p className="text-text-muted mt-1 text-sm">Client deliverables.</p>
+      <div className="flex items-center gap-2.5 flex-wrap">
+        <div>
+          <h2 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">Work Log</h2>
+          <p className="text-text-muted mt-1 text-sm">Client deliverables.</p>
+        </div>
+        {isExploring && (
+          <span className="text-xs font-medium text-[#FFC145] bg-[#1B1B22] border border-[#2A2A33] px-2.5 py-1 rounded">
+            Sample data
+          </span>
+        )}
       </div>
 
       <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
@@ -89,10 +100,10 @@ export function WorkLogToolbar({
                 variant="secondary"
                 size="sm"
                 onClick={onOpenDrive}
-                className="gap-1.5 flex-1 sm:flex-initial border-0"
+                className="gap-1.5 flex-1 sm:flex-initial"
                 title="Upload video to Drive"
               >
-                <UploadCloud size={13} />
+                {!canWrite ? <Lock size={12} /> : <UploadCloud size={13} />}
                 <span>Drive Upload</span>
               </Button>
 
@@ -100,9 +111,9 @@ export function WorkLogToolbar({
                 variant="primary"
                 size="sm"
                 onClick={onOpenForm}
-                className="gap-1.5 flex-1 sm:flex-initial border-0"
+                className="gap-1.5 flex-1 sm:flex-initial"
               >
-                <Plus size={13} />
+                {!canWrite ? <Lock size={12} /> : <Plus size={13} />}
                 <span>Log Work</span>
               </Button>
             </div>

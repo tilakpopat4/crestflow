@@ -19,7 +19,7 @@ export const DashboardSkeleton: React.FC = () => {
       {/* 3 Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="p-5 rounded-lg border border-slate-200 dark:border-[#383838] bg-white dark:bg-[#212121] space-y-3">
+          <div key={i} className="p-5 rounded-xl border border-[#2A2A33] bg-[#131318] space-y-3">
             <div className="flex items-center justify-between">
               <Skeleton className="h-3.5 w-24" />
               <Skeleton className="h-4 w-4" rounded="full" />
@@ -31,7 +31,7 @@ export const DashboardSkeleton: React.FC = () => {
       </div>
 
       {/* Chart Card */}
-      <div className="p-5 rounded-lg border border-slate-200 dark:border-[#383838] bg-white dark:bg-[#212121] space-y-4">
+      <div className="p-5 rounded-xl border border-[#2A2A33] bg-[#131318] space-y-4">
         <div className="flex items-center justify-between">
           <Skeleton className="h-4 w-36" />
           <div className="flex items-center gap-2">
@@ -52,11 +52,11 @@ export const DashboardSkeleton: React.FC = () => {
       {/* Bottom Grid: Top Clients & Recent Invoices */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Top Clients */}
-        <div className="p-5 rounded-lg border border-slate-200 dark:border-[#383838] bg-white dark:bg-[#212121] space-y-4">
+        <div className="p-5 rounded-xl border border-[#2A2A33] bg-[#131318] space-y-4">
           <Skeleton className="h-4 w-28" />
           <div className="space-y-3">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-[#2a2a2a] last:border-0">
+              <div key={i} className="flex items-center justify-between py-2 border-b border-[#2A2A33] last:border-0">
                 <div className="flex items-center gap-2.5">
                   <Skeleton className="h-8 w-8" rounded="full" />
                   <div className="space-y-1.5">
@@ -71,14 +71,14 @@ export const DashboardSkeleton: React.FC = () => {
         </div>
 
         {/* Recent Invoices */}
-        <div className="lg:col-span-2 p-5 rounded-lg border border-slate-200 dark:border-[#383838] bg-white dark:bg-[#212121] space-y-4">
+        <div className="lg:col-span-2 p-5 rounded-xl border border-[#2A2A33] bg-[#131318] space-y-4">
           <div className="flex items-center justify-between">
             <Skeleton className="h-4 w-32" />
             <Skeleton className="h-3 w-16" />
           </div>
           <div className="space-y-2.5">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="flex items-center justify-between p-3 rounded border border-slate-100 dark:border-[#2a2a2a]">
+              <div key={i} className="flex items-center justify-between p-3 rounded border border-[#2A2A33]">
                 <div className="flex items-center gap-3">
                   <Skeleton className="h-7 w-7" rounded="md" />
                   <div className="space-y-1.5">

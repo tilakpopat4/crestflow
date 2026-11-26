@@ -4,6 +4,8 @@ import { Search, Inbox, Users, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { UserProfile, ServiceRequest, Client, WorkItem } from '../types';
 import { useFirestore } from '../hooks/useFirestore';
+import { useAccess } from '../hooks/useAccess';
+import { SAMPLE_SERVICE_REQUESTS, SAMPLE_WORK_ITEMS } from '../data/sampleWorkspaceData';
 import { generateUUID } from '../lib/utils';
 import { OnboardingLinkCard } from './onboarding/OnboardingLinkCard';
 import { OnboardingRequestCard } from './onboarding/OnboardingRequestCard';
@@ -38,12 +40,20 @@ export default function ClientOnboardingTab({
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('pending');
 
-  const { data: serviceRequests, loading, addOrUpdateItem: updateServiceRequest } =
-    useFirestore<ServiceRequest>('serviceRequests', user?.uid);
+  const access = useAccess();
+  const isExploring = access.state === 'none';
+  const liveUid = !isExploring ? user?.uid : undefined;
+
+  const { data: fsRequests, loading: fsLoading, addOrUpdateItem: updateServiceRequest } =
+    useFirestore<ServiceRequest>('serviceRequests', liveUid);
   const { addOrUpdateItem: saveClient } =
-    useFirestore<Client>('clients', user?.uid);
-  const { data: workItems } =
-    useFirestore<WorkItem>('workItems', user?.uid);
+    useFirestore<Client>('clients', liveUid);
+  const { data: fsWorkItems } =
+    useFirestore<WorkItem>('workItems', liveUid);
+
+  const serviceRequests = isExploring ? SAMPLE_SERVICE_REQUESTS : fsRequests;
+  const workItems = isExploring ? SAMPLE_WORK_ITEMS : fsWorkItems;
+  const loading = isExploring ? false : fsLoading;
 
   const hasUsername = useMemo(() => hasConfiguredUsername(profile), [profile]);
   const handle = useMemo(() => (hasUsername ? profile!.username! : getUserHandle(profile, user)), [hasUsername, profile, user]);
@@ -76,6 +86,7 @@ export default function ClientOnboardingTab({
   }, [serviceRequests, statusFilter, searchQuery]);
 
   const handleAcceptRequest = async (request: ServiceRequest) => {
+    if (!access.requireAccess('manage_onboarding', 'Convert client intake requests directly into active clients.')) return;
     try {
       const newClientId = generateUUID();
       const newClient: Client = {
@@ -103,6 +114,7 @@ export default function ClientOnboardingTab({
   };
 
   const handleDeclineRequest = async (request: ServiceRequest) => {
+    if (!access.requireAccess('manage_onboarding', 'Manage incoming client onboarding requests.')) return;
     if (!window.confirm(`Decline the onboarding request from ${request.contactName}?`)) return;
     try {
       await updateServiceRequest({ ...request, status: 'declined' });
@@ -112,6 +124,7 @@ export default function ClientOnboardingTab({
   };
 
   const handleRestoreRequest = async (request: ServiceRequest) => {
+    if (!access.requireAccess('manage_onboarding', 'Restore archived client onboarding requests.')) return;
     try {
       await updateServiceRequest({ ...request, status: 'pending' });
     } catch (err: any) {
@@ -121,14 +134,41 @@ export default function ClientOnboardingTab({
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 w-full min-w-0 text-text-primary">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">
-          Client Onboarding
-        </h1>
-        <p className="text-text-secondary mt-1 text-sm">
-          Intake link and client leads.
-        </p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">
+            Client Onboarding
+          </h1>
+          <p className="text-text-secondary mt-1 text-sm">
+            Intake link and client leads.
+          </p>
+        </div>
+        {isExploring && (
+          <span className="text-xs font-medium text-[#FFC145] bg-[#1B1B22] border border-[#2A2A33] px-2.5 py-1 rounded">
+            Sample data
+          </span>
+        )}
       </div>
+
+      {access.isExpired && counts.pending > 0 && (
+        <div className="rounded-xl bg-[#131318] border border-[#FFB020]/40 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <span className="text-[#F7F7F8]">
+            <strong className="text-[#FFB020]">{counts.pending} waiting</strong>, reactivate to respond.
+          </span>
+          <button
+            type="button"
+            onClick={() =>
+              access.openUpgradeSheet({
+                action: 'manage_onboarding',
+                benefit: 'Reactivate to accept incoming onboarding briefs and convert them to clients.',
+              })
+            }
+            className="px-3 py-1.5 rounded-lg cf-btn-primary text-xs font-semibold cursor-pointer shrink-0"
+          >
+            Reactivate to respond
+          </button>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-5">
         <StatCard label="Pending" value={counts.pending} icon={Inbox} />

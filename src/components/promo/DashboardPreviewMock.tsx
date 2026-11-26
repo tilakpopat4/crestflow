@@ -28,28 +28,28 @@ export const DashboardPreviewMock: React.FC = () => {
   return (
     <div className="relative mx-auto mt-6 sm:mt-10 w-full max-w-6xl xl:max-w-7xl text-left select-none flex-1 flex flex-col justify-end">
       {/* Outer framing shell - rounded top, flush bottom */}
-      <div className="rounded-t-xl sm:rounded-t-2xl border-t border-x border-[#2b2b2b] bg-[#121212] overflow-hidden shadow-2xl flex flex-col w-full flex-1 min-h-[460px] sm:min-h-[520px] lg:min-h-[560px]">
-        <div className="flex flex-1 bg-[#141414] overflow-hidden">
+      <div className="rounded-t-xl sm:rounded-t-2xl border-t border-x border-[#2A2A33] bg-[#0B0B0E] overflow-hidden shadow-2xl flex flex-col w-full flex-1 min-h-[460px] sm:min-h-[520px] lg:min-h-[560px]">
+        <div className="flex flex-1 bg-[#0B0B0E] overflow-hidden">
           {/* Left Navigation Sidebar */}
-          <div className="hidden md:flex w-48 shrink-0 flex-col justify-between border-r border-[#242424] bg-[#161616] p-3 text-xs">
+          <div className="hidden md:flex w-48 shrink-0 flex-col justify-between border-r border-[#2A2A33] bg-[#131318] p-3 text-xs">
             <div className="space-y-4">
               {/* Sidebar Header */}
               <div>
                 <div className="flex items-center gap-1.5 px-1 py-0.5">
                   <Logo className="w-5 h-5 shrink-0" />
-                  <span className="font-bold text-white tracking-tight text-xs">CrestFlow</span>
-                  <span className="text-[9px] font-mono uppercase bg-[#282828] text-slate-300 px-1.5 py-0.5 rounded font-semibold ml-auto">
+                  <span className="font-bold text-[#F7F7F8] tracking-tight text-xs">CrestFlow</span>
+                  <span className="text-[9px] font-mono uppercase bg-[#1B1B22] border border-[#FFC145]/40 text-[#FFC145] px-1.5 py-0.5 rounded font-semibold ml-auto">
                     PRO
                   </span>
-                  <ChevronLeft className="size-3.5 text-slate-500 ml-1" />
+                  <ChevronLeft className="size-3.5 text-[#A1A1AA] ml-1" />
                 </div>
-                <p className="text-[10px] text-slate-500 px-1 mt-0.5">Freelancing Client Manager</p>
+                <p className="text-[10px] text-[#A1A1AA] px-1 mt-0.5">Freelancing Client Manager</p>
               </div>
 
               {/* Navigation Items - Normalized to CrestFlow Sidebar */}
-              <div className="space-y-0.5 text-slate-400 font-medium text-[11px]">
-                <div className="flex h-7 items-center gap-2 rounded-md bg-[#222222] px-2 text-white font-medium">
-                  <LayoutDashboard className="size-3.5 text-white" />
+              <div className="space-y-0.5 text-[#A1A1AA] font-medium text-[11px]">
+                <div className="flex h-7 items-center gap-2 rounded-md bg-[#1B1B22] px-2 text-[#F7F7F8] font-medium">
+                  <LayoutDashboard className="size-3.5 text-[#F7F7F8]" />
                   <span>Dashboard</span>
                 </div>
                 <div className="flex h-7 items-center gap-2 px-2 hover:text-white transition-colors">
@@ -77,24 +77,24 @@ export const DashboardPreviewMock: React.FC = () => {
           </div>
 
           {/* Main App Workspace */}
-          <div className="flex-1 flex flex-col min-w-0 bg-[#121212]">
+          <div className="flex-1 flex flex-col min-w-0 bg-[#0B0B0E]">
             {/* Global Header Bar - Simplified */}
-            <div className="h-10 sm:h-11 border-b border-[#242424] px-3 sm:px-4 flex items-center justify-between gap-3 text-xs bg-[#161616]">
+            <div className="h-10 sm:h-11 border-b border-[#2A2A33] px-3 sm:px-4 flex items-center justify-between gap-3 text-xs bg-[#131318]">
               {/* Search Bar */}
-              <div className="flex-1 max-w-xs sm:max-w-sm bg-[#1d1d1d] border border-[#2b2b2b] rounded-md px-2.5 py-1 flex items-center gap-2 text-slate-400 text-[11px]">
-                <Search className="size-3 shrink-0 text-slate-500" />
+              <div className="flex-1 max-w-xs sm:max-w-sm bg-[#1B1B22] border border-[#2A2A33] rounded-md px-2.5 py-1 flex items-center gap-2 text-[#A1A1AA] text-[11px]">
+                <Search className="size-3 shrink-0 text-[#A1A1AA]" />
                 <span className="truncate">Search clients, invoices...</span>
-                <span className="ml-auto text-[10px] font-mono text-slate-500 bg-[#262626] px-1 rounded">⌘K</span>
+                <span className="ml-auto text-[10px] font-mono text-[#A1A1AA] bg-[#131318] px-1 rounded">⌘K</span>
               </div>
 
               {/* Header Right Tools: Clean Status */}
-              <div className="flex items-center gap-2 text-slate-400 text-[11px] shrink-0">
-                <span className="inline-flex items-center gap-1.5 text-[11px] text-slate-400">
-                  <Calendar className="size-3 text-slate-400" />
+              <div className="flex items-center gap-2 text-[#A1A1AA] text-[11px] shrink-0">
+                <span className="inline-flex items-center gap-1.5 text-[11px] text-[#A1A1AA]">
+                  <Calendar className="size-3 text-[#A1A1AA]" />
                   <span>280 days worked</span>
                 </span>
-                <span className="text-[10px] text-slate-400 font-mono bg-[#222222] px-1.5 py-0.5 rounded">
-                  Pro
+                <span className="text-[10px] text-[#FFC145] font-mono bg-[#1B1B22] border border-[#FFC145]/30 px-1.5 py-0.5 rounded">
+                  Pro: 22 days left
                 </span>
               </div>
             </div>

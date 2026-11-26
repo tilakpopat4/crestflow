@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, ShieldAlert } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { SubscriptionState } from '../../hooks/useSubscription';
 
 interface ClientsFilterToolbarProps {
@@ -85,26 +85,17 @@ export const ClientsFilterToolbar: React.FC<ClientsFilterToolbarProps> = ({
         </div>
       </div>
 
-      {/* Free Plan Limit Notice */}
-      {subscriptionState && !subscriptionState.isPro && (
-        <div className="flex items-center justify-between text-xs bg-surface-700 border border-surface-400 px-3.5 py-2 rounded-lg text-text-secondary">
-          <div className="flex items-center gap-2">
-            <ShieldAlert size={14} className="text-text-muted" />
-            <span>
-              Free Plan:{' '}
-              <span className="font-mono tabular-nums font-semibold text-text-primary">
-                {clientsCount} / {subscriptionState.limits.maxClients}
-              </span>{' '}
-              clients used
-            </span>
-          </div>
+      {/* Keep toolbar clean; action-based UpgradeSheet opens only on gated mutation */}
+      {subscriptionState && subscriptionState.isExploring && (
+        <div className="flex items-center justify-between text-xs bg-[#131318] border border-[#2A2A33] px-3.5 py-2 rounded-lg text-[#A1A1AA]">
+          <span>Viewing sample client directory ({clientsCount}).</span>
           {onOpenSubscriptionModal && (
             <button
               type="button"
               onClick={onOpenSubscriptionModal}
-              className="font-medium text-text-primary hover:underline cursor-pointer border-0 bg-transparent"
+              className="font-medium text-[#FFC145] hover:underline cursor-pointer border-0 bg-transparent"
             >
-              Upgrade to Pro &rarr;
+              Start 7-day free trial &rarr;
             </button>
           )}
         </div>

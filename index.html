@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -54,25 +54,24 @@
     <link rel="shortcut icon" href="/favicon.ico?v=20261118" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=20261118" />
     <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#0f0f0f" />
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0f0f0f" />
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#0f0f0f" />
+    <meta name="theme-color" content="#0B0B0E" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0B0B0E" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#0B0B0E" />
     <meta name="color-scheme" content="dark" />
     <meta name="application-name" content="CrestFlow" />
     <meta name="apple-mobile-web-app-title" content="CrestFlow" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-    <!-- Performance Hints -->
+    <!-- Self-hosted Fonts Preload & External Origin Hints -->
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/inter-400.woff2" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/anton-400.woff2" crossorigin />
     <link rel="preconnect" href="https://n0ohengfxq.ufs.sh" crossorigin />
     <link rel="dns-prefetch" href="https://n0ohengfxq.ufs.sh" />
     <link rel="preconnect" href="https://utfs.io" crossorigin />
     <link rel="dns-prefetch" href="https://utfs.io" />
     <link rel="preconnect" href="https://ufs.sh" crossorigin />
     <link rel="dns-prefetch" href="https://ufs.sh" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Plus+Jakarta+Sans:wght@500;600&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet" />
     <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin />
     <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin />
     <link rel="dns-prefetch" href="https://apis.google.com" />
@@ -120,7 +119,7 @@
               "price": "0",
               "priceCurrency": "INR",
               "billingDuration": "P7D",
-              "description": "Full access to all CrestFlow Pro features for 7 days completely free. No payment method required."
+              "description": "7-day free trial, no card needed, no automatic charge."
             },
             {
               "@type": "Offer",
@@ -132,11 +131,19 @@
             },
             {
               "@type": "Offer",
+              "name": "CrestFlow Pro Quarterly",
+              "price": "199",
+              "priceCurrency": "INR",
+              "billingDuration": "P3M",
+              "description": "Best quarterly value (~₹66/month), save 16%"
+            },
+            {
+              "@type": "Offer",
               "name": "CrestFlow Pro Yearly",
-              "price": "899",
+              "price": "699",
               "priceCurrency": "INR",
               "billingDuration": "P1Y",
-              "description": "Full Pro suite with 2 months free"
+              "description": "Best value annual plan (~₹58/month), save 26%"
             }
           ],
           "aggregateRating": {
@@ -201,7 +208,7 @@
               "name": "How does the 7-day free trial work?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "First-time users receive 7 days of complete CrestFlow Pro access for ₹0 with no credit card or payment method required. After the 7-day period, choose from flexible plans: ₹79/month, ₹199/quarter, ₹449/6-month, or ₹899/year. You get unlimited clients, automated 6:00 AM invoice delivery, Google Drive integration, and branded client portals."
+                "text": "7-day free trial, no card needed, no automatic charge. After your trial, choose ₹79/month, ₹199/quarter, or ₹699/year with unlimited clients, automated 6:00 AM invoice delivery, Google Drive integration, and branded client portals."
               }
             },
             {
@@ -234,17 +241,17 @@
     }
     </script>
   </head>
-  <body>
+  <body style="background-color:#0B0B0E;color:#F7F7F8;">
     <div id="root"></div>
     <noscript>
-      <div style="background: #111; color: #eee; padding: 2rem; text-align: center;">
-        <p>CrestFlow is optimized for modern web browsers. Explore our public pages:</p>
+      <div style="background: #0B0B0E; color: #F7F7F8; padding: 2rem; text-align: center;">
+        <p>CrestFlow works best with JavaScript enabled. Explore our public pages:</p>
         <nav style="display: flex; justify-content: center; gap: 1rem; margin-top: 1rem;">
-          <a href="/pricing" style="color: #6366f1;">Pricing Plans</a>
-          <a href="/contact" style="color: #6366f1;">Contact Us</a>
-          <a href="/privacy" style="color: #6366f1;">Privacy Policy</a>
-          <a href="/terms" style="color: #6366f1;">Terms of Service</a>
-          <a href="/refund" style="color: #6366f1;">Refund Policy</a>
+          <a href="/pricing" style="color: #F7F7F8;">Pricing Plans</a>
+          <a href="/contact" style="color: #F7F7F8;">Contact Us</a>
+          <a href="/privacy" style="color: #F7F7F8;">Privacy Policy</a>
+          <a href="/terms" style="color: #F7F7F8;">Terms of Service</a>
+          <a href="/refund" style="color: #F7F7F8;">Refund Policy</a>
         </nav>
       </div>
     </noscript>

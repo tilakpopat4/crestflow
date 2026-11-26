@@ -21,9 +21,9 @@ export default function PublicPageView({
   onNavigate,
 }: PublicPageViewProps) {
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col justify-between">
+    <div className="min-h-screen bg-[#0B0B0E] text-[#F7F7F8] flex flex-col justify-between">
       {/* Public Top Header */}
-      <header className="border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-4 sm:px-8 py-3 sticky top-0 z-40">
+      <header className="border-b border-[#2A2A33] bg-[#131318] px-4 sm:px-8 py-3 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <button
             type="button"
@@ -31,7 +31,7 @@ export default function PublicPageView({
             className="flex items-center gap-2 cursor-pointer border-none bg-transparent"
           >
             <Logo className="w-7 h-7" />
-            <span className="font-bold text-slate-900 dark:text-white text-base tracking-tight">CrestFlow</span>
+            <span className="font-bold text-[#F7F7F8] text-base tracking-tight">CrestFlow</span>
           </button>
 
           <div className="flex items-center gap-2 sm:gap-3">
@@ -40,8 +40,8 @@ export default function PublicPageView({
               onClick={() => onNavigate('pricing')}
               className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors cursor-pointer border-none ${
                 currentRoute === 'pricing'
-                  ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-transparent'
+                  ? 'bg-[#1B1B22] text-[#F7F7F8]'
+                  : 'text-[#A1A1AA] hover:text-[#F7F7F8] bg-transparent'
               }`}
             >
               Pricing
@@ -49,7 +49,7 @@ export default function PublicPageView({
             <button
               type="button"
               onClick={() => onNavigate('dashboard')}
-              className="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-[#282828] text-white hover:bg-[#383838] transition-colors cursor-pointer border-none"
+              className="px-3.5 py-1.5 text-xs font-semibold rounded-lg cf-btn-primary transition-colors cursor-pointer"
             >
               {user ? 'Open Workspace' : 'Sign In'}
             </button>

@@ -27,9 +27,9 @@ export const WorkLogSkeleton: React.FC = () => {
       </div>
 
       {/* Work Table Container */}
-      <div className="rounded-lg border border-slate-200 dark:border-[#383838] bg-white dark:bg-[#212121] overflow-hidden">
+      <div className="rounded-xl border border-[#2A2A33] bg-[#131318] overflow-hidden">
         {/* Table Header Row */}
-        <div className="grid grid-cols-12 gap-3 px-5 py-3.5 border-b border-slate-200 dark:border-[#383838] bg-slate-50/50 dark:bg-[#262626]">
+        <div className="grid grid-cols-12 gap-3 px-5 py-3.5 border-b border-[#2A2A33] bg-[#1B1B22]">
           <div className="col-span-1 flex items-center">
             <Skeleton className="h-4 w-4" rounded="sm" />
           </div>
@@ -48,7 +48,7 @@ export const WorkLogSkeleton: React.FC = () => {
         </div>
 
         {/* Table Body Rows */}
-        <div className="divide-y divide-slate-100 dark:divide-[#2a2a2a]">
+        <div className="divide-y divide-[#2A2A33]">
           {[1, 2, 3, 4, 5, 6, 7].map((i) => (
             <div key={i} className="grid grid-cols-12 gap-3 px-5 py-4 items-center">
               <div className="col-span-1 flex items-center">

@@ -59,7 +59,7 @@ export const AUTOMATED_TRIGGERS: TriggerItem[] = [
   {
     id: 'payment_receipt',
     name: 'Pro Subscription Receipt',
-    triggerEvent: 'User completes ₹79/month or ₹899/year membership payment',
+    triggerEvent: 'User completes ₹79/month, ₹199/quarter, or ₹699/year membership payment',
     recipient: 'Freelancer Email',
     subject: 'Payment Receipt: CrestFlow Pro Membership ([Plan])',
     status: 'Active',

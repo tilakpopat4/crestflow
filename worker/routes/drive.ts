@@ -1,5 +1,6 @@
 import { Env } from '../types';
 import { getFirestoreDoc, setFirestoreDoc } from '../firestore';
+import { requireEntitlement } from '../entitlements';
 import { jsonResponse } from './subscription';
 import {
   GOOGLE_TOKEN_URL,
@@ -48,7 +49,9 @@ export async function handleDriveStatus(request: Request, env: Env): Promise<Res
  */
 export async function handleDriveSaveSession(request: Request, env: Env): Promise<Response> {
   try {
-    const { creds, user } = await authenticateDriveUser(request, env);
+    const gate = await requireEntitlement(request, env);
+    if (!gate.ok) return gate.response;
+    const { creds, user } = gate;
     const body = (await request.json().catch(() => ({}))) as {
       accessToken?: string;
       expiresAt?: number;
@@ -97,7 +100,9 @@ export async function handleDriveSaveSession(request: Request, env: Env): Promis
  */
 export async function handleDriveExchange(request: Request, env: Env): Promise<Response> {
   try {
-    const { creds, user } = await authenticateDriveUser(request, env);
+    const gate = await requireEntitlement(request, env);
+    if (!gate.ok) return gate.response;
+    const { creds, user } = gate;
     const body = (await request.json().catch(() => ({}))) as { code?: string };
     const code = typeof body.code === 'string' ? body.code.trim() : '';
     if (!code) return jsonResponse({ error: 'Missing authorization code' }, 400);

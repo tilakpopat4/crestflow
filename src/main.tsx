@@ -1,8 +1,9 @@
-import {StrictMode} from 'react';
-import {createRoot} from 'react-dom/client';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 import { ThemeProvider } from './context/ThemeContext.tsx';
+import { ToastProvider } from './context/ToastContext.tsx';
 import ErrorBoundary from './components/ErrorBoundary.tsx';
 
 // Global handler for Vite dynamic preload errors (when chunk hash changes after deployment)
@@ -18,32 +19,12 @@ if (typeof window !== 'undefined') {
     }
   });
 
-  // Register PWA Service Worker for offline capability and browser install popup
   if ('serviceWorker' in navigator && (import.meta.env.PROD || window.location.protocol === 'https:')) {
     window.addEventListener('load', () => {
       navigator.serviceWorker
         .register('/sw.js', { scope: '/' })
-        .then((reg) => {
-          // Check for worker updates
-          reg.onupdatefound = () => {
-            const installing = reg.installing;
-            if (installing) {
-              installing.onstatechange = () => {
-                if (installing.state === 'installed' && navigator.serviceWorker.controller) {
-                  console.info('[PWA] New version available');
-                }
-              };
-            }
-          };
-        })
-        .catch((err) => {
-          // Gracefully handle browser security restrictions, private browsing, or security extension blocks (e.g., wrsParams, Brave Shields, antivirus)
-          const msg = String(err?.message || err);
-          if (msg.includes('Rejected') || msg.includes('SecurityError') || msg.includes('disallowed')) {
-            console.debug?.('[PWA] Service worker disabled by browser policy or privacy extension');
-          } else {
-            console.warn('[PWA] Service worker registration failed:', err);
-          }
+        .catch(() => {
+          // Ignore service worker registration errors in restricted contexts
         });
     });
   }
@@ -52,9 +33,11 @@ if (typeof window !== 'undefined') {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeProvider>
-      <ErrorBoundary fallbackTitle="An unexpected application error occurred">
-        <App />
-      </ErrorBoundary>
+      <ToastProvider>
+        <ErrorBoundary fallbackTitle="An unexpected application error occurred">
+          <App />
+        </ErrorBoundary>
+      </ToastProvider>
     </ThemeProvider>
   </StrictMode>,
 );

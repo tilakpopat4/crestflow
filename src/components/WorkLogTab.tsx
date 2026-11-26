@@ -5,6 +5,7 @@ import GoogleDriveUploadModal from './GoogleDriveUploadModal';
 import MediaEmbedModal from './MediaEmbedModal';
 import BulkEditWorkModal from './BulkEditWorkModal';
 import { useWorkLog } from '../hooks/useWorkLog';
+import { useAccess } from '../hooks/useAccess';
 import WorkLogToolbar from './work-log/WorkLogToolbar';
 import WorkLogFormCard from './work-log/WorkLogFormCard';
 import WorkLogEmptyState from './work-log/WorkLogEmptyState';
@@ -24,6 +25,8 @@ interface WorkLogTabProps {
  * Track deliverables, manage video embeds, bulk edit line items, and aggregate billable services.
  */
 export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients }: WorkLogTabProps) {
+  const access = useAccess();
+  const isExploring = access.state === 'none';
   const {
     clients,
     workItems,
@@ -83,8 +86,16 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
         showClosed={showClosed}
         setShowClosed={setShowClosed}
         isFormOpen={isFormOpen}
-        onOpenDrive={() => setIsDriveModalOpen(true)}
-        onOpenForm={() => setIsFormOpen(true)}
+        canWrite={access.canWrite}
+        isExploring={isExploring}
+        onOpenDrive={() => {
+          if (!access.requireAccess('log_work', 'Upload video previews to Google Drive.')) return;
+          setIsDriveModalOpen(true);
+        }}
+        onOpenForm={() => {
+          if (!access.requireAccess('log_work', 'Log deliverables and billable client tasks.')) return;
+          setIsFormOpen(true);
+        }}
       />
 
       {isFormOpen && (
@@ -105,7 +116,10 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
           hasWorkItems={workItems.length > 0}
           searchQuery={searchQuery}
           onClearSearch={() => setSearchQuery('')}
-          onOpenForm={() => setIsFormOpen(true)}
+          onOpenForm={() => {
+            if (!access.requireAccess('log_work', 'Log your first deliverable or client task.')) return;
+            setIsFormOpen(true);
+          }}
           onNavigateToClients={onNavigateToClients}
         />
       ) : (
@@ -127,7 +141,10 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
       <WorkLogBulkToolbar
         selectedCount={selectedCount}
         selectedInvoicedCount={selectedInvoicedCount}
-        onOpenBulkEdit={() => setIsBulkEditModalOpen(true)}
+        onOpenBulkEdit={() => {
+          if (!access.requireAccess('log_work', 'Bulk edit work items across clients.')) return;
+          setIsBulkEditModalOpen(true);
+        }}
         onBulkDelete={handleBulkDelete}
         onDeselectAll={() => setSelectedWorkIds(new Set())}
       />

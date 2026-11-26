@@ -1,26 +1,22 @@
-import { Env, ServiceAccountCredentials, SubscriptionRecord } from './types';
-import {
-  parseServiceAccount,
-  getGoogleAccessToken,
-  fromFirestoreValue,
-  updateSubscriptionInFirestore,
-} from './firestore';
+import { Env, EntitlementRecord, ServiceAccountCredentials } from './types';
+import { parseServiceAccount, getGoogleAccessToken, fromFirestoreValue } from './firestore';
+import { writeEntitlement } from './entitlements';
 import { fetchRazorpaySubscription } from './razorpay';
+import { GRACE_DURATION_DAYS } from '../src/shared/pricing';
 import {
   sendTrialDay5Email,
-  sendCharge24hEmail,
   sendChargeFailedEmail,
   sendExpiredEmail,
 } from './resend';
 
 /**
- * Lists all subscription documents from Firestore `subscriptions` collection.
+ * Lists all entitlement documents from Firestore `entitlements` collection.
  */
-export async function listSubscriptionsFromFirestore(
+export async function listEntitlementsFromFirestore(
   creds: ServiceAccountCredentials
-): Promise<SubscriptionRecord[]> {
+): Promise<EntitlementRecord[]> {
   const token = await getGoogleAccessToken(creds);
-  const url = `https://firestore.googleapis.com/v1/projects/${creds.project_id}/databases/(default)/documents/subscriptions?pageSize=300`;
+  const url = `https://firestore.googleapis.com/v1/projects/${creds.project_id}/databases/(default)/documents/entitlements?pageSize=300`;
 
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${token}` },
@@ -28,7 +24,7 @@ export async function listSubscriptionsFromFirestore(
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Failed to list subscriptions from Firestore: ${res.status} ${text}`);
+    throw new Error(`Failed to list entitlements from Firestore: ${res.status} ${text}`);
   }
 
   const data = (await res.json()) as {
@@ -48,64 +44,76 @@ export async function listSubscriptionsFromFirestore(
         result[k] = fromFirestoreValue(v);
       }
     }
-    return result as SubscriptionRecord;
+    return result as EntitlementRecord;
   });
 }
 
 /**
- * Reconciles a single subscription record with Razorpay, validates expiration,
- * and dispatches Resend lifecycle notification emails.
+ * Reconciles a single entitlement record with Razorpay and dispatches lifecycle notifications.
+ * Expiry enforcement never depends on cron (`validUntil > request.time` is authoritative).
  */
-export async function reconcileSubscription(
+export async function reconcileEntitlement(
   env: Env,
   creds: ServiceAccountCredentials,
-  sub: SubscriptionRecord,
+  ent: EntitlementRecord,
   nowMs = Date.now()
 ): Promise<{ updated: boolean; emailsSent: string[] }> {
+  if (ent.plan === 'lifetime' || ent.status === 'suspended' || ent.status === 'none') {
+    return { updated: false, emailsSent: [] };
+  }
+
   const emailsSent: string[] = [];
-  const updates: Partial<SubscriptionRecord> = {};
-  const userEmail = sub.userEmail;
-  const userName = sub.userName;
+  const updates: Partial<EntitlementRecord> = {};
+  const userEmail = ent.userEmail;
+  const userName = ent.userName;
 
-  // 1. Razorpay State Sync (if subscription has an active Razorpay ID)
-  if (sub.razorpaySubscriptionId) {
+  if (ent.razorpaySubscriptionId && ent.checkoutMode === 'subscription') {
     try {
-      const rzpSub = await fetchRazorpaySubscription(env, sub.razorpaySubscriptionId);
-
-      if (rzpSub.status === 'halted') {
-        const graceEnd = (rzpSub.current_end || 0) * 1000 + 3 * 24 * 3600 * 1000;
-        if (nowMs > graceEnd) {
+      const rzpSub = await fetchRazorpaySubscription(env, ent.razorpaySubscriptionId);
+      if (rzpSub.status === 'halted' || rzpSub.status === 'pending') {
+        const baseEndMs = Math.max(
+          (rzpSub.current_end || 0) * 1000,
+          ent.validUntil ? new Date(ent.validUntil).getTime() : nowMs
+        );
+        const graceEndIso = ent.graceUntil || new Date(baseEndMs + GRACE_DURATION_DAYS * 86400 * 1000).toISOString();
+        if (nowMs > new Date(graceEndIso).getTime()) {
           updates.status = 'expired';
+          updates.validUntil = new Date(nowMs - 1000).toISOString();
+          updates.graceUntil = null;
         } else {
-          updates.status = 'past_due';
+          updates.status = 'grace';
+          updates.graceUntil = graceEndIso;
+          updates.validUntil = graceEndIso;
         }
       } else if (rzpSub.status === 'cancelled') {
+        updates.cancelAtPeriodEnd = true;
         const currentEndMs = (rzpSub.current_end || 0) * 1000;
         if (currentEndMs > 0 && nowMs >= currentEndMs) {
           updates.status = 'expired';
+          updates.validUntil = new Date(currentEndMs).toISOString();
         }
-      } else if (rzpSub.status === 'pending') {
-        updates.status = 'past_due';
-      } else if (rzpSub.status === 'active' && sub.status === 'trialing') {
-        // Trial was charged and transitioned to active paid cycle
-        updates.status = 'active';
-        if (rzpSub.current_end) {
-          updates.currentPeriodEnd = rzpSub.current_end * 1000;
-          updates.accessUntil = new Date(rzpSub.current_end * 1000).toISOString();
+      } else if (rzpSub.status === 'active' && rzpSub.current_end) {
+        const currentEndIso = new Date(rzpSub.current_end * 1000).toISOString();
+        if (ent.status === 'grace' || currentEndIso !== ent.validUntil) {
+          updates.status = 'active';
+          updates.validUntil = currentEndIso;
+          updates.graceUntil = null;
         }
       }
     } catch (err: any) {
-      console.warn(`[Reconcile Razorpay Error] user ${sub.userId}: ${err.message}`);
+      console.warn(`[Reconcile Razorpay Warning] user ${ent.userId}:`, err?.message);
     }
   }
 
-  // 2. Access Expiration Verification
-  const currentAccessUntil = updates.accessUntil || sub.accessUntil;
-  if (currentAccessUntil) {
-    const accessUntilMs = new Date(currentAccessUntil).getTime();
-    if (accessUntilMs <= nowMs && (updates.status || sub.status) !== 'expired') {
+  const currentValidUntil = updates.validUntil !== undefined ? updates.validUntil : ent.validUntil;
+  const currentStatus = updates.status || ent.status;
+
+  if (currentValidUntil) {
+    const validMs = new Date(currentValidUntil).getTime();
+    if (validMs <= nowMs && currentStatus !== 'expired') {
       updates.status = 'expired';
-      if (!sub.notifiedExpired && userEmail) {
+      updates.graceUntil = null;
+      if (!ent.notifiedExpired && userEmail) {
         await sendExpiredEmail(env, userEmail, userName);
         updates.notifiedExpired = true;
         emailsSent.push('expired');
@@ -113,94 +121,52 @@ export async function reconcileSubscription(
     }
   }
 
-  // 3. Pending Plan Change Activation
-  if (sub.pendingPlanChange && nowMs >= sub.pendingPlanChange.effectiveDate) {
-    updates.plan = sub.pendingPlanChange.newPlan;
-    updates.billingCycle = sub.pendingPlanChange.newPlan;
-    updates.razorpaySubscriptionId = sub.pendingPlanChange.newSubscriptionId;
-    updates.razorpayPlanId = sub.pendingPlanChange.newPlanId;
-    updates.cancelAtPeriodEnd = false;
-    updates.pendingPlanChange = undefined as any;
-  }
-
-  // 4. Lifecycle & Milestone Resend Emails
-  const effectiveStatus = updates.status || sub.status;
-
-  // Charge failed email (past_due status)
-  if (effectiveStatus === 'past_due' && !sub.notifiedChargeFailed && userEmail) {
+  if ((updates.status || ent.status) === 'grace' && !ent.notifiedChargeFailed && userEmail) {
     await sendChargeFailedEmail(env, userEmail, userName);
     updates.notifiedChargeFailed = true;
     emailsSent.push('charge_failed');
   }
 
-  // Trial Milestone Resend Emails
-  if (effectiveStatus === 'trialing') {
-    const trialEndStr = sub.trialEndsAt || currentAccessUntil;
-    const trialEndMs = trialEndStr ? new Date(trialEndStr).getTime() : 0;
-    const msRemaining = trialEndMs - nowMs;
-
-    // Day 5 of 7-day trial: ~2 days remaining (between 24h and 48h before trial end)
-    if (
-      msRemaining <= 48 * 3600 * 1000 &&
-      msRemaining > 24 * 3600 * 1000 &&
-      !sub.notifiedTrialDay5 &&
-      userEmail
-    ) {
+  if ((updates.status || ent.status) === 'trialing' && currentValidUntil) {
+    const msRemaining = new Date(currentValidUntil).getTime() - nowMs;
+    if (msRemaining <= 48 * 3600 * 1000 && msRemaining > 0 && !ent.notifiedTrialDay5 && userEmail) {
       await sendTrialDay5Email(env, userEmail, userName);
       updates.notifiedTrialDay5 = true;
       emailsSent.push('trial_day_5');
     }
-
-    // 24 hours before first charge: between 0 and 24h remaining, if not canceled
-    if (
-      msRemaining <= 24 * 3600 * 1000 &&
-      msRemaining > 0 &&
-      !sub.cancelAtPeriodEnd &&
-      !sub.notifiedCharge24h &&
-      userEmail
-    ) {
-      const planName = String(sub.plan || 'Pro').toUpperCase();
-      await sendCharge24hEmail(env, userEmail, userName, planName);
-      updates.notifiedCharge24h = true;
-      emailsSent.push('charge_24h_reminder');
-    }
   }
 
-  // 5. Commit Updates to Firestore
   if (Object.keys(updates).length > 0) {
-    updates.updatedAt = nowMs;
-    await updateSubscriptionInFirestore(creds, sub.userId, updates);
+    updates.updatedAt = new Date(nowMs).toISOString();
+    await writeEntitlement(creds, ent.userId, updates);
     return { updated: true, emailsSent };
   }
 
   return { updated: false, emailsSent };
 }
 
-/**
- * Main Daily Cron Reconciliation Handler
- */
 export async function handleCronReconciliation(
   env: Env,
   nowMs = Date.now()
 ): Promise<{ processed: number; updated: number; emailsSent: number }> {
   const creds = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
-  const subscriptions = await listSubscriptionsFromFirestore(creds);
+  const entitlements = await listEntitlementsFromFirestore(creds);
 
   let updatedCount = 0;
   let totalEmailsSent = 0;
 
-  for (const sub of subscriptions) {
+  for (const ent of entitlements) {
     try {
-      const res = await reconcileSubscription(env, creds, sub, nowMs);
+      const res = await reconcileEntitlement(env, creds, ent, nowMs);
       if (res.updated) updatedCount++;
       totalEmailsSent += res.emailsSent.length;
     } catch (err: any) {
-      console.error(`[Cron Reconcile Error] user ${sub.userId}:`, err);
+      console.error(`[Cron Reconcile Error] user ${ent.userId}:`, err?.message);
     }
   }
 
   return {
-    processed: subscriptions.length,
+    processed: entitlements.length,
     updated: updatedCount,
     emailsSent: totalEmailsSent,
   };

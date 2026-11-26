@@ -4,7 +4,9 @@ import {
   parseServiceAccount,
   getGoogleAccessToken,
   getSubscriptionFromFirestore,
+  toFirestoreValue,
 } from '../firestore';
+import { getEntitlementFromFirestore } from '../entitlements';
 import {
   normalizeGoogleEmail,
   hashIdentifier,
@@ -183,42 +185,78 @@ export async function handleDeleteAccount(request: Request, env: Env): Promise<R
   const uid = verifiedUser.uid;
   const googleToken = await getGoogleAccessToken(creds);
 
-  // 1. Inspect existing subscription: cancel recurring Razorpay sub & preserve lifetime trial ledger
+  // 1. Inspect existing entitlement/subscription: cancel recurring Razorpay sub & preserve lifetime trialClaims
   try {
-    const existingSub = await getSubscriptionFromFirestore(creds, uid);
-    if (existingSub) {
-      if (
-        existingSub.razorpaySubscriptionId &&
-        env.RAZORPAY_KEY_ID &&
-        env.RAZORPAY_KEY_SECRET &&
-        ['active', 'trialing', 'past_due'].includes(existingSub.status)
-      ) {
-        const authHeader = `Basic ${btoa(`${env.RAZORPAY_KEY_ID}:${env.RAZORPAY_KEY_SECRET}`)}`;
-        await fetch(
-          `https://api.razorpay.com/v1/subscriptions/${existingSub.razorpaySubscriptionId}/cancel`,
-          {
-            method: 'POST',
-            headers: {
-              Authorization: authHeader,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ cancel_at_cycle_end: 0 }),
-          }
-        ).catch(() => {});
-      }
+    const existingEnt = await getEntitlementFromFirestore(creds, uid).catch(() => null);
+    const existingSub = await getSubscriptionFromFirestore(creds, uid).catch(() => null);
+    const activeRzpSubId = existingEnt?.razorpaySubscriptionId || existingSub?.razorpaySubscriptionId;
+    const activeSubStatus = existingEnt?.status || existingSub?.status || '';
 
-      // Preserve lifetime trial claim in trial_ledger so deletion cannot reset free-trial eligibility
-      if (
-        verifiedUser.email &&
-        (existingSub.trialClaimed || existingSub.hasHadTrial || existingSub.trialEndsAt)
-      ) {
+    if (
+      activeRzpSubId &&
+      activeRzpSubId.startsWith('sub_') &&
+      env.RAZORPAY_KEY_ID &&
+      env.RAZORPAY_KEY_SECRET &&
+      ['active', 'trialing', 'past_due', 'grace'].includes(activeSubStatus)
+    ) {
+      const authHeader = `Basic ${btoa(`${env.RAZORPAY_KEY_ID}:${env.RAZORPAY_KEY_SECRET}`)}`;
+      await fetch(`https://api.razorpay.com/v1/subscriptions/${activeRzpSubId}/cancel`, {
+        method: 'POST',
+        headers: {
+          Authorization: authHeader,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ cancel_at_cycle_end: 0 }),
+      }).catch(() => {});
+    }
+
+    const hadTrial = Boolean(
+      existingEnt?.trialUsed ||
+        existingEnt?.trialStartedAt ||
+        existingSub?.trialClaimed ||
+        existingSub?.hasHadTrial ||
+        existingSub?.trialEndsAt
+    );
+
+    // Preserve permanent claim records across account deletion so re-signing up cannot grant another trial
+    if (hadTrial) {
+      const nowIso = new Date().toISOString();
+      const claimUrlBase = `https://firestore.googleapis.com/v1/projects/${creds.project_id}/databases/(default)/documents/trialClaims`;
+      await fetch(`${claimUrlBase}/uid_${uid}`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${googleToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fields: {
+            claimKey: toFirestoreValue(`uid_${uid}`),
+            type: toFirestoreValue('uid'),
+            claimedByUid: toFirestoreValue(uid),
+            claimedAt: toFirestoreValue(nowIso),
+          },
+        }),
+      }).catch(() => {});
+
+      if (verifiedUser.email) {
         const normalizedEmail = normalizeGoogleEmail(verifiedUser.email);
         const emailHash = await hashIdentifier(normalizedEmail, env.TRIAL_LEDGER_PEPPER);
-        await markTrialLedgerUsed(creds, emailHash, 'email', uid).catch(() => {});
+        await Promise.all([
+          markTrialLedgerUsed(creds, emailHash, 'email', uid).catch(() => {}),
+          fetch(`${claimUrlBase}/email_${emailHash}`, {
+            method: 'PATCH',
+            headers: { Authorization: `Bearer ${googleToken}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              fields: {
+                claimKey: toFirestoreValue(`email_${emailHash}`),
+                type: toFirestoreValue('email'),
+                claimedByUid: toFirestoreValue(uid),
+                claimedAt: toFirestoreValue(nowIso),
+              },
+            }),
+          }).catch(() => {}),
+        ]);
       }
     }
   } catch (err) {
-    console.warn('[DeleteAccount] Pre-cleanup subscription warning:', err);
+    console.warn('[DeleteAccount] Pre-cleanup entitlement warning:', err);
   }
 
   // 2. Delete all user-owned Firestore collections & profile documents
@@ -231,6 +269,7 @@ export async function handleDeleteAccount(request: Request, env: Env): Promise<R
   await Promise.all([
     deleteFirestoreDoc(creds, googleToken, `profiles/${uid}`),
     deleteFirestoreDoc(creds, googleToken, `public_profiles/${uid}`),
+    deleteFirestoreDoc(creds, googleToken, `entitlements/${uid}`),
     deleteFirestoreDoc(creds, googleToken, `subscriptions/${uid}`),
   ]);
 
