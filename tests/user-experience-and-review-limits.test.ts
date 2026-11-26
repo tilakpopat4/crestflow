@@ -21,7 +21,10 @@ describe('User Experience, Domain, and Review Limits Suite', () => {
     const tabsFile = fs.readFileSync('src/components/onboarding/OnboardingViewTabs.tsx', 'utf-8');
     // Active tabs must not be bg-white with text-slate-900 because text-slate-900 gets overridden to light text in index.css
     assert.ok(!tabsFile.includes('bg-white dark:bg-slate-900 text-slate-900'), 'Must not use bg-white with text-slate-900');
-    assert.ok(tabsFile.includes('bg-[#282828] text-white'), 'Active tab must use graphite bg with explicit white text');
+    assert.ok(
+      tabsFile.includes("bg-[#1B1B22] text-white") || tabsFile.includes("bg-[#282828] text-white"),
+      'Active tab must use graphite/raised bg with explicit white text'
+    );
   });
 
   it('3. Direct Photo Upload: Profile uploader exists and firestore.rules permits photoURL data URLs up to 250KB', () => {

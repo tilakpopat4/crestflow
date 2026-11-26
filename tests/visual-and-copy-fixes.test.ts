@@ -31,12 +31,12 @@ describe('Visual & Copy Fixes Verification Suite', () => {
     const dashboardContent = fs.readFileSync(dashboardTabPath, 'utf-8');
     const revChartContent = fs.readFileSync(revChartPath, 'utf-8');
 
-    // Card background #282828 and dark tooltip styles
-    assert.ok(dashboardContent.includes("backgroundColor: '#282828'"));
-    assert.ok(dashboardContent.includes("stroke=\"#444444\""));
+    // Card background #1B1B22/#282828 and dark tooltip styles
+    assert.ok(dashboardContent.includes("backgroundColor: '#1B1B22'") || dashboardContent.includes("backgroundColor: '#282828'"));
+    assert.ok(dashboardContent.includes('stroke="#2A2A33"') || dashboardContent.includes('stroke="#444444"'));
 
-    // RevenueComparisonChart uses #282828 card and #444444 border
-    assert.ok(revChartContent.includes("stroke-[#282828]"));
+    // RevenueComparisonChart uses dark raised card and line border
+    assert.ok(revChartContent.includes("stroke-[#1B1B22]") || revChartContent.includes("stroke-[#282828]"));
   });
 
   it('3. Social Links: Filters empty URLs and correctly supports Instagram', () => {
