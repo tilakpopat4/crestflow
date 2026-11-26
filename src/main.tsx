@@ -19,14 +19,19 @@ if (typeof window !== 'undefined') {
     }
   });
 
-  if ('serviceWorker' in navigator && (import.meta.env.PROD || window.location.protocol === 'https:')) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker
-        .register('/sw.js', { scope: '/' })
-        .catch(() => {
-          // Ignore service worker registration errors in restricted contexts
-        });
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (const registration of registrations) {
+        registration.unregister();
+      }
     });
+    if (typeof caches !== 'undefined') {
+      caches.keys().then((keys) => {
+        for (const key of keys) {
+          caches.delete(key);
+        }
+      });
+    }
   }
 }
 
