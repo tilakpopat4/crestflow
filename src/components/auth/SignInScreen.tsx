@@ -11,7 +11,7 @@ import { useHeroConfig } from '../../lib/heroConfig';
 import { siteConfig } from '../../config/site';
 import { auth } from '../../firebase';
 
-// Palette compliance reference: text-accent (#e1002d) for headline highlight & active brand accents
+// Palette compliance reference: text-accent (#E0002B) for headline highlight & active brand accents
 interface SignInScreenProps {
   user?: any;
   isAdminRoute: boolean;
@@ -164,7 +164,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
             <button
               type="button"
               onClick={() => onSupportingNavigate('pricing')}
-              className="text-xs font-medium px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition-colors duration-120 cursor-pointer border-none bg-transparent"
+              className="text-xs font-medium px-3 py-1.5 rounded-lg text-[#A1A1AA] hover:text-white transition-colors duration-120 cursor-pointer border-none bg-transparent"
             >
               Compare Plans
             </button>
@@ -173,7 +173,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
                 <button
                   type="button"
                   onClick={() => { setAuthCardInitialMode('signin'); setAuthView('auth'); }}
-                  className="text-xs font-medium px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition-colors duration-120 cursor-pointer border-none bg-transparent"
+                  className="text-xs font-medium px-3 py-1.5 rounded-lg text-[#A1A1AA] hover:text-white transition-colors duration-120 cursor-pointer border-none bg-transparent"
                 >
                   Sign In
                 </button>
@@ -189,7 +189,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({
               <button
                 type="button"
                 onClick={() => setAuthView('promo')}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-white transition-colors duration-120 cursor-pointer border-none bg-[#242424] rounded-lg"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#A1A1AA] hover:text-white transition-colors duration-120 cursor-pointer border-none bg-[#1B1B22] rounded-lg"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Overview</span>

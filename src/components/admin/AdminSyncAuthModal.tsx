@@ -202,18 +202,18 @@ export default function AdminSyncAuthModal({ isOpen, onClose, onSynced }: AdminS
         <div className="p-5 space-y-6 overflow-y-auto text-xs">
           {/* Status Message */}
           {statusMessage && (
-            <div className="p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-200 font-medium flex items-center gap-2">
-              <Check className="w-4 h-4 text-indigo-600 shrink-0" />
+            <div className="p-3 bg-[#131318] dark:bg-[#0B0B0E] border border-[#2A2A33] dark:border-[#2A2A33] rounded-lg text-[#F7F7F8] dark:text-[#F7F7F8] font-medium flex items-center gap-2">
+              <Check className="w-4 h-4 text-[#FF2D4A] shrink-0" />
               <span>{statusMessage}</span>
             </div>
           )}
 
           {/* Quick Sync Known Users */}
-          <div className="p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg space-y-2">
-            <div className="font-bold text-slate-900 dark:text-slate-100 text-sm">
+          <div className="p-4 bg-[#131318] dark:bg-[#0B0B0E] border border-[#2A2A33] dark:border-[#2A2A33] rounded-lg space-y-2">
+            <div className="font-bold text-[#F7F7F8] dark:text-[#F7F7F8] text-sm">
               Quick Sync Firebase Auth Accounts ({KNOWN_AUTH_USERS.length} detected)
             </div>
-            <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
+            <p className="text-[#A1A1AA] dark:text-[#A1A1AA] leading-relaxed">
               Instantly create Firestore profile documents for all 10 registered accounts shown in your Firebase Authentication console so they appear in the Admin Portal.
             </p>
             <button
@@ -228,10 +228,10 @@ export default function AdminSyncAuthModal({ isOpen, onClose, onSynced }: AdminS
 
           {/* Paste Firebase Console Export */}
           <div className="space-y-2">
-            <div className="font-bold text-slate-900 dark:text-slate-100 text-sm">
+            <div className="font-bold text-[#F7F7F8] dark:text-[#F7F7F8] text-sm">
               Import from Firebase Console Export (JSON or CSV)
             </div>
-            <p className="text-slate-500 leading-relaxed">
+            <p className="text-[#A1A1AA] leading-relaxed">
               In Firebase Console $\rightarrow$ Authentication $\rightarrow$ Users $\rightarrow$ click the three dots (`⋮`) menu $\rightarrow$ <strong>Export users</strong>. Paste the downloaded JSON or CSV below:
             </p>
             <textarea
@@ -239,20 +239,20 @@ export default function AdminSyncAuthModal({ isOpen, onClose, onSynced }: AdminS
               value={pasteData}
               onChange={(e) => setPasteData(e.target.value)}
               placeholder="Paste exported JSON or CSV lines here..."
-              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-3 font-mono text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 outline-none focus:border-indigo-500"
+              className="w-full bg-[#131318] dark:bg-[#0B0B0E] border border-[#2A2A33] dark:border-[#2A2A33] rounded-lg p-3 font-mono text-xs text-[#F7F7F8] dark:text-[#F7F7F8] placeholder:text-[#A1A1AA] outline-none focus:border-[#FF2D4A]"
             />
             <button
               onClick={handleImportPasted}
               disabled={isProcessing || !pasteData.trim()}
-              className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold px-3 py-1.5 rounded-lg transition-colors duration-120 border-0 cursor-pointer disabled:opacity-50"
+              className="bg-[#131318] hover:bg-[#1B1B22] dark:bg-[#1B1B22] dark:hover:bg-[#1B1B22] text-[#F7F7F8] dark:text-[#F7F7F8] font-semibold px-3 py-1.5 rounded-lg transition-colors duration-120 border-0 cursor-pointer disabled:opacity-50"
             >
               Import Pasted Accounts
             </button>
           </div>
 
           {/* Manual Add */}
-          <form onSubmit={handleAddSingle} className="space-y-2 border-t border-slate-200 dark:border-slate-800 pt-4">
-            <div className="font-bold text-slate-900 dark:text-slate-100 text-sm">
+          <form onSubmit={handleAddSingle} className="space-y-2 border-t border-[#2A2A33] dark:border-[#2A2A33] pt-4">
+            <div className="font-bold text-[#F7F7F8] dark:text-[#F7F7F8] text-sm">
               Add Account Manually
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -262,7 +262,7 @@ export default function AdminSyncAuthModal({ isOpen, onClose, onSynced }: AdminS
                 value={singleEmail}
                 onChange={(e) => setSingleEmail(e.target.value)}
                 required
-                className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-500"
+                className="bg-[#131318] dark:bg-[#0B0B0E] border border-[#2A2A33] dark:border-[#2A2A33] rounded-lg px-3 py-1.5 text-xs text-[#F7F7F8] dark:text-[#F7F7F8] outline-none focus:border-[#FF2D4A]"
               />
               <input
                 type="text"

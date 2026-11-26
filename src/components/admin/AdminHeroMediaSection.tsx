@@ -22,19 +22,19 @@ interface AdminHeroMediaSectionProps {
  * - Only administrators authenticated on the server can commit video assets.
  * - Supports direct video upload up to 25 MB (H.264 MP4 and WebM).
  * - Fallbacks to poster frame or solid surface background when video is disabled/loading.
- * - Ensures dark scrim contrast with #1A1A1A surface overlay to meet WCAG 4.5:1.
+ * - Ensures dark scrim contrast with #0B0B0E surface overlay to meet WCAG 4.5:1.
  */
 export const AdminHeroMediaSection: React.FC<AdminHeroMediaSectionProps> = ({
   draft,
   setDraft,
 }) => {
   return (
-    <div className="bg-[#212121] border border-[#333333] rounded-xl p-5 space-y-4">
+    <div className="bg-[#131318] border border-[#2A2A33] rounded-xl p-5 space-y-4">
       <h3 className="text-sm font-bold text-white uppercase tracking-wider">Background &amp; Sign-In Placement</h3>
 
       {/* Sign-in Box Alignment Controls */}
       <div>
-        <label className="block text-xs font-medium text-slate-400 mb-1.5">Sign-In Box Alignment</label>
+        <label className="block text-xs font-medium text-[#A1A1AA] mb-1.5">Sign-In Box Alignment</label>
         <div className="grid grid-cols-3 gap-2">
           {[
             { id: 'right' as HeroCardAlignment, label: 'Right (Standard)', icon: AlignRight },
@@ -51,7 +51,7 @@ export const AdminHeroMediaSection: React.FC<AdminHeroMediaSectionProps> = ({
                 className={`flex flex-col items-center justify-center p-2.5 rounded-lg border text-xs font-medium transition-colors cursor-pointer ${
                   isSelected
                     ? 'border-accent bg-accent/10 text-white'
-                    : 'border-[#383838] bg-[#181818] text-slate-400 hover:text-white'
+                    : 'border-[#2A2A33] bg-[#0B0B0E] text-[#A1A1AA] hover:text-white'
                 }`}
               >
                 <Icon className="w-4 h-4 mb-1" />
@@ -64,7 +64,7 @@ export const AdminHeroMediaSection: React.FC<AdminHeroMediaSectionProps> = ({
 
       {/* Background Media Type Selection */}
       <div>
-        <label className="block text-xs font-medium text-slate-400 mb-1.5">Background Media Type</label>
+        <label className="block text-xs font-medium text-[#A1A1AA] mb-1.5">Background Media Type</label>
         <div className="grid grid-cols-3 gap-2">
           {[
             { id: 'color' as HeroBackgroundType, label: 'Solid Color', icon: Palette },
@@ -81,7 +81,7 @@ export const AdminHeroMediaSection: React.FC<AdminHeroMediaSectionProps> = ({
                 className={`flex flex-col items-center justify-center p-2.5 rounded-lg border text-xs font-medium transition-colors cursor-pointer ${
                   isSelected
                     ? 'border-accent bg-accent/10 text-white'
-                    : 'border-[#383838] bg-[#181818] text-slate-400 hover:text-white'
+                    : 'border-[#2A2A33] bg-[#0B0B0E] text-[#A1A1AA] hover:text-white'
                 }`}
               >
                 <Icon className="w-4 h-4 mb-1" />
@@ -95,20 +95,20 @@ export const AdminHeroMediaSection: React.FC<AdminHeroMediaSectionProps> = ({
       {/* Solid Color Background Controls */}
       {draft.backgroundType === 'color' && (
         <div>
-          <label className="block text-xs font-medium text-slate-400 mb-1">Background Color</label>
+          <label className="block text-xs font-medium text-[#A1A1AA] mb-1">Background Color</label>
           <div className="flex items-center gap-2">
             <input
               type="color"
-              value={draft.backgroundColor.startsWith('#') ? draft.backgroundColor : '#1E1E1E'}
+              value={draft.backgroundColor.startsWith('#') ? draft.backgroundColor : '#131318'}
               onChange={(e) => setDraft((prev) => ({ ...prev, backgroundColor: e.target.value }))}
-              className="w-9 h-9 rounded border border-[#383838] bg-transparent cursor-pointer"
+              className="w-9 h-9 rounded border border-[#2A2A33] bg-transparent cursor-pointer"
             />
             <input
               type="text"
               value={draft.backgroundColor}
               onChange={(e) => setDraft((prev) => ({ ...prev, backgroundColor: e.target.value }))}
-              className="flex-1 bg-[#181818] border border-[#383838] rounded-lg px-3 py-2 text-xs text-white font-mono"
-              placeholder="#1E1E1E"
+              className="flex-1 bg-[#0B0B0E] border border-[#2A2A33] rounded-lg px-3 py-2 text-xs text-white font-mono"
+              placeholder="#131318"
             />
           </div>
         </div>
@@ -118,7 +118,7 @@ export const AdminHeroMediaSection: React.FC<AdminHeroMediaSectionProps> = ({
       {draft.backgroundType === 'image' && (
         <div className="space-y-3">
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Image URL</label>
+            <label className="block text-xs font-medium text-[#A1A1AA] mb-1">Image URL</label>
             <input
               type="url"
               value={draft.backgroundImageUrl}
@@ -130,12 +130,12 @@ export const AdminHeroMediaSection: React.FC<AdminHeroMediaSectionProps> = ({
                   ...(val.trim() && prev.backgroundType !== 'image' ? { backgroundType: 'image' } : {}),
                 }));
               }}
-              className="w-full bg-[#181818] border border-[#383838] rounded-lg px-3 py-2 text-xs text-white font-mono"
+              className="w-full bg-[#0B0B0E] border border-[#2A2A33] rounded-lg px-3 py-2 text-xs text-white font-mono"
               placeholder="https://images.unsplash.com/photo-..."
             />
           </div>
           <div>
-            <div className="flex justify-between text-xs text-slate-400 mb-1">
+            <div className="flex justify-between text-xs text-[#A1A1AA] mb-1">
               <span>Dark Scrim Overlay</span>
               <span className="font-mono">{Math.round(draft.backgroundOverlayOpacity * 100)}%</span>
             </div>

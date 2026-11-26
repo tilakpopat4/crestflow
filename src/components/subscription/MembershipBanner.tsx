@@ -182,7 +182,7 @@ export const MembershipBanner: React.FC<MembershipBannerProps> = ({
           <button
             type="button"
             onClick={handleExportJson}
-            className="px-3 py-1.5 rounded-lg bg-[#1B1B22] hover:bg-[#22222B] border border-[#2A2A33] text-xs font-medium text-[#F7F7F8] inline-flex items-center gap-1.5 cursor-pointer"
+            className="px-3 py-1.5 rounded-lg bg-[#1B1B22] hover:bg-[#2A2A33] border border-[#2A2A33] text-xs font-medium text-[#F7F7F8] inline-flex items-center gap-1.5 cursor-pointer"
           >
             <Download size={13} />
             <span>Export JSON</span>
@@ -190,7 +190,7 @@ export const MembershipBanner: React.FC<MembershipBannerProps> = ({
           <button
             type="button"
             onClick={handleExportCsvAll}
-            className="px-3 py-1.5 rounded-lg bg-[#1B1B22] hover:bg-[#22222B] border border-[#2A2A33] text-xs font-medium text-[#F7F7F8] inline-flex items-center gap-1.5 cursor-pointer"
+            className="px-3 py-1.5 rounded-lg bg-[#1B1B22] hover:bg-[#2A2A33] border border-[#2A2A33] text-xs font-medium text-[#F7F7F8] inline-flex items-center gap-1.5 cursor-pointer"
           >
             <Download size={13} />
             <span>Export CSV</span>

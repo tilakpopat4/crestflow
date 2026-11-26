@@ -65,7 +65,7 @@ export const ReviewsToolbar: React.FC<ReviewsToolbarProps> = ({
             }`}
           >
             <span className="font-mono tabular-nums">{r}</span>
-            <Star className="w-3 h-3 fill-amber-400 text-amber-400 shrink-0" />
+            <Star className="w-3 h-3 fill-amber-400 text-[#FFB020] shrink-0" />
           </button>
         ))}
       </div>

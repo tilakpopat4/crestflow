@@ -193,7 +193,7 @@ export const DateInput: React.FC<DateInputProps> = ({
           tabIndex={-1}
           title="Open calendar picker"
           aria-expanded={isCalendarOpen}
-          className="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+          className="text-[#A1A1AA] hover:text-[#FF2D4A] dark:hover:text-[#FF2D4A] transition-colors p-1 rounded hover:bg-[#131318] dark:hover:bg-[#1B1B22] cursor-pointer"
         >
           <Calendar size={16} />
         </button>

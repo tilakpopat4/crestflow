@@ -77,10 +77,10 @@ export default function ContactPage() {
   return (
     <div className="w-full py-8 md:py-12 px-4 md:px-6">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
+        <h1 className="text-2xl md:text-3xl font-bold text-[#F7F7F8] dark:text-[#F7F7F8] tracking-tight">
           Contact Us
         </h1>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 mb-8">
+        <p className="text-sm text-[#A1A1AA] dark:text-[#A1A1AA] mt-1 mb-8">
           Have a question, feedback, or need support with CrestFlow? Get in touch with our team.
         </p>
 
@@ -90,7 +90,7 @@ export default function ContactPage() {
             <div>
               <label
                 htmlFor="contact-name"
-                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5"
+                className="block text-sm font-medium text-[#A1A1AA] dark:text-[#A1A1AA] mb-1.5"
               >
                 Name
               </label>
@@ -103,17 +103,17 @@ export default function ContactPage() {
                   if (errors.name) setErrors((prev) => ({ ...prev, name: '' }));
                 }}
                 placeholder="Your full name"
-                className="w-full p-3 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-xl focus:border-slate-400 dark:focus:border-slate-500 outline-none text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                className="w-full p-3 bg-[#131318] dark:bg-[#131318] text-[#F7F7F8] dark:text-[#F7F7F8] border border-[#2A2A33] dark:border-[#2A2A33] rounded-xl focus:border-[#2A2A33] dark:focus:border-[#2A2A33] outline-none text-sm placeholder:text-[#A1A1AA] dark:placeholder:text-[#A1A1AA]"
               />
               {errors.name && (
-                <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.name}</p>
+                <p className="text-xs text-[#E0002B] dark:text-[#F0607A] mt-1">{errors.name}</p>
               )}
             </div>
 
             <div>
               <label
                 htmlFor="contact-email"
-                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5"
+                className="block text-sm font-medium text-[#A1A1AA] dark:text-[#A1A1AA] mb-1.5"
               >
                 Email
               </label>
@@ -126,17 +126,17 @@ export default function ContactPage() {
                   if (errors.email) setErrors((prev) => ({ ...prev, email: '' }));
                 }}
                 placeholder="name@example.com"
-                className="w-full p-3 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-xl focus:border-slate-400 dark:focus:border-slate-500 outline-none text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                className="w-full p-3 bg-[#131318] dark:bg-[#131318] text-[#F7F7F8] dark:text-[#F7F7F8] border border-[#2A2A33] dark:border-[#2A2A33] rounded-xl focus:border-[#2A2A33] dark:focus:border-[#2A2A33] outline-none text-sm placeholder:text-[#A1A1AA] dark:placeholder:text-[#A1A1AA]"
               />
               {errors.email && (
-                <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.email}</p>
+                <p className="text-xs text-[#E0002B] dark:text-[#F0607A] mt-1">{errors.email}</p>
               )}
             </div>
 
             <div>
               <label
                 htmlFor="contact-subject"
-                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5"
+                className="block text-sm font-medium text-[#A1A1AA] dark:text-[#A1A1AA] mb-1.5"
               >
                 Subject
               </label>
@@ -149,17 +149,17 @@ export default function ContactPage() {
                   if (errors.subject) setErrors((prev) => ({ ...prev, subject: '' }));
                 }}
                 placeholder="How can we help?"
-                className="w-full p-3 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-xl focus:border-slate-400 dark:focus:border-slate-500 outline-none text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                className="w-full p-3 bg-[#131318] dark:bg-[#131318] text-[#F7F7F8] dark:text-[#F7F7F8] border border-[#2A2A33] dark:border-[#2A2A33] rounded-xl focus:border-[#2A2A33] dark:focus:border-[#2A2A33] outline-none text-sm placeholder:text-[#A1A1AA] dark:placeholder:text-[#A1A1AA]"
               />
               {errors.subject && (
-                <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.subject}</p>
+                <p className="text-xs text-[#E0002B] dark:text-[#F0607A] mt-1">{errors.subject}</p>
               )}
             </div>
 
             <div>
               <label
                 htmlFor="contact-message"
-                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5"
+                className="block text-sm font-medium text-[#A1A1AA] dark:text-[#A1A1AA] mb-1.5"
               >
                 Message
               </label>
@@ -172,22 +172,22 @@ export default function ContactPage() {
                   if (errors.message) setErrors((prev) => ({ ...prev, message: '' }));
                 }}
                 placeholder="Describe your question or issue in detail..."
-                className="w-full p-3 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-xl focus:border-slate-400 dark:focus:border-slate-500 outline-none text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                className="w-full p-3 bg-[#131318] dark:bg-[#131318] text-[#F7F7F8] dark:text-[#F7F7F8] border border-[#2A2A33] dark:border-[#2A2A33] rounded-xl focus:border-[#2A2A33] dark:focus:border-[#2A2A33] outline-none text-sm placeholder:text-[#A1A1AA] dark:placeholder:text-[#A1A1AA]"
               />
               {errors.message && (
-                <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.message}</p>
+                <p className="text-xs text-[#E0002B] dark:text-[#F0607A] mt-1">{errors.message}</p>
               )}
             </div>
 
             {isSubmitted && (
-              <div className="p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm text-slate-800 dark:text-slate-200">
+              <div className="p-4 bg-[#131318] dark:bg-[#131318] border border-[#2A2A33] dark:border-[#2A2A33] rounded-lg text-sm text-[#F7F7F8] dark:text-[#F7F7F8]">
                 <span className="font-semibold block mb-1">Message Sent</span>
                 Thank you for contacting CrestFlow. We have sent a confirmation email to your inbox — our team will contact you within 48 hours.
               </div>
             )}
 
             {submitError && !isSubmitted && (
-              <div className="p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-slate-600 dark:text-slate-400">
+              <div className="p-3 bg-[#131318] dark:bg-[#131318] border border-[#2A2A33] dark:border-[#2A2A33] rounded-lg text-xs text-[#A1A1AA] dark:text-[#A1A1AA]">
                 {submitError}
               </div>
             )}
@@ -204,17 +204,17 @@ export default function ContactPage() {
           </form>
 
           {/* Plain Text Details */}
-          <div className="pt-6 border-t border-slate-200 dark:border-slate-800 space-y-4 text-xs text-slate-600 dark:text-slate-400">
+          <div className="pt-6 border-t border-[#2A2A33] dark:border-[#2A2A33] space-y-4 text-xs text-[#A1A1AA] dark:text-[#A1A1AA]">
             <div>
-              <span className="font-semibold text-slate-700 dark:text-slate-300 block mb-0.5">
+              <span className="font-semibold text-[#A1A1AA] dark:text-[#A1A1AA] block mb-0.5">
                 Product &amp; Company
               </span>
-              <p className="text-slate-900 dark:text-slate-100 font-medium">CrestFlow</p>
-              <p className="text-slate-600 dark:text-slate-400">Operated by Tilak Popat Films</p>
+              <p className="text-[#F7F7F8] dark:text-[#F7F7F8] font-medium">CrestFlow</p>
+              <p className="text-[#A1A1AA] dark:text-[#A1A1AA]">Operated by Tilak Popat Films</p>
             </div>
 
             <div>
-              <span className="font-semibold text-slate-700 dark:text-slate-300 block mb-0.5">
+              <span className="font-semibold text-[#A1A1AA] dark:text-[#A1A1AA] block mb-0.5">
                 Contact &amp; Support Email
               </span>
               <a
@@ -226,25 +226,25 @@ export default function ContactPage() {
             </div>
 
             <div>
-              <span className="font-semibold text-slate-700 dark:text-slate-300 block mb-0.5">
+              <span className="font-semibold text-[#A1A1AA] dark:text-[#A1A1AA] block mb-0.5">
                 Response Time
               </span>
-              <p className="text-slate-900 dark:text-slate-100">24-48 working hours</p>
+              <p className="text-[#F7F7F8] dark:text-[#F7F7F8]">24-48 working hours</p>
             </div>
 
             <div>
-              <span className="font-semibold text-slate-700 dark:text-slate-300 block mb-0.5">
+              <span className="font-semibold text-[#A1A1AA] dark:text-[#A1A1AA] block mb-0.5">
                 Address
               </span>
-              <p className="text-slate-900 dark:text-slate-100">Uvarsad, Gandhinagar, Gujarat, INDIA.</p>
+              <p className="text-[#F7F7F8] dark:text-[#F7F7F8]">Uvarsad, Gandhinagar, Gujarat, INDIA.</p>
             </div>
 
             <div>
-              <span className="font-semibold text-slate-700 dark:text-slate-300 block mb-0.5">
+              <span className="font-semibold text-[#A1A1AA] dark:text-[#A1A1AA] block mb-0.5">
                 Grievance Redressal
               </span>
-              <p className="text-slate-600 dark:text-slate-400">
-                There is no separate Grievance Officer; all inquiries and grievances are handled directly by the Founder: <strong className="text-slate-800 dark:text-slate-200">Tilak Popat</strong>.
+              <p className="text-[#A1A1AA] dark:text-[#A1A1AA]">
+                There is no separate Grievance Officer; all inquiries and grievances are handled directly by the Founder: <strong className="text-[#F7F7F8] dark:text-[#F7F7F8]">Tilak Popat</strong>.
               </p>
             </div>
           </div>

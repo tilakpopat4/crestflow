@@ -181,7 +181,7 @@ export function UpgradeSheet() {
                   <button
                     type="button"
                     onClick={handleRefreshStatus}
-                    className="w-full py-2 px-3 rounded-lg bg-[#1B1B22] hover:bg-[#22222B] border border-[#2A2A33] text-xs font-semibold text-[#F7F7F8] inline-flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="w-full py-2 px-3 rounded-lg bg-[#1B1B22] hover:bg-[#2A2A33] border border-[#2A2A33] text-xs font-semibold text-[#F7F7F8] inline-flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <RefreshCw size={13} />
                     <span>Refresh status</span>
@@ -234,7 +234,7 @@ export function UpgradeSheet() {
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-semibold text-[#F7F7F8]">{plan.name}</span>
-                          {isBestValue && <span className="px-2 py-0.5 rounded bg-[#22222B] text-[10px] font-semibold text-[#FFC145]">Best value</span>}
+                          {isBestValue && <span className="px-2 py-0.5 rounded bg-[#2A2A33] text-[10px] font-semibold text-[#FFC145]">Best value</span>}
                           {plan.savingsBadge && <span className="text-[11px] font-semibold text-[#2DD4A0]">{plan.savingsBadge}</span>}
                         </div>
                         <div className="text-right">

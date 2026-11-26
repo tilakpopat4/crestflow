@@ -142,7 +142,7 @@ export const ProfileSubscriptionSection: React.FC<ProfileSubscriptionSectionProp
                     type="button"
                     disabled={cancelling}
                     onClick={handleCancel}
-                    className="h-9 px-3.5 rounded-lg text-xs font-semibold text-[#F0607A] bg-[#1B1B22] hover:bg-[#22222B] border border-[#2A2A33] cursor-pointer"
+                    className="h-9 px-3.5 rounded-lg text-xs font-semibold text-[#F0607A] bg-[#1B1B22] hover:bg-[#2A2A33] border border-[#2A2A33] cursor-pointer"
                   >
                     {cancelling ? 'Cancelling...' : 'Cancel auto-renewal'}
                   </button>

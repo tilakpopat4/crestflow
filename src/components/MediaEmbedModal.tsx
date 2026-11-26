@@ -83,17 +83,17 @@ export default function MediaEmbedModal({
       <div
         id="media-embed-card"
         onClick={(e) => e.stopPropagation()}
-        className={`bg-black sm:bg-[#181818] border-0 text-white rounded-none sm:rounded-xl shadow-2xl w-full h-[100dvh] sm:h-auto sm:max-h-[92vh] overflow-hidden cursor-default flex flex-col animate-in zoom-in-95 duration-200 ${
+        className={`bg-black sm:bg-[#0B0B0E] border-0 text-white rounded-none sm:rounded-xl shadow-2xl w-full h-[100dvh] sm:h-auto sm:max-h-[92vh] overflow-hidden cursor-default flex flex-col animate-in zoom-in-95 duration-200 ${
           detectedPortrait ? 'sm:max-w-md' : 'sm:max-w-4xl'
         }`}
       >
-        <div className="px-4 py-3 border-b border-[#222222] flex items-center justify-between gap-3 bg-[#121212] sm:bg-[#1e1e1e] shrink-0">
+        <div className="px-4 py-3 border-b border-[#131318] flex items-center justify-between gap-3 bg-[#0B0B0E] sm:bg-[#131318] shrink-0">
           <div className="min-w-0">
             <h3 className="font-semibold text-sm text-white truncate">
               {title || 'Preview'}
             </h3>
             {clientName && !clientName.includes('@') && (
-              <p className="text-[11px] text-slate-400 truncate mt-0.5">{clientName}</p>
+              <p className="text-[11px] text-[#A1A1AA] truncate mt-0.5">{clientName}</p>
             )}
           </div>
 
@@ -103,7 +103,7 @@ export default function MediaEmbedModal({
                 href={downloadUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#242424] hover:bg-[#303030] text-slate-200 rounded-lg text-xs font-medium transition-colors border-0"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#1B1B22] hover:bg-[#2A2A33] text-[#F7F7F8] rounded-lg text-xs font-medium transition-colors border-0"
                 title="Download"
               >
                 <Download size={13} />
@@ -115,7 +115,7 @@ export default function MediaEmbedModal({
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#242424] hover:bg-[#303030] text-slate-200 rounded-lg text-xs font-medium transition-colors border-0"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#1B1B22] hover:bg-[#2A2A33] text-[#F7F7F8] rounded-lg text-xs font-medium transition-colors border-0"
               title="Open in Drive"
             >
               <ExternalLink size={13} />
@@ -125,7 +125,7 @@ export default function MediaEmbedModal({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-[#242424] transition-colors cursor-pointer border-0 bg-transparent"
+              className="p-1.5 rounded-lg text-[#A1A1AA] hover:text-white hover:bg-[#1B1B22] transition-colors cursor-pointer border-0 bg-transparent"
               title="Close"
             >
               <X size={17} />

@@ -18,11 +18,11 @@ interface Particle {
 }
 
 const FESTIVE_COLORS = [
-  '#f59e0b', // warm gold
-  '#fbbf24', // bright yellow
-  '#10b981', // emerald
-  '#34d399', // mint
-  '#6366f1', // electric indigo
+  '#FFB020', // warm gold
+  '#FFB020', // bright yellow
+  '#2DD4A0', // emerald
+  '#2DD4A0', // mint
+  '#FF2D4A', // electric indigo
   '#38bdf8', // sky blue
   '#f43f5e', // coral rose
   '#a855f7', // soft purple

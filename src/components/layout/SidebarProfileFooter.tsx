@@ -46,7 +46,7 @@ export const SidebarProfileFooter: React.FC<SidebarProfileFooterProps> = ({
           isIconOnly ? "justify-center p-1.5" : "space-x-3 flex-1 min-w-0 p-1.5",
           activeTab === 'profile'
             ? "bg-[#1B1B22] text-[#F7F7F8]"
-            : "hover:bg-[#1B1B22] active:bg-[#22222B] text-[#A1A1AA]"
+            : "hover:bg-[#1B1B22] active:bg-[#2A2A33] text-[#A1A1AA]"
         )}
         title={isIconOnly ? (profile?.name || user?.displayName || 'Profile Settings') : "Open Profile Settings"}
       >
@@ -59,7 +59,7 @@ export const SidebarProfileFooter: React.FC<SidebarProfileFooterProps> = ({
             decoding="async"
           />
         ) : (
-          <div className="w-8 h-8 rounded-full bg-[#333333] text-slate-200 flex items-center justify-center text-xs font-semibold shrink-0">
+          <div className="w-8 h-8 rounded-full bg-[#2A2A33] text-[#F7F7F8] flex items-center justify-center text-xs font-semibold shrink-0">
             {(profile?.name || user?.displayName)?.charAt(0) || 'U'}
           </div>
         )}
@@ -73,10 +73,10 @@ export const SidebarProfileFooter: React.FC<SidebarProfileFooterProps> = ({
               transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
               className="flex-1 min-w-0 overflow-hidden whitespace-nowrap"
             >
-              <p className="text-sm font-semibold text-slate-100 truncate group-hover:text-white transition-colors">
+              <p className="text-sm font-semibold text-[#F7F7F8] truncate group-hover:text-white transition-colors">
                 {profile?.name || user?.displayName || 'User Account'}
               </p>
-              <p className="text-xs text-slate-400 truncate mt-0.5">
+              <p className="text-xs text-[#A1A1AA] truncate mt-0.5">
                 {profile?.professionalTitle || user?.email || 'View Profile'}
               </p>
             </motion.div>
@@ -89,7 +89,7 @@ export const SidebarProfileFooter: React.FC<SidebarProfileFooterProps> = ({
           <button
             type="button"
             onClick={() => promptInstall()}
-            className="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-[#282828] active:bg-[#333333] transition-colors cursor-pointer border-none bg-transparent"
+            className="text-[#A1A1AA] hover:text-white p-2 rounded-lg hover:bg-[#1B1B22] active:bg-[#2A2A33] transition-colors cursor-pointer border-none bg-transparent"
             title="Install CrestFlow App"
             aria-label="Install CrestFlow App"
           >
@@ -100,7 +100,7 @@ export const SidebarProfileFooter: React.FC<SidebarProfileFooterProps> = ({
         {onLogout && (
           <button
             onClick={onLogout}
-            className="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-[#282828] active:bg-[#333333] transition-colors cursor-pointer border-none bg-transparent"
+            className="text-[#A1A1AA] hover:text-white p-2 rounded-lg hover:bg-[#1B1B22] active:bg-[#2A2A33] transition-colors cursor-pointer border-none bg-transparent"
             title="Sign out"
             aria-label="Sign out"
           >

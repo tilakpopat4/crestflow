@@ -47,7 +47,7 @@ export const CenteredProductHero: React.FC<CenteredProductHeroProps> = ({
           <button
             type="button"
             onClick={onComparePlans}
-            className="inline-flex h-10 sm:h-11 cursor-pointer items-center justify-center gap-2 rounded-lg bg-[#1B1B22] hover:bg-[#22222B] border border-[#2A2A33] px-4 sm:px-5 text-sm font-medium whitespace-nowrap text-[#F7F7F8]"
+            className="inline-flex h-10 sm:h-11 cursor-pointer items-center justify-center gap-2 rounded-lg bg-[#1B1B22] hover:bg-[#2A2A33] border border-[#2A2A33] px-4 sm:px-5 text-sm font-medium whitespace-nowrap text-[#F7F7F8]"
           >
             <Layers className="w-3.5 h-3.5 shrink-0 text-[#A1A1AA]" />
             <span>Compare Plans</span>

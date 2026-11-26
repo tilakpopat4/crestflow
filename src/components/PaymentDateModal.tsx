@@ -51,12 +51,12 @@ export default function PaymentDateModal({
   return (
     <div className="fixed inset-0 bg-black/25 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in select-none">
       <div 
-        className="bg-[#212121] rounded-xl w-full max-w-sm p-6 shadow-2xl border border-[#333333] text-white"
+        className="bg-[#131318] rounded-xl w-full max-w-sm p-6 shadow-2xl border border-[#2A2A33] text-white"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-[#282828] text-white rounded-lg border border-[#383838]">
+            <div className="p-2 bg-[#1B1B22] text-white rounded-lg border border-[#2A2A33]">
               <Calendar size={20} />
             </div>
             <h3 className="text-lg font-bold text-white">
@@ -65,26 +65,26 @@ export default function PaymentDateModal({
           </div>
           <button 
             onClick={onClose}
-            className="text-[#aaaaaa] hover:text-white p-1.5 rounded-lg bg-[#282828] hover:bg-[#333333] border border-[#383838] transition-colors cursor-pointer"
+            className="text-[#A1A1AA] hover:text-white p-1.5 rounded-lg bg-[#1B1B22] hover:bg-[#2A2A33] border border-[#2A2A33] transition-colors cursor-pointer"
           >
             <X size={18} />
           </button>
         </div>
 
-        <p className="text-xs text-[#aaaaaa] mb-5 leading-relaxed">
+        <p className="text-xs text-[#A1A1AA] mb-5 leading-relaxed">
           Select the exact date you received the payment{invoiceNumber ? ` for Invoice #${invoiceNumber}` : ''}. This will be used for your monthly earning calculations.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-[#cccccc] block">
+            <label className="text-xs font-semibold text-[#A1A1AA] block">
               Payment Received On
             </label>
             <DateInput
               value={dateStr}
               onChange={val => setDateStr(val)}
               required
-              className="px-3 py-2.5 bg-[#282828] border border-[#383838] rounded-xl text-sm font-medium text-white outline-none focus:border-slate-500 transition-colors"
+              className="px-3 py-2.5 bg-[#1B1B22] border border-[#2A2A33] rounded-xl text-sm font-medium text-white outline-none focus:border-[#2A2A33] transition-colors"
             />
           </div>
 
@@ -93,13 +93,13 @@ export default function PaymentDateModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 px-4 py-2.5 text-sm font-semibold text-[#aaaaaa] hover:text-white bg-[#282828] hover:bg-[#333333] border border-[#383838] rounded-xl transition-colors cursor-pointer"
+                className="flex-1 px-4 py-2.5 text-sm font-semibold text-[#A1A1AA] hover:text-white bg-[#1B1B22] hover:bg-[#2A2A33] border border-[#2A2A33] rounded-xl transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="flex-1 px-4 py-2.5 bg-[#282828] hover:bg-[#333333] text-white border border-[#444444] rounded-xl text-sm font-semibold transition-colors cursor-pointer"
+                className="flex-1 px-4 py-2.5 bg-[#1B1B22] hover:bg-[#2A2A33] text-white border border-[#2A2A33] rounded-xl text-sm font-semibold transition-colors cursor-pointer"
               >
                 {isAlreadyPaid ? 'Update Date' : 'Confirm Paid'}
               </button>
@@ -108,7 +108,7 @@ export default function PaymentDateModal({
               <button
                 type="button"
                 onClick={onUnmark}
-                className="w-full px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors border border-slate-200 dark:border-slate-700 cursor-pointer"
+                className="w-full px-4 py-2 text-sm font-semibold text-[#A1A1AA] dark:text-[#A1A1AA] hover:bg-[#131318] dark:hover:bg-[#1B1B22] rounded-xl transition-colors border border-[#2A2A33] dark:border-[#2A2A33] cursor-pointer"
               >
                 Mark as Pending (Unpaid)
               </button>

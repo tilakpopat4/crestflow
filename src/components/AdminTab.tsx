@@ -101,14 +101,14 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
   ];
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 text-slate-900 dark:text-slate-100 w-full min-w-0">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 text-[#F7F7F8] dark:text-[#F7F7F8] w-full min-w-0">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#2A2A33] dark:border-[#2A2A33] pb-5">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Admin Command Center</h1>
-          <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mt-1 flex-wrap">
+          <div className="text-xs text-[#A1A1AA] dark:text-[#A1A1AA] flex items-center gap-1.5 mt-1 flex-wrap">
             <span>Signed in as:</span>
-            <span className="font-semibold text-slate-700 dark:text-slate-200 font-mono">{currentUser?.email}</span>
+            <span className="font-semibold text-[#A1A1AA] dark:text-[#F7F7F8] font-mono">{currentUser?.email}</span>
             {isSuperAdmin && <span className="text-white font-medium">(Super Admin)</span>}
           </div>
         </div>
@@ -116,7 +116,7 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
           {onNavigateBack && (
             <button
               onClick={onNavigateBack}
-              className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-sm font-medium transition-colors duration-120 cursor-pointer border-0 inline-flex items-center gap-1.5"
+              className="px-3.5 py-2 bg-[#131318] hover:bg-[#1B1B22] dark:bg-[#1B1B22] dark:hover:bg-[#1B1B22] text-[#A1A1AA] dark:text-[#F7F7F8] rounded-lg text-sm font-medium transition-colors duration-120 cursor-pointer border-0 inline-flex items-center gap-1.5"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Exit to App</span>
@@ -124,7 +124,7 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
           )}
           <button
             onClick={handleRefreshAll}
-            className="p-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-120 border-0 cursor-pointer"
+            className="p-2 text-[#A1A1AA] hover:text-[#F7F7F8] dark:text-[#A1A1AA] dark:hover:text-[#F7F7F8] rounded-lg hover:bg-[#131318] dark:hover:bg-[#1B1B22] transition-colors duration-120 border-0 cursor-pointer"
             title="Refresh platform data"
           >
             <RefreshCw className={`w-4 h-4 ${loadingUnified ? 'animate-spin' : ''}`} />
@@ -143,20 +143,20 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
       {/* Platform Feature Controls */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Subscription Feature Toggle */}
-        <div className="bg-white dark:bg-slate-900 rounded-xl p-5 sm:p-6 flex flex-col justify-between gap-4 shadow-2xs border border-slate-200 dark:border-slate-800">
+        <div className="bg-[#131318] dark:bg-[#131318] rounded-xl p-5 sm:p-6 flex flex-col justify-between gap-4 shadow-2xs border border-[#2A2A33] dark:border-[#2A2A33]">
           <div className="space-y-1">
             <div className="flex items-center gap-2.5">
               <span className={`w-2.5 h-2.5 rounded-full ${isSubscriptionEnabled ? 'admin-indicator-active' : 'admin-indicator-inactive'}`} />
-              <h2 className="text-base font-bold text-slate-100">Subscriptions: {isSubscriptionEnabled ? 'ACTIVE (ON)' : 'DISABLED (OFF)'}</h2>
+              <h2 className="text-base font-bold text-[#F7F7F8]">Subscriptions: {isSubscriptionEnabled ? 'ACTIVE (ON)' : 'DISABLED (OFF)'}</h2>
             </div>
-            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#A1A1AA] leading-relaxed">
               {isSubscriptionEnabled
                 ? 'Subscriptions are active across the platform. Non-whitelisted freelancers are prompted for membership.'
                 : 'Subscriptions are turned OFF. All membership banners, upgrade buttons, and paywalls are removed.'}
             </p>
           </div>
-          <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-[#2a2a2a]">
-            <span className="text-xs sm:text-sm font-medium text-slate-200">
+          <div className="flex items-center justify-between pt-2 border-t border-[#2A2A33] dark:border-[#2A2A33]">
+            <span className="text-xs sm:text-sm font-medium text-[#F7F7F8]">
               {isSubscriptionEnabled ? 'Subscriptions ON' : 'Subscriptions OFF'}
             </span>
             <button
@@ -178,20 +178,20 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
         </div>
 
         {/* AI Work Summarizer Feature Toggle */}
-        <div className="bg-white dark:bg-slate-900 rounded-xl p-5 sm:p-6 flex flex-col justify-between gap-4 shadow-2xs border border-slate-200 dark:border-slate-800">
+        <div className="bg-[#131318] dark:bg-[#131318] rounded-xl p-5 sm:p-6 flex flex-col justify-between gap-4 shadow-2xs border border-[#2A2A33] dark:border-[#2A2A33]">
           <div className="space-y-1">
             <div className="flex items-center gap-2.5">
               <span className={`w-2.5 h-2.5 rounded-full ${isAiEnabled ? 'admin-indicator-active' : 'admin-indicator-inactive'}`} />
-              <h2 className="text-base font-bold text-slate-100">AI Summarizer: {isAiEnabled ? 'ACTIVE (ON)' : 'HIDDEN (OFF)'}</h2>
+              <h2 className="text-base font-bold text-[#F7F7F8]">AI Summarizer: {isAiEnabled ? 'ACTIVE (ON)' : 'HIDDEN (OFF)'}</h2>
             </div>
-            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#A1A1AA] leading-relaxed">
               {isAiEnabled
                 ? 'AI Summarizer is visible to users. Freelancers can use Gemini AI on their dashboard and configure AI keys.'
                 : 'AI Summarizer is turned OFF. All AI summarizer tools, cards, and settings are hidden from users.'}
             </p>
           </div>
-          <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-[#2a2a2a]">
-            <span className="text-xs sm:text-sm font-medium text-slate-200">
+          <div className="flex items-center justify-between pt-2 border-t border-[#2A2A33] dark:border-[#2A2A33]">
+            <span className="text-xs sm:text-sm font-medium text-[#F7F7F8]">
               {isAiEnabled ? 'AI Summarizer ON' : 'AI Summarizer OFF'}
             </span>
             <button
@@ -215,20 +215,20 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
 
       {/* Metrics Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs border border-slate-200 dark:border-slate-800">
-          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Freelancers</div>
+        <div className="bg-[#131318] dark:bg-[#131318] rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs border border-[#2A2A33] dark:border-[#2A2A33]">
+          <div className="text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA] uppercase tracking-wider">Total Freelancers</div>
           <div className="text-2xl sm:text-3xl font-bold">{unifiedStats.totalUsers}</div>
         </div>
-        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs border border-slate-200 dark:border-slate-800">
-          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Active Subscriptions</div>
+        <div className="bg-[#131318] dark:bg-[#131318] rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs border border-[#2A2A33] dark:border-[#2A2A33]">
+          <div className="text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA] uppercase tracking-wider">Active Subscriptions</div>
           <div className="text-2xl sm:text-3xl font-bold text-white">{unifiedStats.activeSubscribers}</div>
         </div>
-        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs border border-slate-200 dark:border-slate-800">
-          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">VIP Whitelist</div>
+        <div className="bg-[#131318] dark:bg-[#131318] rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs border border-[#2A2A33] dark:border-[#2A2A33]">
+          <div className="text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA] uppercase tracking-wider">VIP Whitelist</div>
           <div className="text-2xl sm:text-3xl font-bold">{whitelistCount}</div>
         </div>
-        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs border border-slate-200 dark:border-slate-800">
-          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Admin Accounts</div>
+        <div className="bg-[#131318] dark:bg-[#131318] rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs border border-[#2A2A33] dark:border-[#2A2A33]">
+          <div className="text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA] uppercase tracking-wider">Admin Accounts</div>
           <div className="text-2xl sm:text-3xl font-bold">{adminEmails.length}</div>
         </div>
       </div>
@@ -246,13 +246,13 @@ export default function AdminTab({ user: propUser, onNavigateBack }: AdminTabPro
               className={`relative px-4 py-2 rounded-lg font-medium transition-colors duration-150 inline-flex items-center gap-2 cursor-pointer border-0 select-none ${
                 isActive
                   ? 'text-white'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  : 'text-[#A1A1AA] dark:text-[#A1A1AA] hover:text-[#F7F7F8] dark:hover:text-[#F7F7F8] hover:bg-[#131318] dark:hover:bg-[#1B1B22]'
               }`}
             >
               {isActive && (
                 <motion.div
                   layoutId="adminActiveTabIndicator"
-                  className="absolute inset-0 bg-[#212121] rounded-lg shadow-xs -z-0"
+                  className="absolute inset-0 bg-[#131318] rounded-lg shadow-xs -z-0"
                   transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 450, damping: 38 }}
                 />
               )}

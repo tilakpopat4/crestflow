@@ -169,13 +169,13 @@ export const ClientRatesModal: React.FC<ClientRatesModalProps> = ({
                 animate={{ opacity: 1, y: 0 }}
                 exit={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: -3 }}
                 transition={{ duration: 0.14 }}
-                className="space-y-1.5 p-3.5 bg-slate-50 dark:bg-slate-950 rounded-xl"
+                className="space-y-1.5 p-3.5 bg-[#131318] dark:bg-[#0B0B0E] rounded-xl"
               >
-                <label className="block text-xs font-semibold text-slate-800 dark:text-slate-200">
+                <label className="block text-xs font-semibold text-[#F7F7F8] dark:text-[#F7F7F8]">
                   Fixed Monthly Retainer Amount ({currencySymbol}) *
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-[#A1A1AA]">
                     {currencySymbol}
                   </span>
                   <input

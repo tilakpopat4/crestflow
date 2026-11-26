@@ -71,23 +71,23 @@ export default class ErrorBoundary extends Component<Props, State> {
 
       if (isChunkError) {
         return (
-          <div className="min-h-[320px] flex items-center justify-center p-6 text-slate-900 dark:text-slate-100">
-            <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm text-center space-y-4">
+          <div className="min-h-[320px] flex items-center justify-center p-6 text-[#F7F7F8] dark:text-[#F7F7F8]">
+            <div className="max-w-md w-full bg-[#131318] dark:bg-[#131318] border border-[#2A2A33] dark:border-[#2A2A33] rounded-xl p-6 shadow-sm text-center space-y-4">
               <div className="w-10 h-10 bg-surface-600 border border-surface-400 text-text-primary rounded-xl flex items-center justify-center mx-auto">
                 <RefreshCw size={20} className="animate-spin" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+                <h3 className="text-base font-bold text-[#F7F7F8] dark:text-[#F7F7F8]">
                   Updating to latest version
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="text-xs text-[#A1A1AA] dark:text-[#A1A1AA]">
                   A newer version of CrestFlow is available. Reloading workspace...
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => window.location.reload()}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#282828] hover:bg-[#383838] text-white rounded-lg text-xs font-semibold transition-colors duration-120 cursor-pointer border-0"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#1B1B22] hover:bg-[#2A2A33] text-white rounded-lg text-xs font-semibold transition-colors duration-120 cursor-pointer border-0"
               >
                 <RefreshCw size={13} />
                 Refresh Now
@@ -98,16 +98,16 @@ export default class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="min-h-[320px] flex items-center justify-center p-6 text-slate-900 dark:text-slate-100">
-          <div className="max-w-md w-full bg-white dark:bg-[#181818] border border-slate-200 dark:border-[#2b2b2b] rounded-xl p-6 shadow-sm text-center space-y-4">
-            <div className="w-11 h-11 bg-slate-100 dark:bg-[#282828] text-red-600 dark:text-red-400 rounded-lg flex items-center justify-center mx-auto">
+        <div className="min-h-[320px] flex items-center justify-center p-6 text-[#F7F7F8] dark:text-[#F7F7F8]">
+          <div className="max-w-md w-full bg-[#131318] dark:bg-[#0B0B0E] border border-[#2A2A33] dark:border-[#2A2A33] rounded-xl p-6 shadow-sm text-center space-y-4">
+            <div className="w-11 h-11 bg-[#131318] dark:bg-[#1B1B22] text-[#E0002B] dark:text-[#F0607A] rounded-lg flex items-center justify-center mx-auto">
               <AlertTriangle size={20} />
             </div>
             <div className="space-y-1">
-              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+              <h3 className="text-base font-bold text-[#F7F7F8] dark:text-[#F7F7F8]">
                 {this.props.fallbackTitle || 'Something went wrong'}
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+              <p className="text-xs text-[#A1A1AA] dark:text-[#A1A1AA] leading-relaxed">
                 We ran into a temporary display issue. Your workspace data is safe and unaffected.
               </p>
             </div>
@@ -115,7 +115,7 @@ export default class ErrorBoundary extends Component<Props, State> {
               <button
                 type="button"
                 onClick={this.handleReset}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#282828] hover:bg-[#383838] text-white rounded-lg text-xs font-medium transition-colors duration-120 cursor-pointer border-none"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#1B1B22] hover:bg-[#2A2A33] text-white rounded-lg text-xs font-medium transition-colors duration-120 cursor-pointer border-none"
               >
                 <RefreshCw size={13} />
                 Try Again
@@ -123,7 +123,7 @@ export default class ErrorBoundary extends Component<Props, State> {
               <button
                 type="button"
                 onClick={() => window.location.reload()}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-[#282828] dark:hover:bg-[#333333] text-slate-700 dark:text-slate-200 rounded-lg text-xs font-medium transition-colors duration-120 cursor-pointer border-none"
+                className="px-4 py-2 bg-[#131318] hover:bg-[#1B1B22] dark:bg-[#1B1B22] dark:hover:bg-[#2A2A33] text-[#A1A1AA] dark:text-[#F7F7F8] rounded-lg text-xs font-medium transition-colors duration-120 cursor-pointer border-none"
               >
                 Reload App
               </button>

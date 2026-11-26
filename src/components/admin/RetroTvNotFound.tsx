@@ -153,11 +153,11 @@ const StyledWrapper = styled.div`
     height: 5.5em;
     border-radius: 50px;
     background-image: linear-gradient(
-      #171717,
-      #171717,
-      #353535,
-      #353535,
-      #171717
+      #0B0B0E,
+      #0B0B0E,
+      #2A2A33,
+      #2A2A33,
+      #0B0B0E
     );
     transform: rotate(-29deg);
     clip-path: polygon(50% 0%, 49% 100%, 52% 100%);
@@ -181,13 +181,13 @@ const StyledWrapper = styled.div`
     width: 12em;
     height: 4em;
     border-radius: 50px;
-    background-color: #171717;
+    background-color: #0B0B0E;
     background-image: linear-gradient(
-      #171717,
-      #171717,
-      #353535,
-      #353535,
-      #171717
+      #0B0B0E,
+      #0B0B0E,
+      #2A2A33,
+      #2A2A33,
+      #0B0B0E
     );
     margin-right: 5em;
     clip-path: polygon(
@@ -294,7 +294,7 @@ const StyledWrapper = styled.div`
     align-items: center;
     justify-content: center;
     font-weight: bold;
-    color: #252525;
+    color: #1B1B22;
     letter-spacing: 0.15em;
     text-align: center;
   }
@@ -307,18 +307,18 @@ const StyledWrapper = styled.div`
       to right,
       #002fc6 0%,
       #002bb2 14.2857142857%,
-      #3a3a3a 14.2857142857%,
-      #303030 28.5714285714%,
+      #2A2A33 14.2857142857%,
+      #2A2A33 28.5714285714%,
       #ff0afe 28.5714285714%,
       #f500f4 42.8571428571%,
       #6c6c6c 42.8571428571%,
       #626262 57.1428571429%,
       #0affd9 57.1428571429%,
       #00f5ce 71.4285714286%,
-      #3a3a3a 71.4285714286%,
-      #303030 85.7142857143%,
+      #2A2A33 71.4285714286%,
+      #2A2A33 85.7142857143%,
       white 85.7142857143%,
-      #fafafa 100%
+      #F7F7F8 100%
     );
     border-radius: 10px;
     border: 2px solid black;
@@ -327,7 +327,7 @@ const StyledWrapper = styled.div`
     align-items: center;
     justify-content: center;
     font-weight: bold;
-    color: #252525;
+    color: #1B1B22;
     letter-spacing: 0.15em;
     text-align: center;
     overflow: hidden;
@@ -346,7 +346,7 @@ const StyledWrapper = styled.div`
     background: linear-gradient(
       to right,
       white 0%,
-      #fafafa 14.2857142857%,
+      #F7F7F8 14.2857142857%,
       #ffe60a 14.2857142857%,
       #f5dc00 28.5714285714%,
       #0affd9 28.5714285714%,
@@ -369,15 +369,15 @@ const StyledWrapper = styled.div`
       #006c6b 0%,
       #005857 16.6666666667%,
       white 16.6666666667%,
-      #fafafa 33.3333333333%,
+      #F7F7F8 33.3333333333%,
       #001b75 33.3333333333%,
       #001761 50%,
       #6c6c6c 50%,
       #626262 66.6666666667%,
       #929292 66.6666666667%,
-      #888888 83.3333333333%,
-      #3a3a3a 83.3333333333%,
-      #303030 100%
+      #A1A1AA 83.3333333333%,
+      #2A2A33 83.3333333333%,
+      #2A2A33 100%
     );
   }
 
@@ -522,7 +522,7 @@ const StyledWrapper = styled.div`
   .speakers .g {
     width: auto;
     height: 2px;
-    background-color: #171717;
+    background-color: #0B0B0E;
   }
 
   .bottom {
@@ -537,7 +537,7 @@ const StyledWrapper = styled.div`
   .base2 {
     height: 1em;
     width: 2em;
-    border: 2px solid #171717;
+    border: 2px solid #0B0B0E;
     background-color: #4d4d4d;
     margin-top: -0.15em;
     z-index: -1;
@@ -546,7 +546,7 @@ const StyledWrapper = styled.div`
     position: absolute;
     height: 0.15em;
     width: 17.5em;
-    background-color: #171717;
+    background-color: #0B0B0E;
     margin-top: 0.8em;
   }
 

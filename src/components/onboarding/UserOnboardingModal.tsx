@@ -254,7 +254,7 @@ export const UserOnboardingModal: React.FC<UserOnboardingModalProps> = ({
                 setError(null);
                 setStep((s) => (s === 3 ? 2 : 1));
               }}
-              className="px-3.5 py-2 rounded-lg bg-[#1B1B22] hover:bg-[#22222B] border border-[#2A2A33] text-xs font-semibold text-[#F7F7F8] cursor-pointer"
+              className="px-3.5 py-2 rounded-lg bg-[#1B1B22] hover:bg-[#2A2A33] border border-[#2A2A33] text-xs font-semibold text-[#F7F7F8] cursor-pointer"
             >
               Back
             </button>
@@ -277,7 +277,7 @@ export const UserOnboardingModal: React.FC<UserOnboardingModalProps> = ({
               </button>
             ) : (
               <>
-                <button type="button" disabled={saving} onClick={() => void handleFinish('dashboard')} className="px-3.5 py-2 rounded-lg bg-[#1B1B22] hover:bg-[#22222B] border border-[#2A2A33] text-xs font-semibold text-[#A1A1AA] hover:text-[#F7F7F8] cursor-pointer">
+                <button type="button" disabled={saving} onClick={() => void handleFinish('dashboard')} className="px-3.5 py-2 rounded-lg bg-[#1B1B22] hover:bg-[#2A2A33] border border-[#2A2A33] text-xs font-semibold text-[#A1A1AA] hover:text-[#F7F7F8] cursor-pointer">
                   Open Dashboard
                 </button>
                 <button type="button" disabled={saving} onClick={() => void handleFinish('invoices')} className="px-4 py-2 rounded-lg cf-btn-primary text-xs font-semibold cursor-pointer disabled:opacity-50">

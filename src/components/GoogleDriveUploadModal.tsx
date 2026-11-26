@@ -235,19 +235,19 @@ export default function GoogleDriveUploadModal({
         <div className="p-6 space-y-5 overflow-y-auto">
           {/* API Disabled in Google Cloud Assistance UI */}
           {isApiDisabledError ? (
-            <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-4.5 space-y-3.5 animate-in fade-in">
+            <div className="bg-[#131318] dark:bg-[#131318]/60 border border-[#2A2A33] dark:border-[#2A2A33] rounded-2xl p-4.5 space-y-3.5 animate-in fade-in">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center shrink-0 mt-0.5">
+                <div className="w-8 h-8 rounded-xl bg-[#131318] dark:bg-[#1B1B22] text-[#A1A1AA] dark:text-[#A1A1AA] flex items-center justify-center shrink-0 mt-0.5">
                   <AlertCircle size={18} />
                 </div>
                 <div className="space-y-1.5 flex-1">
-                  <div className="font-bold text-xs text-slate-900 dark:text-slate-100 uppercase tracking-wide">
+                  <div className="font-bold text-xs text-[#F7F7F8] dark:text-[#F7F7F8] uppercase tracking-wide">
                     Google Drive API Needs 1-Click Activation
                   </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                  <p className="text-xs text-[#A1A1AA] dark:text-[#A1A1AA] leading-relaxed">
                     Google Cloud requires the <strong>Google Drive API</strong> to be turned on once for project <strong>960977935987</strong> (CrestFlow).
                   </p>
-                  <ol className="list-decimal list-inside text-xs text-slate-600 dark:text-slate-400 space-y-1 pl-1 font-medium">
+                  <ol className="list-decimal list-inside text-xs text-[#A1A1AA] dark:text-[#A1A1AA] space-y-1 pl-1 font-medium">
                     <li>
                       Click the blue button below to open Google Cloud Console.
                     </li>
@@ -261,7 +261,7 @@ export default function GoogleDriveUploadModal({
                 </div>
               </div>
 
-              <div className="pt-2 flex flex-wrap items-center gap-2 border-t border-slate-200 dark:border-slate-800">
+              <div className="pt-2 flex flex-wrap items-center gap-2 border-t border-[#2A2A33] dark:border-[#2A2A33]">
                 <a
                   href={activationUrl}
                   target="_blank"
@@ -283,19 +283,19 @@ export default function GoogleDriveUploadModal({
               </div>
             </div>
           ) : isPopupBlockedError ? (
-            <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-4.5 space-y-3 animate-in fade-in">
+            <div className="bg-[#131318] dark:bg-[#131318]/60 border border-[#2A2A33] dark:border-[#2A2A33] rounded-2xl p-4.5 space-y-3 animate-in fade-in">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center shrink-0 mt-0.5">
+                <div className="w-8 h-8 rounded-xl bg-[#131318] dark:bg-[#1B1B22] text-[#A1A1AA] dark:text-[#A1A1AA] flex items-center justify-center shrink-0 mt-0.5">
                   <AlertCircle size={18} />
                 </div>
                 <div className="space-y-1.5 flex-1">
-                  <div className="font-bold text-xs text-slate-900 dark:text-slate-100 uppercase tracking-wide">
+                  <div className="font-bold text-xs text-[#F7F7F8] dark:text-[#F7F7F8] uppercase tracking-wide">
                     Google Popup Blocked by Browser
                   </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                  <p className="text-xs text-[#A1A1AA] dark:text-[#A1A1AA] leading-relaxed">
                     Your browser prevented the Google Drive sign-in popup from opening. Follow these 2 steps:
                   </p>
-                  <ol className="list-decimal list-inside text-xs text-slate-600 dark:text-slate-400 space-y-1 pl-1 font-medium">
+                  <ol className="list-decimal list-inside text-xs text-[#A1A1AA] dark:text-[#A1A1AA] space-y-1 pl-1 font-medium">
                     <li>
                       Look at the <strong>far right of your browser's address (URL) bar</strong> and click the <strong>Pop-up blocked icon</strong>.
                     </li>
@@ -491,14 +491,14 @@ export default function GoogleDriveUploadModal({
               {isUploading && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                    <span className="font-semibold text-[#A1A1AA] dark:text-[#A1A1AA] flex items-center gap-1.5">
                       <Loader2 size={14} className="animate-spin text-white" /> Uploading to Google Drive...
                     </span>
                     <span className="font-mono font-bold text-white">
                       {uploadProgress}%
                     </span>
                   </div>
-                  <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden">
+                  <div className="w-full bg-[#131318] dark:bg-[#1B1B22] rounded-full h-2.5 overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-300"
                       style={{ width: `${uploadProgress}%`, backgroundColor: '#ffffff' }}

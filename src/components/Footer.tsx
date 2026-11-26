@@ -85,19 +85,19 @@ export default function Footer({
   };
 
   const navLinkClass =
-    'rounded-sm text-xs md:text-sm text-slate-400 transition-colors duration-150 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-50';
+    'rounded-sm text-xs md:text-sm text-[#A1A1AA] transition-colors duration-150 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F7F7F8]';
 
   const bottomLinkClass =
-    'rounded-sm whitespace-nowrap text-xs md:text-sm text-slate-400 transition-colors duration-150 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-50';
+    'rounded-sm whitespace-nowrap text-xs md:text-sm text-[#A1A1AA] transition-colors duration-150 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F7F7F8]';
 
   const socialLinkClass =
-    'inline-flex size-7 md:size-8 items-center justify-center rounded-lg text-slate-400 transition-colors duration-150 hover:bg-[#333333] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-50';
+    'inline-flex size-7 md:size-8 items-center justify-center rounded-lg text-[#A1A1AA] transition-colors duration-150 hover:bg-[#2A2A33] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F7F7F8]';
 
   const brandLogo = (
     <a
       href="/"
       onClick={(e) => handleLinkClick(e, { id: 'home', name: config.brandName, url: '/', route: 'dashboard' })}
-      className="flex shrink-0 items-center gap-2 rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-50 group"
+      className="flex shrink-0 items-center gap-2 rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F7F7F8] group"
     >
       <Logo className="w-6 h-6 md:w-7 md:h-7 rounded-lg shadow-xs group-hover:scale-105 transition-transform duration-150" />
       <span className="text-sm md:text-[15px] font-semibold tracking-tight text-white">
@@ -151,19 +151,19 @@ export default function Footer({
         className={`w-full transition-colors ${
           transparent
             ? 'bg-transparent text-white/80'
-            : 'bg-[#282828] text-slate-400'
+            : 'bg-[#1B1B22] text-[#A1A1AA]'
         } px-4 md:px-8 ${className}`}
       >
         <h2 id="ft-simple-title" className="sr-only">
           Footer
         </h2>
         <div className="mx-auto max-w-7xl">
-          <div className="flex flex-col gap-2 py-3 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between sm:text-sm sm:py-4">
+          <div className="flex flex-col gap-2 py-3 text-xs text-[#A1A1AA] sm:flex-row sm:items-center sm:justify-between sm:text-sm sm:py-4">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 sm:gap-x-4 sm:gap-y-2">
-              <p className="text-slate-400">
+              <p className="text-[#A1A1AA]">
                 {config.copyrightText}{' '}
                 {config.versionText && (
-                  <span className="text-slate-500">&bull; Version {config.versionText}</span>
+                  <span className="text-[#A1A1AA]">&bull; Version {config.versionText}</span>
                 )}
               </p>
               {legalLinks}
@@ -178,7 +178,7 @@ export default function Footer({
   return (
     <footer
       aria-labelledby="ft-simple-title"
-      className={`bg-[#282828] px-4 md:px-8 ${className}`}
+      className={`bg-[#1B1B22] px-4 md:px-8 ${className}`}
     >
       <h2 id="ft-simple-title" className="sr-only">
         Footer
@@ -204,12 +204,12 @@ export default function Footer({
             </ul>
           </nav>
         </div>
-        <div className="flex flex-col gap-2 border-t border-[#333333] py-2.5 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between sm:text-sm sm:py-3.5 md:gap-4">
+        <div className="flex flex-col gap-2 border-t border-[#2A2A33] py-2.5 text-xs text-[#A1A1AA] sm:flex-row sm:items-center sm:justify-between sm:text-sm sm:py-3.5 md:gap-4">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 sm:gap-x-4 sm:gap-y-2">
-            <p className="text-slate-400">
+            <p className="text-[#A1A1AA]">
               {config.copyrightText}{' '}
               {config.versionText && (
-                <span className="text-slate-500">&bull; Version {config.versionText}</span>
+                <span className="text-[#A1A1AA]">&bull; Version {config.versionText}</span>
               )}
             </p>
             {legalLinks}

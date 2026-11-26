@@ -40,7 +40,7 @@ export const AdminHeroVideoManager: React.FC<AdminHeroVideoManagerProps> = ({ dr
   const hasVideo = Boolean(activeVideoUrl && !activeVideoUrl.includes('REPLACE_ME'));
 
   return (
-    <div className="space-y-4 pt-3 border-t border-[#333333]">
+    <div className="space-y-4 pt-3 border-t border-[#2A2A33]">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -48,36 +48,36 @@ export const AdminHeroVideoManager: React.FC<AdminHeroVideoManagerProps> = ({ dr
             <Video className="w-4 h-4 text-accent" />
             <span>Self-Hosted Hero Video Background</span>
           </span>
-          <p className="text-[11px] text-[#aaaaaa]">Zero player controls • Native HTML5 &lt;video&gt; • UploadThing CDN</p>
+          <p className="text-[11px] text-[#A1A1AA]">Zero player controls • Native HTML5 &lt;video&gt; • UploadThing CDN</p>
         </div>
-        <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-950/60 text-emerald-400 border border-emerald-800">
+        <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-950/60 text-[#2DD4A0] border border-emerald-800">
           UI-Free
         </span>
       </div>
 
       {/* Instructions Guide */}
-      <div className="bg-[#181818] p-3.5 rounded-lg border border-[#333333] space-y-3">
+      <div className="bg-[#0B0B0E] p-3.5 rounded-lg border border-[#2A2A33] space-y-3">
         <span className="block text-xs font-semibold text-white">How to Change the Landing Background Video</span>
-        <ol className="text-xs text-slate-300 space-y-2 list-decimal list-inside leading-relaxed">
+        <ol className="text-xs text-[#A1A1AA] space-y-2 list-decimal list-inside leading-relaxed">
           <li>
-            <strong className="text-white">Upload your video:</strong> Upload your compressed <code className="text-accent bg-[#222222] px-1 py-0.5 rounded">.mp4</code> or <code className="text-accent bg-[#222222] px-1 py-0.5 rounded">.webm</code> (under 25 MB) to UploadThing or any CDN.
+            <strong className="text-white">Upload your video:</strong> Upload your compressed <code className="text-accent bg-[#131318] px-1 py-0.5 rounded">.mp4</code> or <code className="text-accent bg-[#131318] px-1 py-0.5 rounded">.webm</code> (under 25 MB) to UploadThing or any CDN.
           </li>
           <li>
-            <strong className="text-white">Add URL to Environment Variables:</strong> Set <code className="text-white bg-[#222222] px-1 py-0.5 rounded">VITE_HERO_VIDEO_MP4</code> in your <code className="text-slate-400">.env</code> or in <code className="text-slate-400">wrangler.jsonc</code> under <code className="text-slate-400">vars</code>.
+            <strong className="text-white">Add URL to Environment Variables:</strong> Set <code className="text-white bg-[#131318] px-1 py-0.5 rounded">VITE_HERO_VIDEO_MP4</code> in your <code className="text-[#A1A1AA]">.env</code> or in <code className="text-[#A1A1AA]">wrangler.jsonc</code> under <code className="text-[#A1A1AA]">vars</code>.
           </li>
           <li>
-            <strong className="text-white">Or Edit Config File:</strong> Directly update <code className="text-white bg-[#222222] px-1 py-0.5 rounded">src/config/site.ts</code> with your public URL.
+            <strong className="text-white">Or Edit Config File:</strong> Directly update <code className="text-white bg-[#131318] px-1 py-0.5 rounded">src/config/site.ts</code> with your public URL.
           </li>
           <li>
-            <strong className="text-white">Fallback Poster:</strong> Place your static poster image at <code className="text-white bg-[#222222] px-1 py-0.5 rounded">public/hero-v1-poster.jpg</code>.
+            <strong className="text-white">Fallback Poster:</strong> Place your static poster image at <code className="text-white bg-[#131318] px-1 py-0.5 rounded">public/hero-v1-poster.jpg</code>.
           </li>
         </ol>
 
         {/* Current Active Video Source Indicator */}
-        <div className="pt-2 border-t border-[#2a2a2a] space-y-1">
-          <span className="text-[11px] text-[#aaaaaa] font-medium block">Current Active Stream Source:</span>
-          <div className="bg-[#121212] border border-[#2a2a2a] rounded p-2 flex items-center justify-between gap-2 overflow-hidden">
-            <span className="text-xs font-mono text-emerald-400 truncate select-all">
+        <div className="pt-2 border-t border-[#2A2A33] space-y-1">
+          <span className="text-[11px] text-[#A1A1AA] font-medium block">Current Active Stream Source:</span>
+          <div className="bg-[#0B0B0E] border border-[#2A2A33] rounded p-2 flex items-center justify-between gap-2 overflow-hidden">
+            <span className="text-xs font-mono text-[#2DD4A0] truncate select-all">
               {hasVideo ? activeVideoUrl : 'Using local static poster fallback (/hero-v1-poster.jpg)'}
             </span>
             {hasVideo && (
@@ -85,7 +85,7 @@ export const AdminHeroVideoManager: React.FC<AdminHeroVideoManagerProps> = ({ dr
                 href={activeVideoUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="text-[#aaaaaa] hover:text-white shrink-0 p-1"
+                className="text-[#A1A1AA] hover:text-white shrink-0 p-1"
                 title="Open in new tab"
               >
                 <ExternalLink className="w-3.5 h-3.5" />
@@ -96,7 +96,7 @@ export const AdminHeroVideoManager: React.FC<AdminHeroVideoManagerProps> = ({ dr
       </div>
 
       {/* Toggles: Video Enabled & Show on Mobile */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#181818] p-3 rounded-lg border border-[#333333]">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#0B0B0E] p-3 rounded-lg border border-[#2A2A33]">
         <label className="flex items-center justify-between gap-2 cursor-pointer">
           <span className="text-xs text-white">Enable Video Background</span>
           <input
@@ -108,7 +108,7 @@ export const AdminHeroVideoManager: React.FC<AdminHeroVideoManagerProps> = ({ dr
         </label>
         <label className="flex items-center justify-between gap-2 cursor-pointer">
           <span className="text-xs text-white inline-flex items-center gap-1">
-            <Smartphone className="w-3.5 h-3.5 text-[#aaaaaa]" />
+            <Smartphone className="w-3.5 h-3.5 text-[#A1A1AA]" />
             <span>Show on Mobile</span>
           </span>
           <input
@@ -121,9 +121,9 @@ export const AdminHeroVideoManager: React.FC<AdminHeroVideoManagerProps> = ({ dr
       </div>
 
       {/* Scrim Contrast Slider */}
-      <div className="bg-[#181818] p-3 rounded-lg border border-[#333333] space-y-1.5">
-        <div className="flex justify-between text-xs text-slate-300">
-          <span>Dark Scrim Contrast (#1A1A1A)</span>
+      <div className="bg-[#0B0B0E] p-3 rounded-lg border border-[#2A2A33] space-y-1.5">
+        <div className="flex justify-between text-xs text-[#A1A1AA]">
+          <span>Dark Scrim Contrast (#0B0B0E)</span>
           <span className="font-mono text-white">{Math.round(draft.backgroundOverlayOpacity * 100)}%</span>
         </div>
         <input
@@ -135,7 +135,7 @@ export const AdminHeroVideoManager: React.FC<AdminHeroVideoManagerProps> = ({ dr
           onChange={(e) => setDraft((prev) => ({ ...prev, backgroundOverlayOpacity: parseFloat(e.target.value) }))}
           className="w-full accent-accent cursor-pointer"
         />
-        <p className="text-[11px] text-[#aaaaaa]">
+        <p className="text-[11px] text-[#A1A1AA]">
           Guarantees $\ge 4.5:1$ WCAG AA contrast ratio so headlines and inputs remain readable against any frame.
         </p>
       </div>
@@ -143,8 +143,8 @@ export const AdminHeroVideoManager: React.FC<AdminHeroVideoManagerProps> = ({ dr
       {/* Live Preview Player */}
       {hasVideo && (
         <div className="space-y-2">
-          <label className="block text-xs font-medium text-[#aaaaaa]">Live Video Preview</label>
-          <div className="relative rounded-lg overflow-hidden bg-black border border-[#333333] aspect-video">
+          <label className="block text-xs font-medium text-[#A1A1AA]">Live Video Preview</label>
+          <div className="relative rounded-lg overflow-hidden bg-black border border-[#2A2A33] aspect-video">
             <video
               src={activeVideoUrl}
               poster={siteConfig.heroVideo.poster || draft.posterUrl || undefined}
@@ -157,19 +157,19 @@ export const AdminHeroVideoManager: React.FC<AdminHeroVideoManagerProps> = ({ dr
       )}
 
       {/* Optional Cloudflare R2 Upload Section */}
-      <div className="pt-2 border-t border-[#333333]">
+      <div className="pt-2 border-t border-[#2A2A33]">
         <button
           type="button"
           onClick={() => setShowR2Upload((prev) => !prev)}
-          className="w-full flex items-center justify-between text-xs text-[#aaaaaa] hover:text-white py-1 cursor-pointer border-0 bg-transparent"
+          className="w-full flex items-center justify-between text-xs text-[#A1A1AA] hover:text-white py-1 cursor-pointer border-0 bg-transparent"
         >
           <span>Direct MP4 Upload to Cloudflare R2 (Optional)</span>
           {showR2Upload ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </button>
 
         {showR2Upload && (
-          <div className="mt-2.5 p-3 bg-[#181818] rounded-lg border border-[#333333] space-y-2.5">
-            <p className="text-[11px] text-slate-400">
+          <div className="mt-2.5 p-3 bg-[#0B0B0E] rounded-lg border border-[#2A2A33] space-y-2.5">
+            <p className="text-[11px] text-[#A1A1AA]">
               Upload video directly to your configured Cloudflare R2 storage bucket.
             </p>
             <input ref={videoFileInputRef} type="file" accept="video/mp4,video/webm" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUploadVideo(f); }} />
@@ -180,18 +180,18 @@ export const AdminHeroVideoManager: React.FC<AdminHeroVideoManagerProps> = ({ dr
                 type="button"
                 disabled={uploading}
                 onClick={() => videoFileInputRef.current?.click()}
-                className="px-3 py-1.5 bg-[#282828] hover:bg-[#333333] text-white rounded-lg text-xs font-medium inline-flex items-center gap-1.5 cursor-pointer border-0"
+                className="px-3 py-1.5 bg-[#1B1B22] hover:bg-[#2A2A33] text-white rounded-lg text-xs font-medium inline-flex items-center gap-1.5 cursor-pointer border-0"
               >
                 <Upload className="w-3.5 h-3.5 text-accent" />
                 <span>Upload Video to R2</span>
               </button>
               {hasVideo && (
                 <>
-                  <button type="button" disabled={isCapturingPoster} onClick={handleExtractFirstFrame} className="px-3 py-1.5 bg-[#282828] hover:bg-[#333333] text-[#aaaaaa] hover:text-white rounded-lg text-xs font-medium inline-flex items-center gap-1.5 cursor-pointer border-0">
+                  <button type="button" disabled={isCapturingPoster} onClick={handleExtractFirstFrame} className="px-3 py-1.5 bg-[#1B1B22] hover:bg-[#2A2A33] text-[#A1A1AA] hover:text-white rounded-lg text-xs font-medium inline-flex items-center gap-1.5 cursor-pointer border-0">
                     <Camera className="w-3.5 h-3.5" />
                     <span>Capture Frame as Poster</span>
                   </button>
-                  <button type="button" onClick={() => posterFileInputRef.current?.click()} className="px-3 py-1.5 bg-[#282828] hover:bg-[#333333] text-[#aaaaaa] hover:text-white rounded-lg text-xs font-medium cursor-pointer border-0">
+                  <button type="button" onClick={() => posterFileInputRef.current?.click()} className="px-3 py-1.5 bg-[#1B1B22] hover:bg-[#2A2A33] text-[#A1A1AA] hover:text-white rounded-lg text-xs font-medium cursor-pointer border-0">
                     <span>Upload Poster</span>
                   </button>
                 </>
@@ -200,11 +200,11 @@ export const AdminHeroVideoManager: React.FC<AdminHeroVideoManagerProps> = ({ dr
 
             {uploading && (
               <div className="space-y-1">
-                <div className="flex justify-between text-xs text-[#aaaaaa]">
+                <div className="flex justify-between text-xs text-[#A1A1AA]">
                   <span>Uploading to R2...</span>
                   <span className="font-mono">{progress}%</span>
                 </div>
-                <div className="w-full h-1.5 bg-[#121212] rounded-full overflow-hidden">
+                <div className="w-full h-1.5 bg-[#0B0B0E] rounded-full overflow-hidden">
                   <div className="h-full bg-accent transition-all duration-150" style={{ width: `${progress}%` }} />
                 </div>
               </div>
@@ -212,7 +212,7 @@ export const AdminHeroVideoManager: React.FC<AdminHeroVideoManagerProps> = ({ dr
 
             {statusMessage && (
               <div className="p-2 bg-emerald-950/40 border border-emerald-800 text-emerald-300 rounded text-xs flex items-center gap-2">
-                <Check className="w-4 h-4 shrink-0 text-emerald-400" />
+                <Check className="w-4 h-4 shrink-0 text-[#2DD4A0]" />
                 <span>{statusMessage}</span>
               </div>
             )}
@@ -220,7 +220,7 @@ export const AdminHeroVideoManager: React.FC<AdminHeroVideoManagerProps> = ({ dr
             {errorMessage && (
               <div className="p-2 bg-red-950/40 border border-red-800 text-red-300 rounded text-xs flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
+                  <AlertCircle className="w-4 h-4 shrink-0 text-[#F0607A]" />
                   <span>{errorMessage}</span>
                 </div>
                 {lastFailedFile && (

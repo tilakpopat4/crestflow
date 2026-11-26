@@ -53,7 +53,7 @@ export const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
       >
         <caption
           id={`${id}-caption`}
-          className="pb-2 text-sm/9 font-medium text-slate-900 dark:text-slate-100"
+          className="pb-2 text-sm/9 font-medium text-[#F7F7F8] dark:text-[#F7F7F8]"
         >
           {monthName(view)}
         </caption>
@@ -64,7 +64,7 @@ export const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
                 key={name}
                 scope="col"
                 abbr={name}
-                className="h-8 text-xs font-medium text-slate-500 dark:text-slate-400"
+                className="h-8 text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA]"
               >
                 {name.slice(0, 2)}
               </th>
@@ -86,7 +86,7 @@ export const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
                     aria-selected={a.selected === 'true' ? true : a.selected === 'false' ? false : Boolean(a.selected)}
                     data-range={a.range}
                     data-edge={a.edge}
-                    className="group p-0 first:rounded-l-lg last:rounded-r-lg aria-selected:bg-[#282828] data-[range=end]:rounded-r-lg data-[range=preview]:bg-[#282828] data-[range=single]:rounded-lg data-[range=start]:rounded-l-lg"
+                    className="group p-0 first:rounded-l-lg last:rounded-r-lg aria-selected:bg-[#1B1B22] data-[range=end]:rounded-r-lg data-[range=preview]:bg-[#1B1B22] data-[range=single]:rounded-lg data-[range=start]:rounded-l-lg"
                   >
                     <button
                       type="button"

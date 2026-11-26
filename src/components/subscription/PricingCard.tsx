@@ -105,7 +105,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
           className={`w-full py-2.5 px-4 rounded-lg text-xs font-semibold cursor-pointer inline-flex items-center justify-center gap-1.5 disabled:opacity-50 ${
             isBestValue || isTrial
               ? 'cf-btn-primary text-white'
-              : 'bg-[#1B1B22] hover:bg-[#22222B] border border-[#2A2A33] text-[#F7F7F8]'
+              : 'bg-[#1B1B22] hover:bg-[#2A2A33] border border-[#2A2A33] text-[#F7F7F8]'
           }`}
         >
           {loading && <Loader2 size={13} className="animate-spin" />}

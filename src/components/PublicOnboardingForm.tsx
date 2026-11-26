@@ -49,8 +49,8 @@ export default function PublicOnboardingForm({
   onClear,
 }: PublicOnboardingFormProps) {
   return (
-    <div className="bg-white dark:bg-slate-900 border-0 rounded-xl p-6 md:p-8 flex-1 flex flex-col justify-between">
-      <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+    <div className="bg-[#131318] dark:bg-[#131318] border-0 rounded-xl p-6 md:p-8 flex-1 flex flex-col justify-between">
+      <h2 className="text-xl md:text-2xl font-bold text-[#F7F7F8] dark:text-white tracking-tight">
         Project Brief
       </h2>
 
@@ -58,7 +58,7 @@ export default function PublicOnboardingForm({
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 mb-1 uppercase tracking-wider">
+              <label className="block text-[11px] font-semibold text-[#A1A1AA] mb-1 uppercase tracking-wider">
                 Company / Client *
               </label>
               <input
@@ -67,12 +67,12 @@ export default function PublicOnboardingForm({
                 placeholder="Acme Studio"
                 value={clientName}
                 onChange={(e) => setClientName(e.target.value)}
-                className="w-full px-3.5 py-2.5 text-sm border border-slate-700 rounded-lg bg-slate-800 text-slate-100 placeholder-slate-500 outline-none transition-colors duration-120 focus:border-slate-500"
+                className="w-full px-3.5 py-2.5 text-sm border border-[#2A2A33] rounded-lg bg-[#1B1B22] text-[#F7F7F8] placeholder-slate-500 outline-none transition-colors duration-120 focus:border-[#2A2A33]"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 mb-1 uppercase tracking-wider">
+              <label className="block text-[11px] font-semibold text-[#A1A1AA] mb-1 uppercase tracking-wider">
                 Contact Name *
               </label>
               <input
@@ -81,14 +81,14 @@ export default function PublicOnboardingForm({
                 placeholder="Jane Smith"
                 value={contactName}
                 onChange={(e) => setContactName(e.target.value)}
-                className="w-full px-3.5 py-2.5 text-sm border border-slate-700 rounded-lg bg-slate-800 text-slate-100 placeholder-slate-500 outline-none transition-colors duration-120 focus:border-slate-500"
+                className="w-full px-3.5 py-2.5 text-sm border border-[#2A2A33] rounded-lg bg-[#1B1B22] text-[#F7F7F8] placeholder-slate-500 outline-none transition-colors duration-120 focus:border-[#2A2A33]"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 mb-1 uppercase tracking-wider">
+              <label className="block text-[11px] font-semibold text-[#A1A1AA] mb-1 uppercase tracking-wider">
                 Phone *
               </label>
               <input
@@ -97,12 +97,12 @@ export default function PublicOnboardingForm({
                 placeholder="+91 98765 43210"
                 value={contactPhone}
                 onChange={(e) => setContactPhone(e.target.value)}
-                className="w-full px-3.5 py-2.5 text-sm border border-slate-700 rounded-lg bg-slate-800 text-slate-100 placeholder-slate-500 outline-none transition-colors duration-120 focus:border-slate-500"
+                className="w-full px-3.5 py-2.5 text-sm border border-[#2A2A33] rounded-lg bg-[#1B1B22] text-[#F7F7F8] placeholder-slate-500 outline-none transition-colors duration-120 focus:border-[#2A2A33]"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 mb-1 uppercase tracking-wider">
+              <label className="block text-[11px] font-semibold text-[#A1A1AA] mb-1 uppercase tracking-wider">
                 Email *
               </label>
               <input
@@ -111,14 +111,14 @@ export default function PublicOnboardingForm({
                 placeholder="client@example.com"
                 value={contactEmail}
                 onChange={(e) => setContactEmail(e.target.value)}
-                className="w-full px-3.5 py-2.5 text-sm border border-slate-700 rounded-lg bg-slate-800 text-slate-100 placeholder-slate-500 outline-none transition-colors duration-120 focus:border-slate-500"
+                className="w-full px-3.5 py-2.5 text-sm border border-[#2A2A33] rounded-lg bg-[#1B1B22] text-[#F7F7F8] placeholder-slate-500 outline-none transition-colors duration-120 focus:border-[#2A2A33]"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 mb-1 uppercase tracking-wider">
+              <label className="block text-[11px] font-semibold text-[#A1A1AA] mb-1 uppercase tracking-wider">
                 Instagram / Website
               </label>
               <input
@@ -126,12 +126,12 @@ export default function PublicOnboardingForm({
                 placeholder="https://instagram.com/brand"
                 value={instagram}
                 onChange={(e) => setInstagram(e.target.value)}
-                className="w-full px-3.5 py-2.5 text-sm border border-slate-700 rounded-lg bg-slate-800 text-slate-100 placeholder-slate-500 outline-none transition-colors duration-120 focus:border-slate-500"
+                className="w-full px-3.5 py-2.5 text-sm border border-[#2A2A33] rounded-lg bg-[#1B1B22] text-[#F7F7F8] placeholder-slate-500 outline-none transition-colors duration-120 focus:border-[#2A2A33]"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 mb-1 uppercase tracking-wider">
+              <label className="block text-[11px] font-semibold text-[#A1A1AA] mb-1 uppercase tracking-wider">
                 Rate (₹/reel)
               </label>
               <input
@@ -139,13 +139,13 @@ export default function PublicOnboardingForm({
                 placeholder={String(profile.defaultRate || 1500)}
                 value={proposedRate}
                 onChange={(e) => setProposedRate(e.target.value)}
-                className="w-full px-3.5 py-2.5 text-sm border border-slate-700 rounded-lg bg-slate-800 text-slate-100 placeholder-slate-500 outline-none transition-colors duration-120 focus:border-slate-500"
+                className="w-full px-3.5 py-2.5 text-sm border border-[#2A2A33] rounded-lg bg-[#1B1B22] text-[#F7F7F8] placeholder-slate-500 outline-none transition-colors duration-120 focus:border-[#2A2A33]"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-[11px] font-semibold text-slate-400 mb-1 uppercase tracking-wider">
+            <label className="block text-[11px] font-semibold text-[#A1A1AA] mb-1 uppercase tracking-wider">
               Details *
             </label>
             <textarea
@@ -154,7 +154,7 @@ export default function PublicOnboardingForm({
               placeholder="Editing needs, style, frequency..."
               value={projectDetails}
               onChange={(e) => setProjectDetails(e.target.value)}
-              className="w-full p-3 text-sm border border-slate-700 rounded-lg bg-slate-800 text-slate-100 placeholder-slate-500 outline-none transition-colors duration-120 focus:border-slate-500 resize-none leading-relaxed flex-1 min-h-[96px]"
+              className="w-full p-3 text-sm border border-[#2A2A33] rounded-lg bg-[#1B1B22] text-[#F7F7F8] placeholder-slate-500 outline-none transition-colors duration-120 focus:border-[#2A2A33] resize-none leading-relaxed flex-1 min-h-[96px]"
             />
           </div>
         </div>
@@ -170,7 +170,7 @@ export default function PublicOnboardingForm({
 
           <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
             {!auth.currentUser && (
-              <span className="text-[11px] text-slate-400">
+              <span className="text-[11px] text-[#A1A1AA]">
                 Sign-in required
               </span>
             )}

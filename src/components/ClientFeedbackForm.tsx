@@ -167,7 +167,7 @@ export default function ClientFeedbackForm() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#131318] dark:bg-[#0B0B0E] flex items-center justify-center p-4">
         <Loader2 className="w-8 h-8 animate-spin text-accent" />
       </div>
     );
@@ -210,10 +210,10 @@ export default function ClientFeedbackForm() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4 font-sans text-slate-800 dark:text-slate-200 transition-colors duration-150">
-      <div className="max-w-lg w-full bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden relative animate-in fade-in duration-300">
+    <div className="min-h-screen bg-[#131318] dark:bg-[#0B0B0E] flex flex-col items-center justify-center p-4 font-sans text-[#F7F7F8] dark:text-[#F7F7F8] transition-colors duration-150">
+      <div className="max-w-lg w-full bg-[#131318] dark:bg-[#131318] rounded-xl shadow-xl border border-[#2A2A33] dark:border-[#2A2A33] overflow-hidden relative animate-in fade-in duration-300">
         {/* Header */}
-        <div className="p-6 md:p-8 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
+        <div className="p-6 md:p-8 bg-[#131318] text-white flex items-center justify-between border-b border-[#2A2A33]">
           <div className="flex items-center gap-3">
             <Logo className="w-9 h-9 shadow-sm" />
             <div className="flex flex-col">
@@ -221,24 +221,24 @@ export default function ClientFeedbackForm() {
               <span className="text-[9px] text-accent font-bold uppercase tracking-wider mt-1">Client Feedback Portal</span>
             </div>
           </div>
-          <span className="text-xs text-slate-400 font-medium">Leave Review</span>
+          <span className="text-xs text-[#A1A1AA] font-medium">Leave Review</span>
         </div>
 
         {/* Content */}
         <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-6">
           <div className="space-y-2">
-            <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Share Your Experience</h1>
-            <p className="text-slate-500 dark:text-slate-400 text-xs md:text-sm leading-relaxed">
+            <h1 className="text-xl font-bold text-[#F7F7F8] dark:text-[#F7F7F8]">Share Your Experience</h1>
+            <p className="text-[#A1A1AA] dark:text-[#A1A1AA] text-xs md:text-sm leading-relaxed">
               Hi there! Please take a moment to leave a review for <span className="font-semibold text-text-primary">{freelancerName}</span>. Your review helps build trust and improve future collaborations.
             </p>
-            <p className="text-[11px] text-slate-400 font-mono">
+            <p className="text-[11px] text-[#A1A1AA] font-mono">
               Signed in as {currentUser.email} • 1 review permitted per account
             </p>
           </div>
 
           {error && (
-            <div className="bg-[#181818] border border-red-600/40 text-red-400 p-4 rounded-xl text-xs font-semibold flex items-start gap-2.5">
-              <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+            <div className="bg-[#0B0B0E] border border-red-600/40 text-[#F0607A] p-4 rounded-xl text-xs font-semibold flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 text-[#F0607A] flex-shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}

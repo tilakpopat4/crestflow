@@ -284,16 +284,16 @@ export default function BulkEditWorkModal({
 
         {/* Invoiced Sync Notification Banner */}
         {hasInvoiced && (
-          <div className="mx-6 mt-5 p-3.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl flex items-start gap-3">
-            <Info size={18} className="text-slate-500 dark:text-slate-400 shrink-0 mt-0.5" />
-            <div className="text-xs text-slate-700 dark:text-slate-300">
+          <div className="mx-6 mt-5 p-3.5 bg-[#131318] dark:bg-[#131318]/60 border border-[#2A2A33] dark:border-[#2A2A33] rounded-xl flex items-start gap-3">
+            <Info size={18} className="text-[#A1A1AA] dark:text-[#A1A1AA] shrink-0 mt-0.5" />
+            <div className="text-xs text-[#A1A1AA] dark:text-[#A1A1AA]">
               <span className="font-bold">Automatic Invoice Sync Active:</span> {invoicedItems.length} of the {selectedItems.length} selected logs belong to {affectedInvoices.length} existing listed invoice(s). Any edits to Rate, Quantity, Description, or Sub-Client will automatically be synchronized into the line items and grand totals of their respective invoices.
             </div>
           </div>
         )}
 
         {errorMsg && (
-          <div className="mx-6 mt-4 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800/60 rounded-xl flex items-center gap-2 text-xs text-red-700 dark:text-red-300">
+          <div className="mx-6 mt-4 p-3 bg-[#1B1B22] dark:bg-red-950/30 border border-[#E0002B] dark:border-red-800/60 rounded-xl flex items-center gap-2 text-xs text-red-700 dark:text-red-300">
             <AlertCircle size={15} className="shrink-0" />
             <span>{errorMsg}</span>
           </div>
@@ -302,51 +302,51 @@ export default function BulkEditWorkModal({
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[68vh] overflow-y-auto">
           {/* Rate Section */}
-          <div className={`p-4 rounded-xl border transition-colors ${updateRate ? 'border-indigo-300 dark:border-indigo-700 bg-indigo-50/20 dark:bg-indigo-950/20' : 'border-slate-200 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-900/30'}`}>
-            <label className="flex items-center gap-2.5 cursor-pointer font-semibold text-sm text-slate-800 dark:text-slate-200 select-none">
+          <div className={`p-4 rounded-xl border transition-colors ${updateRate ? 'border-indigo-300 dark:border-indigo-700 bg-indigo-50/20 dark:bg-indigo-950/20' : 'border-[#2A2A33] dark:border-[#2A2A33] bg-[#131318]/30 dark:bg-[#131318]/30'}`}>
+            <label className="flex items-center gap-2.5 cursor-pointer font-semibold text-sm text-[#F7F7F8] dark:text-[#F7F7F8] select-none">
               <Checkbox
                 checked={updateRate}
                 onChange={(e) => setUpdateRate(e.target.checked)}
                 aria-label="Update Rate"
               />
-              <IndianRupee size={15} className="text-indigo-600 dark:text-indigo-400" />
+              <IndianRupee size={15} className="text-[#FF2D4A] dark:text-[#FF2D4A]" />
               <span>Update Rate (₹)</span>
             </label>
 
             {updateRate && (
               <div className="mt-3 pl-6 space-y-3 animate-fadeIn">
                 <div className="flex items-center gap-4 text-xs">
-                  <label className="flex items-center gap-1.5 cursor-pointer text-slate-700 dark:text-slate-300">
+                  <label className="flex items-center gap-1.5 cursor-pointer text-[#A1A1AA] dark:text-[#A1A1AA]">
                     <input
                       type="radio"
                       name="rateMode"
                       checked={rateMode === 'fixed'}
                       onChange={() => setRateMode('fixed')}
-                      className="text-indigo-600 focus:ring-indigo-500"
+                      className="text-[#FF2D4A] focus:ring-[#FF2D4A]"
                     />
                     <span>Set fixed rate for all</span>
                   </label>
-                  <label className="flex items-center gap-1.5 cursor-pointer text-slate-700 dark:text-slate-300">
+                  <label className="flex items-center gap-1.5 cursor-pointer text-[#A1A1AA] dark:text-[#A1A1AA]">
                     <input
                       type="radio"
                       name="rateMode"
                       checked={rateMode === 'clientDefault'}
                       onChange={() => setRateMode('clientDefault')}
-                      className="text-indigo-600 focus:ring-indigo-500"
+                      className="text-[#FF2D4A] focus:ring-[#FF2D4A]"
                     />
                     <span>Reset to each client's default rate</span>
                   </label>
                 </div>
 
                 {rateMode === 'clientDefault' && (
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                  <p className="text-xs text-[#A1A1AA] dark:text-[#A1A1AA]">
                     Applies each client's standard per-reel rate. For monthly basis clients, reel rate is set to ₹0 because deliverables are covered by the monthly retainer.
                   </p>
                 )}
 
                 {rateMode === 'fixed' && (
                   <div className="relative max-w-xs">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400 font-semibold">₹</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#A1A1AA] font-semibold">₹</span>
                     <input
                       type="number"
                       min="0"
@@ -363,14 +363,14 @@ export default function BulkEditWorkModal({
           </div>
 
           {/* Date Section */}
-          <div className={`p-4 rounded-xl border transition-colors ${updateDate ? 'border-indigo-300 dark:border-indigo-700 bg-indigo-50/20 dark:bg-indigo-950/20' : 'border-slate-200 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-900/30'}`}>
-            <label className="flex items-center gap-2.5 cursor-pointer font-semibold text-sm text-slate-800 dark:text-slate-200 select-none">
+          <div className={`p-4 rounded-xl border transition-colors ${updateDate ? 'border-indigo-300 dark:border-indigo-700 bg-indigo-50/20 dark:bg-indigo-950/20' : 'border-[#2A2A33] dark:border-[#2A2A33] bg-[#131318]/30 dark:bg-[#131318]/30'}`}>
+            <label className="flex items-center gap-2.5 cursor-pointer font-semibold text-sm text-[#F7F7F8] dark:text-[#F7F7F8] select-none">
               <Checkbox
                 checked={updateDate}
                 onChange={(e) => setUpdateDate(e.target.checked)}
                 aria-label="Update Date Completed"
               />
-              <Calendar size={15} className="text-indigo-600 dark:text-indigo-400" />
+              <Calendar size={15} className="text-[#FF2D4A] dark:text-[#FF2D4A]" />
               <span>Update Date Completed</span>
             </label>
 
@@ -386,14 +386,14 @@ export default function BulkEditWorkModal({
           </div>
 
           {/* Quantity Section */}
-          <div className={`p-4 rounded-xl border transition-colors ${updateQuantity ? 'border-indigo-300 dark:border-indigo-700 bg-indigo-50/20 dark:bg-indigo-950/20' : 'border-slate-200 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-900/30'}`}>
-            <label className="flex items-center gap-2.5 cursor-pointer font-semibold text-sm text-slate-800 dark:text-slate-200 select-none">
+          <div className={`p-4 rounded-xl border transition-colors ${updateQuantity ? 'border-indigo-300 dark:border-indigo-700 bg-indigo-50/20 dark:bg-indigo-950/20' : 'border-[#2A2A33] dark:border-[#2A2A33] bg-[#131318]/30 dark:bg-[#131318]/30'}`}>
+            <label className="flex items-center gap-2.5 cursor-pointer font-semibold text-sm text-[#F7F7F8] dark:text-[#F7F7F8] select-none">
               <Checkbox
                 checked={updateQuantity}
                 onChange={(e) => setUpdateQuantity(e.target.checked)}
                 aria-label="Update Quantity"
               />
-              <Hash size={15} className="text-indigo-600 dark:text-indigo-400" />
+              <Hash size={15} className="text-[#FF2D4A] dark:text-[#FF2D4A]" />
               <span>Update Quantity</span>
             </label>
 
@@ -412,47 +412,47 @@ export default function BulkEditWorkModal({
           </div>
 
           {/* Description Section */}
-          <div className={`p-4 rounded-xl border transition-colors ${updateDescription ? 'border-indigo-300 dark:border-indigo-700 bg-indigo-50/20 dark:bg-indigo-950/20' : 'border-slate-200 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-900/30'}`}>
-            <label className="flex items-center gap-2.5 cursor-pointer font-semibold text-sm text-slate-800 dark:text-slate-200 select-none">
+          <div className={`p-4 rounded-xl border transition-colors ${updateDescription ? 'border-indigo-300 dark:border-indigo-700 bg-indigo-50/20 dark:bg-indigo-950/20' : 'border-[#2A2A33] dark:border-[#2A2A33] bg-[#131318]/30 dark:bg-[#131318]/30'}`}>
+            <label className="flex items-center gap-2.5 cursor-pointer font-semibold text-sm text-[#F7F7F8] dark:text-[#F7F7F8] select-none">
               <Checkbox
                 checked={updateDescription}
                 onChange={(e) => setUpdateDescription(e.target.checked)}
                 aria-label="Update Description"
               />
-              <FileText size={15} className="text-indigo-600 dark:text-indigo-400" />
+              <FileText size={15} className="text-[#FF2D4A] dark:text-[#FF2D4A]" />
               <span>Update Description</span>
             </label>
 
             {updateDescription && (
               <div className="mt-3 pl-6 space-y-3 animate-fadeIn">
                 <div className="flex flex-wrap items-center gap-4 text-xs">
-                  <label className="flex items-center gap-1.5 cursor-pointer text-slate-700 dark:text-slate-300">
+                  <label className="flex items-center gap-1.5 cursor-pointer text-[#A1A1AA] dark:text-[#A1A1AA]">
                     <input
                       type="radio"
                       name="descMode"
                       checked={descriptionMode === 'replace'}
                       onChange={() => setDescriptionMode('replace')}
-                      className="text-indigo-600 focus:ring-indigo-500"
+                      className="text-[#FF2D4A] focus:ring-[#FF2D4A]"
                     />
                     <span>Replace completely</span>
                   </label>
-                  <label className="flex items-center gap-1.5 cursor-pointer text-slate-700 dark:text-slate-300">
+                  <label className="flex items-center gap-1.5 cursor-pointer text-[#A1A1AA] dark:text-[#A1A1AA]">
                     <input
                       type="radio"
                       name="descMode"
                       checked={descriptionMode === 'append'}
                       onChange={() => setDescriptionMode('append')}
-                      className="text-indigo-600 focus:ring-indigo-500"
+                      className="text-[#FF2D4A] focus:ring-[#FF2D4A]"
                     />
                     <span>Append to end</span>
                   </label>
-                  <label className="flex items-center gap-1.5 cursor-pointer text-slate-700 dark:text-slate-300">
+                  <label className="flex items-center gap-1.5 cursor-pointer text-[#A1A1AA] dark:text-[#A1A1AA]">
                     <input
                       type="radio"
                       name="descMode"
                       checked={descriptionMode === 'prepend'}
                       onChange={() => setDescriptionMode('prepend')}
-                      className="text-indigo-600 focus:ring-indigo-500"
+                      className="text-[#FF2D4A] focus:ring-[#FF2D4A]"
                     />
                     <span>Prefix to beginning</span>
                   </label>
@@ -470,14 +470,14 @@ export default function BulkEditWorkModal({
           </div>
 
           {/* Client & Sub-Client Section */}
-          <div className={`p-4 rounded-xl border transition-colors ${updateClient ? 'border-indigo-300 dark:border-indigo-700 bg-indigo-50/20 dark:bg-indigo-950/20' : 'border-slate-200 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-900/30'}`}>
-            <label className="flex items-center gap-2.5 cursor-pointer font-semibold text-sm text-slate-800 dark:text-slate-200 select-none">
+          <div className={`p-4 rounded-xl border transition-colors ${updateClient ? 'border-indigo-300 dark:border-indigo-700 bg-indigo-50/20 dark:bg-indigo-950/20' : 'border-[#2A2A33] dark:border-[#2A2A33] bg-[#131318]/30 dark:bg-[#131318]/30'}`}>
+            <label className="flex items-center gap-2.5 cursor-pointer font-semibold text-sm text-[#F7F7F8] dark:text-[#F7F7F8] select-none">
               <Checkbox
                 checked={updateClient}
                 onChange={(e) => setUpdateClient(e.target.checked)}
                 aria-label="Update Client"
               />
-              <Building2 size={15} className="text-indigo-600 dark:text-indigo-400" />
+              <Building2 size={15} className="text-[#FF2D4A] dark:text-[#FF2D4A]" />
               <span>Change Client / Sub-Client</span>
             </label>
 
@@ -485,7 +485,7 @@ export default function BulkEditWorkModal({
               <div className="mt-3 pl-6 space-y-3 animate-fadeIn">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Target Client</label>
+                    <label className="block text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA] mb-1">Target Client</label>
                     <select
                       value={selectedClientId}
                       onChange={(e) => {
@@ -503,7 +503,7 @@ export default function BulkEditWorkModal({
 
                   {selectedClientObj?.subClients && selectedClientObj.subClients.length > 0 && (
                     <div>
-                      <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
+                      <label className="block text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA] mb-1 flex items-center gap-1">
                         <Users size={11} /> Assign Sub-Client (Optional)
                       </label>
                       <select
@@ -526,38 +526,38 @@ export default function BulkEditWorkModal({
           </div>
 
           {/* Deliverable Video URL Section */}
-          <div className={`p-4 rounded-xl border transition-colors ${updateVideoUrl ? 'border-indigo-300 dark:border-indigo-700 bg-indigo-50/20 dark:bg-indigo-950/20' : 'border-slate-200 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-900/30'}`}>
-            <label className="flex items-center gap-2.5 cursor-pointer font-semibold text-sm text-slate-800 dark:text-slate-200 select-none">
+          <div className={`p-4 rounded-xl border transition-colors ${updateVideoUrl ? 'border-indigo-300 dark:border-indigo-700 bg-indigo-50/20 dark:bg-indigo-950/20' : 'border-[#2A2A33] dark:border-[#2A2A33] bg-[#131318]/30 dark:bg-[#131318]/30'}`}>
+            <label className="flex items-center gap-2.5 cursor-pointer font-semibold text-sm text-[#F7F7F8] dark:text-[#F7F7F8] select-none">
               <input
                 type="checkbox"
                 checked={updateVideoUrl}
                 onChange={(e) => setUpdateVideoUrl(e.target.checked)}
-                className="w-4 h-4 rounded text-indigo-600 border-slate-300 focus:ring-indigo-500 cursor-pointer"
+                className="w-4 h-4 rounded text-[#FF2D4A] border-[#2A2A33] focus:ring-[#FF2D4A] cursor-pointer"
               />
-              <LinkIcon size={15} className="text-indigo-600 dark:text-indigo-400" />
+              <LinkIcon size={15} className="text-[#FF2D4A] dark:text-[#FF2D4A]" />
               <span>Update Video / Deliverable Link</span>
             </label>
 
             {updateVideoUrl && (
               <div className="mt-3 pl-6 space-y-3 animate-fadeIn">
                 <div className="flex items-center gap-4 text-xs">
-                  <label className="flex items-center gap-1.5 cursor-pointer text-slate-700 dark:text-slate-300">
+                  <label className="flex items-center gap-1.5 cursor-pointer text-[#A1A1AA] dark:text-[#A1A1AA]">
                     <input
                       type="radio"
                       name="videoUrlMode"
                       checked={videoUrlMode === 'set'}
                       onChange={() => setVideoUrlMode('set')}
-                      className="text-indigo-600 focus:ring-indigo-500"
+                      className="text-[#FF2D4A] focus:ring-[#FF2D4A]"
                     />
                     <span>Set link URL</span>
                   </label>
-                  <label className="flex items-center gap-1.5 cursor-pointer text-slate-700 dark:text-slate-300">
+                  <label className="flex items-center gap-1.5 cursor-pointer text-[#A1A1AA] dark:text-[#A1A1AA]">
                     <input
                       type="radio"
                       name="videoUrlMode"
                       checked={videoUrlMode === 'clear'}
                       onChange={() => setVideoUrlMode('clear')}
-                      className="text-indigo-600 focus:ring-indigo-500"
+                      className="text-[#FF2D4A] focus:ring-[#FF2D4A]"
                     />
                     <span>Clear existing links</span>
                   </label>

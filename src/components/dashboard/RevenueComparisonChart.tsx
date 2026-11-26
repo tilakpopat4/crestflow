@@ -137,7 +137,7 @@ export default function RevenueComparisonChart({
           {/* Y-Axis Labels */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-y-0 right-full mr-2 flex flex-col justify-between text-right text-[11px] whitespace-nowrap text-slate-400 dark:text-slate-500 tabular-nums"
+            className="pointer-events-none absolute inset-y-0 right-full mr-2 flex flex-col justify-between text-right text-[11px] whitespace-nowrap text-[#A1A1AA] dark:text-[#A1A1AA] tabular-nums"
           >
             <span className="-mt-2">{formatCompact(MAX)}</span>
             <span>{formatCompact(MAX * 0.75)}</span>
@@ -199,7 +199,7 @@ export default function RevenueComparisonChart({
               cy={yAt(last.now)}
               r="4.5"
               strokeWidth="2"
-              className="fill-text-primary stroke-[#282828]"
+              className="fill-text-primary stroke-[#1B1B22]"
             />
             <text
               x={left(months.length - 1)}

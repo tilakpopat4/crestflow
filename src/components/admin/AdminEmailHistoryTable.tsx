@@ -149,17 +149,17 @@ export default function AdminEmailHistoryTable({ refreshSignal }: { refreshSigna
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-2xs space-y-4">
+    <div className="bg-[#131318] dark:bg-[#131318] rounded-xl overflow-hidden shadow-2xs space-y-4">
       {/* Header & Controls */}
-      <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-4 sm:p-5 border-b border-[#2A2A33] dark:border-[#2A2A33] flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <Mail className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-            <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100">
+            <Mail className="w-4 h-4 text-[#A1A1AA] dark:text-[#A1A1AA]" />
+            <h3 className="font-semibold text-sm text-[#F7F7F8] dark:text-[#F7F7F8]">
               Live Mail Dispatch History
             </h3>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          <p className="text-xs text-[#A1A1AA] dark:text-[#A1A1AA] mt-0.5">
             Real-time delivery log of transactional notifications and automated triggers
           </p>
         </div>
@@ -167,17 +167,17 @@ export default function AdminEmailHistoryTable({ refreshSignal }: { refreshSigna
         {/* Search, Filter & Refresh */}
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-3.5 h-3.5 text-[#A1A1AA] absolute left-2.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search recipient or subject..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="text-xs pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-600 w-48 sm:w-60"
+              className="text-xs pl-8 pr-3 py-1.5 bg-[#131318] dark:bg-[#1B1B22] border border-[#2A2A33] dark:border-[#2A2A33] rounded-lg text-[#F7F7F8] dark:text-[#F7F7F8] outline-none focus:border-indigo-600 w-48 sm:w-60"
             />
           </div>
 
-          <div className="flex items-center bg-[#181818] p-1 rounded-lg text-xs font-medium border border-[#2a2a2a]">
+          <div className="flex items-center bg-[#0B0B0E] p-1 rounded-lg text-xs font-medium border border-[#2A2A33]">
             {(['all', 'sent', 'failed', 'queued'] as const).map((s) => (
               <button
                 key={s}
@@ -185,8 +185,8 @@ export default function AdminEmailHistoryTable({ refreshSignal }: { refreshSigna
                 onClick={() => setStatusFilter(s)}
                 className={`px-3 py-1 rounded-md capitalize font-medium cursor-pointer transition-colors duration-120 border-0 text-xs ${
                   statusFilter === s
-                    ? 'bg-[#282828] text-white font-semibold shadow-xs'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-[#1B1B22] text-white font-semibold shadow-xs'
+                    : 'text-[#A1A1AA] hover:text-white'
                 }`}
               >
                 {s}
@@ -198,7 +198,7 @@ export default function AdminEmailHistoryTable({ refreshSignal }: { refreshSigna
             type="button"
             onClick={fetchEmailHistory}
             disabled={loading}
-            className="p-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg cursor-pointer transition-colors disabled:opacity-50"
+            className="p-1.5 bg-[#131318] hover:bg-[#1B1B22] dark:bg-[#1B1B22] dark:hover:bg-[#1B1B22] text-[#A1A1AA] dark:text-[#A1A1AA] rounded-lg cursor-pointer transition-colors disabled:opacity-50"
             title="Refresh mail log"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -209,7 +209,7 @@ export default function AdminEmailHistoryTable({ refreshSignal }: { refreshSigna
               type="button"
               onClick={handleClearHistory}
               disabled={isClearing}
-              className="px-2.5 py-1.5 bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 text-xs font-medium rounded-lg cursor-pointer transition-colors flex items-center gap-1.5 border border-red-200 dark:border-red-900/60"
+              className="px-2.5 py-1.5 bg-[#1B1B22] hover:bg-[#1B1B22] dark:bg-red-950/40 dark:hover:bg-red-900/50 text-[#E0002B] dark:text-[#F0607A] text-xs font-medium rounded-lg cursor-pointer transition-colors flex items-center gap-1.5 border border-[#E0002B] dark:border-red-900/60"
               title="Clear all previous records"
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -221,26 +221,26 @@ export default function AdminEmailHistoryTable({ refreshSignal }: { refreshSigna
 
       {/* Metrics Strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 px-4 sm:px-5">
-        <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-lg">
-          <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Total Dispatches</span>
-          <span className="text-lg font-bold text-slate-900 dark:text-slate-100">{stats.total}</span>
+        <div className="p-3 bg-[#131318] dark:bg-[#1B1B22] rounded-lg">
+          <span className="text-[11px] font-medium text-[#A1A1AA] dark:text-[#A1A1AA] uppercase tracking-wider block">Total Dispatches</span>
+          <span className="text-lg font-bold text-[#F7F7F8] dark:text-[#F7F7F8]">{stats.total}</span>
         </div>
-        <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-lg">
-          <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Delivered</span>
-          <span className="text-lg font-bold text-indigo-600 dark:text-indigo-400">{stats.sent}</span>
+        <div className="p-3 bg-[#131318] dark:bg-[#1B1B22] rounded-lg">
+          <span className="text-[11px] font-medium text-[#A1A1AA] dark:text-[#A1A1AA] uppercase tracking-wider block">Delivered</span>
+          <span className="text-lg font-bold text-[#FF2D4A] dark:text-[#FF2D4A]">{stats.sent}</span>
         </div>
-        <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-lg">
-          <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Failed / Errors</span>
-          <span className="text-lg font-bold text-red-600 dark:text-red-400">{stats.failed}</span>
+        <div className="p-3 bg-[#131318] dark:bg-[#1B1B22] rounded-lg">
+          <span className="text-[11px] font-medium text-[#A1A1AA] dark:text-[#A1A1AA] uppercase tracking-wider block">Failed / Errors</span>
+          <span className="text-lg font-bold text-[#E0002B] dark:text-[#F0607A]">{stats.failed}</span>
         </div>
-        <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-lg">
-          <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Queued / Active</span>
-          <span className="text-lg font-bold text-slate-700 dark:text-slate-300">{stats.queued}</span>
+        <div className="p-3 bg-[#131318] dark:bg-[#1B1B22] rounded-lg">
+          <span className="text-[11px] font-medium text-[#A1A1AA] dark:text-[#A1A1AA] uppercase tracking-wider block">Queued / Active</span>
+          <span className="text-lg font-bold text-[#A1A1AA] dark:text-[#A1A1AA]">{stats.queued}</span>
         </div>
       </div>
 
       {actionFeedback && (
-        <div className="mx-4 sm:mx-5 p-3 rounded-lg text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200">
+        <div className="mx-4 sm:mx-5 p-3 rounded-lg text-xs bg-[#131318] dark:bg-[#1B1B22] border border-[#2A2A33] dark:border-[#2A2A33] text-[#F7F7F8] dark:text-[#F7F7F8]">
           {actionFeedback}
         </div>
       )}
@@ -248,7 +248,7 @@ export default function AdminEmailHistoryTable({ refreshSignal }: { refreshSigna
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs">
-          <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 border-b border-slate-100 dark:border-slate-800">
+          <thead className="bg-[#131318] dark:bg-[#1B1B22] text-[#A1A1AA] dark:text-[#A1A1AA] border-b border-[#2A2A33] dark:border-[#2A2A33]">
             <tr>
               <th className="py-2.5 px-4 font-semibold uppercase tracking-wider text-[11px]">Status</th>
               <th className="py-2.5 px-4 font-semibold uppercase tracking-wider text-[11px]">Recipient</th>
@@ -258,17 +258,17 @@ export default function AdminEmailHistoryTable({ refreshSignal }: { refreshSigna
               <th className="py-2.5 px-4 font-semibold uppercase tracking-wider text-[11px] text-right">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
+          <tbody className="divide-y divide-[#2A2A33] dark:divide-[#2A2A33] text-[#A1A1AA] dark:text-[#A1A1AA]">
             {loading && emails.length === 0 ? (
               <tr>
-                <td colSpan={6} className="py-8 text-center text-slate-500 dark:text-slate-400">
-                  <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-indigo-500" />
+                <td colSpan={6} className="py-8 text-center text-[#A1A1AA] dark:text-[#A1A1AA]">
+                  <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-[#FF2D4A]" />
                   <span>Loading mail dispatch history...</span>
                 </td>
               </tr>
             ) : filteredEmails.length === 0 ? (
               <tr>
-                <td colSpan={6} className="py-8 text-center text-slate-500 dark:text-slate-400">
+                <td colSpan={6} className="py-8 text-center text-[#A1A1AA] dark:text-[#A1A1AA]">
                   No email history matches your filter.
                 </td>
               </tr>

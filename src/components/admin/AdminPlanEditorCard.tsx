@@ -46,21 +46,21 @@ export default function AdminPlanEditorCard({ plan, onChange }: AdminPlanEditorC
   };
 
   const inputClass =
-    'w-full text-xs p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-600';
+    'w-full text-xs p-2.5 rounded-lg border border-[#2A2A33] dark:border-[#2A2A33] bg-[#131318] dark:bg-[#0B0B0E] text-[#F7F7F8] dark:text-[#F7F7F8] outline-none focus:border-indigo-600';
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 space-y-5 shadow-2xs">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
+    <div className="bg-[#131318] dark:bg-[#131318] rounded-xl p-5 border border-[#2A2A33] dark:border-[#2A2A33] space-y-5 shadow-2xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#2A2A33] dark:border-[#2A2A33]">
         <div>
-          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+          <h3 className="text-sm font-bold text-[#F7F7F8] dark:text-[#F7F7F8]">
             Editing: {plan.name}
           </h3>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+          <p className="text-[11px] text-[#A1A1AA] dark:text-[#A1A1AA] mt-0.5">
             Plan ID: <span className="font-mono">{plan.id}</span> &middot; Code: <span className="font-mono">{plan.planCode}</span>
           </p>
         </div>
         {isTrial && (
-          <span className="text-[11px] text-slate-500 dark:text-slate-400 inline-flex items-center gap-1.5">
+          <span className="text-[11px] text-[#A1A1AA] dark:text-[#A1A1AA] inline-flex items-center gap-1.5">
             <Info className="w-3.5 h-3.5 shrink-0" />
             <span>Trial price is locked at ₹0 per platform policy</span>
           </span>
@@ -70,7 +70,7 @@ export default function AdminPlanEditorCard({ plan, onChange }: AdminPlanEditorC
       {/* Row 1: Identity & Badges */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
-          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Plan Title</label>
+          <label className="block text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA] mb-1">Plan Title</label>
           <input
             type="text"
             value={plan.name}
@@ -80,7 +80,7 @@ export default function AdminPlanEditorCard({ plan, onChange }: AdminPlanEditorC
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Tab Label (Wall)</label>
+          <label className="block text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA] mb-1">Tab Label (Wall)</label>
           <input
             type="text"
             value={plan.tabLabel ?? plan.name.replace('Pro ', '')}
@@ -90,7 +90,7 @@ export default function AdminPlanEditorCard({ plan, onChange }: AdminPlanEditorC
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Badge Label (Optional)</label>
+          <label className="block text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA] mb-1">Badge Label (Optional)</label>
           <input
             type="text"
             value={plan.savingsBadge || ''}
@@ -104,7 +104,7 @@ export default function AdminPlanEditorCard({ plan, onChange }: AdminPlanEditorC
       {/* Row 2: Pricing & Billing Interval */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div>
-          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Price (₹ INR)</label>
+          <label className="block text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA] mb-1">Price (₹ INR)</label>
           <input
             type="number"
             min={0}
@@ -115,7 +115,7 @@ export default function AdminPlanEditorCard({ plan, onChange }: AdminPlanEditorC
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Period Suffix</label>
+          <label className="block text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA] mb-1">Period Suffix</label>
           <input
             type="text"
             value={plan.periodLabel}
@@ -125,7 +125,7 @@ export default function AdminPlanEditorCard({ plan, onChange }: AdminPlanEditorC
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Monthly Equivalent (₹)</label>
+          <label className="block text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA] mb-1">Monthly Equivalent (₹)</label>
           <input
             type="number"
             min={0}
@@ -136,7 +136,7 @@ export default function AdminPlanEditorCard({ plan, onChange }: AdminPlanEditorC
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Billing Interval Text</label>
+          <label className="block text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA] mb-1">Billing Interval Text</label>
           <input
             type="text"
             value={plan.interval}
@@ -150,7 +150,7 @@ export default function AdminPlanEditorCard({ plan, onChange }: AdminPlanEditorC
       {/* Row 3: Description & CTA Button */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Plan Description</label>
+          <label className="block text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA] mb-1">Plan Description</label>
           <input
             type="text"
             value={plan.description}
@@ -160,7 +160,7 @@ export default function AdminPlanEditorCard({ plan, onChange }: AdminPlanEditorC
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Button Label (Optional Override)</label>
+          <label className="block text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA] mb-1">Button Label (Optional Override)</label>
           <input
             type="text"
             value={plan.ctaLabel || ''}
@@ -174,7 +174,7 @@ export default function AdminPlanEditorCard({ plan, onChange }: AdminPlanEditorC
       {/* Row 4: Disclosure / Info Box & Additional Extra Info */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+          <label className="block text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA] mb-1">
             Billing / Disclosure Info Box
           </label>
           <textarea
@@ -186,7 +186,7 @@ export default function AdminPlanEditorCard({ plan, onChange }: AdminPlanEditorC
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+          <label className="block text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA] mb-1">
             Additional Custom Info / Note (Optional)
           </label>
           <textarea
@@ -200,12 +200,12 @@ export default function AdminPlanEditorCard({ plan, onChange }: AdminPlanEditorC
       </div>
 
       {/* Row 5: Features List Editor */}
-      <div className="space-y-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+      <div className="space-y-3 pt-2 border-t border-[#2A2A33] dark:border-[#2A2A33]">
         <div className="flex items-center justify-between">
-          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+          <label className="text-xs font-bold text-[#A1A1AA] uppercase tracking-wider">
             Included Features ({plan.features.length})
           </label>
-          <span className="text-[11px] text-slate-400">Shown on Subscription Wall, Pricing Page &amp; Upgrade Modal</span>
+          <span className="text-[11px] text-[#A1A1AA]">Shown on Subscription Wall, Pricing Page &amp; Upgrade Modal</span>
         </div>
 
         <div className="space-y-2">
@@ -222,7 +222,7 @@ export default function AdminPlanEditorCard({ plan, onChange }: AdminPlanEditorC
                 onClick={() => handleMoveFeature(idx, -1)}
                 disabled={idx === 0}
                 title="Move up"
-                className="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg border-0 cursor-pointer disabled:opacity-30 transition-colors duration-120"
+                className="p-2 text-[#A1A1AA] hover:text-[#A1A1AA] dark:hover:text-[#F7F7F8] hover:bg-[#131318] dark:hover:bg-[#1B1B22] rounded-lg border-0 cursor-pointer disabled:opacity-30 transition-colors duration-120"
               >
                 <ArrowUp className="w-3.5 h-3.5" />
               </button>
@@ -231,7 +231,7 @@ export default function AdminPlanEditorCard({ plan, onChange }: AdminPlanEditorC
                 onClick={() => handleMoveFeature(idx, 1)}
                 disabled={idx === plan.features.length - 1}
                 title="Move down"
-                className="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg border-0 cursor-pointer disabled:opacity-30 transition-colors duration-120"
+                className="p-2 text-[#A1A1AA] hover:text-[#A1A1AA] dark:hover:text-[#F7F7F8] hover:bg-[#131318] dark:hover:bg-[#1B1B22] rounded-lg border-0 cursor-pointer disabled:opacity-30 transition-colors duration-120"
               >
                 <ArrowDown className="w-3.5 h-3.5" />
               </button>
@@ -240,7 +240,7 @@ export default function AdminPlanEditorCard({ plan, onChange }: AdminPlanEditorC
                 onClick={() => handleDeleteFeature(idx)}
                 disabled={plan.features.length <= 1}
                 title="Remove feature"
-                className="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg border-0 cursor-pointer disabled:opacity-30 transition-colors duration-120"
+                className="p-2 text-[#A1A1AA] hover:text-[#E0002B] dark:hover:text-[#F0607A] hover:bg-[#131318] dark:hover:bg-[#1B1B22] rounded-lg border-0 cursor-pointer disabled:opacity-30 transition-colors duration-120"
               >
                 <Trash2 className="w-3.5 h-3.5" />
               </button>

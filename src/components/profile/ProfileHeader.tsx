@@ -9,12 +9,12 @@ interface ProfileHeaderProps {
 
 export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ isSaving, isSaved, onSave }) => {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#2A2A33] dark:border-[#2A2A33]">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#F7F7F8] dark:text-white tracking-tight">
           Profile &amp; Settings
         </h1>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+        <p className="text-sm text-[#A1A1AA] dark:text-[#A1A1AA] mt-1">
           Manage your creator branding, UPI invoice details, and workspace preferences.
         </p>
       </div>

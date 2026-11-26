@@ -133,7 +133,7 @@ export const SignInCard: React.FC<SignInCardProps> = ({
           type="button"
           onClick={onLogin}
           disabled={isSigningIn || isSubmitting}
-          className="w-full min-h-[42px] flex items-center justify-center gap-2.5 bg-[#282828] hover:bg-[#333333] active:bg-[#3d3d3d] border-none disabled:opacity-50 text-white py-2.5 px-4 rounded-lg font-medium text-xs transition-colors cursor-pointer"
+          className="w-full min-h-[42px] flex items-center justify-center gap-2.5 bg-[#1B1B22] hover:bg-[#2A2A33] active:bg-[#2A2A33] border-none disabled:opacity-50 text-white py-2.5 px-4 rounded-lg font-medium text-xs transition-colors cursor-pointer"
         >
           {isSigningIn ? (
             <div className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-white border-t-transparent" />
@@ -151,18 +151,18 @@ export const SignInCard: React.FC<SignInCardProps> = ({
         {!isAdminRoute && (
           <>
             <div className="my-4 flex items-center gap-3">
-              <div className="h-px bg-[#333333] flex-1" />
-              <span className="text-[11px] uppercase tracking-wider text-[#aaaaaa] font-medium select-none">
+              <div className="h-px bg-[#2A2A33] flex-1" />
+              <span className="text-[11px] uppercase tracking-wider text-[#A1A1AA] font-medium select-none">
                 OR
               </span>
-              <div className="h-px bg-[#333333] flex-1" />
+              <div className="h-px bg-[#2A2A33] flex-1" />
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-3">
               {authMode === 'signup' && (
                 <div>
-                  <label className="block text-[11px] font-medium text-slate-300 mb-1">
-                    Your Name <span className="text-red-400">*</span>
+                  <label className="block text-[11px] font-medium text-[#A1A1AA] mb-1">
+                    Your Name <span className="text-[#F0607A]">*</span>
                   </label>
                   <input
                     type="text"
@@ -170,14 +170,14 @@ export const SignInCard: React.FC<SignInCardProps> = ({
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Tilak Popat"
-                    className="w-full bg-[#121212] border-none rounded-lg px-3 py-2 text-xs text-white placeholder:text-slate-600 outline-none focus:outline-none focus:ring-0"
+                    className="w-full bg-[#0B0B0E] border-none rounded-lg px-3 py-2 text-xs text-white placeholder:text-[#A1A1AA] outline-none focus:outline-none focus:ring-0"
                   />
                 </div>
               )}
 
               <div>
-                <label className="block text-[11px] font-medium text-slate-300 mb-1">
-                  Email Address <span className="text-red-400">*</span>
+                <label className="block text-[11px] font-medium text-[#A1A1AA] mb-1">
+                  Email Address <span className="text-[#F0607A]">*</span>
                 </label>
                 <input
                   type="email"
@@ -185,13 +185,13 @@ export const SignInCard: React.FC<SignInCardProps> = ({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@creativestudio.com"
-                  className="w-full bg-[#121212] border-none rounded-lg px-3 py-2 text-xs text-white placeholder:text-slate-600 outline-none focus:outline-none focus:ring-0"
+                  className="w-full bg-[#0B0B0E] border-none rounded-lg px-3 py-2 text-xs text-white placeholder:text-[#A1A1AA] outline-none focus:outline-none focus:ring-0"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-slate-300 mb-1">
-                  Password <span className="text-red-400">*</span>
+                <label className="block text-[11px] font-medium text-[#A1A1AA] mb-1">
+                  Password <span className="text-[#F0607A]">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -200,12 +200,12 @@ export const SignInCard: React.FC<SignInCardProps> = ({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full bg-[#121212] border-none rounded-lg pl-3 pr-9 py-2 text-xs text-white placeholder:text-slate-600 outline-none focus:outline-none focus:ring-0"
+                    className="w-full bg-[#0B0B0E] border-none rounded-lg pl-3 pr-9 py-2 text-xs text-white placeholder:text-[#A1A1AA] outline-none focus:outline-none focus:ring-0"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 bg-transparent border-none cursor-pointer"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#A1A1AA] hover:text-[#A1A1AA] bg-transparent border-none cursor-pointer"
                   >
                     {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
                   </button>
@@ -224,9 +224,9 @@ export const SignInCard: React.FC<SignInCardProps> = ({
         )}
 
         {/* Footer info & links */}
-        <div className="mt-5 pt-3 border-t border-[#333333] text-center space-y-1.5">
+        <div className="mt-5 pt-3 border-t border-[#2A2A33] text-center space-y-1.5">
           {!isAdminRoute && (
-            <p className="text-xs text-[#aaaaaa]">
+            <p className="text-xs text-[#A1A1AA]">
               {authMode === 'signup'
                 ? 'Already have an account? '
                 : "Don't have an account yet? "}
@@ -236,19 +236,19 @@ export const SignInCard: React.FC<SignInCardProps> = ({
                   setAuthMode(authMode === 'signup' ? 'signin' : 'signup');
                   setFormError(null);
                 }}
-                className="text-[#f1f1f1] hover:text-white font-medium underline border-none bg-transparent cursor-pointer p-0 text-xs ml-1"
+                className="text-[#F7F7F8] hover:text-white font-medium underline border-none bg-transparent cursor-pointer p-0 text-xs ml-1"
               >
                 {authMode === 'signup' ? 'Sign in' : 'Create one free'}
               </button>
             </p>
           )}
 
-          <p className="text-xs text-[#aaaaaa] pt-0.5 leading-relaxed">
+          <p className="text-xs text-[#A1A1AA] pt-0.5 leading-relaxed">
             By continuing, you agree to our{' '}
             <a
               href="/terms"
               onClick={(e) => { e.preventDefault(); onSupportingNavigate('terms'); }}
-              className="text-[#f1f1f1] hover:text-white underline"
+              className="text-[#F7F7F8] hover:text-white underline"
             >
               Terms
             </a>{' '}
@@ -256,7 +256,7 @@ export const SignInCard: React.FC<SignInCardProps> = ({
             <a
               href="/privacy"
               onClick={(e) => { e.preventDefault(); onSupportingNavigate('privacy'); }}
-              className="text-[#f1f1f1] hover:text-white underline"
+              className="text-[#F7F7F8] hover:text-white underline"
             >
               Privacy Policy
             </a>.

@@ -74,15 +74,15 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
   return (
     <section id="section-profile" className="grid grid-cols-1 gap-x-8 gap-y-4 pt-6 first:pt-0 lg:grid-cols-[13rem_minmax(0,1fr)]">
       <div>
-        <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+        <h2 className="text-base font-semibold text-[#F7F7F8] dark:text-[#F7F7F8]">
           Public profile
         </h2>
-        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+        <p className="mt-1 text-xs text-[#A1A1AA] dark:text-[#A1A1AA] leading-relaxed">
           Your public identity and handle.
         </p>
       </div>
 
-      <div className="rounded-xl bg-white dark:bg-slate-900 overflow-hidden">
+      <div className="rounded-xl bg-[#131318] dark:bg-[#131318] overflow-hidden">
         <div className="grid grid-cols-1 gap-x-4 gap-y-5 p-5 sm:grid-cols-2 sm:p-6">
           {/* Avatar with Direct Photo Upload */}
           <div className="flex flex-col gap-4 sm:col-span-2 sm:flex-row sm:items-center">
@@ -96,16 +96,16 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
 
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
+                <span className="text-sm font-semibold text-[#F7F7F8] dark:text-[#F7F7F8] truncate">
                   {name || user.displayName || 'Creator Account'}
                 </span>
                 {activeDays && (
-                  <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400">
+                  <span className="text-[11px] font-medium text-[#A1A1AA] dark:text-[#A1A1AA]">
                     {activeDays}
                   </span>
                 )}
               </div>
-              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 truncate font-mono">
+              <p className="mt-0.5 text-xs text-[#A1A1AA] dark:text-[#A1A1AA] truncate font-mono">
                 @{cleanHandle} • {user.email || 'Authenticated Google Account'}
               </p>
             </div>
@@ -113,7 +113,7 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
 
           {/* Full Name */}
           <div>
-            <label htmlFor="profile-name" className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <label htmlFor="profile-name" className="mb-1.5 block text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA]">
               Full name
             </label>
             <input
@@ -122,17 +122,17 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Maya Ortiz"
-              className="block h-10 w-full rounded-lg bg-slate-50 dark:bg-slate-800/60 px-3 text-sm text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 placeholder:text-slate-400 focus:border-slate-400 dark:focus:border-slate-500 outline-none transition-colors"
+              className="block h-10 w-full rounded-lg bg-[#131318] dark:bg-[#1B1B22] px-3 text-sm text-[#F7F7F8] dark:text-[#F7F7F8] border border-[#2A2A33] dark:border-[#2A2A33] placeholder:text-[#A1A1AA] focus:border-[#2A2A33] dark:focus:border-[#2A2A33] outline-none transition-colors"
             />
           </div>
 
           {/* Professional Job Title */}
           <div>
             <div className="mb-1.5 flex items-baseline justify-between gap-2">
-              <label htmlFor="profile-title" className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+              <label htmlFor="profile-title" className="block text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA]">
                 Job title
               </label>
-              <span className="text-[11px] text-slate-400 dark:text-slate-500">Optional</span>
+              <span className="text-[11px] text-[#A1A1AA] dark:text-[#A1A1AA]">Optional</span>
             </div>
             <input
               id="profile-title"
@@ -140,7 +140,7 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
               value={professionalTitle}
               onChange={(e) => setProfessionalTitle(e.target.value)}
               placeholder="e.g. UI/UX Designer, Web Developer, Video Editor"
-              className="block h-10 w-full rounded-lg bg-slate-50 dark:bg-slate-800/60 px-3 text-sm text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 placeholder:text-slate-400 focus:border-slate-400 dark:focus:border-slate-500 outline-none transition-colors"
+              className="block h-10 w-full rounded-lg bg-[#131318] dark:bg-[#1B1B22] px-3 text-sm text-[#F7F7F8] dark:text-[#F7F7F8] border border-[#2A2A33] dark:border-[#2A2A33] placeholder:text-[#A1A1AA] focus:border-[#2A2A33] dark:focus:border-[#2A2A33] outline-none transition-colors"
             />
           </div>
 
@@ -186,7 +186,7 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
 
           {/* Career Start Date */}
           <div>
-            <label htmlFor="profile-start-date" className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <label htmlFor="profile-start-date" className="mb-1.5 block text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA]">
               Start date
             </label>
             <input
@@ -199,17 +199,17 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
                 onAutoSaveDate?.(val);
               }}
               onBlur={() => onAutoSaveDate?.(freelanceStartDate)}
-              className="block h-10 w-full rounded-lg bg-slate-50 dark:bg-slate-800/60 px-3 text-sm text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 placeholder:text-slate-400 focus:border-indigo-600 dark:focus:border-indigo-400 outline-none transition-colors"
+              className="block h-10 w-full rounded-lg bg-[#131318] dark:bg-[#1B1B22] px-3 text-sm text-[#F7F7F8] dark:text-[#F7F7F8] border border-[#2A2A33] dark:border-[#2A2A33] placeholder:text-[#A1A1AA] focus:border-indigo-600 dark:focus:border-indigo-400 outline-none transition-colors"
             />
           </div>
 
           {/* Bio / Experience */}
           <div className="sm:col-span-2">
             <div className="mb-1.5 flex items-baseline justify-between gap-2">
-              <label htmlFor="profile-bio" className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+              <label htmlFor="profile-bio" className="block text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA]">
                 Bio
               </label>
-              <span className="text-[11px] text-slate-400 dark:text-slate-500 tabular-nums">{charsLeft} left</span>
+              <span className="text-[11px] text-[#A1A1AA] dark:text-[#A1A1AA] tabular-nums">{charsLeft} left</span>
             </div>
             <textarea
               id="profile-bio"
@@ -218,21 +218,21 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               placeholder="e.g. Independent creative specializing in high-impact design, development, or video storytelling."
-              className="block w-full resize-y rounded-lg bg-slate-50 dark:bg-slate-800/60 p-3 text-sm text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 placeholder:text-slate-400 focus:border-indigo-600 dark:focus:border-indigo-400 outline-none transition-colors"
+              className="block w-full resize-y rounded-lg bg-[#131318] dark:bg-[#1B1B22] p-3 text-sm text-[#F7F7F8] dark:text-[#F7F7F8] border border-[#2A2A33] dark:border-[#2A2A33] placeholder:text-[#A1A1AA] focus:border-indigo-600 dark:focus:border-indigo-400 outline-none transition-colors"
             />
           </div>
         </div>
 
         {/* Section Action Bar */}
-        <div className="flex min-h-14 flex-wrap items-center justify-end gap-x-3 gap-y-2 border-t border-slate-100 dark:border-slate-800 px-5 py-3 sm:px-6">
-          <p className="mr-auto flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+        <div className="flex min-h-14 flex-wrap items-center justify-end gap-x-3 gap-y-2 border-t border-[#2A2A33] dark:border-[#2A2A33] px-5 py-3 sm:px-6">
+          <p className="mr-auto flex items-center gap-1.5 text-xs text-[#A1A1AA] dark:text-[#A1A1AA]">
             {isSaved ? (
               <span className="inline-flex items-center gap-1 text-text-primary font-medium">
                 <Check size={13} />
                 <span>Saved</span>
               </span>
             ) : isDirty ? (
-              <span className="inline-flex items-center gap-1.5 text-slate-700 dark:text-slate-300 font-medium">
+              <span className="inline-flex items-center gap-1.5 text-[#A1A1AA] dark:text-[#A1A1AA] font-medium">
                 <span className="size-1.5 rounded-full bg-accent" />
                 <span>Unsaved changes</span>
               </span>
@@ -246,7 +246,7 @@ export const ProfilePublicSection: React.FC<ProfilePublicSectionProps> = ({
               type="button"
               disabled={isSaving}
               onClick={onDiscard}
-              className="inline-flex h-9 items-center justify-center rounded-lg bg-[#333333] hover:bg-[#3e3e3e] border-0 px-3.5 text-xs font-semibold text-slate-300 hover:text-white cursor-pointer transition-colors duration-120"
+              className="inline-flex h-9 items-center justify-center rounded-lg bg-[#2A2A33] hover:bg-[#2A2A33] border-0 px-3.5 text-xs font-semibold text-[#A1A1AA] hover:text-white cursor-pointer transition-colors duration-120"
             >
               Discard
             </button>

@@ -18,10 +18,10 @@ export const RatesCurrencySelector: React.FC<RatesCurrencySelectorProps> = ({
 }) => {
   return (
     <div className="space-y-1.5">
-      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+      <label className="block text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA]">
         Payment Currency *
       </label>
-      <div className="grid grid-cols-4 gap-1.5 bg-[#212121] p-1 rounded-xl">
+      <div className="grid grid-cols-4 gap-1.5 bg-[#131318] p-1 rounded-xl">
         {FREELANCE_CURRENCIES.map((c) => {
           const isSelected = currency === c.code;
           return (
@@ -33,13 +33,13 @@ export const RatesCurrencySelector: React.FC<RatesCurrencySelectorProps> = ({
               className={`relative py-2 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 cursor-pointer border-0 select-none transition-colors duration-120 ${
                 isSelected
                   ? 'text-white'
-                  : 'text-slate-400 hover:text-white hover:bg-[#282828] active:bg-[#333333]'
+                  : 'text-[#A1A1AA] hover:text-white hover:bg-[#1B1B22] active:bg-[#2A2A33]'
               }`}
             >
               {isSelected && (
                 <motion.div
                   layoutId="activeCurrencyIndicator"
-                  className="absolute inset-0 bg-[#383838] rounded-lg shadow-2xs z-0"
+                  className="absolute inset-0 bg-[#2A2A33] rounded-lg shadow-2xs z-0"
                   transition={
                     shouldReduceMotion
                       ? { duration: 0 }

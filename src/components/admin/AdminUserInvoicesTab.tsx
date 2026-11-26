@@ -6,14 +6,14 @@ interface AdminUserInvoicesTabProps {
 
 export default function AdminUserInvoicesTab({ invoices }: AdminUserInvoicesTabProps) {
   if (invoices.length === 0) {
-    return <div className="text-center py-12 text-slate-400 text-xs">No invoices created yet.</div>;
+    return <div className="text-center py-12 text-[#A1A1AA] text-xs">No invoices created yet.</div>;
   }
 
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left border-collapse text-xs">
         <thead>
-          <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase font-semibold">
+          <tr className="border-b border-[#2A2A33] dark:border-[#2A2A33] text-[#A1A1AA] uppercase font-semibold">
             <th className="pb-2">Invoice #</th>
             <th className="pb-2">Client</th>
             <th className="pb-2">Amount</th>
@@ -21,37 +21,37 @@ export default function AdminUserInvoicesTab({ invoices }: AdminUserInvoicesTabP
             <th className="pb-2 text-right">Date</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+        <tbody className="divide-y divide-[#2A2A33] dark:divide-[#2A2A33]/60">
           {invoices.map((inv: any) => (
-            <tr key={inv.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-              <td className="py-2.5 font-mono text-slate-700 dark:text-slate-300">
+            <tr key={inv.id} className="hover:bg-[#131318] dark:hover:bg-[#1B1B22]">
+              <td className="py-2.5 font-mono text-[#A1A1AA] dark:text-[#A1A1AA]">
                 {inv.invoiceNumber || inv.id.slice(0, 8)}
               </td>
               <td className="py-2.5">
-                <div className="font-semibold text-slate-900 dark:text-slate-100">
+                <div className="font-semibold text-[#F7F7F8] dark:text-[#F7F7F8]">
                   {inv.clientName || 'Unnamed'}
                 </div>
                 {inv.clientEmail && (
-                  <div className="text-[11px] text-slate-400">{inv.clientEmail}</div>
+                  <div className="text-[11px] text-[#A1A1AA]">{inv.clientEmail}</div>
                 )}
               </td>
-              <td className="py-2.5 font-semibold text-slate-900 dark:text-slate-100">
+              <td className="py-2.5 font-semibold text-[#F7F7F8] dark:text-[#F7F7F8]">
                 {inv.currency || '₹'} {Number(inv.totalAmount || 0).toLocaleString()}
               </td>
               <td className="py-2.5">
                 <span
                   className={`font-medium ${
                     inv.status === 'paid'
-                      ? 'text-indigo-600 dark:text-indigo-400'
+                      ? 'text-[#FF2D4A] dark:text-[#FF2D4A]'
                       : inv.status === 'overdue'
-                      ? 'text-red-600 dark:text-red-400'
-                      : 'text-slate-600 dark:text-slate-400'
+                      ? 'text-[#E0002B] dark:text-[#F0607A]'
+                      : 'text-[#A1A1AA] dark:text-[#A1A1AA]'
                   }`}
                 >
                   {inv.status || 'draft'}
                 </span>
               </td>
-              <td className="py-2.5 text-right text-slate-400">
+              <td className="py-2.5 text-right text-[#A1A1AA]">
                 {inv.createdAt ? new Date(inv.createdAt).toLocaleDateString() : '—'}
               </td>
             </tr>

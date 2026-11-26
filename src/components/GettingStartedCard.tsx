@@ -149,18 +149,18 @@ export default function GettingStartedCard({
   const progressPercent = Math.round((stepsCompleted / 5) * 100);
 
   return (
-    <div className="bg-[#282828] rounded-xl p-4 sm:p-5 shadow-xs space-y-4 text-white">
+    <div className="bg-[#1B1B22] rounded-xl p-4 sm:p-5 shadow-xs space-y-4 text-white">
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 flex-wrap">
             <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-white">
               Getting Started
             </h3>
-            <span className="text-xs text-slate-400 font-medium">
+            <span className="text-xs text-[#A1A1AA] font-medium">
               ({stepsCompleted} of 5 completed)
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-[#A1A1AA] mt-1">
             Log work, get paid by UPI without chasing.
           </p>
         </div>
@@ -168,7 +168,7 @@ export default function GettingStartedCard({
         <button
           type="button"
           onClick={handleDismiss}
-          className="p-1.5 text-slate-400 hover:text-white rounded-lg transition-colors cursor-pointer shrink-0"
+          className="p-1.5 text-[#A1A1AA] hover:text-white rounded-lg transition-colors cursor-pointer shrink-0"
           title="Dismiss onboarding guide"
           aria-label="Dismiss onboarding guide"
         >
@@ -177,9 +177,9 @@ export default function GettingStartedCard({
       </div>
 
       {/* Progress Bar */}
-      <div className="w-full bg-[#212121] h-1.5 rounded-full overflow-hidden">
+      <div className="w-full bg-[#131318] h-1.5 rounded-full overflow-hidden">
         <div
-          className="h-full bg-white transition-all duration-300"
+          className="h-full bg-[#131318] transition-all duration-300"
           style={{ width: `${progressPercent}%` }}
         />
       </div>
@@ -193,30 +193,30 @@ export default function GettingStartedCard({
               key={step.number}
               className={`p-3.5 rounded-xl flex flex-col justify-between space-y-2.5 transition-colors ${
                 step.isDone
-                  ? 'bg-[#212121] text-slate-300 opacity-90'
-                  : 'bg-[#212121] text-white'
+                  ? 'bg-[#131318] text-[#A1A1AA] opacity-90'
+                  : 'bg-[#131318] text-white'
               }`}
             >
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[#A1A1AA]">
                     Step {step.number}
                   </span>
                   {step.isDone ? (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-200">
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#F7F7F8]">
                       <Check size={12} strokeWidth={2.5} /> Done
                     </span>
                   ) : (
-                    <Circle size={13} className="text-slate-500" />
+                    <Circle size={13} className="text-[#A1A1AA]" />
                   )}
                 </div>
 
                 <div className="flex items-center gap-1.5">
-                  <StepIcon size={14} className={step.isDone ? 'text-slate-400' : 'text-white'} />
+                  <StepIcon size={14} className={step.isDone ? 'text-[#A1A1AA]' : 'text-white'} />
                   <h4 className="text-xs font-bold truncate">{step.title}</h4>
                 </div>
 
-                <p className="text-[11px] text-slate-400 leading-relaxed line-clamp-3">
+                <p className="text-[11px] text-[#A1A1AA] leading-relaxed line-clamp-3">
                   {step.description}
                 </p>
               </div>
@@ -228,8 +228,8 @@ export default function GettingStartedCard({
                   disabled={step.isDone}
                   className={`w-full py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-colors ${
                     step.isDone
-                      ? 'bg-[#282828] text-slate-500 cursor-default'
-                      : 'bg-[#333333] hover:bg-[#3d3d3d] text-white cursor-pointer'
+                      ? 'bg-[#1B1B22] text-[#A1A1AA] cursor-default'
+                      : 'bg-[#2A2A33] hover:bg-[#2A2A33] text-white cursor-pointer'
                   }`}
                 >
                   {step.isDone ? 'Completed' : step.actionLabel}

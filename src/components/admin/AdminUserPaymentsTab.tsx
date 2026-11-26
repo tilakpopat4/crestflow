@@ -46,16 +46,16 @@ export default function AdminUserPaymentsTab({ user, subscription }: AdminUserPa
   const getStatusColor = (st: string) => {
     switch (st.toLowerCase()) {
       case 'active':
-        return 'text-indigo-600 dark:text-indigo-400 bg-indigo-600';
+        return 'text-[#FF2D4A] dark:text-[#FF2D4A] bg-[#E0002B]';
       case 'trialing':
-        return 'text-indigo-600 dark:text-indigo-400 bg-indigo-600';
+        return 'text-[#FF2D4A] dark:text-[#FF2D4A] bg-[#E0002B]';
       case 'expired':
-        return 'text-red-600 dark:text-red-400 bg-red-600';
+        return 'text-[#E0002B] dark:text-[#F0607A] bg-[#E0002B]';
       case 'cancelled':
       case 'past_due':
-        return 'text-slate-600 dark:text-slate-400 bg-slate-500';
+        return 'text-[#A1A1AA] dark:text-[#A1A1AA] bg-[#2A2A33]';
       default:
-        return 'text-slate-500 bg-slate-400';
+        return 'text-[#A1A1AA] bg-[#2A2A33]';
     }
   };
 
@@ -67,83 +67,83 @@ export default function AdminUserPaymentsTab({ user, subscription }: AdminUserPa
     <div className="space-y-4 text-xs">
       {/* Primary Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="p-3.5 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 space-y-1">
-          <div className="text-slate-500 font-semibold uppercase text-[10px] tracking-wide">Subscription Plan</div>
-          <div className="text-sm font-bold text-slate-900 dark:text-slate-100 capitalize">
+        <div className="p-3.5 bg-[#131318] dark:bg-[#0B0B0E] rounded-lg border border-[#2A2A33] dark:border-[#2A2A33] space-y-1">
+          <div className="text-[#A1A1AA] font-semibold uppercase text-[10px] tracking-wide">Subscription Plan</div>
+          <div className="text-sm font-bold text-[#F7F7F8] dark:text-[#F7F7F8] capitalize">
             {cycle === 'trial' ? '7-Day Trial' : `Pro ${cycle}`}
           </div>
-          <div className="text-[11px] text-slate-400">
+          <div className="text-[11px] text-[#A1A1AA]">
             {plan === 'pro' || status === 'active' || status === 'trialing' ? 'Full Workspace Access' : 'Free Workspace'}
           </div>
         </div>
 
-        <div className="p-3.5 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 space-y-1">
-          <div className="text-slate-500 font-semibold uppercase text-[10px] tracking-wide">Amount Paid</div>
-          <div className="text-sm font-bold text-slate-900 dark:text-slate-100">
+        <div className="p-3.5 bg-[#131318] dark:bg-[#0B0B0E] rounded-lg border border-[#2A2A33] dark:border-[#2A2A33] space-y-1">
+          <div className="text-[#A1A1AA] font-semibold uppercase text-[10px] tracking-wide">Amount Paid</div>
+          <div className="text-sm font-bold text-[#F7F7F8] dark:text-[#F7F7F8]">
             {amountPaid > 0 ? `₹${amountPaid.toLocaleString('en-IN')}` : 'Free'}
           </div>
-          <div className="text-[11px] text-slate-400">
+          <div className="text-[11px] text-[#A1A1AA]">
             Method: {paymentMethod}
           </div>
         </div>
 
-        <div className="p-3.5 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 space-y-1">
-          <div className="text-slate-500 font-semibold uppercase text-[10px] tracking-wide">Status</div>
+        <div className="p-3.5 bg-[#131318] dark:bg-[#0B0B0E] rounded-lg border border-[#2A2A33] dark:border-[#2A2A33] space-y-1">
+          <div className="text-[#A1A1AA] font-semibold uppercase text-[10px] tracking-wide">Status</div>
           <div className={`text-sm font-bold inline-flex items-center gap-1.5 ${textColor}`}>
             <span className={`w-2 h-2 rounded-full ${dotBg}`} />
             <span className="capitalize">{status}</span>
           </div>
-          <div className="text-[11px] text-slate-400">
+          <div className="text-[11px] text-[#A1A1AA]">
             {isCurrentlyActive ? 'Access Entitlement Valid' : 'Access Restricted'}
           </div>
         </div>
       </div>
 
       {/* Transaction & Razorpay Identifiers */}
-      <div className="bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 p-4 space-y-3">
-        <div className="text-xs font-bold text-slate-900 dark:text-slate-100">
+      <div className="bg-[#131318] dark:bg-[#0B0B0E] rounded-lg border border-[#2A2A33] dark:border-[#2A2A33] p-4 space-y-3">
+        <div className="text-xs font-bold text-[#F7F7F8] dark:text-[#F7F7F8]">
           Payment Authorization & Settlement Details
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="space-y-0.5">
-            <span className="text-slate-500 uppercase text-[10px] font-semibold">Payment / Order Reference</span>
-            <p className="font-mono text-slate-800 dark:text-slate-200 select-all truncate text-[11px]">
+            <span className="text-[#A1A1AA] uppercase text-[10px] font-semibold">Payment / Order Reference</span>
+            <p className="font-mono text-[#F7F7F8] dark:text-[#F7F7F8] select-all truncate text-[11px]">
               {paymentId}
             </p>
           </div>
 
           <div className="space-y-0.5">
-            <span className="text-slate-500 uppercase text-[10px] font-semibold">UPI VPA Handle</span>
-            <p className="font-mono text-slate-800 dark:text-slate-200 truncate text-[11px]">
+            <span className="text-[#A1A1AA] uppercase text-[10px] font-semibold">UPI VPA Handle</span>
+            <p className="font-mono text-[#F7F7F8] dark:text-[#F7F7F8] truncate text-[11px]">
               {paymentVpa || '—'}
             </p>
           </div>
 
           <div className="space-y-0.5">
-            <span className="text-slate-500 uppercase text-[10px] font-semibold">Transaction Date</span>
-            <p className="font-medium text-slate-800 dark:text-slate-200">
+            <span className="text-[#A1A1AA] uppercase text-[10px] font-semibold">Transaction Date</span>
+            <p className="font-medium text-[#F7F7F8] dark:text-[#F7F7F8]">
               {paymentDate ? paymentDate.toLocaleString() : '—'}
             </p>
           </div>
 
           <div className="space-y-0.5">
-            <span className="text-slate-500 uppercase text-[10px] font-semibold">Access Validity Period</span>
-            <p className="font-medium text-slate-800 dark:text-slate-200">
+            <span className="text-[#A1A1AA] uppercase text-[10px] font-semibold">Access Validity Period</span>
+            <p className="font-medium text-[#F7F7F8] dark:text-[#F7F7F8]">
               {accessExpiryDate ? accessExpiryDate.toLocaleString() : 'No Active Expiry'}
             </p>
           </div>
 
           <div className="space-y-0.5">
-            <span className="text-slate-500 uppercase text-[10px] font-semibold">7-Day Free Trial Status</span>
-            <p className="font-medium text-slate-800 dark:text-slate-200">
+            <span className="text-[#A1A1AA] uppercase text-[10px] font-semibold">7-Day Free Trial Status</span>
+            <p className="font-medium text-[#F7F7F8] dark:text-[#F7F7F8]">
               {hasTrialClaimed ? 'Claimed / Used' : 'Available for Claim'}
             </p>
           </div>
 
           <div className="space-y-0.5">
-            <span className="text-slate-500 uppercase text-[10px] font-semibold">First-Time Welcome Email</span>
-            <p className="font-medium text-slate-800 dark:text-slate-200">
+            <span className="text-[#A1A1AA] uppercase text-[10px] font-semibold">First-Time Welcome Email</span>
+            <p className="font-medium text-[#F7F7F8] dark:text-[#F7F7F8]">
               {hasTrialClaimed || status === 'active' ? 'Dispatched on First Payment' : 'Pending First Payment'}
             </p>
           </div>

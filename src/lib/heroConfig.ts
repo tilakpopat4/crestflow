@@ -101,7 +101,7 @@ export const DEFAULT_HERO_CONFIG: HeroConfig = {
   showBenefits: true,
   showWorkflowIllustration: true,
   backgroundType: 'color',
-  backgroundColor: '#333333',
+  backgroundColor: '#2A2A33',
   backgroundImageUrl: '',
   backgroundVideoUrl: '',
   posterUrl: '',
@@ -159,7 +159,7 @@ export function mergeHeroConfig(raw?: Partial<HeroConfig> | null): HeroConfig {
         : validTypes.includes(raw.backgroundType as any)
         ? (raw.backgroundType as HeroBackgroundType)
         : 'color',
-    backgroundColor: typeof raw.backgroundColor === 'string' && raw.backgroundColor.trim() ? raw.backgroundColor.trim() : '#333333',
+    backgroundColor: typeof raw.backgroundColor === 'string' && raw.backgroundColor.trim() ? raw.backgroundColor.trim() : '#2A2A33',
     backgroundImageUrl: typeof raw.backgroundImageUrl === 'string' ? raw.backgroundImageUrl.trim() : '',
     backgroundVideoUrl: typeof raw.backgroundVideoUrl === 'string' ? raw.backgroundVideoUrl.trim() : '',
     posterUrl: typeof raw.posterUrl === 'string' ? raw.posterUrl.trim() : '',

@@ -50,7 +50,7 @@ export const ReviewsGrid: React.FC<ReviewsGridProps> = ({
                         key={star}
                         className={`w-4 h-4 ${
                           star <= review.rating
-                            ? 'text-amber-400 fill-amber-400'
+                            ? 'text-[#FFB020] fill-amber-400'
                             : 'text-surface-400 fill-none'
                         }`}
                       />

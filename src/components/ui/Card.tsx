@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * Standard Design System Card container.
- * Uses surface-700 (#212121) with crisp 1px surface-400 (#333333) border.
+ * Uses surface-700 (#131318) with crisp 1px surface-400 (#2A2A33) border.
  */
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;

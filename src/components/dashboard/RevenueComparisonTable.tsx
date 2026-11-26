@@ -11,9 +11,9 @@ export const RevenueComparisonTable: React.FC<RevenueComparisonTableProps> = ({
   hasPrevYearData,
 }) => {
   return (
-    <div className="mt-3 overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700">
+    <div className="mt-3 overflow-x-auto rounded-lg border border-[#2A2A33] dark:border-[#2A2A33]">
       <table className="w-full text-left text-xs whitespace-nowrap">
-        <thead className="bg-slate-50 dark:bg-slate-800/80 text-[11px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400">
+        <thead className="bg-[#131318] dark:bg-[#1B1B22]/80 text-[11px] uppercase tracking-wider font-semibold text-[#A1A1AA] dark:text-[#A1A1AA]">
           <tr>
             <th scope="col" className="px-3.5 py-2">Month</th>
             <th scope="col" className="px-3.5 py-2 text-right">Paid Revenue</th>
@@ -23,31 +23,31 @@ export const RevenueComparisonTable: React.FC<RevenueComparisonTableProps> = ({
             <th scope="col" className="px-3.5 py-2 text-right">Change</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100 dark:divide-slate-700 text-slate-700 dark:text-slate-300">
+        <tbody className="divide-y divide-[#2A2A33] dark:divide-[#2A2A33] text-[#A1A1AA] dark:text-[#A1A1AA]">
           {months.map((p) => {
             const ch = calculateChange(p.now, p.prev);
             return (
               <tr
                 key={`tbl-${p.year}-${p.month}`}
-                className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40"
+                className="hover:bg-[#131318]/50 dark:hover:bg-[#1B1B22]"
               >
                 <th
                   scope="row"
-                  className="px-3.5 py-2 font-medium text-slate-900 dark:text-slate-100"
+                  className="px-3.5 py-2 font-medium text-[#F7F7F8] dark:text-[#F7F7F8]"
                 >
                   {p.shortMonth} {p.year}
                 </th>
-                <td className="px-3.5 py-2 text-right font-medium text-slate-900 dark:text-slate-100 tabular-nums">
+                <td className="px-3.5 py-2 text-right font-medium text-[#F7F7F8] dark:text-[#F7F7F8] tabular-nums">
                   {formatCurrency(p.now)}
                 </td>
-                <td className="px-3.5 py-2 text-right text-slate-500 dark:text-slate-400 tabular-nums">
+                <td className="px-3.5 py-2 text-right text-[#A1A1AA] dark:text-[#A1A1AA] tabular-nums">
                   {formatCurrency(p.prev)}
                 </td>
                 <td
                   className={`px-3.5 py-2 text-right font-medium tabular-nums ${
                     ch < 0
-                      ? 'text-red-600 dark:text-red-400'
-                      : 'text-indigo-600 dark:text-indigo-400'
+                      ? 'text-[#E0002B] dark:text-[#F0607A]'
+                      : 'text-[#FF2D4A] dark:text-[#FF2D4A]'
                   }`}
                 >
                   {`${ch < 0 ? '−' : '+'}${Math.abs(ch).toFixed(1)}%`}

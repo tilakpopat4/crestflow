@@ -75,7 +75,7 @@ export function getPaymentStatusInfo(
       daysRemaining,
       code: 'UP_TO_DATE',
       label: 'Closed',
-      badgeClass: 'text-slate-500 dark:text-slate-400',
+      badgeClass: 'text-[#A1A1AA] dark:text-[#A1A1AA]',
       isNotificationRequired: false,
       notificationTitle: '',
       notificationMessage: '',
@@ -86,7 +86,7 @@ export function getPaymentStatusInfo(
 
   let code: PaymentStatusInfo['code'] = 'UP_TO_DATE';
   let label = `Due in ${daysRemaining} days`;
-  let badgeClass = 'text-slate-700 dark:text-slate-300';
+  let badgeClass = 'text-[#A1A1AA] dark:text-[#A1A1AA]';
   let isNotificationRequired = false;
   let notificationTitle = '';
   let notificationMessage = '';
@@ -95,7 +95,7 @@ export function getPaymentStatusInfo(
   if (daysRemaining === 3) {
     code = 'DUE_IN_3_DAYS';
     label = 'Payment Due in 3 Days';
-    badgeClass = 'text-slate-700 dark:text-slate-300 font-medium';
+    badgeClass = 'text-[#A1A1AA] dark:text-[#A1A1AA] font-medium';
     isNotificationRequired = true;
     severity = 'warning';
     notificationTitle = `Payment Due in 3 Days: ${client.name}`;
@@ -103,7 +103,7 @@ export function getPaymentStatusInfo(
   } else if (daysRemaining === 2 || daysRemaining === 1) {
     code = 'DUE_IN_1_DAY';
     label = daysRemaining === 1 ? 'Payment Due Tomorrow!' : 'Payment Due in 2 Days';
-    badgeClass = 'text-slate-700 dark:text-slate-300 font-medium';
+    badgeClass = 'text-[#A1A1AA] dark:text-[#A1A1AA] font-medium';
     isNotificationRequired = true;
     severity = 'urgent';
     notificationTitle = `Payment Due ${daysRemaining === 1 ? 'Tomorrow' : 'in 2 Days'}: ${client.name}`;
@@ -111,7 +111,7 @@ export function getPaymentStatusInfo(
   } else if (daysRemaining === 0) {
     code = 'DUE_TODAY';
     label = 'Payment DUE TODAY!';
-    badgeClass = 'text-red-600 dark:text-red-400 font-medium';
+    badgeClass = 'text-[#E0002B] dark:text-[#F0607A] font-medium';
     isNotificationRequired = true;
     severity = 'critical';
     notificationTitle = `Payment DUE TODAY: ${client.name}`;
@@ -119,7 +119,7 @@ export function getPaymentStatusInfo(
   } else if (daysRemaining === -2) {
     code = 'OVERDUE_2_DAYS';
     label = 'Delayed Notification (2nd Day Overdue)';
-    badgeClass = 'text-red-600 dark:text-red-400 font-medium';
+    badgeClass = 'text-[#E0002B] dark:text-[#F0607A] font-medium';
     isNotificationRequired = true;
     severity = 'delayed';
     notificationTitle = `Delayed Payment (Day 2 Overdue): ${client.name}`;
@@ -128,7 +128,7 @@ export function getPaymentStatusInfo(
     code = 'OVERDUE';
     const overdueDays = Math.abs(daysRemaining);
     label = `Delayed (${overdueDays} Days Overdue)`;
-    badgeClass = 'text-red-600 dark:text-red-400 font-medium';
+    badgeClass = 'text-[#E0002B] dark:text-[#F0607A] font-medium';
     isNotificationRequired = overdueDays >= 2;
     severity = 'delayed';
     notificationTitle = `Payment Overdue (${overdueDays} Days): ${client.name}`;
@@ -136,7 +136,7 @@ export function getPaymentStatusInfo(
   } else if (daysRemaining > 3) {
     code = 'UP_TO_DATE';
     label = `Next Due: ${new Date(nextDueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })} (${daysRemaining}d)`;
-    badgeClass = 'text-slate-700 dark:text-slate-300';
+    badgeClass = 'text-[#A1A1AA] dark:text-[#A1A1AA]';
     isNotificationRequired = false;
     severity = 'ok';
   }

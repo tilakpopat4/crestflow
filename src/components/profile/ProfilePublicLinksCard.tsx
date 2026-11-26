@@ -38,11 +38,11 @@ export const ProfilePublicLinksCard: React.FC<ProfilePublicLinksCardProps> = ({
 
   if (!isHandleValid) {
     return (
-      <div className="sm:col-span-2 p-3.5 rounded-lg bg-slate-50/50 dark:bg-slate-800/40 space-y-1">
-        <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+      <div className="sm:col-span-2 p-3.5 rounded-lg bg-[#131318]/50 dark:bg-[#1B1B22] space-y-1">
+        <p className="text-xs font-semibold text-[#F7F7F8] dark:text-[#F7F7F8]">
           Username required
         </p>
-        <p className="text-[11px] text-slate-500 dark:text-slate-400">
+        <p className="text-[11px] text-[#A1A1AA] dark:text-[#A1A1AA]">
           Save a valid username above to activate your link.
         </p>
       </div>
@@ -52,32 +52,32 @@ export const ProfilePublicLinksCard: React.FC<ProfilePublicLinksCardProps> = ({
   return (
     <div className="sm:col-span-2 pt-1">
       {/* Unified Onboarding Link Card */}
-      <div className="p-3.5 rounded-lg bg-slate-50/50 dark:bg-slate-800/40 space-y-1.5">
+      <div className="p-3.5 rounded-lg bg-[#131318]/50 dark:bg-[#1B1B22] space-y-1.5">
         <div className="flex items-center justify-between gap-2">
-          <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+          <span className="text-xs font-semibold text-[#F7F7F8] dark:text-[#F7F7F8]">
             Onboarding link
           </span>
           <div className="flex items-center gap-1">
             <button
               type="button"
               onClick={copyUrl}
-              className="p-1.5 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-slate-200/60 dark:hover:bg-slate-700 rounded cursor-pointer border-0"
+              className="p-1.5 text-[#A1A1AA] hover:text-[#F7F7F8] dark:text-[#A1A1AA] dark:hover:text-[#F7F7F8] hover:bg-[#1B1B22]/60 dark:hover:bg-[#1B1B22] rounded cursor-pointer border-0"
               title="Copy Onboarding Link"
             >
-              {copied ? <Check size={13} className="text-indigo-600" /> : <Copy size={13} />}
+              {copied ? <Check size={13} className="text-[#FF2D4A]" /> : <Copy size={13} />}
             </button>
             <a
               href={onboardingUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-1.5 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-slate-200/60 dark:hover:bg-slate-700 rounded"
+              className="p-1.5 text-[#A1A1AA] hover:text-[#F7F7F8] dark:text-[#A1A1AA] dark:hover:text-[#F7F7F8] hover:bg-[#1B1B22]/60 dark:hover:bg-[#1B1B22] rounded"
               title="Open onboarding page in new tab"
             >
               <ExternalLink size={13} />
             </a>
           </div>
         </div>
-        <p className="text-[11px] font-mono text-slate-600 dark:text-slate-300 truncate">
+        <p className="text-[11px] font-mono text-[#A1A1AA] dark:text-[#A1A1AA] truncate">
           /{cleanHandle}/onboarding
         </p>
       </div>

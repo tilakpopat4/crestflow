@@ -87,10 +87,10 @@ export default function AdminUserHistoryModal({ user, isOpen, onClose }: AdminUs
               <img
                 src={displayUser.photoURL}
                 alt={displayUser.name}
-                className="w-11 h-11 rounded-full object-cover shrink-0 border border-slate-200 dark:border-slate-700"
+                className="w-11 h-11 rounded-full object-cover shrink-0 border border-[#2A2A33] dark:border-[#2A2A33]"
               />
             ) : (
-              <div className="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 font-bold shrink-0">
+              <div className="w-11 h-11 rounded-full bg-[#131318] dark:bg-[#1B1B22] flex items-center justify-center text-[#A1A1AA] dark:text-[#F7F7F8] font-bold shrink-0">
                 {(displayUser.name || displayUser.email || 'U').charAt(0).toUpperCase()}
               </div>
             )}
@@ -98,26 +98,26 @@ export default function AdminUserHistoryModal({ user, isOpen, onClose }: AdminUs
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="text-lg font-bold truncate">{displayUser.name}</h3>
                 {isSubActive ? (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400">
-                    <span className="w-2 h-2 rounded-full bg-indigo-600" />
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#FF2D4A] dark:text-[#FF2D4A]">
+                    <span className="w-2 h-2 rounded-full bg-[#E0002B]" />
                     {status === 'trialing' ? '7-Day Trial' : 'Active Pro'}
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500">
-                    <span className="w-2 h-2 rounded-full bg-slate-400" />
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A1A1AA]">
+                    <span className="w-2 h-2 rounded-full bg-[#2A2A33]" />
                     {status === 'expired' ? 'Expired' : 'Free Account'}
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{displayUser.email}</p>
-              <p className="text-[11px] font-mono text-slate-400 select-all truncate mt-0.5">
+              <p className="text-xs text-[#A1A1AA] dark:text-[#A1A1AA] truncate">{displayUser.email}</p>
+              <p className="text-[11px] font-mono text-[#A1A1AA] select-all truncate mt-0.5">
                 UID: {user.id}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 border-0 cursor-pointer"
+            className="p-1.5 text-[#A1A1AA] hover:text-[#A1A1AA] dark:hover:text-[#F7F7F8] rounded-lg hover:bg-[#131318] dark:hover:bg-[#1B1B22] border-0 cursor-pointer"
             title="Close modal"
           >
             <X className="w-5 h-5" />
@@ -125,28 +125,28 @@ export default function AdminUserHistoryModal({ user, isOpen, onClose }: AdminUs
         </div>
 
         {/* Quick Metrics Bar */}
-        <div className="grid grid-cols-4 border-b border-slate-200 dark:border-slate-800 text-center divide-x divide-slate-200 dark:divide-slate-800 bg-slate-50/50 dark:bg-slate-950/50 text-xs py-3">
+        <div className="grid grid-cols-4 border-b border-[#2A2A33] dark:border-[#2A2A33] text-center divide-x divide-[#2A2A33] dark:divide-[#2A2A33] bg-[#131318]/50 dark:bg-[#0B0B0E]/50 text-xs py-3">
           <div>
-            <div className="text-slate-500">Plan & Cycle</div>
-            <div className="font-bold text-slate-900 dark:text-slate-100 text-sm mt-0.5 capitalize truncate px-2">
+            <div className="text-[#A1A1AA]">Plan & Cycle</div>
+            <div className="font-bold text-[#F7F7F8] dark:text-[#F7F7F8] text-sm mt-0.5 capitalize truncate px-2">
               {loading ? '…' : cycle === 'trial' ? '7-Day Trial' : `Pro ${cycle}`}
             </div>
           </div>
           <div>
-            <div className="text-slate-500">Amount Paid</div>
-            <div className="font-bold text-slate-900 dark:text-slate-100 text-sm mt-0.5">
+            <div className="text-[#A1A1AA]">Amount Paid</div>
+            <div className="font-bold text-[#F7F7F8] dark:text-[#F7F7F8] text-sm mt-0.5">
               {loading ? '…' : paymentAmount > 0 ? `₹${paymentAmount.toLocaleString('en-IN')}` : 'Free'}
             </div>
           </div>
           <div>
-            <div className="text-slate-500">Invoices</div>
-            <div className="font-bold text-slate-900 dark:text-slate-100 text-sm mt-0.5">
+            <div className="text-[#A1A1AA]">Invoices</div>
+            <div className="font-bold text-[#F7F7F8] dark:text-[#F7F7F8] text-sm mt-0.5">
               {loading ? '…' : invoicesCount}
             </div>
           </div>
           <div>
-            <div className="text-slate-500">Total Billed</div>
-            <div className="font-bold text-slate-900 dark:text-slate-100 text-sm mt-0.5">
+            <div className="text-[#A1A1AA]">Total Billed</div>
+            <div className="font-bold text-[#F7F7F8] dark:text-[#F7F7F8] text-sm mt-0.5">
               {loading ? '…' : `₹${totalBilled.toLocaleString()}`}
             </div>
           </div>
@@ -169,8 +169,8 @@ export default function AdminUserHistoryModal({ user, isOpen, onClose }: AdminUs
                 onClick={() => setActiveTab(t.id)}
                 className={`pb-2.5 px-3 text-xs font-semibold inline-flex items-center gap-1.5 border-0 border-b-2 transition-colors duration-120 cursor-pointer shrink-0 ${
                   isSel
-                    ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
-                    : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                    ? 'border-indigo-600 text-[#FF2D4A] dark:text-[#FF2D4A]'
+                    : 'border-transparent text-[#A1A1AA] hover:text-[#F7F7F8] dark:hover:text-[#F7F7F8]'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -183,12 +183,12 @@ export default function AdminUserHistoryModal({ user, isOpen, onClose }: AdminUs
         {/* Tab Body Content */}
         <div className="flex-1 overflow-y-auto p-5 text-sm">
           {loading ? (
-            <div className="flex items-center justify-center py-16 text-slate-400 gap-2 text-xs">
-              <RefreshCw className="w-4 h-4 animate-spin text-indigo-600" />
+            <div className="flex items-center justify-center py-16 text-[#A1A1AA] gap-2 text-xs">
+              <RefreshCw className="w-4 h-4 animate-spin text-[#FF2D4A]" />
               <span>Fetching history and details from Firebase...</span>
             </div>
           ) : error ? (
-            <div className="p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-red-600 dark:text-red-400">
+            <div className="p-4 bg-[#131318] dark:bg-[#0B0B0E] border border-[#2A2A33] dark:border-[#2A2A33] rounded-lg text-xs text-[#E0002B] dark:text-[#F0607A]">
               {error}
             </div>
           ) : activeTab === 'payments' ? (
@@ -198,12 +198,12 @@ export default function AdminUserHistoryModal({ user, isOpen, onClose }: AdminUs
           ) : activeTab === 'clients' ? (
             <div>
               {clients.length === 0 ? (
-                <div className="text-center py-12 text-slate-400 text-xs">No clients added yet.</div>
+                <div className="text-center py-12 text-[#A1A1AA] text-xs">No clients added yet.</div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase font-semibold">
+                      <tr className="border-b border-[#2A2A33] dark:border-[#2A2A33] text-[#A1A1AA] uppercase font-semibold">
                         <th className="pb-2">Client Name</th>
                         <th className="pb-2">Company / Phone</th>
                         <th className="pb-2">Email</th>
@@ -211,14 +211,14 @@ export default function AdminUserHistoryModal({ user, isOpen, onClose }: AdminUs
                         <th className="pb-2 text-right">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                    <tbody className="divide-y divide-[#2A2A33] dark:divide-[#2A2A33]/60">
                       {clients.map((c: any) => (
-                        <tr key={c.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                          <td className="py-2.5 font-semibold text-slate-900 dark:text-slate-100">{c.name}</td>
-                          <td className="py-2.5 text-slate-600 dark:text-slate-300">{c.company || c.phone || '—'}</td>
-                          <td className="py-2.5 font-mono text-slate-500">{c.email || '—'}</td>
+                        <tr key={c.id} className="hover:bg-[#131318] dark:hover:bg-[#1B1B22]">
+                          <td className="py-2.5 font-semibold text-[#F7F7F8] dark:text-[#F7F7F8]">{c.name}</td>
+                          <td className="py-2.5 text-[#A1A1AA] dark:text-[#A1A1AA]">{c.company || c.phone || '—'}</td>
+                          <td className="py-2.5 font-mono text-[#A1A1AA]">{c.email || '—'}</td>
                           <td className="py-2.5 font-semibold">{c.currency || '₹'} {c.rate || 0}</td>
-                          <td className="py-2.5 text-right font-medium text-slate-600">{c.isClosed ? 'Closed' : c.status || 'Active'}</td>
+                          <td className="py-2.5 text-right font-medium text-[#A1A1AA]">{c.isClosed ? 'Closed' : c.status || 'Active'}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -229,21 +229,21 @@ export default function AdminUserHistoryModal({ user, isOpen, onClose }: AdminUs
           ) : activeTab === 'work' ? (
             <div>
               {workItems.length === 0 ? (
-                <div className="text-center py-12 text-slate-400 text-xs">No work logs recorded yet.</div>
+                <div className="text-center py-12 text-[#A1A1AA] text-xs">No work logs recorded yet.</div>
               ) : (
                 <div className="space-y-2">
                   {workItems.map((w: any) => (
                     <div
                       key={w.id}
-                      className="p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg flex items-center justify-between text-xs"
+                      className="p-3 bg-[#131318] dark:bg-[#0B0B0E] border border-[#2A2A33] dark:border-[#2A2A33] rounded-lg flex items-center justify-between text-xs"
                     >
                       <div>
-                        <div className="font-semibold text-slate-900 dark:text-slate-100">{w.title}</div>
-                        {w.clientEmail && <div className="text-[11px] text-slate-400 mt-0.5">{w.clientEmail}</div>}
+                        <div className="font-semibold text-[#F7F7F8] dark:text-[#F7F7F8]">{w.title}</div>
+                        {w.clientEmail && <div className="text-[11px] text-[#A1A1AA] mt-0.5">{w.clientEmail}</div>}
                       </div>
                       <div className="text-right">
-                        <span className="font-medium text-slate-600 dark:text-slate-300 capitalize">{w.status || 'in progress'}</span>
-                        <div className="text-[11px] text-slate-400 mt-0.5">{w.createdAt ? new Date(w.createdAt).toLocaleDateString() : '—'}</div>
+                        <span className="font-medium text-[#A1A1AA] dark:text-[#A1A1AA] capitalize">{w.status || 'in progress'}</span>
+                        <div className="text-[11px] text-[#A1A1AA] mt-0.5">{w.createdAt ? new Date(w.createdAt).toLocaleDateString() : '—'}</div>
                       </div>
                     </div>
                   ))}
@@ -252,28 +252,28 @@ export default function AdminUserHistoryModal({ user, isOpen, onClose }: AdminUs
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-4 text-xs">
-              <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 space-y-1">
-                <span className="text-slate-400 font-semibold uppercase">Phone Number</span>
-                <p className="font-medium text-slate-800 dark:text-slate-200">{displayUser.phone || '—'}</p>
+              <div className="p-3 bg-[#131318] dark:bg-[#0B0B0E] rounded-lg border border-[#2A2A33] dark:border-[#2A2A33] space-y-1">
+                <span className="text-[#A1A1AA] font-semibold uppercase">Phone Number</span>
+                <p className="font-medium text-[#F7F7F8] dark:text-[#F7F7F8]">{displayUser.phone || '—'}</p>
               </div>
-              <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 space-y-1">
-                <span className="text-slate-400 font-semibold uppercase">UPI ID</span>
-                <p className="font-mono text-slate-800 dark:text-slate-200">{displayUser.upiId || '—'}</p>
+              <div className="p-3 bg-[#131318] dark:bg-[#0B0B0E] rounded-lg border border-[#2A2A33] dark:border-[#2A2A33] space-y-1">
+                <span className="text-[#A1A1AA] font-semibold uppercase">UPI ID</span>
+                <p className="font-mono text-[#F7F7F8] dark:text-[#F7F7F8]">{displayUser.upiId || '—'}</p>
               </div>
-              <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 space-y-1">
-                <span className="text-slate-400 font-semibold uppercase">Professional Title</span>
-                <p className="font-medium text-slate-800 dark:text-slate-200">{displayUser.professionalTitle || '—'}</p>
+              <div className="p-3 bg-[#131318] dark:bg-[#0B0B0E] rounded-lg border border-[#2A2A33] dark:border-[#2A2A33] space-y-1">
+                <span className="text-[#A1A1AA] font-semibold uppercase">Professional Title</span>
+                <p className="font-medium text-[#F7F7F8] dark:text-[#F7F7F8]">{displayUser.professionalTitle || '—'}</p>
               </div>
-              <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 space-y-1">
-                <span className="text-slate-400 font-semibold uppercase">Registered Date</span>
-                <p className="font-medium text-slate-800 dark:text-slate-200">
+              <div className="p-3 bg-[#131318] dark:bg-[#0B0B0E] rounded-lg border border-[#2A2A33] dark:border-[#2A2A33] space-y-1">
+                <span className="text-[#A1A1AA] font-semibold uppercase">Registered Date</span>
+                <p className="font-medium text-[#F7F7F8] dark:text-[#F7F7F8]">
                   {displayUser.createdAt ? new Date(displayUser.createdAt).toLocaleString() : '—'}
                 </p>
               </div>
               {displayUser.bio && (
-                <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 space-y-1 col-span-2">
-                  <span className="text-slate-400 font-semibold uppercase">Services & Experience Bio</span>
-                  <p className="text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">{displayUser.bio}</p>
+                <div className="p-3 bg-[#131318] dark:bg-[#0B0B0E] rounded-lg border border-[#2A2A33] dark:border-[#2A2A33] space-y-1 col-span-2">
+                  <span className="text-[#A1A1AA] font-semibold uppercase">Services & Experience Bio</span>
+                  <p className="text-[#A1A1AA] dark:text-[#A1A1AA] leading-relaxed whitespace-pre-wrap">{displayUser.bio}</p>
                 </div>
               )}
             </div>

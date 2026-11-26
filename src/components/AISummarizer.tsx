@@ -109,7 +109,7 @@ export default function AISummarizer({ clients, workItems, profile }: AISummariz
         {isGenerating && (
           <div className="py-6 flex flex-col items-center justify-center gap-2 select-none">
             <div className="w-5 h-5 rounded-full border-2 border-accent border-t-transparent animate-spin" />
-            <span className="text-xs text-slate-400">Generating summary...</span>
+            <span className="text-xs text-[#A1A1AA]">Generating summary...</span>
           </div>
         )}
 
@@ -118,13 +118,13 @@ export default function AISummarizer({ clients, workItems, profile }: AISummariz
             <div className="absolute -top-3 -right-3">
               <button
                 onClick={handleCopy}
-                className="p-2 bg-[#282828] hover:bg-[#333333] border border-[#383838] rounded-lg shadow-sm text-slate-300 hover:text-white transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 cursor-pointer"
+                className="p-2 bg-[#1B1B22] hover:bg-[#2A2A33] border border-[#2A2A33] rounded-lg shadow-sm text-[#A1A1AA] hover:text-white transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 cursor-pointer"
                 title="Copy to clipboard"
               >
                 {copied ? <span className="text-xs font-semibold text-text-primary px-1">Copied!</span> : <Copy size={16} />}
               </button>
             </div>
-            <p className="text-[#f1f1f1] text-sm sm:text-base leading-relaxed bg-[#1e1e1e] p-5 rounded-xl border border-[#333333]">
+            <p className="text-[#F7F7F8] text-sm sm:text-base leading-relaxed bg-[#131318] p-5 rounded-xl border border-[#2A2A33]">
               {summary}
             </p>
           </div>

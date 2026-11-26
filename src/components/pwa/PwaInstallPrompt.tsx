@@ -18,16 +18,16 @@ export const PwaInstallPrompt: React.FC = () => {
     <div
       role="region"
       aria-label="Install CrestFlow Application"
-      className="fixed bottom-4 right-4 z-50 max-w-sm w-[calc(100vw-2rem)] bg-[#212121] text-slate-100 rounded-xl p-4 shadow-xl border border-[#383838] transition-all duration-150 animate-fadeIn"
+      className="fixed bottom-4 right-4 z-50 max-w-sm w-[calc(100vw-2rem)] bg-[#131318] text-[#F7F7F8] rounded-xl p-4 shadow-xl border border-[#2A2A33] transition-all duration-150 animate-fadeIn"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-[#282828] border border-[#3a3a3a] flex items-center justify-center shrink-0">
-            <Download className="w-5 h-5 text-slate-200" />
+          <div className="w-10 h-10 rounded-lg bg-[#1B1B22] border border-[#2A2A33] flex items-center justify-center shrink-0">
+            <Download className="w-5 h-5 text-[#F7F7F8]" />
           </div>
           <div>
             <h3 className="text-sm font-semibold text-white tracking-tight">Install CrestFlow App</h3>
-            <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">
+            <p className="text-xs text-[#A1A1AA] mt-0.5 leading-relaxed">
               Add to desktop or home screen for faster access and offline work logging.
             </p>
           </div>
@@ -35,7 +35,7 @@ export const PwaInstallPrompt: React.FC = () => {
         <button
           type="button"
           onClick={dismissPrompt}
-          className="text-slate-400 hover:text-white p-1 rounded hover:bg-[#282828] transition-colors cursor-pointer border-0 bg-transparent shrink-0"
+          className="text-[#A1A1AA] hover:text-white p-1 rounded hover:bg-[#1B1B22] transition-colors cursor-pointer border-0 bg-transparent shrink-0"
           title="Dismiss"
           aria-label="Dismiss install prompt"
         >
@@ -43,7 +43,7 @@ export const PwaInstallPrompt: React.FC = () => {
         </button>
       </div>
 
-      <div className="flex items-center gap-2 mt-3.5 pt-2 border-t border-[#2e2e2e]">
+      <div className="flex items-center gap-2 mt-3.5 pt-2 border-t border-[#2A2A33]">
         <button
           type="button"
           onClick={() => promptInstall()}
@@ -55,7 +55,7 @@ export const PwaInstallPrompt: React.FC = () => {
         <button
           type="button"
           onClick={dismissPrompt}
-          className="py-2 px-3 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-[#282828] transition-colors duration-120 cursor-pointer border-0 bg-transparent"
+          className="py-2 px-3 rounded-lg text-xs font-medium text-[#A1A1AA] hover:text-[#F7F7F8] hover:bg-[#1B1B22] transition-colors duration-120 cursor-pointer border-0 bg-transparent"
         >
           Not Now
         </button>

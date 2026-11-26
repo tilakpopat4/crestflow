@@ -101,15 +101,15 @@ export default function AdminHeroManager() {
   };
 
   return (
-    <div className="space-y-6 text-slate-100">
+    <div className="space-y-6 text-[#F7F7F8]">
       {/* Top Header & Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#212121] border border-[#333333] p-4 sm:p-5 rounded-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#131318] border border-[#2A2A33] p-4 sm:p-5 rounded-xl">
         <div>
           <h2 className="text-base sm:text-lg font-bold flex items-center gap-2">
             <LayoutTemplate className="w-5 h-5 text-accent" />
             <span>Hero &amp; Landing Page Manager</span>
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-[#A1A1AA] mt-0.5">
             Customize the landing hero copy, background media (photo/video), and auth box alignment.
           </p>
         </div>
@@ -118,7 +118,7 @@ export default function AdminHeroManager() {
             type="button"
             onClick={handleReset}
             disabled={saving}
-            className="px-3 py-1.5 bg-[#282828] hover:bg-[#333333] text-slate-300 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 transition-colors cursor-pointer border-0"
+            className="px-3 py-1.5 bg-[#1B1B22] hover:bg-[#2A2A33] text-[#A1A1AA] rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 transition-colors cursor-pointer border-0"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Reset</span>
@@ -149,48 +149,48 @@ export default function AdminHeroManager() {
       {/* Grid: Left Column (Text & Benefits), Right Column (Media & Alignment) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Card 1: Headline, Highlight & Subtitle */}
-        <div className="bg-[#212121] border border-[#333333] rounded-xl p-5 space-y-4">
+        <div className="bg-[#131318] border border-[#2A2A33] rounded-xl p-5 space-y-4">
           <h3 className="text-sm font-bold text-white uppercase tracking-wider">Hero Text &amp; Copy</h3>
           
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Headline Text</label>
+            <label className="block text-xs font-medium text-[#A1A1AA] mb-1">Headline Text</label>
             <input
               type="text"
               value={draft.headline}
               onChange={(e) => setDraft({ ...draft, headline: e.target.value })}
-              className="w-full bg-[#181818] border border-[#383838] rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-slate-500"
+              className="w-full bg-[#0B0B0E] border border-[#2A2A33] rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#2A2A33]"
               placeholder="e.g. Invoice. Scan. Get Paid."
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">
+            <label className="block text-xs font-medium text-[#A1A1AA] mb-1">
               Highlighted Substring (Styled in Indigo Accent)
             </label>
             <input
               type="text"
               value={draft.headlineHighlight}
               onChange={(e) => setDraft({ ...draft, headlineHighlight: e.target.value })}
-              className="w-full bg-[#181818] border border-[#383838] rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-slate-500"
+              className="w-full bg-[#0B0B0E] border border-[#2A2A33] rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#2A2A33]"
               placeholder="e.g. Get Paid."
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Subtitle / Supporting Copy</label>
+            <label className="block text-xs font-medium text-[#A1A1AA] mb-1">Subtitle / Supporting Copy</label>
             <textarea
               rows={3}
               value={draft.subtitle}
               onChange={(e) => setDraft({ ...draft, subtitle: e.target.value })}
-              className="w-full bg-[#181818] border border-[#383838] rounded-lg p-3 text-xs text-white outline-none focus:border-slate-500 leading-relaxed"
+              className="w-full bg-[#0B0B0E] border border-[#2A2A33] rounded-lg p-3 text-xs text-white outline-none focus:border-[#2A2A33] leading-relaxed"
               placeholder="Describe your platform value proposition..."
             />
           </div>
 
-          <div className="flex items-center justify-between pt-2 border-t border-[#2a2a2a]">
+          <div className="flex items-center justify-between pt-2 border-t border-[#2A2A33]">
             <div>
               <p className="text-xs font-medium text-white">Show Workflow Illustration Diagram</p>
-              <p className="text-[11px] text-slate-400">Renders the graphic showing deliverable and invoice cycle.</p>
+              <p className="text-[11px] text-[#A1A1AA]">Renders the graphic showing deliverable and invoice cycle.</p>
             </div>
             <button
               type="button"
@@ -198,10 +198,10 @@ export default function AdminHeroManager() {
               aria-checked={draft.showWorkflowIllustration}
               onClick={() => setDraft({ ...draft, showWorkflowIllustration: !draft.showWorkflowIllustration })}
               className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors duration-150 border-0 ${
-                draft.showWorkflowIllustration ? 'bg-accent' : 'bg-[#383838]'
+                draft.showWorkflowIllustration ? 'bg-accent' : 'bg-[#2A2A33]'
               }`}
             >
-              <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform duration-150 mt-0.5 ml-0.5 ${
+              <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-[#131318] transition-transform duration-150 mt-0.5 ml-0.5 ${
                 draft.showWorkflowIllustration ? 'translate-x-4' : 'translate-x-0'
               }`} />
             </button>

@@ -17,10 +17,10 @@ export const RatesBasisSelector: React.FC<RatesBasisSelectorProps> = ({
 }) => {
   return (
     <div className="space-y-1.5">
-      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+      <label className="block text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA]">
         Payment Basis / Billing Type *
       </label>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 bg-[#212121] p-1 rounded-xl">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 bg-[#131318] p-1 rounded-xl">
         <motion.button
           type="button"
           onClick={() => onChange('per_reel')}
@@ -28,13 +28,13 @@ export const RatesBasisSelector: React.FC<RatesBasisSelectorProps> = ({
           className={`relative p-3 rounded-lg text-left cursor-pointer border-0 select-none transition-colors duration-120 ${
             paymentBasis === 'per_reel'
               ? 'text-white'
-              : 'text-slate-400 hover:text-white hover:bg-[#282828] active:bg-[#333333]'
+              : 'text-[#A1A1AA] hover:text-white hover:bg-[#1B1B22] active:bg-[#2A2A33]'
           }`}
         >
           {paymentBasis === 'per_reel' && (
             <motion.div
               layoutId="activePaymentBasisIndicator"
-              className="absolute inset-0 bg-[#383838] rounded-lg shadow-2xs z-0"
+              className="absolute inset-0 bg-[#2A2A33] rounded-lg shadow-2xs z-0"
               transition={
                 shouldReduceMotion
                   ? { duration: 0 }
@@ -55,13 +55,13 @@ export const RatesBasisSelector: React.FC<RatesBasisSelectorProps> = ({
           className={`relative p-3 rounded-lg text-left cursor-pointer border-0 select-none transition-colors duration-120 ${
             paymentBasis === 'monthly_retainer'
               ? 'text-white'
-              : 'text-slate-400 hover:text-white hover:bg-[#282828] active:bg-[#333333]'
+              : 'text-[#A1A1AA] hover:text-white hover:bg-[#1B1B22] active:bg-[#2A2A33]'
           }`}
         >
           {paymentBasis === 'monthly_retainer' && (
             <motion.div
               layoutId="activePaymentBasisIndicator"
-              className="absolute inset-0 bg-[#383838] rounded-lg shadow-2xs z-0"
+              className="absolute inset-0 bg-[#2A2A33] rounded-lg shadow-2xs z-0"
               transition={
                 shouldReduceMotion
                   ? { duration: 0 }

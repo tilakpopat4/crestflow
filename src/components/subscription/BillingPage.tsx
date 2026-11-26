@@ -204,7 +204,7 @@ export default function BillingPage({
               <button
                 type="button"
                 onClick={onNavigateToPricing}
-                className="px-3.5 py-2 rounded-lg bg-[#1B1B22] hover:bg-[#22222B] border border-[#2A2A33] text-xs font-semibold text-[#F7F7F8] cursor-pointer"
+                className="px-3.5 py-2 rounded-lg bg-[#1B1B22] hover:bg-[#2A2A33] border border-[#2A2A33] text-xs font-semibold text-[#F7F7F8] cursor-pointer"
               >
                 Compare plans
               </button>

@@ -37,68 +37,68 @@ export default function AdminCampaignFormInputs({
     <div className="space-y-3">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="sm:col-span-2">
-          <label className="block font-medium text-slate-300 mb-1 text-xs">Subject Line</label>
+          <label className="block font-medium text-[#A1A1AA] mb-1 text-xs">Subject Line</label>
           <input
             type="text"
             placeholder="e.g. Exclusive Pro Plan Offer | CrestFlow"
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
-            className="w-full p-2 bg-[#181818] border border-[#333333] rounded-lg text-white placeholder:text-slate-500 outline-none focus:border-indigo-500 text-xs"
+            className="w-full p-2 bg-[#0B0B0E] border border-[#2A2A33] rounded-lg text-white placeholder:text-[#A1A1AA] outline-none focus:border-[#FF2D4A] text-xs"
           />
         </div>
         <div>
-          <label className="block font-medium text-slate-300 mb-1 text-xs">Banner Tag (Optional)</label>
+          <label className="block font-medium text-[#A1A1AA] mb-1 text-xs">Banner Tag (Optional)</label>
           <input
             type="text"
             placeholder="e.g. Limited Offer"
             value={bannerText}
             onChange={(e) => setBannerText(e.target.value)}
-            className="w-full p-2 bg-[#181818] border border-[#333333] rounded-lg text-white placeholder:text-slate-500 outline-none focus:border-indigo-500 text-xs"
+            className="w-full p-2 bg-[#0B0B0E] border border-[#2A2A33] rounded-lg text-white placeholder:text-[#A1A1AA] outline-none focus:border-[#FF2D4A] text-xs"
           />
         </div>
       </div>
 
       <div>
-        <label className="block font-medium text-slate-300 mb-1 text-xs">Campaign Headline</label>
+        <label className="block font-medium text-[#A1A1AA] mb-1 text-xs">Campaign Headline</label>
         <input
           type="text"
           placeholder="e.g. Elevate Your Video Editing Business With CrestFlow Pro"
           value={headline}
           onChange={(e) => setHeadline(e.target.value)}
-          className="w-full p-2 bg-[#181818] border border-[#333333] rounded-lg text-white placeholder:text-slate-500 outline-none focus:border-indigo-500 text-xs"
+          className="w-full p-2 bg-[#0B0B0E] border border-[#2A2A33] rounded-lg text-white placeholder:text-[#A1A1AA] outline-none focus:border-[#FF2D4A] text-xs"
         />
       </div>
 
       <div>
-        <label className="block font-medium text-slate-300 mb-1 text-xs">Message Body</label>
+        <label className="block font-medium text-[#A1A1AA] mb-1 text-xs">Message Body</label>
         <textarea
           rows={4}
           placeholder="Write your announcement or promotional offer details here..."
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          className="w-full p-2 bg-[#181818] border border-[#333333] rounded-lg text-white placeholder:text-slate-500 outline-none focus:border-indigo-500 leading-relaxed text-xs"
+          className="w-full p-2 bg-[#0B0B0E] border border-[#2A2A33] rounded-lg text-white placeholder:text-[#A1A1AA] outline-none focus:border-[#FF2D4A] leading-relaxed text-xs"
         />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label className="block font-medium text-slate-300 mb-1 text-xs">Button Label (Optional)</label>
+          <label className="block font-medium text-[#A1A1AA] mb-1 text-xs">Button Label (Optional)</label>
           <input
             type="text"
             placeholder="e.g. Upgrade to Pro"
             value={actionLabel}
             onChange={(e) => setActionLabel(e.target.value)}
-            className="w-full p-2 bg-[#181818] border border-[#333333] rounded-lg text-white placeholder:text-slate-500 outline-none focus:border-indigo-500 text-xs"
+            className="w-full p-2 bg-[#0B0B0E] border border-[#2A2A33] rounded-lg text-white placeholder:text-[#A1A1AA] outline-none focus:border-[#FF2D4A] text-xs"
           />
         </div>
         <div>
-          <label className="block font-medium text-slate-300 mb-1 text-xs">Button Target Link (Optional)</label>
+          <label className="block font-medium text-[#A1A1AA] mb-1 text-xs">Button Target Link (Optional)</label>
           <input
             type="text"
             placeholder="https://crestflow.app/pricing"
             value={actionUrl}
             onChange={(e) => setActionUrl(e.target.value)}
-            className="w-full p-2 bg-[#181818] border border-[#333333] rounded-lg text-white placeholder:text-slate-500 outline-none focus:border-indigo-500 font-mono text-[11px]"
+            className="w-full p-2 bg-[#0B0B0E] border border-[#2A2A33] rounded-lg text-white placeholder:text-[#A1A1AA] outline-none focus:border-[#FF2D4A] font-mono text-[11px]"
           />
         </div>
       </div>

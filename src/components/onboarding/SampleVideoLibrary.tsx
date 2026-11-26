@@ -46,21 +46,21 @@ export default function SampleVideoLibrary({
       </div>
 
       {!hasSamples ? (
-        <div className="bg-[#181818] border-0 rounded-xl p-8 text-center space-y-2.5">
-          <div className="w-11 h-11 mx-auto rounded-full bg-[#242424] text-slate-400 flex items-center justify-center">
-            <Film className="w-5 h-5 text-slate-400" />
+        <div className="bg-[#0B0B0E] border-0 rounded-xl p-8 text-center space-y-2.5">
+          <div className="w-11 h-11 mx-auto rounded-full bg-[#1B1B22] text-[#A1A1AA] flex items-center justify-center">
+            <Film className="w-5 h-5 text-[#A1A1AA]" />
           </div>
-          <p className="text-sm font-semibold text-slate-200">
+          <p className="text-sm font-semibold text-[#F7F7F8]">
             No sample videos
           </p>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-[#A1A1AA]">
             No videos published yet.
           </p>
           {onOpenIntake && (
             <button
               type="button"
               onClick={onOpenIntake}
-              className="mt-1 text-xs font-medium text-slate-300 hover:text-white cursor-pointer border-0 bg-transparent"
+              className="mt-1 text-xs font-medium text-[#A1A1AA] hover:text-white cursor-pointer border-0 bg-transparent"
             >
               Request samples &rarr;
             </button>

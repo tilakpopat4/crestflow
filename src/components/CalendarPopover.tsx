@@ -176,15 +176,15 @@ export const CalendarPopover: React.FC<CalendarPopoverProps> = ({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="fixed inset-x-0 bottom-0 z-50 rounded-t-2xl bg-white dark:bg-slate-900 shadow-2xl ring-1 ring-slate-900/10 dark:ring-slate-800 max-h-[90dvh] overflow-y-auto sm:absolute sm:inset-x-auto sm:bottom-auto sm:top-full sm:right-0 sm:mt-1.5 sm:w-80 sm:rounded-xl sm:shadow-lg sm:data-[side=top]:top-auto sm:data-[side=top]:bottom-full sm:data-[side=top]:mt-0 sm:data-[side=top]:mb-1.5 transition-all duration-120 p-3 sm:p-4"
+        className="fixed inset-x-0 bottom-0 z-50 rounded-t-2xl bg-[#131318] dark:bg-[#131318] shadow-2xl ring-1 ring-[#0B0B0E]/10 max-h-[90dvh] overflow-y-auto sm:absolute sm:inset-x-auto sm:bottom-auto sm:top-full sm:right-0 sm:mt-1.5 sm:w-80 sm:rounded-xl sm:shadow-lg sm:data-[side=top]:top-auto sm:data-[side=top]:bottom-full sm:data-[side=top]:mt-0 sm:data-[side=top]:mb-1.5 transition-all duration-120 p-3 sm:p-4"
       >
         {/* Header bar on mobile */}
-        <div className="flex items-center justify-between pb-2 sm:hidden border-b border-slate-200 dark:border-slate-800">
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">{title}</h3>
+        <div className="flex items-center justify-between pb-2 sm:hidden border-b border-[#2A2A33] dark:border-[#2A2A33]">
+          <h3 className="text-sm font-semibold text-[#F7F7F8] dark:text-[#F7F7F8]">{title}</h3>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+            className="p-1.5 text-[#A1A1AA] hover:text-[#F7F7F8] dark:text-[#A1A1AA] dark:hover:text-[#F7F7F8]"
             aria-label="Close calendar"
           >
             <X size={15} />
@@ -196,14 +196,14 @@ export const CalendarPopover: React.FC<CalendarPopoverProps> = ({
           <button
             type="button"
             onClick={() => handlePick(presets.today[0])}
-            className="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 shrink-0 transition-colors"
+            className="px-2.5 py-1 text-xs font-medium rounded-lg bg-[#131318] hover:bg-[#1B1B22] dark:bg-[#1B1B22] dark:hover:bg-[#1B1B22] text-[#A1A1AA] dark:text-[#F7F7F8] shrink-0 transition-colors"
           >
             Today
           </button>
           <button
             type="button"
             onClick={() => handlePick(presets.yesterday[0])}
-            className="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 shrink-0 transition-colors"
+            className="px-2.5 py-1 text-xs font-medium rounded-lg bg-[#131318] hover:bg-[#1B1B22] dark:bg-[#1B1B22] dark:hover:bg-[#1B1B22] text-[#A1A1AA] dark:text-[#F7F7F8] shrink-0 transition-colors"
           >
             Yesterday
           </button>
@@ -211,7 +211,7 @@ export const CalendarPopover: React.FC<CalendarPopoverProps> = ({
             <button
               type="button"
               onClick={() => handlePick(TODAY + 1)}
-              className="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 shrink-0 transition-colors"
+              className="px-2.5 py-1 text-xs font-medium rounded-lg bg-[#131318] hover:bg-[#1B1B22] dark:bg-[#1B1B22] dark:hover:bg-[#1B1B22] text-[#A1A1AA] dark:text-[#F7F7F8] shrink-0 transition-colors"
             >
               Tomorrow
             </button>
@@ -225,11 +225,11 @@ export const CalendarPopover: React.FC<CalendarPopoverProps> = ({
               type="button"
               onClick={() => setView(nextMonth(view, -1))}
               aria-label="Previous month"
-              className="inline-flex size-8 cursor-pointer items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-50 transition-colors"
+              className="inline-flex size-8 cursor-pointer items-center justify-center rounded-lg text-[#A1A1AA] hover:bg-[#131318] hover:text-[#F7F7F8] dark:text-[#A1A1AA] dark:hover:bg-[#1B1B22] dark:hover:text-[#F7F7F8] transition-colors"
             >
               ‹
             </button>
-            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <span className="text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA]">
               {fromDay(focusDay).y}
             </span>
             <button
@@ -237,7 +237,7 @@ export const CalendarPopover: React.FC<CalendarPopoverProps> = ({
               onClick={() => setView(nextMonth(view, 1))}
               aria-label="Next month"
               disabled={!allowFuture && monthIndex(view) >= monthIndex(monthOf(TODAY))}
-              className="inline-flex size-8 cursor-pointer items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="inline-flex size-8 cursor-pointer items-center justify-center rounded-lg text-[#A1A1AA] hover:bg-[#131318] hover:text-[#F7F7F8] dark:text-[#A1A1AA] dark:hover:bg-[#1B1B22] dark:hover:text-[#F7F7F8] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               ›
             </button>
@@ -255,7 +255,7 @@ export const CalendarPopover: React.FC<CalendarPopoverProps> = ({
         </div>
 
         {/* Manual Date Input & Apply Footer */}
-        <div className="mt-3 pt-2.5 border-t border-slate-200 dark:border-slate-800 space-y-2">
+        <div className="mt-3 pt-2.5 border-t border-[#2A2A33] dark:border-[#2A2A33] space-y-2">
           <div className="flex gap-2">
             <input
               type="text"
@@ -282,9 +282,9 @@ export const CalendarPopover: React.FC<CalendarPopoverProps> = ({
             </button>
           </div>
           {errorMsg ? (
-            <p className="text-[11px] text-red-600 dark:text-red-400">{errorMsg}</p>
+            <p className="text-[11px] text-[#E0002B] dark:text-[#F0607A]">{errorMsg}</p>
           ) : (
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+            <p className="text-[11px] text-[#A1A1AA] dark:text-[#A1A1AA]">
               Selected: {dayMonthYear(focusDay)}
             </p>
           )}

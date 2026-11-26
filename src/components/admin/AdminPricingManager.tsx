@@ -69,25 +69,25 @@ export default function AdminPricingManager() {
 
   const activePlan = draft.plans.find((p) => p.id === selectedPlanId) || draft.plans[0];
   const inputClass =
-    'w-full text-xs p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-600';
+    'w-full text-xs p-2.5 rounded-lg border border-[#2A2A33] dark:border-[#2A2A33] bg-[#131318] dark:bg-[#0B0B0E] text-[#F7F7F8] dark:text-[#F7F7F8] outline-none focus:border-indigo-600';
 
   return (
     <div className="space-y-6">
       {/* Top Action Bar */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
+      <div className="bg-[#131318] dark:bg-[#131318] rounded-xl p-5 border border-[#2A2A33] dark:border-[#2A2A33] flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
         <div>
-          <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <CreditCard className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+          <h2 className="text-base font-bold text-[#F7F7F8] dark:text-[#F7F7F8] flex items-center gap-2">
+            <CreditCard className="w-5 h-5 text-[#FF2D4A] dark:text-[#FF2D4A]" />
             <span>Subscription Wall &amp; Plans Editor</span>
           </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-xs text-[#A1A1AA] dark:text-[#A1A1AA] mt-1">
             Edit headlines, terms, features, badges, and custom notes for every plan across the Subscription Wall, Pricing Page, and Upgrade Modal.
           </p>
         </div>
 
         <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
           {statusMessage && (
-            <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400 inline-flex items-center gap-1">
+            <span className="text-xs font-medium text-[#FF2D4A] dark:text-[#FF2D4A] inline-flex items-center gap-1">
               <Check className="w-3.5 h-3.5" />
               <span>{statusMessage}</span>
             </span>
@@ -96,7 +96,7 @@ export default function AdminPricingManager() {
             type="button"
             onClick={handleReset}
             disabled={saving}
-            className="px-3 py-2 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg cursor-pointer border-0 inline-flex items-center gap-1.5 transition-colors duration-120"
+            className="px-3 py-2 text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA] hover:text-[#F7F7F8] dark:hover:text-white bg-[#131318] hover:bg-[#1B1B22] dark:bg-[#1B1B22] dark:hover:bg-[#1B1B22] rounded-lg cursor-pointer border-0 inline-flex items-center gap-1.5 transition-colors duration-120"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Reset Defaults</span>
@@ -114,14 +114,14 @@ export default function AdminPricingManager() {
       </div>
 
       {errorMessage && (
-        <div className="p-3.5 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-xs text-red-600 dark:text-red-400">
+        <div className="p-3.5 rounded-lg bg-[#1B1B22] dark:bg-red-950/40 border border-[#E0002B] dark:border-red-900 text-xs text-[#E0002B] dark:text-[#F0607A]">
           {errorMessage}
         </div>
       )}
 
       {/* Section 1: Plan Selector & Plan Editor */}
       <div className="space-y-3">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1 bg-slate-100 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1 bg-[#131318] dark:bg-[#131318] rounded-lg border border-[#2A2A33] dark:border-[#2A2A33]">
           {draft.plans.map((p) => {
             const isSelected = p.id === selectedPlanId;
             return (
@@ -131,12 +131,12 @@ export default function AdminPricingManager() {
                 onClick={() => setSelectedPlanId(p.id)}
                 className={`px-3 py-2 rounded-lg text-xs border-0 cursor-pointer transition-colors duration-120 text-center ${
                   isSelected
-                    ? 'bg-[#282828] text-white font-semibold'
-                    : 'bg-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium'
+                    ? 'bg-[#1B1B22] text-white font-semibold'
+                    : 'bg-transparent text-[#A1A1AA] dark:text-[#A1A1AA] hover:text-[#F7F7F8] dark:hover:text-white font-medium'
                 }`}
               >
                 <div className="truncate">{p.tabLabel || p.name.replace('Pro ', '')}</div>
-                <div className={`text-[11px] mt-0.5 ${isSelected ? 'text-slate-300' : 'text-slate-500'}`}>
+                <div className={`text-[11px] mt-0.5 ${isSelected ? 'text-[#A1A1AA]' : 'text-[#A1A1AA]'}`}>
                   {p.price === 0 ? 'Free' : `₹${p.price.toLocaleString('en-IN')}`}
                 </div>
               </button>
@@ -150,14 +150,14 @@ export default function AdminPricingManager() {
       </div>
 
       {/* Section 2: Global Subscription Wall & Pricing Page Copy */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 space-y-4 shadow-2xs">
-        <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+      <div className="bg-[#131318] dark:bg-[#131318] rounded-xl p-5 border border-[#2A2A33] dark:border-[#2A2A33] space-y-4 shadow-2xs">
+        <h3 className="text-xs font-bold text-[#A1A1AA] uppercase tracking-wider">
           Subscription Wall &amp; Pricing Page Headings &amp; Terms
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+            <label className="block text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA] mb-1">
               Subscription Wall Heading
             </label>
             <input
@@ -168,7 +168,7 @@ export default function AdminPricingManager() {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+            <label className="block text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA] mb-1">
               Public Pricing Page Heading
             </label>
             <input
@@ -182,7 +182,7 @@ export default function AdminPricingManager() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+            <label className="block text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA] mb-1">
               Subscription Wall Subtitle
             </label>
             <textarea
@@ -193,7 +193,7 @@ export default function AdminPricingManager() {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+            <label className="block text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA] mb-1">
               Public Pricing Page Subtitle
             </label>
             <textarea
@@ -207,7 +207,7 @@ export default function AdminPricingManager() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+            <label className="block text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA] mb-1">
               Terms Box Title (Pricing Page)
             </label>
             <input
@@ -218,7 +218,7 @@ export default function AdminPricingManager() {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+            <label className="block text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA] mb-1">
               Checkout Footer Note (Subscription Wall)
             </label>
             <input
@@ -231,7 +231,7 @@ export default function AdminPricingManager() {
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+          <label className="block text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA] mb-1">
             Terms &amp; Policy Body Text
           </label>
           <textarea

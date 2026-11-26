@@ -53,13 +53,13 @@ export default function AdminFooterManager() {
   return (
     <div className="space-y-6">
       {/* Top Bar with actions */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
+      <div className="bg-[#131318] dark:bg-[#131318] rounded-xl p-5 border border-[#2A2A33] dark:border-[#2A2A33] flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
         <div>
-          <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <Globe className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+          <h2 className="text-base font-bold text-[#F7F7F8] dark:text-[#F7F7F8] flex items-center gap-2">
+            <Globe className="w-5 h-5 text-[#FF2D4A] dark:text-[#FF2D4A]" />
             <span>Footer Links &amp; Navigation Editor</span>
           </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-xs text-[#A1A1AA] dark:text-[#A1A1AA] mt-1">
             Manage links, labels, routes, legal documents, and social media icons across all application footers.
           </p>
         </div>
@@ -74,7 +74,7 @@ export default function AdminFooterManager() {
             type="button"
             onClick={handleReset}
             disabled={saving}
-            className="px-3 py-2 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg cursor-pointer border-0 inline-flex items-center gap-1.5 transition-colors duration-120"
+            className="px-3 py-2 text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA] hover:text-[#F7F7F8] bg-[#131318] hover:bg-[#1B1B22] dark:bg-[#1B1B22] dark:hover:bg-[#1B1B22] rounded-lg cursor-pointer border-0 inline-flex items-center gap-1.5 transition-colors duration-120"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Reset Defaults</span>
@@ -92,34 +92,34 @@ export default function AdminFooterManager() {
       </div>
 
       {/* 1. Branding & Meta */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 space-y-4 shadow-2xs">
-        <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Branding &amp; Meta Text</h3>
+      <div className="bg-[#131318] dark:bg-[#131318] rounded-xl p-5 border border-[#2A2A33] dark:border-[#2A2A33] space-y-4 shadow-2xs">
+        <h3 className="text-xs font-bold text-[#A1A1AA] uppercase tracking-wider">Branding &amp; Meta Text</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Brand Name</label>
+            <label className="block text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA] mb-1">Brand Name</label>
             <input
               type="text"
               value={draft.brandName}
               onChange={(e) => setDraft({ ...draft, brandName: e.target.value })}
-              className="w-full text-xs p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-600"
+              className="w-full text-xs p-2.5 rounded-lg border border-[#2A2A33] dark:border-[#2A2A33] bg-[#131318] dark:bg-[#0B0B0E] text-[#F7F7F8] dark:text-[#F7F7F8] outline-none focus:border-indigo-600"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Copyright Notice</label>
+            <label className="block text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA] mb-1">Copyright Notice</label>
             <input
               type="text"
               value={draft.copyrightText}
               onChange={(e) => setDraft({ ...draft, copyrightText: e.target.value })}
-              className="w-full text-xs p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-600"
+              className="w-full text-xs p-2.5 rounded-lg border border-[#2A2A33] dark:border-[#2A2A33] bg-[#131318] dark:bg-[#0B0B0E] text-[#F7F7F8] dark:text-[#F7F7F8] outline-none focus:border-indigo-600"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">App Version</label>
+            <label className="block text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA] mb-1">App Version</label>
             <input
               type="text"
               value={draft.versionText}
               onChange={(e) => setDraft({ ...draft, versionText: e.target.value })}
-              className="w-full text-xs p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-600"
+              className="w-full text-xs p-2.5 rounded-lg border border-[#2A2A33] dark:border-[#2A2A33] bg-[#131318] dark:bg-[#0B0B0E] text-[#F7F7F8] dark:text-[#F7F7F8] outline-none focus:border-indigo-600"
             />
           </div>
         </div>

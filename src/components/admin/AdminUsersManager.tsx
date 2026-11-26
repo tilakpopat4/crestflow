@@ -115,16 +115,16 @@ export default function AdminUsersManager({ currentUserEmail }: AdminUsersManage
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-2xs space-y-4">
+    <div className="bg-[#131318] dark:bg-[#131318] border border-[#2A2A33] dark:border-[#2A2A33] rounded-xl overflow-hidden shadow-2xs space-y-4">
       {/* Top Header and Add Form */}
-      <div className="p-5 border-b border-slate-200 dark:border-slate-800">
+      <div className="p-5 border-b border-[#2A2A33] dark:border-[#2A2A33]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
           <div>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <Shield className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            <h2 className="text-lg font-bold text-[#F7F7F8] dark:text-[#F7F7F8] flex items-center gap-2">
+              <Shield className="w-5 h-5 text-[#FF2D4A] dark:text-[#FF2D4A]" />
               <span>Authorized Admin Google Accounts</span>
             </h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-sm text-[#A1A1AA] dark:text-[#A1A1AA] mt-0.5">
               Only Google IDs listed here can access and administer the CrestFlow Command Center.
             </p>
           </div>
@@ -132,7 +132,7 @@ export default function AdminUsersManager({ currentUserEmail }: AdminUsersManage
 
         <form onSubmit={handleAddAdmin} className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
           <div className="sm:col-span-6">
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA] uppercase tracking-wider mb-1.5">
               Admin Google Email
             </label>
             <input
@@ -141,12 +141,12 @@ export default function AdminUsersManager({ currentUserEmail }: AdminUsersManage
               value={newEmail}
               onChange={(e) => setNewEmail(e.target.value)}
               required
-              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3.5 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-colors duration-120"
+              className="w-full bg-[#131318] dark:bg-[#1B1B22] border border-[#2A2A33] dark:border-[#2A2A33] rounded-lg px-3.5 py-2 text-sm text-[#F7F7F8] dark:text-[#F7F7F8] placeholder-slate-400 focus:outline-none focus:border-[#FF2D4A] transition-colors duration-120"
             />
           </div>
 
           <div className="sm:col-span-4">
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA] uppercase tracking-wider mb-1.5">
               Name or Department
             </label>
             <input
@@ -154,7 +154,7 @@ export default function AdminUsersManager({ currentUserEmail }: AdminUsersManage
               placeholder="e.g. Operations / Co-founder"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3.5 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-colors duration-120"
+              className="w-full bg-[#131318] dark:bg-[#1B1B22] border border-[#2A2A33] dark:border-[#2A2A33] rounded-lg px-3.5 py-2 text-sm text-[#F7F7F8] dark:text-[#F7F7F8] placeholder-slate-400 focus:outline-none focus:border-[#FF2D4A] transition-colors duration-120"
             />
           </div>
 
@@ -175,7 +175,7 @@ export default function AdminUsersManager({ currentUserEmail }: AdminUsersManage
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse text-sm">
           <thead>
-            <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/30 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <tr className="border-b border-[#2A2A33] dark:border-[#2A2A33] bg-[#131318]/50 dark:bg-[#0B0B0E]/30 text-xs font-semibold text-[#A1A1AA] uppercase tracking-wider">
               <th className="py-3 px-5">Administrator Account</th>
               <th className="py-3 px-5">Role</th>
               <th className="py-3 px-5">Description</th>
@@ -183,30 +183,30 @@ export default function AdminUsersManager({ currentUserEmail }: AdminUsersManage
               <th className="py-3 px-5 text-right">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+          <tbody className="divide-y divide-[#2A2A33] dark:divide-[#2A2A33]/60">
             {/* Super Admin Permanent Row */}
             <tr className="bg-indigo-50/30 dark:bg-indigo-950/10">
               <td className="py-3.5 px-5">
-                <div className="font-semibold text-slate-900 dark:text-slate-100">
+                <div className="font-semibold text-[#F7F7F8] dark:text-[#F7F7F8]">
                   {SUPER_ADMIN_EMAIL}
                 </div>
-                <div className="text-xs text-slate-500 dark:text-slate-400">
+                <div className="text-xs text-[#A1A1AA] dark:text-[#A1A1AA]">
                   Platform Owner
                 </div>
               </td>
               <td className="py-3.5 px-5">
-                <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400">
+                <span className="text-xs font-medium text-[#FF2D4A] dark:text-[#FF2D4A]">
                   Super Admin
                 </span>
               </td>
-              <td className="py-3.5 px-5 text-slate-600 dark:text-slate-300">
+              <td className="py-3.5 px-5 text-[#A1A1AA] dark:text-[#A1A1AA]">
                 Primary Root Administrator
               </td>
-              <td className="py-3.5 px-5 text-slate-500 text-xs">
+              <td className="py-3.5 px-5 text-[#A1A1AA] text-xs">
                 Permanent
               </td>
               <td className="py-3.5 px-5 text-right">
-                <span className="inline-flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500">
+                <span className="inline-flex items-center gap-1 text-xs text-[#A1A1AA] dark:text-[#A1A1AA]">
                   <Lock className="w-3.5 h-3.5" />
                   <span>Protected</span>
                 </span>
@@ -215,33 +215,33 @@ export default function AdminUsersManager({ currentUserEmail }: AdminUsersManage
 
             {/* Manually Added Admins */}
             {adminList.map((admin) => (
-              <tr key={admin.email} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors duration-120">
+              <tr key={admin.email} className="hover:bg-[#131318]/50 dark:hover:bg-[#1B1B22]/30 transition-colors duration-120">
                 <td className="py-3.5 px-5">
-                  <div className="font-medium text-slate-900 dark:text-slate-100">
+                  <div className="font-medium text-[#F7F7F8] dark:text-[#F7F7F8]">
                     {admin.email}
                   </div>
                   {admin.addedBy && (
-                    <div className="text-xs text-slate-400 dark:text-slate-500">
+                    <div className="text-xs text-[#A1A1AA] dark:text-[#A1A1AA]">
                       Added by: {admin.addedBy}
                     </div>
                   )}
                 </td>
                 <td className="py-3.5 px-5">
-                  <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                  <span className="text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA]">
                     Admin
                   </span>
                 </td>
-                <td className="py-3.5 px-5 text-slate-600 dark:text-slate-300">
+                <td className="py-3.5 px-5 text-[#A1A1AA] dark:text-[#A1A1AA]">
                   {admin.name || '—'}
                 </td>
-                <td className="py-3.5 px-5 text-slate-500 text-xs">
+                <td className="py-3.5 px-5 text-[#A1A1AA] text-xs">
                   {admin.addedAt ? new Date(admin.addedAt).toLocaleDateString() : '—'}
                 </td>
                 <td className="py-3.5 px-5 text-right">
                   <button
                     onClick={() => handleRevokeAdmin(admin.email)}
                     disabled={actionLoading === admin.email}
-                    className="p-1.5 text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded transition-colors duration-120 border-0 bg-transparent cursor-pointer disabled:opacity-50"
+                    className="p-1.5 text-[#A1A1AA] hover:text-[#E0002B] dark:hover:text-[#F0607A] rounded transition-colors duration-120 border-0 bg-transparent cursor-pointer disabled:opacity-50"
                     title={`Revoke admin privileges for ${admin.email}`}
                   >
                     <Trash2 className="w-4 h-4" />
@@ -252,7 +252,7 @@ export default function AdminUsersManager({ currentUserEmail }: AdminUsersManage
 
             {adminList.length === 0 && !loading && (
               <tr>
-                <td colSpan={5} className="py-6 text-center text-xs text-slate-400 dark:text-slate-500">
+                <td colSpan={5} className="py-6 text-center text-xs text-[#A1A1AA] dark:text-[#A1A1AA]">
                   No additional administrators added. Only {SUPER_ADMIN_EMAIL} has access.
                 </td>
               </tr>

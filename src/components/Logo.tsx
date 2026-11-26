@@ -22,8 +22,8 @@ export default function Logo({ className = "w-8 h-8" }: LogoProps) {
           gradientUnits="userSpaceOnUse" 
           gradientTransform="matrix(562.800409,562.800409,-562.800409,562.800409,218.599796,218.599796)"
         >
-          <stop offset="0" style={{ stopColor: '#404040', stopOpacity: 1 }} />
-          <stop offset="1" style={{ stopColor: '#242424', stopOpacity: 1 }} />
+          <stop offset="0" style={{ stopColor: '#2A2A33', stopOpacity: 1 }} />
+          <stop offset="1" style={{ stopColor: '#1B1B22', stopOpacity: 1 }} />
         </linearGradient>
         <linearGradient 
           id="cfFinalLinear3" 
@@ -61,21 +61,21 @@ export default function Logo({ className = "w-8 h-8" }: LogoProps) {
           />
           <path 
             d="M425.111,329.798l-22.694,45.387" 
-            style={{ fill: 'none', fillRule: 'nonzero', stroke: '#242424', strokeWidth: '9.08px', strokeLinecap: 'round' }}
+            style={{ fill: 'none', fillRule: 'nonzero', stroke: '#1B1B22', strokeWidth: '9.08px', strokeLinecap: 'round' }}
           />
           <path 
             d="M493.192,329.798l-22.694,45.387" 
-            style={{ fill: 'none', fillRule: 'nonzero', stroke: '#242424', strokeWidth: '9.08px', strokeLinecap: 'round' }}
+            style={{ fill: 'none', fillRule: 'nonzero', stroke: '#1B1B22', strokeWidth: '9.08px', strokeLinecap: 'round' }}
           />
           <path 
             d="M561.273,329.798l-22.694,45.387" 
-            style={{ fill: 'none', fillRule: 'nonzero', stroke: '#242424', strokeWidth: '9.08px', strokeLinecap: 'round' }}
+            style={{ fill: 'none', fillRule: 'nonzero', stroke: '#1B1B22', strokeWidth: '9.08px', strokeLinecap: 'round' }}
           />
           <circle 
             cx="500" 
             cy="528.367" 
             r="49.926" 
-            style={{ fill: '#242424' }}
+            style={{ fill: '#1B1B22' }}
           />
           <path 
             d="M488.653,505.673l36.31,22.694l-36.31,22.694l0,-45.387Z" 

@@ -29,7 +29,7 @@ export const SampleVideoCard: React.FC<SampleVideoCardProps> = ({ item, onSelect
   };
 
   return (
-    <div className="bg-[#181818] hover:bg-[#1e1e1e] border-0 rounded-xl overflow-hidden flex flex-col break-inside-avoid transition-colors group">
+    <div className="bg-[#0B0B0E] hover:bg-[#131318] border-0 rounded-xl overflow-hidden flex flex-col break-inside-avoid transition-colors group">
       <div
         onClick={() => onSelect(item, isPortrait)}
         className={`relative bg-black w-full overflow-hidden flex items-center justify-center cursor-pointer select-none ${
@@ -48,9 +48,9 @@ export const SampleVideoCard: React.FC<SampleVideoCardProps> = ({ item, onSelect
             onError={() => setHasImageError(true)}
           />
         ) : (
-          <div className="flex flex-col items-center justify-center text-slate-500 gap-2 p-4 text-center">
-            <Film className="w-8 h-8 text-slate-600" />
-            <span className="text-[11px] text-slate-400">Video preview</span>
+          <div className="flex flex-col items-center justify-center text-[#A1A1AA] gap-2 p-4 text-center">
+            <Film className="w-8 h-8 text-[#A1A1AA]" />
+            <span className="text-[11px] text-[#A1A1AA]">Video preview</span>
           </div>
         )}
 
@@ -58,7 +58,7 @@ export const SampleVideoCard: React.FC<SampleVideoCardProps> = ({ item, onSelect
 
         {!showThumbnail && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-11 h-11 rounded-full bg-[#1e1e1e]/90 text-white flex items-center justify-center">
+            <div className="w-11 h-11 rounded-full bg-[#131318]/90 text-white flex items-center justify-center">
               <Play size={18} className="ml-0.5 fill-current text-white" />
             </div>
           </div>
@@ -69,23 +69,23 @@ export const SampleVideoCard: React.FC<SampleVideoCardProps> = ({ item, onSelect
         <div className="flex items-center justify-between gap-2">
           <h3
             onClick={() => onSelect(item, isPortrait)}
-            className="text-sm font-semibold text-white truncate cursor-pointer hover:text-slate-200 transition-colors"
+            className="text-sm font-semibold text-white truncate cursor-pointer hover:text-[#F7F7F8] transition-colors"
             title={item.title}
           >
             {item.title}
           </h3>
           {item.category && (
-            <span className="text-[11px] text-slate-400 shrink-0 truncate max-w-[120px]">
+            <span className="text-[11px] text-[#A1A1AA] shrink-0 truncate max-w-[120px]">
               {item.category}
             </span>
           )}
         </div>
 
-        <div className="pt-2 border-t border-[#242424] flex items-center justify-between gap-2 text-xs">
+        <div className="pt-2 border-t border-[#1B1B22] flex items-center justify-between gap-2 text-xs">
           <button
             type="button"
             onClick={() => onSelect(item, isPortrait)}
-            className="inline-flex items-center gap-1.5 text-slate-200 hover:text-white font-medium cursor-pointer border-0 bg-transparent p-0 transition-colors"
+            className="inline-flex items-center gap-1.5 text-[#F7F7F8] hover:text-white font-medium cursor-pointer border-0 bg-transparent p-0 transition-colors"
           >
             <Play size={13} className="fill-current" />
             <span>Preview</span>
@@ -95,7 +95,7 @@ export const SampleVideoCard: React.FC<SampleVideoCardProps> = ({ item, onSelect
             href={item.videoUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-slate-400 hover:text-white transition-colors"
+            className="inline-flex items-center gap-1 text-[#A1A1AA] hover:text-white transition-colors"
             title="Open in Drive"
           >
             <span>Drive</span>

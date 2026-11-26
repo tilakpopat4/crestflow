@@ -163,8 +163,8 @@ export default function NotificationBellPopover({
         onClick={handleToggle}
         className={`p-1.5 sm:p-2 rounded-lg transition-colors cursor-pointer relative border-none ${
           isOpen
-            ? 'bg-[#282828] text-white'
-            : 'bg-transparent text-[#aaaaaa] hover:text-white hover:bg-[#282828] active:bg-[#333333]'
+            ? 'bg-[#1B1B22] text-white'
+            : 'bg-transparent text-[#A1A1AA] hover:text-white hover:bg-[#1B1B22] active:bg-[#2A2A33]'
         }`}
         title="Payment Notifications"
         aria-label="Payment Notifications"
@@ -172,7 +172,7 @@ export default function NotificationBellPopover({
         <Bell size={18} strokeWidth={2} />
         {hasUnread && (
           <span 
-            className="w-1.5 h-1.5 rounded-full bg-[#e1002d] absolute top-1.5 right-1.5 ring-2 ring-[#0f0f0f]" 
+            className="w-1.5 h-1.5 rounded-full bg-[#E0002B] absolute top-1.5 right-1.5 ring-2 ring-[#0B0B0E]" 
             aria-label="Unread notifications"
           />
         )}
@@ -181,31 +181,31 @@ export default function NotificationBellPopover({
       {isOpen && (
         <div 
           style={{ top: typeof window !== 'undefined' && window.innerWidth < 640 ? `${mobileTop}px` : undefined }}
-          className="fixed sm:absolute left-3 right-3 sm:left-auto sm:right-0 sm:top-full mt-0 sm:mt-2 w-auto sm:w-96 max-w-sm sm:max-w-none mx-auto sm:mx-0 bg-[#212121] border border-[#333333] rounded-xl shadow-2xl p-4 z-50 text-white animate-in fade-in duration-100"
+          className="fixed sm:absolute left-3 right-3 sm:left-auto sm:right-0 sm:top-full mt-0 sm:mt-2 w-auto sm:w-96 max-w-sm sm:max-w-none mx-auto sm:mx-0 bg-[#131318] border border-[#2A2A33] rounded-xl shadow-2xl p-4 z-50 text-white animate-in fade-in duration-100"
         >
-          <div className="flex items-center justify-between pb-3 border-b border-[#333333]">
+          <div className="flex items-center justify-between pb-3 border-b border-[#2A2A33]">
             <div className="flex items-center gap-2">
               <span className="font-semibold text-sm text-white">Notifications</span>
               {activeNotifications.length > 0 && (
-                <span className="text-xs text-slate-400">({activeNotifications.length})</span>
+                <span className="text-xs text-[#A1A1AA]">({activeNotifications.length})</span>
               )}
             </div>
             {activeNotifications.length > 0 && (
               <button
                 type="button"
                 onClick={handleClearAll}
-                className="text-xs text-slate-400 hover:text-white transition-colors cursor-pointer"
+                className="text-xs text-[#A1A1AA] hover:text-white transition-colors cursor-pointer"
               >
                 Clear all
               </button>
             )}
           </div>
 
-          <div className="max-h-80 overflow-y-auto divide-y divide-[#333333]">
+          <div className="max-h-80 overflow-y-auto divide-y divide-[#2A2A33]">
             {activeNotifications.length === 0 ? (
-              <div className="py-6 text-center text-slate-400">
-                <p className="text-xs font-medium text-slate-300">No new notifications</p>
-                <p className="text-[11px] text-slate-400 mt-1">Payment reminders will appear here once payment is due.</p>
+              <div className="py-6 text-center text-[#A1A1AA]">
+                <p className="text-xs font-medium text-[#A1A1AA]">No new notifications</p>
+                <p className="text-[11px] text-[#A1A1AA] mt-1">Payment reminders will appear here once payment is due.</p>
               </div>
             ) : (
               activeNotifications.map(({ client, cycleKey, statusInfo, financials }) => {
@@ -229,15 +229,15 @@ export default function NotificationBellPopover({
                           >
                             {client.name}
                           </button>
-                          <span className={`text-[11px] font-medium ${isOverdue || statusInfo.code === 'DUE_TODAY' ? 'text-[#e1002d]' : 'text-slate-400'}`}>
+                          <span className={`text-[11px] font-medium ${isOverdue || statusInfo.code === 'DUE_TODAY' ? 'text-[#E0002B]' : 'text-[#A1A1AA]'}`}>
                             • {statusInfo.label}
                           </span>
                         </div>
 
-                        <div className="text-[11px] text-slate-400 flex items-center gap-2 mt-0.5">
-                          <span>Due: <strong className="text-slate-200">{new Date(statusInfo.nextDueDate).toLocaleDateString('en-IN')}</strong></span>
+                        <div className="text-[11px] text-[#A1A1AA] flex items-center gap-2 mt-0.5">
+                          <span>Due: <strong className="text-[#F7F7F8]">{new Date(statusInfo.nextDueDate).toLocaleDateString('en-IN')}</strong></span>
                           {financials.totalPendingAmount > 0 && (
-                            <span>Pending: <strong className="text-[#e1002d]">₹{financials.totalPendingAmount.toLocaleString('en-IN')}</strong></span>
+                            <span>Pending: <strong className="text-[#E0002B]">₹{financials.totalPendingAmount.toLocaleString('en-IN')}</strong></span>
                           )}
                         </div>
                       </div>
@@ -245,7 +245,7 @@ export default function NotificationBellPopover({
                       <button
                         type="button"
                         onClick={() => handleDismiss(cycleKey)}
-                        className="p-1 text-slate-400 hover:text-white rounded-md transition-colors cursor-pointer shrink-0"
+                        className="p-1 text-[#A1A1AA] hover:text-white rounded-md transition-colors cursor-pointer shrink-0"
                         title="Dismiss notification"
                         aria-label="Dismiss notification"
                       >
@@ -258,7 +258,7 @@ export default function NotificationBellPopover({
                         href={generateWhatsAppReminder(client, statusInfo)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 px-2 py-1 bg-[#282828] hover:bg-[#333333] border border-[#383838] text-white rounded-md text-[11px] font-medium transition-colors"
+                        className="inline-flex items-center gap-1 px-2 py-1 bg-[#1B1B22] hover:bg-[#2A2A33] border border-[#2A2A33] text-white rounded-md text-[11px] font-medium transition-colors"
                         title="Send WhatsApp Reminder"
                       >
                         <Send size={11} /> WhatsApp
@@ -266,7 +266,7 @@ export default function NotificationBellPopover({
                       {isEmailEnabled && (
                         <a
                           href={emailData.mailtoLink}
-                          className="p-1.5 bg-[#282828] hover:bg-[#333333] border border-[#383838] text-[#aaaaaa] hover:text-white rounded-md text-[11px] transition-colors"
+                          className="p-1.5 bg-[#1B1B22] hover:bg-[#2A2A33] border border-[#2A2A33] text-[#A1A1AA] hover:text-white rounded-md text-[11px] transition-colors"
                           title="Draft Email Reminder"
                         >
                           <Mail size={12} />
@@ -275,7 +275,7 @@ export default function NotificationBellPopover({
                       <button
                         type="button"
                         onClick={() => handleCopyEmail(cycleKey, emailData.subject, emailData.body)}
-                        className="p-1.5 bg-[#282828] hover:bg-[#333333] border border-[#383838] text-[#aaaaaa] hover:text-white rounded-md text-[11px] transition-colors cursor-pointer"
+                        className="p-1.5 bg-[#1B1B22] hover:bg-[#2A2A33] border border-[#2A2A33] text-[#A1A1AA] hover:text-white rounded-md text-[11px] transition-colors cursor-pointer"
                         title="Copy Email Template"
                       >
                         {copiedKey === cycleKey ? <Check size={12} className="text-white" /> : <Copy size={12} />}

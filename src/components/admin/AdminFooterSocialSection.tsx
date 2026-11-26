@@ -19,16 +19,16 @@ export const AdminFooterSocialSection: React.FC<AdminFooterSocialSectionProps> =
   onRemove,
 }) => {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 space-y-3.5 shadow-2xs">
+    <div className="bg-[#131318] dark:bg-[#131318] rounded-xl p-5 border border-[#2A2A33] dark:border-[#2A2A33] space-y-3.5 shadow-2xs">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Social Media Hyperlinks</h3>
-          <p className="text-xs text-slate-500 mt-0.5">Icon links for X, GitHub, LinkedIn, YouTube, Instagram, etc.</p>
+          <h3 className="text-xs font-bold text-[#A1A1AA] uppercase tracking-wider">Social Media Hyperlinks</h3>
+          <p className="text-xs text-[#A1A1AA] mt-0.5">Icon links for X, GitHub, LinkedIn, YouTube, Instagram, etc.</p>
         </div>
         <button
           type="button"
           onClick={onAdd}
-          className="px-2.5 py-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 rounded-lg cursor-pointer border-0 inline-flex items-center gap-1 transition-colors duration-120"
+          className="px-2.5 py-1.5 text-xs font-semibold text-[#FF2D4A] dark:text-[#FF2D4A] hover:bg-indigo-50 dark:hover:bg-indigo-950/50 rounded-lg cursor-pointer border-0 inline-flex items-center gap-1 transition-colors duration-120"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>Add Social Link</span>
@@ -39,12 +39,12 @@ export const AdminFooterSocialSection: React.FC<AdminFooterSocialSectionProps> =
         {socialLinks.map((social) => (
           <div
             key={social.id}
-            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800"
+            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-2.5 rounded-lg bg-[#131318] dark:bg-[#0B0B0E] border border-[#2A2A33] dark:border-[#2A2A33]"
           >
             <select
               value={social.platform}
               onChange={(e) => onUpdate(social.id, 'platform', e.target.value)}
-              className="w-full sm:w-1/4 text-xs p-2 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-600 cursor-pointer"
+              className="w-full sm:w-1/4 text-xs p-2 rounded-md border border-[#2A2A33] dark:border-[#2A2A33] bg-[#131318] dark:bg-[#131318] text-[#F7F7F8] dark:text-[#F7F7F8] outline-none focus:border-indigo-600 cursor-pointer"
             >
               <option value="x">X / Twitter</option>
               <option value="github">GitHub</option>
@@ -58,19 +58,19 @@ export const AdminFooterSocialSection: React.FC<AdminFooterSocialSectionProps> =
               placeholder="Accessible Label (e.g. CrestFlow on X)"
               value={social.name}
               onChange={(e) => onUpdate(social.id, 'name', e.target.value)}
-              className="w-full sm:w-1/3 text-xs p-2 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-600"
+              className="w-full sm:w-1/3 text-xs p-2 rounded-md border border-[#2A2A33] dark:border-[#2A2A33] bg-[#131318] dark:bg-[#131318] text-[#F7F7F8] dark:text-[#F7F7F8] outline-none focus:border-indigo-600"
             />
             <input
               type="text"
               placeholder="Profile URL"
               value={social.url}
               onChange={(e) => onUpdate(social.id, 'url', e.target.value)}
-              className="w-full sm:w-1/3 text-xs p-2 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 outline-none focus:border-indigo-600 font-mono"
+              className="w-full sm:w-1/3 text-xs p-2 rounded-md border border-[#2A2A33] dark:border-[#2A2A33] bg-[#131318] dark:bg-[#131318] text-[#F7F7F8] dark:text-[#F7F7F8] outline-none focus:border-indigo-600 font-mono"
             />
             <button
               type="button"
               onClick={() => onRemove(social.id)}
-              className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-md cursor-pointer border-0 transition-colors ml-auto"
+              className="p-1.5 text-[#A1A1AA] hover:text-[#E0002B] hover:bg-[#1B1B22] dark:hover:bg-red-950/30 rounded-md cursor-pointer border-0 transition-colors ml-auto"
               title="Remove social link"
             >
               <Trash2 className="w-4 h-4" />

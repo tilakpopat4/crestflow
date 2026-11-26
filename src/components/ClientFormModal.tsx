@@ -76,42 +76,42 @@ export const ClientFormModal: React.FC<ClientFormModalProps> = ({
 
         <form onSubmit={onSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Client Name *</label>
+            <label className="block text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA]">Client Name *</label>
             <input required type="text" value={formData.name} onChange={(e) => update('name', e.target.value)} className={inputCls} placeholder="e.g. Acme Media Studio" />
           </div>
 
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Phone Number *</label>
+            <label className="block text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA]">Phone Number *</label>
             <input required type="tel" value={formData.phone} onChange={(e) => update('phone', e.target.value)} className={inputCls} placeholder="+91 98765 43210" />
           </div>
 
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Email Address (Optional)</label>
+            <label className="block text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA]">Email Address (Optional)</label>
             <input type="email" value={formData.email} onChange={(e) => update('email', e.target.value)} className={inputCls} placeholder="client@example.com" />
           </div>
 
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Logo URL (Optional)</label>
+            <label className="block text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA]">Logo URL (Optional)</label>
             <input type="url" value={formData.logoUrl} onChange={(e) => update('logoUrl', e.target.value)} className={inputCls} placeholder="https://example.com/logo.png" />
           </div>
 
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Instagram (Optional)</label>
+            <label className="block text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA]">Instagram (Optional)</label>
             <input type="text" value={formData.instagram} onChange={(e) => update('instagram', e.target.value)} className={inputCls} placeholder="@username or link" />
           </div>
 
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Acquisition Source</label>
+            <label className="block text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA]">Acquisition Source</label>
             <input type="text" value={formData.clientFrom} onChange={(e) => update('clientFrom', e.target.value)} className={inputCls} placeholder="e.g. LinkedIn, Referral" />
           </div>
 
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Work Experience (Optional)</label>
+            <label className="block text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA]">Work Experience (Optional)</label>
             <input type="text" value={formData.workExperience} onChange={(e) => update('workExperience', e.target.value)} className={inputCls} placeholder="e.g. 6 months, 20+ videos" />
           </div>
 
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Last Payment Received Date *</label>
+            <label className="block text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA]">Last Payment Received Date *</label>
             <input required type="date" value={formData.lastPaymentDate} onChange={(e) => update('lastPaymentDate', e.target.value)} className={inputCls} />
           </div>
 
@@ -122,7 +122,7 @@ export const ClientFormModal: React.FC<ClientFormModalProps> = ({
               onChange={(curr) => update('currency', curr)}
               shouldReduceMotion={shouldReduceMotion}
             />
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+            <p className="text-[11px] text-[#A1A1AA] dark:text-[#A1A1AA]">
               Selected currency applies to invoices, work items, and rate calculations for this client.
             </p>
           </div>
@@ -137,12 +137,12 @@ export const ClientFormModal: React.FC<ClientFormModalProps> = ({
           </div>
 
           {formData.paymentBasis === 'monthly_retainer' ? (
-            <div className="space-y-1.5 md:col-span-2 p-3.5 bg-slate-50 dark:bg-slate-900/60 rounded-xl">
-              <label className="block text-xs font-semibold text-slate-800 dark:text-slate-200">
+            <div className="space-y-1.5 md:col-span-2 p-3.5 bg-[#131318] dark:bg-[#131318]/60 rounded-xl">
+              <label className="block text-xs font-semibold text-[#F7F7F8] dark:text-[#F7F7F8]">
                 Fixed Monthly Retainer ({currencySymbol}) *
               </label>
               <div className="relative">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-[#A1A1AA]">
                   {currencySymbol}
                 </span>
                 <input

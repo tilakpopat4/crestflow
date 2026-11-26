@@ -176,11 +176,11 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
         type="button"
         onClick={() => setOpen(!isOpen)}
         aria-expanded={isOpen}
-        className="inline-flex h-9 items-center gap-2 rounded-lg border border-[#383838] bg-[#282828] px-3 text-xs sm:text-sm font-medium text-[#f1f1f1] hover:bg-[#333333] transition-colors cursor-pointer shadow-2xs"
+        className="inline-flex h-9 items-center gap-2 rounded-lg border border-[#2A2A33] bg-[#1B1B22] px-3 text-xs sm:text-sm font-medium text-[#F7F7F8] hover:bg-[#2A2A33] transition-colors cursor-pointer shadow-2xs"
       >
-        <Calendar size={14} className="text-slate-400 shrink-0" />
+        <Calendar size={14} className="text-[#A1A1AA] shrink-0" />
         <span>{rangeText(applied.start, applied.end)}</span>
-        <span className="text-xs text-slate-400">▾</span>
+        <span className="text-xs text-[#A1A1AA]">▾</span>
       </button>
 
       {/* Popover / Mobile Scrim */}
@@ -195,7 +195,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
             ref={dialogRef}
             role="dialog"
             aria-modal="true"
-            className="fixed inset-x-0 bottom-0 z-50 rounded-t-2xl bg-white dark:bg-slate-900 shadow-2xl ring-1 ring-slate-900/10 dark:ring-slate-800 max-h-[90dvh] overflow-y-auto sm:absolute sm:inset-x-auto sm:bottom-auto sm:top-full sm:right-0 sm:mt-1.5 sm:w-116 lg:w-176 sm:rounded-xl sm:shadow-lg sm:data-[side=top]:top-auto sm:data-[side=top]:bottom-full sm:data-[side=top]:mt-0 sm:data-[side=top]:mb-1.5 transition-all duration-120"
+            className="fixed inset-x-0 bottom-0 z-50 rounded-t-2xl bg-[#131318] dark:bg-[#131318] shadow-2xl ring-1 ring-[#0B0B0E]/10 max-h-[90dvh] overflow-y-auto sm:absolute sm:inset-x-auto sm:bottom-auto sm:top-full sm:right-0 sm:mt-1.5 sm:w-116 lg:w-176 sm:rounded-xl sm:shadow-lg sm:data-[side=top]:top-auto sm:data-[side=top]:bottom-full sm:data-[side=top]:mt-0 sm:data-[side=top]:mb-1.5 transition-all duration-120"
           >
             <div className="pt-3 sm:flex sm:pt-0">
               <DateRangePresets activePreset={activePreset} onSelectPreset={choosePreset} />
@@ -207,7 +207,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                     type="button"
                     onClick={() => setView(nextMonth(view, -1))}
                     aria-label="Previous month"
-                    className="size-8 inline-flex items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+                    className="size-8 inline-flex items-center justify-center rounded-lg text-[#A1A1AA] hover:bg-[#131318] dark:text-[#A1A1AA] dark:hover:bg-[#1B1B22]"
                   >
                     ‹
                   </button>
@@ -216,7 +216,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                     onClick={() => setView(nextMonth(view, 1))}
                     aria-label="Next month"
                     disabled={!allowFuture && monthIndex(view) >= monthIndex(monthOf(TODAY))}
-                    className="size-8 inline-flex items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 disabled:opacity-40"
+                    className="size-8 inline-flex items-center justify-center rounded-lg text-[#A1A1AA] hover:bg-[#131318] dark:text-[#A1A1AA] dark:hover:bg-[#1B1B22] disabled:opacity-40"
                   >
                     ›
                   </button>
@@ -265,8 +265,8 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
             </div>
 
             {/* Footer with summary and Apply */}
-            <div className="border-t border-slate-200 dark:border-slate-800 p-3 flex flex-wrap items-center justify-between gap-2">
-              <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
+            <div className="border-t border-[#2A2A33] dark:border-[#2A2A33] p-3 flex flex-wrap items-center justify-between gap-2">
+              <span className="text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA]">
                 {s.end === null ? 'Pick end date' : plural(s.end - s.start + 1, 'day', 'days')}
               </span>
               <div className="flex gap-2">

@@ -70,7 +70,7 @@ export default function SupportingInfoModal({
         </div>
 
         {/* Content Body */}
-        <div className="overflow-y-auto p-4 sm:p-6 flex-1 text-slate-700 dark:text-slate-300">
+        <div className="overflow-y-auto p-4 sm:p-6 flex-1 text-[#A1A1AA] dark:text-[#A1A1AA]">
           {route === 'privacy' && <PrivacyPolicyPage onNavigate={onNavigate} />}
           {route === 'terms' && <TermsOfServicePage onNavigate={onNavigate} />}
           {route === 'contact' && <ContactPage />}

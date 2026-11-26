@@ -11,37 +11,37 @@ interface StickyNotesWidgetProps {
 
 const COLOR_MAP: Record<StickyNote['color'], { bg: string; border: string; text: string; pin: string; dot: string }> = {
   yellow: {
-    bg: 'bg-[#212121]',
-    border: 'border-[#383838] hover:border-surface-300',
-    text: 'text-[#f1f1f1]',
-    pin: 'text-[#aaaaaa]',
-    dot: 'bg-[#aaaaaa]'
+    bg: 'bg-[#131318]',
+    border: 'border-[#2A2A33] hover:border-surface-300',
+    text: 'text-[#F7F7F8]',
+    pin: 'text-[#A1A1AA]',
+    dot: 'bg-[#A1A1AA]'
   },
   blue: {
-    bg: 'bg-[#1e1e1e]',
-    border: 'border-[#383838] hover:border-surface-300',
-    text: 'text-[#f1f1f1]',
+    bg: 'bg-[#131318]',
+    border: 'border-[#2A2A33] hover:border-surface-300',
+    text: 'text-[#F7F7F8]',
     pin: 'text-text-primary',
     dot: 'bg-surface-400'
   },
   green: {
-    bg: 'bg-[#242424]',
-    border: 'border-[#383838] hover:border-surface-300',
-    text: 'text-[#f1f1f1]',
-    pin: 'text-slate-400',
-    dot: 'bg-slate-400'
+    bg: 'bg-[#1B1B22]',
+    border: 'border-[#2A2A33] hover:border-surface-300',
+    text: 'text-[#F7F7F8]',
+    pin: 'text-[#A1A1AA]',
+    dot: 'bg-[#2A2A33]'
   },
   pink: {
-    bg: 'bg-[#212121]',
-    border: 'border-[#383838] hover:border-surface-300',
-    text: 'text-[#f1f1f1]',
-    pin: 'text-[#aaaaaa]',
-    dot: 'bg-[#aaaaaa]'
+    bg: 'bg-[#131318]',
+    border: 'border-[#2A2A33] hover:border-surface-300',
+    text: 'text-[#F7F7F8]',
+    pin: 'text-[#A1A1AA]',
+    dot: 'bg-[#A1A1AA]'
   },
   purple: {
-    bg: 'bg-[#1a1a1a]',
-    border: 'border-[#383838] hover:border-surface-300',
-    text: 'text-[#f1f1f1]',
+    bg: 'bg-[#0B0B0E]',
+    border: 'border-[#2A2A33] hover:border-surface-300',
+    text: 'text-[#F7F7F8]',
     pin: 'text-text-primary',
     dot: 'bg-surface-400'
   }
@@ -166,21 +166,21 @@ export default function StickyNotesWidget({ user, clients }: StickyNotesWidgetPr
   }).sort((a, b) => (b.updatedAt || b.createdAt) - (a.updatedAt || a.createdAt));
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6 space-y-6">
+    <div className="bg-[#131318] dark:bg-[#1B1B22] rounded-xl border border-[#2A2A33] dark:border-[#2A2A33] shadow-sm p-6 space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg">
+          <div className="p-2.5 bg-[#131318] dark:bg-[#1B1B22] text-[#A1A1AA] dark:text-[#A1A1AA] rounded-lg">
             <NoteIcon size={20} />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
+            <h3 className="text-lg font-bold text-[#F7F7F8] dark:text-[#F7F7F8] tracking-tight flex items-center gap-2">
               Sticky Notes
-              <span className="text-xs font-medium px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded">
+              <span className="text-xs font-medium px-2 py-0.5 bg-[#131318] dark:bg-[#1B1B22] text-[#A1A1AA] dark:text-[#A1A1AA] rounded">
                 {notes.length}
               </span>
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Quick temporary snippets and notes for your clients.</p>
+            <p className="text-xs text-[#A1A1AA] dark:text-[#A1A1AA]">Quick temporary snippets and notes for your clients.</p>
           </div>
         </div>
 
@@ -193,15 +193,15 @@ export default function StickyNotesWidget({ user, clients }: StickyNotesWidgetPr
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row items-center gap-3 bg-slate-50 dark:bg-slate-900/70 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+      <div className="flex flex-col sm:flex-row items-center gap-3 bg-[#131318] dark:bg-[#131318]/70 p-3 rounded-lg border border-[#2A2A33] dark:border-[#2A2A33]">
         <div className="relative flex-1 w-full">
-          <Search size={15} className="absolute left-3 top-2.5 text-slate-400 dark:text-slate-500" />
+          <Search size={15} className="absolute left-3 top-2.5 text-[#A1A1AA] dark:text-[#A1A1AA]" />
           <input
             type="text"
             placeholder="Search notes or clients..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-slate-400"
+            className="w-full pl-9 pr-3 py-1.5 bg-[#131318] dark:bg-[#1B1B22] border border-[#2A2A33] dark:border-[#2A2A33] rounded-md text-xs text-[#F7F7F8] dark:text-[#F7F7F8] placeholder:text-[#A1A1AA] dark:placeholder:text-[#A1A1AA] focus:outline-none focus:border-[#2A2A33]"
           />
         </div>
 
@@ -209,7 +209,7 @@ export default function StickyNotesWidget({ user, clients }: StickyNotesWidgetPr
           <select
             value={selectedClientFilter}
             onChange={(e) => setSelectedClientFilter(e.target.value)}
-            className="w-full py-1.5 px-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:border-slate-400"
+            className="w-full py-1.5 px-3 bg-[#131318] dark:bg-[#1B1B22] border border-[#2A2A33] dark:border-[#2A2A33] rounded-md text-xs font-medium text-[#A1A1AA] dark:text-[#F7F7F8] focus:outline-none focus:border-[#2A2A33]"
           >
             <option value="ALL">All Clients & Notes</option>
             <option value="GENERAL">General Snippets Only</option>
@@ -224,15 +224,15 @@ export default function StickyNotesWidget({ user, clients }: StickyNotesWidgetPr
       {loading ? (
         <div className="py-12 flex flex-col items-center justify-center gap-2 select-none">
           <div className="w-5 h-5 rounded-full border-2 border-accent border-t-transparent animate-spin" />
-          <span className="text-xs text-slate-400 dark:text-slate-500">Loading sticky notes...</span>
+          <span className="text-xs text-[#A1A1AA] dark:text-[#A1A1AA]">Loading sticky notes...</span>
         </div>
       ) : filteredNotes.length === 0 ? (
-        <div className="py-12 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl text-center space-y-2">
-          <div className="w-10 h-10 mx-auto rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500">
+        <div className="py-12 border-2 border-dashed border-[#2A2A33] dark:border-[#2A2A33] rounded-xl text-center space-y-2">
+          <div className="w-10 h-10 mx-auto rounded-full bg-[#131318] dark:bg-[#1B1B22] flex items-center justify-center text-[#A1A1AA] dark:text-[#A1A1AA]">
             <Pin size={20} />
           </div>
-          <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">No sticky notes found</p>
-          <p className="text-[11px] text-slate-400 dark:text-slate-500 max-w-sm mx-auto">
+          <p className="text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA]">No sticky notes found</p>
+          <p className="text-[11px] text-[#A1A1AA] dark:text-[#A1A1AA] max-w-sm mx-auto">
             {searchQuery || selectedClientFilter !== 'ALL'
               ? 'Try clearing your search filters to view existing notes.'
               : 'Create a quick sticky note to record client guidelines, feedback, or temporary snippets.'}
@@ -279,7 +279,7 @@ export default function StickyNotesWidget({ user, clients }: StickyNotesWidgetPr
                       <button
                         onClick={() => handleDelete(note.id)}
                         style={{ backgroundColor: 'transparent' }}
-                        className="p-1 rounded hover:bg-red-500/10 text-rose-600 dark:text-rose-400 transition-colors cursor-pointer !bg-transparent border-none"
+                        className="p-1 rounded hover:bg-[#E0002B]/10 text-rose-600 dark:text-rose-400 transition-colors cursor-pointer !bg-transparent border-none"
                         title="Delete note"
                       >
                         <Trash2 size={14} />
@@ -292,7 +292,7 @@ export default function StickyNotesWidget({ user, clients }: StickyNotesWidgetPr
                   </p>
                 </div>
 
-                <div className="pt-3 border-t border-black/5 dark:border-white/10 flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 mt-3">
+                <div className="pt-3 border-t border-black/5 dark:border-white/10 flex items-center justify-between text-[10px] text-[#A1A1AA] dark:text-[#A1A1AA] mt-3">
                   <span>
                     {new Date(note.createdAt).toLocaleDateString('en-IN', {
                       day: '2-digit',

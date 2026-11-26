@@ -21,27 +21,27 @@ export const PublicFreelancerProfileSubmitted: React.FC<PublicFreelancerProfileS
   onReset,
 }) => {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 p-4 text-center transition-colors duration-150">
-      <div className="bg-white dark:bg-slate-900 border-0 rounded-xl p-6 md:p-8 max-w-md w-full space-y-5">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#131318] dark:bg-[#0B0B0E] p-4 text-center transition-colors duration-150">
+      <div className="bg-[#131318] dark:bg-[#131318] border-0 rounded-xl p-6 md:p-8 max-w-md w-full space-y-5">
         <div className="space-y-1.5">
-          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Submitted</h1>
-          <p className="text-slate-400 text-xs">
-            Sent to <strong className="text-slate-200">{profile.name}</strong>.
+          <h1 className="text-xl font-bold text-[#F7F7F8] dark:text-[#F7F7F8]">Submitted</h1>
+          <p className="text-[#A1A1AA] text-xs">
+            Sent to <strong className="text-[#F7F7F8]">{profile.name}</strong>.
           </p>
         </div>
 
-        <div className="bg-slate-800/60 border-0 rounded-lg p-3.5 text-left space-y-2 text-xs text-slate-300">
+        <div className="bg-[#1B1B22] border-0 rounded-lg p-3.5 text-left space-y-2 text-xs text-[#A1A1AA]">
           <div className="flex justify-between">
-            <span className="text-slate-400">Freelancer</span>
-            <span className="font-semibold text-slate-100">{profile.name}</span>
+            <span className="text-[#A1A1AA]">Freelancer</span>
+            <span className="font-semibold text-[#F7F7F8]">{profile.name}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-slate-400">Client</span>
-            <span className="font-semibold text-slate-100">{clientName}</span>
+            <span className="text-[#A1A1AA]">Client</span>
+            <span className="font-semibold text-[#F7F7F8]">{clientName}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-slate-400">Email</span>
-            <span className="font-semibold text-slate-100">{contactEmail}</span>
+            <span className="text-[#A1A1AA]">Email</span>
+            <span className="font-semibold text-[#F7F7F8]">{contactEmail}</span>
           </div>
         </div>
 

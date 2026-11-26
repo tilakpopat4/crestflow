@@ -246,7 +246,7 @@ export function InvoiceFormCard({
             <button
               type="button"
               onClick={onOpenUpiSettings}
-              className="px-3 py-1.5 rounded-lg bg-[#1B1B22] hover:bg-[#22222B] border border-[#2A2A33] text-[#F7F7F8] text-xs font-semibold inline-flex items-center gap-1 shrink-0 cursor-pointer"
+              className="px-3 py-1.5 rounded-lg bg-[#1B1B22] hover:bg-[#2A2A33] border border-[#2A2A33] text-[#F7F7F8] text-xs font-semibold inline-flex items-center gap-1 shrink-0 cursor-pointer"
             >
               <span>Add UPI ID in Settings</span>
               <ArrowUpRight size={13} />

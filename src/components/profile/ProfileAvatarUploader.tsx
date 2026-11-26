@@ -59,7 +59,7 @@ export const ProfileAvatarUploader: React.FC<ProfileAvatarUploaderProps> = ({
 
         <div
           onClick={() => !disabled && !isProcessing && fileInputRef.current?.click()}
-          className="relative size-16 rounded-full cursor-pointer overflow-hidden border-0 bg-slate-100 dark:bg-slate-800 flex items-center justify-center transition-opacity hover:opacity-90"
+          className="relative size-16 rounded-full cursor-pointer overflow-hidden border-0 bg-[#131318] dark:bg-[#1B1B22] flex items-center justify-center transition-opacity hover:opacity-90"
           title="Click to upload profile photo directly from device"
           role="button"
           tabIndex={0}
@@ -71,7 +71,7 @@ export const ProfileAvatarUploader: React.FC<ProfileAvatarUploaderProps> = ({
           }}
         >
           {isProcessing ? (
-            <Loader2 size={20} className="animate-spin text-slate-500 dark:text-slate-400" />
+            <Loader2 size={20} className="animate-spin text-[#A1A1AA] dark:text-[#A1A1AA]" />
           ) : currentPhotoUrl ? (
             <img
               src={currentPhotoUrl}
@@ -81,7 +81,7 @@ export const ProfileAvatarUploader: React.FC<ProfileAvatarUploaderProps> = ({
               decoding="async"
             />
           ) : (
-            <span className="text-xl font-bold text-slate-700 dark:text-slate-200 select-none">
+            <span className="text-xl font-bold text-[#A1A1AA] dark:text-[#F7F7F8] select-none">
               {fallbackInitial}
             </span>
           )}
@@ -99,7 +99,7 @@ export const ProfileAvatarUploader: React.FC<ProfileAvatarUploaderProps> = ({
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={disabled || isProcessing}
-            className="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors border-0 cursor-pointer disabled:opacity-50"
+            className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[#131318] dark:bg-[#1B1B22] hover:bg-[#1B1B22] dark:hover:bg-[#1B1B22] text-[#A1A1AA] dark:text-[#F7F7F8] transition-colors border-0 cursor-pointer disabled:opacity-50"
           >
             {isProcessing ? 'Processing...' : 'Upload Photo'}
           </button>
@@ -109,7 +109,7 @@ export const ProfileAvatarUploader: React.FC<ProfileAvatarUploaderProps> = ({
               type="button"
               onClick={onPhotoRemoved}
               disabled={disabled || isProcessing}
-              className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg transition-colors border-0 cursor-pointer"
+              className="p-1.5 text-[#A1A1AA] hover:text-[#F0607A] rounded-lg transition-colors border-0 cursor-pointer"
               title="Remove uploaded photo"
             >
               <Trash2 size={14} />
@@ -117,12 +117,12 @@ export const ProfileAvatarUploader: React.FC<ProfileAvatarUploaderProps> = ({
           )}
         </div>
 
-        <p className="text-[11px] text-slate-500 dark:text-slate-400">
+        <p className="text-[11px] text-[#A1A1AA] dark:text-[#A1A1AA]">
           PNG, JPG, or WEBP.
         </p>
 
         {uploadError && (
-          <p className="text-xs text-red-500 font-medium">{uploadError}</p>
+          <p className="text-xs text-[#F0607A] font-medium">{uploadError}</p>
         )}
       </div>
     </div>

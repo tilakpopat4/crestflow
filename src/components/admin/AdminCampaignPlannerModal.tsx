@@ -157,29 +157,29 @@ export default function AdminCampaignPlannerModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/25 backdrop-blur-sm overflow-y-auto select-none">
-      <div className="bg-[#212121] rounded-xl max-w-2xl w-full border border-[#333333] shadow-xl overflow-hidden my-auto text-white">
+      <div className="bg-[#131318] rounded-xl max-w-2xl w-full border border-[#2A2A33] shadow-xl overflow-hidden my-auto text-white">
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-[#333333] flex items-center justify-between">
+        <div className="p-4 sm:p-5 border-b border-[#2A2A33] flex items-center justify-between">
           <div>
             <h3 className="font-semibold text-sm sm:text-base text-white">
               Promotional Campaign & Bulk Mail Planner
             </h3>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-[#A1A1AA] mt-0.5">
               Target user segments, schedule future announcements, or broadcast instant updates
             </p>
           </div>
-          <button type="button" onClick={onClose} className="text-slate-400 hover:text-white cursor-pointer p-1">
+          <button type="button" onClick={onClose} className="text-[#A1A1AA] hover:text-white cursor-pointer p-1">
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Mode Toggle Tabs */}
-        <div className="flex border-b border-[#333333] px-5 text-xs font-medium bg-[#1a1a1a]">
+        <div className="flex border-b border-[#2A2A33] px-5 text-xs font-medium bg-[#0B0B0E]">
           <button
             type="button"
             onClick={() => setActiveTab('compose')}
             className={`py-3 px-3 inline-flex items-center gap-1.5 border-b-2 transition-colors cursor-pointer ${
-              activeTab === 'compose' ? 'border-indigo-500 text-white font-semibold' : 'border-transparent text-slate-400 hover:text-slate-200'
+              activeTab === 'compose' ? 'border-indigo-500 text-white font-semibold' : 'border-transparent text-[#A1A1AA] hover:text-[#F7F7F8]'
             }`}
           >
             <Edit3 className="w-3.5 h-3.5" />
@@ -189,7 +189,7 @@ export default function AdminCampaignPlannerModal({
             type="button"
             onClick={() => setActiveTab('preview')}
             className={`py-3 px-3 inline-flex items-center gap-1.5 border-b-2 transition-colors cursor-pointer ${
-              activeTab === 'preview' ? 'border-indigo-500 text-white font-semibold' : 'border-transparent text-slate-400 hover:text-slate-200'
+              activeTab === 'preview' ? 'border-indigo-500 text-white font-semibold' : 'border-transparent text-[#A1A1AA] hover:text-[#F7F7F8]'
             }`}
           >
             <Eye className="w-3.5 h-3.5" />
@@ -200,7 +200,7 @@ export default function AdminCampaignPlannerModal({
         {/* Tab Content */}
         <div className="p-5 max-h-[70vh] overflow-y-auto space-y-4">
           {feedback && (
-            <div className={`p-3 rounded-lg text-xs border ${feedback.success ? 'bg-[#181818] border-slate-700 text-slate-200' : 'bg-red-950/40 border-red-900 text-red-300'}`}>
+            <div className={`p-3 rounded-lg text-xs border ${feedback.success ? 'bg-[#0B0B0E] border-[#2A2A33] text-[#F7F7F8]' : 'bg-red-950/40 border-red-900 text-red-300'}`}>
               {feedback.text}
             </div>
           )}
@@ -243,13 +243,13 @@ export default function AdminCampaignPlannerModal({
               />
 
               {/* Delivery Timing */}
-              <div className="p-3 bg-[#181818] rounded-lg flex flex-wrap items-center justify-between gap-3 border border-[#2e2e2e]">
+              <div className="p-3 bg-[#0B0B0E] rounded-lg flex flex-wrap items-center justify-between gap-3 border border-[#2A2A33]">
                 <div className="flex items-center gap-3">
-                  <label className="flex items-center gap-1.5 cursor-pointer text-slate-300">
+                  <label className="flex items-center gap-1.5 cursor-pointer text-[#A1A1AA]">
                     <input type="radio" name="delMode" checked={deliveryMode === 'immediate'} onChange={() => setDeliveryMode('immediate')} className="accent-indigo-500" />
                     <span>Send Immediately</span>
                   </label>
-                  <label className="flex items-center gap-1.5 cursor-pointer text-slate-300">
+                  <label className="flex items-center gap-1.5 cursor-pointer text-[#A1A1AA]">
                     <input type="radio" name="delMode" checked={deliveryMode === 'schedule'} onChange={() => setDeliveryMode('schedule')} className="accent-indigo-500" />
                     <span>Schedule For Future</span>
                   </label>
@@ -260,24 +260,24 @@ export default function AdminCampaignPlannerModal({
                     type="datetime-local"
                     value={scheduledDateTime}
                     onChange={(e) => setScheduledDateTime(e.target.value)}
-                    className="p-1.5 bg-[#1e1e1e] border border-[#333333] rounded text-white text-xs outline-none focus:border-indigo-500"
+                    className="p-1.5 bg-[#131318] border border-[#2A2A33] rounded text-white text-xs outline-none focus:border-[#FF2D4A]"
                   />
                 )}
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-between pt-2 border-t border-[#333333]">
+              <div className="flex items-center justify-between pt-2 border-t border-[#2A2A33]">
                 <button
                   type="button"
                   onClick={handleSendTest}
                   disabled={isTesting}
-                  className="px-3.5 py-2 bg-[#282828] hover:bg-[#333333] text-slate-300 hover:text-white rounded-lg font-medium cursor-pointer transition-colors disabled:opacity-50 border-0"
+                  className="px-3.5 py-2 bg-[#1B1B22] hover:bg-[#2A2A33] text-[#A1A1AA] hover:text-white rounded-lg font-medium cursor-pointer transition-colors disabled:opacity-50 border-0"
                 >
                   {isTesting ? 'Sending Test...' : 'Send Test Copy to Self'}
                 </button>
 
                 <div className="flex items-center gap-2">
-                  <button type="button" onClick={onClose} className="px-4 py-2 border border-[#333333] bg-[#1e1e1e] rounded-lg text-slate-400 hover:text-white hover:bg-[#252525] cursor-pointer">
+                  <button type="button" onClick={onClose} className="px-4 py-2 border border-[#2A2A33] bg-[#131318] rounded-lg text-[#A1A1AA] hover:text-white hover:bg-[#1B1B22] cursor-pointer">
                     Cancel
                   </button>
                   <button

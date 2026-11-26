@@ -134,7 +134,7 @@ export const ProfileInvoicingSection: React.FC<ProfileInvoicingSectionProps> = (
               type="button"
               disabled={isSaving}
               onClick={onDiscard}
-              className="inline-flex h-9 items-center justify-center rounded-lg bg-[#1B1B22] hover:bg-[#22222B] border border-[#2A2A33] px-3.5 text-xs font-semibold text-[#A1A1AA] hover:text-[#F7F7F8] cursor-pointer"
+              className="inline-flex h-9 items-center justify-center rounded-lg bg-[#1B1B22] hover:bg-[#2A2A33] border border-[#2A2A33] px-3.5 text-xs font-semibold text-[#A1A1AA] hover:text-[#F7F7F8] cursor-pointer"
             >
               Discard
             </button>

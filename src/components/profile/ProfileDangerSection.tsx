@@ -78,21 +78,21 @@ export const ProfileDangerSection: React.FC<ProfileDangerSectionProps> = ({ user
       className="grid grid-cols-1 gap-x-8 gap-y-4 pt-8 lg:grid-cols-[13rem_minmax(0,1fr)]"
     >
       <div>
-        <h2 className="text-base font-semibold text-red-600 dark:text-red-400">
+        <h2 className="text-base font-semibold text-[#E0002B] dark:text-[#F0607A]">
           Delete account
         </h2>
-        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+        <p className="mt-1 text-xs text-[#A1A1AA] dark:text-[#A1A1AA] leading-relaxed">
           Permanently delete your account.
         </p>
       </div>
 
-      <div className="rounded-xl bg-white dark:bg-slate-900 overflow-hidden">
+      <div className="rounded-xl bg-[#131318] dark:bg-[#131318] overflow-hidden">
         <div className="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1 max-w-xl">
-            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+            <p className="text-sm font-semibold text-[#F7F7F8] dark:text-[#F7F7F8]">
               Permanently delete your account
             </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+            <p className="text-xs text-[#A1A1AA] dark:text-[#A1A1AA] leading-relaxed">
               Erases all workspace data and cancels any active subscription.
             </p>
           </div>
@@ -100,7 +100,7 @@ export const ProfileDangerSection: React.FC<ProfileDangerSectionProps> = ({ user
           <button
             type="button"
             onClick={handleOpenModal}
-            className="h-9 px-4 rounded-lg text-xs font-medium bg-red-600 hover:bg-red-700 text-white border-0 cursor-pointer transition-colors duration-120 inline-flex items-center justify-center gap-1.5 shrink-0"
+            className="h-9 px-4 rounded-lg text-xs font-medium bg-[#E0002B] hover:bg-[#E0002B] text-white border-0 cursor-pointer transition-colors duration-120 inline-flex items-center justify-center gap-1.5 shrink-0"
           >
             <Trash2 className="w-3.5 h-3.5" />
             <span>Delete Account</span>
@@ -125,12 +125,12 @@ export const ProfileDangerSection: React.FC<ProfileDangerSectionProps> = ({ user
               <div>
                 <h3
                   id="delete-account-modal-title"
-                  className="text-base font-bold text-slate-900 dark:text-white"
+                  className="text-base font-bold text-[#F7F7F8] dark:text-white"
                 >
                   Confirm Account Deletion
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  Signed in as <span className="font-medium text-slate-700 dark:text-slate-200">{user.email}</span>
+                <p className="text-xs text-[#A1A1AA] dark:text-[#A1A1AA] mt-1">
+                  Signed in as <span className="font-medium text-[#A1A1AA] dark:text-[#F7F7F8]">{user.email}</span>
                 </p>
               </div>
               <button
@@ -138,14 +138,14 @@ export const ProfileDangerSection: React.FC<ProfileDangerSectionProps> = ({ user
                 onClick={handleCloseModal}
                 disabled={isDeleting}
                 aria-label="Close confirmation dialog"
-                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-[#282828] border-0 cursor-pointer transition-colors duration-120 disabled:opacity-50"
+                className="p-1.5 text-[#A1A1AA] hover:text-[#A1A1AA] dark:hover:text-[#F7F7F8] rounded-lg hover:bg-[#131318] dark:hover:bg-[#1B1B22] border-0 cursor-pointer transition-colors duration-120 disabled:opacity-50"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="p-3.5 rounded-lg bg-slate-50 dark:bg-[#212121] border border-slate-200 dark:border-[#333333] space-y-1.5 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              <p className="font-semibold text-red-600 dark:text-red-400">
+            <div className="p-3.5 rounded-lg bg-[#131318] dark:bg-[#131318] border border-[#2A2A33] dark:border-[#2A2A33] space-y-1.5 text-xs text-[#A1A1AA] dark:text-[#A1A1AA] leading-relaxed">
+              <p className="font-semibold text-[#E0002B] dark:text-[#F0607A]">
                 This action is permanent and cannot be undone.
               </p>
               <p>
@@ -154,7 +154,7 @@ export const ProfileDangerSection: React.FC<ProfileDangerSectionProps> = ({ user
             </div>
 
             {error && (
-              <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-xs text-red-600 dark:text-red-400">
+              <div className="p-3 rounded-lg bg-[#1B1B22] dark:bg-red-950/40 border border-[#E0002B] dark:border-red-900 text-xs text-[#E0002B] dark:text-[#F0607A]">
                 {error}
               </div>
             )}
@@ -163,9 +163,9 @@ export const ProfileDangerSection: React.FC<ProfileDangerSectionProps> = ({ user
               <div>
                 <label
                   htmlFor="delete-confirm-input"
-                  className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5"
+                  className="block text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA] mb-1.5"
                 >
-                  Type <span className="font-bold text-slate-900 dark:text-white">DELETE</span> to confirm
+                  Type <span className="font-bold text-[#F7F7F8] dark:text-white">DELETE</span> to confirm
                 </label>
                 <input
                   id="delete-confirm-input"
@@ -176,7 +176,7 @@ export const ProfileDangerSection: React.FC<ProfileDangerSectionProps> = ({ user
                   onChange={(e) => setConfirmInput(e.target.value)}
                   disabled={isDeleting}
                   placeholder="DELETE"
-                  className="w-full px-3 py-2 text-xs rounded-lg bg-slate-100 dark:bg-[#121212] text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 border-none outline-none focus:outline-none focus:ring-0"
+                  className="w-full px-3 py-2 text-xs rounded-lg bg-[#131318] dark:bg-[#0B0B0E] text-[#F7F7F8] dark:text-white placeholder:text-[#A1A1AA] dark:placeholder:text-[#A1A1AA] border-none outline-none focus:outline-none focus:ring-0"
                 />
               </div>
 
@@ -185,14 +185,14 @@ export const ProfileDangerSection: React.FC<ProfileDangerSectionProps> = ({ user
                   type="button"
                   onClick={handleCloseModal}
                   disabled={isDeleting}
-                  className="px-3.5 py-2 rounded-lg text-xs font-medium bg-slate-100 hover:bg-slate-200 dark:bg-[#282828] dark:hover:bg-[#333333] text-slate-700 dark:text-slate-200 border-0 cursor-pointer transition-colors duration-120 disabled:opacity-50"
+                  className="px-3.5 py-2 rounded-lg text-xs font-medium bg-[#131318] hover:bg-[#1B1B22] dark:bg-[#1B1B22] dark:hover:bg-[#2A2A33] text-[#A1A1AA] dark:text-[#F7F7F8] border-0 cursor-pointer transition-colors duration-120 disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={!isConfirmed || isDeleting}
-                  className="px-4 py-2 rounded-lg text-xs font-medium bg-red-600 hover:bg-red-700 text-white border-0 cursor-pointer transition-colors duration-120 disabled:opacity-50 inline-flex items-center gap-1.5"
+                  className="px-4 py-2 rounded-lg text-xs font-medium bg-[#E0002B] hover:bg-[#E0002B] text-white border-0 cursor-pointer transition-colors duration-120 disabled:opacity-50 inline-flex items-center gap-1.5"
                 >
                   {isDeleting ? (
                     <>

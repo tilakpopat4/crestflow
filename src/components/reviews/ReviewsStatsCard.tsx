@@ -30,7 +30,7 @@ export const ReviewsStatsCard: React.FC<ReviewsStatsCardProps> = ({
               key={star}
               className={`w-4 h-4 ${
                 star <= Math.round(averageRating)
-                  ? 'text-amber-400 fill-amber-400'
+                  ? 'text-[#FFB020] fill-amber-400'
                   : 'text-surface-400 fill-none'
               }`}
             />
@@ -49,7 +49,7 @@ export const ReviewsStatsCard: React.FC<ReviewsStatsCardProps> = ({
           return (
             <div key={rating} className="flex items-center text-xs gap-3">
               <span className="w-3 font-semibold text-text-secondary font-mono tabular-nums">{rating}</span>
-              <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400 shrink-0" />
+              <Star className="w-3.5 h-3.5 text-[#FFB020] fill-amber-400 shrink-0" />
               <div className="flex-1 bg-surface-800 h-2 rounded-full overflow-hidden">
                 <div
                   className="bg-amber-400 h-full rounded-full transition-all duration-300"

@@ -51,11 +51,11 @@ export const ProfileNavSidebar: React.FC<ProfileNavSidebarProps> = ({
           aria-current={isActive ? 'page' : undefined}
           className={`flex h-10 w-full items-center gap-2.5 rounded-lg px-3 text-sm font-medium whitespace-nowrap transition-colors duration-120 cursor-pointer text-left lg:h-8.5 lg:px-2.5 border-0 ${
             isActive
-              ? 'bg-[#282828] text-white font-semibold'
-              : 'text-[#aaaaaa] hover:text-white hover:bg-[#282828]'
+              ? 'bg-[#1B1B22] text-white font-semibold'
+              : 'text-[#A1A1AA] hover:text-white hover:bg-[#1B1B22]'
           }`}
         >
-          <Icon className={`size-4 shrink-0 ${isActive ? 'text-white' : 'text-[#aaaaaa]'}`} strokeWidth={1.75} />
+          <Icon className={`size-4 shrink-0 ${isActive ? 'text-white' : 'text-[#A1A1AA]'}`} strokeWidth={1.75} />
           <span>{item.label}</span>
         </button>
       </li>
@@ -66,7 +66,7 @@ export const ProfileNavSidebar: React.FC<ProfileNavSidebarProps> = ({
     <nav aria-label="Settings Navigation" className="min-w-0">
       <div className="flex flex-col gap-3 md:flex-row md:gap-4 lg:sticky lg:top-6 lg:flex-col lg:gap-6">
         <div className="min-w-0">
-          <p className="px-2.5 pb-1.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          <p className="px-2.5 pb-1.5 text-xs font-semibold uppercase tracking-wider text-[#A1A1AA] dark:text-[#A1A1AA]">
             Account
           </p>
           <ul className="flex flex-wrap gap-1 lg:flex-col lg:gap-1">
@@ -75,8 +75,8 @@ export const ProfileNavSidebar: React.FC<ProfileNavSidebarProps> = ({
         </div>
 
         {systemLinks.length > 0 && (
-          <div className="min-w-0 md:border-l md:border-slate-200 md:pl-4 lg:border-l-0 lg:pl-0 dark:md:border-slate-800">
-            <p className="px-2.5 pb-1.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          <div className="min-w-0 md:border-l md:border-[#2A2A33] md:pl-4 lg:border-l-0 lg:pl-0 dark:md:border-[#2A2A33]">
+            <p className="px-2.5 pb-1.5 text-xs font-semibold uppercase tracking-wider text-[#A1A1AA] dark:text-[#A1A1AA]">
               Workspace
             </p>
             <ul className="flex flex-wrap gap-1 lg:flex-col lg:gap-1">
@@ -86,8 +86,8 @@ export const ProfileNavSidebar: React.FC<ProfileNavSidebarProps> = ({
         )}
 
         {adminLinks.length > 0 && (
-          <div className="min-w-0 md:border-l md:border-slate-200 md:pl-4 lg:border-l-0 lg:pl-0 dark:md:border-slate-800">
-            <p className="px-2.5 pb-1.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          <div className="min-w-0 md:border-l md:border-[#2A2A33] md:pl-4 lg:border-l-0 lg:pl-0 dark:md:border-[#2A2A33]">
+            <p className="px-2.5 pb-1.5 text-xs font-semibold uppercase tracking-wider text-[#A1A1AA] dark:text-[#A1A1AA]">
               Admin
             </p>
             <ul className="flex flex-wrap gap-1 lg:flex-col lg:gap-1">

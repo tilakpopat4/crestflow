@@ -21,46 +21,46 @@ export default function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps
   return (
     <div className="w-full py-8 md:py-12 px-4 md:px-6">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
+        <h1 className="text-2xl md:text-3xl font-bold text-[#F7F7F8] dark:text-[#F7F7F8] tracking-tight">
           Privacy Policy
         </h1>
-        <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-1.5 mb-8">
+        <p className="text-xs md:text-sm text-[#A1A1AA] dark:text-[#A1A1AA] mt-1.5 mb-8">
           Last updated: October 2026 &bull; Review Status: Pending Legal Verification
         </p>
 
-        <div className="space-y-6 text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+        <div className="space-y-6 text-base text-[#A1A1AA] dark:text-[#A1A1AA] leading-relaxed">
           <section>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
+            <h2 className="text-lg font-bold text-[#F7F7F8] dark:text-[#F7F7F8] mb-2.5">
               1. Overview
             </h2>
             <p>
-              This Privacy Policy explains how <strong className="text-slate-900 dark:text-slate-100">Tilak Popat Films</strong> (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) collects, uses, and safeguards information when you use our product, the <strong className="text-slate-900 dark:text-slate-100">CrestFlow</strong> platform (&quot;Service&quot;).
+              This Privacy Policy explains how <strong className="text-[#F7F7F8] dark:text-[#F7F7F8]">Tilak Popat Films</strong> (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) collects, uses, and safeguards information when you use our product, the <strong className="text-[#F7F7F8] dark:text-[#F7F7F8]">CrestFlow</strong> platform (&quot;Service&quot;).
             </p>
           </section>
 
           <section>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
+            <h2 className="text-lg font-bold text-[#F7F7F8] dark:text-[#F7F7F8] mb-2.5">
               2. Data We Collect
             </h2>
             <p className="mb-2">
               We collect information strictly necessary to provide freelance workflow and invoicing services:
             </p>
-            <ul className="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-300">
-              <li><strong className="text-slate-800 dark:text-slate-200">Account Identity:</strong> Google account profile information (email, full name, profile picture) during Google OAuth sign-in.</li>
-              <li><strong className="text-slate-800 dark:text-slate-200">Freelancer Profile:</strong> Professional title, business bio, portfolio links, and freelance start date.</li>
-              <li><strong className="text-slate-800 dark:text-slate-200">Invoicing &amp; Payout Rails:</strong> Personal UPI ID (VPA) and optional bank account details entered by you to render on your client invoices.</li>
-              <li><strong className="text-slate-800 dark:text-slate-200">Workflow Entities:</strong> Client contact details, work item logs, deliverables, and invoice line items.</li>
+            <ul className="list-disc pl-5 space-y-1 text-[#A1A1AA] dark:text-[#A1A1AA]">
+              <li><strong className="text-[#F7F7F8] dark:text-[#F7F7F8]">Account Identity:</strong> Google account profile information (email, full name, profile picture) during Google OAuth sign-in.</li>
+              <li><strong className="text-[#F7F7F8] dark:text-[#F7F7F8]">Freelancer Profile:</strong> Professional title, business bio, portfolio links, and freelance start date.</li>
+              <li><strong className="text-[#F7F7F8] dark:text-[#F7F7F8]">Invoicing &amp; Payout Rails:</strong> Personal UPI ID (VPA) and optional bank account details entered by you to render on your client invoices.</li>
+              <li><strong className="text-[#F7F7F8] dark:text-[#F7F7F8]">Workflow Entities:</strong> Client contact details, work item logs, deliverables, and invoice line items.</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
+            <h2 className="text-lg font-bold text-[#F7F7F8] dark:text-[#F7F7F8] mb-2.5">
               3. How Your Information Is Used
             </h2>
             <p className="mb-2">
               Collected information is used solely to operate the core platform:
             </p>
-            <ul className="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-300">
+            <ul className="list-disc pl-5 space-y-1 text-[#A1A1AA] dark:text-[#A1A1AA]">
               <li>Generating professional invoices with dynamic QR codes for direct client payment.</li>
               <li>Hosting branded client review portals for deliverable review and sign-off.</li>
               <li>Automating delivery scheduling via connected Google Workspace integrations (when authorized by you).</li>
@@ -69,7 +69,7 @@ export default function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps
           </section>
 
           <section>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
+            <h2 className="text-lg font-bold text-[#F7F7F8] dark:text-[#F7F7F8] mb-2.5">
               4. Payment Processing via Razorpay
             </h2>
             <p>
@@ -78,7 +78,7 @@ export default function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps
           </section>
 
           <section>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
+            <h2 className="text-lg font-bold text-[#F7F7F8] dark:text-[#F7F7F8] mb-2.5">
               5. Data Retention and Deletion
             </h2>
             <p>
@@ -87,13 +87,13 @@ export default function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps
           </section>
 
           <section>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
+            <h2 className="text-lg font-bold text-[#F7F7F8] dark:text-[#F7F7F8] mb-2.5">
               6. User Rights and Controls
             </h2>
             <p className="mb-2">
               As a CrestFlow user, you maintain full control over your information:
             </p>
-            <ul className="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-300">
+            <ul className="list-disc pl-5 space-y-1 text-[#A1A1AA] dark:text-[#A1A1AA]">
               <li>You may update or remove client, invoice, or UPI details directly within your dashboard at any time.</li>
               <li>You may revoke Google permissions via your Google Security account settings.</li>
               <li>You may request an export or complete deletion of your records by contacting support.</li>
@@ -101,30 +101,30 @@ export default function PrivacyPolicyPage({ onNavigate }: PrivacyPolicyPageProps
           </section>
 
           <section>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
+            <h2 className="text-lg font-bold text-[#F7F7F8] dark:text-[#F7F7F8] mb-2.5">
               7. Governing Law (India)
             </h2>
             <p>
-              This Privacy Policy is governed by the laws of India, including the Information Technology Act, 2000 and the Digital Personal Data Protection Act, 2023. Disputes shall be subject to the exclusive jurisdiction of courts located in <strong className="text-slate-900 dark:text-slate-100">Gandhinagar, Gujarat</strong>, India.
+              This Privacy Policy is governed by the laws of India, including the Information Technology Act, 2000 and the Digital Personal Data Protection Act, 2023. Disputes shall be subject to the exclusive jurisdiction of courts located in <strong className="text-[#F7F7F8] dark:text-[#F7F7F8]">Gandhinagar, Gujarat</strong>, India.
             </p>
           </section>
 
-          <section className="pt-4 border-t border-slate-200 dark:border-slate-800">
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2.5">
+          <section className="pt-4 border-t border-[#2A2A33] dark:border-[#2A2A33]">
+            <h2 className="text-lg font-bold text-[#F7F7F8] dark:text-[#F7F7F8] mb-2.5">
               8. Contact &amp; Grievance Redressal
             </h2>
-            <div className="space-y-1.5 text-slate-700 dark:text-slate-300">
-              <p><strong className="text-slate-900 dark:text-slate-100">Product:</strong> CrestFlow</p>
-              <p><strong className="text-slate-900 dark:text-slate-100">Company:</strong> Tilak Popat Films</p>
-              <p><strong className="text-slate-900 dark:text-slate-100">Contact:</strong> <a href="mailto:support.crestflow@gmail.com" className="text-indigo-600 dark:text-indigo-400 hover:underline">support.crestflow@gmail.com</a></p>
-              <p><strong className="text-slate-900 dark:text-slate-100">Address:</strong> Uvarsad, Gandhinagar, Gujarat, INDIA.</p>
-              <p><strong className="text-slate-900 dark:text-slate-100">Response Time:</strong> 24-48 working hours.</p>
-              <p className="pt-1 text-xs text-slate-500 dark:text-slate-400">
-                <strong>Grievance Handling:</strong> There is no separate Grievance Officer; all inquiries and grievances are handled directly by the Founder: <strong className="text-slate-700 dark:text-slate-300">Tilak Popat</strong>.
+            <div className="space-y-1.5 text-[#A1A1AA] dark:text-[#A1A1AA]">
+              <p><strong className="text-[#F7F7F8] dark:text-[#F7F7F8]">Product:</strong> CrestFlow</p>
+              <p><strong className="text-[#F7F7F8] dark:text-[#F7F7F8]">Company:</strong> Tilak Popat Films</p>
+              <p><strong className="text-[#F7F7F8] dark:text-[#F7F7F8]">Contact:</strong> <a href="mailto:support.crestflow@gmail.com" className="text-[#FF2D4A] dark:text-[#FF2D4A] hover:underline">support.crestflow@gmail.com</a></p>
+              <p><strong className="text-[#F7F7F8] dark:text-[#F7F7F8]">Address:</strong> Uvarsad, Gandhinagar, Gujarat, INDIA.</p>
+              <p><strong className="text-[#F7F7F8] dark:text-[#F7F7F8]">Response Time:</strong> 24-48 working hours.</p>
+              <p className="pt-1 text-xs text-[#A1A1AA] dark:text-[#A1A1AA]">
+                <strong>Grievance Handling:</strong> There is no separate Grievance Officer; all inquiries and grievances are handled directly by the Founder: <strong className="text-[#A1A1AA] dark:text-[#A1A1AA]">Tilak Popat</strong>.
               </p>
               <p className="mt-2 text-xs">
                 You can also reach us directly via the{' '}
-                <a href="/contact" onClick={handleContactLink} className="text-indigo-600 dark:text-indigo-400 hover:underline font-medium">
+                <a href="/contact" onClick={handleContactLink} className="text-[#FF2D4A] dark:text-[#FF2D4A] hover:underline font-medium">
                   Contact Us form
                 </a>.
               </p>

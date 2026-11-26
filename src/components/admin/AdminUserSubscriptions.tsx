@@ -131,13 +131,13 @@ export default function AdminUserSubscriptions({
 
   return (
     <>
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-2xs">
-        <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800">
+      <div className="bg-[#131318] dark:bg-[#131318] border border-[#2A2A33] dark:border-[#2A2A33] rounded-xl overflow-hidden shadow-2xs">
+        <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#2A2A33] dark:border-[#2A2A33]">
           <div>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+            <h2 className="text-lg font-bold text-[#F7F7F8] dark:text-[#F7F7F8]">
               Registered Freelancers & Subscriptions ({users.length})
             </h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-sm text-[#A1A1AA] dark:text-[#A1A1AA] mt-0.5">
               Comprehensive list of all current and historical users aggregated from profiles, subscriptions, and activities.
             </p>
           </div>
@@ -152,18 +152,18 @@ export default function AdminUserSubscriptions({
               <span>Sync Auth Users</span>
             </button>
             <div className="relative w-full sm:w-64">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-[#A1A1AA] absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Search name, email, phone, UID..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg pl-9 pr-3.5 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 outline-none focus:border-indigo-500 transition-colors duration-120"
+                className="w-full bg-[#131318] dark:bg-[#0B0B0E] border border-[#2A2A33] dark:border-[#2A2A33] rounded-lg pl-9 pr-3.5 py-2 text-sm text-[#F7F7F8] dark:text-[#F7F7F8] placeholder:text-[#A1A1AA] outline-none focus:border-[#FF2D4A] transition-colors duration-120"
               />
             </div>
             <button
               onClick={onRefresh}
-              className="p-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-120 border-0 cursor-pointer"
+              className="p-2 text-[#A1A1AA] hover:text-[#F7F7F8] dark:text-[#A1A1AA] dark:hover:text-[#F7F7F8] rounded-lg hover:bg-[#131318] dark:hover:bg-[#1B1B22] transition-colors duration-120 border-0 cursor-pointer"
               title="Refresh list"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -173,17 +173,17 @@ export default function AdminUserSubscriptions({
 
         <div className="overflow-x-auto">
           {loading ? (
-            <div className="p-12 text-center text-slate-500 text-sm">
+            <div className="p-12 text-center text-[#A1A1AA] text-sm">
               Loading all historical and current users...
             </div>
           ) : filtered.length === 0 ? (
-            <div className="p-12 text-center text-slate-500 text-sm">
+            <div className="p-12 text-center text-[#A1A1AA] text-sm">
               No accounts matching search criteria.
             </div>
           ) : (
             <table className="w-full text-left border-collapse text-sm">
               <thead>
-                <tr className="bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-semibold border-b border-slate-200 dark:border-slate-800">
+                <tr className="bg-[#131318] dark:bg-[#0B0B0E] text-[#A1A1AA] dark:text-[#A1A1AA] text-xs uppercase tracking-wider font-semibold border-b border-[#2A2A33] dark:border-[#2A2A33]">
                   <th className="p-4">Freelancer</th>
                   <th className="p-4">Contact / UPI</th>
                   <th className="p-4">Activity History</th>
@@ -192,7 +192,7 @@ export default function AdminUserSubscriptions({
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+              <tbody className="divide-y divide-[#2A2A33] dark:divide-[#2A2A33]/60">
                 {filtered.map((p) => (
                   <UserSubscriptionRow
                     key={p.id}

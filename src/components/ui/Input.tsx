@@ -8,7 +8,7 @@ export interface InputProps
 
 /**
  * Standard Design System Input.
- * Uses surface-500 (#282828), surface-400 (#333333) border, and 150ms transitions.
+ * Uses surface-500 (#1B1B22), surface-400 (#2A2A33) border, and 150ms transitions.
  */
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type = "text", error, ...props }, ref) => {

@@ -49,44 +49,44 @@ export default function UserSubscriptionRow({
   const isSubActive = isLifetime || (isEntitledStatus && (!expiryDate || expiryDate.getTime() > now));
 
   return (
-    <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors duration-120">
+    <tr className="hover:bg-[#131318]/50 dark:hover:bg-[#1B1B22] transition-colors duration-120">
       <td className="p-4">
-        <div className="font-bold text-slate-900 dark:text-slate-100 text-sm">
+        <div className="font-bold text-[#F7F7F8] dark:text-[#F7F7F8] text-sm">
           {profile.name || 'Anonymous User'}
         </div>
         {profile.email && (
-          <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          <div className="text-xs text-[#A1A1AA] dark:text-[#A1A1AA] mt-0.5">
             {profile.email}
           </div>
         )}
         <div
-          className="font-mono text-xs text-slate-400 dark:text-slate-500 mt-0.5 select-all"
+          className="font-mono text-xs text-[#A1A1AA] dark:text-[#A1A1AA] mt-0.5 select-all"
           title="User UID"
         >
           {profile.id}
         </div>
         {profile.professional_title && (
-          <div className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">
+          <div className="text-[#A1A1AA] dark:text-[#A1A1AA] text-xs mt-0.5">
             {profile.professional_title}
           </div>
         )}
       </td>
       <td className="p-4">
-        {profile.phone && <div className="text-slate-700 dark:text-slate-300 text-sm font-medium">{profile.phone}</div>}
-        {profile.upi_id && <div className="font-mono text-xs text-slate-500 mt-0.5">{profile.upi_id}</div>}
+        {profile.phone && <div className="text-[#A1A1AA] dark:text-[#A1A1AA] text-sm font-medium">{profile.phone}</div>}
+        {profile.upi_id && <div className="font-mono text-xs text-[#A1A1AA] mt-0.5">{profile.upi_id}</div>}
       </td>
       <td className="p-4">
-        <div className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+        <div className="text-xs font-semibold text-[#F7F7F8] dark:text-[#F7F7F8]">
           {profile.invoicesCount || 0} Invoices
         </div>
-        <div className="text-[11px] text-slate-500 mt-0.5">
+        <div className="text-[11px] text-[#A1A1AA] mt-0.5">
           ₹{(profile.totalBilled || 0).toLocaleString()} billed · {profile.clientsCount || 0} clients
         </div>
       </td>
       <td className="p-4">
         {isBlocked ? (
-          <div className="inline-flex items-center gap-1.5 text-sm font-medium text-red-500">
-            <span className="w-2 h-2 rounded-full bg-red-500" />
+          <div className="inline-flex items-center gap-1.5 text-sm font-medium text-[#F0607A]">
+            <span className="w-2 h-2 rounded-full bg-[#E0002B]" />
             <span>Blocked</span>
           </div>
         ) : isLifetime ? (
@@ -100,23 +100,23 @@ export default function UserSubscriptionRow({
             <span>{profile.subscription_status === 'trialing' ? 'Trial' : profile.subscription_status === 'grace' ? 'Grace' : 'Active Pro'}</span>
           </div>
         ) : (
-          <div className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-400">
+          <div className="inline-flex items-center gap-1.5 text-sm font-medium text-[#A1A1AA]">
             <span className="w-2 h-2 rounded-full admin-indicator-inactive" />
             <span>No Active Plan</span>
           </div>
         )}
       </td>
-      <td className="p-4 text-slate-600 dark:text-slate-300 text-xs font-medium">
+      <td className="p-4 text-[#A1A1AA] dark:text-[#A1A1AA] text-xs font-medium">
         {expiryDate ? expiryDate.toLocaleDateString() : '—'}
       </td>
       <td className="p-4 text-right">
         <div className="inline-flex items-center gap-1.5">
           <button
             onClick={() => onViewHistory(profile)}
-            className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs px-2.5 py-1.5 rounded-lg transition-colors duration-120 inline-flex items-center gap-1 border-0 cursor-pointer"
+            className="bg-[#131318] hover:bg-[#1B1B22] dark:bg-[#1B1B22] dark:hover:bg-[#1B1B22] text-[#A1A1AA] dark:text-[#A1A1AA] font-semibold text-xs px-2.5 py-1.5 rounded-lg transition-colors duration-120 inline-flex items-center gap-1 border-0 cursor-pointer"
             title="Inspect full user activity & history"
           >
-            <FileText className="w-3.5 h-3.5 text-slate-500" />
+            <FileText className="w-3.5 h-3.5 text-[#A1A1AA]" />
             <span>History</span>
           </button>
 
@@ -134,7 +134,7 @@ export default function UserSubscriptionRow({
             <button
               onClick={() => onGrantDays(profile.id, profile.name, true)}
               disabled={isProcessing}
-              className="bg-[#1B1B22] hover:bg-[#22222B] text-[#FFC145] border border-[#2A2A33] font-semibold text-xs px-2.5 py-1.5 rounded-lg transition-colors duration-120 disabled:opacity-50 inline-flex items-center gap-1 cursor-pointer"
+              className="bg-[#1B1B22] hover:bg-[#2A2A33] text-[#FFC145] border border-[#2A2A33] font-semibold text-xs px-2.5 py-1.5 rounded-lg transition-colors duration-120 disabled:opacity-50 inline-flex items-center gap-1 cursor-pointer"
               title="Grant Lifetime Pro access"
             >
               <span>Lifetime</span>
@@ -145,10 +145,10 @@ export default function UserSubscriptionRow({
             <button
               onClick={() => onRevoke(profile.id, profile.name)}
               disabled={isProcessing}
-              className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs px-2.5 py-1.5 rounded-lg transition-colors duration-120 disabled:opacity-50 inline-flex items-center gap-1 border-0 cursor-pointer"
+              className="bg-[#131318] hover:bg-[#1B1B22] dark:bg-[#1B1B22] dark:hover:bg-[#1B1B22] text-[#A1A1AA] dark:text-[#A1A1AA] font-semibold text-xs px-2.5 py-1.5 rounded-lg transition-colors duration-120 disabled:opacity-50 inline-flex items-center gap-1 border-0 cursor-pointer"
               title="Revoke subscription access"
             >
-              <XCircle className="w-3.5 h-3.5 text-red-500" />
+              <XCircle className="w-3.5 h-3.5 text-[#F0607A]" />
               <span>Revoke</span>
             </button>
           )}
@@ -158,12 +158,12 @@ export default function UserSubscriptionRow({
             disabled={isProcessing}
             className={`font-semibold text-xs px-2 py-1.5 rounded-lg transition-colors duration-120 disabled:opacity-50 inline-flex items-center gap-1 border-0 cursor-pointer ${
               isBlocked
-                ? 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200'
-                : 'text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                ? 'bg-[#131318] hover:bg-[#1B1B22] dark:bg-[#1B1B22] text-[#A1A1AA] dark:text-[#F7F7F8]'
+                : 'text-[#A1A1AA] hover:text-[#E0002B] dark:hover:text-[#F0607A] hover:bg-[#131318] dark:hover:bg-[#1B1B22]'
             }`}
             title={isBlocked ? 'Unblock user' : 'Block user'}
           >
-            {isBlocked ? <CheckCircle className="w-3.5 h-3.5 text-indigo-500" /> : <Ban className="w-3.5 h-3.5" />}
+            {isBlocked ? <CheckCircle className="w-3.5 h-3.5 text-[#FF2D4A]" /> : <Ban className="w-3.5 h-3.5" />}
             <span>{isBlocked ? 'Unblock' : 'Block'}</span>
           </button>
         </div>

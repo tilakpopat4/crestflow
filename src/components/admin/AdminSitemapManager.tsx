@@ -66,17 +66,17 @@ export const AdminSitemapManager: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 sm:p-6 shadow-2xs space-y-2">
+      <div className="bg-[#131318] dark:bg-[#131318] border border-[#2A2A33] dark:border-[#2A2A33] rounded-xl p-5 sm:p-6 shadow-2xs space-y-2">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <span className="p-2 rounded-lg bg-surface-600 border border-surface-400 text-text-primary">
               <Compass size={20} />
             </span>
             <div>
-              <h2 className="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100">
+              <h2 className="text-lg font-bold tracking-tight text-[#F7F7F8] dark:text-[#F7F7F8]">
                 Portal Sitemap &amp; Connected Pages
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              <p className="text-xs text-[#A1A1AA] dark:text-[#A1A1AA] mt-0.5">
                 Live registry of every route, public portal, client intake channel, and workspace tab.
               </p>
             </div>
@@ -86,9 +86,9 @@ export const AdminSitemapManager: React.FC = () => {
             href="/sitemap.xml"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors self-start sm:self-auto cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#131318] dark:bg-[#1B1B22] hover:bg-[#1B1B22] dark:hover:bg-[#1B1B22] text-xs font-semibold text-[#A1A1AA] dark:text-[#F7F7F8] transition-colors self-start sm:self-auto cursor-pointer"
           >
-            <FileCode size={14} className="text-indigo-600 dark:text-indigo-400" />
+            <FileCode size={14} className="text-[#FF2D4A] dark:text-[#FF2D4A]" />
             <span>View XML Sitemap</span>
             <ExternalLink size={12} />
           </a>
@@ -97,26 +97,26 @@ export const AdminSitemapManager: React.FC = () => {
 
       {/* Metrics Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1 shadow-2xs border border-slate-200 dark:border-slate-800">
-          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+        <div className="bg-[#131318] dark:bg-[#131318] rounded-xl p-4 sm:p-5 space-y-1 shadow-2xs border border-[#2A2A33] dark:border-[#2A2A33]">
+          <div className="text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA] uppercase tracking-wider">
             Connected Pages
           </div>
           <div className="text-2xl font-bold">{counts.all}</div>
         </div>
-        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1 shadow-2xs border border-slate-200 dark:border-slate-800">
-          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+        <div className="bg-[#131318] dark:bg-[#131318] rounded-xl p-4 sm:p-5 space-y-1 shadow-2xs border border-[#2A2A33] dark:border-[#2A2A33]">
+          <div className="text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA] uppercase tracking-wider">
             Public &amp; Legal
           </div>
-          <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">{counts.public}</div>
+          <div className="text-2xl font-bold text-[#F7F7F8] dark:text-[#F7F7F8]">{counts.public}</div>
         </div>
-        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1 shadow-2xs border border-slate-200 dark:border-slate-800">
-          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+        <div className="bg-[#131318] dark:bg-[#131318] rounded-xl p-4 sm:p-5 space-y-1 shadow-2xs border border-[#2A2A33] dark:border-[#2A2A33]">
+          <div className="text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA] uppercase tracking-wider">
             Public Portals &amp; Intake
           </div>
-          <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{counts.client}</div>
+          <div className="text-2xl font-bold text-[#FF2D4A] dark:text-[#FF2D4A]">{counts.client}</div>
         </div>
-        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1 shadow-2xs border border-slate-200 dark:border-slate-800">
-          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+        <div className="bg-[#131318] dark:bg-[#131318] rounded-xl p-4 sm:p-5 space-y-1 shadow-2xs border border-[#2A2A33] dark:border-[#2A2A33]">
+          <div className="text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA] uppercase tracking-wider">
             Workspace Tabs
           </div>
           <div className="text-2xl font-bold">{counts.workspace}</div>
@@ -126,17 +126,17 @@ export const AdminSitemapManager: React.FC = () => {
       {/* Search & Category Filter */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A1A1AA]" size={16} />
           <input
             type="text"
             placeholder="Search pages by name, path, or access level..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2 text-sm outline-none focus:border-indigo-600 transition-colors"
+            className="w-full bg-[#131318] dark:bg-[#131318] border border-[#2A2A33] dark:border-[#2A2A33] rounded-xl pl-10 pr-4 py-2 text-sm outline-none focus:border-indigo-600 transition-colors"
           />
         </div>
 
-        <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl self-start sm:self-auto overflow-x-auto max-w-full">
+        <div className="flex items-center gap-1.5 bg-[#131318] dark:bg-[#1B1B22]/80 p-1 rounded-xl self-start sm:self-auto overflow-x-auto max-w-full">
           {[
             { id: 'all', label: `All (${counts.all})` },
             { id: 'public', label: `Public (${counts.public})` },
@@ -151,8 +151,8 @@ export const AdminSitemapManager: React.FC = () => {
                 onClick={() => setSelectedCategory(cat.id as any)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer border-0 whitespace-nowrap ${
                   isActive
-                    ? 'bg-[#282828] text-white'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    ? 'bg-[#1B1B22] text-white'
+                    : 'text-[#A1A1AA] dark:text-[#A1A1AA] hover:text-[#F7F7F8] hover:bg-[#1B1B22] dark:hover:bg-[#1B1B22]'
                 }`}
               >
                 {cat.label}
@@ -163,51 +163,51 @@ export const AdminSitemapManager: React.FC = () => {
       </div>
 
       {/* Pages Table / Card Grid */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-2xs">
-        <div className="divide-y divide-slate-100 dark:divide-slate-800">
+      <div className="bg-[#131318] dark:bg-[#131318] border border-[#2A2A33] dark:border-[#2A2A33] rounded-xl overflow-hidden shadow-2xs">
+        <div className="divide-y divide-[#2A2A33] dark:divide-[#2A2A33]">
           {filteredPages.map((page) => {
             const isCopied = copiedId === page.id;
             const fullUrl = `${origin}${page.samplePath}`;
             return (
               <div
                 key={page.id}
-                className="p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors"
+                className="p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-[#131318]/60 dark:hover:bg-[#1B1B22] transition-colors"
               >
                 <div className="space-y-1.5 min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">
+                    <span className="font-semibold text-sm text-[#F7F7F8] dark:text-[#F7F7F8]">
                       {page.name}
                     </span>
                     <span
                       className={`px-2 py-0.5 rounded text-[10px] font-semibold tracking-wide uppercase ${
                         page.category === 'public'
-                          ? 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+                          ? 'bg-[#131318] dark:bg-[#1B1B22] text-[#A1A1AA] dark:text-[#A1A1AA]'
                           : page.category === 'client'
-                          ? 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+                          ? 'bg-[#131318] dark:bg-[#1B1B22] text-[#A1A1AA] dark:text-[#A1A1AA]'
                           : page.category === 'workspace'
-                          ? 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
-                          : 'bg-slate-900 text-white dark:bg-slate-700'
+                          ? 'bg-[#131318] dark:bg-[#1B1B22] text-[#A1A1AA] dark:text-[#A1A1AA]'
+                          : 'bg-[#131318] text-white dark:bg-[#1B1B22]'
                       }`}
                     >
                       {page.accessLevel}
                     </span>
                     {page.inXmlSitemap && (
-                      <span className="text-[10px] text-slate-500 font-mono">
+                      <span className="text-[10px] text-[#A1A1AA] font-mono">
                         (sitemap.xml)
                       </span>
                     )}
                   </div>
 
-                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                  <p className="text-xs text-[#A1A1AA] dark:text-[#A1A1AA] leading-relaxed">
                     {page.description}
                   </p>
 
-                  <div className="flex items-center gap-2 text-xs font-mono text-slate-700 dark:text-slate-300">
-                    <span className="font-semibold text-indigo-600 dark:text-indigo-400">
+                  <div className="flex items-center gap-2 text-xs font-mono text-[#A1A1AA] dark:text-[#A1A1AA]">
+                    <span className="font-semibold text-[#FF2D4A] dark:text-[#FF2D4A]">
                       {page.path}
                     </span>
-                    <span className="text-slate-400">→</span>
-                    <span className="text-slate-500 truncate">{fullUrl}</span>
+                    <span className="text-[#A1A1AA]">→</span>
+                    <span className="text-[#A1A1AA] truncate">{fullUrl}</span>
                   </div>
                 </div>
 
@@ -215,10 +215,10 @@ export const AdminSitemapManager: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => copyUrl(page.samplePath, page.id)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors cursor-pointer border-0"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#131318] hover:bg-[#1B1B22] dark:bg-[#1B1B22] dark:hover:bg-[#1B1B22] text-xs font-semibold text-[#A1A1AA] dark:text-[#F7F7F8] transition-colors cursor-pointer border-0"
                     title="Copy full URL"
                   >
-                    {isCopied ? <Check size={13} className="text-indigo-600" /> : <Copy size={13} />}
+                    {isCopied ? <Check size={13} className="text-[#FF2D4A]" /> : <Copy size={13} />}
                     <span>{isCopied ? 'Copied' : 'Copy'}</span>
                   </button>
 

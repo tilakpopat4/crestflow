@@ -8,13 +8,13 @@ interface NotFoundScreenProps {
 /**
  * NotFoundScreen renders the vintage animated TV 404 screen
  * whenever someone accesses an unknown route outside our established sitemaps.
- * Matches CrestFlow's page palette (bg-slate-50 dark:bg-slate-950).
+ * Matches CrestFlow's page palette (bg-[#131318] dark:bg-[#0B0B0E]).
  */
 export const NotFoundScreen: React.FC<NotFoundScreenProps> = ({ onBack }) => {
   return (
     <div
       onClick={onBack ? onBack : () => (window.location.href = '/')}
-      className="min-h-screen w-full flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 p-4 select-none overflow-x-hidden transition-colors duration-150 cursor-pointer"
+      className="min-h-screen w-full flex flex-col items-center justify-center bg-[#131318] dark:bg-[#0B0B0E] p-4 select-none overflow-x-hidden transition-colors duration-150 cursor-pointer"
       title="Click to return to workspace"
     >
       <RetroTvNotFound />

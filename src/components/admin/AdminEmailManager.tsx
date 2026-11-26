@@ -102,15 +102,15 @@ export default function AdminEmailManager({ users = [] }: AdminEmailManagerProps
   return (
     <div className="space-y-6">
       {/* Promotional Campaign & Bulk Mail Action Banner */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs border border-slate-200 dark:border-slate-800">
+      <div className="bg-[#131318] dark:bg-[#131318] rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs border border-[#2A2A33] dark:border-[#2A2A33]">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <Mail className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-            <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100">
+            <Mail className="w-4 h-4 text-[#FF2D4A] dark:text-[#FF2D4A]" />
+            <h2 className="text-sm sm:text-base font-bold text-[#F7F7F8] dark:text-[#F7F7F8]">
               Promotional Campaigns & Bulk Mail
             </h2>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-2xl">
+          <p className="text-xs text-[#A1A1AA] dark:text-[#A1A1AA] max-w-2xl">
             Design announcements, target user cohorts or custom email lists, and broadcast directly through support.crestflow@gmail.com.
           </p>
         </div>
@@ -118,7 +118,7 @@ export default function AdminEmailManager({ users = [] }: AdminEmailManagerProps
           <button
             type="button"
             onClick={() => setIsConfigOpen((v) => !v)}
-            className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold cursor-pointer transition-colors duration-120 border-0 flex items-center gap-1.5 shrink-0"
+            className="px-3.5 py-2 bg-[#131318] hover:bg-[#1B1B22] dark:bg-[#1B1B22] dark:hover:bg-[#1B1B22] text-[#A1A1AA] dark:text-[#F7F7F8] rounded-lg text-xs font-semibold cursor-pointer transition-colors duration-120 border-0 flex items-center gap-1.5 shrink-0"
           >
             <Settings className="w-3.5 h-3.5" />
             <span>Gmail API Settings</span>
@@ -136,29 +136,29 @@ export default function AdminEmailManager({ users = [] }: AdminEmailManagerProps
 
       {/* Gmail Config Modal / Drawer */}
       {isConfigOpen && (
-        <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+        <div className="bg-[#131318] dark:bg-[#131318] rounded-xl p-5 border border-[#2A2A33] dark:border-[#2A2A33] shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b border-[#2A2A33] dark:border-[#2A2A33] pb-3">
             <div>
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Direct Gmail REST API Configuration</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Connect support.crestflow@gmail.com via Google Cloud OAuth2</p>
+              <h3 className="text-sm font-semibold text-[#F7F7F8] dark:text-white">Direct Gmail REST API Configuration</h3>
+              <p className="text-xs text-[#A1A1AA] dark:text-[#A1A1AA]">Connect support.crestflow@gmail.com via Google Cloud OAuth2</p>
             </div>
-            <button type="button" onClick={() => setIsConfigOpen(false)} className="text-xs text-slate-400 hover:text-white bg-transparent border-none cursor-pointer">Close</button>
+            <button type="button" onClick={() => setIsConfigOpen(false)} className="text-xs text-[#A1A1AA] hover:text-white bg-transparent border-none cursor-pointer">Close</button>
           </div>
           <form onSubmit={handleSaveConfig} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="block text-[11px] font-medium text-slate-500 mb-1">Google Client ID</label>
-              <input type="text" value={clientId} onChange={(e) => setClientId(e.target.value)} placeholder="...apps.googleusercontent.com" className="w-full text-xs p-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-white outline-none" />
+              <label className="block text-[11px] font-medium text-[#A1A1AA] mb-1">Google Client ID</label>
+              <input type="text" value={clientId} onChange={(e) => setClientId(e.target.value)} placeholder="...apps.googleusercontent.com" className="w-full text-xs p-2 bg-[#131318] dark:bg-[#1B1B22] border border-[#2A2A33] dark:border-[#2A2A33] rounded text-[#F7F7F8] dark:text-white outline-none" />
             </div>
             <div>
-              <label className="block text-[11px] font-medium text-slate-500 mb-1">Google Client Secret</label>
-              <input type="password" value={clientSecret} onChange={(e) => setClientSecret(e.target.value)} placeholder="GOCSPX-..." className="w-full text-xs p-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-white outline-none" />
+              <label className="block text-[11px] font-medium text-[#A1A1AA] mb-1">Google Client Secret</label>
+              <input type="password" value={clientSecret} onChange={(e) => setClientSecret(e.target.value)} placeholder="GOCSPX-..." className="w-full text-xs p-2 bg-[#131318] dark:bg-[#1B1B22] border border-[#2A2A33] dark:border-[#2A2A33] rounded text-[#F7F7F8] dark:text-white outline-none" />
             </div>
             <div>
-              <label className="block text-[11px] font-medium text-slate-500 mb-1">Refresh Token (Offline Scope)</label>
-              <input type="password" value={refreshToken} onChange={(e) => setRefreshToken(e.target.value)} placeholder="1//04..." className="w-full text-xs p-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-white outline-none" />
+              <label className="block text-[11px] font-medium text-[#A1A1AA] mb-1">Refresh Token (Offline Scope)</label>
+              <input type="password" value={refreshToken} onChange={(e) => setRefreshToken(e.target.value)} placeholder="1//04..." className="w-full text-xs p-2 bg-[#131318] dark:bg-[#1B1B22] border border-[#2A2A33] dark:border-[#2A2A33] rounded text-[#F7F7F8] dark:text-white outline-none" />
             </div>
             <div className="sm:col-span-3 flex items-center justify-between pt-2">
-              <span className="text-xs text-slate-500">{configFeedback}</span>
+              <span className="text-xs text-[#A1A1AA]">{configFeedback}</span>
               <button type="submit" disabled={configSaving} className="px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded text-xs font-semibold border-none cursor-pointer">{configSaving ? 'Saving...' : 'Save Gmail Connection'}</button>
             </div>
           </form>
@@ -167,77 +167,77 @@ export default function AdminEmailManager({ users = [] }: AdminEmailManagerProps
 
       {/* Top Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs">
-          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Primary Sender</div>
-          <div className="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100 font-mono truncate">support.crestflow@gmail.com</div>
-          <div className="text-xs text-indigo-600 dark:text-indigo-400 font-medium flex items-center gap-1">
+        <div className="bg-[#131318] dark:bg-[#131318] rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs">
+          <div className="text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA] uppercase tracking-wider">Primary Sender</div>
+          <div className="text-sm sm:text-base font-bold text-[#F7F7F8] dark:text-[#F7F7F8] font-mono truncate">support.crestflow@gmail.com</div>
+          <div className="text-xs text-[#FF2D4A] dark:text-[#FF2D4A] font-medium flex items-center gap-1">
             <CheckCircle2 className="w-3.5 h-3.5" />
             <span>{isGmailConnected ? 'Google API Active' : 'Gmail Direct Ready'}</span>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs">
-          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Delivery Provider</div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">Direct GMail</div>
-          <div className="text-xs text-slate-500 dark:text-slate-400">Google Cloud Mail REST API</div>
+        <div className="bg-[#131318] dark:bg-[#131318] rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs">
+          <div className="text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA] uppercase tracking-wider">Delivery Provider</div>
+          <div className="text-xl sm:text-2xl font-bold text-[#F7F7F8] dark:text-[#F7F7F8]">Direct GMail</div>
+          <div className="text-xs text-[#A1A1AA] dark:text-[#A1A1AA]">Google Cloud Mail REST API</div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs">
-          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Engine Protocol</div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">OAuth2 MIME</div>
-          <div className="text-xs text-slate-500 dark:text-slate-400">500 Emails / Day Free</div>
+        <div className="bg-[#131318] dark:bg-[#131318] rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs">
+          <div className="text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA] uppercase tracking-wider">Engine Protocol</div>
+          <div className="text-xl sm:text-2xl font-bold text-[#F7F7F8] dark:text-[#F7F7F8]">OAuth2 MIME</div>
+          <div className="text-xs text-[#A1A1AA] dark:text-[#A1A1AA]">500 Emails / Day Free</div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs">
-          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Automated Triggers</div>
-          <div className="text-xl sm:text-2xl font-bold text-indigo-600 dark:text-indigo-400">{AUTOMATED_TRIGGERS.length} Active</div>
-          <div className="text-xs text-slate-500 dark:text-slate-400">Zero Emojis &bull; Native Google Dispatch</div>
+        <div className="bg-[#131318] dark:bg-[#131318] rounded-xl p-4 sm:p-5 space-y-1.5 shadow-2xs">
+          <div className="text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA] uppercase tracking-wider">Automated Triggers</div>
+          <div className="text-xl sm:text-2xl font-bold text-[#FF2D4A] dark:text-[#FF2D4A]">{AUTOMATED_TRIGGERS.length} Active</div>
+          <div className="text-xs text-[#A1A1AA] dark:text-[#A1A1AA]">Zero Emojis &bull; Native Google Dispatch</div>
         </div>
       </div>
 
       {/* Provider Details & Test Sender Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl p-5 sm:p-6 space-y-4 shadow-2xs">
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+        <div className="lg:col-span-2 bg-[#131318] dark:bg-[#131318] rounded-xl p-5 sm:p-6 space-y-4 shadow-2xs">
+          <div className="flex items-center justify-between border-b border-[#2A2A33] dark:border-[#2A2A33] pb-3">
             <div className="flex items-center gap-2">
-              <Server className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-              <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100">Connected Mail Infrastructure</h3>
+              <Server className="w-4 h-4 text-[#A1A1AA] dark:text-[#A1A1AA]" />
+              <h3 className="font-semibold text-sm text-[#F7F7F8] dark:text-[#F7F7F8]">Connected Mail Infrastructure</h3>
             </div>
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium font-mono">support.crestflow@gmail.com</span>
+            <span className="text-xs text-[#A1A1AA] dark:text-[#A1A1AA] font-medium font-mono">support.crestflow@gmail.com</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-            <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-lg space-y-1">
-              <span className="text-slate-500 dark:text-slate-400 block font-medium">Mail Sender</span>
-              <span className="font-mono text-slate-800 dark:text-slate-200 font-semibold">support.crestflow@gmail.com</span>
+            <div className="p-3 bg-[#131318] dark:bg-[#1B1B22] rounded-lg space-y-1">
+              <span className="text-[#A1A1AA] dark:text-[#A1A1AA] block font-medium">Mail Sender</span>
+              <span className="font-mono text-[#F7F7F8] dark:text-[#F7F7F8] font-semibold">support.crestflow@gmail.com</span>
             </div>
-            <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-lg space-y-1">
-              <span className="text-slate-500 dark:text-slate-400 block font-medium">Google API Scope</span>
-              <span className="font-mono text-slate-800 dark:text-slate-200 font-semibold">gmail.send</span>
+            <div className="p-3 bg-[#131318] dark:bg-[#1B1B22] rounded-lg space-y-1">
+              <span className="text-[#A1A1AA] dark:text-[#A1A1AA] block font-medium">Google API Scope</span>
+              <span className="font-mono text-[#F7F7F8] dark:text-[#F7F7F8] font-semibold">gmail.send</span>
             </div>
-            <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-lg space-y-1">
-              <span className="text-slate-500 dark:text-slate-400 block font-medium">Delivery Endpoint</span>
-              <span className="font-mono text-slate-800 dark:text-slate-200 font-semibold">gmail.googleapis.com</span>
+            <div className="p-3 bg-[#131318] dark:bg-[#1B1B22] rounded-lg space-y-1">
+              <span className="text-[#A1A1AA] dark:text-[#A1A1AA] block font-medium">Delivery Endpoint</span>
+              <span className="font-mono text-[#F7F7F8] dark:text-[#F7F7F8] font-semibold">gmail.googleapis.com</span>
             </div>
-            <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-lg space-y-1">
-              <span className="text-slate-500 dark:text-slate-400 block font-medium">Sent Box Sync</span>
-              <span className="font-mono text-slate-800 dark:text-slate-200 font-semibold">Automatic in Gmail App</span>
+            <div className="p-3 bg-[#131318] dark:bg-[#1B1B22] rounded-lg space-y-1">
+              <span className="text-[#A1A1AA] dark:text-[#A1A1AA] block font-medium">Sent Box Sync</span>
+              <span className="font-mono text-[#F7F7F8] dark:text-[#F7F7F8] font-semibold">Automatic in Gmail App</span>
             </div>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed pt-1">
+          <p className="text-xs text-[#A1A1AA] dark:text-[#A1A1AA] leading-relaxed pt-1">
             Emails dispatched from CrestFlow originate directly from <strong>support.crestflow@gmail.com</strong> through Google's authenticated infrastructure.
           </p>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-xl p-5 sm:p-6 space-y-4 shadow-2xs">
-          <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
-            <Mail className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-            <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100">Send Test Dispatch</h3>
+        <div className="bg-[#131318] dark:bg-[#131318] rounded-xl p-5 sm:p-6 space-y-4 shadow-2xs">
+          <div className="flex items-center gap-2 border-b border-[#2A2A33] dark:border-[#2A2A33] pb-3">
+            <Mail className="w-4 h-4 text-[#A1A1AA] dark:text-[#A1A1AA]" />
+            <h3 className="font-semibold text-sm text-[#F7F7F8] dark:text-[#F7F7F8]">Send Test Dispatch</h3>
           </div>
           <form onSubmit={handleSendTest} className="space-y-3">
             <div>
-              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Recipient Email</label>
-              <input type="email" placeholder="support.crestflow@gmail.com" value={testEmail} onChange={(e) => setTestEmail(e.target.value)} className="w-full text-xs p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 outline-none focus:border-surface-400" />
+              <label className="block text-xs font-medium text-[#A1A1AA] dark:text-[#A1A1AA] mb-1">Recipient Email</label>
+              <input type="email" placeholder="support.crestflow@gmail.com" value={testEmail} onChange={(e) => setTestEmail(e.target.value)} className="w-full text-xs p-2.5 bg-[#131318] dark:bg-[#1B1B22] border border-[#2A2A33] dark:border-[#2A2A33] rounded-lg text-[#F7F7F8] dark:text-[#F7F7F8] outline-none focus:border-surface-400" />
             </div>
             <button type="submit" disabled={isSendingTest} className="w-full py-2 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white rounded-lg text-xs font-semibold cursor-pointer transition-colors duration-120 border-0 flex items-center justify-center gap-1.5">
               {isSendingTest ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
@@ -245,7 +245,7 @@ export default function AdminEmailManager({ users = [] }: AdminEmailManagerProps
             </button>
           </form>
           {testResult && (
-            <div className={`p-3 rounded-lg text-xs ${testResult.success ? 'bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700' : 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-900'}`}>
+            <div className={`p-3 rounded-lg text-xs ${testResult.success ? 'bg-[#131318] dark:bg-[#1B1B22] text-[#F7F7F8] dark:text-[#F7F7F8] border border-[#2A2A33] dark:border-[#2A2A33]' : 'bg-[#1B1B22] dark:bg-red-950/40 text-red-700 dark:text-red-300 border border-[#E0002B] dark:border-red-900'}`}>
               {testResult.message}
             </div>
           )}

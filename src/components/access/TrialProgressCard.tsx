@@ -120,7 +120,7 @@ export function TrialProgressCard({
                   benefit: 'Lock in CrestFlow Pro from ₹58/month with Yearly billing.',
                 })
           }
-          className="px-3.5 py-2 rounded-lg bg-[#1B1B22] hover:bg-[#22222B] border border-[#2A2A33] text-xs font-semibold text-[#F7F7F8] shrink-0 cursor-pointer"
+          className="px-3.5 py-2 rounded-lg bg-[#1B1B22] hover:bg-[#2A2A33] border border-[#2A2A33] text-xs font-semibold text-[#F7F7F8] shrink-0 cursor-pointer"
         >
           View plans
         </button>

@@ -177,7 +177,7 @@ export const OnboardingLinkCard: React.FC<OnboardingLinkCardProps> = ({
             className="overflow-hidden"
           >
             <div className="flex flex-col sm:flex-row items-center gap-4 bg-surface-800 p-3.5 rounded-lg border border-surface-400">
-              <div className="p-2.5 bg-white rounded-lg shrink-0">
+              <div className="p-2.5 bg-[#131318] rounded-lg shrink-0">
                 <QRCodeSVG value={onboardingUrl} size={96} level="M" />
               </div>
               <div className="space-y-0.5 text-center sm:text-left">

@@ -104,62 +104,62 @@ export const DashboardPreviewMock: React.FC = () => {
               {/* Page Title */}
               <div>
                 <h2 className="text-base sm:text-lg font-bold text-white tracking-tight">Dashboard</h2>
-                <p className="text-[10px] sm:text-[11px] text-slate-400">Financial overview & payment cycles</p>
+                <p className="text-[10px] sm:text-[11px] text-[#A1A1AA]">Financial overview & payment cycles</p>
               </div>
 
               {/* 4 Stat Cards - Clean & Focused */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5">
-                <div className="bg-[#181818] border border-[#262626] rounded-lg p-2.5 sm:p-3">
-                  <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                <div className="bg-[#0B0B0E] border border-[#1B1B22] rounded-lg p-2.5 sm:p-3">
+                  <div className="flex items-center justify-between text-[10px] text-[#A1A1AA] font-medium">
                     <span>TOTAL EARNED THIS MONTH</span>
-                    <IndianRupee className="size-3 text-slate-500" />
+                    <IndianRupee className="size-3 text-[#A1A1AA]" />
                   </div>
                   <p className="mt-1 text-sm sm:text-base font-bold text-white tabular-nums tracking-tight">₹10,000</p>
                 </div>
 
-                <div className="bg-[#181818] border border-[#262626] rounded-lg p-2.5 sm:p-3">
-                  <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                <div className="bg-[#0B0B0E] border border-[#1B1B22] rounded-lg p-2.5 sm:p-3">
+                  <div className="flex items-center justify-between text-[10px] text-[#A1A1AA] font-medium">
                     <span>TOTAL DUE</span>
-                    <Clock className="size-3 text-slate-500" />
+                    <Clock className="size-3 text-[#A1A1AA]" />
                   </div>
                   <p className="mt-1 text-sm sm:text-base font-bold text-white tabular-nums tracking-tight">₹0</p>
                 </div>
 
-                <div className="hidden sm:block bg-[#181818] border border-[#262626] rounded-lg p-2.5 sm:p-3">
-                  <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                <div className="hidden sm:block bg-[#0B0B0E] border border-[#1B1B22] rounded-lg p-2.5 sm:p-3">
+                  <div className="flex items-center justify-between text-[10px] text-[#A1A1AA] font-medium">
                     <span>OVERDUE AMOUNT</span>
-                    <AlertCircle className="size-3 text-slate-500" />
+                    <AlertCircle className="size-3 text-[#A1A1AA]" />
                   </div>
                   <p className="mt-1 text-sm sm:text-base font-bold text-white tabular-nums tracking-tight">₹0</p>
                 </div>
 
-                <div className="hidden sm:block bg-[#181818] border border-[#262626] rounded-lg p-2.5 sm:p-3">
-                  <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                <div className="hidden sm:block bg-[#0B0B0E] border border-[#1B1B22] rounded-lg p-2.5 sm:p-3">
+                  <div className="flex items-center justify-between text-[10px] text-[#A1A1AA] font-medium">
                     <span>INVOICES ISSUED</span>
-                    <TrendingUp className="size-3 text-slate-500" />
+                    <TrendingUp className="size-3 text-[#A1A1AA]" />
                   </div>
                   <p className="mt-1 text-sm sm:text-base font-bold text-white tabular-nums tracking-tight">1</p>
                 </div>
               </div>
 
               {/* Net Revenue Comparison Chart - Calm & Uncluttered */}
-              <div className="flex-1 bg-[#181818] border border-[#262626] rounded-lg p-3 sm:p-4 flex flex-col justify-between min-h-[140px]">
+              <div className="flex-1 bg-[#0B0B0E] border border-[#1B1B22] rounded-lg p-3 sm:p-4 flex flex-col justify-between min-h-[140px]">
                 {/* Chart Header */}
                 <div className="flex items-start justify-between gap-2 pb-1">
                   <div>
-                    <span className="text-[9px] sm:text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
+                    <span className="text-[9px] sm:text-[10px] font-semibold text-[#A1A1AA] uppercase tracking-wider block">
                       NET REVENUE BY MONTH, INR
                     </span>
                     <p className="text-xs sm:text-sm font-semibold text-white tracking-tight mt-0.5">
                       Collected ₹36,700 of ₹36,700 invoiced (100% matched)
                     </p>
                   </div>
-                  <div className="hidden sm:flex items-center gap-3 text-[10px] text-slate-400">
+                  <div className="hidden sm:flex items-center gap-3 text-[10px] text-[#A1A1AA]">
                     <span className="flex items-center gap-1 text-white">
-                      <span className="w-2.5 h-0.5 bg-white inline-block"></span> Net Revenue
+                      <span className="w-2.5 h-0.5 bg-[#131318] inline-block"></span> Net Revenue
                     </span>
-                    <span className="flex items-center gap-1 text-slate-400">
-                      <span className="w-2.5 h-0.5 border-t border-dashed border-slate-400 inline-block"></span> Invoiced
+                    <span className="flex items-center gap-1 text-[#A1A1AA]">
+                      <span className="w-2.5 h-0.5 border-t border-dashed border-[#2A2A33] inline-block"></span> Invoiced
                     </span>
                   </div>
                 </div>
@@ -168,14 +168,14 @@ export const DashboardPreviewMock: React.FC = () => {
                 <div className="relative w-full h-24 sm:h-32 my-1">
                   <svg className="w-full h-full overflow-visible" viewBox="0 0 600 100" preserveAspectRatio="none">
                     {/* Horizontal Grid lines */}
-                    <line x1="40" y1="20" x2="590" y2="20" stroke="#262626" strokeWidth="1" />
-                    <line x1="40" y1="50" x2="590" y2="50" stroke="#262626" strokeWidth="1" />
-                    <line x1="40" y1="80" x2="590" y2="80" stroke="#262626" strokeWidth="1" />
+                    <line x1="40" y1="20" x2="590" y2="20" stroke="#1B1B22" strokeWidth="1" />
+                    <line x1="40" y1="50" x2="590" y2="50" stroke="#1B1B22" strokeWidth="1" />
+                    <line x1="40" y1="80" x2="590" y2="80" stroke="#1B1B22" strokeWidth="1" />
 
                     {/* Y Axis Labels */}
-                    <text x="35" y="24" fill="#666666" fontSize="9" textAnchor="end">₹36k</text>
-                    <text x="35" y="54" fill="#666666" fontSize="9" textAnchor="end">₹20k</text>
-                    <text x="35" y="84" fill="#666666" fontSize="9" textAnchor="end">₹0k</text>
+                    <text x="35" y="24" fill="#A1A1AA" fontSize="9" textAnchor="end">₹36k</text>
+                    <text x="35" y="54" fill="#A1A1AA" fontSize="9" textAnchor="end">₹20k</text>
+                    <text x="35" y="84" fill="#A1A1AA" fontSize="9" textAnchor="end">₹0k</text>
 
                     {/* Dashed Total Invoiced Line */}
                     <path
@@ -196,13 +196,13 @@ export const DashboardPreviewMock: React.FC = () => {
 
                     {/* Peak Point on Nov */}
                     <circle cx="560" cy="20" r="3.5" fill="#ffffff" />
-                    <rect x="535" y="6" width="32" height="14" rx="3" fill="#242424" stroke="#383838" strokeWidth="1" />
+                    <rect x="535" y="6" width="32" height="14" rx="3" fill="#1B1B22" stroke="#2A2A33" strokeWidth="1" />
                     <text x="551" y="16" fill="#ffffff" fontSize="8" fontWeight="bold" textAnchor="middle">₹36k</text>
                   </svg>
                 </div>
 
                 {/* X Axis Month Labels */}
-                <div className="flex justify-between pl-8 pr-3 text-[9px] text-slate-500 font-mono">
+                <div className="flex justify-between pl-8 pr-3 text-[9px] text-[#A1A1AA] font-mono">
                   <span>Feb</span>
                   <span>Mar</span>
                   <span>Apr</span>

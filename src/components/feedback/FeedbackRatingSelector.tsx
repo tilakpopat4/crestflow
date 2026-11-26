@@ -32,8 +32,8 @@ export const FeedbackRatingSelector: React.FC<FeedbackRatingSelectorProps> = ({
   };
 
   return (
-    <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60 rounded-xl p-5 text-center space-y-3">
-      <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+    <div className="bg-[#131318] dark:bg-[#1B1B22] border border-[#2A2A33] dark:border-[#2A2A33]/60 rounded-xl p-5 text-center space-y-3">
+      <label className="block text-xs font-bold text-[#A1A1AA] dark:text-[#A1A1AA] uppercase tracking-wider">
         Rate Your Experience *
       </label>
       <div className="flex justify-center gap-2">
@@ -52,8 +52,8 @@ export const FeedbackRatingSelector: React.FC<FeedbackRatingSelectorProps> = ({
               <Star
                 className={`w-9 h-9 transition-colors ${
                   isLit
-                    ? 'text-amber-500 fill-amber-400'
-                    : 'text-slate-300 dark:text-slate-600 fill-none hover:text-amber-400'
+                    ? 'text-[#FFB020] fill-amber-400'
+                    : 'text-[#A1A1AA] dark:text-[#A1A1AA] fill-none hover:text-[#FFB020]'
                 }`}
               />
             </button>
@@ -61,7 +61,7 @@ export const FeedbackRatingSelector: React.FC<FeedbackRatingSelectorProps> = ({
         })}
       </div>
       {rating > 0 && (
-        <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 block">
+        <span className="text-xs font-semibold text-[#FF2D4A] dark:text-[#FF2D4A] block">
           {getLabel()}
         </span>
       )}

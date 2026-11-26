@@ -221,14 +221,14 @@ export default function ProfilePage({
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 w-full min-w-0 flex-1">
       <div className="pb-2">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-3xl">Settings</h1>
-        <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+        <h1 className="text-2xl font-bold tracking-tight text-[#F7F7F8] dark:text-[#F7F7F8] sm:text-3xl">Settings</h1>
+        <p className="mt-1 text-xs sm:text-sm text-[#A1A1AA] dark:text-[#A1A1AA]">
           Profile, payouts, and plan.
         </p>
       </div>
 
       {error && (
-        <div className="p-3.5 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-xs text-red-600 dark:text-red-400">
+        <div className="p-3.5 rounded-xl bg-[#1B1B22] dark:bg-red-950/40 border border-[#E0002B] dark:border-red-900 text-xs text-[#E0002B] dark:text-[#F0607A]">
           {error}
         </div>
       )}

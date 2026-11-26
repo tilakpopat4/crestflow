@@ -39,22 +39,22 @@ export const ProfilePreferencesCard: React.FC<ProfilePreferencesCardProps> = ({
   return (
     <section id="section-ai" className="grid grid-cols-1 gap-x-8 gap-y-4 pt-8 lg:grid-cols-[13rem_minmax(0,1fr)]">
       <div>
-        <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+        <h2 className="text-base font-semibold text-[#F7F7F8] dark:text-[#F7F7F8]">
           AI &amp; automation
         </h2>
-        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+        <p className="mt-1 text-xs text-[#A1A1AA] dark:text-[#A1A1AA] leading-relaxed">
           Configure Gemini API keys to generate one-click deliverable work summaries and smart invoice notes.
         </p>
       </div>
 
-      <div className="rounded-xl bg-white dark:bg-slate-900 shadow-xs ring-1 ring-slate-200 dark:ring-slate-800 overflow-hidden">
+      <div className="rounded-xl bg-[#131318] dark:bg-[#131318] shadow-xs ring-1 ring-[#2A2A33] overflow-hidden">
         <div className="p-5 sm:p-6 space-y-4">
           <div className="flex items-center justify-between">
-            <label htmlFor="gemini-api-key-input" className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <label htmlFor="gemini-api-key-input" className="block text-xs font-semibold text-[#A1A1AA] dark:text-[#A1A1AA]">
               Gemini AI API Key (Optional)
             </label>
             {geminiApiKey && (
-              <span className="inline-flex items-center gap-1 text-[11px] text-slate-600 dark:text-slate-400 font-medium">
+              <span className="inline-flex items-center gap-1 text-[11px] text-[#A1A1AA] dark:text-[#A1A1AA] font-medium">
                 <CheckCircle2 size={12} className="text-text-primary" />
                 <span>Key configured</span>
               </span>
@@ -70,14 +70,14 @@ export const ProfilePreferencesCard: React.FC<ProfilePreferencesCardProps> = ({
               onChange={(e) => setGeminiApiKey(e.target.value)}
               autoComplete="off"
               spellCheck={false}
-              className="w-full pl-3.5 pr-20 py-2.5 text-xs sm:text-sm font-mono rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-900 dark:text-slate-100 outline-none focus:border-slate-400 dark:focus:border-slate-500 transition-colors min-h-[40px]"
+              className="w-full pl-3.5 pr-20 py-2.5 text-xs sm:text-sm font-mono rounded-lg border border-[#2A2A33] dark:border-[#2A2A33] bg-[#131318] dark:bg-[#1B1B22] text-[#F7F7F8] dark:text-[#F7F7F8] outline-none focus:border-[#2A2A33] dark:focus:border-[#2A2A33] transition-colors min-h-[40px]"
             />
             <div className="absolute right-2 flex items-center gap-1">
               {geminiApiKey && (
                 <button
                   type="button"
                   onClick={() => setGeminiApiKey('')}
-                  className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-md transition-colors"
+                  className="p-1.5 text-[#A1A1AA] hover:text-[#A1A1AA] dark:hover:text-[#F7F7F8] rounded-md transition-colors"
                   title="Clear API Key"
                 >
                   <X size={14} />
@@ -86,7 +86,7 @@ export const ProfilePreferencesCard: React.FC<ProfilePreferencesCardProps> = ({
               <button
                 type="button"
                 onClick={() => setShowKey(!showKey)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-md transition-colors"
+                className="p-1.5 text-[#A1A1AA] hover:text-[#A1A1AA] dark:hover:text-[#F7F7F8] rounded-md transition-colors"
                 title={showKey ? 'Hide Key' : 'Reveal Key'}
               >
                 {showKey ? <EyeOff size={14} /> : <Eye size={14} />}
@@ -94,7 +94,7 @@ export const ProfilePreferencesCard: React.FC<ProfilePreferencesCardProps> = ({
             </div>
           </div>
 
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+          <p className="text-[11px] text-[#A1A1AA] dark:text-[#A1A1AA] leading-relaxed">
             Your key is encrypted in your personal Firestore document and used exclusively for your own client summaries. You can obtain a free API key at{' '}
             <a
               href="https://aistudio.google.com/app/apikey"
@@ -110,15 +110,15 @@ export const ProfilePreferencesCard: React.FC<ProfilePreferencesCardProps> = ({
 
         {/* Section Action Bar */}
         {onSave && (
-          <div className="flex min-h-14 flex-wrap items-center justify-end gap-x-3 gap-y-2 border-t border-slate-100 dark:border-slate-800 px-5 py-3 sm:px-6">
-            <p className="mr-auto flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+          <div className="flex min-h-14 flex-wrap items-center justify-end gap-x-3 gap-y-2 border-t border-[#2A2A33] dark:border-[#2A2A33] px-5 py-3 sm:px-6">
+            <p className="mr-auto flex items-center gap-1.5 text-xs text-[#A1A1AA] dark:text-[#A1A1AA]">
               {isSaved ? (
                 <span className="inline-flex items-center gap-1 text-text-primary font-medium">
                   <Check size={13} />
                   <span>Saved just now</span>
                 </span>
               ) : isDirty ? (
-                <span className="inline-flex items-center gap-1.5 text-slate-700 dark:text-slate-300 font-medium">
+                <span className="inline-flex items-center gap-1.5 text-[#A1A1AA] dark:text-[#A1A1AA] font-medium">
                   <span className="size-1.5 rounded-full bg-accent" />
                   <span>You have unsaved changes</span>
                 </span>
@@ -132,7 +132,7 @@ export const ProfilePreferencesCard: React.FC<ProfilePreferencesCardProps> = ({
                 type="button"
                 disabled={isSaving}
                 onClick={onDiscard}
-                className="inline-flex h-9 items-center justify-center rounded-lg bg-[#282828] hover:bg-[#383838] border border-[#3a3a3a] px-3.5 text-xs font-semibold text-slate-300 hover:text-white cursor-pointer transition-colors duration-120"
+                className="inline-flex h-9 items-center justify-center rounded-lg bg-[#1B1B22] hover:bg-[#2A2A33] border border-[#2A2A33] px-3.5 text-xs font-semibold text-[#A1A1AA] hover:text-white cursor-pointer transition-colors duration-120"
               >
                 Discard
               </button>

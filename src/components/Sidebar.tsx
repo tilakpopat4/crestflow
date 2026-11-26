@@ -71,7 +71,7 @@ export default function Sidebar({
     >
       <div
         className={clsx(
-          "hidden md:block border-b border-[#2a2a2a] mb-2 transition-all duration-200",
+          "hidden md:block border-b border-[#2A2A33] mb-2 transition-all duration-200",
           isIconOnly ? "p-3" : "p-6"
         )}
       >
@@ -111,7 +111,7 @@ export default function Sidebar({
             <button
               type="button"
               onClick={onCollapse}
-              className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-[#282828] active:bg-[#333333] transition-colors cursor-pointer border-none bg-transparent shrink-0"
+              className="p-1 rounded-lg text-[#A1A1AA] hover:text-white hover:bg-[#1B1B22] active:bg-[#2A2A33] transition-colors cursor-pointer border-none bg-transparent shrink-0"
               title="Collapse sidebar"
               aria-label="Collapse sidebar"
             >
@@ -127,7 +127,7 @@ export default function Sidebar({
               animate={{ opacity: 1, height: 'auto' }}
               exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
               transition={{ duration: 0.18, ease: [0.25, 1, 0.5, 1] }}
-              className="text-xs text-slate-500 overflow-hidden whitespace-nowrap"
+              className="text-xs text-[#A1A1AA] overflow-hidden whitespace-nowrap"
             >
               Freelancing Client Manager
             </motion.p>
@@ -155,13 +155,13 @@ export default function Sidebar({
                 isIconOnly ? "md:justify-center" : "md:justify-start md:space-x-3",
                 isActive
                   ? "text-white"
-                  : "text-[#aaaaaa] hover:text-white hover:bg-[#282828]/50 active:bg-[#333333] transition-colors duration-120"
+                  : "text-[#A1A1AA] hover:text-white hover:bg-[#1B1B22]/50 active:bg-[#2A2A33] transition-colors duration-120"
               )}
             >
               {isActive && (
                 <motion.div
                   layoutId="active-sidebar-nav-pill"
-                  className="absolute inset-0 rounded-lg bg-[#282828] border-0"
+                  className="absolute inset-0 rounded-lg bg-[#1B1B22] border-0"
                   transition={
                     shouldReduceMotion
                       ? { duration: 0 }
@@ -179,7 +179,7 @@ export default function Sidebar({
                 <Icon
                   size={20}
                   className={clsx(
-                    isActive ? "text-white" : "text-[#aaaaaa] group-hover:text-white",
+                    isActive ? "text-white" : "text-[#A1A1AA] group-hover:text-white",
                     "shrink-0 transition-colors md:w-[18px] md:h-[18px]"
                   )}
                 />
@@ -193,7 +193,7 @@ export default function Sidebar({
                       transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
                       className={clsx(
                         "hidden md:inline-block truncate leading-tight overflow-hidden whitespace-nowrap",
-                        isActive ? "font-semibold text-white" : "text-[#aaaaaa] group-hover:text-white"
+                        isActive ? "font-semibold text-white" : "text-[#A1A1AA] group-hover:text-white"
                       )}
                     >
                       {item.label}

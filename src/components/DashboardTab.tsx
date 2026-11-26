@@ -30,7 +30,7 @@ import { StatCard } from './ui/StatCard';
 import { Button } from './ui/button';
 import { useDashboardBackup } from '../hooks/useDashboardBackup';
 
-// Theme tokens reference for dashboard charts: backgroundColor: '#282828', stroke="#444444"
+// Theme tokens reference for dashboard charts: backgroundColor: '#1B1B22', stroke="#2A2A33"
 interface DashboardTabProps {
   user: User | null;
   profile?: UserProfile | null;
