@@ -1,4 +1,4 @@
-const CACHE_NAME = 'crestflow-pwa-v1';
+const CACHE_NAME = 'crestflow-pwa-v2';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
@@ -41,10 +41,11 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // 1. Never cache non-GET requests, API endpoints, or third-party auth/payment origins
+  // 1. Never cache non-GET requests, API endpoints, auth handlers, or third-party auth/payment origins
   if (
     event.request.method !== 'GET' ||
     url.pathname.startsWith('/api/') ||
+    url.pathname.startsWith('/__/auth/') ||
     url.hostname.includes('googleapis.com') ||
     url.hostname.includes('firebaseio.com') ||
     url.hostname.includes('razorpay.com') ||
