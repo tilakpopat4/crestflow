@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, UploadCloud, CheckCircle2, AlertCircle, Loader2, Video, File, ExternalLink, Copy, Check, Play, FolderPlus, KeyRound, Globe } from 'lucide-react';
+import { X, UploadCloud } from 'lucide-react';
 import {
-  uploadFileToGoogleDrive,
   GoogleDriveUploadResult,
+  MultiUploadProgress,
+  uploadMultipleFilesToGoogleDrive,
   hasPersistedDriveConnection,
   checkDriveConnectionStatus,
   fetchServerDriveToken,
@@ -11,6 +12,12 @@ import {
 } from '../lib/driveService';
 import { Client, WorkItem } from '../types';
 import { generateUUID } from '../lib/utils';
+import { DriveDropZone } from './drive/DriveDropZone';
+import { DriveSuccessCard } from './drive/DriveSuccessCard';
+import { DriveApiHelpCard } from './drive/DriveApiHelpCard';
+import { DriveUploadProgress } from './drive/DriveUploadProgress';
+import { DriveConnectionBanner } from './drive/DriveConnectionBanner';
+import { DriveWorkItemFields } from './drive/DriveWorkItemFields';
 
 interface GoogleDriveUploadModalProps {
   isOpen: boolean;
@@ -18,7 +25,9 @@ interface GoogleDriveUploadModalProps {
   clients: Client[];
   defaultClientId?: string;
   onWorkItemCreated?: (workItem: WorkItem) => void;
+  onWorkItemsCreated?: (workItems: WorkItem[]) => void;
   onLinkGenerated?: (driveResult: GoogleDriveUploadResult) => void;
+  onLinksGenerated?: (driveResults: GoogleDriveUploadResult[]) => void;
 }
 
 export default function GoogleDriveUploadModal({
@@ -27,18 +36,19 @@ export default function GoogleDriveUploadModal({
   clients,
   defaultClientId,
   onWorkItemCreated,
-  onLinkGenerated
+  onWorkItemsCreated,
+  onLinkGenerated,
+  onLinksGenerated,
 }: GoogleDriveUploadModalProps) {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [clientId, setClientId] = useState<string>(defaultClientId || (clients[0]?.id || ''));
   const [description, setDescription] = useState<string>('');
   const [quantity, setQuantity] = useState<string>('1');
   const [rate, setRate] = useState<string>('');
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadProgress, setUploadProgress] = useState<MultiUploadProgress | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [uploadResult, setUploadResult] = useState<GoogleDriveUploadResult | null>(null);
-  const [copiedLink, setCopiedLink] = useState(false);
+  const [uploadResults, setUploadResults] = useState<GoogleDriveUploadResult[] | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isAuthorizing, setIsAuthorizing] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
@@ -48,7 +58,14 @@ export default function GoogleDriveUploadModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      setSelectedFiles([]);
+      setUploadResults(null);
+      setUploadProgress(null);
+      setError(null);
+      setDescription('');
+      return;
+    }
     let cancelled = false;
     const localConnected = hasPersistedDriveConnection();
     setHasConnectedDrive(localConnected);
@@ -59,29 +76,25 @@ export default function GoogleDriveUploadModal({
         if (cancelled) return;
         setHasConnectedDrive(status.connected);
         setConnectedEmail(status.email);
-        if (status.connected) {
-          void fetchServerDriveToken(false);
-        }
+        if (status.connected) void fetchServerDriveToken(false);
       })
       .finally(() => {
         if (!cancelled) setIsCheckingConnection(false);
       });
 
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [isOpen]);
 
   if (!isOpen) return null;
 
-  const handleFileChange = (file: File) => {
-    setSelectedFile(file);
+  const handleFilesAdded = (incoming: FileList | File[]) => {
+    const arr = Array.from(incoming);
+    if (!arr.length) return;
+    setSelectedFiles((prev) => [...prev, ...arr]);
     setError(null);
-    setUploadResult(null);
-    setUploadProgress(0);
-    if (!description.trim()) {
-      // Auto-set clean description from filename
-      const cleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[_-]+/g, ' ');
+    setUploadResults(null);
+    if (!description.trim() && arr[0]) {
+      const cleanName = arr[0].name.replace(/\.[^/.]+$/, '').replace(/[_-]+/g, ' ');
       setDescription(cleanName.charAt(0).toUpperCase() + cleanName.slice(1));
     }
   };
@@ -94,9 +107,7 @@ export default function GoogleDriveUploadModal({
       setHasConnectedDrive(true);
       const status = await checkDriveConnectionStatus();
       setConnectedEmail(status.email);
-      setError(null);
     } catch (err: any) {
-      console.error(err);
       setError(err?.message || 'Failed to authorize Google Drive.');
     } finally {
       setIsAuthorizing(false);
@@ -116,494 +127,157 @@ export default function GoogleDriveUploadModal({
   };
 
   const handleStartUpload = async () => {
-    if (!selectedFile) {
-      setError('Please choose a video or file to upload.');
+    if (!selectedFiles.length) {
+      setError('Please choose at least one file to upload.');
       return;
     }
-
     setIsUploading(true);
     setError(null);
-    setUploadProgress(0);
+    setUploadProgress(null);
 
     try {
-      const result = await uploadFileToGoogleDrive(selectedFile, (percent) => {
-        setUploadProgress(percent);
-      });
-
+      const results = await uploadMultipleFilesToGoogleDrive(selectedFiles, setUploadProgress);
       setHasConnectedDrive(true);
-      setUploadResult(result);
+      setUploadResults(results);
 
-      if (onLinkGenerated) {
-        onLinkGenerated(result);
-      }
-
-      // If client selected and callback provided, create work item directly
-      if (onWorkItemCreated && clientId) {
-        const clientObj = clients.find(c => c.id === clientId);
+      const willCreateWorkItems = Boolean(clientId && (onWorkItemsCreated || onWorkItemCreated));
+      if (!willCreateWorkItems) {
+        if (onLinksGenerated) onLinksGenerated(results);
+        if (onLinkGenerated && results[0]) onLinkGenerated(results[0]);
+      } else {
+        const clientObj = clients.find((c) => c.id === clientId);
         const isMonthly = clientObj?.paymentBasis === 'monthly_retainer' || Boolean(clientObj?.monthlyRetainerAmount && clientObj.monthlyRetainerAmount > 0);
         const itemRate = isMonthly ? 0 : (Number(rate) || (clientObj ? clientObj.defaultRate : 0));
-        const newWork: WorkItem = {
+
+        const createdItems: WorkItem[] = results.map((res, i) => ({
           id: generateUUID(),
-          clientId: clientId,
-          description: description.trim() || selectedFile.name,
-          videoUrl: result.webViewLink,
+          clientId,
+          description: selectedFiles.length === 1
+            ? (description.trim() || res.name)
+            : (description.trim() ? `${description.trim()} (${i + 1})` : res.name),
+          videoUrl: res.webViewLink,
           quantity: Number(quantity) || 1,
           rate: itemRate,
           date: Date.now(),
           status: 'Uninvoiced',
-          createdAt: Date.now()
-        };
-        onWorkItemCreated(newWork);
+          createdAt: Date.now(),
+        }));
+
+        if (onWorkItemsCreated) onWorkItemsCreated(createdItems);
+        else if (onWorkItemCreated) createdItems.forEach((itm) => onWorkItemCreated(itm));
       }
     } catch (err: any) {
-      console.error(err);
-      setError(err?.message || 'Upload to Google Drive failed. Please verify your Google account permissions.');
+      setError(err?.message || 'Upload to Google Drive failed.');
     } finally {
       setIsUploading(false);
     }
   };
 
-  const handleCopyLink = () => {
-    if (uploadResult?.webViewLink) {
-      navigator.clipboard.writeText(uploadResult.webViewLink);
-      setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 2000);
-    }
-  };
-
-  const formatBytes = (bytes: number) => {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
-  };
-
-  const isPopupBlockedError = error && (error.toLowerCase().includes('popup') || error.toLowerCase().includes('blocked'));
-  const isApiDisabledError = error && (
-    error.includes('Google Drive API has not been used') ||
-    error.includes('SERVICE_DISABLED') ||
-    error.includes('drive.googleapis.com') ||
-    error.includes('console.developers.google.com')
-  );
-  const activationUrl = "https://console.developers.google.com/apis/api/drive.googleapis.com/overview?project=960977935987";
+  const isPopupBlocked = Boolean(error && error.toLowerCase().includes('popup'));
+  const isApiDisabled = Boolean(error && (error.includes('Google Drive API has not been used') || error.includes('SERVICE_DISABLED')));
 
   return (
     <div
-      id="drive-upload-modal-overlay"
       onClick={() => { if (!isUploading) onClose(); }}
-      className="fixed inset-0 bg-black/25 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6 cursor-pointer animate-in fade-in duration-150 select-none"
+      className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-6 cursor-pointer"
     >
       <div
-        id="drive-upload-card"
         onClick={(e) => e.stopPropagation()}
-        className="bg-surface-700 border border-surface-400 text-text-primary rounded-xl shadow-2xl max-w-lg w-full overflow-hidden cursor-default flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-150"
+        className="bg-[#131318] border border-[#2A2A33] text-[#F7F7F8] rounded-xl shadow-2xl max-w-lg w-full overflow-hidden cursor-default flex flex-col max-h-[92vh]"
       >
-        {/* Header */}
-        <div className="p-5 border-b border-surface-400/80 flex items-center justify-between gap-3 bg-surface-700">
+        <div className="p-4 sm:p-5 border-b border-[#2A2A33] flex items-center justify-between gap-3 bg-[#131318]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-surface-800 border border-surface-400 text-accent flex items-center justify-center shadow-xs shrink-0">
-              <UploadCloud size={22} />
+            <div className="w-9 h-9 rounded-lg bg-[#1B1B22] border border-[#2A2A33] text-[#F7F7F8] flex items-center justify-center shrink-0">
+              <UploadCloud size={20} />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-bold text-base text-text-primary">
-                  Upload Directly to Google Drive
-                </h3>
+                <h3 className="font-bold text-sm sm:text-base text-[#F7F7F8]">Upload to Google Drive</h3>
                 {hasConnectedDrive && (
-                  <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-medium text-text-secondary">
-                    <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+                  <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-medium text-[#2DD4A0]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#2DD4A0] shrink-0" />
                     Connected
                   </span>
                 )}
               </div>
-              <p className="text-xs text-text-secondary">
-                Upload deliverable video & embed directly in client portal
-              </p>
+              <p className="text-xs text-[#A1A1AA]">Saves to dedicated "Work Logs" folder automatically</p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isUploading}
-            className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-600 transition-colors disabled:opacity-50 cursor-pointer border-0"
-          >
+          <button type="button" onClick={onClose} disabled={isUploading} className="p-1.5 rounded-lg text-[#A1A1AA] hover:text-[#F7F7F8] hover:bg-[#1B1B22] transition-colors disabled:opacity-50 cursor-pointer border-0">
             <X size={18} />
           </button>
         </div>
 
-        <div className="p-6 space-y-5 overflow-y-auto">
-          {/* API Disabled in Google Cloud Assistance UI */}
-          {isApiDisabledError ? (
-            <div className="bg-[#131318] dark:bg-[#131318]/60 border border-[#2A2A33] dark:border-[#2A2A33] rounded-2xl p-4.5 space-y-3.5 animate-in fade-in">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-xl bg-[#131318] dark:bg-[#1B1B22] text-[#A1A1AA] dark:text-[#A1A1AA] flex items-center justify-center shrink-0 mt-0.5">
-                  <AlertCircle size={18} />
-                </div>
-                <div className="space-y-1.5 flex-1">
-                  <div className="font-bold text-xs text-[#F7F7F8] dark:text-[#F7F7F8] uppercase tracking-wide">
-                    Google Drive API Needs 1-Click Activation
-                  </div>
-                  <p className="text-xs text-[#A1A1AA] dark:text-[#A1A1AA] leading-relaxed">
-                    Google Cloud requires the <strong>Google Drive API</strong> to be turned on once for project <strong>960977935987</strong> (CrestFlow).
-                  </p>
-                  <ol className="list-decimal list-inside text-xs text-[#A1A1AA] dark:text-[#A1A1AA] space-y-1 pl-1 font-medium">
-                    <li>
-                      Click the blue button below to open Google Cloud Console.
-                    </li>
-                    <li>
-                      Click the blue <strong>"ENABLE"</strong> button on the page.
-                    </li>
-                    <li>
-                      Return to this modal and click <strong>"Retry Upload"</strong>!
-                    </li>
-                  </ol>
-                </div>
-              </div>
-
-              <div className="pt-2 flex flex-wrap items-center gap-2 border-t border-[#2A2A33] dark:border-[#2A2A33]">
-                <a
-                  href={activationUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
-                >
-                  <ExternalLink size={13} />
-                  <span>Enable Google Drive API</span>
-                </a>
-                <button
-                  type="button"
-                  onClick={handleStartUpload}
-                  disabled={isUploading}
-                  className="px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                >
-                  {isUploading ? <Loader2 size={13} className="animate-spin" /> : <UploadCloud size={13} />}
-                  <span>Retry Upload</span>
-                </button>
-              </div>
-            </div>
-          ) : isPopupBlockedError ? (
-            <div className="bg-[#131318] dark:bg-[#131318]/60 border border-[#2A2A33] dark:border-[#2A2A33] rounded-2xl p-4.5 space-y-3 animate-in fade-in">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-xl bg-[#131318] dark:bg-[#1B1B22] text-[#A1A1AA] dark:text-[#A1A1AA] flex items-center justify-center shrink-0 mt-0.5">
-                  <AlertCircle size={18} />
-                </div>
-                <div className="space-y-1.5 flex-1">
-                  <div className="font-bold text-xs text-[#F7F7F8] dark:text-[#F7F7F8] uppercase tracking-wide">
-                    Google Popup Blocked by Browser
-                  </div>
-                  <p className="text-xs text-[#A1A1AA] dark:text-[#A1A1AA] leading-relaxed">
-                    Your browser prevented the Google Drive sign-in popup from opening. Follow these 2 steps:
-                  </p>
-                  <ol className="list-decimal list-inside text-xs text-[#A1A1AA] dark:text-[#A1A1AA] space-y-1 pl-1 font-medium">
-                    <li>
-                      Look at the <strong>far right of your browser's address (URL) bar</strong> and click the <strong>Pop-up blocked icon</strong>.
-                    </li>
-                    <li>
-                      Select <strong>"Always allow pop-ups and redirects for this site"</strong> and click <strong>Done</strong>.
-                    </li>
-                  </ol>
-                </div>
-              </div>
-
-              <div className="pt-2 flex flex-wrap items-center gap-2 border-t border-surface-400/80">
-                <button
-                  type="button"
-                  onClick={handleConnectDrive}
-                  disabled={isAuthorizing}
-                  className="px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-lg text-xs font-semibold transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50 border-0"
-                >
-                  {isAuthorizing ? <Loader2 size={13} className="animate-spin" /> : <UploadCloud size={13} />}
-                  <span>Authorize Google Drive</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setError(null)}
-                  className="px-3 py-2 text-xs font-semibold text-text-secondary hover:bg-surface-600 rounded-lg cursor-pointer border-0 bg-transparent"
-                >
-                  Dismiss
-                </button>
-              </div>
-            </div>
-          ) : error ? (
-            <div className="bg-surface-800 border border-accent/40 text-accent p-3.5 rounded-xl text-xs flex items-start gap-2.5">
-              <AlertCircle size={16} className="shrink-0 mt-0.5" />
-              <div className="flex-1 leading-relaxed">{error}</div>
-            </div>
-          ) : null}
-
-          {/* Connect Drive prompt if not connected */}
-          {!isCheckingConnection && !hasConnectedDrive && !uploadResult && !isPopupBlockedError && (
-            <div className="bg-surface-800 border border-surface-400 p-3.5 rounded-xl flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-surface-700 border border-surface-400 text-text-secondary flex items-center justify-center shrink-0">
-                  <KeyRound size={15} />
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-text-primary">Google Drive Permission</div>
-                  <div className="text-[11px] text-text-secondary">Connect once — stays linked across reloads and sessions</div>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={handleConnectDrive}
-                disabled={isAuthorizing}
-                className="px-3 py-1.5 bg-accent hover:bg-accent-hover text-white rounded-lg text-xs font-medium shrink-0 transition-colors duration-120 border-none flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-              >
-                {isAuthorizing ? <Loader2 size={12} className="animate-spin" /> : <UploadCloud size={12} />}
-                <span>Connect</span>
-              </button>
-            </div>
+        <div className="p-5 sm:p-6 space-y-4 overflow-y-auto">
+          {error && (
+            <DriveApiHelpCard
+              error={error} isApiDisabledError={isApiDisabled} isPopupBlockedError={isPopupBlocked}
+              isUploading={isUploading} isAuthorizing={isAuthorizing}
+              onRetryUpload={handleStartUpload} onConnectDrive={handleConnectDrive} onDismiss={() => setError(null)}
+            />
           )}
 
-          {/* Connected status strip with Disconnect option */}
-          {hasConnectedDrive && !uploadResult && !isPopupBlockedError && (
-            <div className="flex items-center justify-between gap-2 px-1 text-xs text-text-secondary">
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
-                <span className="truncate">
-                  Google Drive connected{connectedEmail ? ` (${connectedEmail})` : ''}
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={handleDisconnectDrive}
-                disabled={isDisconnecting || isUploading}
-                className="text-xs font-medium text-text-muted hover:text-accent transition-colors duration-120 border-none bg-transparent shrink-0 cursor-pointer disabled:opacity-50"
-              >
-                {isDisconnecting ? 'Disconnecting...' : 'Disconnect'}
-              </button>
-            </div>
-          )}
+          <DriveConnectionBanner
+            isCheckingConnection={isCheckingConnection} hasConnectedDrive={hasConnectedDrive}
+            hasUploadResults={Boolean(uploadResults)} hasError={Boolean(error)}
+            isAuthorizing={isAuthorizing} isDisconnecting={isDisconnecting} isUploading={isUploading}
+            connectedEmail={connectedEmail} onConnect={handleConnectDrive} onDisconnect={handleDisconnectDrive}
+          />
 
-          {/* Success card if uploaded */}
-          {uploadResult && (
-            <div className="bg-surface-800 border border-surface-400 rounded-xl p-4.5 space-y-3">
-              <div className="flex items-center gap-2.5 text-text-primary">
-                <CheckCircle2 size={20} className="text-accent shrink-0" />
-                <div className="font-bold text-sm">Upload Successful to Google Drive!</div>
-              </div>
-              <p className="text-xs text-text-secondary leading-relaxed">
-                File is uploaded and permissions are set to anyone with link. Clients can now stream and view the embedded video directly on the portal!
-              </p>
-
-              <div className="bg-surface-700 p-3 rounded-lg border border-surface-400 flex items-center justify-between gap-3">
-                <div className="truncate text-xs font-mono text-text-secondary">
-                  {uploadResult.webViewLink}
-                </div>
-                <button
-                  type="button"
-                  onClick={handleCopyLink}
-                  className="px-2.5 py-1 bg-surface-600 hover:bg-surface-500 text-text-primary rounded-md text-xs font-semibold shrink-0 transition-colors flex items-center gap-1 cursor-pointer border-0"
-                >
-                  {copiedLink ? <Check size={13} className="text-accent" /> : <Copy size={13} />}
-                  <span>{copiedLink ? 'Copied' : 'Copy'}</span>
-                </button>
-              </div>
-
-              <div className="flex items-center gap-2 pt-1">
-                <a
-                  href={uploadResult.webViewLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 py-2 bg-surface-600 hover:bg-surface-500 text-text-primary rounded-lg text-xs font-medium text-center transition-colors duration-120 border-none flex items-center justify-center gap-1.5 no-underline"
-                >
-                  <ExternalLink size={13} /> Open in Drive
-                </a>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="flex-1 py-2 bg-accent hover:bg-accent-hover text-white rounded-lg text-xs font-medium transition-colors duration-120 border-none cursor-pointer"
-                >
-                  Done
-                </button>
-              </div>
-            </div>
-          )}
-
-          {!uploadResult && (
+          {uploadResults ? (
+            <DriveSuccessCard results={uploadResults} onClose={onClose} />
+          ) : (
             <>
-              {/* Drop / Select File Zone */}
-              <div
-                onClick={() => fileInputRef.current?.click()}
+              <DriveDropZone
+                fileInputRef={fileInputRef}
+                selectedFiles={selectedFiles}
+                isDragging={isDragging}
+                isUploading={isUploading}
                 onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                 onDragLeave={() => setIsDragging(false)}
                 onDrop={(e) => {
                   e.preventDefault();
                   setIsDragging(false);
-                  if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                    handleFileChange(e.dataTransfer.files[0]);
+                  if (e.dataTransfer.files) handleFilesAdded(e.dataTransfer.files);
+                }}
+                onFilesAdded={handleFilesAdded}
+                onRemoveFile={(idx) => setSelectedFiles((prev) => prev.filter((_, i) => i !== idx))}
+              />
+
+              {isUploading && <DriveUploadProgress progress={uploadProgress} />}
+
+              <DriveWorkItemFields
+                clients={clients}
+                clientId={clientId}
+                description={description}
+                quantity={quantity}
+                rate={rate}
+                fileCount={selectedFiles.length}
+                onClientChange={(id) => {
+                  setClientId(id);
+                  const cl = clients.find((c) => c.id === id);
+                  if (cl && !rate) {
+                    const isMonthly = cl.paymentBasis === 'monthly_retainer' || Boolean(cl.monthlyRetainerAmount && cl.monthlyRetainerAmount > 0);
+                    setRate(isMonthly ? '0' : String(cl.defaultRate));
                   }
                 }}
-                className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all ${
-                  isDragging
-                    ? 'border-accent bg-surface-800'
-                    : selectedFile
-                    ? 'border-surface-300 bg-surface-800'
-                    : 'border-surface-400 hover:border-surface-300 bg-surface-800'
-                }`}
-              >
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="video/*,image/*,.pdf,.zip,.rar"
-                  className="hidden"
-                  onChange={(e) => {
-                    if (e.target.files && e.target.files[0]) {
-                      handleFileChange(e.target.files[0]);
-                    }
-                  }}
-                />
+                onDescriptionChange={setDescription}
+                onQuantityChange={setQuantity}
+                onRateChange={setRate}
+              />
 
-                {selectedFile ? (
-                  <div className="flex items-center justify-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-surface-700 border border-surface-400 text-accent flex items-center justify-center">
-                      <Video size={24} />
-                    </div>
-                    <div className="text-left">
-                      <div className="text-xs font-bold text-text-primary truncate max-w-xs">
-                        {selectedFile.name}
-                      </div>
-                      <div className="text-[11px] text-text-muted">
-                        {formatBytes(selectedFile.size)} • Click to change file
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <div className="w-12 h-12 rounded-xl bg-surface-700 border border-surface-400 text-accent flex items-center justify-center mx-auto shadow-2xs">
-                      <UploadCloud size={24} />
-                    </div>
-                    <div>
-                      <span className="text-xs font-bold text-text-primary">
-                        Click to select a video / file
-                      </span>{' '}
-                      <span className="text-xs text-text-muted">or drag and drop here</span>
-                    </div>
-                    <p className="text-[11px] text-text-muted">
-                      Supports MP4, MOV, MKV, ProRes, Images, and Documents
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Progress Bar during Upload */}
-              {isUploading && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold text-[#A1A1AA] dark:text-[#A1A1AA] flex items-center gap-1.5">
-                      <Loader2 size={14} className="animate-spin text-white" /> Uploading to Google Drive...
-                    </span>
-                    <span className="font-mono font-bold text-white">
-                      {uploadProgress}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-[#131318] dark:bg-[#1B1B22] rounded-full h-2.5 overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-300"
-                      style={{ width: `${uploadProgress}%`, backgroundColor: '#ffffff' }}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Form Details */}
-              <div className="space-y-3.5 text-left">
-                {clients.length > 0 && (
-                  <div>
-                    <label className="block text-xs font-semibold text-text-secondary mb-1">
-                      Associate with Client (for work log)
-                    </label>
-                    <select
-                      value={clientId}
-                      onChange={(e) => {
-                        setClientId(e.target.value);
-                        const cl = clients.find(c => c.id === e.target.value);
-                        if (cl && !rate) {
-                          const isMonthly = cl.paymentBasis === 'monthly_retainer' || Boolean(cl.monthlyRetainerAmount && cl.monthlyRetainerAmount > 0);
-                          setRate(isMonthly ? '0' : String(cl.defaultRate));
-                        }
-                      }}
-                      className="w-full p-2.5 bg-surface-800 text-text-primary border border-surface-400 rounded-lg text-xs outline-none focus:border-surface-300 cursor-pointer"
-                    >
-                      <option value="">None (Just generate link)</option>
-                      {clients.map(c => (
-                        <option key={c.id} value={c.id}>{c.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
-                <div>
-                  <label className="block text-xs font-semibold text-text-secondary mb-1">
-                    Deliverable Description
-                  </label>
-                  <input
-                    type="text"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="e.g. Real Estate Tour Final Cut"
-                    className="w-full p-2.5 bg-surface-800 text-text-primary border border-surface-400 rounded-lg text-xs outline-none focus:border-surface-300"
-                  />
-                </div>
-
-                {clientId && (
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-semibold text-text-secondary mb-1">
-                        Quantity
-                      </label>
-                      <input
-                        type="number"
-                        min="1"
-                        value={quantity}
-                        onChange={(e) => setQuantity(e.target.value)}
-                        className="w-full p-2.5 bg-surface-800 text-text-primary border border-surface-400 rounded-lg text-xs outline-none focus:border-surface-300"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-text-secondary mb-1">
-                        Rate (₹)
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={rate}
-                        onChange={(e) => setRate(e.target.value)}
-                        placeholder="Optional"
-                        className="w-full p-2.5 bg-surface-800 text-text-primary border border-surface-400 rounded-lg text-xs outline-none focus:border-surface-300 font-mono"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="pt-2 flex items-center justify-end gap-2.5 border-t border-surface-400/80">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  disabled={isUploading}
-                  className="px-4 py-2 rounded-lg text-xs font-semibold text-text-secondary hover:bg-surface-600 transition-colors cursor-pointer border-0 bg-transparent"
-                >
+              <div className="pt-2 flex items-center justify-end gap-2.5 border-t border-[#2A2A33]">
+                <button type="button" onClick={onClose} disabled={isUploading} className="px-4 py-2 rounded-lg text-xs font-semibold text-[#A1A1AA] hover:text-[#F7F7F8] transition-colors cursor-pointer border-0 bg-transparent">
                   Cancel
                 </button>
                 <button
-                  type="button"
-                  onClick={handleStartUpload}
-                  disabled={isUploading || !selectedFile}
-                  className="px-5 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-lg text-xs font-semibold transition-colors shadow-xs disabled:opacity-50 flex items-center gap-2 cursor-pointer border-0"
+                  type="button" onClick={handleStartUpload} disabled={isUploading || selectedFiles.length === 0}
+                  className="px-5 py-2.5 bg-[#E0002B] hover:bg-[#FF2D4A] text-[#F7F7F8] rounded-lg text-xs font-semibold transition-colors flex items-center gap-2 cursor-pointer border-0 disabled:opacity-50"
                 >
-                  {isUploading ? (
-                    <>
-                      <Loader2 size={14} className="animate-spin" />
-                      <span>Uploading to Drive ({uploadProgress}%)...</span>
-                    </>
-                  ) : (
-                    <>
-                      <UploadCloud size={15} />
-                      <span>Upload & Embed to Drive</span>
-                    </>
-                  )}
+                  <UploadCloud size={15} />
+                  <span>
+                    {isUploading ? 'Uploading...' : selectedFiles.length > 1 ? `Upload ${selectedFiles.length} Files to "Work Logs"` : 'Upload to "Work Logs"'}
+                  </span>
                 </button>
               </div>
             </>

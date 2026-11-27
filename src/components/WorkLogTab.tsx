@@ -165,6 +165,11 @@ export function WorkLogTab({ user, initialSearchQuery = '', onNavigateToClients 
         onClose={() => setIsDriveModalOpen(false)}
         clients={clients}
         defaultClientId={formData.clientId}
+        onWorkItemsCreated={async (newWorks) => {
+          for (const item of newWorks) {
+            await addOrUpdateItem(item);
+          }
+        }}
         onWorkItemCreated={async (newWork) => {
           await addOrUpdateItem(newWork);
           setIsDriveModalOpen(false);

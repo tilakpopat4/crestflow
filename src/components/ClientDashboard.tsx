@@ -271,6 +271,11 @@ export default function ClientDashboard({ client, user, onBack, onEditClient }: 
       />
       <GoogleDriveUploadModal
         isOpen={isDriveModalOpen} onClose={() => setIsDriveModalOpen(false)} clients={[client]} defaultClientId={client.id}
+        onWorkItemsCreated={async (newWorks) => {
+          for (const item of newWorks) {
+            await updateWorkItem(item);
+          }
+        }}
         onWorkItemCreated={async (newWork) => { await updateWorkItem(newWork); setIsDriveModalOpen(false); }}
         onLinkGenerated={(result) => {
           setWorkFormData((prev) => ({ ...prev, videoUrl: result.webViewLink, description: prev.description.trim() ? prev.description : result.name }));
