@@ -81,25 +81,6 @@ export default {
     const seoResponse = handleSeoRoutes(url, baseUrl);
     if (seoResponse) return seoResponse;
 
-    // Firebase Auth handler proxy (prevents 404 on /__/auth/*)
-    if (url.pathname.startsWith('/__/auth/')) {
-      const targetUrl = new URL(request.url);
-      targetUrl.hostname = 'crestflow-14f4b.firebaseapp.com';
-      targetUrl.port = '';
-      targetUrl.protocol = 'https:';
-
-      const newHeaders = new Headers(request.headers);
-      newHeaders.set('host', 'crestflow-14f4b.firebaseapp.com');
-      newHeaders.set('x-forwarded-host', url.host);
-
-      return fetch(targetUrl.toString(), {
-        method: request.method,
-        headers: newHeaders,
-        body: request.body,
-        redirect: 'follow',
-      });
-    }
-
     if (!url.pathname.startsWith('/api/')) {
       return await handleStaticAsset(request, env);
     }
