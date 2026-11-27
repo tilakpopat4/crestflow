@@ -130,6 +130,8 @@ export function useAuthSession() {
         msg = 'Password should be at least 6 characters.';
       } else if (err.code === 'auth/invalid-email') {
         msg = 'Please enter a valid email address.';
+      } else if (err.code === 'auth/operation-not-allowed') {
+        msg = 'Email/Password accounts are currently disabled in Firebase Console. Please sign in using "Continue with Google" or enable Email/Password in Firebase Console.';
       }
       return { success: false, error: msg };
     } finally {
@@ -149,6 +151,8 @@ export function useAuthSession() {
         msg = 'Invalid email or password. Please verify your credentials.';
       } else if (err.code === 'auth/too-many-requests') {
         msg = 'Too many failed login attempts. Please try again later or reset password.';
+      } else if (err.code === 'auth/operation-not-allowed') {
+        msg = 'Email/Password sign-in is not enabled in Firebase Console. Please sign in with Google or enable Email/Password provider in Firebase Console.';
       }
       return { success: false, error: msg };
     } finally {
